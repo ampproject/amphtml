@@ -20,11 +20,11 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
-import {setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+const TAG_ = 'amp-analytics/iframe-transport';
 
 /** @private @const {number} */
 const LONG_TASK_REPORTING_THRESHOLD = 5;
@@ -143,9 +143,7 @@ export class IframeTransport {
           'data-amp-3p-sentinel': sentinel,
         }));
     frame.sentinel = sentinel;
-    setStyles(frame, {
-      display: 'none',
-    });
+    toggle(frame, false);
     frame.src = this.frameUrl_;
     const frameData = /** @const {FrameData} */ ({
       frame,

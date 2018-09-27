@@ -10,10 +10,11 @@ requirement: {
 # Element
 
 requirement: {
-  type: BANNED_PROPERTY_WRITE
+  type: BANNED_PROPERTY_READ
   error_message: 'Use style.js#setStyle or style.js#setStyles'
   value: 'Element.prototype.style'
   whitelist: 'src/style.js'
+  whitelist: 'src/layout.js'
 }
 
 # CSSStyleDeclaration
@@ -23,6 +24,15 @@ requirement: {
   error_message: 'Use style.js#setStyle or style.js#setStyles'
   value: 'CSSStyleDeclaration.prototype.setProperty'
   whitelist: 'src/style.js'
+}
+
+# History
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
+  value: 'History.prototype.state'
+  whitelist: 'src/history.js'
 }
 
 # Strings

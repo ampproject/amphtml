@@ -77,8 +77,17 @@
       display: none;
     }
 
+    svg {
+      background-color: #4682B4;
+      opacity: 0.3;
+    }
+
     #pan-zoom {
       display: initial;
+    }
+
+    #hide-controls .amp-pan-zoom-button {
+      display: none;
     }
 
   </style>
@@ -114,22 +123,17 @@
   </amp-state>
 <article>
   <h1>AMP Pan Zoom</h1>
-  <h2>AMP Pan Zoom Basic Example</h2>
-  <amp-pan-zoom layout="responsive" width="300" height="400" disable-double-tap>
+  <p>Note that for testing purposes, I've added a black border to all amp-pan-zooms. These are not actually present as part of the default UI. The show/hide and seat picking state between components is shared here for simplicity.</p>
+  <h2>AMP Pan Zoom Basic Example - Layout Responsive</h2>
+  <p>This is amp pan zoom with a basic image</p>
+  <amp-pan-zoom layout="responsive" width="300" height="400">
       <amp-img id="img0"
-        src="/examples/img/sample.jpg"
+        src="/examples/img/sea@1x.jpg"
         width="641" height="481" layout="fixed"></amp-img>
   </amp-pan-zoom>
 
-  <h2>AMP Pan-Zoom Hide Controls Example</h2>
-  <amp-pan-zoom id="hide-controls" layout="responsive" width="300" height="400">
-    <amp-img id="img0"
-      src="/examples/img/sample.jpg"
-      width="641" height="481" layout="fixed"></amp-img>
-</amp-pan-zoom>
-
-  <h2>AMP Pan-Zoom Advanced Example</h2>
-  <p>Double tap or pinch to zoom in and out. This tests all initial configurations. </p>
+  <h2>AMP Pan-Zoom Advanced Example - Layout Responsive</h2>
+  <p>Double tap or pinch to zoom in and out. This tests all initial configurations. Note that the max scale has been set to 5 in this example, which is different from the default of 3. </p>
   <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
       <amp-pan-zoom
         layout="responsive"
@@ -176,12 +180,11 @@
         </svg>
     </amp-pan-zoom>
 
-  <h1>AMP Pan-Zoom Layout Fill</h1>
+  <h1>AMP Pan-Zoom - Layout Fill</h1>
   <p>This just tests basic features under layout fill</p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
     <amp-layout layout="responsive" height="1" width="1">
       <amp-pan-zoom
-        disable-double-tap
         layout="fill"
         on="transformEnd:AMP.setState({scale: event.scale})">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
@@ -220,7 +223,7 @@
     </amp-pan-zoom>
   </amp-layout>
 
-  <h1>AMP Pan-Zoom Layout Fixed Height</h1>
+  <h1>AMP Pan-Zoom - Layout Fixed Height</h1>
   <p>This just tests basic features under layout fixed height</p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
       <amp-pan-zoom layout="fixed-height" height="200" on="transformEnd:AMP.setState({scale: event.scale})">
@@ -259,66 +262,12 @@
         </svg>
     </amp-pan-zoom>
 
-    <h1>AMP Pan-Zoom with other content on page</h1>
-    <p [text]="'Current scale: ' + transform.scale + ', ' + transform.x + ', ' + transform.y">Current transform: 1, 0, 0</p>
-    <amp-img [hidden]="scale > 1" id="img1"
-        src="/examples/img/sample.jpg"
-        width="641" height="481" layout="fixed"></amp-img>
-    <amp-pan-zoom layout="responsive" width="1" height="1" on="transformEnd:AMP.setState({transform: {scale: event.scale, y: event.y, x: event.x} })">
-      <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
-        <rect class="area-half" x="5" y="5" />
-        <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
-            <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
-          <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
-          <rect class="seat-taken" x="10" y="30" />
-          <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
-        </g>
-
-        <rect class="area-full" x="55" y="5" />
-        <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
-          <rect class="seat-taken" x="60" y="10" />
-          <rect class="seat-taken" x="80" y="10" />
-          <rect class="seat-taken" x="60" y="30" />
-          <rect class="seat-taken" x="80" y="30" />
-        </g>
-
-        <rect class="area-free" x="5" y="55" />
-        <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
-            <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
-        </g>
-
-        <rect class="area-free" x="55" y="55" />
-        <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
-            <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
-            <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
-        </g>
-      </svg>
-    </amp-pan-zoom>
-
-    <h2>AMP Pan-Zoom Toggle Visibility Example</h2>
-    <p>Double tap or pinch to zoom in and out. This tests all initial configurations. </p>
-    <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
-    <button on="tap:pan-target.toggleVisibility">Click to toggle visibility</button>
-    <button on="tap:AMP.setState({shouldHide: true})">Click to hide</button>
-    <button on="tap:AMP.setState({shouldHide: false})">Click to show</button>
-      <amp-pan-zoom
-          id="pan-target"
-          [hidden]="shouldHide"
-          layout="responsive"
-          on="transformEnd:AMP.setState({transform: {scale: event.scale, x: event.x, y: event.y}})"
-          height="3"
-          width="4"
-          max-scale="5"
-          initial-scale="2"
-          initial-x="150"
-          initial-y="100">
-        <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
-
+    <h1>AMP Pan-Zoom - Layout Fixed</h1>
+    <p>This just tests basic features under layout fixed height. Double tap is disabled in this example. There should be no tap latency.</p>
+    <p [text]="'Current scale: ' + scale">Current scale: 1</p>
+        <amp-pan-zoom layout="fixed" height="300" width="400" disable-double-tap
+          on="transformEnd:AMP.setState({scale: event.scale})">
+          <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
             <rect class="area-half" x="5" y="5" />
             <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
                 <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
@@ -353,6 +302,69 @@
           </svg>
       </amp-pan-zoom>
 
+    <h2>AMP Pan-Zoom Toggle Visibility Example</h2>
+    <p>This tests whether or not the gestures reactivate after amp-pan-zoom's visibility has been toggled. Click on each button to toggle visibilty or display. Verify that amp-pan-zoom's zooming and panning via all gestures still work after toggling.</p>
+    <p [text]="'Current scale: ' + transform.scale + ', x: ' + transform.x + ', y: ' + transform.y">Current scale: 1</p>
+    <button on="tap:pan-target.toggleVisibility">Click to toggle visibility</button>
+    <button on="tap:AMP.setState({shouldHide: true})">Click to hide</button>
+    <button on="tap:AMP.setState({shouldHide: false})">Click to show</button>
+      <amp-pan-zoom
+          id="pan-target"
+          [hidden]="shouldHide"
+          layout="responsive"
+          on="transformEnd:AMP.setState({transform: {scale: event.scale, x: event.x, y: event.y}})"
+          height="3"
+          width="4">
+        <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
+            <rect class="area-half" x="5" y="5" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
+              <rect class="seat-free" [class]="seat == 2 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 2})" x="30" y="10" tabindex="0" role="button" />
+              <rect class="seat-taken" x="10" y="30" />
+              <rect class="seat-free" [class]="seat == 3 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 3})" x="30" y="30" tabindex="0" role="button" />
+            </g>
+
+            <rect class="area-full" x="55" y="5" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+              <rect class="seat-taken" x="60" y="10" />
+              <rect class="seat-taken" x="80" y="10" />
+              <rect class="seat-taken" x="60" y="30" />
+              <rect class="seat-taken" x="80" y="30" />
+            </g>
+
+            <rect class="area-free" x="5" y="55" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-free" [class]="seat == 4 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 4})" x="10" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 6 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 6})" x="30" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 7 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 7})" x="10" y="80" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 10 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 10})" x="30" y="80" tabindex="0" role="button" />
+            </g>
+
+            <rect class="area-free" x="55" y="55" />
+            <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
+                <rect class="seat-free" [class]="seat == 5 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 5})" x="60" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 8 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 8})" x="80" y="60" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 11 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 11})" x="60" y="80" tabindex="0" role="button" />
+                <rect class="seat-free" [class]="seat == 12 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 12})" x="80" y="80" tabindex="0" role="button" />
+            </g>
+          </svg>
+      </amp-pan-zoom>
+
+      <h2>AMP Pan-Zoom Hide Controls Example</h2>
+      <p>The controls buttons is hidden. Double tap zoom and pinch zoom should work in this case. </p>
+      <amp-pan-zoom id="hide-controls" layout="responsive" width="300" height="400">
+        <amp-img id="img0"
+          src="/examples/img/sea@1x.jpg"
+          width="641" height="481" layout="fixed"></amp-img>
+      </amp-pan-zoom>
+
+      <h2>AMP Pan Zoom Disable Doubletap Example</h2>
+      <p>Double tap is disabled in this example. </p>
+      <amp-pan-zoom layout="responsive" width="300" height="400">
+          <amp-img id="img0"
+            src="/examples/img/sea@1x.jpg"
+            width="641" height="481" layout="fixed"></amp-img>
+      </amp-pan-zoom>
 </article>
 </body>
 </html>

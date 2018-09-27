@@ -22,7 +22,6 @@ import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {poll} from '../../testing/iframe';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -1098,10 +1097,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
-      // fully migrated.
-      expect(element1.style.display).to.equal('none');
-      expect(element1).to.have.class('i-amphtml-display');
+      expect(element1).to.have.display('none');
     });
 
     it('should change size without sizer', () => {
@@ -1502,31 +1498,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     const elements = element.getRealChildren();
     expect(elements.length).to.equal(1);
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
-  it('toggleLayoutDisplay should add/remove display class', () => {
-    element.setAttribute('layout', 'nodisplay');
-    win.document.body.appendChild(element);
-    return poll('wait for static layout',
-        () => element.classList.contains('i-amphtml-layout-nodisplay'))
-        .then(() => {
-          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
-          // deployed this will start `false`.
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-
-          element.style.display = 'block';
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-
-          element.toggleLayoutDisplay(false);
-          expect(element.classList.contains('i-amphtml-display')).to.be.false;
-          expect(win.getComputedStyle(element).display).to.equal('none');
-
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-        });
   });
 
   it('getPlaceholder should return nothing', () => {

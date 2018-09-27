@@ -163,3 +163,18 @@ export function withdrawRequest(win, id) {
     credentials: 'omit',
   }).then(res => res.json());
 }
+
+export function createPointerEvent(type, x, y) {
+  const event = new /*OK*/CustomEvent(type);
+  event.clientX = x;
+  event.clientY = y;
+  event.pageX = x;
+  event.pageY = y;
+  event.touches = [{
+    clientX: x,
+    clientY: y,
+    pageX: x,
+    pageY: y,
+  }];
+  return event;
+}

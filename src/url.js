@@ -15,7 +15,7 @@
  */
 
 import {LruCache} from './utils/lru-cache';
-import {dict} from './utils/object';
+import {dict, hasOwn} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
@@ -218,6 +218,25 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  */
 export function addParamsToUrl(url, params) {
   return appendEncodedParamStringToUrl(url, serializeQueryString(params));
+}
+
+/**
+ * Append query string fields and values to a url, only if the key does not
+ * exist in current query string.
+ * @param {string} url
+ * @param {!JsonObject<string, string|!Array<string>>} params
+ */
+export function addMissingParamsToUrl(url, params) {
+  const location = parseUrlDeprecated(url);
+  const existingParams = parseQueryString(location.search);
+  const paramsToAdd = dict({});
+  const keys = Object.keys(params);
+  for (let i = 0; i < keys.length; i++) {
+    if (!hasOwn(existingParams, keys[i])) {
+      paramsToAdd[keys[i]] = params[keys[i]];
+    }
+  }
+  return addParamsToUrl(url, paramsToAdd);
 }
 
 /**

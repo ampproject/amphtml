@@ -57,6 +57,9 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const extensions = {};
 const extensionAliasFilePath = {};
 
+// All extensions to build
+let extensionsToBuild = null;
+
 // All a4a extensions.
 const adVendors = [];
 
@@ -238,9 +241,16 @@ function buildExtensions(options) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild() {
-  let extensionsToBuild = [];
+  if (extensionsToBuild) {
+    return extensionsToBuild;
+  }
+
+  extensionsToBuild = [];
 
   if (!!argv.extensions) {
+    if (argv.extensions === 'minimal_set') {
+      argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    }
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -761,9 +771,10 @@ function printConfigHelp(command) {
 }
 
 /**
- * Parse the --extensions or the --noextensions flag and
- * prints a helpful message that lets the developer know how to build
- * a list of extensions or without any extensions.
+ * Parses the --extensions, --extensions_from, and the --noextensions flags,
+ * and prints a helpful message that lets the developer know how to build the
+ * runtime with a list of extensions, all the extensions used by a test file,
+ * or no extensions at all.
  */
 function parseExtensionFlags() {
   if (!process.env.TRAVIS) {
@@ -790,11 +801,9 @@ function parseExtensionFlags() {
         process.exit(1);
       }
       argv.extensions = argv.extensions.replace(/\s/g, '');
+    }
 
-      if (argv.extensions === 'minimal_set') {
-        argv.extensions = MINIMAL_EXTENSION_SET.join(',');
-      }
-
+    if (argv.extensions || argv.extensions_from) {
       log(green('Building extension(s):'),
           cyan(getExtensionsToBuild().join(', ')));
 
@@ -819,10 +828,10 @@ function parseExtensionFlags() {
  * @return {boolean}
  */
 function maybeAddVideoService() {
-  if (!argv.extensions.split(',').find(ext => VIDEO_EXTENSIONS.has(ext))) {
+  if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
     return false;
   }
-  argv.extensions += ',amp-video-service';
+  extensionsToBuild.push('amp-video-service');
   return true;
 }
 

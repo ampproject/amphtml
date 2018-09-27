@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {dict, map} from './utils/object';
-import {iterateCursor} from './dom';
+import {dict} from './utils/object';
+import {
+  fromStructuredCloneable,
+  toStructuredCloneable,
+  verifyAmpCORSHeaders,
+} from './utils/xhr-utils';
 
-/** The attributes we allow to be sent to the viewer. */
-const ATTRS_TO_SEND_TO_VIEWER = {
-  'amp-list': ['src', 'single-item', 'max-items'],
-  'amp-form': ['action-xhr'],
-};
+/**
+ * @typedef {{
+ *   successTemplate: ?(Element|JsonObject|undefined),
+ *   errorTemplate: ?(Element|JsonObject|undefined)
+ * }}
+ */
+export let SsrTemplateDef;
 
 /**
  * Helper, that manages the proxying of template rendering to the viewer.
@@ -41,81 +47,112 @@ export class SsrTemplateHelper {
     /** @private @const */
     this.templates_ = templates;
 
-    /** @private @const {!XMLSerializer} */
-    this.xmls_ = new XMLSerializer();
-
     /** @private @const */
     this.sourceComponent_ = sourceComponent;
   }
 
   /**
-   * Whether the viewer can render templates.
+   * Whether the viewer can render templates. A doc-level opt in as
+   * trusted viewers must set this capability explicitly, as a security
+   * measure for potential abuse of feature.
    * @return {boolean}
    */
   isSupported() {
-    return this.viewer_.hasCapability('viewerRenderTemplate');
+    const {ampdoc} = this.viewer_;
+    if (ampdoc.isSingleDoc()) {
+      const htmlElement = ampdoc.getRootNode().documentElement;
+      if (htmlElement.hasAttribute('allow-viewer-render-template')) {
+        return this.viewer_.hasCapability('viewerRenderTemplate');
+      }
+    }
+    return false;
   }
 
   /**
-   * Proxies xhr and template rendering to the viewer and renders
-   * the response.
+   * Proxies xhr and template rendering to the viewer and renders the response.
    * @param {!Element} element
+   * @param {!FetchRequestDef} request The fetch/XHR related data.
+   * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
+   *     the payload. If provided, finding the template in the passed in
+   *     element is not attempted.
+   * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
-  fetchAndRenderTemplate(element) {
-    const inputsAsJson = this.getElementInputsAsJson_(element);
-    const elementAttrsAsJson =
-        this.getElementAttributesAsJson_(element);
-    elementAttrsAsJson['inputData'] = inputsAsJson;
-    const template = this.templates_.maybeFindTemplate(element);
+  fetchAndRenderTemplate(
+    element, request, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
-    if (template) {
-      // The document fragment can't be used in the message channel API thus
-      // serializeToString for a string representation of the dom tree.
-      mustacheTemplate = this.xmls_.serializeToString(
-          this.templates_.findTemplate(element));
+    if (!opt_templates) {
+      mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
-    const data = dict({
-      'data': elementAttrsAsJson,
-      'mustacheTemplate': mustacheTemplate,
-      'sourceAmpComponent': this.sourceComponent_,
-    });
     return this.viewer_.sendMessageAwaitResponse(
-        'viewerRenderTemplate', data);
+        'viewerRenderTemplate',
+        this.buildPayload_(
+            request,
+            mustacheTemplate,
+            opt_templates,
+            opt_attributes
+        ));
   }
 
   /**
-   * Returns the element's contained inputs and values in json format.
-   * @param {!Element} element
+   * @param {!FetchRequestDef} request
+   * @param {?Element|undefined} mustacheTemplate
+   * @param {?SsrTemplateDef=} opt_templates
+   * @param {!Object=} opt_attributes
    * @return {!JsonObject}
+   * @private
    */
-  getElementInputsAsJson_(element) {
-    const inputs = element.querySelectorAll('input');
-    const inputsAsJson = map();
-    iterateCursor(inputs, input => {
-      inputsAsJson[input.name] = input.value;
-    });
-    return inputsAsJson;
-  }
+  buildPayload_(
+    request, mustacheTemplate, opt_templates, opt_attributes = {}) {
+    const ampComponent = dict({'type': this.sourceComponent_});
 
-  /**
-   * Returns the element's attributes in json format.
-   * @param {!Element} element
-   * @return {!JsonObject}
-   */
-  getElementAttributesAsJson_(element) {
-    const attrsAsJson = map();
-    if (element.attributes.length > 0) {
-      const {attributes} = element;
-      /** {!Array} */
-      const whiteList = ATTRS_TO_SEND_TO_VIEWER[this.sourceComponent_];
-      iterateCursor(attributes, attribute => {
-        if (whiteList.indexOf(attribute.name) != -1) {
-          attrsAsJson[attribute.name] = attribute.value;
-        }
-      });
+    const successTemplateKey = 'successTemplate';
+    const successTemplate =
+      (opt_templates && opt_templates[successTemplateKey])
+        ? opt_templates[successTemplateKey] : mustacheTemplate;
+    if (successTemplate) {
+      ampComponent[successTemplateKey] = {
+        'type': 'amp-mustache',
+        'payload': successTemplate./*REVIEW*/innerHTML,
+      };
     }
-    return attrsAsJson;
+
+    const errorTemplateKey = 'errorTemplate';
+    const errorTemplate =
+      (opt_templates && opt_templates[errorTemplateKey])
+        ? opt_templates[errorTemplateKey] : null;
+    if (errorTemplate) {
+      ampComponent[errorTemplateKey] = {
+        'type': 'amp-mustache',
+        'payload': errorTemplate./*REVIEW*/innerHTML,
+      };
+    }
+
+    if (opt_attributes) {
+      Object.assign(ampComponent, opt_attributes);
+    }
+
+    const data = dict({
+      'originalRequest':
+        toStructuredCloneable(request.xhrUrl, request.fetchOpt),
+      'ampComponent': ampComponent,
+    });
+
+    return data;
   }
 
+  /**
+   * Constructs the fetch response and verifies AMP CORS headers.
+   * @param {!Window} win
+   * @param {!JsonObject|string|undefined} response
+   * @param {!FetchRequestDef|string} request
+   */
+  verifySsrResponse(win, response, request) {
+    verifyAmpCORSHeaders(
+        win,
+        fromStructuredCloneable(
+            response,
+            request.fetchOpt.responseType),
+        request.fetchOpt);
+  }
 }

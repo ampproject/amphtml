@@ -21,15 +21,17 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {
+  appendEncodedParamStringToUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
+import {dict, map} from '../../../src/utils/object';
+import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {parseQueryString} from '../../../src/url';
+import {remove} from '../../../src/utils/array';
 
-const TAG = 'AMP-ANALYTICS';
+const TAG = 'amp-analytics/requests';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -38,10 +40,10 @@ export class RequestHandler {
    * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {function(string, !JsonObject)} handler
+   * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
+  constructor(ampAnalyticsElement, request, preconnect, transport, isSandbox) {
 
     /** @const {!Window} */
     this.win = ampAnalyticsElement.getAmpDoc().win;
@@ -92,8 +94,8 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {function(string, !JsonObject)} */
-    this.handler_ = handler;
+    /** @private {./transport.Transport} */
+    this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
@@ -113,6 +115,9 @@ export class RequestHandler {
     /** @private {number} */
     this.queueSize_ = 0;
 
+    /** @private @const {number} */
+    this.startTime_ = Date.now();
+
     this.initReportWindow_();
     this.initBatchInterval_();
   }
@@ -123,11 +128,8 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @param {!Object<string, *>} dynamicBindings A mapping of variables to
-   *     stringable values. For example, values could be strings, functions that
-   *     return strings, promises, etc.
    */
-  send(configParams, trigger, expansionOption, dynamicBindings) {
+  send(configParams, trigger, expansionOption) {
     const isImportant = trigger['important'];
 
     const isImmediate =
@@ -141,8 +143,9 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
 
-    const macros = this.variableService_.getMacros();
-    const bindings = Object.assign({}, dynamicBindings, macros);
+    const bindings = this.variableService_.getMacros();
+    bindings['RESOURCE_TIMING'] = getResourceTiming(
+        this.win, trigger['resourceTimingSpec'], this.startTime_);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
@@ -229,7 +232,7 @@ export class RequestHandler {
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: batchSegmentsPromise,
     } = this;
-    const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
+    const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
     baseUrlTemplatePromise.then(preUrl => {
@@ -243,8 +246,18 @@ export class RequestHandler {
           requestUrlPromise =
               constructExtraUrlParamStrs(baseUrl, extraUrlParamsPromise);
         }
-        requestUrlPromise.then(requestUrl => {
-          this.handler_(requestUrl, lastTrigger);
+        requestUrlPromise.then(request => {
+          if (!request) {
+            user().error(TAG, 'Request not sent. Contents empty.');
+            return;
+          }
+          if (trigger['iframePing']) {
+            user().assert(trigger['on'] == 'visible',
+                'iframePing is only available on page view requests.');
+            this.transport_.sendRequestUsingIframe(request);
+          } else {
+            this.transport_.sendRequest(request);
+          }
         });
       });
     });
@@ -352,21 +365,17 @@ export class RequestHandler {
  * @param {!AMP.BaseElement} baseInstance
  * @param {string} msg
  * @param {?JsonObject} configParams
- * @param {?JsonObject} triggerParams
+ * @param {!JsonObject} trigger
  * @param {!./variables.ExpansionOptions} expansionOption
- * @param {!Object<string, *>} dynamicBindings A mapping of variables to
- *     stringable values. For example, values could be strings, functions that
- *     return strings, promises, etc.
  * @return {Promise<string>}
  */
-export function expandPostMessage(baseInstance, msg,
-  configParams, triggerParams, expansionOption, dynamicBindings) {
+export function expandPostMessage(
+  baseInstance, msg, configParams, trigger, expansionOption) {
   const variableService = variableServiceFor(baseInstance.win);
   const urlReplacementService =
       Services.urlReplacementsForDoc(baseInstance.element);
 
-  const macros = variableService.getMacros();
-  const bindings = Object.assign({}, dynamicBindings, macros);
+  const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService.expandTemplate(
@@ -380,7 +389,7 @@ export function expandPostMessage(baseInstance, msg,
 
   //return base url with the appended extra url params;
   const extraUrlParamsStrPromise = getExtraUrlParams(
-      variableService, configParams, triggerParams, expansionOption)
+      variableService, configParams, trigger['extraUrlParams'], expansionOption)
       .then(params => {
         const str = getExtraUrlParamsString(variableService, params);
         return urlReplacementService.expandUrlAsync(str, bindings);
@@ -453,7 +462,7 @@ function getExtraUrlParamsString(variableService, params) {
  */
 function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
   return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-    filterSplice(paramStrs, item => {return !!item;});
+    remove(paramStrs, item => !item);
     const extraUrlParamsStr = paramStrs.join('&');
     let requestUrl;
     if (baseUrl.indexOf('${extraUrlParams}') >= 0) {

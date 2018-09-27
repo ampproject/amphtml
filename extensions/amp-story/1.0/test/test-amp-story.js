@@ -109,11 +109,9 @@ describes.realWin('amp-story', {
 
     AmpStory.isBrowserSupported = () => true;
 
-    story = new AmpStory(element);
-    // TODO(alanorozco): Test active page event triggers once the stubbable
-    // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_,
-    // 'triggerActiveEventForPage_').callsFake(NOOP);
+    return element.getImpl().then(impl => {
+      story = impl;
+    });
   });
 
   afterEach(() => {
@@ -294,7 +292,6 @@ describes.realWin('amp-story', {
 
   it('lock body when amp-story is initialized', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
-    story.buildCallback();
 
     return story.layoutCallback()
         .then(() => {
@@ -309,7 +306,6 @@ describes.realWin('amp-story', {
 
   it('builds and attaches pagination buttons ', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
-    story.buildCallback();
 
     return story.layoutCallback()
         .then(() => {
@@ -373,7 +369,6 @@ describes.realWin('amp-story', {
     const pageCount = 2;
     createPages(story.element, pageCount, [firstPageId, 'page-1']);
 
-    story.buildCallback();
     return story.layoutCallback()
         .then(() => {
           return expect(replaceStateStub).to.have.been.calledWith(
@@ -391,7 +386,6 @@ describes.realWin('amp-story', {
     const firstPage = pages[0];
     firstPage.setAttribute('ad', '');
 
-    story.buildCallback();
     return story.layoutCallback()
         .then(() => {
           return expect(replaceStateStub).to.not.have.been.called;
@@ -402,7 +396,6 @@ describes.realWin('amp-story', {
     createPages(story.element, 2, ['cover', 'page-1']);
 
     story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-    story.buildCallback();
 
     return story.layoutCallback()
         .then(() => {
@@ -414,7 +407,7 @@ describes.realWin('amp-story', {
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -431,8 +424,6 @@ describes.realWin('amp-story', {
       // consent prompt.
       const promise = new Promise(() => {});
       sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -454,7 +445,7 @@ describes.realWin('amp-story', {
 
     it('should play the story after the consent is resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -475,8 +466,6 @@ describes.realWin('amp-story', {
       });
 
       sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -502,7 +491,7 @@ describes.realWin('amp-story', {
 
     it('should play the story if the consent was already resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -518,8 +507,6 @@ describes.realWin('amp-story', {
       // Returns an already resolved promised: the user already accepted or
       // rejected the consent in a previous session.
       sandbox.stub(consent, 'getConsentPolicyState').resolves();
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -591,8 +578,6 @@ describes.realWin('amp-story', {
     it('should pause the story when viewer becomes inactive', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
 
-      story.buildCallback();
-
       return story.layoutCallback()
           .then(() => {
             story.pauseCallback();
@@ -606,8 +591,6 @@ describes.realWin('amp-story', {
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
-      story.buildCallback();
-
       return story.layoutCallback()
           .then(() => {
             story.resumeCallback();
@@ -620,8 +603,6 @@ describes.realWin('amp-story', {
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -639,7 +620,6 @@ describes.realWin('amp-story', {
       story = new AmpStory(element);
       const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
       createPages(story.element, 2, ['cover', 'page-4']);
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             expect(dispatchStub).to.have.been.calledWith(
@@ -649,7 +629,6 @@ describes.realWin('amp-story', {
     });
 
     it('should display the story after clicking "continue" button', () => {
-
       AmpStory.isBrowserSupported = () => false;
       story = new AmpStory(element);
       const dispatchStub = sandbox.stub(
@@ -657,9 +636,6 @@ describes.realWin('amp-story', {
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.buildCallback();
-      //story.layoutCallback();
-
-      //story.unsupportedBrowserLayer_.continueButton_.click();
 
       return story.layoutCallback()
           .then(() => {
@@ -741,7 +717,6 @@ describes.realWin('amp-story', {
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
       const page1 = pages[1];
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
@@ -755,7 +730,6 @@ describes.realWin('amp-story', {
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
       const page0 = pages[0];
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => story.switchTo_('page-1'))
           .then(() => {
@@ -770,7 +744,6 @@ describes.realWin('amp-story', {
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
       const page0 = pages[0];
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => story.switchTo_('page-1'))
           .then(() => {
@@ -788,8 +761,6 @@ describes.realWin('amp-story', {
 
       createPages(story.element, 2, ['cover', 'page-1']);
 
-      story.buildCallback();
-
       return story.layoutCallback()
           .then(() => {
             expect(story.backgroundAudioEl_).to.exist;
@@ -804,7 +775,6 @@ describes.realWin('amp-story', {
           sandbox.stub(story.mediaPool_, 'blessAll').resolves();
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -819,7 +789,6 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
@@ -838,7 +807,6 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -864,7 +832,6 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -884,7 +851,6 @@ describes.realWin('amp-story', {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-      story.buildCallback();
 
       let coverMuteStub;
       let firstPageUnmuteStub;
@@ -907,7 +873,6 @@ describes.realWin('amp-story', {
   describe('#getMaxMediaElementCounts', () => {
     it('should create 2 audio & video elements when no elements found', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -923,7 +888,6 @@ describes.realWin('amp-story', {
 
     it('should create 2 extra audio & video elements for ads', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -941,7 +905,6 @@ describes.realWin('amp-story', {
 
     it('never have more than the defined maximums', () => {
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -964,8 +927,6 @@ describes.realWin('amp-story', {
     it('should set the access state to true if next page blocked', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-      story.buildCallback();
-
       return story.layoutCallback()
           .then(() => {
             story.getPageById('page-1')
@@ -980,8 +941,6 @@ describes.realWin('amp-story', {
 
     it('should not navigate if next page is blocked by paywall', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -1004,8 +963,6 @@ describes.realWin('amp-story', {
       };
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
-
-      story.buildCallback();
 
       // Navigates to a paywall protected page, and waits until the document
       // is successfuly reauthorized to navigate.
@@ -1034,8 +991,6 @@ describes.realWin('amp-story', {
       };
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
-
-      story.buildCallback();
 
       // Navigates to a paywall protected page, and waits until the document
       // is successfuly reauthorized to hide the access UI.
@@ -1067,8 +1022,6 @@ describes.realWin('amp-story', {
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
 
-      story.buildCallback();
-
       // Navigates to a paywall protected page, and does not navigate to that
       // page if the document has been reauthorized with insuficient rights.
       return story.layoutCallback()
@@ -1094,8 +1047,6 @@ describes.realWin('amp-story', {
       };
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
-
-      story.buildCallback();
 
       // Navigates to a paywall protected page, and does not hide the access UI
       // if the document has been reauthorized with insuficient rights.
@@ -1123,8 +1074,6 @@ describes.realWin('amp-story', {
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
 
-      story.buildCallback();
-
       // Navigates to a maybe protected page (has amp-access="" rule), but the
       // document authorizations are still pending. Asserts that it blocks the
       // navigation.
@@ -1149,8 +1098,6 @@ describes.realWin('amp-story', {
       };
       sandbox.stub(Services, 'accessServiceForDocOrNull')
           .resolves(fakeAccessService);
-
-      story.buildCallback();
 
       // Navigation to a maybe protected page (has amp-access="" rule) is
       // blocked until the authorizations are completed.

@@ -46,10 +46,6 @@ import {AmpStoryPage, PageState} from './amp-story-page';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {
-  DoubletapRecognizer,
-  SwipeXYRecognizer,
-} from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
@@ -64,6 +60,7 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -82,7 +79,7 @@ import {
   px,
   resetStyles,
   setImportantStyles,
-  setStyle,
+  toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -91,10 +88,12 @@ import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
 import LocalizedStringsEn from './_locales/en';
@@ -289,8 +288,7 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        // TODO(newmuis, #11647): Enable Arabic strings once RTL is supported.
-        // .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
         .registerLocalizedStringBundle('de', LocalizedStringsDe)
         .registerLocalizedStringBundle('en', LocalizedStringsEn)
         .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
@@ -353,10 +351,14 @@ export class AmpStory extends AMP.BaseElement {
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
 
+    // Removes title in order to prevent incorrect titles appearing on link
+    // hover. (See 17654)
+    this.element.removeAttribute('title');
+
     // Disallow all actions in a (standalone) story.
     // Components then add their own actions.
     const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.setWhitelist([]);
+    actions.clearWhitelist();
   }
 
 
@@ -576,16 +578,11 @@ export class AmpStory extends AMP.BaseElement {
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
 
-    // Disables zoom on double-tap.
-    gestures.onGesture(DoubletapRecognizer, gesture => {
-      const {event} = gesture;
-      event.preventDefault();
-    });
-
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
-      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
+      if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
+          this.storeService_.get(StateProperty.ACCESS_STATE)) {
         return;
       }
       if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
@@ -704,8 +701,9 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => {
-          this.pages_.forEach(page => {
+          this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
+            this.upgradeCtaAnchorTagsForTracking_(page, index);
           });
         })
         .then(() => this.switchTo_(initialPageId))
@@ -821,7 +819,6 @@ export class AmpStory extends AMP.BaseElement {
     dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
   }
-
 
   /**
    * @private
@@ -1129,7 +1126,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      setStyle(this.element, 'display', 'none');
+      toggle(this.element, false);
 
       // Reading the height is what forces the repaint.  The conditional exists
       // only to workaround the fact that the closure compiler would otherwise
@@ -1137,7 +1134,7 @@ export class AmpStory extends AMP.BaseElement {
       // always >= 0, this conditional will always be executed.
       const height = this.element./*OK*/offsetHeight;
       if (height >= 0) {
-        setStyle(this.element, 'display', '');
+        toggle(this.element, true);
       }
     });
   }
@@ -1201,11 +1198,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string}
    */
   getHistoryStatePageId_() {
-    const {history} = this.win;
-    if (history && history.state) {
-      return history.state.ampStoryPageId;
-    }
-    return null;
+    const state = getState(this.win.history);
+    return state ? state.ampStoryPageId : null;
   }
 
 
@@ -1912,6 +1906,27 @@ export class AmpStory extends AMP.BaseElement {
         removeAttributeInMutate(page, Attributes.VISITED));
     }));
   }
+
+
+  /**
+   * @param {!AmpStoryPage} page The page whose CTA anchor tags should be
+   *     upgraded.
+   * @param {number} pageIndex The index of the page.
+   * @private
+   */
+  upgradeCtaAnchorTagsForTracking_(page, pageIndex) {
+    this.mutateElement(() => {
+      const pageId = page.element.id;
+      const ctaAnchorEls =
+          scopedQuerySelectorAll(page.element, 'amp-story-cta-layer a');
+
+      Array.prototype.forEach.call(ctaAnchorEls, ctaAnchorEl => {
+        ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
+        ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
+      });
+    });
+  }
+
 
   /** @return {!NavigationState} */
   getNavigationState() {

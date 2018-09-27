@@ -23,11 +23,16 @@ const {getStdout} = require('./exec');
 
 /**
  * Returns the branch point of the current branch off of master.
+ * @param {boolean} fromMerge true if this is a merge commit.
  * @return {string}
  */
-function gitBranchPoint() {
-  return getStdout('git merge-base master HEAD').trim();
-}
+exports.gitBranchPoint = function(fromMerge = false) {
+  if (fromMerge) {
+    return getStdout('git merge-base HEAD^1 HEAD^2').trim();
+  } else {
+    return getStdout('git merge-base master HEAD').trim();
+  }
+};
 
 /**
  * Returns the list of files changed on the local branch relative to the branch
@@ -35,7 +40,7 @@ function gitBranchPoint() {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPoint();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -45,7 +50,7 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPoint();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
@@ -55,7 +60,7 @@ exports.gitDiffStatMaster = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPoint();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
@@ -82,4 +87,23 @@ exports.gitBranchName = function() {
  */
 exports.gitCommitterEmail = function() {
   return getStdout('git log -1 --pretty=format:"%ae"').trim();
+};
+
+/**
+ * Returns the timestamp of the latest commit on the local branch.
+ * @return {number}
+ */
+exports.gitCommitFormattedTime = function() {
+  return getStdout(
+      'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S')
+      .trim();
+};
+
+/**
+ * Returns machine parsable list of uncommitted changed files, or an empty
+ * string if no files were changed.
+ * @return {string}
+ */
+exports.gitStatusPorcelain = function() {
+  return getStdout('git status --porcelain').trim();
 };
