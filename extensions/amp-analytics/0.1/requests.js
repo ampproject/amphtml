@@ -63,15 +63,15 @@ export class RequestHandler {
     this.batchIntervalPointer_ = null;
 
     /** @private @const {string} */
-    this.batchPluginId_ = request['batchPlugin'];
+    const batchPluginId = request['batchPlugin'];
 
-    user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
+    user().assert((batchPluginId ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
     /** @const {function(string, !Array<!batchSegmentDef>):string} */
-    this.batchingPlugin_ = this.batchPluginId_
-      ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
-          `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
+    this.batchingPlugin_ = batchPluginId
+      ? user().assert(BatchingPluginFunctions[batchPluginId],
+          `Invalid request: unsupported batch plugin ${batchPluginId}`)
       : defaultBatchPlugin;
 
     /** @private {!./variables.VariableService} */
@@ -209,14 +209,14 @@ export class RequestHandler {
     const {
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
-      batchSegmentPromises_: batchSegmentsPromises,
+      batchSegmentPromises_: segmentPromises,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
     baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      Promise.all([baseUrlPromise, batchSegmentsPromises]).then(results => {
+      Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
         const baseUrl = results[0];
         const batchSegments = results[1];
         const request = this.batchingPlugin_(baseUrl, batchSegments);

@@ -298,8 +298,8 @@ describes.realWin('Requests', {amp: 1}, env => {
         const handler = new RequestHandler(
             analyticsMock, r, preconnect, {sendRequest: spy}, false);
         const expansionOptions = new ExpansionOptions({});
-        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
-        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
+        handler.send({'e1': 'e1'}, {}, expansionOptions);
+        handler.send({'e1': 'e1'}, {}, expansionOptions);
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledWith('r1?e1=e1&e1=e1');
@@ -363,21 +363,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         } catch (e) {
           expect(e).to.match(/unsupported batch plugin/);
         }
-      });
-
-      it('should handle batchPlugin function error', function* () {
-        const spy = sandbox.spy();
-        const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, {sendRequest: spy}, false);
-        // Overwrite batchPlugin function
-        handler.batchingPlugin_ = () => {throw new Error('test');};
-        expectAsyncConsoleError(/test/);
-        const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
-        clock.tick(1000);
-        yield macroTask();
-        expect(spy).to.be.not.called;
       });
 
       it('should pass in correct batchSegments', function* () {
