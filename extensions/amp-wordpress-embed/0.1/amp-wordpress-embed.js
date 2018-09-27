@@ -31,6 +31,7 @@ import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
 
@@ -40,14 +41,27 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {?string} */
+    this.url_ = null;
+  }
+
+  buildCallback() {
+    // @todo Need to support placeholder.
+
+    const {element: el} = this;
+
+    this.url_ = user().assert(
+        el.getAttribute('data-url'),
+        'The data-url attribute is required for %s', el);
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://gist.github.com/', opt_onLayout);
+    this.preconnect.url(this.url_, opt_onLayout);
   }
 
   /** @override */
@@ -58,7 +72,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     /* the third parameter 'github' ties it to the 3p/github.js */
-    const iframe = getIframe(this.win, this.element, 'github');
+    const iframe = getIframe(this.win, this.element, 'github'); // @todo Change.
     this.applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
