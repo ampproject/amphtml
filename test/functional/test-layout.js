@@ -199,9 +199,7 @@ describe('Layout', () => {
     expect(applyStaticLayout(div)).to.equal(Layout.NODISPLAY);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    document.body.appendChild(div);
-    expect(div).to.have.display('none');
-    document.body.removeChild(div);
+    expect(div.style.display).to.equal('none');
     expect(div).to.have.class('i-amphtml-layout-nodisplay');
     expect(div).to.not.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);

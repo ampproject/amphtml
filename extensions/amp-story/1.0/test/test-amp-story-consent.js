@@ -18,6 +18,7 @@ import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
 import {Services} from '../../../../src/services';
+import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-consent', {amp: true}, env => {
@@ -165,7 +166,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    expect(buttonEl).to.have.display('block');
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('block');
   });
 
   it('should hide the decline button if onlyAccept is true', () => {
@@ -179,7 +181,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    expect(buttonEl).to.have.display('none');
+    const styles = computedStyle(window, buttonEl);
+    expect(styles.display).to.equal('none');
   });
 
   it('should hide the external link by default', () => {
@@ -188,7 +191,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    expect(linkEl).to.have.display('none');
+    const styles = computedStyle(window, linkEl);
+    expect(styles.display).to.equal('none');
   });
 
   it('should require an external link title if a URL is provided', () => {
@@ -235,7 +239,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    expect(linkEl).not.to.have.display('none');
+    const styles = computedStyle(window, linkEl);
+    expect(styles.display).not.to.equal('none');
   });
 
   it('should whitelist the <amp-consent> actions', () => {

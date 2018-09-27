@@ -35,10 +35,6 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
     });
   });
 
-  function waitForDisplay(element, display) {
-    return () => fixture.win.getComputedStyle(element)['display'] === display;
-  }
-
   afterEach(() => {
     sandbox.restore();
   });
@@ -49,7 +45,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('hideBtn');
 
       button.click();
-      yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
+      yield poll('#spanToHide hidden', () => span.style['display'] === 'none');
     });
 
     it('<AMP element>.toggleVisibility', function*() {
@@ -57,10 +53,10 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('toggleBtn');
 
       button.click();
-      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
+      yield poll('#imgToToggle hidden', () => img.style['display'] === 'none');
 
       button.click();
-      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
+      yield poll('#imgToToggle displayed', () => img.style['display'] === '');
     });
 
     describe.configure().skipIfPropertiesObfuscated().run('navigate',

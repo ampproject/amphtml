@@ -17,7 +17,6 @@ import {LogLevel, dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray} from '../../../src/types';
 import {removeChildren} from '../../../src/dom';
-import {toggle} from '../../../src/style';
 
 
 /**
@@ -27,7 +26,11 @@ import {toggle} from '../../../src/style';
  */
 function toggleHiddenAttribute(vsync, el, isHidden) {
   vsync.mutate(() => {
-    toggle(el, !isHidden);
+    if (isHidden) {
+      el.setAttribute('hidden', 'hidden');
+    } else {
+      el.removeAttribute('hidden');
+    }
   });
 }
 
@@ -222,7 +225,7 @@ export class DevelopmentModeLog {
 
     this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-story-developer-log');
-    toggle(this.root_, false);
+    this.root_.setAttribute('hidden', '');
     this.root_.appendChild(headerEl);
     this.root_.appendChild(this.entriesEl_);
 

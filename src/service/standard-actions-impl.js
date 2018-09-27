@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
+import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
@@ -29,7 +29,8 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return element.hasAttribute('hidden');
+  return getStyle(element, 'display') == 'none'
+      || element.hasAttribute('hidden');
 }
 
 /** @const {string} */
@@ -257,6 +258,7 @@ export class StandardActions {
         target./*OK*/expand();
       } else {
         toggle(target, true);
+        target.removeAttribute('hidden');
       }
     });
 

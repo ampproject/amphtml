@@ -52,7 +52,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
     it('should open and close correctly', () => {
       const lightbox = win.document.getElementById('amp-lightbox-gallery');
       return openLightbox(win.document).then(() => {
-        expect(lightbox).to.not.have.display('none');
+        expect(lightbox.style.display).to.not.equal('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
         const carousel = carouselQuery[0];
@@ -69,7 +69,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         closeButton.click();
         return lightboxClose;
       }).then(() => {
-        expect(lightbox).to.have.display('none');
+        expect(lightbox.style.display).to.equal('none');
       });
     });
 
@@ -85,20 +85,20 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         const closeButton = getButton(win.document,
             'i-amphtml-lbg-button-close');
         expect(closeButton.getAttribute('aria-label')).to.equal('Close');
-        expect(closeButton).to.have.display('block');
+        expect(win.getComputedStyle(closeButton).display).to.equal('block');
 
         const galleryButton = getButton(win.document,
             'i-amphtml-lbg-button-gallery');
         expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
-        expect(galleryButton).to.have.display('none');
+        expect(win.getComputedStyle(galleryButton).display).to.equal('none');
 
         const prevButton = getButton(win.document, 'i-amphtml-lbg-button-prev');
         expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
-        expect(prevButton).to.have.display('none');
+        expect(win.getComputedStyle(prevButton).display).to.equal('none');
 
         const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
         expect(nextButton.getAttribute('aria-label')).to.equal('Next');
-        expect(nextButton).to.have.display('none');
+        expect(win.getComputedStyle(nextButton).display).to.equal('none');
       });
     });
 
@@ -201,7 +201,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
 
 function openLightbox(document) {
   const lightbox = document.getElementById('amp-lightbox-gallery');
-  expect(lightbox).to.have.display('none');
+  expect(lightbox.style.display).to.equal('none');
   const ampImage = document.getElementById('img0');
   const imageLoadedPromise = waitForImageToLoad(ampImage);
   return imageLoadedPromise.then(() => {
@@ -223,15 +223,13 @@ function getButton(document, className) {
 
 function waitForLightboxOpen(lightbox) {
   return poll('wait for amp-lightbox-gallery to open', () => {
-    const styles = lightbox.ownerNode.defaultView.getComputedStyle(lightbox);
-    return styles.display != 'none' && lightbox.style.opacity == '';
+    return lightbox.style.display == '' && lightbox.style.opacity == '';
   });
 }
 
 function waitForLightboxClose(lightbox, carousel) {
   return poll('wait for amp-lightbox-gallery to close', () => {
-    const styles = carousel.ownerNode.defaultView.getComputedStyle(carousel);
-    return styles.display == 'none';
+    return carousel.style.display == 'none';
   });
 }
 

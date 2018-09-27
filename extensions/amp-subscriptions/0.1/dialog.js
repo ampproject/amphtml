@@ -50,8 +50,9 @@ export class Dialog {
         doc,
         'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
           'role': 'dialog',
+          // TODO(jridgewell, #17475): Use toggle once it switches to [hidden]
+          'hidden': '',
         }));
-    toggle(this.wrapper_, false);
 
     /** @private @const {!Element} */
     this.closeButton_ = createElementWithAttributes(
@@ -104,7 +105,8 @@ export class Dialog {
     }
     this.visible_ = true;
     return this.vsync_.mutatePromise(() => {
-      toggle(this.wrapper_, true);
+      // TODO(jridgewell, #17475): Use toggle once it switches to [hidden]
+      this.wrapper_.removeAttribute('hidden');
       this.showCloseAction(/** @type {boolean} */ (showCloseAction));
     }).then(() => {
       // Animate to display.
@@ -143,7 +145,8 @@ export class Dialog {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {
-        toggle(this.wrapper_, false);
+        // TODO(jridgewell, #17475): Use toggle once it switches to [hidden]
+        this.wrapper_.setAttribute('hidden', '');
         this.viewport_.updatePaddingBottom(0);
         this.visible_ = false;
       });

@@ -20,6 +20,7 @@ import {
 } from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {computedStyle} from '../../../../src/style';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -597,7 +598,8 @@ describes.realWin('amp-consent', {
         expect(postPromptUI).to.have.display('none');
         yield macroTask();
 
-        expect(ampConsent.element).to.not.have.display('none');
+        expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
+            .to.not.equal('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
         expect(postPromptUI).to.not.have.display('none');
