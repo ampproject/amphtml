@@ -144,8 +144,8 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
       'extensions/amp-analytics/0.1/config.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -337,12 +337,14 @@ const forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/error.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'extensions/amp-bind/0.1/bind-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
@@ -563,6 +565,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'dist.3p/current/integration.js',
@@ -609,7 +612,6 @@ const forbiddenTerms = {
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
-      'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
@@ -619,6 +621,17 @@ const forbiddenTerms = {
     checkInTestFolder: true,
     whitelist: [
       'test/_init_tests.js',
+    ],
+  },
+  '[^\\.]makeBodyVisible\\(': {
+    message: 'This is a protected function. If you are calling this to show ' +
+        'body after an error please use `makeBodyVisibleRecovery`',
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/style-installer.js',
+      'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
@@ -783,6 +796,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -893,6 +907,17 @@ function isInTestFolder(path) {
 }
 
 /**
+ * Check if file is inside the build-system/babel-plugins test/fixture folder.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isInBuildSystemFixtureFolder(filePath) {
+  const folder = path.dirname(filePath);
+  return folder.startsWith('build-system/babel-plugins') &&
+    folder.includes('test/fixtures');
+}
+
+/**
  * Strip Comments
  * @param {string} contents
  */
@@ -932,9 +957,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) &&
+    if (isInBuildSystemFixtureFolder(relative) || (Array.isArray(whitelist) &&
       (whitelist.indexOf(relative) != -1 ||
-      (isInTestFolder(relative) && !checkInTestFolder))) {
+      (isInTestFolder(relative) && !checkInTestFolder)))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build

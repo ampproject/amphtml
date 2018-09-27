@@ -16,12 +16,12 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
@@ -68,7 +68,13 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.barStick_ = null;
 
     /** @private {Element|null} */
-    this.hint_ = null;
+    this.hintLeftArrow_ = null;
+    /** @private {Element|null} */
+    this.hintRightArrow_ = null;
+    /** @private {Element|null} */
+    this.hintLeftBody_ = null;
+    /** @private {Element|null} */
+    this.hintRightBody_ = null;
 
     /** @private {UnlistenDef|null} */
     this.unlistenMouseDown_ = null;
@@ -85,21 +91,14 @@ export class AmpImageSlider extends AMP.BaseElement {
       (Number(this.element.getAttribute('step-size')) || 0.1) : 0.1;
 
     /** @private {boolean} */
-    this.disableHint_ = this.element.hasAttribute('disable-hint');
-    /** @private {number} */
-    this.hintReappearInterval_ = 10000;
-    /** @private {boolean} */
-    this.shouldHintReappear_ = false;
-    /** @private {number|null} */
-    this.hintTimeoutHandle_ = null;
-    /** @private {boolean} */
-    this.isHintHidden_ = false;
-
-    /** @private {boolean} */
-    this.gestureDisabled_ = false; // for now, will be set later
+    this.shouldHintReappear_ =
+      !this.element.hasAttribute('disable-hint-reappear');
 
     /** @private {Gestures|null} */
     this.gestures_ = null;
+
+    /** @private {boolean} */
+    this.isEdge_ = Services.platformFor(this.win).isEdge();
 
     /** @public {boolean} */
     this.isEventRegistered = false; // for test purpose
@@ -107,11 +106,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     const children = this.getRealChildren();
 
     for (let i = 0; i < children.length; i++) {
@@ -123,14 +117,19 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.leftAmpImage_ = child;
         } else if (!this.rightAmpImage_) {
           this.rightAmpImage_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain more than 2 <amp-img>s.');
         }
-      }
-
-      if (child.tagName.toLowerCase() === 'div') {
-        if (child.hasAttribute('before')) {
+      } else if (child.tagName.toLowerCase() === 'div') {
+        if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
-        } else if (child.hasAttribute('after')) {
+        } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain <div>s without ' +
+              '"first" or "second" attributes.');
         }
       }
     }
@@ -151,7 +150,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.buildImageWrappers_();
     this.buildBar_();
+    // Notice: hints are attached after amp-img finished loading
     this.buildHint_();
+    this.checkARIA_();
 
     this.registerAction('seekTo', invocation => {
       const {args} = invocation;
@@ -160,12 +161,15 @@ export class AmpImageSlider extends AMP.BaseElement {
           const percent = args['percent'];
           user().assertNumber(percent,
               'value to seek to must be a number');
-          this.updatePositions_(percent);
+          this.mutateElement(() => {
+            this.updatePositions_(percent);
+          });
         }
       }
     }, ActionTrust.LOW);
 
-    const initialPercentString = this.element.getAttribute('initial-percent');
+    const initialPositionString =
+        this.element.getAttribute('initial-slider-position');
     // TODO(kqian): move this before building child components on issue
     // This is the only step when content tree is attached to document
     return this.mutateElement(() => {
@@ -174,56 +178,17 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.leftMask_.appendChild(this.leftAmpImage_);
       this.rightMask_.appendChild(this.rightAmpImage_);
       // Set initial positioning
-      if (initialPercentString) {
-        const initialPercent = Number(initialPercentString);
-        this.updatePositions_(initialPercent);
+      if (initialPositionString) {
+        const initialPosition = Number(initialPositionString);
+        this.updatePositions_(initialPosition);
+      }
+      // Prevent Edge horizontal swipe for go back/forward
+      if (this.isEdge_) {
+        setStyles(this.element, {
+          'touch-action': 'pan-y', // allow browser only default y behavior
+        });
       }
     });
-  }
-
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    const newGestureDisabled = mutations['disable-gesture'];
-    if (newGestureDisabled) {
-      this.disableGesture_(); // this.gestureDisabled_ is set in this call
-    } else {
-      this.enableGesture_(); // this.gestureDisabled_ is set in this call
-    }
-  }
-
-  /**
-   * Enable user interaction
-   * @private
-   */
-  enableGesture_() {
-    if (!this.gestureDisabled_) {
-      return;
-    }
-    // Show hint if needed
-    if (!this.disableHint_) {
-      this.animateShowHint_();
-    }
-    this.registerEvents_();
-    this.gestureDisabled_ = false;
-  }
-
-  /**
-   * Disable user interaction
-   * @private
-   */
-  disableGesture_() {
-    if (this.gestureDisabled_) {
-      return;
-    }
-    // Hide hint if needed
-    if (!this.disableHint_) {
-      // need to clear timeout handle inside
-      // thus not directly calling animateHideHint_
-      this.resetHintReappear_(true); // no restart
-      this.isHintHidden_ = true;
-    }
-    this.unregisterEvents_();
-    this.gestureDisabled_ = true;
   }
 
   /**
@@ -241,19 +206,20 @@ export class AmpImageSlider extends AMP.BaseElement {
     if (this.leftLabel_) {
       this.leftLabelWrapper_ = this.doc_.createElement('div');
       this.leftLabelWrapper_.classList
-          .add('i-amphtml-image-slider-left-label-wrapper');
-      this.leftLabel_.classList.add('i-amphtml-image-slider-left-label');
+          .add('i-amphtml-image-slider-label-wrapper');
       this.leftLabelWrapper_.appendChild(this.leftLabel_);
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
 
     this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-    this.rightAmpImage_.classList.add('i-amphtml-image-slider-image-on-top');
+    this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
+    this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList
-          .add('i-amphtml-image-slider-right-label-wrapper');
-      this.rightLabel_.classList.add('i-amphtml-image-slider-right-label');
+          .add('i-amphtml-image-slider-label-wrapper');
+      this.rightLabelWrapper_.classList
+          .add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -269,7 +235,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.bar_.appendChild(this.barStick_);
 
     this.bar_.classList.add('i-amphtml-image-slider-bar');
+    this.bar_.classList.add('i-amphtml-image-slider-push-right');
     this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
+    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
 
     this.container_.appendChild(this.bar_);
   }
@@ -279,31 +247,79 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   buildHint_() {
-    if (this.disableHint_) {
-      return;
-    }
+    // Switch to attach left and right hint separately
+    // and translate each of the two independently.
+    // This addresses:
+    // 1. Safari glitch that causes flashing arrows when 2 arrows are placed
+    //   in any kind of normal DOM flow (inline-block, flex, grid, etc.)
+    // 2. Edge glitch that forgets to update second child position if its
+    //   parent have updated its own transform
+    this.hintLeftBody_ = this.doc_.createElement('div');
+    this.hintLeftBody_.classList.add('i-amphtml-image-slider-hint');
+    this.hintRightBody_ = this.doc_.createElement('div');
+    this.hintRightBody_.classList.add('i-amphtml-image-slider-hint');
 
-    this.hint_ = this.doc_.createElement('div');
+    const leftHintWrapper = this.doc_.createElement('div');
+    leftHintWrapper.classList.add('i-amphtml-image-slider-hint-left-wrapper');
+    const rightHintWrapper = this.doc_.createElement('div');
+    rightHintWrapper.classList.add('i-amphtml-image-slider-hint-right-wrapper');
 
-    if (this.element.hasAttribute('hint-reappear')) {
-      this.shouldHintReappear_ = true;
-    }
+    this.hintLeftArrow_ = this.doc_.createElement('div');
+    this.hintLeftArrow_.classList.add('amp-image-slider-hint-left');
+    this.hintRightArrow_ = this.doc_.createElement('div');
+    this.hintRightArrow_.classList.add('amp-image-slider-hint-right');
 
-    if (this.element.hasAttribute('hint-reappear-interval')) {
-      this.hintReappearInterval_ =
-          Number(this.element.getAttribute('hint-reappear-interval')) ||
-          this.hintReappearInterval_;
-    }
+    leftHintWrapper.appendChild(this.hintLeftArrow_);
+    rightHintWrapper.appendChild(this.hintRightArrow_);
+    this.hintLeftBody_.appendChild(leftHintWrapper);
+    this.hintRightBody_.appendChild(rightHintWrapper);
+    // Notice: hints are attached after amp-img finished loading
+  }
 
-    const leftHintIcon = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-left-arrow"></div>`;
-    const rightHintIcon = htmlFor(this.doc_)
-    `<div class="amp-image-slider-hint-right-arrow"></div>`;
-
-    this.hint_.appendChild(leftHintIcon);
-    this.hint_.appendChild(rightHintIcon);
-    this.hint_.classList.add('i-amphtml-image-slider-hint');
-    this.bar_.appendChild(this.hint_);
+  /**
+   * Check if aria attributes are correctly set
+   * If not, apply default and warn user in console
+   * @private
+   */
+  checkARIA_() {
+    const leftAmpImage = dev().assertElement(this.leftAmpImage_);
+    const rightAmpImage = dev().assertElement(this.rightAmpImage_);
+    leftAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (leftAmpImage.childElementCount > 0) {
+        const img = leftAmpImage.querySelector('img');
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            leftAmpImage.getAttribute('data-left-image-aria-suffix')
+              || 'left image';
+          if (leftAmpImage.hasAttribute('alt')) {
+            newAltText = `${leftAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
+    rightAmpImage.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (rightAmpImage.childElementCount > 0) {
+        const img = rightAmpImage.querySelector('img');
+        let newAltText;
+        this.measureMutateElement(() => {
+          const ariaSuffix =
+            rightAmpImage.getAttribute('data-right-image-aria-suffix')
+              || 'right image';
+          if (rightAmpImage.hasAttribute('alt')) {
+            newAltText = `${rightAmpImage.getAttribute('alt')}, ${ariaSuffix}`;
+          } else {
+            newAltText = ariaSuffix;
+          }
+        }, () => {
+          img.setAttribute('alt', newAltText);
+        });
+      }
+    });
   }
 
   /**
@@ -318,26 +334,18 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_ = Gestures.get(this.element);
 
     this.gestures_.onGesture(SwipeXRecognizer, e => {
-      // We need the initial offset, yet gesture event seems not providing
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
-        this.resetHintReappear_(true);
+        this.animateHideHint_();
       }
       this.pointerMoveX_(
           e.data.startX + e.data.deltaX);
-      if (e.data.last) {
-        // Reset hint reappearance timeout if needed
-        this.resetHintReappear_(!this.shouldHintReappear_);
-      }
     });
 
     this.gestures_.onPointerDown(e => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
-      // Use !this.shouldHintReappear_ here
-      // It is possible that after onPointerDown
-      // SwipeXRecognizer callback is not triggered
-      this.resetHintReappear_(!this.shouldHintReappear_);
+      this.animateHideHint_();
     });
   }
 
@@ -354,44 +362,16 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 
   /**
-   * Reset interval when the hint would reappear
-   * Call this when an user interaction is done
-   * Specify opt_noRestart to true if no intent to start a timeout for
-   * showing hint again.
-   * @param {boolean=} opt_noRestart
-   * @private
-   */
-  resetHintReappear_(opt_noRestart) {
-    if (this.disableHint_) {
-      return;
-    }
-
-    if (!this.isHintHidden_) {
-      this.animateHideHint_();
-    }
-
-    if (this.hintTimeoutHandle_ !== null) {
-      Services.timerFor(this.win).cancel(this.hintTimeoutHandle_);
-    }
-
-    if (opt_noRestart === true) {
-      this.hintTimeoutHandle_ = null;
-      return;
-    }
-
-    // Use timer instead of default setTimeout
-    this.hintTimeoutHandle_ = Services.timerFor(this.win).delay(() => {
-      this.animateShowHint_();
-    }, this.hintReappearInterval_);
-  }
-
-  /**
    * Show hint with animation
    * @private
    */
   animateShowHint_() {
-    this.hint_.classList.remove('i-amphtml-image-slider-hint-hidden');
-    this.isHintHidden_ = false;
+    this.mutateElement(() => {
+      this.hintLeftBody_.classList
+          .remove('i-amphtml-image-slider-hint-hidden');
+      this.hintRightBody_.classList
+          .remove('i-amphtml-image-slider-hint-hidden');
+    });
   }
 
   /**
@@ -399,8 +379,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   animateHideHint_() {
-    this.hint_.classList.add('i-amphtml-image-slider-hint-hidden');
-    this.isHintHidden_ = true;
+    this.mutateElement(() => {
+      this.hintLeftBody_.classList.add('i-amphtml-image-slider-hint-hidden');
+      this.hintRightBody_.classList.add('i-amphtml-image-slider-hint-hidden');
+    });
   }
 
   /**
@@ -422,7 +404,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.unlistenMouseUp_ =
         listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
 
-    this.resetHintReappear_(true);
+    this.animateHideHint_();
   }
 
   /**
@@ -444,8 +426,6 @@ export class AmpImageSlider extends AMP.BaseElement {
     e.preventDefault();
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);
-
-    this.resetHintReappear_(!this.shouldHintReappear_);
   }
 
   /**
@@ -459,14 +439,16 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
 
-    this.resetHintReappear_(!this.shouldHintReappear_);
+    this.animateHideHint_();
 
     switch (e.key.toLowerCase()) {
+      case 'left': // Edge non-standard, pre EdgeHTML 17
       case 'arrowleft':
         e.preventDefault();
         e.stopPropagation();
         this.stepLeft_();
         break;
+      case 'right': // Edge non-standard, pre EdgeHTML 17
       case 'arrowright':
         e.preventDefault();
         e.stopPropagation();
@@ -512,8 +494,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       return;
     }
     this.unlistenMouseDown_ =
-        listen(dev().assertElement(this.container_),
-            'mousedown', this.onMouseDown_.bind(this));
+        listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
     this.unlistenKeyDown_ =
         listen(this.element, 'keydown', this.onKeyDown_.bind(this));
     this.registerTouchGestures_();
@@ -645,6 +626,9 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.updateTranslateX_(this.bar_, percentFromLeft);
     this.updateTranslateX_(this.rightMask_, percentFromLeft);
     this.updateTranslateX_(this.rightAmpImage_, -percentFromLeft);
+    const adjustedDeltaFromLeft = percentFromLeft - 0.5;
+    this.updateTranslateX_(this.hintLeftBody_, adjustedDeltaFromLeft);
+    this.updateTranslateX_(this.hintRightBody_, adjustedDeltaFromLeft);
     if (this.rightLabelWrapper_) {
       this.updateTranslateX_(this.rightLabelWrapper_, -percentFromLeft);
     }
@@ -679,11 +663,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     // Extensions such as amp-carousel still uses .setAsOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
@@ -695,12 +674,20 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerEvents_();
 
-    // disable-gesture is checked here instead, after all construction is done
-    if (this.element.hasAttribute('disable-gesture')) {
-      this.disableGesture_();
-    }
-
-    return Promise.resolve();
+    return Promise.all([
+      dev().assertElement(this.leftAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+      dev().assertElement(this.rightAmpImage_)
+          .signals().whenSignal(CommonSignals.LOAD_END),
+    ]).then(() => {
+      // Notice: hints are attached after amp-img finished loading
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    }, () => {
+      // Do the same thing when signal rejects
+      this.container_.appendChild(this.hintLeftBody_);
+      this.container_.appendChild(this.hintRightBody_);
+    });
   }
 
   /** @override */
@@ -717,6 +704,15 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     this.registerEvents_();
+  }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    // Show hint if back into viewport and user does not explicitly
+    // disable this
+    if (inViewport && this.shouldHintReappear_) {
+      this.animateShowHint_();
+    }
   }
 }
 

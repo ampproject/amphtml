@@ -16,7 +16,9 @@
 
 import {Actions} from './actions';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
@@ -199,6 +201,7 @@ export class LocalSubscriptionPlatform {
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
+      // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
@@ -211,8 +214,8 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

@@ -73,6 +73,10 @@ describe('A4AVariableSource', () => {
         '[{\"id\":\"parent\"}]');
   });
 
+  it('should replace CLIENT_ID with null', () => {
+    return expect(expandSync('CLIENT_ID', ['a'])).to.be.null;
+  });
+
   function undefinedVariable(varName) {
     it('should not replace ' + varName, () => {
       expect(varSource.get(varName)).to.be.undefined;

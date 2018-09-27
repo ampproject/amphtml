@@ -56,9 +56,11 @@ limitations under the License.
 Given a list of pages, `amp-next-page` tries to load them after the current 
 document, providing an infinite-scroll type experience. 
 
-The pages should be inlined using a JSON format.
-
+Pages should be specified in a JSON config loaded from a remote URL listed in
+the element `src`, or inlined as a `script` element child.
 ```html
+<amp-next-page src="https://example.com/next-page-config.json"></amp-next-page>
+<!-- Or -->
 <amp-next-page>
   <script type="application/json">
     {
@@ -105,11 +107,10 @@ Alternatively, you can specify a custom separator containing arbitrary HTML
 content as a child of the `amp-next-page` component by using the `separator` 
 attribute.
 ```html
-<amp-next-page>
+<amp-next-page src="https://example.com/config.json">
   <div separator>
     <h1>Keep reading</h1>
   </div>
-  ...
 </amp-next-page>
 ```
 
@@ -140,7 +141,16 @@ selectors will be set to `display: none` in all child documents.
 
 ## Attributes
 
-N/A
+##### src
+
+The URL of the remote endpoint that returns the JSON that will be used to 
+configure this `amp-next-page` component. This must be a CORS HTTP service. 
+The URL's protocol must be HTTPS.
+
+{% call callout('Important', type='caution') %} Your endpoint must implement 
+the requirements specified in the CORS Requests in AMP spec. {% endcall %}
+
+The `src` attribute is required unless a config has been specified inline.
 
 ## Configuration spec
 
@@ -185,6 +195,19 @@ read, and hides the header and footer elements from each child document.
   ]
 }
 ```
+
+## Substitutions
+
+The `amp-next-page` src allows all standard URL variable substitutions. See 
+the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+For example:
+```html
+<amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
+```
+may make a request to something like 
+`https://foo.com/config.json?0.8390278471201` where the RANDOM value is 
+randomly generated upon each impression.
 
 ## Validation
 

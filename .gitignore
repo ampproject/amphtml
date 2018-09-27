@@ -29,3 +29,7 @@ EXTENSIONS_CSS_MAP
 deps.txt
 flags-array.txt
 out/
+firebase
+.firebaserc
+firebase.json
+.firebase/

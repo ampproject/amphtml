@@ -23,7 +23,11 @@ import {
 import {ActionTrust} from '../../../../src/action-constants';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
-import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from '../amp-story-share';
+import {
+  DEPRECATED_SHARE_PROVIDERS_KEY,
+  SHARE_PROVIDERS_KEY,
+  ScrollableShareWidget,
+} from '../amp-story-share';
 import {EventType, dispatch} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../localization';
@@ -37,16 +41,7 @@ import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
-import {throttle} from '../../../../src/utils/rate-limit';
 
-/**
- * Scroll amount required for full-bleed in px.
- * @private @const {number}
- */
-const FULLBLEED_THRESHOLD = 88;
-
-/** @private @const {string} */
-const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
@@ -110,6 +105,22 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
     children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-story-bookend-article-text-content'}),
+        children: [
+          {
+            tag: 'h2',
+            attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
+            unlocalizedString: title,
+          },
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-bookend-component-meta'}),
+            unlocalizedString: domainName,
+          },
+        ],
+      },
       !imageUrl ? REPLAY_ICON_TEMPLATE : {
         tag: 'div',
         attrs: dict({
@@ -117,16 +128,6 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
           'style': `background-image: url(${imageUrl}) !important`,
         }),
         children: [REPLAY_ICON_TEMPLATE],
-      },
-      {
-        tag: 'h2',
-        attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        unlocalizedString: title,
-      },
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-component-meta'}),
-        unlocalizedString: domainName,
       },
     ],
   });
@@ -143,14 +144,16 @@ const buildPromptConsentTemplate = consentId => {
     children: [
       {
         tag: 'h3',
-        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading ' +
+          ' i-amphtml-story-bookend-component'}),
         localizedStringId:
             LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
       },
       {
         tag: 'h2',
         attrs: dict({
-          'class': 'i-amphtml-story-bookend-consent-button',
+          'class': 'i-amphtml-story-bookend-consent-button ' +
+            'i-amphtml-story-bookend-component',
           'on': `tap:${consentId}.prompt`,
           'role': 'button',
           'aria-label': 'Change data privacy settings',
@@ -260,11 +263,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.replayButton_
         .addEventListener('click', event => this.onReplayButtonClick_(event));
 
-    this.getOverflowContainer_().addEventListener('scroll',
-        // minInterval is high since this is a step function that does not
-        // require smoothness
-        throttle(this.win, () => this.onScroll_(), 100));
-
     this.win.addEventListener('keyup', event => {
       if (!this.isActive_()) {
         return;
@@ -285,6 +283,10 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
       this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
   }
 
@@ -339,6 +341,19 @@ export class AmpStoryBookend extends AMP.BaseElement {
       uiState === UIType.DESKTOP ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.mutateElement(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
     });
   }
 
@@ -454,24 +469,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   elementOutsideUsableArea_(el) {
     return !closest(el, el => el == this.getInnerContainer_());
-  }
-
-  /**
-   * Changes between card view and full-bleed based on scroll position.
-   * @private
-   */
-  onScroll_() {
-    if (!this.isActive_()) {
-      return;
-    }
-    let shouldBeFullBleed = false;
-    this.measureMutateElement(() => {
-      shouldBeFullBleed =
-          this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
-    }, () => {
-      this.getShadowRoot().classList.toggle(
-          FULLBLEED_CLASSNAME, shouldBeFullBleed);
-    });
   }
 
   /**

@@ -27,6 +27,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
+import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -124,7 +125,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     /** @private {boolean} */
     this.shouldDisableCssSnap_ = !isExperimentOn(
-        this.win, 'amp-carousel-scroll-snap');
+        this.win, 'amp-carousel-scroll-snap') ||
+        startsWith(
+            Services.platformFor(this.win).getIosVersionString(),
+            '10.3');
   }
 
   /** @override */
@@ -263,12 +267,19 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
+
+    if (this.hasNativeSnapPoints_) {
+      // The state being calculated after this short circuit is only needed if
+      // CSS Scroll Snap is not enabled.
+      return;
+    }
+
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
           this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
@@ -723,7 +734,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {

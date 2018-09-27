@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
+import {
+  ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
+} from './utils';
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {camelCaseToDash} from '../../src/string';
 import {hasOwn} from '../../src/utils/object';
@@ -35,7 +39,8 @@ export function adsense(global, data) {
         'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
         'matchedContentColumnsNum']);
 
-  if (data['autoFormat'] == 'rspv') {
+  if (data['autoFormat'] == ADSENSE_RSPV_TAG ||
+      data['autoFormat'] == ADSENSE_MCRSPV_TAG) {
     user().assert(hasOwn(data, 'fullWidth'),
         'Responsive AdSense ad units require the attribute data-full-width.');
 

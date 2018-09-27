@@ -546,7 +546,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 
@@ -780,12 +779,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
@@ -1020,6 +1020,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

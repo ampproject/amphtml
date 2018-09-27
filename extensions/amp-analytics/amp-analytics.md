@@ -88,6 +88,10 @@ To send data to a specific URL:
 1.  Determine what data you want to capture and track, and [specify those details in the configuration data](#specifying-configuration-data).
 2.  In the [`requests`](#requests) configuration object, specify the type of request to track (e.g., pageview, specific triggered events) and the url(s) of where you want to send the tracking data to.
 
+{% call callout('Note', type='note') %}
+When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
+{% endcall %}
+
 *Example: Sending data to a URL*
 
 Here's a simple example that tracks page views.  Every time a page is visible, the trigger event fires, and sends the pageview data to a defined URL along with a random ID.
@@ -143,7 +147,6 @@ The configuration object for `<amp-analytics>` uses the following format:
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-    "iframe": *url*,
   }
 }
 ```
@@ -433,11 +436,7 @@ The user error event (`"on": "user-error"`) is triggered when an error occurs th
 }
 ```
 
-NOTE:
-- The feature is right now behind an experiment flag `user-error-reporting`. Read [this](https://github.com/ampproject/amphtml/blob/master/tools/experiments/README.md#amp-experiments) to turn on the experiemnt.
-- There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
-- If you are OK with the above known issue and want to opt-in this feature for your site, please file an issue and contact AMP team.
-- Please report any bugs you see.
+NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/10891) that it still reports errors from A4A iframe embeds, which are irrelevant to the page.
 
 <strong><a id="visibility-spec"></a>Visibility Spec</strong>
 
@@ -655,7 +654,8 @@ indicate which transport methods are acceptable.
   - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
-  - `iframe` The value is a URL string. Indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. This option is also only available to MRC-accredited vendors.
+
+MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration.
 
 If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 
@@ -669,7 +669,7 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 }
 ```
 
-To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
+To learn more, see [this example that implements iframe transport client API](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
 
 ##### Referrer Policy
 
@@ -684,6 +684,14 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
   "referrerPolicy": "no-referrer"
 }
 ```
+
+#### Linkers
+
+The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+
+Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
+
+If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
 
 ## Validation
 

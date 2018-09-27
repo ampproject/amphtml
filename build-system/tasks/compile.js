@@ -220,6 +220,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-video-service/**/*.js',
       // Needed to access ConsentPolicyManager from other extensions
       'extensions/amp-consent/**/*.js',
+      // Needed to access AmpGeo type for service locator
+      'extensions/amp-geo/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
@@ -241,6 +243,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/react-dates/bundle.js',
       'node_modules/dompurify/dist/purify.cjs.js',
       'node_modules/promise-pjs/promise.js',
+      'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
       'node_modules/document-register-element/build/' +

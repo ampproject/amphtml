@@ -23,7 +23,6 @@ import {
   isJsonOrObj,
   mutedOrUnmutedEvent,
   objOrParseJson,
-  originMatches,
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
@@ -36,7 +35,9 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 
@@ -77,6 +78,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.playerId_ = null;
+
+    /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = null;
   }
 
   /** @override */
@@ -98,8 +102,10 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const ampdoc = this.getAmpDoc();
     const deferred = new Deferred();
 
+    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
@@ -154,7 +160,7 @@ class AmpBrightcove extends AMP.BaseElement {
   handlePlayerMessage_(event) {
     const {element} = this;
 
-    if (originMatches(event, this.iframe_, 'https://players.brightcove.net')) {
+    if (event.source != this.iframe_.contentWindow) {
       return;
     }
 
@@ -236,6 +242,7 @@ class AmpBrightcove extends AMP.BaseElement {
         'The data-account attribute is required for <amp-brightcove> %s',
         el);
     const embed = (el.getAttribute('data-embed') || 'default');
+    const customReferrer = el.getAttribute('data-referrer');
 
     this.playerId_ = (el.getAttribute('data-player') ||
       el.getAttribute('data-player-id') ||
@@ -248,7 +255,12 @@ class AmpBrightcove extends AMP.BaseElement {
         // These are encodeURIComponent'd in encodeId_().
         (el.getAttribute('data-playlist-id') ?
           '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')));
+          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        ) +
+        (customReferrer ?
+          `&referrer=${this.urlReplacements_.expandUrlSync(customReferrer)}` :
+          ''
+        );
 
     el.setAttribute('data-param-playsinline', 'true');
 

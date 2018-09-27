@@ -23,6 +23,28 @@ import {user} from '../../src/log';
 export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
 
 /**
+ * The attribute value for AdSense data-auto-format tag.
+ * For full-width responsive ad: data-auto-format='rspv'.
+ * For full-width matched content responsive ad: data-auto-format='mcrspv'
+ * @const {string}
+ */
+export const ADSENSE_RSPV_TAG = 'rspv';
+export const ADSENSE_MCRSPV_TAG = 'mcrspv';
+
+/**
+ * Required size to be sent with fluid requests.
+ * @const {string}
+ */
+export const DUMMY_FLUID_SIZE = '320x50';
+
+/**
+ * Required size to be sent with fluid requests in array format.
+ * @const {!Array<number>}
+ */
+const DUMMY_FLUID_SIZE_ARR =
+    DUMMY_FLUID_SIZE.split('x').map(dim => Number(dim));
+
+/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
@@ -34,7 +56,8 @@ export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
  * @param {boolean} multiSizeValidation A flag that if set to true will enforce
  *   the rule that ensures multi-size dimensions are no less than 2/3rds of
  *   their primary dimension's counterpart.
- * @param {boolean=} isFluid Indicates whether this ad slot is Fluid-enabled.
+ * @param {boolean=} isFluidPrimary Indicates whether the ad slot's primary
+ *   size is fluid.
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
@@ -42,7 +65,7 @@ export function getMultiSizeDimensions(
   primaryWidth,
   primaryHeight,
   multiSizeValidation,
-  isFluid = false) {
+  isFluidPrimary = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -50,6 +73,14 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
 
     const sizeStr = arrayOfSizeStrs[i];
+    if (sizeStr.toLowerCase() == 'fluid') {
+      if (!isFluidPrimary) {
+        // If the primary size is fluid, then the dummy size will already be
+        // be included.
+        dimensions.push(DUMMY_FLUID_SIZE_ARR);
+      }
+      continue;
+    }
     const size = sizeStr.split('x');
 
     // Make sure that each size is specified in the form WxH.
@@ -72,7 +103,7 @@ export function getMultiSizeDimensions(
     }
 
     // Check that secondary size is not larger than primary size.
-    if (!isFluid && !validateDimensions(width, height,
+    if (!isFluidPrimary && !validateDimensions(width, height,
         w => w > primaryWidth,
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>

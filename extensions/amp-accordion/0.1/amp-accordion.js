@@ -21,15 +21,18 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest} from '../../../src/dom';
+import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {numeric, px, setStyles as setStylesTransition} from '../../../src/transition';
+import {
+  numeric,
+  px,
+  setStyles as setStylesTransition,
+} from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
-import {setStyles} from '../../../src/style';
-import {tryFocus} from '../../../src/dom';
+import {setImportantStyles, setStyles} from '../../../src/style';
 
 const TAG = 'amp-accordion';
 const MAX_TRANSITION_DURATION = 500; // ms
@@ -316,9 +319,9 @@ class AmpAccordion extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       // We set position and opacity to avoid a FOUC while measuring height
-      setStyles(sectionChild, {
-        opacity: 0,
-        position: 'fixed',
+      setImportantStyles(sectionChild, {
+        'position': 'fixed',
+        'opacity': '0',
       });
       if (!section.hasAttribute('expanded')) {
         this.triggerEvent_('expand', section);
@@ -334,9 +337,9 @@ class AmpAccordion extends AMP.BaseElement {
           },
           () => {
             setStyles(sectionChild, {
+              'position': '',
               'opacity': '',
               'height': 0,
-              'position': '',
             });
           });
     }).then(() => {
