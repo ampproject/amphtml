@@ -1867,8 +1867,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    const switchPromise = this.switchTo_(
-        dev().assertElement(this.pages_[0].element).id);
+    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 
   /** @return {!NavigationState} */
