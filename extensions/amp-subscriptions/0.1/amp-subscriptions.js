@@ -19,7 +19,10 @@ import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
-import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
+import {
+  PageConfig,
+  PageConfigResolver,
+} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
@@ -30,10 +33,9 @@ import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -185,6 +187,11 @@ export class SubscriptionService {
           subscriptionPlatform);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          subscriptionPlatform.getServiceId()
+      );
+      // Deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
           subscriptionPlatform.getServiceId()
       );
       this.fetchEntitlements_(subscriptionPlatform);
@@ -395,6 +402,10 @@ export class SubscriptionService {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId());
+      // Deprecated events are fire for backwards compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
+          selectedPlatform.getServiceId());
       if (selectedEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.ACCESS_GRANTED,
@@ -451,6 +462,11 @@ export class SubscriptionService {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+          subscriptionPlatform.getServiceId()
+      );
+      // deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
           subscriptionPlatform.getServiceId()
       );
       this.platformStore_.reset();

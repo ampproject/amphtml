@@ -546,7 +546,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 
@@ -1021,6 +1020,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

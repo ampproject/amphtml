@@ -15,324 +15,446 @@
  */
 
 import * as experiments from '../../../../src/experiments';
-import {LinkerManager} from '../linker-manager';
+import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
+import {installVariableService} from '../variables';
+import {mockWindowInterface} from '../../../../testing/test-helper';
 
-describe('Linker Manager', () => {
+describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
   let ampdoc;
-  let registerSpy;
-  let isProxySpy;
-  let findMetaTagStub;
+  let win;
+  let doc;
+  let windowInterface;
+  let handler;
 
   beforeEach(() => {
-    // Linker uses a timestamp value to generate checksum.
-    sandbox = sinon.sandbox;
-
-    findMetaTagStub = sandbox.stub();
-    ampdoc = {
-      win: {
-        document: {
-          head: {
-            querySelector: findMetaTagStub,
-          },
-        },
-      },
-    };
-
+    sandbox = env.sandbox;
+    ampdoc = env.ampdoc;
+    win = env.win;
+    doc = win.document;
+    windowInterface = mockWindowInterface(sandbox);
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
-          sourceUrl: 'www.example.com ',
-          canonicalUrl: 'www.example.com',
+          sourceUrl: 'https://amp.source.com/some/path?q=123',
+          canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
-    registerSpy = sandbox.spy();
+    handler = null;
     sandbox.stub(Services, 'navigationForDoc').returns({
-      registerAnchorMutator: registerSpy,
+      registerAnchorMutator: (callback, priority) => {
+        if (priority === Priority.ANALYTICS_LINKER) {
+          handler = callback;
+        }
+      },
     });
-
-    isProxySpy = sandbox.spy();
-    sandbox.stub(Services, 'urlForDoc').returns({
-      isProxyOrigin: isProxySpy,
+    windowInterface.getLocation.returns({
+      origin: 'https://amp-source-com.cdn.ampproject.org',
     });
+    installVariableService(win);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-
-  it('registers the callback if given valid linkers config', () => {
-
-    const config = {
+  it('registers anchor mutator if given valid linkers config', () => {
+    new LinkerManager(ampdoc, {
       linkers: {
         testLinker: {
-          enabled: true,
-          ids: {
-            gclid: '123',
-          },
-        },
-      },
-    };
-
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    manager.init();
-
-    expect(registerSpy.calledOnce).to.be.true;
-    expect(registerSpy).calledWith(
-        sinon.match.func,
-        Priority.ANALYTICS_LINKER,
-    );
-  });
-
-  it('does not register the callback if no linkers config', () => {
-    const config = {};
-
-    const manager = new LinkerManager(ampdoc, config);
-    manager.init();
-
-    expect(registerSpy.notCalled).to.be.true;
-  });
-
-  it('starts resolving macros and adds them to the a tag', () => {
-    const config = {
-      linkers: {
-        testLinker1: {
-          enabled: true,
-          ids: {
-            _key: 'CLIENT_ID(_ga)',
-            gclid: '234',
-          },
-        },
-        testLinker2: {
           enabled: true,
           ids: {
             foo: 'bar',
           },
         },
       },
+    }, null).init();
+
+    expect(handler).to.be.ok;
+  });
+
+  it('does not register anchor mutator if no linkers config', () => {
+    new LinkerManager(ampdoc, {}, null).init();
+    expect(handler).to.not.be.ok;
+  });
+
+  it('does not register anchor mutator if empty linkers config', () => {
+    new LinkerManager(ampdoc, {linkers: {}}, null).init();
+    expect(handler).to.not.be.ok;
+  });
+
+  it('does not register anchor mutator if no linkers enabled', () => {
+    new LinkerManager(ampdoc, {
+      linkers: {
+        testLinker1: {
+          ids: {
+            bar: 'foo',
+          },
+        },
+        testLinker2: {
+          ids: {
+            foo: 'bar',
+          },
+        },
+      },
+    }, null).init();
+    expect(handler).to.not.be.ok;
+  });
+
+  it('does not register anchor mutator if not on proxy', () => {
+    windowInterface.getLocation.returns({
+      origin: 'https://amp.source.com',
+    });
+    new LinkerManager(ampdoc, {
+      linkers: {
+        testLinker: {
+          enabled: true,
+          ids: {
+            bar: 'foo',
+          },
+        },
+      },
+    }, null).init();
+    expect(handler).to.not.be.ok;
+  });
+
+  it('registers anchor mutator if not on proxy but proxyOnly=false', () => {
+    windowInterface.getLocation.returns({
+      origin: 'https://amp.source.com',
+    });
+    new LinkerManager(ampdoc, {
+      linkers: {
+        testLinker: {
+          enabled: true,
+          proxyOnly: false,
+          ids: {
+            bar: 'foo',
+          },
+        },
+      },
+    }, null).init();
+    expect(handler).to.be.ok;
+  });
+
+  it('should resolve vars and append to matching anchor', () => {
+    windowInterface.getUserAgent.returns('Mozilla/5.0 (X11; Linux x86_64) ' +
+        'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
+        'Safari/537.36');
+    windowInterface.getUserLanguage.returns('en-US');
+    sandbox.useFakeTimers(1533329483292);
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    doc.title = 'TEST TITLE';
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker1: {
+          ids: {
+            _key: '${title}',
+            gclid: '234',
+          },
+        },
+        testLinker2: {
+          ids: {
+            foo: 'bar',
+          },
+        },
+      },
+      vars: {
+        'title': 'TITLE',
+      },
     };
 
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    expandStub.withArgs('CLIENT_ID(_ga)')
-        .returns('amp-12345');
-    expandStub.returnsArg(0);
-    manager.init();
-
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      const parsedUrl = new URL(a.href);
-      const param1 = parsedUrl.searchParams.get('testLinker1').split('~');
-      const param2 = parsedUrl.searchParams.get('testLinker2').split('~');
-
-      expect(param1[2]).to.equal('_key');
-      expect(param1[3]).to.match(/^amp-([a-zA-Z0-9_-]+)/);
-      expect(param1[4]).to.equal('gclid');
-      expect(param1[5]).to.equal('234');
-
-      expect(param2[2]).to.equal('foo');
-      return expect(param2[3]).to.equal('bar');
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      expect(handler).to.be.ok;
+      expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
+          'https://www.source.com/dest' +
+          '?a=1' +
+          '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
+          '&testLinker2=1*1u4ugj3*foo*YmFy');
     });
   });
 
-  it('should add linker with valid config.', () => {
+  it('should respect destinationDomains config', () => {
     const config = {
       linkers: {
+        enabled: true,
         testLinker1: {
-          enabled: true,
           ids: {
-            _key: 'CLIENT_ID(_ga)',
-            gclid: '234',
+            id: '111',
+          },
+        },
+        testLinker2: {
+          ids: {
+            id: '222',
+          },
+          destinationDomains: ['foo.com', 'bar.com'],
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      // testLinker1 should apply to both canonical and source
+      // testLinker2 should not
+      const canonicalDomainUrl = clickAnchor('https://www.canonical.com/path');
+      expect(canonicalDomainUrl).to.contain('testLinker1=');
+      expect(canonicalDomainUrl).to.not.contain('testLinker2=');
+
+      const sourceDomainUrl = clickAnchor('https://amp.source.com/path');
+      expect(sourceDomainUrl).to.contain('testLinker1=');
+      expect(sourceDomainUrl).to.not.contain('testLinker2=');
+
+      // testLinker2 should apply to both foo and bar
+      // testLinker1 should not
+      const fooUrl = clickAnchor('https://foo.com/path');
+      expect(fooUrl).to.not.contain('testLinker1=');
+      expect(fooUrl).to.contain('testLinker2=');
+
+      const barDomainUrl = clickAnchor('https://bar.com/path');
+      expect(barDomainUrl).to.not.contain('testLinker1=');
+      expect(barDomainUrl).to.contain('testLinker2=');
+    });
+  });
+
+  it('should respect default destinationDomains config', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        destinationDomains: ['foo.com'],
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+        testLinker2: {
+          ids: {
+            id: '222',
+          },
+          destinationDomains: ['bar.com'],
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const fooDomainUrl = clickAnchor('https://foo.com/path');
+      const barDomainUrl = clickAnchor('https://bar.com/path');
+
+      expect(fooDomainUrl).to.contain('testLinker1=');
+      expect(fooDomainUrl).to.not.contain('testLinker2=');
+      expect(barDomainUrl).to.contain('testLinker2=');
+      expect(barDomainUrl).to.not.contain('testLinker1=');
+    });
+  });
+
+  it('should match friendly domain if destinationDomains unspecified', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker1: {
+          ids: {
+            id: '111',
           },
         },
       },
     };
 
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const url1 = clickAnchor('https://www.source.com/path');
+      const url2 = clickAnchor('https://amp.www.source.com/path');
+      const url3 = clickAnchor('https://canonical.com/path');
+      const url4 = clickAnchor('https://amp.www.canonical.com/path');
+      const url5 = clickAnchor('https://amp.google.com/path');
 
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    expandStub.withArgs('CLIENT_ID(_ga)')
-        .returns('amp-12345');
-    expandStub.returnsArg(0);
-    manager.init();
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      return expect(a.href).to.not.equal('https://www.example.com');
+      expect(url1).to.contain('testLinker1=');
+      expect(url2).to.contain('testLinker1=');
+      expect(url3).to.contain('testLinker1=');
+      expect(url4).to.contain('testLinker1=');
+      expect(url5).to.not.contain('testLinker1=');
     });
   });
 
-  it('should not add linker if not proxy && proxyOnly == true', () => {
-
+  it('should respect proxyOnly config', () => {
+    windowInterface.getLocation.returns({
+      origin: 'https://amp.source.com',
+    });
     const config = {
       linkers: {
+        enabled: true,
         testLinker1: {
-          enabled: true,
+          proxyOnly: false,
+          ids: {
+            id: '111',
+          },
+        },
+        testLinker2: {
           proxyOnly: true,
           ids: {
-            _key: 'CLIENT_ID(_ga)',
-            gclid: '234',
+            id: '222',
           },
         },
       },
     };
 
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
-
-    const manager = new LinkerManager(ampdoc, config);
-
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    manager.init();
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const a = clickAnchor('https://www.source.com/path');
+      expect(a).to.contain('testLinker1=');
+      expect(a).to.not.contain('testLinker2=');
     });
   });
 
-  it('should not add linker destination domains do not match', () => {
+  it('proxyOnly should default to true', () => {
+    windowInterface.getLocation.returns({
+      origin: 'https://amp.source.com',
+    });
     const config = {
       linkers: {
+        enabled: true,
         testLinker1: {
-          enabled: true,
           ids: {
-            _key: 'CLIENT_ID(_ga)',
+            id: '111',
           },
-          destinationDomains: ['www.foo.com'],
+        },
+        testLinker2: {
+          ids: {
+            id: '222',
+          },
+          proxyOnly: false,
         },
       },
     };
 
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
-
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    manager.init();
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+    return new LinkerManager(ampdoc, config).init().then(() => {
+      const a = clickAnchor('https://www.source.com');
+      expect(a).to.not.contain('testLinker1=');
+      expect(a).to.contain('testLinker2=');
     });
   });
 
-  it('should not add linker if not explicitly enabled', () => {
-    const config = {
-      linkers: {
-        testLinker1: {
-          ids: {
-            _key: 'CLIENT_ID(_ga)',
-            gclid: '234',
-          },
-        },
-      },
-    };
+  describe('when CID API enabled', () => {
 
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
-
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(manager, 'isLegacyOptIn_').returns(false);
-    sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    manager.init();
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      return expect(a.href).to.equal('https://www.example.com');
+    beforeEach(() => {
+      addCidApiMeta();
     });
-  });
 
-  it('should add linker if meta tag is present and experiment on', () => {
-    const config = {
-      linkers: {
-        testLinker1: {
-          ids: {
-            _key: 'CLIENT_ID(_ga)',
-            gclid: '234',
-          },
-        },
-      },
-    };
-
-    const a = {
-      href: 'https://www.example.com',
-      hostname: 'www.example.com',
-    };
-
-    const manager = new LinkerManager(ampdoc, config);
-    sandbox.stub(experiments, 'isExperimentOn').returns(true);
-    manager.type_ = 'googleanalytics';
-    findMetaTagStub.returns({});
-    const expandStub = sandbox.stub(manager, 'expandTemplateWithUrlParams_');
-    expandStub.withArgs('CLIENT_ID(_ga)')
-        .returns('amp-12345');
-    expandStub.returnsArg(0);
-
-    manager.init();
-
-    return Promise.all(manager.allLinkerPromises_).then(() => {
-      manager.handleAnchorMutation(a);
-      return expect(a.href).not.to.equal('https://www.example.com');
-    });
-  });
-
-  it('should not add linker if meta tag is present but experiment is not on',
-      () => {
-        const config = {
-          linkers: {
-            testLinker1: {
-              ids: {
-                _key: 'CLIENT_ID(_ga)',
-                gclid: '234',
-              },
+    it('should add linker for Safari 12', () => {
+      stubPlatform(true, 12);
+      sandbox.stub(experiments, 'isExperimentOn').returns(true);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
             },
           },
-        };
+        },
+      };
 
-        const a = {
-          href: 'https://www.example.com',
-          hostname: 'www.example.com',
-        };
+      return new LinkerManager(ampdoc, config, 'googleanalytics')
+          .init().then(() => {
+            const a = clickAnchor('https://www.source.com/path');
+            expect(a).to.contain('testLinker1=');
+          });
+    });
 
-        const manager = new LinkerManager(ampdoc, config);
-        sandbox.stub(experiments, 'isExperimentOn').returns(false);
-        manager.type_ = 'googleanalytics';
-        findMetaTagStub.returns({});
-        const expandStub = sandbox.stub(manager,
-            'expandTemplateWithUrlParams_');
-        expandStub.withArgs('CLIENT_ID(_ga)')
-            .returns('amp-12345');
-        expandStub.returnsArg(0);
+    it('should not add linker for not google analytics vendor', () => {
+      stubPlatform(true, 12);
+      sandbox.stub(experiments, 'isExperimentOn').returns(true);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+        },
+      };
 
-        manager.init();
+      new LinkerManager(ampdoc, config, 'somevendor');
+      expect(handler).to.be.null;
+    });
 
-        return Promise.all(manager.allLinkerPromises_).then(() => {
-          manager.handleAnchorMutation(a);
-          return expect(a.href).to.equal('https://www.example.com');
-        });
-      });
+    it('should not add linker for Safari 11', () => {
+      stubPlatform(true, 11);
+      sandbox.stub(experiments, 'isExperimentOn').returns(true);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+
+      new LinkerManager(ampdoc, config, 'googleanalytics');
+      expect(handler).to.be.null;
+    });
+
+    it('should not add linker for Chrome', () => {
+      stubPlatform(false, 66);
+      sandbox.stub(experiments, 'isExperimentOn').returns(true);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+
+      new LinkerManager(ampdoc, config, 'googleanalytics');
+      expect(handler).to.be.null;
+    });
+
+    it('should not add linker if experiment is off', () => {
+      stubPlatform(true, 12);
+      sandbox.stub(experiments, 'isExperimentOn').returns(false);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+
+      new LinkerManager(ampdoc, config, 'googleanalytics');
+      expect(handler).to.be.null;
+    });
+  });
+
+  function clickAnchor(url) {
+    const a = doc.createElement('a');
+    a.href = url;
+    doc.body.appendChild(a);
+    handler(a);
+    return a.href;
+  }
+
+  function addCidApiMeta() {
+    const meta = doc.createElement('meta');
+    meta.setAttribute('name', 'amp-google-client-id-api');
+    meta.setAttribute('content', 'googleanalytics');
+    doc.head.appendChild(meta);
+  }
+
+  function stubPlatform(isSafari, version) {
+    const platform = Services.platformFor(ampdoc.win);
+    sandbox.stub(platform, 'isSafari').returns(isSafari);
+    sandbox.stub(platform, 'getMajorVersion').returns(version);
+  }
+});
+
+describe('areFriendlyDomains', () => {
+  it('should work', () => {
+    expect(areFriendlyDomains('amp.source.com', 'www.source.com')).to.be.true;
+    expect(areFriendlyDomains('m.source.com', 'www.source.com')).to.be.true;
+    expect(areFriendlyDomains('amp.www.source.com', 'source.com')).to.be.true;
+    expect(areFriendlyDomains('amp.source.com', 'm.www.source.com'))
+        .to.be.true;
+
+    expect(areFriendlyDomains('amp.source.com', 'amp.google.com')).to.be.false;
+    expect(areFriendlyDomains('web.amp.source.com', 'web.m.source.com'))
+        .to.be.false;
+  });
 });

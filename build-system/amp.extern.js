@@ -17,6 +17,41 @@
 /** @externs */
 
 /**
+ * The "init" argument of the Fetch API. Externed due to being passes across
+ * component/runtime boundary.
+ *
+ * Currently, only "credentials: include" is implemented.
+ *
+ * Note ampCors === false indicates that __amp_source_origin should not be
+ * appended to the URL to allow for potential caching or response across pages.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
+ *   cache: (string|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!JsonObject|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+var FetchInitDef;
+
+/**
+ * Externed due to being passed across component/runtime boundary.
+ * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
+ */
+var FetchRequestDef;
+
+/** @constructor **/
+var FormDataWrapper = function() {};
+
+FormDataWrapper.prototype.entries = function() {};
+FormDataWrapper.prototype.getFormData = function() {};
+
+/**
  * A type for Objects that can be JSON serialized or that come from
  * JSON serialization. Requires the objects fields to be accessed with
  * bracket notation object['name'] to make sure the fields do not get
@@ -155,6 +190,8 @@ AmpConfigType.prototype.v;
 AmpConfigType.prototype.canary;
 /* @public {string} */
 AmpConfigType.prototype.runtime;
+/* @public {boolean} */
+AmpConfigType.prototype.test;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -330,6 +367,8 @@ data.headerBackgroundColor;
 data.bodyBackgroundColor;
 data.data.fontColor;
 data.width;
+data.sitekey;
+data.fortesting;
 
 // 3p code
 var twttr;
@@ -354,6 +393,9 @@ animationHandler.pause;
 animationHandler.stop;
 animationHandler.goToAndStop;
 animationHandler.totalFrames;
+
+var grecaptcha;
+grecaptcha.execute;
 
 // Validator
 var amp;

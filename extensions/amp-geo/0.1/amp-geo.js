@@ -51,10 +51,9 @@ import {ampGeoPresets} from './amp-geo-presets';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
+import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
-import {waitForBodyPromise} from '../../../src/dom';
 
 /**
  * @enum {number}

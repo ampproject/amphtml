@@ -17,7 +17,7 @@
 import {BindExpression} from './bind-expression';
 import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
-import {filterSplice} from '../../../src/utils/array';
+import {remove} from '../../../src/utils/array';
 
 /**
  * Asynchronously evaluates a set of Bind expressions.
@@ -75,8 +75,8 @@ export class BindEvaluator {
       expressionsToRemove[expressionString] = true;
     });
 
-    filterSplice(this.bindings_, binding =>
-      !expressionsToRemove[binding.expressionString]);
+    remove(this.bindings_, binding =>
+      !!expressionsToRemove[binding.expressionString]);
   }
 
   /**

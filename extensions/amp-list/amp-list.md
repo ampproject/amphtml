@@ -243,16 +243,13 @@ By default, this will only trigger on refreshes that cause a network fetch. To r
 
 #### binding (optional)
 
-Controls refreshing behavior of `amp-list` on pages that also use `amp-bind`. Specifically, controls whether or not to block render on the evaluation of bindings (bracket attributes e.g. `[text]`) in rendered `amp-list` children.
+For pages using `amp-list` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
 
-We recommend using `binding="no"` or `binding="refresh"` for faster `amp-list` performance.
+We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 - `binding="no"`: Never block render **(fastest)**.
-  - Use this on all `amp-list` elements that don't render bindings.
 - `binding="refresh"`: Don't block render on initial load **(faster)**.
-  - Use this on `amp-list` elements that do render bindings.
 - `binding="always"`: Always block render **(slow)**.
-  - Only use this when it's not possible to server-side render the content displayed by the `amp-list.`
 
 If `binding` attribute is not provided, default is `always`.
 

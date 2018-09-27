@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {
+  IntersectionObserverApi,
+} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';

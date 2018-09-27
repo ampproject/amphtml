@@ -20,7 +20,10 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
+import {
+  DevelopmentModeLog,
+  DevelopmentModeLogButtonSet,
+} from './development-ui';
 import {LocalizedStringId} from './localization';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
@@ -230,6 +233,8 @@ export class SystemLayer {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
+    /** @private {?number|?string} */
+    this.timeoutId_ = null;
   }
 
   /**
@@ -443,7 +448,10 @@ export class SystemLayer {
    * @private
    */
   hideAfterTimeout_() {
-    this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    if (this.timeoutId_) {
+      this.timer_.cancel(this.timeoutId_);
+    }
+    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
   }
 
   /**

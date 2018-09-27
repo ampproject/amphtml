@@ -16,11 +16,19 @@
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
+/**
+ * subscriptions-platform-* event names are deprecated in favor
+ * of subscription-service-*  The DEPRECATED events are still triggered
+ * for backward compatibility with existing publisher code.
+ */
 export const SubscriptionAnalyticsEvents = {
-  PLATFORM_ACTIVATED: 'subscriptions-platform-activated',
+  PLATFORM_ACTIVATED: 'subscriptions-service-activated',
+  PLATFORM_ACTIVATED_DEPRECATED: 'subscriptions-platform-activated',
   PAYWALL_ACTIVATED: 'subscriptions-paywall-activated',
-  PLATFORM_REGISTERED: 'subscriptions-platform-registered',
-  PLATFORM_REAUTHORIZED: 'subscriptions-platform-re-authorized',
+  PLATFORM_REGISTERED: 'subscriptions-service-registered',
+  PLATFORM_REGISTERED_DEPRECATED: 'subscriptions-platform-registered',
+  PLATFORM_REAUTHORIZED: 'subscriptions-service-re-authorized',
+  PLATFORM_REAUTHORIZED_DEPRECATED: 'subscriptions-platform-re-authorized',
   ACTION_DELEGATED: 'subscriptions-action-delegated',
   ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
   STARTED: 'subscriptions-started',
