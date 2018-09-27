@@ -673,6 +673,7 @@ describes.realWin('amp-story', {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
+            clearWhitelist: () => {},
             execute: executeSpy,
           });
 
@@ -694,6 +695,7 @@ describes.realWin('amp-story', {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
             addToWhitelist: () => {},
+            clearWhitelist: () => {},
             execute: () => {sidebar.setAttribute('open', '');}});
 
       story.buildCallback();
