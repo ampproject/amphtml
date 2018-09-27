@@ -28,10 +28,10 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {createFrameFor} from '../../../src/iframe-video';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
-import {createFrameFor} from '../../../src/iframe-video';
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
 
@@ -46,6 +46,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     this.url_ = null;
   }
 
+  /** @override */
   buildCallback() {
     // @todo Need to support placeholder.
 
@@ -71,8 +72,8 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const url = new URL( this.url_ );
-    url.searchParams.set( 'embed', 'true' );
+    const url = new URL(this.url_);
+    url.searchParams.set('embed', 'true');
 
     const iframe = createFrameFor(this, url.toString());
     this.applyFillContent(iframe);
