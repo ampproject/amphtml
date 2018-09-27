@@ -182,14 +182,14 @@ export class AmpAdXOriginIframeHandler {
 
     // Iframe.onload normally called by the Ad after full load.
     const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe)
-      .then(() => {
-      // Wait just a little to allow `no-content` message to arrive.
-      if (this.iframe) {
-        // Chrome does not reflect the iframe readystate.
-        this.iframe.readyState = 'complete';
-      }
-      return timer.promise(10);
-    });
+        .then(() => {
+          // Wait just a little to allow `no-content` message to arrive.
+          if (this.iframe) {
+            // Chrome does not reflect the iframe readystate.
+            this.iframe.readyState = 'complete';
+          }
+          return timer.promise(10);
+        });
 
     // Calculate render-start and no-content signals.
     const {
