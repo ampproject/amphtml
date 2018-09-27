@@ -167,8 +167,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.transport_.maybeInitIframeTransport(
-        this.getAmpDoc().win, this.element);
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        this.transport_.maybeInitIframeTransport(
+            this.getAmpDoc().win, this.element);
+      });
+    }
   }
 
   /** @override */
@@ -178,8 +182,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return false;
     }
 
-    // Page was unloaded - free up owned resources.
-    this.transport_.deleteIframeTransport();
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        // Page was unloaded - free up owned resources.
+        this.transport_.deleteIframeTransport();
+      });
+    }
+
     return super.unlayoutCallback();
   }
 
