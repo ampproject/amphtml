@@ -21,8 +21,8 @@
  * <code>
  * <amp-wordpress-embed
  *   layout="fixed-height"
- *   data-gistid="a19e811dcd7df10c4da0931641538497"
- *   height="1613">
+ *   data-url="https://example.com/2018/05/17/awesome-post/"
+ *   height="240">
  * </amp-wordpress-embed>
  * </code>
  */

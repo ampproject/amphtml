@@ -29,36 +29,24 @@ describes.realWin('amp-wordpress-embed', {
     doc = win.document;
   });
 
-  function getIns(gistid, file) {
+  function getIns(url) {
     const ins = doc.createElement('amp-wordpress-embed');
-    ins.setAttribute('data-gistid', gistid);
-    ins.setAttribute('height', '237');
-    if (file) {
-      ins.setAttribute('data-file', file);
-    }
+    ins.setAttribute('data-url', url);
+    ins.setAttribute('height', '241');
     doc.body.appendChild(ins);
     return ins.build().then(() => ins.layoutCallback()).then(() => ins);
   }
 
   it('renders responsively', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
+    return getIns('https://wordpress.example.com/post').then(ins => {
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
-  it('renders responsively with specific file', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f', 'hello-world.html')
-        .then(ins => {
-          const iframe = ins.querySelector('iframe');
-          expect(iframe).to.not.be.null;
-          expect(iframe.className).to.match(/i-amphtml-fill-content/);
-        });
-  });
-
-  it('Rejects because data-gistid is missing', () => {
+  it('Rejects because data-url is missing', () => {
     expect(getIns('')).to.be.rejectedWith(
-        /The data-gistid attribute is required for/);
+        /The data-url attribute is required for/);
   });
 });

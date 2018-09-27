@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://gist.github.com/">GitHub Gist</a>.</td>
+    <td>Embeds a <a href="https://wordpress.org/">WordPress post</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -29,44 +29,33 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed-height</td>
   </tr>
-  <tr>
+  <!-- <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-wordpress-embed/">Annotated code example for amp-wordpress-embed</a></td>
-  </tr>
+  </tr> -->
 </table>
 
 [TOC]
 
 ## Behavior
 
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/). 
+This extension creates an iframe and displays the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post. 
 
-#### Example: Embedding multiple files
-
-```html
-<amp-wordpress-embed
-    data-gistid="b9bb35bc68df68259af94430f012425f"
-    layout="fixed-height"
-    height="225">
-</amp-wordpress-embed>
-```
-
-#### Example: Embedding a single file
+#### Example: Embedding a WordPress post
 
 ```html
 <amp-wordpress-embed
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c"
+    data-url="https://wordpress.example.com/post-title/"
     layout="fixed-height"
-    height="185">
+    height="240">
 </amp-wordpress-embed>
 ```
 
 ## Attributes
 
-##### data-gistid (required)
+##### data-url (required)
 
-The ID of the gist to embed.
+The URL of the post to embed.
 
 ##### layout (required)
 
@@ -74,13 +63,7 @@ Currently only supports `fixed-height`.
 
 ##### height (required)
 
-The initial height of the gist or gist file in pixels.
-
-**Note**: You should obtain the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will resize to fit so that its contents will fit.
-
-##### data-file (optional)
-
-If specified, display only one file in a gist.
+The initial height of the WordPress post embed in pixels.
 
 ## Validation
 See [amp-wordpress-embed rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-wordpress-embed/validator-amp-wordpress-embed.protoascii) in the AMP validator specification.
