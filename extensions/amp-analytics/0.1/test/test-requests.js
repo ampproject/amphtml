@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import * as ResourceTiming from '../resource-timing';
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Requests', {amp: 1}, env => {
   let ampdoc;
@@ -427,67 +427,17 @@ describes.realWin('Requests', {amp: 1}, env => {
 
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
-    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
+    const r = {'baseUrl': 'r1&${resourceTiming}'};
     const handler = new RequestHandler(
         analyticsMock, r, preconnect, {sendRequest: spy}, false);
     const expansionOptions = new ExpansionOptions({
-      'param1': 'PARAM_1',
-      'param2': 'PARAM_2',
-      'param3': 'PARAM_3',
+      'resourceTiming': 'RESOURCE_TIMING',
     });
-    const bindings = {
-      'PARAM_1': 'val1',
-      'PARAM_2': () => 'val2',
-      'PARAM_3': Promise.resolve('val3'),
-      'BASE_VALUE': 'val_base',
-    };
-    const params = {
-      'extraUrlParams': {
-        'key1': '${param1}',
-        'key2': '${param2}',
-        'key3': '${param3}',
-      },
-    };
-    handler.send({}, params, expansionOptions, bindings);
+    sandbox.stub(ResourceTiming, 'getResourceTiming')
+        .returns(Promise.resolve('resource-timing'));
+    handler.send({}, {}, expansionOptions);
     yield macroTask();
-    expect(spy).to.be.calledWith(
-        'r1&key1=val1&key2=val2&key3=val3&val_base');
-  });
-
-
-  it('should replace bindings with v2 flag', function* () {
-    toggleExperiment(env.win, 'url-replacement-v2', true);
-    const spy = sandbox.spy();
-    const r = {
-      'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
-    };
-    const handler = new RequestHandler(
-        analyticsMock, r, preconnect, {sendRequest: spy}, false);
-    const expansionOptions = new ExpansionOptions({
-      'param1': 'PARAM_1',
-      'param2': 'PARAM_2',
-      'param3': 'PARAM_3',
-      'foo': '$TOUPPERCASE($BASE64(foo))',
-    }, /* opt_iterations */ 2, /* opt_noencode */ true);
-
-    const bindings = {
-      'PARAM_1': 'val1',
-      'PARAM_2': () => 'val2',
-      'PARAM_3': Promise.resolve('val3'),
-      'BASE_VALUE': 'val_base',
-    };
-    const params = {
-      'extraUrlParams': {
-        'key1': '${param1}',
-        'key2': '${param2}',
-        'key3': '${param3}',
-      },
-    };
-    handler.send({}, params, expansionOptions, bindings);
-    yield macroTask();
-    expect(spy).to.be.calledWith(
-        'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    toggleExperiment(env.win, 'url-replacement-v2');
+    expect(spy).to.be.calledWith('r1&resource-timing');
   });
 
   describe('expandPostMessage', () => {
@@ -513,9 +463,8 @@ describes.realWin('Requests', {amp: 1}, env => {
           analyticsInstanceMock,
           'test foo 123 ... ${teste1}',
           undefined,
-          undefined,
-          expansionOptions,
-          {}).then(msg => {
+          {},
+          expansionOptions).then(msg => {
         expect(msg).to.equal('test foo 123 ... TESTE1');
       });
     });
@@ -525,16 +474,14 @@ describes.realWin('Requests', {amp: 1}, env => {
           analyticsInstanceMock,
           'test ${extraUrlParams} foo',
           params, /* configParams */
-          undefined, /* triggerParams */
-          expansionOptions,
-          {} /* dynamicBindings */);
+          {}, /* trigger */
+          expansionOptions);
       const appendPromise = expandPostMessage(
           analyticsInstanceMock,
           'test foo',
           params, /* configParams */
-          undefined, /* triggerParams */
-          expansionOptions,
-          {} /* dynamicBindings */);
+          {}, /* trigger */
+          expansionOptions);
       return replacePromise.then(replace => {
         expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
         expect(appendPromise).to.eventually.equal('test foo');

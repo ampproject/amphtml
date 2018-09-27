@@ -27,6 +27,7 @@ import {
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {remove} from '../../../src/utils/array';
 
@@ -114,6 +115,9 @@ export class RequestHandler {
     /** @private {number} */
     this.queueSize_ = 0;
 
+    /** @private @const {number} */
+    this.startTime_ = Date.now();
+
     this.initReportWindow_();
     this.initBatchInterval_();
   }
@@ -124,11 +128,8 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @param {!Object<string, *>} dynamicBindings A mapping of variables to
-   *     stringable values. For example, values could be strings, functions that
-   *     return strings, promises, etc.
    */
-  send(configParams, trigger, expansionOption, dynamicBindings) {
+  send(configParams, trigger, expansionOption) {
     const isImportant = trigger['important'];
 
     const isImmediate =
@@ -142,8 +143,9 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
 
-    const macros = this.variableService_.getMacros();
-    const bindings = Object.assign({}, dynamicBindings, macros);
+    const bindings = this.variableService_.getMacros();
+    bindings['RESOURCE_TIMING'] = getResourceTiming(
+        this.win, trigger['resourceTimingSpec'], this.startTime_);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
@@ -363,21 +365,17 @@ export class RequestHandler {
  * @param {!AMP.BaseElement} baseInstance
  * @param {string} msg
  * @param {?JsonObject} configParams
- * @param {?JsonObject} triggerParams
+ * @param {!JsonObject} trigger
  * @param {!./variables.ExpansionOptions} expansionOption
- * @param {!Object<string, *>} dynamicBindings A mapping of variables to
- *     stringable values. For example, values could be strings, functions that
- *     return strings, promises, etc.
  * @return {Promise<string>}
  */
-export function expandPostMessage(baseInstance, msg,
-  configParams, triggerParams, expansionOption, dynamicBindings) {
+export function expandPostMessage(
+  baseInstance, msg, configParams, trigger, expansionOption) {
   const variableService = variableServiceFor(baseInstance.win);
   const urlReplacementService =
       Services.urlReplacementsForDoc(baseInstance.element);
 
-  const macros = variableService.getMacros();
-  const bindings = Object.assign({}, dynamicBindings, macros);
+  const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService.expandTemplate(
@@ -391,7 +389,7 @@ export function expandPostMessage(baseInstance, msg,
 
   //return base url with the appended extra url params;
   const extraUrlParamsStrPromise = getExtraUrlParams(
-      variableService, configParams, triggerParams, expansionOption)
+      variableService, configParams, trigger['extraUrlParams'], expansionOption)
       .then(params => {
         const str = getExtraUrlParamsString(variableService, params);
         return urlReplacementService.expandUrlAsync(str, bindings);
