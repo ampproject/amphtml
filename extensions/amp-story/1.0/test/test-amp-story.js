@@ -701,21 +701,6 @@ describes.realWin('amp-story', {
             expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
           });
     });
-
-    it('should add previous visited attribute', () => {
-      sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
-
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page0 = pages[0];
-      story.buildCallback();
-      return story.layoutCallback()
-          .then(() => story.switchTo_('page-1'))
-          .then(() => {
-            expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
-          });
-    });
   });
 
   describe('amp-story audio', () => {
