@@ -49,6 +49,7 @@ import {
   toggle,
   translate,
 } from '../../style';
+import {urls} from '../../config';
 
 
 /** @private @const {number} */
@@ -482,8 +483,7 @@ export class VideoDocking {
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
-        `${
-                  .cdn}/experiments.html`);
+        `${urls.cdn}/experiments.html`);
 
     this.install_();
 
