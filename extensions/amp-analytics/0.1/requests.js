@@ -68,7 +68,7 @@ export class RequestHandler {
     user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
-    /** @const {function(string, !Array<!batchSegmentDef>):!Promise<string>} */
+    /** @const {function(string, !Array<!batchSegmentDef>):string} */
     this.batchingPlugin_ = this.batchPluginId_
       ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
           `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
@@ -209,47 +209,29 @@ export class RequestHandler {
     const {
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
-      batchSegmentPromises_: batchSegmentsPromise,
+      batchSegmentPromises_: batchSegmentsPromises,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
     baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      baseUrlPromise.then(baseUrl => {
-        this.constructBatchSegments_(
-            baseUrl, batchSegmentsPromise).then(request => {
-          if (!request) {
-            user().error(TAG, 'Request not sent. Contents empty.');
-            return;
-          }
-          if (trigger['iframePing']) {
-            user().assert(trigger['on'] == 'visible',
-                'iframePing is only available on page view requests.');
-            this.transport_.sendRequestUsingIframe(request);
-          } else {
-            this.transport_.sendRequest(request);
-          }
-        });
+      Promise.all([baseUrlPromise, batchSegmentsPromises]).then(results => {
+        const baseUrl = results[0];
+        const batchSegments = results[1];
+        const request = this.batchingPlugin_(baseUrl, batchSegments);
+        if (!request) {
+          user().error(TAG, 'Request not sent. Contents empty.');
+          return;
+        }
+        if (trigger['iframePing']) {
+          user().assert(trigger['on'] == 'visible',
+              'iframePing is only available on page view requests.');
+          this.transport_.sendRequestUsingIframe(request);
+        } else {
+          this.transport_.sendRequest(request);
+        }
       });
-    });
-  }
-
-  /**
-   * Construct the final requestUrl by calling the batch plugin function
-   * @param {string} baseUrl
-   * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromises
-   * @return {!Promise<string>}
-   */
-  constructBatchSegments_(baseUrl, batchSegmentsPromises) {
-    return Promise.all(batchSegmentsPromises).then(batchSegments => {
-      try {
-        return this.batchingPlugin_(baseUrl, batchSegments);
-      } catch (e) {
-        dev().error(TAG,
-            `Error: batchPlugin function ${this.batchPluginId_}`, e);
-        return '';
-      }
     });
   }
 
@@ -403,7 +385,7 @@ function expandExtraUrlParams(
  *
  * @param {string} baseUrl
  * @param {!Array<!batchSegmentDef>} batchSegments
- * @return {Promise<string>}
+ * @return {string}
  * @private
  */
 function defaultBatchPlugin(baseUrl, batchSegments) {
@@ -417,5 +399,5 @@ function defaultBatchPlugin(baseUrl, batchSegments) {
   } else {
     requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
   }
-  return Promise.resolve(requestUrl);
+  return requestUrl;
 }
