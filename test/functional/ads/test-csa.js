@@ -186,7 +186,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
 
       // Overflow should exist and be displayed
       expect(overflow).to.not.be.null;
-      expect(overflow).not.to.have.display('none');
+      expect(overflow.style.display).not.to.equal('none');
       // We should have tried to resize to 300 px
       expect(requestedHeight).to.equal(300);
       // Container should be set to AMP height (100) - overflow height (40)
@@ -236,7 +236,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       resizeSuccessHandler(win, container, requestedHeight);
 
       // Overflow should be present, but hidden
-      expect(overflow).to.have.display('none');
+      expect(overflow.style.display).to.equal('none');
       // We should have tried to resize to 300 px
       expect(requestedHeight).to.equal(300);
       // Container should be set to full CSA height

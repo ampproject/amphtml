@@ -75,7 +75,8 @@ describes.realWin('amp-recaptcha-input', {
 
     it('Should be visible after built', () => {
       return getRecaptchaInput().then(ampRecaptchaInput => {
-        expect(ampRecaptchaInput).to.not.have.display('none');
+        expect(win.getComputedStyle(ampRecaptchaInput).display)
+            .to.not.equal('none');
       });
     });
 

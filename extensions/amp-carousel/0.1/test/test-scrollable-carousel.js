@@ -78,8 +78,9 @@ describes.realWin('test-scrollable-carousel', {
       // build child slides
       const carouselSlideEls =
         container.getElementsByClassName('amp-carousel-slide');
+      const slideStyle = win.getComputedStyle(carouselSlideEls[0], null);
       expect(carouselSlideEls.length).to.equal(7);
-      expect(carouselSlideEls[0]).to.have.display('inline-block');
+      expect(slideStyle.getPropertyValue('display')).to.equal('inline-block');
 
       // show control buttons correctly
       expect(impl.hasPrev()).to.be.false;

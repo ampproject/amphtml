@@ -155,10 +155,10 @@ describes.realWin('amp-analytics', {
   }
 
   function waitForSendRequest(analytics, opt_max, opt_cnt) {
-    expect(analytics.element).to.not.have.display('none');
+    expect(analytics.element.style.display).to.equal('');
     const callCount = opt_cnt || 0;
     return analytics.layoutCallback().then(() => {
-      expect(analytics.element).to.have.display('none');
+      expect(analytics.element.style.display).to.equal('none');
       if (sendRequestSpy.callCount > callCount) {
         return;
       }
@@ -400,7 +400,7 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     const iniPromise = analytics.iniPromise_;
     expect(iniPromise).to.be.ok;
-    expect(el).to.have.attribute('hidden');
+    expect(el.style.display).to.equal('none');
     // Viewer.whenFirstVisible is the first blocking call to initialize.
     expect(whenFirstVisibleStub).to.be.calledOnce;
 

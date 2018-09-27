@@ -134,7 +134,8 @@ describe('amp-sidebar - toolbar', () => {
             toolbar.onLayoutChange();
           });
           expect(toolbarElements.length).to.be.above(0);
-          expect(toolbarElements[0].parentElement).to.have.display('none');
+          expect(toolbarElements[0].parentElement.style.display)
+              .to.be.equal('none');
         });
       });
     });
@@ -152,7 +153,8 @@ describe('amp-sidebar - toolbar', () => {
                 toArray(obj.ampdoc.getRootNode()
                     .getElementsByClassName('i-amphtml-toolbar'));
         expect(toolbarElements.length).to.be.above(0);
-        expect(toolbarElements[0].parentElement).to.not.have.display('none');
+        expect(toolbarElements[0].parentElement.style.display)
+            .to.be.equal('');
       });
     });
   });
@@ -194,7 +196,8 @@ describe('amp-sidebar - toolbar', () => {
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0]).to.not.have.display('none');
+        expect(toolbarTargets[0].style.display)
+            .to.be.equal('');
       });
     });
   });
@@ -215,7 +218,8 @@ describe('amp-sidebar - toolbar', () => {
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0]).to.have.display('none');
+        expect(toolbarTargets[0].style.display)
+            .to.be.equal('none');
       });
     });
   });

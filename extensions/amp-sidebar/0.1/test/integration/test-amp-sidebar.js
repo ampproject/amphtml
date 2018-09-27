@@ -99,15 +99,13 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
 function waitForSidebarOpen(document) {
   return poll('wait for sidebar to open', () => {
     const dummy = document.getElementById('dummy');
-    const styles = document.defaultView.getComputedStyle(dummy);
-    return styles.display == 'none';
+    return dummy.style.display == 'none';
   });
 }
 
 function waitForSidebarClose(document) {
   return poll('wait for sidebar to open', () => {
     const dummy = document.getElementById('dummy');
-    const styles = document.defaultView.getComputedStyle(dummy);
-    return styles.display != 'none';
+    return dummy.style.display == '';
   });
 }
