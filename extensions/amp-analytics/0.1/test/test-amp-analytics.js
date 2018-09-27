@@ -1494,6 +1494,26 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy).to.have.not.been.called;
       });
     });
+
+    it('should not throw in resumeCallback/unlayoutCallback ' +
+        'if consent rejected', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/local'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'data-consent-notification-id': 'amp-user-notification1',
+      });
+
+      sandbox.stub(uidService, 'get').callsFake(id => {
+        expect(id).to.equal('amp-user-notification1');
+        return Promise.reject();
+      });
+
+      sandbox.stub(viewer, 'isVisible').returns(false);
+      analytics.layoutCallback();
+      analytics.resumeCallback();
+      analytics.unlayoutCallback();
+    });
   });
 
   describe('Sandbox AMP Analytics Element', () => {
