@@ -22,7 +22,6 @@ import {
   installVariableService,
   variableServiceFor,
 } from './variables';
-import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
@@ -38,12 +37,9 @@ import {Transport} from './transport';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
-import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -98,21 +94,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iniPromise_ = null;
 
+    /** @private {./transport.Transport} */
     this.transport_ = null;
-
-    /** @private {?IframeTransport} */
-    this.iframeTransport_ = null;
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
-
-
-    /**
-     * Maximum time (since epoch) to report resource timing metrics.
-     * We stop reporting after 1 minute.
-     * @private @const {number}
-     */
-    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
   }
 
   /** @override */
@@ -173,8 +159,11 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        this.transport_.maybeInitIframeTransport(
+            this.getAmpDoc().win, this.element);
+      });
     }
   }
 
@@ -185,11 +174,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return false;
     }
 
-    // Page was unloaded - free up owned resources.
-    if (this.iframeTransport_) {
-      this.iframeTransport_.detach();
-      this.iframeTransport_ = null;
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        // Page was unloaded - free up owned resources.
+        this.transport_.deleteIframeTransport();
+      });
     }
+
     return super.unlayoutCallback();
   }
 
@@ -260,9 +251,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
-    }
+    this.transport_.maybeInitIframeTransport(
+        this.getAmpDoc().win, this.element, this.preconnect);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -329,27 +319,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
-   * This is limited to MRC-accreddited vendors. The frame is removed if the
-   * user navigates/swipes away from the page, and is recreated if the user
-   * navigates back to the page.
-   * @private
-   */
-  initIframeTransport_() {
-    if (this.iframeTransport_) {
-      return;
-    }
-    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
-    const ampAdResourceId = this.assertAmpAdResourceId();
-
-    this.iframeTransport_ = new IframeTransport(
-        this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport'], ampAdResourceId);
-  }
-
-  /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
@@ -359,19 +328,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   preload(url, opt_preloadAs) {
     this.preconnect.preload(url, opt_preloadAs);
-  }
-
-  /**
-   * Gets the resourceID of the parent amp-ad element.
-   * Throws an exception if no such element.
-   * @return {string}
-   * @visibleForTesting
-   */
-  assertAmpAdResourceId() {
-    return user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
-        'for amp-analytics tag with iframe transport.');
   }
 
   /**
@@ -497,7 +453,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
               this.element, request, this.preconnect,
-              this.sendRequest_.bind(this),
+              this.transport_,
               this.isSandbox_);
         }
       }
@@ -557,30 +513,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
-   * @private
-   */
-  getDynamicVariableBindings_(trigger, expansionOptions) {
-    const dynamicBindings = {};
-    const resourceTimingSpec = trigger['resourceTimingSpec'];
-    if (resourceTimingSpec) {
-      // Check if we're done reporting resource timing metrics before binding
-      // before binding the resource timing variable.
-      if (!resourceTimingSpec['done'] &&
-          Date.now() < this.maxResourceTimingReportingTime_) {
-        const binding = 'RESOURCE_TIMING';
-        const analyticsVar = 'resourceTiming';
-        dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec);
-        expansionOptions.vars[analyticsVar] = binding;
-      }
-    }
-    return dynamicBindings;
-  }
-
-  /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
@@ -592,11 +524,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    const dynamicBindings =
-        this.getDynamicVariableBindings_(trigger, expansionOptions);
-    request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions,
-        dynamicBindings);
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
   }
 
   /**
@@ -613,12 +541,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(
-        this,
-        msg,
-        this.config_['extraUrlParams'],
-        trigger['extraUrlParams'],
-        expansionOptions,
-        this.getDynamicVariableBindings_(trigger, expansionOptions))
+        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
@@ -715,31 +638,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * @param {string} request The full request string to send.
-   * @param {!JsonObject} trigger
-   * @private
-   */
-  sendRequest_(request, trigger) {
-    if (!request) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'Request not sent. Contents empty.');
-      return;
-    }
-    if (trigger['iframePing']) {
-      user().assert(trigger['on'] == 'visible',
-          'iframePing is only available on page view requests.');
-      this.transport_.sendRequestUsingIframe(request);
-    } else if (this.config_['transport'] &&
-        this.config_['transport']['iframe']) {
-      user().assert(this.iframeTransport_,
-          'iframe transport was inadvertently deleted');
-      this.iframeTransport_.sendRequest(request);
-    } else {
-      this.transport_.sendRequest(request);
-    }
   }
 
   /**

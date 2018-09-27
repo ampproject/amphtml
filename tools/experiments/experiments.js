@@ -316,6 +316,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
+    id: 'amp-list-diffing',
+    name: 'Enables DOM diffing of amp-list renders via set-dom',
+    spec: 'https://github.com/ampproject/amphtml/pull/17000',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
+  },
+  {
     id: 'no-initial-intersection',
     name: 'Do not invoke context.observeIntersection callback with ' +
         'initialintersection',
@@ -332,11 +338,6 @@ const EXPERIMENTS = [
     id: 'amp-carousel-scroll-snap',
     name: 'Enables scroll snap on carousel across all browsers/OSes',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
-  },
-  {
-    id: 'amp-carousel-new-arrows',
-    name: 'Enables new AMP carousel navigation arrows',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
   },
   {
     id: 'linker-meta-opt-in',

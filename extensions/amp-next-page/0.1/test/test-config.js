@@ -68,7 +68,7 @@ describe('amp-next-page config', () => {
       const config = {
         pages: [
           {
-            ampUrl: 'https://example-com.cdn.ampproject.org/example.com/art1',
+            ampUrl: 'https://example-com.cdn.ampproject.org/c/s/example.com/art1',
             image: 'https://example.com/image.png',
             title: 'Article 1',
           },
@@ -81,6 +81,8 @@ describe('amp-next-page config', () => {
       };
       expect(() => assertConfig(/*ctx*/ null, config, cdnOrigin, origin))
           .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example-com.cdn.ampproject.org/c/s/example.com/art1');
       expect(config.pages[1].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/s/example.com/art2?x=1');
     });

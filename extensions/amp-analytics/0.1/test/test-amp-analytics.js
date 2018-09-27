@@ -24,6 +24,7 @@ import {
 import {LayoutPriority} from '../../../../src/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '../../../../src/services';
+import {Transport} from '../transport';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {
@@ -37,15 +38,10 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {macroTask} from '../../../../testing/yield';
-import {
-  newPerformanceResourceTiming,
-  newResourceTimingSpec,
-} from './test-resource-timing';
 import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-
 
 describes.realWin('amp-analytics', {
   amp: {
@@ -153,16 +149,16 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.stub(Transport.prototype, 'sendRequest');
     postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
 
   function waitForSendRequest(analytics, opt_max, opt_cnt) {
-    expect(analytics.element.style.display).to.equal('');
+    expect(analytics.element).to.not.have.display('none');
     const callCount = opt_cnt || 0;
     return analytics.layoutCallback().then(() => {
-      expect(analytics.element.style.display).to.equal('none');
+      expect(analytics.element).to.have.display('none');
       if (sendRequestSpy.callCount > callCount) {
         return;
       }
@@ -343,45 +339,21 @@ describes.realWin('amp-analytics', {
       },
     };
 
-    it('does not unnecessarily preload iframe transport script', function() {
+    it('initialize iframe transport', () => {
       const el = doc.createElement('amp-analytics');
       el.setAttribute('type', 'foo');
       doc.body.appendChild(el);
       const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId')
-          .callsFake(() => 'fakeId');
-      const preloadSpy = sandbox.spy(analytics, 'preload');
 
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
           .returns(Promise.resolve(sampleconfig));
 
       analytics.buildCallback();
       analytics.preconnectCallback();
+      const initSpy = sandbox.spy(
+          Transport.prototype, 'maybeInitIframeTransport');
       return analytics.layoutCallback().then(() => {
-        expect(preloadSpy).to.have.not.been.called;
-      });
-    });
-
-    it('preloads iframe transport script if relevant', function() {
-      const el = doc.createElement('amp-analytics');
-      el.setAttribute('type', 'foo');
-      doc.body.appendChild(el);
-      const analytics = new AmpAnalytics(el);
-      sandbox.stub(analytics, 'assertAmpAdResourceId')
-          .callsFake(() => 'fakeId');
-      const preloadSpy = sandbox.spy(analytics, 'preload');
-      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
-          .returns(Promise.resolve(Object.assign({}, sampleconfig, {
-            'transport': {
-              'iframe': 'http://example.com',
-            },
-          })));
-      analytics.buildCallback();
-      analytics.preconnectCallback();
-      return analytics.layoutCallback().then(() => {
-        expect(preloadSpy.withArgs(
-            'http://localhost:9876/dist/iframe-transport-client-lib.js',
-            'script')).to.be.calledOnce;
+        expect(initSpy).to.be.called;
       });
     });
   });
@@ -408,7 +380,7 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     // Initialization has not started.
     expect(analytics.iniPromise_).to.be.null;
-    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
@@ -428,7 +400,7 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     const iniPromise = analytics.iniPromise_;
     expect(iniPromise).to.be.ok;
-    expect(el.style.display).to.equal('none');
+    expect(el).to.have.attribute('hidden');
     // Viewer.whenFirstVisible is the first blocking call to initialize.
     expect(whenFirstVisibleStub).to.be.calledOnce;
 
@@ -464,7 +436,7 @@ describes.realWin('amp-analytics', {
         el.connectedCallback();
         analytics.createdCallback();
         analytics.buildCallback();
-        sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+        sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
         return waitForNoSendRequest(analytics).then(() => {
           expect(sendRequestSpy).to.have.not.been.called;
@@ -485,7 +457,7 @@ describes.realWin('amp-analytics', {
     el.connectedCallback();
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.spy(Transport.prototype, 'sendRequest');
 
     return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy).to.have.not.been.called;
@@ -1517,6 +1489,26 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy).to.have.not.been.called;
       });
     });
+
+    it('should not throw in resumeCallback/unlayoutCallback ' +
+        'if consent rejected', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/local'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      }, {
+        'data-consent-notification-id': 'amp-user-notification1',
+      });
+
+      sandbox.stub(uidService, 'get').callsFake(id => {
+        expect(id).to.equal('amp-user-notification1');
+        return Promise.reject();
+      });
+
+      sandbox.stub(viewer, 'isVisible').returns(false);
+      analytics.layoutCallback();
+      analytics.resumeCallback();
+      analytics.unlayoutCallback();
+    });
   });
 
   describe('Sandbox AMP Analytics Element', () => {
@@ -1737,90 +1729,6 @@ describes.realWin('amp-analytics', {
       env.win.AMP_MODE.runtime = 'inabox';
       expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
           LayoutPriority.CONTENT);
-    });
-  });
-
-  describe('resourceTiming', () => {
-    // NOTE: The following tests verify plumbing for resource timing variables.
-    // More tests for resource timing can be found in test-resource-timing.js.
-    const newConfig = function() {
-      return {
-        'requests': {
-          'pageview': 'https://ping.example.com/endpoint',
-        },
-        'triggers': [{
-          'on': 'visible',
-          'request': 'pageview',
-          'extraUrlParams': {
-            'rt': '${resourceTiming}',
-          },
-          'resourceTimingSpec': newResourceTimingSpec(),
-        }],
-      };
-    };
-
-    this.timeout(400);
-
-    const runResourceTimingTest = function(entries, config, expectedPing) {
-      sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
-      const analytics = getAnalyticsTag(config);
-      return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
-      });
-    };
-
-    it('should evaluate ${resourceTiming} to be empty by default', () => {
-      return runResourceTimingTest(
-          [], newConfig(), 'https://ping.example.com/endpoint?rt=');
-    });
-
-    it('should capture multiple matching resources', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const config = newConfig();
-      const trigger = config['triggers'][0];
-      // Check precondition of responseAfter.
-      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.undefined;
-
-      return runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200~' +
-              'foo_bar-script-700-100-0');
-
-      // 'responseAfter' should be set to a positive number.
-      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
-    });
-
-    it('should url encode variables', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const config = newConfig();
-      const spec = config['triggers'][0]['resourceTimingSpec'];
-      spec['encoding']['entry'] = '${key}?${startTime},${duration}';
-      spec['encoding']['delim'] = ':';
-      return runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
-    });
-
-    it('should ignore resourceTimingSpec outside of triggers', () => {
-      const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const config = newConfig();
-      config['resourceTimingSpec'] =
-          config['triggers'][0]['resourceTimingSpec'];
-      delete config['triggers'][0]['resourceTimingSpec'];
-      return runResourceTimingTest(
-          [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });
 });

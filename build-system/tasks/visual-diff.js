@@ -41,6 +41,8 @@ const PORT = 8000;
 const BASE_URL = `http://${HOST}:${PORT}`;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
+const MAX_PARALLEL_TABS = 10;
+const WAIT_FOR_TABS_MS = 1000;
 const CSS_SELECTOR_RETRY_MS = 100;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
@@ -56,6 +58,9 @@ const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
 
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
+
+let browser_;
+let webServerProcess_;
 
 /**
  * Logs a message to the console.
@@ -132,7 +137,7 @@ function setPercyBranch() {
  *     and reachable.
  */
 async function launchWebServer() {
-  const gulpServeAsync = execScriptAsync(
+  webServerProcess_ = execScriptAsync(
       `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
       {
         stdio: argv.webserver_debug ?
@@ -140,17 +145,13 @@ async function launchWebServer() {
           'ignore',
       });
 
-  gulpServeAsync.on('close', code => {
+  webServerProcess_.on('close', code => {
     code = code || 0;
     if (code != 0) {
       log('error', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
       process.exit(code);
     }
-  });
-
-  process.on('exit', async() => {
-    await shutdown(gulpServeAsync);
   });
 
   let resolver, rejecter;
@@ -163,25 +164,9 @@ async function launchWebServer() {
     port: PORT,
     retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
   }).on('connected', () => {
-    return resolver(gulpServeAsync);
+    return resolver(webServerProcess_);
   }).on('timeout', rejecter);
   return deferred;
-}
-
-/**
- * Kill the webserver process and this own process.
- *
- * @param {!ChildProcess} webServerProcess the webserver process to shut down.
- */
-async function shutdown(webServerProcess) {
-  if (!webServerProcess.killed) {
-    // Explicitly exit the webserver.
-    webServerProcess.kill();
-    // The child node process has an asynchronous stdout. See #10409.
-    await sleep(100);
-  }
-  // TODO(rsimha): clean up this exit.
-  process.exit();
 }
 
 /**
@@ -267,12 +252,12 @@ function verifyBuildStatus(status, buildId) {
 }
 
 /**
- * Launches a Puppeteer controlled browser and returns a page handle.
+ * Launches a Puppeteer controlled browser.
  *
  * Waits until the browser is up and reachable, and ties its lifecycle to this
  * process's lifecycle.
  *
- * @return {!puppeteer.Page} a Puppeteer control browser tab/page.
+ * @return {!puppeteer.Browser} a Puppeteer controlled browser.
  */
 async function launchBrowser() {
   const browserOptions = {
@@ -284,9 +269,18 @@ async function launchBrowser() {
     browserOptions['args'].push('--disable-gpu');
   }
 
-  const browser = await puppeteer.launch(browserOptions);
-  process.on('exit', browser.close);
+  browser_ = await puppeteer.launch(browserOptions)
+      .catch(err => log('fatal', err));
 
+  return browser_;
+}
+
+/**
+ * Opens a new browser tab, resizes its viewport, and returns a Page handler.
+ *
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ */
+async function newPage(browser) {
   const page = await browser.newPage();
   await page.setViewport({
     width: VIEWPORT_WIDTH,
@@ -294,18 +288,16 @@ async function launchBrowser() {
   });
   page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
   await page.setJavaScriptEnabled(true);
-
   return page;
 }
 
 /**
  * Runs the visual tests.
  *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {!JsonObject} visualTestsConfig JSON object containing the config for
  *     the visual tests.
  */
-async function runVisualTests(page, visualTestsConfig) {
+async function runVisualTests(visualTestsConfig) {
   // Create a Percy client and start a build.
   const percy = createPercyPuppeteerController(
       visualTestsConfig.assets_dir, visualTestsConfig.assets_base_url);
@@ -315,7 +307,7 @@ async function runVisualTests(page, visualTestsConfig) {
   log('info', 'Started Percy build', colors.cyan(buildId));
 
   // Take the snapshots.
-  await generateSnapshots(percy, page, visualTestsConfig.webpages);
+  await generateSnapshots(percy, visualTestsConfig.webpages);
 
   // Tell Percy we're finished taking snapshots and check if the build failed
   // early.
@@ -362,16 +354,10 @@ function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
  * set of given webpages.
  *
  * @param {!Percy} percy a Percy-Puppeteer controller.
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function generateSnapshots(percy, page, webpages) {
-  if (argv.master) {
-    await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
-  }
-
+async function generateSnapshots(percy, webpages) {
   const numUnfilteredTests = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
   if (numUnfilteredTests != webpages.length) {
@@ -391,29 +377,38 @@ async function generateSnapshots(percy, page, webpages) {
     log('info', 'Executing', colors.cyan(webpages.length), 'visual diff tests');
   }
 
+  const browser = await launchBrowser();
+  if (argv.master) {
+    const page = await newPage(browser);
+    await page.goto(
+        `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
+    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  }
+
   log('verbose', 'Generating snapshots...');
-  await snapshotWebpages(percy, page, webpages);
+  await snapshotWebpages(percy, browser, webpages);
 }
 
 /**
  * Generates Percy snapshots for a set of given webpages.
  *
  * @param {!Percy} percy a Percy-Puppeteer controller.
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {!JsonObject} webpages a JSON objects containing details about the
- *     pages to snapshot.
+ * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
+ * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
+ *     details about the webpages to snapshot.
  */
-async function snapshotWebpages(percy, page, webpages) {
+async function snapshotWebpages(percy, browser, webpages) {
+  const pagePromises = {};
   for (const webpage of webpages) {
+    while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
+      await sleep(WAIT_FOR_TABS_MS);
+    }
+
+    const page = await newPage(browser);
     const {name, url, viewport} = webpage;
     log('verbose', 'Visual diff test', colors.yellow(name));
 
-    await enableExperiments(page, webpage['experiments']);
-
-    const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
-
     if (viewport) {
-      snapshotOptions.widths = [viewport.width];
       log('verbose', 'Setting explicit viewport size of',
           colors.yellow(`${viewport.width}×${viewport.height}`));
       await page.setViewport({
@@ -422,51 +417,68 @@ async function snapshotWebpages(percy, page, webpages) {
       });
     }
     log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
+
+    // Navigate to an empty page first to support different webpages that only
+    // modify the #anchor name.
+    await page.goto('about:blank').then(() => {}, () => {});
+
     // Puppeteer is flaky when it comes to catching navigation requests, so
     // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build. Navigate to an empty page first to support
-    // different webpages that only modify the #anchor name.
-    await page.goto('about:blank');
-    await page.goto(`${BASE_URL}/${url}`).catch(() => {});
+    // in the resulting Percy build. Also attempt to wait until there are no
+    // more network requests. This method is flaky since Puppeteer doesn't
+    // always understand Chrome's network activity, so ignore timeouts again.
+    const pagePromise = page.goto(
+        `${BASE_URL}/${url}`, {waitUntil: 'networkidle0'})
+        .then(() => {}, () => {})
+        .then(async() => {
+          log('verbose', 'Navigation to page',
+              colors.yellow(`${BASE_URL}/${url}`), 'is done, verifying page');
 
-    // Try to wait until there are no more network requests. This method is
-    // flaky since Puppeteer doesn't always understand Chrome's network
-    // activity, so ignore timeouts.
-    await page.waitForNavigation({waitUntil: 'networkidle0'}).catch(() => {});
+          await page.bringToFront();
 
-    await verifyCssElements(page, url, webpage.forbidden_css,
-        webpage.loading_incomplete_css, webpage.loading_complete_css);
+          await verifyCssElements(page, url, webpage.forbidden_css,
+              webpage.loading_incomplete_css, webpage.loading_complete_css);
 
-    if (webpage.loading_complete_delay_ms) {
-      log('verbose', 'Waiting',
-          colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
-          'for loading to complete');
-      await sleep(webpage.loading_complete_delay_ms);
-    }
+          if (webpage.loading_complete_delay_ms) {
+            log('verbose', 'Waiting',
+                colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+                'for loading to complete');
+            await sleep(webpage.loading_complete_delay_ms);
+          }
 
-    if (webpage.enable_percy_javascript) {
-      snapshotOptions.enableJavaScript = true;
-      // Remove all scripts that have an external source, leaving only those
-      // scripts that are inlined in the page inside a <script> tag.
-      await page.evaluate(
-          'document.head.querySelectorAll("script[src]").forEach(' +
-          'node => node./*OK*/remove())');
-    }
+          const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
 
-    if (viewport) {
-      log('verbose', 'Wrapping viewport-constrained page in an iframe');
-      await page.evaluate(WRAP_IN_IFRAME_SCRIPT
-          .replace(/__WIDTH__/g, viewport.width)
-          .replace(/__HEIGHT__/g, viewport.height));
-      await page.setViewport({
-        width: VIEWPORT_WIDTH,
-        height: VIEWPORT_HEIGHT,
-      });
-    }
+          if (webpage.enable_percy_javascript) {
+            snapshotOptions.enableJavaScript = true;
+            // Remove all scripts that have an external source, leaving only
+            // those scripts that are inlined in the page inside a <script> tag.
+            await page.evaluate(
+                'document.head.querySelectorAll("script[src]").forEach(' +
+                'node => node./*OK*/remove())');
+          }
 
-    await percy.snapshot(name, page, snapshotOptions);
-    await clearExperiments(page);
-    log('travis', colors.cyan('●'));
+          if (viewport) {
+            snapshotOptions.widths = [viewport.width];
+            log('verbose', 'Wrapping viewport-constrained page in an iframe');
+            await page.evaluate(WRAP_IN_IFRAME_SCRIPT
+                .replace(/__WIDTH__/g, viewport.width)
+                .replace(/__HEIGHT__/g, viewport.height));
+            await page.setViewport({
+              width: VIEWPORT_WIDTH,
+              height: VIEWPORT_HEIGHT,
+            });
+          }
+
+          await percy.snapshot(name, page, snapshotOptions);
+          await page.close();
+          log('travis', colors.cyan('●'));
+        })
+        .then(() => delete pagePromises[name]);
+    pagePromises[name] = pagePromise;
+  }
+
+  while (Object.keys(pagePromises).length > 0) {
+    await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
 }
@@ -615,33 +627,6 @@ async function waitForSelectorExistence(page, selector) {
 }
 
 /**
- * Enables the given AMP experiments.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {!Array<string>} experiments List of experiments to enable.
- */
-async function enableExperiments(page, experiments) {
-  if (experiments) {
-    log('verbose', 'Setting AMP experiments',
-        colors.cyan(experiments.join(', ')));
-    await page.setCookie({
-      name: 'AMP_EXP',
-      value: experiments.join('%2C'),
-      domain: HOST,
-    });
-  }
-}
-
-/**
- * Clears all AMP experiment cookies.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- */
-async function clearExperiments(page) {
-  await page.deleteCookie({name: 'AMP_EXP', domain: HOST});
-}
-
-/**
  * Enables debugging if requested via command line.
  */
 function setDebuggingLevel() {
@@ -685,6 +670,7 @@ async function createEmptyBuild(page) {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
+  setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
 
@@ -706,15 +692,16 @@ async function visualDiff() {
   }
   setDebuggingLevel();
 
-  // Launch a browser and local web server.
-  const page = await launchBrowser();
-  const webServerProcess = await launchWebServer().catch(reason => {
+  // Launch a local web server.
+  await launchWebServer().catch(reason => {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
   if (argv.skip) {
+    const browser = await launchBrowser();
+    const page = await newPage(browser);
     await createEmptyBuild(page);
-    await shutdown(webServerProcess);
+    process.exit(0);
     return;
   }
 
@@ -723,9 +710,26 @@ async function visualDiff() {
       fs.readFileSync(
           path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
           'utf8'));
-  await runVisualTests(page, visualTestsConfig);
+  await runVisualTests(visualTestsConfig);
+  process.exit(0);
+}
 
-  await shutdown(webServerProcess);
+function setupCleanup_() {
+  process.on('exit', cleanup_);
+  process.on('SIGINT', cleanup_);
+  process.on('uncaughtException', cleanup_);
+}
+
+async function cleanup_() {
+  if (browser_) {
+    await browser_.close();
+  }
+  if (!webServerProcess_.killed) {
+    // Explicitly exit the webserver.
+    webServerProcess_.kill();
+    // The child node process has an asynchronous stdout. See #10409.
+    await sleep(100);
+  }
 }
 
 gulp.task(
