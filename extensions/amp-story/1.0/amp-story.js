@@ -137,8 +137,8 @@ const Attributes = {
   // Attributes that desktop css looks for to decide where pages will be placed
   PREVIOUS: 'i-amphtml-previous-page', // shown in left pane
   NEXT: 'i-amphtml-next-page', // shown in right pane
-  PREVIOUS_TWO: 'i-amphtml-two-previous-page', // shown in left pane
-  NEXT_TWO: 'i-amphtml-two-next-page', // shown in right pane
+  TWO_PREVIOUS: 'i-amphtml-two-previous-page', // shown in left pane
+  TWO_NEXT: 'i-amphtml-two-next-page', // shown in right pane
 };
 
 /**
@@ -1063,8 +1063,8 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * Clear existing preview attributes, Check to see if there is a next or
-   * previous page, set new attributes.
+   * Clear existing preview attributes, checks to see if there are any pages
+   * within a page distance of 2 from the target, set new attributes.
    * @param {!./amp-story-page.AmpStoryPage} targetPage
    * @private
    */
@@ -1080,12 +1080,12 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     if (this.nMinus2Page_) {
-      removeAttributeInMutate(this.nMinus2Page_, Attributes.PREVIOUS_TWO);
+      removeAttributeInMutate(this.nMinus2Page_, Attributes.TWO_PREVIOUS);
       this.nMinus2Page_ = null;
     }
 
     if (this.nPlus2Page_) {
-      removeAttributeInMutate(this.nPlus2Page_, Attributes.NEXT_TWO);
+      removeAttributeInMutate(this.nPlus2Page_, Attributes.TWO_NEXT);
       this.nPlus2Page_ = null;
     }
 
@@ -1093,10 +1093,11 @@ export class AmpStory extends AMP.BaseElement {
     if (prevPageId) {
       this.previousPage_ = this.getPageById(prevPageId);
       setAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
+
       const prevTwoID = this.previousPage_.getPreviousPageId();
       if (prevTwoID) {
         this.nMinus2Page_ = this.getPageById(prevTwoID);
-        setAttributeInMutate(this.nMinus2Page_, Attributes.PREVIOUS_TWO);
+        setAttributeInMutate(this.nMinus2Page_, Attributes.TWO_PREVIOUS);
       }
     }
 
@@ -1105,12 +1106,13 @@ export class AmpStory extends AMP.BaseElement {
     if (nextPageId) {
       this.nextPage_ = this.getPageById(nextPageId);
       setAttributeInMutate(this.nextPage_, Attributes.NEXT);
+
       const nextTwoID = this.nextPage_.getNextPageId(
-        /* opt_isAutomaticAdvance */ false);
+          /* opt_isAutomaticAdvance */ false);
       if (nextTwoID) {
         this.nPlus2Page_ = this.getPageById(nextTwoID);
-        setAttributeInMutate(this.nPlus2Page_, Attributes.NEXT_TWO);
-      }  
+        setAttributeInMutate(this.nPlus2Page_, Attributes.TWO_NEXT);
+      }
     }
   }
 
