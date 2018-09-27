@@ -17,6 +17,7 @@
 import {Services} from '../services';
 import {
   computedStyle,
+  getStyle,
   getVendorJsPropertyName,
   setImportantStyles,
   setInitialDisplay,
@@ -456,7 +457,7 @@ export class FixedLayer {
    */
   warnAboutInlineStylesIfNecessary_(element) {
     if (element.hasAttribute('style')
-        && (element.style.top || element.style.bottom)) {
+        && (getStyle(element, 'top') || getStyle(element, 'bottom'))) {
       user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
           'CSS rules are not supported yet for fixed or sticky elements ' +
           '(#14186). Unexpected behavior may occur.', element);

@@ -183,8 +183,10 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
-      n['style']['backgroundColor'] = '#ff0';
-      n['style']['color'] = '#333';
+      setStyles(n, {
+        backgroundColor: '#ff0',
+        color: '#333',
+      });
     }
 
     const visibility = this.viewer_.getVisibilityState();
