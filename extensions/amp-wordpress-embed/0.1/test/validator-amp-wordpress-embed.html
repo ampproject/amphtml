@@ -28,32 +28,11 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- Valid: Embeds an entire gist from GitHub. -->
+  <!-- Valid: Embeds a WordPress post. -->
   <amp-wordpress-embed
     layout="fixed-height"
     height="241"
-    data-gistid="b9bb35bc68df68259af94430f012425f">
-  </amp-wordpress-embed>
-
-  <!-- Valid: Embeds one file out of a gist from GitHub. -->
-  <amp-wordpress-embed
-    layout="fixed-height"
-    height="197"
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c">
-  </amp-wordpress-embed>
-
-  <!-- Invalid: missing data-gistid attribute. -->
-  <amp-wordpress-embed
-    layout="fixed-height"
-    height="241">
-  </amp-wordpress-embed>
-
-  <!-- Invalid: illegal layout. -->
-  <amp-wordpress-embed
-    layout="responsive"
-    height="241"
-    data-gistid="b9bb35bc68df68259af94430f012425f">
+    data-url="b9bb35bc68df68259af94430f012425f">
   </amp-wordpress-embed>
 </body>
 </html>
