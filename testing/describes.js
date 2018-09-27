@@ -411,9 +411,6 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private {boolean} */
-    this.sandboxOwner_ = false;
   }
 
   /** @override */
@@ -423,23 +420,12 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    // Sandbox.
-    let {sandbox} = global;
-    if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox;
-      this.sandboxOwner_ = true;
-    }
-    env.sandbox = sandbox;
+    env.sandbox = sinon.createSandbox();
   }
 
   /** @override */
   teardown(env) {
-    // Sandbox.
-    if (this.sandboxOwner_) {
-      env.sandbox.restore();
-      delete global.sandbox;
-      this.sandboxOwner_ = false;
-    }
+    env.sandbox.restore();
   }
 }
 
