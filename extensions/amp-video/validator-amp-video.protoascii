@@ -52,6 +52,7 @@ attr_lists: {
     name: "disableremoteplayback"
     value: ""
   }
+  attrs: { name: "dock" }
   attrs: {
     name: "loop"
     value: ""
