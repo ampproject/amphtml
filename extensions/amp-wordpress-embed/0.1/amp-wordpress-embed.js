@@ -28,10 +28,10 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {createFrameFor} from '../../../src/iframe-video';
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
 
@@ -71,12 +71,15 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    /* the third parameter 'github' ties it to the 3p/github.js */
-    const iframe = getIframe(this.win, this.element, 'github'); // @todo Change.
+    const url = new URL( this.url_ );
+    url.searchParams.set( 'embed', 'true' );
+
+    const iframe = createFrameFor(this, url.toString());
     this.applyFillContent(iframe);
-    // Triggered by window.context.requestResize() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
+
+    // Triggered by sendEmbedMessage inside the iframe.
+    listenFor(iframe, 'height', data => {
+      this./*OK*/changeHeight(data['value']);
     }, /* opt_is3P */true);
 
     this.element.appendChild(iframe);
