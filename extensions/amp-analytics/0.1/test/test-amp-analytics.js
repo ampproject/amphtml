@@ -38,15 +38,10 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
 import {macroTask} from '../../../../testing/yield';
-import {
-  newPerformanceResourceTiming,
-  newResourceTimingSpec,
-} from './test-resource-timing';
 import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-
 
 describes.realWin('amp-analytics', {
   amp: {
@@ -1734,90 +1729,6 @@ describes.realWin('amp-analytics', {
       env.win.AMP_MODE.runtime = 'inabox';
       expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
           LayoutPriority.CONTENT);
-    });
-  });
-
-  describe('resourceTiming', () => {
-    // NOTE: The following tests verify plumbing for resource timing variables.
-    // More tests for resource timing can be found in test-resource-timing.js.
-    const newConfig = function() {
-      return {
-        'requests': {
-          'pageview': 'https://ping.example.com/endpoint',
-        },
-        'triggers': [{
-          'on': 'visible',
-          'request': 'pageview',
-          'extraUrlParams': {
-            'rt': '${resourceTiming}',
-          },
-          'resourceTimingSpec': newResourceTimingSpec(),
-        }],
-      };
-    };
-
-    this.timeout(400);
-
-    const runResourceTimingTest = function(entries, config, expectedPing) {
-      sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
-      const analytics = getAnalyticsTag(config);
-      return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
-      });
-    };
-
-    it('should evaluate ${resourceTiming} to be empty by default', () => {
-      return runResourceTimingTest(
-          [], newConfig(), 'https://ping.example.com/endpoint?rt=');
-    });
-
-    it('should capture multiple matching resources', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const config = newConfig();
-      const trigger = config['triggers'][0];
-      // Check precondition of responseAfter.
-      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.undefined;
-
-      return runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200~' +
-              'foo_bar-script-700-100-0');
-
-      // 'responseAfter' should be set to a positive number.
-      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
-    });
-
-    it('should url encode variables', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const config = newConfig();
-      const spec = config['triggers'][0]['resourceTimingSpec'];
-      spec['encoding']['entry'] = '${key}?${startTime},${duration}';
-      spec['encoding']['delim'] = ':';
-      return runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
-    });
-
-    it('should ignore resourceTimingSpec outside of triggers', () => {
-      const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      const config = newConfig();
-      config['resourceTimingSpec'] =
-          config['triggers'][0]['resourceTimingSpec'];
-      delete config['triggers'][0]['resourceTimingSpec'];
-      return runResourceTimingTest(
-          [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });
 });
