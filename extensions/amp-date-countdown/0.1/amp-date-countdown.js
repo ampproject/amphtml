@@ -118,7 +118,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
-    //Note: One of end-date, timestamp-ms, timestamp-seconds is required.
+    // Note: One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds is required.
     /** @private {string} */
     this.endDate_ = this.element.getAttribute('end-date');
 
@@ -225,8 +225,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
     }
 
     user().assert(!isNaN(epoch),
-        `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds
-         is required`);
+        'One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds' +
+        'is required');
     return epoch;
   }
 
