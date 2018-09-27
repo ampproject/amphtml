@@ -409,10 +409,56 @@ describes.realWin('Platform store', {}, () => {
       sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
       sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
       platformStore.reportPlatformFailure('service1');
+      expect(errorSpy).to.not.be.called;
       platformStore.reportPlatformFailure('local');
       expect(errorSpy).to.be.calledOnce;
       expect(platformStore.entitlements_['local'].json())
           .to.deep.equal(fallbackEntitlement.json());
+    });
+
+    it('should not interfere with selectPlatform flow if using fallback, '
+      + 'when reason is SUBSCRIBER', () => {
+      const platform = new SubscriptionPlatform();
+      const anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(
+          () => serviceIds[0]);
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 10);
+      platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+      platformStore.resolvePlatform('local', platform);
+      platformStore.reportPlatformFailure('local');
+      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      return platformStore.selectPlatform().then(platform => {
+        expect(platformStore.entitlements_['local']).deep.equals(
+            fallbackEntitlement);
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(platform.getServiceId()).to.equal('local');
+      });
+    });
+
+    it('should not interfere with selectPlatform flow if using fallback, '
+      + 'when reason is not SUBSCRIBER', () => {
+      const platform = new SubscriptionPlatform();
+      const anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(
+          () => serviceIds[0]);
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 10);
+      platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+      platformStore.resolvePlatform('local', platform);
+      fallbackEntitlement.grantReason = GrantReason.METERING;
+      platformStore.reportPlatformFailure('local');
+      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      return platformStore.selectPlatform().then(platform => {
+        expect(platformStore.entitlements_['local']).deep.equals(
+            fallbackEntitlement);
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(platform.getServiceId()).to.equal(serviceIds[0]);
+      });
     });
   });
 
