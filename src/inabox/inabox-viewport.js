@@ -346,8 +346,8 @@ export class ViewportBindingInabox {
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
           response => {
             unlisten();
-            if (response.success) {
-              this.updateBoxRect_(response.boxRect);
+            if (response['success']) {
+              this.updateBoxRect_(response['boxRect']);
               resolve();
             } else {
               reject('Request to open lightbox rejected by host document');
@@ -367,7 +367,7 @@ export class ViewportBindingInabox {
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           response => {
             unlisten();
-            this.updateBoxRect_(response.boxRect);
+            this.updateBoxRect_(response['boxRect']);
             resolve();
           });
     });
