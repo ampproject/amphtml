@@ -355,6 +355,12 @@ const EXPERIMENTS = [
     name: 'Enables CMP support to amp-consent component',
     spec: 'https://github.com/ampproject/amphtml/issues/17742',
   },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
 ];
 
 if (getMode().localDev) {
