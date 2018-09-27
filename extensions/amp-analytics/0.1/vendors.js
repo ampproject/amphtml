@@ -138,7 +138,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'queryParam': 'QUERY_PARAM',
       'random': 'RANDOM',
       'redirectTime': 'REDIRECT_TIME',
-      'resourceTiming': 'RESOURCE_TIMING',
       'screenColorDepth': 'SCREEN_COLOR_DEPTH',
       'screenHeight': 'SCREEN_HEIGHT',
       'screenWidth': 'SCREEN_WIDTH',
