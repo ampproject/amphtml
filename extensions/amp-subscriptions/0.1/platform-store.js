@@ -284,7 +284,8 @@ export class PlatformStore {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
       this.onGrantStateResolvedCallbacks_.add(() => {
-        if (this.grantStatusEntitlement_.granted
+        // Grant entitlement only if subscriber
+        if (this.grantStatusEntitlement_.isSubscriber()
             || this.areAllPlatformsResolved_()) {
           this.grantStatusEntitlementPromise_.resolve(
               this.grantStatusEntitlement_);
@@ -312,7 +313,7 @@ export class PlatformStore {
     }
     this.allResolvedPromise_ = new Deferred();
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if non of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblocks the reader
       this.allResolvedPromise_.resolve(
           this.getAvailablePlatformsEntitlements_());
     } else {
@@ -468,17 +469,16 @@ export class PlatformStore {
    * @param {string} serviceId
    */
   reportPlatformFailure(serviceId) {
-    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+    if (serviceId === this.getLocalPlatform().getServiceId()
+      && this.fallbackEntitlement_) {
+      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
+          this.fallbackEntitlement_);
+      user().warn(TAG, 'Local platform has failed to resolve,  '
+        + 'using fallback entitlement.');
+    } else if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       const entitlement = Entitlement.empty(serviceId);
       this.resolveEntitlement(serviceId, entitlement);
       this.failedPlatforms_.push(serviceId);
-    }
-
-    if (this.failedPlatforms_.length == this.serviceIds_.length) {
-      user().warn(TAG, 'All platforms have failed to resolve, '
-          + 'using fallback entitlement for local platform');
-      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
-          this.fallbackEntitlement_);
     }
   }
 
