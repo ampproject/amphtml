@@ -71,7 +71,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const datetime = mutations['datetime'];
     if (datetime !== undefined) {
-      this.datetime_ = this.element.getAttribute('datetime');
+      this.datetime_ = datetime;
       this.setFuzzyTimestampValue_();
     }
   }

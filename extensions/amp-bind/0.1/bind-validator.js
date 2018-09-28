@@ -267,6 +267,7 @@ function createElementRules_() {
     },
     'AMP-TIMEAGO': {
       'datetime': null,
+      'title': null,
     },
     'AMP-VIDEO': {
       'alt': null,
