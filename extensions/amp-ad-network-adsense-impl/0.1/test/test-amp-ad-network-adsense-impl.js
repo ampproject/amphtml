@@ -207,6 +207,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // exact value of ampAnalyticsConfig_ covered in
       // ads/google/test/test-utils.js
     });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onNetworkFailure', () => {
@@ -926,7 +943,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         impl.onLayoutMeasure();
         // Right margin is 9px from containerContainer and 25px from container.
         // TODO(charliereams): In the test harness it is also offset by 15px due
-        // to strange scrollbar behaviour. Figure out how to disable this.
+        // to strange scrollbar behavior. Figure out how to disable this.
         expect(element.style.marginRight).to.be.equal('-124px');
         expect(element.style.marginLeft).to.be.equal('');
       });

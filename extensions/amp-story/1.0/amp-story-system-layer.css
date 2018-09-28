@@ -166,6 +166,7 @@
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text {
   width: max-content !important;
+  color: #fff !important;
 }
 
 .i-amphtml-story-sound-display {
@@ -228,7 +229,8 @@
 }
 
 .i-amphtml-story-no-sharing .i-amphtml-story-share-control,
-.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control,
+.i-amphtml-story-no-sharing .i-amphtml-story-share-pill {
   display: none !important;
 }
 

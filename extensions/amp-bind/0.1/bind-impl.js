@@ -22,20 +22,17 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
-import {deepEquals, parseJson} from '../../../src/json';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
+import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {filterSplice, findIndex} from '../../../src/utils/array';
+import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isArray, isObject, toArray} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
@@ -624,13 +621,13 @@ export class Bind {
    */
   removeBindingsForNodes_(nodes) {
     // Eliminate bound elements that are descendants of `nodes`.
-    filterSplice(this.boundElements_, boundElement => {
+    remove(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].contains(boundElement.element)) {
-          return false;
+          return true;
         }
       }
-      return true;
+      return false;
     });
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
@@ -638,13 +635,13 @@ export class Bind {
     const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
-      filterSplice(elements, element => {
+      remove(elements, element => {
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i].contains(element)) {
-            return false;
+            return true;
           }
         }
-        return true;
+        return false;
       });
       if (elements.length == 0) {
         deletedExpressions.push(expression);

@@ -41,8 +41,15 @@ module.exports = function(context) {
       }
 
       if (arg.type !== 'Literal' || typeof arg.value !== 'string') {
+        if (arg.type === 'CallExpression') {
+          const {callee} = arg;
+          if (callee.type === 'Identifier' && callee.name === 'assertNotDisplay') {
+            return;
+          }
+        }
+
         return context.report({
-          node: arg || node,
+          node: arg,
           message: 'property argument (the second argument) to setStyle must be a string literal',
         });
       }
@@ -72,7 +79,7 @@ module.exports = function(context) {
         }
 
         return context.report({
-          node: arg || node,
+          node: arg,
           message: `styles argument (the second argument) to ${callName} must be an object literal. You may also pass in an explicit call to assertDoesNotContainDisplay`,
         });
       }
@@ -109,7 +116,7 @@ module.exports = function(context) {
 
       if (arg.type !== 'ArrayExpression') {
         return context.report({
-          node: arg || node,
+          node: arg,
           message: `styles argument (the second argument) to resetStyles must be an array literal`,
         });
       }

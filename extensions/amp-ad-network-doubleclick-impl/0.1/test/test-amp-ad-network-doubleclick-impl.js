@@ -276,6 +276,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
               .calledOnce;
         });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -1366,6 +1383,23 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return 12 if no experiment header', () => {
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
         });
+
+        it('should not return renderOutsideViewport boolean not set', () => {
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
+
+        it('should not return renderOutsideViewport boolean ctrl', () => {
+          impl.experimentIds.push('21062567');
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
+
+        it('should return renderOutsideViewport boolean, exp', () => {
+          impl.experimentIds.push('21062568');
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
       });
 
       describe('idle renderNonAmpCreative', () => {
@@ -1439,9 +1473,12 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       describe('#setPageLevelExperiments', () => {
         let randomlySelectUnsetExperimentsStub;
+        let extractUrlExperimentIdStub;
         beforeEach(() => {
           randomlySelectUnsetExperimentsStub =
             sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          extractUrlExperimentIdStub =
+            sandbox.stub(impl, 'extractUrlExperimentId_');
           sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
           sandbox.stub(impl, 'getAmpDoc').returns({});
           sandbox.stub(Services, 'viewerForDoc').returns(
@@ -1467,9 +1504,16 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should select SRA experiments', () => {
           randomlySelectUnsetExperimentsStub.returns(
               {doubleclickSraExp: '117152667'});
+          extractUrlExperimentIdStub.returns(undefined);
           impl.buildCallback();
           expect(impl.experimentIds.includes('117152667')).to.be.true;
           expect(impl.useSra).to.be.true;
+        });
+
+        it('should force-select SRA experiment from URL experiment ID', () => {
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments('8');
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
         });
 
         describe('should properly limit SRA traffic', () => {

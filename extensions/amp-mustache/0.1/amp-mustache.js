@@ -17,10 +17,17 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {
+  parse as mustacheParse,
+  render as mustacheRender,
+  setUnescapedSanitizer,
+} from '../../../third_party/mustache/mustache';
+import {
+  sanitizeHtml,
+  sanitizeTagsForTripleMustache,
+} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-mustache';
@@ -97,7 +104,8 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   serializeHtml_(html) {
     const root = this.win.document.createElement('div');
-    const sanitized = sanitizeHtml(html);
+    const diffing = isExperimentOn(self, 'amp-list-diffing');
+    const sanitized = sanitizeHtml(html, diffing);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }

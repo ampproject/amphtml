@@ -19,13 +19,18 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
-import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
 } from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
+import {SubscriptionsScoreFactor}
+  from '../../../amp-subscriptions/0.1/score-factors.js';
 
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
@@ -220,7 +225,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should reauthorize on complete subscribe', () => {
     const promise = Promise.resolve();
-    const response = new SubscribeResponse(null, null, null, () => promise);
+    const response = new SubscribeResponse(null, null, null, null,
+        () => promise);
     serviceAdapterMock.expects('reAuthorizePlatform')
         .withExactArgs(platform)
         .once();
@@ -372,6 +378,99 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
       return platform.getEntitlements().then(entitlement => {
         expect(entitlement).to.be.equal(null);
+      });
+    });
+  });
+
+  describe('isReadyToPay', () => {
+    // #TODO(jpettitt) remove fake entitlements when swj.js
+    // isRadyToPay is available
+    /**
+     * return a fake entitlements object
+     * @param {boolean} isReadyToPay
+     * @return {Object}
+     */
+    function fakeEntitlements(isReadyToPay) {
+      return {
+        isReadyToPay,
+        entitlements: {},
+        getEntitlementForThis: () => {},
+      };
+    }
+
+    it('should treat missing isReadyToPay as false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
+      });
+    });
+
+    it('should handle isReadyToPay true', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: true,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(true));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(1);
+      });
+    });
+
+    it('should handle isReadyToPay false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: false,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(false));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
       });
     });
   });

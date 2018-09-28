@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {KeyCodes} from '../utils/key-codes';
-import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -168,7 +167,7 @@ export class ActionInvocation {
    */
   constructor(node, method, args, source, caller, event, trust,
     actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
-    /** @const {!Node} */
+    /** @type {!Node} */
     this.node = node;
     /** @const {string} */
     this.method = method;

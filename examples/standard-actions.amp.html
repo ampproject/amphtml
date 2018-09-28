@@ -62,6 +62,16 @@
 </div>
 
 <div class="button-set">
+  <h3>AMP.scrollTo(el)</h3>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3')">Scroll to Element (Global)</button>
+  <button on="tap:AMP.scrollTo('id' = 'normal-element3', 'position' = 'bottom')">Scroll to Element Bottom (Global)</button>
+  <select id="elementScrollSelect" on="change:AMP.scrollTo('id' = event.value)">
+    <option value="normal-element2">Jump to elem 2</option>
+    <option value="normal-element3">Jump to elem 3</option>
+  </select>
+</div>
+
+<div class="button-set">
   <h3>AMP.optoutOfCid()</h3>
   <button on="tap:AMP.optoutOfCid">Opt out CID</button>
 </div>

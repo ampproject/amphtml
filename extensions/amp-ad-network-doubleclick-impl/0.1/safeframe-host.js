@@ -18,9 +18,8 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getStyle} from '../../../src/style';
+import {getStyle, setStyles} from '../../../src/style';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 
@@ -591,9 +590,7 @@ export class SafeframeHostApi {
           (payload['resize_r'] + payload['resize_l']);
 
     // Make sure we are actually resizing here.
-    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
-        resizeWidth > this.creativeSize_.width ||
-        resizeHeight > this.creativeSize_.height) {
+    if (isNaN(resizeWidth) || isNaN(resizeHeight)) {
       dev().error(TAG, 'Invalid resize values.');
       return;
     }

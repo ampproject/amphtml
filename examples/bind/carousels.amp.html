@@ -66,9 +66,13 @@
         [class]="selectedSlide == 8 ? 'selected' : ''" on="tap:AMP.setState({selectedSlide: 8})"></amp-img>
   </amp-carousel>
 
-  <p>With &lt;amp-selector&gt;</p>
+  <p>
+    With &lt;amp-selector&gt;
+    <button on="tap:AMP.setState({selectorDisabled: !selectorDisabled})">Toggle selector[disabled]</button>
+  </p>
   <amp-selector layout=container name="carousel-selector" [selected]="selectedSlide"
-      on="select:AMP.setState({selectedSlide: event.targetOption})">
+      on="select:AMP.setState({selectedSlide: event.targetOption})"
+      [disabled]="selectorDisabled">
     <amp-carousel controls width=400 height=100>
         <amp-img src="https://ampbyexample.com/img/image1.jpg" width=100 height=75 option=0></amp-img>
         <amp-img src="https://ampbyexample.com/img/image2.jpg" width=100 height=75 option=1></amp-img>

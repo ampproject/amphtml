@@ -18,13 +18,16 @@ import {Services} from '../services';
 import {dev, user} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
-import {getCorsUrl, getSourceOrigin, getWinOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {getCorsUrl,
+  getSourceOrigin,
+  getWinOrigin,
+  isProxyOrigin,
+  parseUrlDeprecated,
+  serializeQueryString,
+} from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {serializeQueryString} from '../url';
-import {utf8Encode} from './bytes';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -122,14 +125,14 @@ export function toStructuredCloneable(input, init) {
  *     response to convert back to a regular Response.
  * @param {string|undefined} responseType The original response type used to
  *     initiate the XHR.
- * @return {!FetchResponse|!Response} The deserialized regular response.
+ * @return {!Response} The deserialized regular response.
  * @private
  */
 export function fromStructuredCloneable(response, responseType) {
   user().assert(isObject(response), 'Object expected: %s', response);
 
   const isDocumentType = responseType == 'document';
-  if (typeof Response === 'function' && !isDocumentType) {
+  if (!isDocumentType) {
     // Use native `Response` type if available for performance. If response
     // type is `document`, we must fall back to `FetchResponse` polyfill
     // because callers would then rely on the `responseXML` property being
@@ -141,7 +144,6 @@ export function fromStructuredCloneable(response, responseType) {
   const data = {
     status: 200,
     statusText: 'OK',
-    responseText: (response['body'] ? String(response['body']) : ''),
     /**
      * @param {string} name
      * @return {string}
@@ -169,14 +171,7 @@ export function fromStructuredCloneable(response, responseType) {
     }
   }
 
-  // TODO(prateekbh): remove responseXML after everything is moved to polyfill
-  // it's not used right now, but its tough to remove this due to typings.
-  if (isDocumentType) {
-    data.responseXML =
-        new DOMParser().parseFromString(data.responseText, 'text/html');
-  }
-
-  return new FetchResponse(data);
+  return new Response(response['body'] ? String(response['body']) : '', data);
 }
 
 /**
@@ -195,7 +190,7 @@ export function fromStructuredCloneable(response, responseType) {
  * @param {string} input The URL of the XHR which may get intercepted.
  * @param {!FetchInitDef} init The options of the XHR which may get
  *     intercepted.
- * @return {!Promise<!FetchResponse|!Response|undefined>}
+ * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
  * @private
@@ -359,9 +354,9 @@ function normalizeMethod_(method) {
 /**
  * Verifies if response has the correct headers
  * @param {!Window} win
- * @param {!FetchResponse|!Response} response
+ * @param {!Response} response
  * @param {!FetchInitDef=} init
- * @return {!FetchResponse|!Response}
+ * @return {!Response}
  */
 export function verifyAmpCORSHeaders(win, response, init) {
   const allowSourceOriginHeader = response.headers.get(
@@ -383,110 +378,6 @@ export function verifyAmpCORSHeaders(win, response, init) {
   return response;
 }
 
-// TODO(prateekbh): move everything below this line into the polyfill
-/**
- * A record version of `XMLHttpRequest` that has all the necessary properties
- * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
- * serialized response returned by the viewer.
- * @typedef {{
- *   status: number,
- *   statusText: string,
- *   responseText: string,
- *   responseXML: ?Document,
- *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
- * }}
- */
-let XMLHttpRequestDef;
-
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
-
-/**
- * A minimal polyfill of Fetch API. It only polyfills what we currently use.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * Notice that the "fetch" method itself is not exported as that would require
- * us to immediately support a much wide API.
- *
- * @param {string} input
- * @param {!FetchInitDef} init
- * @return {!Promise<!FetchResponse>}
- * @private Visible for testing
- */
-export function fetchPolyfill(input, init) {
-  return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input);
-
-    if (init.credentials == 'include') {
-      xhr.withCredentials = true;
-    }
-
-    if (init.responseType in allowedFetchTypes_) {
-      xhr.responseType = init.responseType;
-    }
-
-    if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
-        xhr.setRequestHeader(header, init.headers[header]);
-      });
-    }
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
-        return;
-      }
-      if (xhr.status < 100 || xhr.status > 599) {
-        xhr.onreadystatechange = null;
-        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
-        return;
-      }
-
-      // TODO(dvoytenko): This is currently simplified: we will wait for the
-      // whole document loading to complete. This is fine for the use cases
-      // we have now, but may need to be reimplemented later.
-      if (xhr.readyState == /* COMPLETE */ 4) {
-        resolve(new FetchResponse(xhr));
-      }
-    };
-    xhr.onerror = () => {
-      reject(user().createExpectedError('Request failure'));
-    };
-    xhr.onabort = () => {
-      reject(user().createExpectedError('Request aborted'));
-    };
-
-    if (init.method == 'POST') {
-      xhr.send(init.body);
-    } else {
-      xhr.send();
-    }
-  });
-}
-
-/**
- * @param {string} method
- * @param {string} url
- * @return {!XMLHttpRequest|!XDomainRequest}
- * @private
- */
-function createXhrRequest(method, url) {
-  let xhr = new XMLHttpRequest();
-  if ('withCredentials' in xhr) {
-    xhr.open(method, url, true);
-  } else if (typeof XDomainRequest != 'undefined') {
-    // IE-specific object.
-    xhr = new XDomainRequest(); // eslint-disable-line no-undef
-    xhr.open(method, url);
-  } else {
-    throw dev().createExpectedError('CORS is not supported');
-  }
-  return xhr;
-}
-
 /**
  * If 415 or in the 5xx range.
  * @param {number} status
@@ -495,11 +386,10 @@ function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
 }
 
-
 /**
  * Returns the response if successful or otherwise throws an error.
- * @param {!FetchResponse|!Response} response
- * @return {!Promise<!FetchResponse>}
+ * @param {!Response} response
+ * @return {!Promise<!Response>}
  * @private Visible for testing
  */
 export function assertSuccess(response) {
@@ -516,114 +406,4 @@ export function assertSuccess(response) {
     err.response = response;
     throw err;
   });
-}
-
-
-/**
- * Response object in the Fetch API.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- */
-export class FetchResponse {
-  /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
-    this.xhr_ = xhr;
-
-    /** @const {number} */
-    this.status = this.xhr_.status;
-
-    /** @const {boolean} */
-    this.ok = this.status >= 200 && this.status < 300;
-
-    /** @const {!FetchResponseHeaders} */
-    this.headers = new FetchResponseHeaders(xhr);
-
-    /** @type {boolean} */
-    this.bodyUsed = false;
-
-    /** @type {?ReadableStream} */
-    this.body = null;
-  }
-
-  /**
-   * Create a copy of the response and return it.
-   * @return {!FetchResponse}
-   */
-  clone() {
-    dev().assert(!this.bodyUsed, 'Body already used');
-    return new FetchResponse(this.xhr_);
-  }
-
-  /**
-   * Drains the response and returns the text.
-   * @return {!Promise<string>}
-   * @private
-   */
-  drainText_() {
-    dev().assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    return Promise.resolve(this.xhr_.responseText);
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * text.
-   * @return {!Promise<string>}
-   */
-  text() {
-    return this.drainText_();
-  }
-
-  /**
-   * Drains the response and returns the JSON object.
-   * @return {!Promise<!JsonObject>}
-   */
-  json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-      this.drainText_().then(parseJson));
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * ArrayBuffer.
-   * @return {!Promise<!ArrayBuffer>}
-   */
-  arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-      this.drainText_().then(utf8Encode));
-  }
-}
-
-
-/**
- * Provides access to the response headers as defined in the Fetch API.
- * @private Visible for testing.
- */
-export class FetchResponseHeaders {
-  /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
-    this.xhr_ = xhr;
-  }
-
-  /**
-   * @param {string} name
-   * @return {string}
-   */
-  get(name) {
-    return this.xhr_.getResponseHeader(name);
-  }
-
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
-  has(name) {
-    return this.xhr_.getResponseHeader(name) != null;
-  }
 }

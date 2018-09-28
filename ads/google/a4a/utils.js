@@ -20,15 +20,15 @@ import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getBinaryType} from '../../../src/experiments';
+import {
+  getBinaryType,
+  isExperimentOn,
+  toggleExperiment,
+} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {
-  isExperimentOn,
-  toggleExperiment,
-} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
@@ -66,6 +66,9 @@ const visibilityStateCodes = {
 
 /** @const {string} */
 export const QQID_HEADER = 'X-QQID';
+
+/** @type {string} */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
 
 /**
  * Element attribute that stores experiment IDs.
@@ -248,7 +251,7 @@ export function googlePageParameters(a4a, startTime) {
   const referrerPromise = Services.timerFor(win).timeoutPromise(
       1000, Services.viewerForDoc(ampDoc).getReferrerUrl())
       .catch(() => {
-        dev().error('AMP-A4A', 'Referrer timeout!');
+        dev().expectedError('AMP-A4A', 'Referrer timeout!');
         return '';
       });
   return Promise.all([
@@ -600,7 +603,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
  * Extracts configuration used to build amp-analytics element for active view.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
- * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} responseHeaders
+ * @param {!Headers} responseHeaders
  *   XHR service FetchResponseHeaders object containing the response
  *   headers.
  * @return {?JsonObject} config or null if invalid/missing.
@@ -890,7 +893,7 @@ export function isCdnProxy(win) {
 
 /**
  * Populates the fields of the given Nameframe experiment config object.
- * @param {!../../../src/utils/xhr-utils.FetchResponseHeaders} headers
+ * @param {!Headers} headers
  * @param {!NameframeExperimentConfig} nameframeConfig
  */
 export function setNameframeExperimentConfigs(headers, nameframeConfig) {

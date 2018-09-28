@@ -43,6 +43,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
   attrs: {
+    name: "auto-resize"
+    value: ""
+  }
+  attrs: {
     name: "binding"
     value: "always"
     value: "no"

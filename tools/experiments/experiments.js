@@ -322,6 +322,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
   },
   {
+    id: 'amp-list-diffing',
+    name: 'Enables DOM diffing of amp-list renders via set-dom',
+    spec: 'https://github.com/ampproject/amphtml/pull/17000',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
+  },
+  {
     id: 'no-initial-intersection',
     name: 'Do not invoke context.observeIntersection callback with ' +
         'initialintersection',
@@ -340,11 +346,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'amp-carousel-new-arrows',
-    name: 'Enables new AMP carousel navigation arrows',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
-  },
-  {
     id: 'linker-meta-opt-in',
     name: 'Opts-in users that have included the GA client-id meta tag ',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
@@ -353,6 +354,12 @@ const EXPERIMENTS = [
     id: 'amp-consent-v2',
     name: 'Enables CMP support to amp-consent component',
     spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
 ];
 
