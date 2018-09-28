@@ -28,10 +28,10 @@ export default {
     string: 'Ablehnen',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Auf der originalen Webseite anschauen',
+    string: 'Auf der ursprünglichen Domain anschauen,
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'Mehr Informationen zum Thema AMP Ergebnisse',
+    string: 'Mehr Informationen zu AMP Ergebnissen',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Nächste Seite',
@@ -89,10 +89,9 @@ export default {
         'sehen',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Diese Seite sieht am Besten im "Hochformat" aus',
+    string: 'Diese Seite sieht am Besten im Hochformat aus',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Es tut uns sehr leid, aber es sieht so aus als wenn der Browser ' +
-        'dieses Erlebnis nicht unterstützt.',
+    string: 'Es tut uns leid, aber Ihr Browser unterstützt diese Format leider nicht.',
   },
 };
