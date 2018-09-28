@@ -68,6 +68,7 @@ tags: {
     value_casei: "single"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-single-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -121,6 +122,7 @@ tags: {
     value_casei: "range"
   }
   attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-overlay-mode-attributes"
   attr_lists: "amp-date-picker-range-type-attributes"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -198,6 +200,11 @@ attr_lists: {
     name: "fullscreen"
     value: ""
   }
+}
+
+attr_lists: {
+  name: "amp-date-picker-overlay-mode-attributes"
+  attrs: { name: "touch-keyboard-editable" }
 }
 
 # HTML5, 4.11.3 The template element
