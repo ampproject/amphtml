@@ -1505,6 +1505,7 @@ tags: {
     name: "open"
     value: ""
   }
+  attrs: { name: "[open]" }
 }
 # 4.11.2 (HTML5.3) The summary element
 tags: {
