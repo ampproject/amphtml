@@ -240,7 +240,7 @@ describes.repeated('', {
 
         ampForm.handleSubmitEvent_(event);
         expect(fireStub.calledOnce).to.be.true;
-        return expect(fireStub).calledWith(form)
+        return expect(fireStub).calledWith(form);
       });
     });
 
