@@ -24,6 +24,7 @@ import {
 } from './form-verifiers';
 import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
+import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -203,6 +204,9 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
+
+    /** @private {./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = Services.formSubmitForDoc(element);
   }
 
   /**
@@ -447,6 +451,7 @@ export class AmpForm {
    */
   submit_(trust) {
     const varSubsFields = this.getVarSubsFields_();
+    this.formSubmitService_.fire(this.element);
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields, trust);
     } else if (this.method_ == 'POST') {
@@ -1167,4 +1172,5 @@ export class AmpFormService {
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(TAG, AmpFormService);
+  AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
 });
