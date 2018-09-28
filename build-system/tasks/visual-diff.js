@@ -29,7 +29,7 @@ const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {execScriptAsync} = require('../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
-const {gitBranchName, gitCommitterEmail} = require('../git');
+const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -124,6 +124,22 @@ function setPercyBranch() {
     const branchName = process.env['TRAVIS'] ?
       process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
+  }
+}
+
+/**
+ * Set the branching point's SHA to an env variable.
+ *
+ * This will let Percy determine which build to use as the baseline for this new
+ * build.
+ *
+ * Only does something on Travis, and for non-master branches, since master
+ * builds are always built on top of the previous commit (we use the squash and
+ * merge method for pull requests.)
+ */
+function setPercyTargetCommit() {
+  if (process.env.TRAVIS && !argv.master) {
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(/* fromMerge */ true);
   }
 }
 
@@ -305,6 +321,10 @@ async function runVisualTests(visualTestsConfig) {
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
   log('info', 'Started Percy build', colors.cyan(buildId));
+  if (process.env['PERCY_TARGET_COMMIT']) {
+    log('info', 'The Percy build is baselined on top of commit',
+        colors.cyan(process.env['PERCY_TARGET_COMMIT']));
+  }
 
   // Take the snapshots.
   await generateSnapshots(percy, visualTestsConfig.webpages);
@@ -673,6 +693,7 @@ async function visualDiff() {
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
+  setPercyTargetCommit();
 
   if (argv.grep) {
     argv.grep = RegExp(argv.grep);
