@@ -228,6 +228,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
+- [Pressboard](../../ads/pressboard.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
 - [BeOpinion](../amp-beopinion/amp-beopinion.md)
