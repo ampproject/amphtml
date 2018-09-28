@@ -21,7 +21,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {resetStyles, setStyles} from '../../../src/style';
+import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -258,13 +258,13 @@ export class HighlightHandler {
     // https://developer.mozilla.org/en-US/docs/Web/CSS/bottom
     //
     // TODO(yunabe): Revisit the safer way to implement scroll-animation.
+    setInitialDisplay(sentinel, 'block');
     setStyles(sentinel, {
       'position': 'absolute',
       'top': Math.floor(top) + 'px',
       'height': '1px',
       'left': '0',
       'width': '1px',
-      'display': 'block',
       'pointer-events': 'none',
     });
     const body = this.ampdoc_.getBody();
