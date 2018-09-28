@@ -105,7 +105,7 @@ Format | Sample Output | Remarks
 
 ## Attributes
 
-You must specify at least one of these required attributes: `end-date`, `timestamp-ms`, `timestamp-seconds`.
+You must specify at least one of these required attributes: `end-date`, `timeleft-ms`, `timestamp-ms`, `timestamp-seconds`.
 
 ##### end-date
 
@@ -118,6 +118,10 @@ A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `t
 ##### timestamp-seconds
 
 A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
+
+##### timeleft-ms
+
+A value in milliseconds left to be counting down. For example, 48 hours left `timeleft-ms="172800000"`.
 
 ##### offset-seconds (optional)
 
