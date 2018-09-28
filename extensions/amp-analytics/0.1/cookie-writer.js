@@ -15,8 +15,8 @@
  */
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
-import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
+import {getNameArgs} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
@@ -96,14 +96,35 @@ export class CookieWriter {
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieValue = inputConfig[cookieName];
-      if (typeof cookieValue === 'string') {
+      if (this.isCookieValueStringValid_(cookieValue)) {
         promises.push(this.expandAndWrite_(cookieName, cookieValue));
-      } else {
-        user().error(TAG, 'cookie value needs to be a string');
       }
     }
 
     return Promise.all(promises);
+  }
+
+  /**
+   * Check whether the cookie value is supported. Currently only support
+   * QUERY_PARAM(***)
+   * @param {*} str
+   * @return {boolean}
+   */
+  isCookieValueStringValid_(str) {
+    if (typeof str !== 'string') {
+      user().error(TAG, 'cookie value needs to be a string');
+      return false;
+    }
+
+    // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
+    const {name} = getNameArgs(str);
+    if (!EXPAND_WHITELIST[name]) {
+      user().error(TAG, `cookie value ${str} not supported. ` +
+        'Only QUERY_PARAM is supported');
+      return false;
+    }
+
+    return true;
   }
 
   /**

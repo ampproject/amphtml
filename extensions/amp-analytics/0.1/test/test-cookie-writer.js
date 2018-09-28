@@ -17,7 +17,6 @@
 import * as cookie from '../../../../src/cookies';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
-import {Services} from '../../../../src/services';
 
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -36,7 +35,6 @@ describes.realWin('amp-analytics.cookie-writer', {
   beforeEach(() => {
     sandbox = env.sandbox;
     setCookieSpy = sandbox.spy();
-    expandStringAsyncSpy = sandbox.spy();
     win = env.win;
     doc = win.document;
     sandbox.stub(cookie, 'setCookie').callsFake(
@@ -114,51 +112,64 @@ describes.realWin('amp-analytics.cookie-writer', {
         expect(expandAndWriteSpy).to.not.be.called;
       });
     });
-  });
 
-  describe.skip('Cookie value', () => {
-    it('Write cookie', () => {
+    it('Resolve when cookie value is not supported', () => {
       const config = dict({
         'writeCookies': {
-          'testId': 'testValue',
+          'testId': 'RANDOM',
+          'testId1': 'static',
+          'testId2': 'QUERY_PARAM(abc)-suf',
+          'testId3': 'pre-QUERY_PARAM(abc)',
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
+      expectAsyncConsoleError(TAG + ' cookie value RANDOM not supported. ' +
+          'Only QUERY_PARAM is supported');
+      expectAsyncConsoleError(TAG + ' cookie value static not supported. ' +
+          'Only QUERY_PARAM is supported');
+      expectAsyncConsoleError(TAG + ' cookie value QUERY_PARAM(abc)-suf not ' +
+          'supported. Only QUERY_PARAM is supported');
+      expectAsyncConsoleError(TAG + ' cookie value pre-QUERY_PARAM(abc) not ' +
+          'supported. Only QUERY_PARAM is supported');
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+  });
+
+  describe('Cookie value', () => {
+    it('Write cookie', () => {
+      const config = dict({
+        'writeCookies': {
+          'testId': 'QUERY_PARAM(abc)',
+        },
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      sandbox.stub(cookieWriter.urlReplacementService_,
+          'expandStringAsync').callsFake(string => {
+        return Promise.resolve(string);});
       return cookieWriter.write().then(() => {
         expect(setCookieSpy).to.be.calledOnce;
-        expect(setCookieSpy).to.be.calledWith('testId', 'testValue');
+        expect(setCookieSpy).to.be.calledWith('testId', 'QUERY_PARAM(abc)');
       });
     });
 
     it('Write multiple cookie', () => {
       const config = dict({
         'writeCookies': {
-          'testId': 'testValue',
-          'testId2': 'testValue2',
+          'testId': 'QUERY_PARAM(abc)',
+          'testId2': 'QUERY_PARAM(def)',
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
+      sandbox.stub(cookieWriter.urlReplacementService_,
+          'expandStringAsync').callsFake(string => {
+        return Promise.resolve(string);});
       return cookieWriter.write().then(() => {
         expect(setCookieSpy).to.be.calledTwice;
-        expect(setCookieSpy).to.be.calledWith('testId', 'testValue');
-        expect(setCookieSpy).to.be.calledWith('testId2', 'testValue2');
-      });
-    });
-
-    it('Expand whitelist macro', () => {
-      const config = dict({
-        'writeCookies': {
-          'testId': 'pre-QUERY_PARAM(noexist)',
-          'testId2': 'pre-RANDOM',
-        },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      return cookieWriter.write().then(() => {
-        expect(setCookieSpy).to.be.calledTwice;
-        // QUERY_PARAM resolve to empty string
-        expect(setCookieSpy).to.be.calledWith('testId', 'pre-QUERY_PARAM(noexist)');
-        // Never try to resolve RANDOM
-        expect(setCookieSpy).to.be.calledWith('testId2', 'pre-RANDOM');
+        expect(setCookieSpy).to.be.calledWith('testId', 'QUERY_PARAM(abc)');
+        expect(setCookieSpy).to.be.calledWith('testId2', 'QUERY_PARAM(def)');
       });
     });
 
@@ -166,10 +177,12 @@ describes.realWin('amp-analytics.cookie-writer', {
       const config = dict({
         'writeCookies': {
           'testId': 'QUERY_PARAM(noexist)',
-          'testId2': '',
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
+      sandbox.stub(cookieWriter.urlReplacementService_,
+          'expandStringAsync').callsFake(() => {
+        return Promise.resolve('');});
       return cookieWriter.write().then(() => {
         // Both cookie value resolve to empty string
         expect(setCookieSpy).to.not.be.called;
@@ -180,7 +193,6 @@ describes.realWin('amp-analytics.cookie-writer', {
       const config = dict({
         'writeCookies': {
           'testId': 'QUERY_PARAM',
-          'testId2': 'testValue',
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -191,7 +203,7 @@ describes.realWin('amp-analytics.cookie-writer', {
           'the query string param is required');
       return cookieWriter.write().then(() => {
         // Both cookie value resolve to empty string
-        expect(setCookieSpy).to.be.calledOnce;
+        expect(setCookieSpy).to.not.be.called;
       });
     });
   });
