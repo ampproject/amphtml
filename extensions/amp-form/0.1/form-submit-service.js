@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 
 export class FormSubmitService {
   /**
@@ -21,8 +22,7 @@ export class FormSubmitService {
    * amp-form is submitted.
    */
   constructor() {
-    /** @private {!Array} */
-    this.callbacks_ = [];
+    this.observable_ = new Observable();
   }
 
   /**
@@ -30,7 +30,7 @@ export class FormSubmitService {
    * @param {function(*)} cb
    */
   beforeSubmit(cb) {
-    this.callbacks_.push(cb);
+    this.observable_.add(cb);
   }
 
   /**
@@ -38,6 +38,6 @@ export class FormSubmitService {
    * @param {!HTMLFormElement} el
    */
   fire(el) {
-    this.callbacks_.forEach(cb => cb(el));
+    this.observable_.fire(el);
   }
 }

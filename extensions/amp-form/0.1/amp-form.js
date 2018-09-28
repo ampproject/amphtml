@@ -450,8 +450,13 @@ export class AmpForm {
    * @private
    */
   submit_(trust) {
+    try {
+      this.formSubmitService_.fire(this.form_);
+    } catch (e) {
+      dev().error(TAG, `Form submit service failed: ${e}`);
+    }
+
     const varSubsFields = this.getVarSubsFields_();
-    this.formSubmitService_.fire(this.element);
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields, trust);
     } else if (this.method_ == 'POST') {
