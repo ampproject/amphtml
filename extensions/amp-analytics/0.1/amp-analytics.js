@@ -17,6 +17,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   installVariableService,
@@ -212,6 +213,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             })
             .then(config => {
               this.config_ = config;
+              return new CookieWriter(this.win,
+                  this.element, this.config_).write();
+            })
+            .then(() => {
               this.transport_ =
                   new Transport(this.win, this.config_['transport'] || {});
             })

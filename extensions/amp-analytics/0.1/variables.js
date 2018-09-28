@@ -254,7 +254,7 @@ export class VariableService {
  * @param {string} key The key to be parsed.
  * @return {!FunctionNameArgsDef}
  */
-function getNameArgs(key) {
+export function getNameArgs(key) {
   if (!key) {
     return {name: '', argList: ''};
   }

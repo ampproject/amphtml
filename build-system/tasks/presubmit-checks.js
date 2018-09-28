@@ -818,6 +818,7 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
+      'extensions/amp-analytics/0.1/cookie-writer.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
