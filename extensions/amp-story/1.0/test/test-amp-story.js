@@ -22,6 +22,7 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {EventType} from '../events';
@@ -644,6 +645,68 @@ describes.realWin('amp-story', {
             expect(dispatchStub).to.have.been.calledWith(
                 Action.TOGGLE_SUPPORTED_BROWSER, true
             );
+          });
+    });
+  });
+
+  describe('amp-story custom sidebar', () => {
+    it('should show the sidebar control if a sidebar exists', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.storeService_
+                .get(StateProperty.HAS_SIDEBAR_STATE)).to.be.true;
+          });
+    });
+
+    it('should open the sidebar on button click', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      const executeSpy = sandbox.spy();
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: executeSpy,
+          });
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+            expect(executeSpy).to.have.been.calledWith(story.sidebar_, 'open',
+                null, null, null, null, ActionTrust.HIGH);
+          });
+    });
+
+    it('should unpause the story when the sidebar is closed', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+          }).then(() => {
+            story.sidebar_.removeAttribute('open');
+          }).then(() => {
+            expect(story.storeService_.get(StateProperty.SIDEBAR_STATE))
+                .to.be.false;
           });
     });
   });
