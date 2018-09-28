@@ -218,7 +218,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     if (this.endDate_) {
       epoch = Date.parse(this.endDate_);
     } else if (this.timeleftMs_) {
-      epoch = Date.parse(new Date()) + this.timeleftMs_;
+      epoch = Number(new Date()) + this.timeleftMs_;
     } else if (this.timestampMs_) {
       epoch = this.timestampMs_;
     } else if (this.timestampSeconds_) {
