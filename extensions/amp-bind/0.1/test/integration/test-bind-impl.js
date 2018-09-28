@@ -854,7 +854,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       // The new `onePlusOne` element should be scanned and evaluated despite
       // not being attached to the DOM.
       const onePlusOne = createElement(
-          env, /* container */ null, '[text]="1+1"');
+          env, /* container */ null, '[text]="1+1" i-amphtml-binding');
       yield onBindReadyAndScanAndApply(env, bind,
           /* added */ [onePlusOne], /* removed */ [foo]);
       expect(onePlusOne.textContent).to.equal('2');
