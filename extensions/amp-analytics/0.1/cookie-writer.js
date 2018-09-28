@@ -16,6 +16,7 @@
 
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
+import {getMode} from '../../../src/mode';
 import {getNameArgs} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
@@ -73,8 +74,9 @@ export class CookieWriter {
    */
   init_() {
     // TODO: Need the consider the case for shadow doc.
-    if (isInFie(this.element_) || isProxyOrigin(this.win_.location)) {
-      // Disable cookie writer in friendly iframe and proxy origin.
+    if (isInFie(this.element_) || isProxyOrigin(this.win_.location) ||
+        getMode(this.win_).runtime == 'inabox') {
+      // Disable cookie writer in friendly iframe and proxy origin and inabox.
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
       return Promise.resolve();

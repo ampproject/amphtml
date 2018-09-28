@@ -102,6 +102,20 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
     });
 
+    it('Resolve when in inabox ad', () => {
+      env.win.AMP_MODE.runtime = 'inabox';
+      const config = dict({
+        'writeCookies': {
+          'testId': 'QUERY_PARAM(test)',
+        },
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+
     it('Resolve with nothing to write', () => {
       const config = dict({
         'writeCookies': {},
