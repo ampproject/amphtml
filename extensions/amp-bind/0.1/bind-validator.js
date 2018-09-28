@@ -265,6 +265,9 @@ function createElementRules_() {
         },
       },
     },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+    },
     'AMP-VIDEO': {
       'alt': null,
       'attribution': null,
