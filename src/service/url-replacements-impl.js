@@ -804,10 +804,13 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} source
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList
    * @return {!Promise<string>}
    */
-  expandStringAsync(source, opt_bindings) {
-    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings));
+  expandStringAsync(source, opt_bindings, opt_whiteList) {
+    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ undefined, opt_whiteList));
   }
 
   /**
