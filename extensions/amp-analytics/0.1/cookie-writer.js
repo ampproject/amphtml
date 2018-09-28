@@ -49,84 +49,80 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
-    /** @private {!Array<!Promise>} */
-    this.promises_ = [];
+    /** @private {?Promise} */
+    this.writePromise_ = null;
 
-    /** @private {!../../../src/utils/promise.Deferred} */
-    this.readyPromise_ = new Deferred();
-
-    this.init_(config);
+    /** @private {!JsonObject} */
+    this.config_ = config;
   }
 
   /**
    * @return {!Promise}
    */
-  whenReady() {
-    return this.readyPromise_.promise;
+  write() {
+    if (!this.writePromise_) {
+      this.writePromise_ = this.init_();
+    }
+
+    return this.writePromise_;
   }
 
   /**
-   * @param {!JsonObject} config
+   * Parse the config and write to cookie
+   * @return {!Promise}
    */
-  init_(config) {
-    if (!hasOwn(config, 'writeCookies')) {
-      this.readyPromise_.resolve();
-      return;
+  init_() {
+    // TODO: Need the consider the case for shadow doc.
+    if (isInFie(this.element_) || isProxyOrigin(this.win_.location)) {
+      // Disable cookie writer in friendly iframe and proxy origin.
+      // Note: It's important to check origin here so that setCookie doesn't
+      // throw error "should not attempt ot set cookie on proxy origin"
+      return Promise.resolve();
     }
 
-    if (!isObject(config['writeCookies'])) {
+
+    if (!hasOwn(this.config_, 'writeCookies')) {
+      return Promise.resolve();
+    }
+
+    if (!isObject(this.config_['writeCookies'])) {
       user().error(TAG, 'writeCookies config must be an object');
-      this.readyPromise_.resolve();
-      return;
+      return Promise.resolve();
     }
 
-    if (isInFie(this.element_)) {
-      // TODO: Need the consider the case for shadow doc.
-      // QQ: Is this even an error since vendor defines it?
-      user().error(TAG, 'writeCookies is disabled in friendly iframe');
-      this.readyPromise_.resolve();
-      return;
-    }
-    if (isProxyOrigin(this.win_.location)) {
-      // Disable cookie writter for proxy origin
-      // It's important to check here so that setCookie doesn't throw error on
-      // "should not attempt ot set cookie on proxy origin"
-      this.readyPromise_.resolve();
-      return;
-    }
-
-    const inputConfig = config['writeCookies'];
+    const inputConfig = this.config_['writeCookies'];
     const ids = Object.keys(inputConfig);
+    const promises = [];
     for (let i = 0; i < ids.length; i++) {
-      const cookieId = ids[i];
-      const cookieStr = inputConfig[cookieId];
-      if (typeof cookieStr === 'string') {
-        this.promises_.push(this.expandAndWrite_(cookieId, cookieStr));
+      const cookieName = ids[i];
+      const cookieValue = inputConfig[cookieName];
+      if (typeof cookieValue === 'string') {
+        promises.push(this.expandAndWrite_(cookieName, cookieValue));
+      } else {
+        user().error(TAG, 'cookie value needs to be a string');
       }
     }
 
-    Promise.all(this.promises_).then(() => {
-      this.readyPromise_.resolve();
-    });
+    return Promise.all(promises);
   }
 
   /**
    * Expand the value and write to cookie if necessary
-   * @param {string} cookieId
-   * @param {string} cookieStr
+   * @param {string} cookieName
+   * @param {string} cookieValue
    * @return {!Promise}
    */
-  expandAndWrite_(cookieId, cookieStr) {
+  expandAndWrite_(cookieName, cookieValue) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
-    return this.urlReplacementService_.expandStringAsync(cookieStr,
+    return this.urlReplacementService_.expandStringAsync(cookieValue,
         /* TODO: Add opt_binding */ undefined, EXPAND_WHITELIST).then(
-        cookieValue => {
+        value => {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
-          if (cookieValue) {
+          if (value) {
             const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
-            setCookie(this.win_, cookieId, cookieValue, expireDate);
+            setCookie(this.win_, cookieName, value, expireDate);
           }
         }).catch(e => {
       user().error(TAG, 'Error expanding cookie string', e);

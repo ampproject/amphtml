@@ -213,7 +213,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             .then(config => {
               this.config_ = config;
               return new CookieWriter(this.win,
-                  this.element, this.config_).whenReady();
+                  this.element, this.config_).write();
             })
             .then(() => {
               this.transport_ =
