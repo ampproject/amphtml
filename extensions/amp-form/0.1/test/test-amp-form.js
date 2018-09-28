@@ -220,6 +220,30 @@ describes.repeated('', {
       });
     });
 
+    it('should fire the form submit service', () => {
+      const fireStub = sandbox.stub();
+      sandbox.stub(Services, 'formSubmitForDoc').returns({
+        fire: fireStub,
+      });
+
+      const form = getForm();
+      return getAmpForm(form).then(ampForm => {
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+        sandbox.stub(ampForm, 'handleXhrSubmitSuccess_');
+
+
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: ampForm.form_,
+          preventDefault: sandbox.spy(),
+        };
+
+        ampForm.handleSubmitEvent_(event);
+        expect(fireStub.calledOnce).to.be.true;
+        return expect(fireStub).calledWith(form);
+      });
+    });
+
     it('should assert valid action-xhr when provided', () => {
       const form = getForm();
       document.body.appendChild(form);
