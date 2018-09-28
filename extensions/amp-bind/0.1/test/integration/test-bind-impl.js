@@ -855,6 +855,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
       // not being attached to the DOM.
       const onePlusOne = createElement(
           env, /* container */ null, '[text]="1+1"');
+      // Required marker attribute for elements with bindings.
+      onePlusOne.setAttribute('i-amphtml-binding', '');
       yield onBindReadyAndScanAndApply(env, bind,
           /* added */ [onePlusOne], /* removed */ [foo]);
       expect(onePlusOne.textContent).to.equal('2');
