@@ -28,10 +28,20 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {addParamToUrl} from '../../../src/url';
 import {createFrameFor} from '../../../src/iframe-video';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {htmlFor} from '../../../src/static-template';
+import {Services} from '../../../src/services';
+import {setStyle} from '../../../src/style';
+
+/** @type {number}  */
+let count = 0;
+
+/** @type {number}  */
+let trackingIframeTimeout = 5000;
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
 
@@ -44,6 +54,9 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     /** @private {?string} */
     this.url_ = null;
+
+    /** @private {?Element} */
+    this.placeholder_ = null;
   }
 
   /** @override */
@@ -51,6 +64,8 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     // @todo Need to support placeholder.
 
     const {element: el} = this;
+
+    this.placeholder_ = this.getPlaceholder();
 
     this.url_ = user().assert(
         el.getAttribute('data-url'),
@@ -72,20 +87,55 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const url = new URL(this.url_);
-    url.searchParams.set('embed', 'true');
+    const {element: el} = this;
 
-    const iframe = createFrameFor(this, url.toString());
-    this.applyFillContent(iframe);
+    const url = addParamToUrl(this.url_, 'embed', 'true');
 
+    const frame = this.element.ownerDocument.createElement('iframe');
+    frame.setAttribute('frameborder', 0);
+    frame.setAttribute('allowfullscreen', '');
+    frame.setAttribute('scrolling', 'no');
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    this.iframe_ = frame;
+    this.applyFillContent(frame);
+
+    frame.name = 'amp_wordpress_embed' + count++;
+    frame.src = Services.urlForDoc(el).assertHttpsUrl(url, el);
+
+    frame.onload = () => {
+      // Chrome does not reflect the iframe readystate.
+      frame.readyState = 'complete';
+      this.activateIframe_();
+
+      if (this.isTrackingFrame_) {
+        // Prevent this iframe from ever being recreated.
+        this.iframeSrc = null;
+
+        Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
+          removeElement(frame);
+          this.element.setAttribute('amp-removed', '');
+          this.iframe_ = null;
+        });
+      }
+    };
+
+    // @todo Figure out right way to do this with listenFor or whatever is the right way to do it.
+    // @todo Add link message.
     // Triggered by sendEmbedMessage inside the iframe.
-    listenFor(iframe, 'height', data => {
-      this./*OK*/changeHeight(data['value']);
-    }, /* opt_is3P */true);
+    window.addEventListener('message', event => {
+      if (event.source === frame.contentWindow &&
+        'height' === event.data.message &&
+        event.data.value && typeof event.data.value === 'number') {
+        this./*OK*/changeHeight(event.data.value);
+      }
+    });
+    // listenFor(frame, 'height', data => {
+    //   this./*OK*/changeHeight(data['value']);
+    // }, /* opt_is3P */true);
 
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    this.element.appendChild(frame);
+
+    return this.loadPromise(frame);
   }
 
   /**
@@ -94,9 +144,27 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
+      if (this.placeholder_) {
+        this.togglePlaceholder(true);
+      }
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /**
+   * Makes the iframe visible.
+   * @private
+   */
+  activateIframe_() {
+    if (this.placeholder_) {
+      this.getVsync().mutate(() => {
+        if (this.iframe_) {
+          setStyle(this.iframe_, 'zIndex', 0);
+          this.togglePlaceholder(false);
+        }
+      });
+    }
   }
 }
 
