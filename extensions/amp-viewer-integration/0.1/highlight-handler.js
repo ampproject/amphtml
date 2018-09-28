@@ -250,12 +250,21 @@ export class HighlightHandler {
    */
   animateScrollToTop_(top) {
     const sentinel = this.ampdoc_.win.document.createElement('div');
+    // Notes:
+    // The CSS of sentinel can be overwritten by user custom CSS.
+    // We need to set display:block and other CSS fields explicitly here
+    // so that these CSS won't be overwritten.
+    // We use top and height here because they precede bottom
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/bottom
+    //
+    // TODO(yunabe): Revisit the safer way to implement scroll-animation.
     setStyles(sentinel, {
       'position': 'absolute',
       'top': Math.floor(top) + 'px',
-      'bottom': '0',
+      'height': '1px',
       'left': '0',
-      'right': '0',
+      'width': '1px',
+      'display': 'block',
       'pointer-events': 'none',
     });
     const body = this.ampdoc_.getBody();
