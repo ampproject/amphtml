@@ -204,7 +204,10 @@ attr_lists: {
 
 attr_lists: {
   name: "amp-date-picker-overlay-mode-attributes"
-  attrs: { name: "touch-keyboard-editable" }
+  attrs: {
+    name: "touch-keyboard-editable"
+    value: ""
+  }
 }
 
 # HTML5, 4.11.3 The template element
