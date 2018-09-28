@@ -334,9 +334,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
    */
   rendered_(element) {
     return this.mutateElement(() => {
-      const template = this.element.firstElementChild;
+      // TODO(UI): The rendered content should be added to a container child
+      // to avoid removal/re-addition of the <template> child. See amp-list.
+      const template = this.templates_.findTemplate(this.element);
+      const isChildTemplate = this.element.contains(template);
       removeChildren(this.element);
-      this.element.appendChild(template);
+      // Re-add template if it was a child element (vs. referenced by ID).
+      if (isChildTemplate) {
+        this.element.appendChild(template);
+      }
       this.element.appendChild(element);
     });
   }
