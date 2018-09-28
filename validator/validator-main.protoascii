@@ -1494,7 +1494,28 @@ tags: {
     value_regex: "[0-9]*"
   }
 }
-# 4.4.8 The dl element
+# 4.11.1 (HTML5.3) The details element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "DETAILS"
+  attrs: {
+    name: "open"
+    value: ""
+  }
+}
+# 4.11.2 (HTML5.3) The summary element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "SUMMARY"
+  mandatory_parent: "DETAILS"
+}
+# 4.4.9 The dl element
 tags: {
   html_format: AMP
   html_format: AMP4ADS
