@@ -31,7 +31,6 @@ import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
@@ -350,6 +349,8 @@ export class Bind {
    * Returned promise is resolved when all operations complete.
    * If they don't complete within `timeout` ms, the promise is rejected.
    *
+   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
    * @param {number} timeout Timeout in milliseconds.
@@ -357,55 +358,46 @@ export class Bind {
    */
   scanAndApply(addedElements, removedElements, timeout = 2000) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
-    let promise;
-    if (isExperimentOn(this.win_, 'faster-bind-scan')) {
-      /**
-       * Helper function for cleaning up bindings in removed elements.
-       * @param {number} added
-       * @return {!Promise}
-       */
-      const cleanup = added => {
-        this.removeBindingsForNodes_(removedElements).then(removed => {
-          dev().info(TAG,
-              '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
-        });
-        return Promise.resolve();
-      };
-      // Early-out if max number of bindings has already been exceeded.
-      // This can happen since we purge old bindings in `removedElements`
-      // _after_ adding new ones (rather than before) as an optimization.
-      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-        this.emitMaxBindingsExceededError_();
-        return cleanup(0);
-      }
-      const bindings = [];
-      addedElements.forEach(ae => {
-        const elements = ae.querySelectorAll('[i-amphtml-binding]');
-        for (let i = 0; i < elements.length; i++) {
-          this.scanElement_(elements[i], Number.POSITIVE_INFINITY, bindings);
-        }
+    /**
+     * Helper function for cleaning up bindings in removed elements.
+     * @param {number} added
+     * @return {!Promise}
+     */
+    const cleanup = added => {
+      this.removeBindingsForNodes_(removedElements).then(removed => {
+        dev().info(TAG,
+            '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
       });
-      const added = bindings.length;
-      if (added === 0) {
-        return cleanup(0);
-      }
-      promise = this.sendBindingsToWorker_(bindings).then(() => {
-        return this.evaluate_()
-            .then(results => this.applyElements_(results, addedElements));
-      }).then(() => {
-        // Remove bindings at the end to reduce evaluation/apply latency.
-        cleanup(added);
-      });
-    } else {
-      promise = this.removeThenAdd_(removedElements, addedElements)
-          .then(deltas => {
-            // Don't reevaluate/apply if there are no bindings.
-            if (deltas.added > 0) {
-              return this.evaluate_().then(results =>
-                this.applyElements_(results, addedElements));
-            }
-          });
+      return Promise.resolve();
+    };
+    // Early-out if max number of bindings has already been exceeded.
+    // This can happen since we purge old bindings in `removedElements`
+    // _after_ adding new ones (rather than before) as an optimization.
+    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+      this.emitMaxBindingsExceededError_();
+      return cleanup(0);
     }
+    const bindings = [];
+    // Scan `addedElements` and their children for elements with bindings.
+    const elementsToScan = addedElements.slice();
+    addedElements.forEach(el => {
+      const children = el.querySelectorAll('[i-amphtml-binding]');
+      Array.prototype.push.apply(elementsToScan, children);
+    });
+    elementsToScan.forEach(el => {
+      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
+    });
+    const added = bindings.length;
+    if (added === 0) {
+      return cleanup(0);
+    }
+    const promise = this.sendBindingsToWorker_(bindings).then(() => {
+      return this.evaluate_().then(results =>
+        this.applyElements_(results, addedElements));
+    }).then(() => {
+      // Remove bindings at the end to reduce evaluation/apply latency.
+      cleanup(added);
+    });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
