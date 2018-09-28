@@ -207,6 +207,16 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(0);
   });
 
+  it('layout=nodisplay with SSR', () => {
+    div.setAttribute('layout', 'nodisplay');
+    div.style.display = 'none';
+    applyStaticLayout(div);
+    expect(div.style.display).to.equal('');
+
+    document.body.appendChild(div);
+    expect(div).to.have.display('none');
+    document.body.removeChild(div);
+  });
 
   it('layout=fixed', () => {
     div.setAttribute('layout', 'fixed');
