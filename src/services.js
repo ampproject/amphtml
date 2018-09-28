@@ -227,6 +227,16 @@ export class Services {
   /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
+   */
+  static formSubmitForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (
+      getServiceForDoc(elementOrAmpDoc, 'form-submit-service'));
+  }
+
+  /**
+   * Returns service implemented in service/history-impl.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
    */
   static historyForDoc(elementOrAmpDoc) {
