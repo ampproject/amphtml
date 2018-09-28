@@ -349,6 +349,8 @@ export class Bind {
    * Returned promise is resolved when all operations complete.
    * If they don't complete within `timeout` ms, the promise is rejected.
    *
+   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
    * @param {number} timeout Timeout in milliseconds.
@@ -376,11 +378,14 @@ export class Bind {
       return cleanup(0);
     }
     const bindings = [];
-    addedElements.forEach(ae => {
-      const elements = ae.querySelectorAll('[i-amphtml-binding]');
-      for (let i = 0; i < elements.length; i++) {
-        this.scanElement_(elements[i], Number.POSITIVE_INFINITY, bindings);
-      }
+    // Scan `addedElements` and their children for elements with bindings.
+    const elementsToScan = addedElements.slice();
+    addedElements.forEach(el => {
+      const children = el.querySelectorAll('[i-amphtml-binding]');
+      Array.prototype.push.apply(elementsToScan, children);
+    });
+    elementsToScan.forEach(el => {
+      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
     });
     const added = bindings.length;
     if (added === 0) {
