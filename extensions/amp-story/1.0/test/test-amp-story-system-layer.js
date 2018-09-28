@@ -107,4 +107,11 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     expect(systemLayer.getShadowRoot()).to.have.attribute(
         'i-amphtml-story-audio-state');
   });
+
+  it('should show the sidebar control only if a sidebar exists', () => {
+    storeService.dispatch(Action.TOGGLE_HAS_SIDEBAR, true);
+    systemLayer.build();
+    expect(systemLayer.getShadowRoot()).to.have.attribute(
+        'i-amphtml-story-has-sidebar');
+  });
 });
