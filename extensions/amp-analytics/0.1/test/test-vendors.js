@@ -106,7 +106,7 @@ describes.realWin('amp-analytics', {
         continue;
       }
       actualResults[vendor] = {};
-      describe('analytics vendor: ' + vendor, function () {
+      describe('analytics vendor: ' + vendor, function() {
         beforeEach(() => {
           // Remove all the triggers to prevent unwanted requests, for instance
           // one from a "visible" trigger. Those unwanted requests are a source
