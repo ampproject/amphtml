@@ -26,7 +26,7 @@ export function zen(global, data) {
   validateData(
       data,
       ['clid'],
-      ['size', 'orientation', 'successCallback', 'failCallback'],
+      ['size', 'orientation', 'successCallback', 'failCallback']
   );
 
   addToQueue(global, data);
