@@ -173,8 +173,8 @@ describes.realWin('amp-analytics', {
                   ' in vendor-requests.json. Expected value: ' + url);
             }
 
-            // Uncomment this to write this out for easy copy pasting.
-            //writeOutput(vendor, name, url);
+            // Write this out for easy copy pasting.
+            writeOutput(vendor, name, url);
 
             expect(url).to.equal(val);
           });

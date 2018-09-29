@@ -64,6 +64,10 @@ export class ExpansionOptions {
     this.freezeVars[str] = true;
   }
 
+  /**
+   * @param {string} name
+   * @return {*}
+   */
   getVar(name) {
     let value = this.vars[name];
     if (value == null) {
@@ -217,7 +221,7 @@ export class VariableService {
       }
 
       if (!options.noEncode) {
-        value = encodeVars(value);
+        value = encodeVars(/** @type {string|?Array<string>} */(value));
       }
       if (value) {
         value += argList;
