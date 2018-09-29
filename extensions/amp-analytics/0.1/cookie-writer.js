@@ -24,13 +24,13 @@ import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
-
+import {linkerReaderServiceFor} from './linker-reader';
 
 const TAG = 'amp-analytics/cookie-writer';
 
 const EXPAND_WHITELIST = {
   'QUERY_PARAM': true,
-  // TODO: Add linker_param
+  'LINKER_PARAM': true,
 };
 
 export class CookieWriter {
@@ -50,20 +50,28 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
+    this.linkerReader_ = linkerReaderServiceFor(win);
+
     /** @private {?Promise} */
     this.writePromise_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
+
+    this.binding_ = {};
   }
 
   /**
    * @return {!Promise}
    */
   write() {
+
+
     if (!this.writePromise_) {
       this.writePromise_ = this.init_();
     }
+
+    //console.log(this.linkerReader_.get('testlinker', 'abc'));
 
     return this.writePromise_;
   }
@@ -92,6 +100,7 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
+    this.registerDynamicBinding_();
     const inputConfig = this.config_['writeCookies'];
     const ids = Object.keys(inputConfig);
     const promises = [];
@@ -139,8 +148,9 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_.expandStringAsync(cookieValue,
-        /* TODO: Add opt_binding */ undefined, EXPAND_WHITELIST).then(
+        /* TODO: Add opt_binding */ this.binding_, EXPAND_WHITELIST).then(
         value => {
+          console.log('value is ', value);
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
           if (value) {
@@ -151,5 +161,12 @@ export class CookieWriter {
       user().error(TAG, 'Error expanding cookie string', e);
     });
   }
+
+  registerDynamicBinding_() {
+    this.binding_['LINKER_PARAM'] = (name, id) => {
+      return this.linkerReader_.get(name, id);
+    }
+  }
 }
+
 

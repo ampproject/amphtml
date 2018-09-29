@@ -425,7 +425,6 @@ export function removeAmpJsParamsFromUrl(url) {
   const parsed = parseUrlDeprecated(url);
   const search = removeAmpJsParamsFromSearch(parsed.search);
   return parsed.origin + parsed.pathname + search + parsed.hash;
-
 }
 
 /**
@@ -458,6 +457,17 @@ function removeAmpJsParamsFromSearch(urlSearch) {
       .replace(AMP_R_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
+  return search ? '?' + search : '';
+}
+
+export function removeParamsFromSearch(urlSearch, paramName) {
+  if (!urlSearch || urlSearch == '?') {
+    return '';
+  }
+  const paramRegex = new RegExp(`[?&]${paramName}[^&]*`);
+  const search = urlSearch
+      .replace(paramRegex, '')
+      .replace(/^[?&]/, '');
   return search ? '?' + search : '';
 }
 

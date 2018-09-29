@@ -42,6 +42,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
+import {installLinkerReaderService} from './linker-reader';
 
 const TAG = 'amp-analytics';
 
@@ -677,6 +678,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });
