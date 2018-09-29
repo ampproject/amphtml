@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {
@@ -37,11 +36,6 @@ import {
   installUserNotificationManagerForTesting,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '../../../../testing/yield';
-import {variableServiceFor} from '../variables';
-
-/* global require: false */
-const VENDOR_REQUESTS = require('./vendor-requests.json');
 
 describes.realWin('amp-analytics', {
   amp: {
@@ -179,122 +173,6 @@ describes.realWin('amp-analytics', {
   function waitForNoSendRequest(analytics) {
     return waitForSendRequest(analytics, 100);
   }
-
-  /**
-   * Clears the properties in the config that should only be used in vendor
-   * configs. This is needed because we pass in all the vendor requests as
-   * inline config and iframePings/optout are not allowed to be used without
-   * AMP team's approval.
-   *
-   * @param {!JsonObject} config The inline config to update.
-   * @return {!JsonObject}
-   */
-  function clearVendorOnlyConfig(config) {
-    for (const t in config.triggers) {
-      if (config.triggers[t].iframePing) {
-        config.triggers[t].iframePing = undefined;
-      }
-    }
-    if (config.optout) {
-      config.optout = undefined;
-    }
-    return config;
-  }
-
-  describe('vendor request tests', () => {
-    const actualResults = {};
-    for (const vendor in ANALYTICS_CONFIG) {
-      const config = ANALYTICS_CONFIG[vendor];
-      if (!config.requests) {
-        continue;
-      }
-      actualResults[vendor] = {};
-      describe('analytics vendor: ' + vendor, function() {
-        beforeEach(() => {
-          // Remove all the triggers to prevent unwanted requests, for instance
-          // one from a "visible" trigger. Those unwanted requests are a source
-          // of test flakiness. Especially they will alternate value of var
-          // $requestCount.
-          config.triggers = {};
-        });
-
-        for (const name in config.requests) {
-          it('should produce request: ' + name +
-              '. If this test fails update vendor-requests.json', function* () {
-            const urlReplacements =
-                Services.urlReplacementsForDoc(ampdoc);
-            const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
-            sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
-                function(name) {
-                  expect(this.replacements_).to.have.property(name);
-
-                  const defaultValue = `_${name.toLowerCase()}_`;
-                  const extraMapping = VENDOR_REQUESTS[vendor][name];
-                  return {
-                    sync: paramName => {
-                      if (!extraMapping ||
-                        extraMapping[paramName] === undefined) {
-                        return defaultValue;
-                      }
-                      return extraMapping[paramName];
-                    },
-                  };
-                });
-
-            const variables = variableServiceFor(ampdoc.win);
-            const {encodeVars} = variables;
-            sandbox.stub(variables, 'encodeVars').callsFake(
-                function(name, val) {
-                  val = encodeVars.call(this, name, val);
-                  if (val == '') {
-                    return '$' + name;
-                  }
-                  return val;
-                });
-            analytics.createdCallback();
-            analytics.buildCallback();
-            yield analytics.layoutCallback();
-
-            // Wait for event queue to clear and reset sendRequestSpy
-            // to avoid pageView pings.
-            yield macroTask();
-            sendRequestSpy.resetHistory();
-            postMessageSpy.resetHistory();
-
-
-            analytics.handleEvent_({
-              request: name,
-            }, {
-              vars: Object.create(null),
-            });
-            yield macroTask();
-            expect(sendRequestSpy).to.be.calledOnce;
-            const url = sendRequestSpy.args[0][0];
-
-            expect(sendRequestSpy).to.be.calledOnce;
-            const vendorData = VENDOR_REQUESTS[vendor];
-            if (!vendorData) {
-              throw new Error('Add vendor ' + vendor +
-                  ' to vendor-requests.json');
-            }
-            const val = vendorData[name];
-            if (val == '<ignore for test>') {
-              return;
-            }
-            if (val == null) {
-              throw new Error('Define ' + vendor + '.' + name +
-                  ' in vendor-requests.json. Expected value: ' + url);
-            }
-            actualResults[vendor][name] = url;
-            // Write this out for easy copy pasting.
-            // top.document.documentElement.setAttribute('json',
-            //     JSON.stringify(actualResults, null, '  '));
-            expect(url).to.equal(val);
-          });
-        }
-      });
-    }
-  });
 
   describe('Linkers', () => {
     let analytics;
