@@ -330,7 +330,7 @@ export function expandPostMessage(
 
   const basePromise = variableService.expandTemplate(
       msg, expansionOption).then(base => {
-    return urlReplacementService.expandUrlAsync(base, bindings);
+    return urlReplacementService.expandStringAsync(base, bindings);
   });
   if (msg.indexOf('${extraUrlParams}') < 0) {
     // No need to append extraUrlParams
@@ -373,7 +373,8 @@ function expandExtraUrlParams(
   for (const k in params) {
     if (typeof params[k] == 'string') {
       const request = variableService.expandTemplate(params[k], option)
-          .then(v => urlReplacements.expandUrlAsync(v, bindings, opt_whitelist))
+          .then(v =>
+            urlReplacements.expandStringAsync(v, bindings, opt_whitelist))
           .then(value => params[k] = value);
       requestPromises.push(request);
     }
