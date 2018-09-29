@@ -174,7 +174,7 @@ describes.realWin('amp-analytics', {
             }
 
             // Uncomment this to write this out for easy copy pasting.
-            writeOutput(vendor, name, url);
+            //writeOutput(vendor, name, url);
 
             expect(url).to.equal(val);
           });
