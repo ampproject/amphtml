@@ -20,12 +20,37 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Spanish strings.
  * @const {!LocalizedStringBundleDef}
  */
+<<<<<<< HEAD
 export default /** @const {!LocalizedStringBundleDef} */ ({
+=======
+export default {
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Sonido apagado',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sonido encendido',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'Esta página no tiene sonido',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'Más para leer',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Ajustes de privacidad',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Cambiar ajustes de privacidad',
+  },
+>>>>>>> Added missing es and es-419 localization strings
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Aceptar',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
     string: 'Declinar',
+  },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Continuar de todos modos',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
     string: 'Ver el dominio original:',
@@ -91,6 +116,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'La página se ve mejor en modo vertical',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Lo sentimos, parece que su navegador no soporta esta experiencia',
+    string: 'Lo sentimos, parece que tu navegador no soporta esta experiencia',
   },
 });
