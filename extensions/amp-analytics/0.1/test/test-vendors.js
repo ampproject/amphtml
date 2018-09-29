@@ -136,7 +136,7 @@ describes.realWin('amp-analytics', {
             sandbox.stub(ExpansionOptions.prototype, 'getVar').callsFake(
                 function(name) {
                   let val = this.vars[name];
-                  if (val == null) {
+                  if (val == null || val == '') {
                     val = '!' + name;
                   }
                   return val;

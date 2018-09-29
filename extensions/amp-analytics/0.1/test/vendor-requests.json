@@ -6,10 +6,10 @@
     "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
   },
   "adobeanalytics": {
-    "requestPath": "/b/ss//0/amp-1.0/s_random_",
+    "requestPath": "/b/ss/!reportSuites/0/amp-1.0/s_random_",
     "basePrefix": "vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
-    "pageview": "https:///b/ss//0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
-    "click": "https:///b/ss//0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=&pev2="
+    "pageview": "https://!host/b/ss/!reportSuites/0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
+    "click": "https://!host/b/ss/!reportSuites/0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=!linkUrl&pev2=!linkName"
   },
   "afsanalytics": {
     "host": "//www.afsanalytics.com",
@@ -18,8 +18,8 @@
     "click": "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
   },
   "alexametrics": {
-    "base": "https://certify-amp.alexametrics.com/atrk.gif?account=&domain=",
-    "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=&domain=&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+    "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
+    "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
   },
   "atinternet": {
     "base": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
@@ -36,14 +36,14 @@
   "burt": {
     "host": "//ignore.c.richmetrics.com/",
     "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=1&",
-    "pageview": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=1&type=page&ca=&sc=&ln=_browser_language_&lr=_document_referrer_&eu=_source_url_&tz=_timezone_&pd=_scroll_width_x_scroll_height_&sd=_screen_width_x_screen_height_&wd=_available_screen_width_x_available_screen_height_&ws=_scroll_left_x_scroll_top_",
+    "pageview": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=1&type=page&ca=!category&sc=!subCategory&ln=_browser_language_&lr=_document_referrer_&eu=_source_url_&tz=_timezone_&pd=_scroll_width_x_scroll_height_&sd=_screen_width_x_screen_height_&wd=_available_screen_width_x_available_screen_height_&ws=_scroll_left_x_scroll_top_",
     "pageping": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=1&type=pageping"
   },
   "byside": {
-    "host": "//webcare.byside.com/?webcare_id=&bwch=&lang=pt&fid=&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
-    "base": "//webcare.byside.com/BWA/amp/?webcare_id=&bwch=&lang=pt&fid=&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
-    "pageview": "//webcare.byside.com/BWA/amp/pixel.php?webcare_id=&bwch=&lang=pt&fid=&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
-    "event": "//webcare.byside.com/BWA/amp/signal.php?event_id=!eventId&event_label=!eventLabel&fields=!fields&webcare_id=&bwch=&lang=pt&fid=&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
+    "host": "//webcare.byside.com/?webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "base": "//webcare.byside.com/BWA!webcareId/amp/?webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "pageview": "//webcare.byside.com/BWA!webcareId/amp/pixel.php?webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "event": "//webcare.byside.com/BWA!webcareId/amp/signal.php?event_id=!eventId&event_label=!eventLabel&fields=!fields&webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
   },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
@@ -53,10 +53,10 @@
     "anchorClick": "https://ping.chartbeat.net/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_"
   },
   "clicky": {
-    "base": "https://in.getclicky.com/in.php?site_id=",
+    "base": "https://in.getclicky.com/in.php?site_id=!site_id",
     "baseSuffix": "&mime=!contentType&x=_random_",
-    "pageview": "https://in.getclicky.com/in.php?site_id=&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&mime=!contentType&x=_random_",
-    "interval": "https://in.getclicky.com/in.php?site_id=&type=ping&mime=!contentType&x=_random_"
+    "pageview": "https://in.getclicky.com/in.php?site_id=!site_id&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&mime=!contentType&x=_random_",
+    "interval": "https://in.getclicky.com/in.php?site_id=!site_id&type=ping&mime=!contentType&x=_random_"
   },
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
@@ -74,16 +74,16 @@
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=!siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
   "dynatrace": {
-    "endpoint": "https://.live.dynatrace.com:443/ampbf/!tenantpath",
-    "pageview": "https://.live.dynatrace.com:443/ampbf/!tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_"
+    "endpoint": "https://!tenant.live.dynatrace.com:443/ampbf/!tenantpath",
+    "pageview": "https://!tenant.live.dynatrace.com:443/ampbf/!tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_"
   },
   "euleriananalytics": {
-    "base": "https://",
+    "base": "https://!analyticsHost",
     "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
-    "pageview": "https:///col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_external_referrer_&urlp=!pagePath&ss=_screen_width_x_screen_height_&sd=_screen_color_depth_",
-    "action": "https:///action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=!actionCode&actr=!actionRef",
-    "user": "https:///uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk!userParamKey=!userParamVal",
-    "contextflag": "https:///cflag2/-/_random_?euid-amp=_client_id_&url=_source_url_&ecf0k=!cflagKey&ecf0v=!cflagVal"
+    "pageview": "https://!analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_external_referrer_&urlp=!pagePath&ss=_screen_width_x_screen_height_&sd=_screen_color_depth_",
+    "action": "https://!analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=!actionCode&actr=!actionRef",
+    "user": "https://!analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk!userParamKey=!userParamVal",
+    "contextflag": "https://!analyticsHost/cflag2/-/_random_?euid-amp=_client_id_&url=_source_url_&ecf0k=!cflagKey&ecf0v=!cflagVal"
   },
   "facebookpixel": {
     "host": "https://www.facebook.com",
@@ -151,7 +151,7 @@
   "iplabel": {
     "collectorUrl": "m.col.ip-label.net",
     "endpoint": "https://m.col.ip-label.net/coll/",
-    "onload": "https://m.col.ip-label.net/coll/?T=notrackerID&m=2502|_nav_timing_|2508|_nav_timing_|2509|_nav_timing_|2510|_nav_timing_|2512|_nav_timing_|2514|_nav_timing_|2515|_nav_timing_|2517|_nav_timing_|2520|_nav_timing_&ts=_timestamp_&ua=_user_agent_&d=!ipldim&i=&d[1]=&d[2]=&d[3]=&d[4]=&d[5]=&u=&w=_available_screen_width_&h=_available_screen_height_&r=_document_referrer_&l=_browser_language_"
+    "onload": "https://m.col.ip-label.net/coll/?T=notrackerID&m=2502|_nav_timing_|2508|_nav_timing_|2509|_nav_timing_|2510|_nav_timing_|2512|_nav_timing_|2514|_nav_timing_|2515|_nav_timing_|2517|_nav_timing_|2520|_nav_timing_&ts=_timestamp_&ua=_user_agent_&d=!ipldim&i=!clientip&d[1]=!customdim&d[2]=!business&d[3]=!abtesting&d[4]=!infrastructure&d[5]=!customer&u=!urlgroup&w=_available_screen_width_&h=_available_screen_height_&r=_document_referrer_&l=_browser_language_"
   },
   "krux": {
     "beaconHost": "https://beacon.krxd.net",
@@ -162,9 +162,9 @@
   },
   "linkpulse": {
     "base": "https://pp.lp4.io",
-    "pageview": "https://pp.lp4.io/p?i=&r=_document_referrer_&p=_canonical_url_&s=&t=&c=amp&mt=_title_&_t=amp&_r=_random_",
-    "pageload": "https://pp.lp4.io/pl?i=&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=&s=&_t=amp&_r=_random_",
-    "ping": "https://pp.lp4.io/u?i=&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=&s=&_t=amp&_r=_random_"
+    "pageview": "https://pp.lp4.io/p?i=!id&r=_document_referrer_&p=_canonical_url_&s=!section&t=!type&c=amp&mt=_title_&_t=amp&_r=_random_",
+    "pageload": "https://pp.lp4.io/pl?i=!id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=!type&s=!section&_t=amp&_r=_random_",
+    "ping": "https://pp.lp4.io/u?i=!id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=!type&s=!section&_t=amp&_r=_random_"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y"
@@ -184,16 +184,16 @@
     "pageview": "https://events.mediarithmics.com/v1/visits/pixel?$site_token=!site_token&$url=_source_url_&$ev=%24page_view&$referrer=_document_referrer_"
   },
   "mediator": {
-    "host": "//collector.mediator.media/script//amp/",
-    "renderstart": "//collector.mediator.media/script//amp/init/?url=_canonical_url_",
-    "prefix": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&",
+    "host": "//collector.mediator.media/script/!mediator_id/amp/",
+    "renderstart": "//collector.mediator.media/script/!mediator_id/amp/init/?url=_canonical_url_",
+    "prefix": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&",
     "suffix": "vh=_viewport_height_&sh=_scroll_height_&st=_scroll_top_",
-    "pageview": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=v",
-    "timer": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=t&vh=_viewport_height_&sh=_scroll_height_&st=_scroll_top_",
-    "s0": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s0",
-    "s1": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s1",
-    "s2": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s2",
-    "s3": "//collector.mediator.media/script//amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s3"
+    "pageview": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=v",
+    "timer": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=t&vh=_viewport_height_&sh=_scroll_height_&st=_scroll_top_",
+    "s0": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s0",
+    "s1": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s1",
+    "s2": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s2",
+    "s3": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s3"
   },
   "metrika": {
     "pageview": "https://mc.yandex.ru/watch/!counterId?browser-info=amp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A1%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&site-info=!yaParams&page-url=_source_url_&page-ref=_document_referrer_",
@@ -229,24 +229,24 @@
   "mparticle": {
     "host": "https://pixels.mparticle.com",
     "endpointPath": "/v1/!apiKey/Pixel",
-    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=false&lc=!location&av=!appVersion",
-    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=false&lc=!location&av=!appVersion",
-    "event": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=AppEvent&n=!eventName&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=false&lc=!location&av=!appVersion"
+    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion",
+    "event": "https://pixels.mparticle.com/v1/!apiKey/Pixel?dt=AppEvent&n=!eventName&et=Unknown&amp_id=_client_id_&attrs_k=!eventAttributes_Keys&attrs_v=!eventAttributes_Values&ua_k=!userAttributes_Keys&ua_v=!userAttributes_Values&ui_t=!userIdentities_Types&ui_v=!userIdentities_Values&flags_k=!customFlags_Keys&flags_v=!customFlags_Values&ct=_timestamp_&dbg=!debug&lc=!location&av=!appVersion"
   },
   "mpulse": {
     "onvisible": "https://!beacon_url?h.d=!h.d&h.key=!h.key&h.t=!h.t&h.cr=!h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_"
   },
   "newrelic": {
-    "pageview": "https://bam.nr-data.net/amp?appId=&licenseKey=&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing_&timeToDomInteractive=_nav_timing_&timeToDomComplete=_nav_timing_&timeToDomLoading=_nav_timing_&timeToResponseStart=_nav_timing_&timeToResponseEnd=_nav_timing_&timeToLoadEventStart=_nav_timing_&timeToLoadEventEnd=_nav_timing_&timeToConnectStart=_nav_timing_&timeToConnectEnd=_nav_timing_&timeToFetchStart=_nav_timing_&timeToRequestStart=_nav_timing_&timeToUnloadEventStart=_nav_timing_&timeToUnloadEventEnd=_nav_timing_&timeToDomainLookupStart=_nav_timing_&timeToDomainLookupEnd=_nav_timing_&timeToRedirectStart=_nav_timing_&timeToRedirectEnd=_nav_timing_&timeToSecureConnection=_nav_timing_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
+    "pageview": "https://bam.nr-data.net/amp?appId=!appId&licenseKey=!licenseKey&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing_&timeToDomInteractive=_nav_timing_&timeToDomComplete=_nav_timing_&timeToDomLoading=_nav_timing_&timeToResponseStart=_nav_timing_&timeToResponseEnd=_nav_timing_&timeToLoadEventStart=_nav_timing_&timeToLoadEventEnd=_nav_timing_&timeToConnectStart=_nav_timing_&timeToConnectEnd=_nav_timing_&timeToFetchStart=_nav_timing_&timeToRequestStart=_nav_timing_&timeToUnloadEventStart=_nav_timing_&timeToUnloadEventEnd=_nav_timing_&timeToDomainLookupStart=_nav_timing_&timeToDomainLookupEnd=_nav_timing_&timeToRedirectStart=_nav_timing_&timeToRedirectEnd=_nav_timing_&timeToSecureConnection=_nav_timing_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
   },
   "nielsen": {
-    "session": "https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P!apid&sessionId=_client_id___page_view_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
-    "cloudapi": "https://cloudapi.imrworldwide.com/nmapi/v2/!apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id___page_view_id_%22%2C%22apn%22%3A%22!apn%22%2C%22apv%22%3A%22!apv%22%2C%22apid%22%3A%22!apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22!section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22!segA%22%2C%22segB%22%3A%22!segB%22%2C%22segC%22%3A%22!segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%221%22%7D"
+    "session": "https://!prefixuaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P!apid&sessionId=_client_id___page_view_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
+    "cloudapi": "https://!prefixcloudapi.imrworldwide.com/nmapi/v2/!apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id___page_view_id_%22%2C%22apn%22%3A%22!apn%22%2C%22apv%22%3A%22!apv%22%2C%22apid%22%3A%22!apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22!section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22!segA%22%2C%22segB%22%3A%22!segB%22%2C%22segC%22%3A%22!segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%221%22%7D"
   },
   "nielsen-marketing-cloud": {
     "host": "loadeu.exelator.com",
     "pathPrefix": "load/",
-    "trackurl": "https://loadeu.exelator.com/load/?p=&g=&j=0"
+    "trackurl": "https://loadeu.exelator.com/load/?p=!pubId&g=!siteId&j=0"
   },
   "oewa": {
     "pageview": "!url?s=!s&amp=1&cp=!cp&host=_canonical_host_&path=_canonical_path_"
@@ -304,7 +304,7 @@
   },
   "quantcast": {
     "host": "https://pixel.quantserve.com/pixel",
-    "pageview": "https://pixel.quantserve.com/pixel;r=_random_;a=!pcode;labels=;fpan=;fpa=_client_id_;ns=0;ce=1;cm=;je=0;sr=_screen_width_x_screen_height_x_screen_color_depth_;enc=n;et=_timestamp_;ref=_document_referrer_;url=_canonical_url_"
+    "pageview": "https://pixel.quantserve.com/pixel;r=_random_;a=!pcode;labels=!labels;fpan=;fpa=_client_id_;ns=0;ce=1;cm=;je=0;sr=_screen_width_x_screen_height_x_screen_color_depth_;enc=n;et=_timestamp_;ref=_document_referrer_;url=_canonical_url_"
   },
   "rakam": {
     "base": "?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
@@ -329,9 +329,9 @@
   },
   "simplereach": {
     "host": "https://edge.simplereach.com",
-    "baseParams": "amp=true&pid=&title=_title_&url=_canonical_url_&date=&authors=&channels=!categories&tags=&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
-    "visible": "https://edge.simplereach.com/n?amp=true&pid=&title=_title_&url=_canonical_url_&date=&authors=&channels=!categories&tags=&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
-    "timer": "https://edge.simplereach.com/t?amp=true&pid=&title=_title_&url=_canonical_url_&date=&authors=&channels=!categories&tags=&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata&t=5000&e=5000"
+    "baseParams": "amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
+    "visible": "https://edge.simplereach.com/n?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata",
+    "timer": "https://edge.simplereach.com/t?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata&t=5000&e=5000"
   },
   "snowplow": {
     "aaVersion": "amp-0.2",
@@ -341,8 +341,8 @@
   },
   "top100": {
     "host": "https://kraken.rambler.ru",
-    "base": "https://kraken.rambler.ru/cnt/?pid=&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp",
-    "pageview": "https://kraken.rambler.ru/cnt/?pid=&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "base": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=!pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
     "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
     "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
   },
@@ -354,15 +354,15 @@
     "_basicMessage": "js=13;id=!id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=!start;gender=!gender;age=!age;pid=!pid;userid=!userid;device=!device;params=!params;_=_random_"
   },
   "treasuredata": {
-    "base": "https://in.treasuredata.com/postback/v3/event/",
-    "baseParams": "td_write_key=&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
-    "pageview": "https://in.treasuredata.com/postback/v3/event//events?td_write_key=&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
-    "event": "https://in.treasuredata.com/postback/v3/event//events?td_write_key=&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip"
+    "base": "https://in.treasuredata.com/postback/v3/event/!database",
+    "baseParams": "td_write_key=!writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
+    "pageview": "https://in.treasuredata.com/postback/v3/event/!database/events?td_write_key=!writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
+    "event": "https://in.treasuredata.com/postback/v3/event/!database/events?td_write_key=!writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip"
   },
   "umenganalytics": {
-    "base": "https://b.cnzz.com/utrack?&_siteid=&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=",
-    "pageview": "https://b.cnzz.com/utrack?&_siteid=&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=&_ename=$w_page_view&_eprops=",
-    "event": "https://b.cnzz.com/utrack?&_siteid=&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=&_ename=&_eprops="
+    "base": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time",
+    "pageview": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=$w_page_view&_eprops=!eventProps",
+    "event": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=!eventName&_eprops=!eventProps"
   },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",
