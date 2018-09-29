@@ -67,4 +67,19 @@ describes.realWin('amp-timeago', {
     expect(timeElement.textContent).to.equal('11 seconds ago');
   });
 
+  it('should update after mutation of datetime attribute', () => {
+    const date = new Date();
+    date.setDate(date.getDate() - 2);
+    element.setAttribute('datetime', date.toISOString());
+    element.textContent = date.toString();
+    element.build();
+    date.setDate(date.getDate() + 1);
+    element.setAttribute('datetime', date.toString());
+    element.mutatedAttributesCallback({
+      'datetime': date.toString(),
+    });
+    const timeElement = element.querySelector('time');
+    expect(timeElement.textContent).to.equal('1 day ago');
+  });
+
 });
