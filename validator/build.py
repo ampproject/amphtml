@@ -215,7 +215,7 @@ def GenValidatorProtoGeneratedJs(out_dir):
 
 
 def GenValidatorGeneratedJs(out_dir):
-  """Calls validator_gen_js to generate validator-generated.js.
+  """Calls validator_gen_js to generate validator-generated.js and validator-generated.json.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -229,6 +229,7 @@ def GenValidatorGeneratedJs(out_dir):
   # are checked by CheckPrereqs.
   # pylint: disable=g-import-not-at-top
   from google.protobuf import text_format
+  from google.protobuf import json_format
   from google.protobuf import descriptor
   from dist import validator_pb2
   import validator_gen_js
@@ -245,6 +246,18 @@ def GenValidatorGeneratedJs(out_dir):
       out=out)
   out.append('')
   f = open('%s/validator-generated.js' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+
+  out = []
+  validator_gen_js.GenerateValidatorGeneratedJson(
+      specfile='%s/validator.protoascii' % out_dir,
+      validator_pb2=validator_pb2,
+      text_format=text_format,
+      json_format=json_format,
+      out=out)
+  out.append('')
+  f = open('%s/validator-generated.json' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
