@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
 import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes, iterateCursor} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
-import {getUniqueId} from './utils';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
@@ -60,8 +58,8 @@ export class LinkerManager {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
-    /** @private {string} */
-    this.uid_ = getUniqueId(this.ampdoc_.win);
+    /** @private {../../amp-form/0.1/form-sumbit-service.FormSubmitService} */
+    this.formSubmitService_ = Services.formSubmitForDoc(ampdoc);
   }
 
 
@@ -127,7 +125,6 @@ export class LinkerManager {
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
-
     const linkerNames = Object.keys(config).filter(key => {
       const value = config[key];
       const isLinkerConfig = isObject(value);
@@ -242,15 +239,27 @@ export class LinkerManager {
     const {href, hostname} = el;
 
     const /** @type {Array} */ domains = config['destinationDomains'];
+
+    if (this.isDomainMatch_(hostname, domains)) {
+      el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+    }
+  }
+
+  /**
+   * Check to see if the url is a match for the given set of domains.
+   * @param {string} url
+   * @param {!Array} domains
+   */
+  isDomainMatch_(url, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
-      return;
+      return false;
     }
 
     // See if any domains match.
-    if (domains && !domains.includes(hostname)) {
-      return;
+    if (domains && !domains.includes(url)) {
+      return false;
     }
 
     // If no domains given, default to friendly domain matching.
@@ -259,13 +268,12 @@ export class LinkerManager {
           Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
       const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-      if (!areFriendlyDomains(sourceOrigin, hostname)
-          && !areFriendlyDomains(canonicalOrigin, hostname)) {
-        return;
+      if (!areFriendlyDomains(sourceOrigin, url)
+          && !areFriendlyDomains(canonicalOrigin, url)) {
+        return false;
       }
     }
-
-    el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+    return true;
   }
 
   /**
@@ -273,56 +281,52 @@ export class LinkerManager {
    * created.
    */
   enableFormSupport_() {
-    const doc = this.ampdoc_.getRootNode();
-
-    // Maybe a new form has been added.
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
-      this.maybeAddDataToForms_(doc.querySelectorAll('form'));
-    });
-
-    this.maybeAddDataToForms_(doc.querySelectorAll('form'));
+    this.formSubmitService_.beforeSubmit(this.handleFormSubmit_.bind(this));
   }
 
   /**
-   * Check to see if we have already added the linker kv pairs to this form,
-   * if not, add them.
-   * @param {!NodeList<!Element>} forms
+   * Check to see if any linker configs match this form's url, if so, send
+   * along the resolved linker value
+   * @param {HTMLFormElement} form
    */
-  maybeAddDataToForms_(forms) {
-    iterateCursor(forms, form => {
-      if (form['linkerIds'] && form['linkerIds'][this.uid_]) {
-        return;
-      }
+  handleFormSubmit_(form) {
+    for (const linkerName in this.config_) {
+      const config = this.config_[linkerName];
+      const /** @type {Array} */ domains = config['destinationDomains'];
 
-      this.addDataToForm_(form);
-    });
+      const url = form.getAttribute('action-xhr') ||
+          form.getAttribute('action');
+      const {hostname} = this.urlService_.parse(url);
+
+      if (this.isDomainMatch_(hostname, domains)) {
+        this.addDataToForm_(form, linkerName);
+      }
+    }
   }
+
 
   /**
    * Add the linker pairs as <input> elements to form.
    * @param {!Element} form
+   * @param {string} linkerName
    */
-  addDataToForm_(form) {
-    Object.keys(this.resolvedLinkers_).forEach(key => {
-      const attrs = dict({
-        'type': 'hidden',
-        'name': key,
-        'value': this.resolvedLinkers_[key],
-      });
+  addDataToForm_(form, linkerName) {
+    if (!this.resolvedLinkers_[linkerName]) {
+      return;
+    }
 
-      const inputEl = createElementWithAttributes(
-          /** @type {!Document} */ (form.ownerDocument),
-          'input', attrs);
-      form.appendChild(inputEl);
+    const attrs = dict({
+      'type': 'hidden',
+      'name': linkerName,
+      'value': this.resolvedLinkers_[linkerName],
     });
 
-    // Add unique id so that we are able to track which forms have already
-    // been modified.
-    form['linkerIds'] = form['linkerIds'] || {};
-    form['linkerIds'][this.uid_] = true;
+    const inputEl = createElementWithAttributes(
+        /** @type {!Document} */ (form.ownerDocument),
+        'input', attrs);
+    form.appendChild(inputEl);
   }
 }
-
 
 /**
  * Domains are considered to be friends if they are identical
