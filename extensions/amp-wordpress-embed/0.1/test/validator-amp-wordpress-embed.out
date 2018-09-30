@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -29,36 +29,11 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <!-- Valid: Embeds an entire gist from GitHub. -->
+|    <!-- Valid: Embeds a WordPress post. -->
 |    <amp-wordpress-embed
 |      layout="fixed-height"
-|      height="241"
-|      data-gistid="b9bb35bc68df68259af94430f012425f">
-|    </amp-wordpress-embed>
-|
-|    <!-- Valid: Embeds one file out of a gist from GitHub. -->
-|    <amp-wordpress-embed
-|      layout="fixed-height"
-|      height="197"
-|      data-gistid="a19e811dcd7df10c4da0931641538497"
-|      data-file="hi.c">
-|    </amp-wordpress-embed>
-|
-|    <!-- Invalid: missing data-gistid attribute. -->
-|    <amp-wordpress-embed
->>   ^~~~~~~~~
-amp-wordpress-embed/0.1/test/validator-amp-wordpress-embed.html:47:2 The mandatory attribute 'data-gistid' is missing in tag 'amp-wordpress-embed'. (see https://www.ampproject.org/docs/reference/components/amp-wordpress-embed) [AMP_TAG_PROBLEM]
-|      layout="fixed-height"
-|      height="241">
-|    </amp-wordpress-embed>
-|
-|    <!-- Invalid: illegal layout. -->
-|    <amp-wordpress-embed
->>   ^~~~~~~~~
-amp-wordpress-embed/0.1/test/validator-amp-wordpress-embed.html:53:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-wordpress-embed'. (see https://www.ampproject.org/docs/reference/components/amp-wordpress-embed) [AMP_LAYOUT_PROBLEM]
-|      layout="responsive"
-|      height="241"
-|      data-gistid="b9bb35bc68df68259af94430f012425f">
+|      height="240"
+|      data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/">
 |    </amp-wordpress-embed>
 |  </body>
 |  </html>
