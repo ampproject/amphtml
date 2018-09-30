@@ -21,7 +21,7 @@
  * <code>
  * <amp-wordpress-embed
  *   layout="fixed-height"
- *   data-url="https://example.com/2018/05/17/awesome-post/"
+ *   data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
  *   height="240">
  * </amp-wordpress-embed>
  * </code>
