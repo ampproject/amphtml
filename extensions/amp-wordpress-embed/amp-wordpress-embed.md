@@ -45,7 +45,7 @@ This extension creates an iframe and displays the [excerpt](https://make.wordpre
 
 ```html
 <amp-wordpress-embed
-    data-url="https://wordpress.example.com/post-title/"
+    data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
     layout="fixed-height"
     height="240">
 </amp-wordpress-embed>
