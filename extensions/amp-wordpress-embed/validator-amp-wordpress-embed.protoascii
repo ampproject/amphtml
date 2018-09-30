@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +26,14 @@ tags: {  # amp-wordpress-embed
 }
 tags: {  # <amp-wordpress-embed>
   html_format: AMP
-  tag_name: "AMP-GIST"
+  tag_name: "AMP-WORDPRESS-EMBED"
   requires_extension: "amp-wordpress-embed"
   attrs: {
-    name: "data-gistid"
+    name: "data-url"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
     mandatory: true
   }
   attr_lists: "extended-amp-global"
