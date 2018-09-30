@@ -277,8 +277,7 @@ export class LinkerManager {
   }
 
   /**
-   * Add data to any existing forms, and listen for any new forms that may be
-   * created.
+   * Register callback that will handle form sumbits.
    */
   enableFormSupport_() {
     this.formSubmitService_.beforeSubmit(this.handleFormSubmit_.bind(this));
