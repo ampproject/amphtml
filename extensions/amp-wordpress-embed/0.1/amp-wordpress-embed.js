@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Embeds a Github gist
+ * @fileoverview Embeds a WordPress Post
  *
  * Example:
  * <code>
@@ -99,7 +99,6 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     return true;
   }
 }
-
 
 AMP.extension('amp-wordpress-embed', '0.1', AMP => {
   AMP.registerElement('amp-wordpress-embed', AmpWordPressEmbed);
