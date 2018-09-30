@@ -4444,6 +4444,7 @@ tags: {
 tags: {
   html_format: AMP
   mandatory_parent: "DETAILS"
+  tag_name: "SUMMARY"
 }
 
 # 4.11 Scripting
