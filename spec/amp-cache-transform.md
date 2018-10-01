@@ -91,6 +91,9 @@ For each identifier:
  4. Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
+The server should ensure its copy of `caches.json` is no more than 60 days
+out-of-date with the canonical linked above.
+
 ### Response header
 
 If the server responds with an SXG, it should include an `AMP-Cache-Transform`
