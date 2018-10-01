@@ -40,7 +40,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     beforeSubmitStub = sandbox.stub();
     sandbox.stub(Services, 'formSubmitForDoc').returns({
       beforeSubmit: beforeSubmitStub,
-    })
+    });
 
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({

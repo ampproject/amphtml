@@ -58,7 +58,7 @@ export class LinkerManager {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
-    /** @private {../../amp-form/0.1/form-sumbit-service.FormSubmitService} */
+    /** @private {../../amp-form/0.1/form-submit-service.FormSubmitService} */
     this.formSubmitService_ = Services.formSubmitForDoc(ampdoc);
   }
 
