@@ -1533,6 +1533,13 @@ babel-plugin-espower@^2.3.2:
     espurify "^1.6.0"
     estraverse "^4.1.1"
 
+babel-plugin-filter-imports@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/babel-plugin-filter-imports/-/babel-plugin-filter-imports-2.0.3.tgz#21f2773d0d74558986dd7af89f6f753d5fa92da3"
+  dependencies:
+    "@babel/types" "^7.0.0"
+    lodash "^4.17.11"
+
 babel-plugin-istanbul@5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/babel-plugin-istanbul/-/babel-plugin-istanbul-5.0.1.tgz#2ce7bf211f0d9480ff7fd294bd05e2fa555e31ea"
@@ -8867,6 +8874,10 @@ lodash@^4.1.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.16.6, l
 lodash@^4.17.10, lodash@^4.17.5:
   version "4.17.10"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
+
+lodash@^4.17.11:
+  version "4.17.11"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
 
 lodash@~1.0.1:
   version "1.0.2"
