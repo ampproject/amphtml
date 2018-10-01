@@ -108,9 +108,13 @@
   <!-- Valid: range amp-date-picker with start-date and end-date attributes -->
   <amp-date-picker type="range" layout="fixed-height" height="360" start-date="2018-01-01" end-date="2018-01-01">
   </amp-date-picker>
+  <!-- Valid: overlay amp-date-picker with touch-keyboard-editable -->
+  <amp-date-picker mode="overlay" touch-keyboard-editable input-selector="#a4">
+    <input id="a4">
+  </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->
-  <amp-date-picker type="single" mode="static" start-input-selector="#a3" layout="fixed-height" height="360">
+  <amp-date-picker type="single" mode="static" start-input-selector="#x3" layout="fixed-height" height="360">
   </amp-date-picker>
   <!-- Invalid: range amp-date-picker with input-selector -->
   <amp-date-picker type="range" input-selector="#a4" layout="fixed-height" height="360">
@@ -153,6 +157,9 @@
   </amp-date-picker>
   <!-- Invalid: range amp-date-picker with date attribute -->
   <amp-date-picker type="range" layout="fixed-height" height="360" date="2018-01-01">
+  </amp-date-picker>
+  <!-- Invalid: static amp-date-picker with touch-keyboard-editable -->
+  <amp-date-picker layout="fixed-height" height="360" touch-keyboard-editable>
   </amp-date-picker>
 </body>
 </html>

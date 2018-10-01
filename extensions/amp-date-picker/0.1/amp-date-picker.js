@@ -716,10 +716,16 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {?Element}
    */
   setupDateField_(type) {
+    const input = Services.inputFor(this.win);
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc().getRootNode().querySelector(
         fieldSelector);
     if (existingField) {
+      if (!this.element.hasAttribute('touch-keyboard-editable') &&
+        this.mode_ == DatePickerMode.OVERLAY &&
+        input.isTouchDetected()) {
+        existingField.readOnly = true;
+      }
       return existingField;
     }
 
