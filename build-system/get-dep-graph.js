@@ -296,7 +296,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
-    transformPathsToTempDir(graph);
+    transformPathsToTempDir(graph, config);
     resolve(graph);
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -369,7 +369,7 @@ function setupBundles(graph) {
  *
  * @param {!Object} graph
  */
-function transformPathsToTempDir(graph) {
+function transformPathsToTempDir(graph, config) {
   console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -378,7 +378,7 @@ function transformPathsToTempDir(graph) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins,
+        plugins: conf.plugins.concat(config.babel_plugins || []),
         babelrc: false,
         retainLines: true,
       });
@@ -435,6 +435,13 @@ exports.singlePassCompile = function(entryModule, options) {
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
+    babel_plugins: [
+      [require.resolve('babel-plugin-filter-imports'), {
+        "imports": {
+          "./polyfills/fetch": [ "installFetch" ]
+        }
+      }]
+    ],
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
     fs.ensureDirSync('dist/v0');

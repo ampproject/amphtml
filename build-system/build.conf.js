@@ -18,10 +18,5 @@ module.exports = {
   plugins: [
     require.resolve(
         './babel-plugins/babel-plugin-transform-parenthesize-expression'),
-    [require.resolve('babel-plugin-filter-imports'), {
-      "imports": {
-        "./polyfills/fetch": [ "installFetch", "install" ]
-      }
-    }],
   ],
 };
