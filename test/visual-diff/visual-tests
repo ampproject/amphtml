@@ -19,24 +19,14 @@
  */
  {
   /**
-   * Path relative to amphtml/ that contains the assets for all test pages.
-   */
-  "assets_dir": "examples/visual-tests",
-
-  /**
-   * Path relative to webserver root where assets for all test pages are
-   * served.
-   */
-  "assets_base_url": "/examples/visual-tests",
-
-  /**
    * List of webpages used in tests.
    */
   "webpages": [
   /**
    * Example of a webpage spec.
    * {
-   *   // Path of webpage relative to webserver root.
+   *   // Path of webpage relative to webserver root. Note that all assets for
+   *   // this test must be under the same directory as the AMPHTML file.
    *   "url": "examples/visual-tests/foo/foo.html",
    *
    *   // Name used to identify snapshots of webpage on Percy.
