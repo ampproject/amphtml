@@ -30,7 +30,7 @@ export class AmpScript extends AMP.BaseElement {
   layoutCallback() {
     // TODO(choumx): Copy node_modules/@ampproject/worker-dom/dist/worker.safe.(m)js
     // to a temporary directory so it can be compiled by CC.
-    mainThread.upgradeElement(this.element, '/extensions/amp-script/0.1/worker.safe.js');
+    mainThread.upgradeElement(this.element, '/dist/v0/amp-script-worker-0.1.max.js');
   }
 }
 
