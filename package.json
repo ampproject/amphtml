@@ -168,6 +168,7 @@
     "sinon": "6.3.4",
     "sinon-chai": "3.2.0",
     "sleep-promise": "8.0.1",
+    "tempy": "0.2.1",
     "text-table": "0.2.0",
     "through2": "2.0.3",
     "topological-sort": "0.3.0",
