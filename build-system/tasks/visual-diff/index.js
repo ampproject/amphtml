@@ -27,9 +27,9 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../exec');
+const {execScriptAsync} = require('../../exec');
 const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
-const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../git');
+const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -54,7 +54,7 @@ const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
-    path.resolve(__dirname, 'visual-diff-wrapper.snippet.js'), 'utf8');
+    path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
@@ -347,7 +347,7 @@ async function runVisualTests(visualTestsConfig) {
  */
 function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
   if (!argv.percy_disabled) {
-    const buildDir = '../../' + assetsDir;
+    const buildDir = '../../../' + assetsDir;
     return new Percy({
       loaders: [
         new FileSystemAssetLoader({
@@ -668,7 +668,7 @@ function setDebuggingLevel() {
  */
 async function createEmptyBuild(page) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
-  const blankAssetsDir = '../../examples/visual-tests/blank-page';
+  const blankAssetsDir = '../../../examples/visual-tests/blank-page';
   const percy = new Percy({
     loaders: [
       new FileSystemAssetLoader({
@@ -726,7 +726,7 @@ async function visualDiff() {
   // Load and parse the config. Use JSON5 due to JSON comments in file.
   const visualTestsConfig = JSON5.parse(
       fs.readFileSync(
-          path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
+          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
           'utf8'));
   await runVisualTests(visualTestsConfig);
   process.exit(0);
