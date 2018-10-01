@@ -467,7 +467,8 @@ function removeAmpJsParamsFromSearch(urlSearch) {
  * @return {string}
  */
 export function removeParamsFromSearch(urlSearch, paramName) {
-  // TODO: reuse the function in removeAmpJsParamsFromSearch
+  // TODO: reuse the function in removeAmpJsParamsFromSearch. Accept paramNames
+  // as an array.
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
