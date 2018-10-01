@@ -58,7 +58,7 @@ export class LinkerManager {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
-    /** @private {../../amp-form/0.1/form-submit-service.FormSubmitService} */
+    /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     this.formSubmitService_ = Services.formSubmitForDoc(ampdoc);
   }
 
@@ -278,7 +278,8 @@ export class LinkerManager {
    * Register callback that will handle form sumbits.
    */
   enableFormSupport_() {
-    this.formSubmitService_.beforeSubmit(this.handleFormSubmit_.bind(this));
+    this.formSubmitService_.then(formService =>
+      formService.beforeSubmit(this.handleFormSubmit_.bind(this)));
   }
 
   /**
