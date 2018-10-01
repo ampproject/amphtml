@@ -206,20 +206,8 @@ export class VariableSource {
     if (!this.initialized_) {
       this.initialize_();
     }
-
-    const additionalKeys = opt_bindings ? Object.keys(opt_bindings) : null;
-    if (additionalKeys && additionalKeys.length > 0) {
-      const allKeys = Object.keys(this.replacements_);
-      additionalKeys.forEach(key => {
-        if (this.replacements_[key] === undefined) {
-          allKeys.push(key);
-        }
-      });
-      return this.buildExpr_(allKeys, isV2, opt_whiteList);
-    }
-
-    return this.buildExpr_(
-        Object.keys(this.replacements_), isV2, opt_whiteList);
+    const all = Object.assign({}, this.replacements_, opt_bindings);
+    return this.buildExpr_(Object.keys(all), isV2, opt_whiteList);
   }
 
   /**
