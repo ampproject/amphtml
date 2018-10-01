@@ -367,6 +367,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
     compileJs('./src/', 'amp.js', './dist', {
       toName: 'amp.js',
+      minifiedName: 'v1.js',
+      includePolyfills: true,
+      checkTypes: opt_checkTypes,
+      watch,
+      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+      minify: shouldMinify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+    }),
+    compileJs('./src/', 'amp.js', './dist-esm/', {
+      toName: 'amp.js',
       minifiedName: 'v0.js',
       includePolyfills: true,
       checkTypes: opt_checkTypes,
@@ -1168,8 +1179,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         .then(function() {
           const destPath = path.join(destDir, options.minifiedName);
           appendToCompiledFile(srcFilename, destPath);
-          fs.writeFileSync(
-              path.join(destDir, 'version.txt'), internalRuntimeVersion);
+          // fs.writeFileSync(
+          //     path.join(destDir, 'version.txt'), internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
                 destPath,

@@ -402,16 +402,16 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: './dist/',
+    writeTo: `${options.outputDir}/`,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
-    fs.ensureDirSync('dist/v0');
+    fs.ensureDirSync(`${options.outputDir}/v0`);
     return Promise.all([
-      move('dist/amp*', 'dist/v0'),
-      move('dist/_base*', 'dist/v0'),
+      move(`${options.outputDir}/amp*`, `${options.outputDir}/v0`),
+      move(`${options.outputDir}/_base*`, `${options.outputDir}/v0`),
     ]);
   });
 };
