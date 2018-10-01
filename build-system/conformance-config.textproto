@@ -11,7 +11,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  error_message: 'Use getStyle, setStyle, or setStyles in src/style.js'
   value: 'Element.prototype.style'
   whitelist: 'src/style.js'
   whitelist: 'src/layout.js'
@@ -21,7 +21,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  error_message: 'Use setStyle or setStyles in src/style.js'
   value: 'CSSStyleDeclaration.prototype.setProperty'
   whitelist: 'src/style.js'
 }

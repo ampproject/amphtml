@@ -620,14 +620,14 @@ function polyfill(win) {
  * using transpiled classes (which use ES5 construction idioms).
  *
  * @param {!Window} win
+ * @suppress {globalThis}
  */
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect, Object} = win;
   /**
    */
   function HTMLElementWrapper() {
-    const ctor = /** @type {function(...?):?|undefined} */(
-      /** @type {!HTMLElement} */(this).constructor);
+    const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);
 
     // Reflect.construct allows us to construct a new HTMLElement without using
     // `new` (which will always fail because native HTMLElement is a restricted
