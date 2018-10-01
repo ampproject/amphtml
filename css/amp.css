@@ -685,7 +685,7 @@ form [submit-error] {
 /**
  * Form validation error messages should be hidden at first.
  */
-[visible-when-invalid] {
+[visible-when-invalid]:not(.visible) {
   display: none;
 }
 

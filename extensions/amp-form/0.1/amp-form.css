@@ -46,10 +46,5 @@ form.amp-form-submit-error [submit-error] {
 }
 
 [visible-when-invalid] {
-  display: none;
   color: red;
-}
-
-[visible-when-invalid].visible {
-  display: initial;
 }
