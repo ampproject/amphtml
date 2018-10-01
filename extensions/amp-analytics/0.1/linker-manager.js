@@ -59,7 +59,7 @@ export class LinkerManager {
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
     /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
-    this.formSubmitService_ = Services.formSubmitForDoc(ampdoc);
+    this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
   }
 
 
