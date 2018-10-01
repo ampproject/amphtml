@@ -489,6 +489,11 @@ export function getErrorReportData(message, filename, line, col, error,
   }
   data['rt'] = runtime;
 
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
+
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.
   data['ca'] = isCanary(self) ? '1' : '0';
