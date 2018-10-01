@@ -102,7 +102,7 @@
 
   const serializedIds1 = 'key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.';
   const checksum1 = getCheckSum(serializedIds1);
-  const serializedIds2 = 'key1*dmFsdWUx'
+  const serializedIds2 = '~key1*123'
   const checksum2 = getCheckSum(serializedIds2);
 
   const url1 = `1*${checksum1}*${serializedIds1}`;

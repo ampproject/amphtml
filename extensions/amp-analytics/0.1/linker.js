@@ -179,6 +179,11 @@ function deserialize(serializedIds) {
   const params = serializedIds.split(DELIMITER);
   for (let i = 0; i < params.length; i += 2) {
     const key = params[i];
+    const valid = KEY_VALIDATOR.test(key);
+    if (!valid) {
+      user().error(TAG, `Invalid linker key ${key}, value ignored`);
+      continue;
+    }
     const value = decode(params[i + 1]);
     keyValuePairs[key] = value;
   }

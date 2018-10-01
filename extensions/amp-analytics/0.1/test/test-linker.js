@@ -41,6 +41,12 @@ const parseLinkerTests = [
     errorMsg: 'Invalid version number 2',
   },
   {
+    description: 'invalid keys value',
+    value: '1*15qclke*~key1*123',
+    output: {},
+    errorMsg: 'Invalid linker key ~key1, value ignored',
+  },
+  {
     description: 'invalid value checksum not correct',
     currentTime: BASE_TIME + 2 * 60000,
     value: '1*1f66u1p*key1*dmFsdWUx',
