@@ -248,7 +248,7 @@ export class LinkerManager {
   /**
    * Check to see if the url is a match for the given set of domains.
    * @param {string} url
-   * @param {!Array} domains
+   * @param {Array} domains
    */
   isDomainMatch_(url, domains) {
     // If given domains, but not in the right format.
