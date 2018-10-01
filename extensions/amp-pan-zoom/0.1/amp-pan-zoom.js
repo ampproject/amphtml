@@ -29,7 +29,7 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -519,6 +519,9 @@ export class AmpPanZoom extends AMP.BaseElement {
 
     this.gestures_.onGesture(PinchRecognizer, e => this.handlePinch(e.data));
 
+    // Having a doubletap gesture results in a 200ms delay in tap gestures in
+    // order to differentiate the two gestures. Some users may choose to disable
+    // it to avoid the 200ms tap delay.
     if (!this.disableDoubleTap_) {
       this.gestures_.onGesture(DoubletapRecognizer,
           e => this.handleDoubleTap(e.data));
