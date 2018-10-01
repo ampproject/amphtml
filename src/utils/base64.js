@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {bytesToString, stringToBytes, utf8Encode} from './bytes';
+import {
+  bytesToString,
+  stringToBytes,
+  utf8Decode,
+  utf8Encode,
+} from './bytes';
 
 /**
  * Character mapping from base64url to base64.
@@ -69,6 +74,16 @@ export function base64UrlEncodeFromBytes(bytes) {
 export function base64UrlEncodeFromString(str) {
   const bytes = utf8Encode(str);
   return base64UrlEncodeFromBytes(bytes);
+}
+
+/**
+ * Decode a base64url encoded string by `base64UrlEncodeFromString`
+ * @param {string} str
+ * @return {string}
+ */
+export function base64UrlDecodeFromString(str) {
+  const bytes = base64UrlDecodeToBytes(str);
+  return utf8Decode(bytes);
 }
 
 /**

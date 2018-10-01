@@ -39,6 +39,7 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -681,6 +682,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });
