@@ -118,6 +118,27 @@ are available, and a [reference implementation](https://github.com/ampproject/am
 will soon be available. In the interim, the Google AMP Cache will not require
 any rewrites (and, as a result, will not prefetch any subresources).
 
+## Interaction with content negotation
+
+If the URL serves multiple variants, and is thus subject to [HTTP proactive
+negotation](https://tools.ietf.org/html/rfc7231#section-3.4.1), then
+`AMP-Cache-Transform` should only take effect after proactive negotiation has
+selected a resource of content type `application/signed-exchange`. In theory,
+there may be an interaction with content negotation. For instance, assume the
+request is:
+
+```
+Accept-Language: en, de
+AMP-Cache-Transform: google
+```
+
+and the server can only deliver a resource of `de`+`google` or `en`+`cloudflare`.
+In this case, content negotiation may select `en`, and then
+`AMP-Cache-Transform` negotiation would see that the constraint cannot be
+satisfied. In practice, it is expected that this will not happen. Servers should
+avoid such pessimizing interactions with HTTP content negotiation, by being able
+to serve SXGs on all variants of an AMP URL.
+
 ## Caching proxy behavior
 
 An intermediary proxy may choose to cache these SXG responses and serve them to
