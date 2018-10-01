@@ -123,14 +123,20 @@ export class AmpStoryBackground {
 
     setStyle(hidden, 'background-image', 'none');
 
+    // Set css background properties immediately so it will always be overridden
+    // by the image if there is one.
+    setStyle(hidden, 'background', cssBackground);
+
     // Image will be swapped on load.
     whenFresh(imgLoad, () => {
-      setStyle(hidden, 'background-image', url ? `url(${url})` : null);
+      if (!url) {
+        return;
+      }
+
+      setStyle(hidden, 'background-image', `url(${url})`);
     });
 
-    // Color will always be swapped on timeout.
     whenFresh(Promise.race([imgLoad, timeout]), () => {
-      setStyle(hidden, 'background', cssBackground);
       this.rotateActiveBackground_();
     });
   }
