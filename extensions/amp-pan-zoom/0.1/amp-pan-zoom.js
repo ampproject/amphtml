@@ -490,7 +490,6 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   onMouseUp_(e) {
     e.preventDefault();
-    debugger;
     this.release_();
     this.unlisten_(this.unlistenMouseMove_);
     this.unlisten_(this.unlistenMouseUp_);

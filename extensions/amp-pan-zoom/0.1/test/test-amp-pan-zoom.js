@@ -17,7 +17,6 @@
 import '../amp-pan-zoom';
 import {createPointerEvent} from '../../../../testing/test-helper';
 import {htmlFor} from '../../../../src/static-template';
-import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin('amp-pan-zoom', {
   amp: {
@@ -252,21 +251,16 @@ describes.realWin('amp-pan-zoom', {
   });
 
   describe('gestures', () => {
-    it.skip('should pan correctly via mouse when zoomed', async function() {
+    it('should pan correctly via mouse when zoomed', async function() {
       await getPanZoom();
       await el.layoutCallback();
       await impl.transform(0, 0, 2);
       expect(svg.style.transform).to.equal('translate(0px, 0px) scale(2)');
       const mouseDown = createPointerEvent('mousedown', 10, 10);
       const mouseMove = createPointerEvent('mousemove', 20, 20);
-      const mouseUp = createPointerEvent('mouseup', 20, 20);
-      const transformEndPromise = listenOncePromise(el, 'transformEnd');
       el.dispatchEvent(mouseDown);
-      await timeout(500);
       el.dispatchEvent(mouseMove);
       await timeout(500);
-      el.dispatchEvent(mouseUp);
-      await transformEndPromise;
       expect(svg.style.transform).to.equal('translate(10px, 10px) scale(2)');
     });
   });
