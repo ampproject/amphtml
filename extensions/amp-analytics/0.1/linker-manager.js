@@ -100,8 +100,6 @@ export class LinkerManager {
         });
         this.resolvedLinkers_[name] =
             createLinker(/* version */ '1', expandedIds);
-        // This resolution indicates that we have finished a single linker.
-        return Promise.resolve();
       });
     });
 
@@ -247,10 +245,10 @@ export class LinkerManager {
 
   /**
    * Check to see if the url is a match for the given set of domains.
-   * @param {string} url
-   * @param {Array} domains
+   * @param {string} hostname
+   * @param {?Array} domains
    */
-  isDomainMatch_(url, domains) {
+  isDomainMatch_(hostname, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
@@ -258,7 +256,7 @@ export class LinkerManager {
     }
 
     // See if any domains match.
-    if (domains && !domains.includes(url)) {
+    if (domains && !domains.includes(hostname)) {
       return false;
     }
 
@@ -268,8 +266,8 @@ export class LinkerManager {
           Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
       const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-      if (!areFriendlyDomains(sourceOrigin, url)
-          && !areFriendlyDomains(canonicalOrigin, url)) {
+      if (!areFriendlyDomains(sourceOrigin, hostname)
+          && !areFriendlyDomains(canonicalOrigin, hostname)) {
         return false;
       }
     }
