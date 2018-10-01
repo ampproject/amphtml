@@ -28,7 +28,7 @@ export default {
     string: 'Ablehnen',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Auf der ursprünglichen Domain anschauen,
+    string: 'Auf der ursprünglichen Domain anschauen',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'Mehr Informationen zu AMP Ergebnissen',
