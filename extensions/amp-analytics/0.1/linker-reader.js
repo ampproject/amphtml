@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 
-import {getKeyValuePairs} from './linker';
-import {user} from '../../../src/log';
-import {removeParamsFromSearch} from '../../../src/url';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
-import {parseUrlDeprecated, parseQueryString} from '../../../src/url';
+import {parseLinker} from './linker';
+import {
+  parseQueryString,
+  parseUrlDeprecated,
+  removeParamsFromSearch,
+} from '../../../src/url';
+
+import {user} from '../../../src/log';
+
+const TAG = 'amp-analytics/linker-reader';
 
 
 class LinkerReader {
 
-  constructor(window) {
-    this.win_ = window;
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
 
+    /** @private {!Object<string, ?Object<string, string>>} */
     this.linkerParams_ = {};
-
   }
 
   /**
@@ -38,6 +48,11 @@ class LinkerReader {
    * @return {?string}
    */
   get(name, id) {
+    if (!name || !id) {
+      user().error(TAG, 'LINKER_PARAM requires two params, name and id');
+      return null;
+    }
+
     if (!hasOwn(this.linkerParams_, name)) {
       this.linkerParams_[name] = this.parseAndCleanQueryString_(name);
     }
@@ -45,7 +60,6 @@ class LinkerReader {
     if (this.linkerParams_[name] && this.linkerParams_[name][id]) {
       // Return the id value and remove the id from the object
       const value = this.linkerParams_[name][id];
-      console.log('value is ', value);
       delete this.linkerParams_[name][id];
       return value;
     }
@@ -53,19 +67,23 @@ class LinkerReader {
     return null;
   }
 
+  /**
+   * Parse the url get the key value pair for the linker name
+   * and remove the LINKER_PARAM from window location
+   * @param {string} name
+   * @return {?Object<string, string>}
+   */
   parseAndCleanQueryString_(name) {
     const parsedUrl = parseUrlDeprecated(this.win_.location.href);
     const params = parseQueryString(parsedUrl.search);
-    console.log('params are', params, name);
     if (!hasOwn(params, name)) {
       // Linker param not found.
       return null;
     }
     const value = params[name];
-    console.log('value is ', value);
 
     this.removeLinkerParam_(parsedUrl, name);
-    return getKeyValuePairs(value);
+    return parseLinker(value);
   }
 
 
@@ -81,19 +99,24 @@ class LinkerReader {
     }
     const searchUrl = url.search;
     const removedLinkerParamSearchUrl = removeParamsFromSearch(searchUrl, name);
-    console.log(url.origin, url.pathname, removedLinkerParamSearchUrl, url.hash);
-    const newHref =
-        url.origin + url.pathname + removedLinkerParamSearchUrl + url.hash || '';
+    const newHref = url.origin + url.pathname +
+        removedLinkerParamSearchUrl + (url.hash || '');
     this.win_.history.replaceState(null, '', newHref);
   }
 }
 
-
+/**
+ * @param {!Window} win
+ */
 export function installLinkerReaderService(win) {
   registerServiceBuilder(win, 'amp-analyitcs-linker-reader',
       LinkerReader);
 }
 
+/**
+ * @param {!Window} win
+ * @return {!LinkerReader}
+ */
 export function linkerReaderServiceFor(win) {
   return getService(win, 'amp-analyitcs-linker-reader');
 }

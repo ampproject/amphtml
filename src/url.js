@@ -460,11 +460,18 @@ function removeAmpJsParamsFromSearch(urlSearch) {
   return search ? '?' + search : '';
 }
 
+/**
+ * Removes parameters with param name and returns the new search string.
+ * @param {string} urlSearch
+ * @param {string} paramName
+ * @return {string}
+ */
 export function removeParamsFromSearch(urlSearch, paramName) {
+  // TODO: reuse the function in removeAmpJsParamsFromSearch
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
-  const paramRegex = new RegExp(`[?&]${paramName}[^&]*`);
+  const paramRegex = new RegExp(`[?&]${paramName}=[^&]*`, 'g');
   const search = urlSearch
       .replace(paramRegex, '')
       .replace(/^[?&]/, '');

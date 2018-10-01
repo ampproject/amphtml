@@ -15,7 +15,10 @@
  */
 
 import {WindowInterface} from '../../../src/window-interface';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {
+  base64UrlDecodeFromString,
+  base64UrlEncodeFromString,
+} from '../../../src/utils/base64';
 import {crc32} from './crc32';
 import {user} from '../../../src/log';
 
@@ -23,6 +26,7 @@ import {user} from '../../../src/log';
 const DELIMITER = '*';
 const KEY_VALIDATOR = /^[a-zA-Z0-9\-_.]+$/;
 const CHECKSUM_OFFSET_MAX_MIN = 1;
+const VALID_VERSION = 1;
 const TAG = 'amp-analytics/linker';
 
 
@@ -49,10 +53,14 @@ export function createLinker(version, ids) {
   return [version, checksum, serializedIds].join(DELIMITER);
 }
 
-export function getKeyValuePairs(value) {
+/**
+ * Return the key value pairs
+ * @param {string} value
+ * @return {?Object<string, string>}
+ */
+export function parseLinker(value) {
   const linkerObj = parseLinkerParamValue(value);
   if (!linkerObj) {
-    console.log('no linker obj');
     return null;
   }
   const {checksum, serializedIds} = linkerObj;
@@ -63,30 +71,6 @@ export function getKeyValuePairs(value) {
   return deserialize(serializedIds);
 }
 
-
-function deserialize(serializedIds) {
-  console.log('deserialize', serializedIds);
-  const keyValuePairs = {};
-  const params = serializedIds.split(DELIMITER);
-  for (let i = 0; i < params.length; i =+ 2) {
-    const key = params[i];
-    const value = params[i+1];
-    keyValuePairs[key] = value;
-  }
-  return keyValuePairs;
-}
-
-function isCheckSumValid(serializedIds, checksum) {
-  return true;
-  for (let i = 0; i < CHECKSUM_OFFSET_MAX_MIN; i++) {
-    const calculateCheckSum = getCheckSum(serializedIds, i);
-    if (calculateCheckSum == checksum) {
-      return true;
-    }
-  }
-  return true;
-}
-
 /**
  * Parse the linker param value to version checksum and serializedParams
  * @param {string} value
@@ -94,23 +78,45 @@ function isCheckSumValid(serializedIds, checksum) {
  */
 function parseLinkerParamValue(value) {
   const parts = value.split(DELIMITER);
-  console.log('parts are ', parts);
-
   const isEven = parts.length % 2 == 0;
+
   if (parts.length < 4 || !isEven) {
-    // Format <version>~<checksum>~<key1>~<value1>
+    // Format <version>*<checksum>*<key1>*<value1>
     // Note: linker makes sure there's at least one pair of non empty key value
     // Make sure there is at least three delimiters.
     user().error(TAG, `Invalid linker_param value ${value}`);
     return null;
   }
 
+  const version = Number(parts.shift());
+  if (version !== VALID_VERSION) {
+    user().error(TAG, `Invalid version number ${version}`);
+    return null;
+  }
+
+  const checksum = parts.shift();
+  const serializedIds = parts.join(DELIMITER);
   return {
-    'checksum': parts[1],
-    'serializedIds': parts.slice(2).join(DELIMITER),
+    checksum,
+    serializedIds,
   };
 }
 
+/**
+ * Check if the checksum is valid with time offset tolerance.
+ * @param {string} serializedIds
+ * @param {string} checksum
+ * @return {boolean}
+ */
+function isCheckSumValid(serializedIds, checksum) {
+  for (let i = 0; i <= CHECKSUM_OFFSET_MAX_MIN; i++) {
+    const calculateCheckSum = getCheckSum(serializedIds, i);
+    if (calculateCheckSum == checksum) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Create a unique checksum hashing the fingerprint and a few other values.
@@ -164,6 +170,22 @@ function serialize(pairs) {
 }
 
 /**
+ * Deserialize the serializedIds and return keyValue pairs.
+ * @param {string} serializedIds
+ * @return {!Object<string, string>}
+ */
+function deserialize(serializedIds) {
+  const keyValuePairs = {};
+  const params = serializedIds.split(DELIMITER);
+  for (let i = 0; i < params.length; i += 2) {
+    const key = params[i];
+    const value = decode(params[i + 1]);
+    keyValuePairs[key] = value;
+  }
+  return keyValuePairs;
+}
+
+/**
  * Rounded time used to check if t2 - t1 is within our time tolerance.
  * @return {number}
  */
@@ -180,4 +202,12 @@ function getMinSinceEpoch() {
  */
 function encode(value) {
   return base64UrlEncodeFromString(String(value));
+}
+
+/**
+ * @param {string} value
+ * @return {string}
+ */
+function decode(value) {
+  return base64UrlDecodeFromString(String(value));
 }

@@ -39,10 +39,10 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
-import {installLinkerReaderService} from './linker-reader';
 
 const TAG = 'amp-analytics';
 

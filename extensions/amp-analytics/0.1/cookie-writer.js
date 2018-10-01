@@ -22,9 +22,9 @@ import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
+import {linkerReaderServiceFor} from './linker-reader';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
-import {linkerReaderServiceFor} from './linker-reader';
 
 const TAG = 'amp-analytics/cookie-writer';
 
@@ -65,13 +65,9 @@ export class CookieWriter {
    * @return {!Promise}
    */
   write() {
-
-
     if (!this.writePromise_) {
       this.writePromise_ = this.init_();
     }
-
-    //console.log(this.linkerReader_.get('testlinker', 'abc'));
 
     return this.writePromise_;
   }
@@ -148,11 +144,10 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_.expandStringAsync(cookieValue,
-        /* TODO: Add opt_binding */ this.binding_, EXPAND_WHITELIST).then(
+        this.binding_, EXPAND_WHITELIST).then(
         value => {
-          console.log('value is ', value);
-        // Note: We ignore empty cookieValue, that means currently we don't
-        // provide a way to overwrite or erase existing cookie
+          // Note: We ignore empty cookieValue, that means currently we don't
+          // provide a way to overwrite or erase existing cookie
           if (value) {
             const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
             setCookie(this.win_, cookieName, value, expireDate);
@@ -162,10 +157,14 @@ export class CookieWriter {
     });
   }
 
+  /**
+   * register the dynamic binding.
+   * Supported MACRO is LINKER_PARAM(name, id)
+   */
   registerDynamicBinding_() {
     this.binding_['LINKER_PARAM'] = (name, id) => {
       return this.linkerReader_.get(name, id);
-    }
+    };
   }
 }
 
