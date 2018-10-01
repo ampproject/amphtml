@@ -87,8 +87,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
     this.element.appendChild(clip);
-
-    this.getViewport().addToFixedLayer(container);
   }
 
   /** @override */
