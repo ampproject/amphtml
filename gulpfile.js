@@ -754,7 +754,7 @@ function buildExtensionJs(path, name, version, options) {
   if (Array.isArray(options.jsBinaries)) {
     const others = options.jsBinaries.map(n => {
       const opts = optionsFor(n);
-      opts.wrapper = '';
+      opts.wrapper = ''; // TODO
       return compileJs(path + '/', n + '.js', './dist/v0', opts);
     });
     promises.push.apply(promises, others);
