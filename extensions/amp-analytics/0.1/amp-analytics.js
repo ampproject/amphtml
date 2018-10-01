@@ -612,7 +612,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks result of 'enabled' spec evaluation. Returns false if spec is
    * provided and value resolves to a falsey value (empty string, 0, false,
    * null, NaN or undefined).
-   * @param {string} spec Expression that will be evaluated.
+   * @param {string|boolean} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<boolean>} False only if spec is provided and value is
    * falsey.
@@ -622,6 +622,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Spec absence always resolves to true.
     if (spec === undefined) {
       return Promise.resolve(true);
+    }
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
