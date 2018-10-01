@@ -368,6 +368,7 @@ function setupBundles(graph) {
  * to a temporary directory where we can run babel transformations.
  *
  * @param {!Object} graph
+ * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
   console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
@@ -437,10 +438,10 @@ exports.singlePassCompile = function(entryModule, options) {
     hideWarningsFor: options.hideWarningsFor,
     babel_plugins: [
       [require.resolve('babel-plugin-filter-imports'), {
-        "imports": {
-          "./polyfills/fetch": [ "installFetch" ]
-        }
-      }]
+        'imports': {
+          './polyfills/fetch': ['installFetch'],
+        },
+      }],
     ],
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
