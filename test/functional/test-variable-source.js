@@ -90,6 +90,13 @@ describes.fakeWin('VariableSource', {
     });
   });
 
+  it('Does not cache a built Expr', () => {
+    varSource.set('ONE', () => 'foo');
+    const firstExpr = varSource.getExpr();
+    varSource.set('TWO', () => 'bar');
+    expect(firstExpr).not.to.equal(varSource.getExpr());
+  });
+
   describes.realWin('Whitelist of variable substitutions', {
     amp: {
       ampdoc: 'single',
