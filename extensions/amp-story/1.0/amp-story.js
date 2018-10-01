@@ -1396,11 +1396,11 @@ export class AmpStory extends AMP.BaseElement {
     this.getVsync().run({
       measure: state => {
         state.url = this.getBackgroundUrl_(pageElement);
-        state.color = computedStyle(this.win, pageElement)
-            .getPropertyValue('background-color');
+        state.cssBackground = computedStyle(this.win, pageElement)
+            .getPropertyValue('background');
       },
       mutate: state => {
-        this.background_.setBackground(state.color, state.url, initial);
+        this.background_.setBackground(state.cssBackground, state.url, initial);
       },
     }, {});
   }

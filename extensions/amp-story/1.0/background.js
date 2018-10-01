@@ -102,11 +102,11 @@ export class AmpStoryBackground {
 
   /**
    * Update the background with new background image URL.
-   * @param {string} color
+   * @param {string} cssBackground
    * @param {?string} url
    * @param {boolean=} initial
    */
-  setBackground(color, url, initial = false) {
+  setBackground(cssBackground, url, initial = false) {
     const countAtAdd = ++this.count_;
 
     const whenFresh = (promise, callback) => promise.then(() => {
@@ -130,7 +130,7 @@ export class AmpStoryBackground {
 
     // Color will always be swapped on timeout.
     whenFresh(Promise.race([imgLoad, timeout]), () => {
-      setStyle(hidden, 'background-color', color);
+      setStyle(hidden, 'background', cssBackground);
       this.rotateActiveBackground_();
     });
   }
