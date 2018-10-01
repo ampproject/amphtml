@@ -273,7 +273,7 @@ describes.realWin('amp-pan-zoom', {
       await el.layoutCallback();
       const transformEndPromise = listenOncePromise(el, 'transformEnd');
       const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
-      impl.handleDoubleTap({data: {clientX: 10, clientY: 10}});
+      impl.handleDoubleTap({clientX: 10, clientY: 10});
       await transformEndPromise;
       expect(actionTriggerSpy).to.be.calledOnce;
     });
@@ -282,14 +282,14 @@ describes.realWin('amp-pan-zoom', {
       await getPanZoom();
       await el.layoutCallback();
       const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
-      await impl.handlePinch({data: {
+      await impl.handlePinch({
         centerClientX: 10,
         centerClientY: 10,
         deltaX: 10,
         deltaY: 10,
         dir: 1,
         last: false,
-      }});
+      });
       expect(actionTriggerSpy).not.to.be.called;
     });
 
@@ -299,14 +299,12 @@ describes.realWin('amp-pan-zoom', {
       const transformEndPromise = listenOncePromise(el, 'transformEnd');
       const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
       impl.handlePinch({
-        data: {
-          centerClientX: 10,
-          centerClientY: 10,
-          deltaX: 10,
-          deltaY: 10,
-          dir: 1,
-          last: true, // This indicates zoom ended
-        },
+        centerClientX: 10,
+        centerClientY: 10,
+        deltaX: 10,
+        deltaY: 10,
+        dir: 1,
+        last: true, // This indicates zoom ended
       });
       await transformEndPromise;
       expect(actionTriggerSpy).to.be.calledOnce;
@@ -316,13 +314,13 @@ describes.realWin('amp-pan-zoom', {
       await getPanZoom();
       await el.layoutCallback();
       const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
-      await impl.handleSwipe({data: {
+      await impl.handleSwipe({
         deltaX: 10,
         deltaY: 10,
         last: false,
         velocityX: 10,
         velocityY: 10,
-      }});
+      });
       expect(actionTriggerSpy).not.to.be.called;
     });
 
@@ -331,13 +329,13 @@ describes.realWin('amp-pan-zoom', {
       await el.layoutCallback();
       const transformEndPromise = listenOncePromise(el, 'transformEnd');
       const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
-      impl.handleSwipe({data: {
+      impl.handleSwipe({
         deltaX: 10,
         deltaY: 10,
         last: true, // This indicates panning ended.
         velocityX: 10,
         velocityY: 10,
-      }});
+      });
       await transformEndPromise;
       expect(actionTriggerSpy).to.be.calledOnce;
     });

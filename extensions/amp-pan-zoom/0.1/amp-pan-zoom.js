@@ -29,7 +29,7 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -419,7 +419,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   setupEvents_() {
     this.setupGestures_();
     this.unlistenMouseDown_ =
-      listen(this.element, 'mousedown', this.onMouseDown_.bind(this));
+      listen(this.element, 'mousedown', e => this.onMouseDown_(e));
   }
 
   /**
@@ -465,9 +465,9 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.mouseStartY_ = clientY;
 
     this.unlistenMouseMove_ =
-        listen(this.element, 'mousemove', this.onMouseMove_.bind(this));
+        listen(this.element, 'mousemove', e => this.onMouseMove_(e));
     this.unlistenMouseUp_ =
-        listen(this.win, 'mouseup', this.onMouseUp_.bind(this));
+        listen(this.win, 'mouseup', e => this.onMouseUp_(e));
   }
 
   /**
@@ -517,34 +517,33 @@ export class AmpPanZoom extends AMP.BaseElement {
       }
     });
 
-    this.gestures_.onGesture(PinchRecognizer,
-        this.handlePinch.bind(this));
+    this.gestures_.onGesture(PinchRecognizer, e => this.handlePinch(e.data));
 
     if (!this.disableDoubleTap_) {
       this.gestures_.onGesture(DoubletapRecognizer,
-          this.handleDoubleTap.bind(this));
+          e => this.handleDoubleTap(e.data));
       // Override all taps to enable tap events on content
-      this.gestures_.onGesture(TapRecognizer, this.handleTap_.bind(this));
+      this.gestures_.onGesture(TapRecognizer, e => this.handleTap_(e.data));
     }
   }
 
   /**
-   * @param {*} e
+   * @param {!../../../src/gesture-recognizers.DoubletapDef} data
    * @return {!Promise}
    * @visibleForTesting
    */
-  handleDoubleTap(e) {
-    const {clientX, clientY} = e.data;
+  handleDoubleTap(data) {
+    const {clientX, clientY} = data;
     return this.onDoubletapZoom_(clientX, clientY)
         .then(() => this.onZoomRelease_());
   }
 
   /**
-   * @param {*} e
+   * @param {!../../../src/gesture-recognizers.DoubletapDef} data
    * @return {!Promise}
    * @visibleForTesting
    */
-  handlePinch(e) {
+  handlePinch(data) {
     const {
       centerClientX,
       centerClientY,
@@ -552,7 +551,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       deltaY,
       dir,
       last,
-    } = e.data;
+    } = data;
     return this.onPinchZoom_(centerClientX, centerClientY,
         deltaX, deltaY, dir).then(() => {
       if (last) {
@@ -562,18 +561,18 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} e
+   * @param {!../../../src/gesture-recognizers.SwipeDef} data
    * @return {!Promise}
    * @visibleForTesting
    */
-  handleSwipe(e) {
+  handleSwipe(data) {
     const {
       deltaX,
       deltaY,
       last,
       velocityX,
       velocityY,
-    } = e.data;
+    } = data;
     return this.onMove_(deltaX, deltaY, /*animate*/ false).then(() => {
       if (last) {
         return this.onMoveRelease_(velocityX, velocityY);
@@ -582,9 +581,9 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} e
+   * @param {!../../../src/gesture-recognizers.TapDef} data
    */
-  handleTap_(e) {
+  handleTap_(data) {
     // A custom event is necessary here (as opposed to the click() function)
     // because some targets (e.g. SVGs) may not be HTMLElements.
     const event = createCustomEvent(
@@ -593,7 +592,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         null,
         {bubbles: true}
     );
-    e.data.target.dispatchEvent(event);
+    data.target.dispatchEvent(event);
   }
 
   /**
@@ -603,7 +602,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   registerPanningGesture_() {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
-        .onGesture(SwipeXYRecognizer, this.handleSwipe.bind(this));
+        .onGesture(SwipeXYRecognizer, e => this.handleSwipe(e.data));
 
   }
 
