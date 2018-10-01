@@ -46,10 +46,6 @@ import {AmpStoryPage, PageState} from './amp-story-page';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {
-  DoubletapRecognizer,
-  SwipeXYRecognizer,
-} from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
@@ -64,6 +60,7 @@ import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -280,6 +277,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.pausedStateToRestore_ = false;
+
+    /** @private {?Element} */
+    this.sidebar_ = null;
+
+    /** @private {?MutationObserver} */
+    this.sidebarObserver_ = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -550,6 +553,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onPausedStateUpdate_(isPaused);
     });
 
+    this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, sidebarState => {
+      this.onSidebarStateUpdate_(sidebarState);
+    });
+
     this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
       this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
@@ -570,12 +577,6 @@ export class AmpStory extends AMP.BaseElement {
   installGestureRecognizers_() {
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
-
-    // Disables zoom on double-tap.
-    gestures.onGesture(DoubletapRecognizer, gesture => {
-      const {event} = gesture;
-      event.preventDefault();
-    });
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
@@ -695,6 +696,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.initializeBookend_();
+    this.initializeSidebar_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
@@ -1326,6 +1328,39 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Reacts to sidebar state updates.
+   * @param {boolean} sidebarState
+   * @private
+   */
+  onSidebarStateUpdate_(sidebarState) {
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    if (this.win.MutationObserver) {
+      if (!this.sidebarObserver_) {
+        this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
+          if (mutationsList.some(
+              mutation => mutation.attributeName === 'open')) {
+            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+                this.sidebar_.hasAttribute('open'));
+          }
+        });
+      }
+      if (this.sidebar_ && sidebarState) {
+        this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        actions.execute(this.sidebar_, 'open', /* args */ null,
+        /* source */ null, /* caller */ null, /* event */ null,
+            ActionTrust.HIGH);
+      } else {
+        this.sidebarObserver_.disconnect();
+      }
+    } else if (this.sidebar_ && sidebarState) {
+      actions.execute(this.sidebar_, 'open', /* args */ null,
+          /* source */ null, /* caller */ null, /* event */ null,
+          ActionTrust.HIGH);
+      this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
+    }
+  }
+
+  /**
    * If browser is supported, displays the story. Otherwise, shows either the
    * default unsupported browser layer or the publisher fallback (if provided).
    * @param {boolean} isBrowserSupported
@@ -1836,6 +1871,24 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
         containsMediaElementWithAudio || hasStoryAudio);
+  }
+
+  /**
+   * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
+   * permitting for the opening/closing of the sidebar is shown.
+   * @private
+   */
+  initializeSidebar_() {
+    this.sidebar_ = this.element.querySelector('amp-sidebar');
+    if (!this.sidebar_) {
+      return;
+    }
+    this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
+        !!this.sidebar_);
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    actions.addToWhitelist('AMP-SIDEBAR', 'open');
+    actions.addToWhitelist('AMP-SIDEBAR', 'close');
+    actions.addToWhitelist('AMP-SIDEBAR', 'toggle');
   }
 
   /** @private */
