@@ -13,7 +13,8 @@
       "name": "Cloudflare AMP Cache",
       "docs": "https://amp.cloudflare.com/",
       "cacheDomain": "cdn.cloudflare.com",
-      "updateCacheApiDomainSuffix": "amp.cloudflare.com"
+      "updateCacheApiDomainSuffix": "amp.cloudflare.com",
+      "thirdPartyFrameDomainSuffix": "cloudflareamp.net"
     }
   ]
 }
