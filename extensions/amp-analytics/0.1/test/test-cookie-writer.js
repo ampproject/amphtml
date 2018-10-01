@@ -17,6 +17,8 @@
 import * as cookie from '../../../../src/cookies';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
+import {installLinkerReaderService} from '../linker-reader';
+
 
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -43,6 +45,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         });
     element = doc.createElement('div');
     doc.body.appendChild(element);
+    installLinkerReaderService(win);
   });
 
   describe('write with condition', () => {
@@ -95,6 +98,7 @@ describes.realWin('amp-analytics.cookie-writer', {
       const mockWin = {
         location: 'https://www-example-com.cdn.ampproject.org',
       };
+      installLinkerReaderService(mockWin);
       const cookieWriter = new CookieWriter(mockWin, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
@@ -169,6 +173,23 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
     });
 
+    it('Write LINKER_PARAM value to cookie', () => {
+      const config = dict({
+        'writeCookies': {
+          'testId': 'LINKER_PARAM(testlinker, testid)',
+        },
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      sandbox.stub(cookieWriter.linkerReader_,
+          'get').callsFake((name, id) => {
+        return `${name}-${id}`;
+      });
+      return cookieWriter.write().then(() => {
+        expect(setCookieSpy).to.be.calledOnce;
+        expect(setCookieSpy).to.be.calledWith('testId', 'testlinker-testid');
+      });
+    });
+
     it('Write multiple cookie', () => {
       const config = dict({
         'writeCookies': {
@@ -186,6 +207,8 @@ describes.realWin('amp-analytics.cookie-writer', {
         expect(setCookieSpy).to.be.calledWith('testId2', 'QUERY_PARAM(def)');
       });
     });
+
+
 
     it('Do not write when string is empty', () => {
       const config = dict({

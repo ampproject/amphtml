@@ -33,6 +33,7 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
+  removeParamsFromSearch,
   removeSearch,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
@@ -901,6 +902,21 @@ describe('removeAmpJsParamsFromUrl', () => {
     expect(
         removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
         .to.equal('http://example.com/toast?a=a&b=b&c=c&d=d&e=e#frag=yes');
+  });
+});
+
+describe('removeParamsFromSearch', () => {
+  it('should remove the leading ? or &', () => {
+    expect(removeParamsFromSearch('?a=1&', 'a')).to.equal('');
+  });
+
+  it('should remove the param from searchUrl', () => {
+    expect(removeParamsFromSearch('?a=1&b=2&c', 'a')).to.equal('?b=2&c');
+  });
+
+  it('should remove all param with same name from searchUrl', () => {
+    expect(removeParamsFromSearch('?a=1&b=2&a=2&a=3&c&ab=3', 'a')).to.equal(
+        '?b=2&c&ab=3');
   });
 });
 
