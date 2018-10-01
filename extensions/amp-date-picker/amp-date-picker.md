@@ -161,8 +161,13 @@ This example demonstrates using a overlay date picker in a form where the user c
   </form>
 ```
 
-<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
+On touch devices, an `amp-date-picker` in overlay mode automatically adds the
+`readonly` attribute to its `<input>` elements.
+This prevents the device's on-screen keyboard from opening unncessesarily.
+To opt-out of this behavior, add the `touch-keyboard-editable` attribute to the
+`<amp-date-picker>` element.
 
+<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
 
 ## Selection types
 
