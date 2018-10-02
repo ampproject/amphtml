@@ -26,7 +26,7 @@ const DOUBLETAP_DELAY = 200;
  *   clientY: number
  * }}
  */
-let TapDef;
+export let TapDef;
 
 
 /**
@@ -109,7 +109,7 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-let DoubletapDef;
+export let DoubletapDef;
 
 
 /**
@@ -645,7 +645,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let PinchDef;
+export let PinchDef;
 
 /**
  * Threshold in pixels for how much two touches move away from
