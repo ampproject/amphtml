@@ -547,7 +547,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         linkerManager.handleFormSubmit_(form);
 
         const finalUrl = form.getAttribute('linker-xhr');
-        return expect(finalUrl).to.mdatch(/testLinker=1\*\w{5,7}\*foo*\w+/);
+        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
       });
     });
 
