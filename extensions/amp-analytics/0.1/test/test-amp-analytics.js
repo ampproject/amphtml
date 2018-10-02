@@ -1136,6 +1136,16 @@ describes.realWin('amp-analytics', {
       });
     });
 
+    it('does not allow a request through with false', () => {
+      const config = getConfig();
+      config.triggers.conditional.enabled = false;
+      const analytics = getAnalyticsTag(config);
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.have.not.been.called;
+      });
+    });
+
     it('does not allow a request through if a variable is missing', () => {
       const config = getConfig();
       config.triggers.conditional.enabled = '${undefinedParam}';
