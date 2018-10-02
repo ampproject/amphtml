@@ -130,12 +130,28 @@ function compile(entryModuleFilenames, outputDir,
     define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(entryModuleFilenames, {
+    const compilationOptions = {
       define,
       externs: baseExterns,
       hideWarningsFor,
-    }).then(() => {
+    };
+
+    // Add babel plugin to remove unwanted polyfills in esm build
+    if (options.esmPassCompilation) {
+      compilationOptions['babel_plugins'] = [
+        [require.resolve('babel-plugin-filter-imports'), {
+          'imports': {
+            './polyfills/fetch': ['installFetch'],
+          },
+        }],
+      ];
+    }
+
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(
+        entryModuleFilenames,
+        compilationOptions
+    ).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
         stream.on('end', resolve);

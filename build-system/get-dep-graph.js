@@ -71,7 +71,7 @@ exports.getFlags = function(config) {
     ],
     //new_type_inf: true,
     language_in: 'ES6',
-    language_out: 'ES5',
+    language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: config.externs,
     define: config.define,
@@ -379,7 +379,7 @@ function transformPathsToTempDir(graph, config) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins.concat(config.babel_plugins || []),
+        plugins: conf.plugins.concat(config.babel_plugins),
         babelrc: false,
         retainLines: true,
       });
@@ -432,17 +432,11 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: './dist/',
+    writeTo: options.dest || './dist/',
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-    babel_plugins: [
-      [require.resolve('babel-plugin-filter-imports'), {
-        'imports': {
-          './polyfills/fetch': ['installFetch'],
-        },
-      }],
-    ],
+    babel_plugins: options['babel_plugins'] || [],
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
     fs.ensureDirSync('dist/v0');
