@@ -60,6 +60,9 @@ export class LinkerManager {
 
     /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
+
+    /** @private {?UnlistenDef} */
+    this.formSubmitUnlistener_ = null;
   }
 
 
@@ -115,6 +118,15 @@ export class LinkerManager {
             this.enableFormSupport_();
           }
         });
+  }
+
+  /**
+   * Remove any listeners created to manage form submission.
+   */
+  removeListeners() {
+    if (this.formSubmitUnlistener_) {
+      this.formSubmitUnlistener_();
+    }
   }
 
   /**
@@ -282,8 +294,10 @@ export class LinkerManager {
    * Register callback that will handle form sumbits.
    */
   enableFormSupport_() {
-    this.formSubmitService_.then(formService =>
-      formService.beforeSubmit(this.handleFormSubmit_.bind(this)));
+    this.formSubmitService_.then(formService => {
+      this.formSubmitUnlistener_ =
+          formService.beforeSubmit(this.handleFormSubmit_.bind(this));
+    });
   }
 
   /**

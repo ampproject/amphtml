@@ -37,10 +37,11 @@ export class FormSubmitService {
 
   /**
    * Used to register callbacks.
-   * @param {function(!FormSubmitEventDef)} cb
+   * @param {function(HTMLFormElement)} cb
+   * @return {!UnlistenDef}
    */
   beforeSubmit(cb) {
-    this.observable_.add(cb);
+    return this.observable_.add(cb);
   }
 
   /**

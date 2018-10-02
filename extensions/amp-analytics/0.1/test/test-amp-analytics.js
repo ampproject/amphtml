@@ -199,6 +199,21 @@ describes.realWin('amp-analytics', {
         expect(linkerStub.calledOnce).to.be.true;
       });
     });
+
+    it('Removes linker listeners.', () => {
+      sandbox.stub(Services, 'viewerForDoc').returns({
+        isVisible: () => false,
+      });
+
+      const removeStub = sandbox.stub();
+
+      analytics.linkerManager_ = {
+        removeListeners: removeStub,
+      };
+
+      analytics.unlayoutCallback();
+      expect(removeStub.calledOnce).to.be.true;
+    });
   });
 
   describe('iframe transport', () => {
