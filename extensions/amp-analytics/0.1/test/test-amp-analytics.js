@@ -1408,6 +1408,8 @@ describes.realWin('amp-analytics', {
       });
 
       sandbox.stub(viewer, 'isVisible').returns(false);
+      analytics.linkerManager_ = {removeListeners: () => {}};
+
       analytics.layoutCallback();
       analytics.resumeCallback();
       analytics.unlayoutCallback();
