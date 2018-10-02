@@ -208,15 +208,19 @@ describes.realWin('amp-date-picker', {
     it('should always render Unix epoch seconds in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'X'});
       const date = moment();
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600');
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600');
+      });
     });
 
     it('should always render Unix epoch millis in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'x'});
       const date = moment();
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600000');
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600000');
+      });
     });
   });
 
