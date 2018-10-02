@@ -50,7 +50,8 @@ const icons = {
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek':
     `<circle cx="12" cy="12" r="12" />`,
-}
+};
+
 const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
 
