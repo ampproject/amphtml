@@ -17,6 +17,7 @@
 import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
   ExpansionOptions,
+  encodeVars,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
@@ -162,8 +163,8 @@ export class RequestHandler {
         .then(expandExtraUrlParams => {
           // Construct the extraUrlParamsString: Remove null param and encode
           // component
-          const expandedExtraUrlParamsStr = getExtraUrlParamsString(
-              this.variableService_, expandExtraUrlParams);
+          const expandedExtraUrlParamsStr =
+              getExtraUrlParamsString(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(
               expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
@@ -391,7 +392,7 @@ export function expandPostMessage(
   const extraUrlParamsStrPromise = getExtraUrlParams(
       variableService, configParams, trigger['extraUrlParams'], expansionOption)
       .then(params => {
-        const str = getExtraUrlParamsString(variableService, params);
+        const str = getExtraUrlParamsString(params);
         return urlReplacementService.expandUrlAsync(str, bindings);
       });
 
@@ -437,18 +438,17 @@ function getExtraUrlParams(
 
 /**
  * Handle the params map and form the final extraUrlParams string
- * @param {!./variables.VariableService} variableService
  * @param {!Object} params
  * @return {string}
  */
-function getExtraUrlParamsString(variableService, params) {
+function getExtraUrlParamsString(params) {
   const s = [];
   for (const k in params) {
     const v = params[k];
     if (v == null) {
       continue;
     } else {
-      const sv = variableService.encodeVars(k, v);
+      const sv = encodeVars(v);
       s.push(`${encodeURIComponent(k)}=${sv}`);
     }
   }
