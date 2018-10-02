@@ -309,14 +309,14 @@ async function newPage(browser) {
 /**
  * Runs the visual tests.
  *
+ * @param {!Array<string>} assetGlobs an array of glob strings to load assets
+ *     from.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function runVisualTests(webpages) {
+async function runVisualTests(assetGlobs, webpages) {
   // Create a Percy client and start a build.
-  const allAssetDirs = webpages.filter(webpage => !webpage.flaky)
-      .map(webpage => path.dirname(webpage.url));
-  const percy = createPercyPuppeteerController(allAssetDirs);
+  const percy = createPercyPuppeteerController(assetGlobs);
   await percy.startBuild();
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
@@ -344,13 +344,14 @@ async function runVisualTests(webpages) {
 /**
  * Create a new Percy-Puppeteer controller and return it.
  *
- * @param {Array<string>} assetDirs array of directories to load assets from.
+ * @param {!Array<string>} assetGlobs an array of glob strings to load assets
+ *     from.
  * @return {!Percy} a Percy-Puppeteer controller.
  */
-function createPercyPuppeteerController(assetDirs) {
+function createPercyPuppeteerController(assetGlobs) {
   if (!argv.percy_disabled) {
     return new Percy({
-      loaders: [new PercyAssetsLoader(assetDirs, ROOT_DIR)],
+      loaders: [new PercyAssetsLoader(assetGlobs, ROOT_DIR)],
     });
   } else {
     return {
@@ -722,7 +723,8 @@ async function visualDiff() {
       fs.readFileSync(
           path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
           'utf8'));
-  await runVisualTests(visualTestsConfig.webpages);
+  await runVisualTests(
+      visualTestsConfig.asset_globs, visualTestsConfig.webpages);
   process.exit(0);
 }
 

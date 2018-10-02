@@ -19,6 +19,15 @@
  */
  {
   /**
+  * An array of glob strings to use to load assets to Percy, relative to
+  * the base amphtml/ directory.
+  * See: glob primer https://github.com/isaacs/node-glob#glob-primer
+  */
+  "asset_globs": [
+    "examples/visual-tests/**",
+  ],
+
+  /**
    * List of webpages used in tests.
    */
   "webpages": [
