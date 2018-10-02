@@ -17,11 +17,7 @@ limitations under the License.
 # How AMP HTML is deployed
 
 ## Requirements
-- git
-- node 6+
-- yarn 1.0.2+ (see https://yarnpkg.com/)
-- gulp (installed globally)
-- java 8
+Go through the initial [one time setup](../contributing/getting-started-quick.md#one-time-setup).
 
 ## Steps
 ```bash
