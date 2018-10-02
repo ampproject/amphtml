@@ -314,7 +314,9 @@ async function newPage(browser) {
  */
 async function runVisualTests(webpages) {
   // Create a Percy client and start a build.
-  const percy = createPercyPuppeteerController(getAssetDirs(webpages));
+  const allAssetDirs = webpages.filter(webpage => !webpage.flaky)
+      .map(webpage => path.dirname(webpage.url));
+  const percy = createPercyPuppeteerController(allAssetDirs);
   await percy.startBuild();
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
@@ -337,59 +339,6 @@ async function runVisualTests(webpages) {
     log('info', 'Build', colors.cyan(buildId),
         'is now being processed by Percy.');
   }
-}
-
-/**
- * Get all asset directories to use with Percy.
- *
- * Removes duplicates and child paths. e.g., if the input has URLs of:
- * ['a/b/1.amp.html', 'a/b/2.amp.html', 'a/c/3.amp.html', 'd/e/4.amp.html',
- * ['d/f/5.amp.html', 'd/6.amp.html']
- * And the root path is /root, then the resulting array will be:
- * ['/root/a/b', '/root/a/c', '/root/d']
- *
- * @param {!Array<JsonObject>} webpages an array of JSON objects containing
- *     details about the pages to snapshot.
- * @return {!Array<string>} an array of unique asset directory paths, with
- *     child directories removed.
- */
-function getAssetDirs(webpages) {
-  // Collect all unique asset directories.
-  const uniqueAssetDirs = new Set();
-  for (const webpage of webpages) {
-    uniqueAssetDirs.add(path.dirname(webpage.url));
-  }
-
-  // Reformat the list of directories into a tree, such that any path that we
-  // want to include (e.g., 'a/b') will have pathsTree['a']['b']['.'] === true.
-  const pathsTree = {};
-  for (const uniqueAssetDir of uniqueAssetDirs) {
-    let subPathsTree = pathsTree;
-    const dirParts = uniqueAssetDir.split('/');
-    dirParts.push('.');
-    for (const dirPart of dirParts) {
-      if (dirPart == '.') {
-        subPathsTree[dirPart] = true;
-        break;
-      } else if (!subPathsTree.hasOwnProperty(dirPart)) {
-        subPathsTree[dirPart] = {};
-      }
-      subPathsTree = subPathsTree[dirPart];
-    }
-  }
-
-  // Recursively iterate the tree to find all the nodes with key '.' having its
-  // value === true, and return as an array.
-  function* iterateTree_(tree, pathSoFar = '') {
-    if (tree['.'] === true) {
-      yield path.resolve(__dirname, '../../../', pathSoFar);
-    } else {
-      for (const subPath in tree) {
-        yield* iterateTree_(tree[subPath], path.join(pathSoFar, subPath));
-      }
-    }
-  }
-  return Array.from(iterateTree_(pathsTree));
 }
 
 /**

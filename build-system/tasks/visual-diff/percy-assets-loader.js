@@ -20,8 +20,8 @@ class PercyAssetsLoader {
    * @param {string} rootDir the root of the web server.
    */
   constructor(assetDirs, rootDir) {
-    this.assetDirs = assetDirs;
     this.rootDir = rootDir;
+    this.assetDirs = this.dedupAssetDirs_(assetDirs);
   }
 
   /**
@@ -82,6 +82,57 @@ class PercyAssetsLoader {
     }
 
     return resources;
+  }
+
+  /**
+   * Deduplicate all asset directories and remove child directories.
+   *
+   * e.g., if the input has these directory paths:
+   * ['a/b', 'a/b', 'a/c', 'd/e', 'd/f', 'd']
+   * And the root path is /root, then the resulting array will be:
+   * ['/root/a/b', '/root/a/c', '/root/d']
+   *
+   * @param {!Array<string>} rawAssetDirs an array of all asset directories
+   *     that we want to include.
+   * @return {!Array<string>} an array of unique asset directory paths, with
+   *     child directories removed.
+   */
+  dedupAssetDirs_(rawAssetDirs) {
+    const {rootDir} = this;
+
+    // Collect all unique asset directories.
+    const uniqueAssetDirs = new Set(rawAssetDirs);
+
+    // Reformat the list of directories into a tree such that any path that we
+    // want included (e.g., 'a/b') will have pathsTree['a']['b']['.'] === true.
+    const pathsTree = {};
+    for (const uniqueAssetDir of uniqueAssetDirs) {
+      let subPathsTree = pathsTree;
+      const dirParts = uniqueAssetDir.split('/');
+      dirParts.push('.');
+      for (const dirPart of dirParts) {
+        if (dirPart == '.') {
+          subPathsTree[dirPart] = true;
+          break;
+        } else if (!subPathsTree.hasOwnProperty(dirPart)) {
+          subPathsTree[dirPart] = {};
+        }
+        subPathsTree = subPathsTree[dirPart];
+      }
+    }
+
+    // Recursively iterate the tree to find all the nodes with key '.' having
+    // its value === true, and return as an array.
+    function* iterateTree_(tree, pathSoFar = '') {
+      if (tree['.'] === true) {
+        yield path.resolve(rootDir, pathSoFar);
+      } else {
+        for (const subPath in tree) {
+          yield* iterateTree_(tree[subPath], path.join(pathSoFar, subPath));
+        }
+      }
+    }
+    return Array.from(iterateTree_(pathsTree));
   }
 }
 
