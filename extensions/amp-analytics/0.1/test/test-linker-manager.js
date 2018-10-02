@@ -20,6 +20,7 @@ import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {installVariableService} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
@@ -28,6 +29,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   let doc;
   let windowInterface;
   let handler;
+  let beforeSubmitStub;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -35,6 +37,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     windowInterface = mockWindowInterface(sandbox);
+
+    beforeSubmitStub = sandbox.stub();
+    sandbox.stub(Services, 'formSubmitPromiseForDoc').resolves({
+      beforeSubmit: beforeSubmitStub,
+    });
+
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
           sourceUrl: 'https://amp.source.com/some/path?q=123',
@@ -443,6 +451,139 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     sandbox.stub(platform, 'isSafari').returns(isSafari);
     sandbox.stub(platform, 'getMajorVersion').returns(version);
   }
+
+  describe('form support', () => {
+    it('should register the `beforeSubmit` callback', () => {
+      toggleExperiment(win, 'linker-form', true);
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        expect(beforeSubmitStub.calledOnce).to.be.true;
+        toggleExperiment(win, 'linker-form', false);
+        return expect(beforeSubmitStub).calledWith(sinon.match.func);
+      });
+    });
+
+    it('should add linker data to form', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        linkerManager.handleFormSubmit_(form);
+
+        const el = form.firstChild;
+        expect(el).to.be.ok;
+        expect(el.tagName).to.equal('INPUT');
+        expect(el.getAttribute('name')).to.equal('testLinker');
+        expect(el.getAttribute('value')).to.contain('foo');
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+        return expect(el.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    it('should not add linker if no domain match', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
+        linkerManager.handleFormSubmit_(form);
+        return expect(form.children.length).to.equal(0);
+      });
+    });
+
+    it('should add multiple linker data to one form', () => {
+      windowInterface.getLocation.returns({
+        origin: 'https://www.ampbyexample.com',
+      });
+
+      const manager1 = new LinkerManager(ampdoc, {
+        linkers: {
+          proxyOnly: false,
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null);
+
+      const manager2 = new LinkerManager(ampdoc, {
+        linkers: {
+          proxyOnly: false,
+          testLinker2: {
+            enabled: true,
+            ids: {
+              hello: 'world',
+            },
+          },
+        },
+      }, null);
+
+      const p1 = manager1.init();
+      const p2 = manager2.init();
+
+      return Promise.all([p1, p2]).then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.source.com');
+        manager1.handleFormSubmit_(form);
+        manager2.handleFormSubmit_(form);
+
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+
+        const firstChild = form.children[0];
+        expect(firstChild).to.be.ok;
+        expect(firstChild.tagName).to.equal('INPUT');
+        expect(firstChild.getAttribute('name')).to.equal('testLinker');
+        expect(firstChild.getAttribute('value')).to.contain('foo');
+        expect(firstChild.getAttribute('value')).to.match(prefixRegex);
+
+        const secondChild = form.children[1];
+        expect(secondChild).to.be.ok;
+        expect(secondChild.tagName).to.equal('INPUT');
+        expect(secondChild.getAttribute('name')).to.equal('testLinker2');
+        expect(secondChild.getAttribute('value')).to.contain('hello');
+        return expect(secondChild.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    function createForm() {
+      const form = doc.createElement('form');
+      doc.body.appendChild(form);
+      return form;
+    }
+  });
 });
 
 describe('areFriendlyDomains', () => {
