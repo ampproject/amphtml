@@ -304,8 +304,8 @@ export class LinkerManager {
 
 
   /**
-   * Add the linker data to form. If it is a GET add it to the `action` or
-   * `action-xhr`. If it is a post add it to FINISHSI
+   * Add the linker data to form. If action-xhr is present we can modify its
+   * value, if not we fallback to adding hidden inputs.
    * @param {!Element} form
    * @param {string} linkerName
    */
@@ -324,7 +324,7 @@ export class LinkerManager {
     }
 
     // If we are not using `action-xhr` it must be a GET request using the
-    // vanilla action attribute. Browsers will not let you change this in the
+    // standard action attribute. Browsers will not let you change this in the
     // middle of a submit, so we add the input hidden attributes.
     this.addHiddenInputs_(form, linkerName, linkerValue);
   }
