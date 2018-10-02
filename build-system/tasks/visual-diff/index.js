@@ -370,13 +370,11 @@ function getAssetDirs(webpages) {
     for (const dirPart of dirParts) {
       if (dirPart == '.') {
         subPathsTree[dirPart] = true;
+        break;
       } else if (!subPathsTree.hasOwnProperty(dirPart)) {
         subPathsTree[dirPart] = {};
       }
       subPathsTree = subPathsTree[dirPart];
-      if (subPathsTree === true) {
-        break;
-      }
     }
   }
 
