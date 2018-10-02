@@ -110,11 +110,7 @@ export class LinkerManager {
     }
 
     return Promise.all(this.allLinkerPromises_)
-        .then(() => {
-          if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-            this.enableFormSupport_();
-          }
-        });
+        .then(this.enableFormSupport_.bind(this));
   }
 
   /**
@@ -308,19 +304,42 @@ export class LinkerManager {
 
 
   /**
-   * Add the linker pairs as <input> elements to form.
+   * Add the linker data to form. If it is a GET add it to the `action` or
+   * `action-xhr`. If it is a post add it to FINISHSI
    * @param {!Element} form
    * @param {string} linkerName
    */
   addDataToForm_(form, linkerName) {
-    if (!this.resolvedLinkers_[linkerName]) {
+    const linkerValue = this.resolvedLinkers_[linkerName];
+    if (!linkerValue) {
       return;
     }
 
+    // Runtime controls submits with `action-xhr`, so we can reassign the value.
+    const actionXhrUrl = form.getAttribute('action-xhr');
+    if (actionXhrUrl) {
+      form.setAttribute('action-xhr',
+          addParamToUrl(actionXhrUrl, linkerName, linkerValue));
+      return;
+    }
+
+    // If we are not using `action-xhr` it must be a GET request using the
+    // vanilla action attribute. Browsers will not let you change this in the
+    // middle of a submit, so we add the input hidden attributes.
+    this.addHiddenInputs_(form, linkerName, linkerValue);
+  }
+
+  /**
+   * Add the linker pairs as <input> elements to form.
+   * @param {!Element} form
+   * @param {string} linkerName
+   * @param {string} linkerValue
+   */
+  addHiddenInputs_(form, linkerName, linkerValue) {
     const attrs = dict({
       'type': 'hidden',
       'name': linkerName,
-      'value': this.resolvedLinkers_[linkerName],
+      'value': linkerValue,
     });
 
     const inputEl = createElementWithAttributes(

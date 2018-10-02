@@ -473,7 +473,35 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should add linker data to form', () => {
+    it('should add hidden elements to form if not action-xhr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action', 'https://www.ampproject.com');
+        linkerManager.handleFormSubmit_(form);
+
+        const el = form.firstChild;
+        expect(el).to.be.ok;
+        expect(el.tagName).to.equal('INPUT');
+        expect(el.getAttribute('name')).to.equal('testLinker');
+        expect(el.getAttribute('value')).to.contain('foo');
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+        return expect(el.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    it('if action-xhr and method=GET it should rewrite action-xhr', () => {
       const linkerManager = new LinkerManager(ampdoc, {
         linkers: {
           testLinker: {
@@ -489,17 +517,40 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        form.setAttribute('method', 'get');
+
         linkerManager.handleFormSubmit_(form);
 
-        const el = form.firstChild;
-        expect(el).to.be.ok;
-        expect(el.tagName).to.equal('INPUT');
-        expect(el.getAttribute('name')).to.equal('testLinker');
-        expect(el.getAttribute('value')).to.contain('foo');
-        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
-        return expect(el.getAttribute('value')).to.match(prefixRegex);
+        const finalUrl = form.getAttribute('action-xhr');
+        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
       });
     });
+
+    it('if action-xhr and method=POST it should rewrite action-xhr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        form.setAttribute('method', 'post');
+
+        linkerManager.handleFormSubmit_(form);
+
+        const finalUrl = form.getAttribute('action-xhr');
+        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
+      });
+    });
+
 
     it('should not add linker if no domain match', () => {
       const linkerManager = new LinkerManager(ampdoc, {
@@ -522,7 +573,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should add multiple linker data to one form', () => {
+    it('should add multiple linker data to one form if not action-xhr', () => {
       windowInterface.getLocation.returns({
         origin: 'https://www.ampbyexample.com',
       });
@@ -556,7 +607,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return Promise.all([p1, p2]).then(() => {
         const form = createForm();
-        form.setAttribute('action-xhr', 'https://www.source.com');
+        form.setAttribute('action', 'https://www.source.com');
         manager1.handleFormSubmit_(form);
         manager2.handleFormSubmit_(form);
 
