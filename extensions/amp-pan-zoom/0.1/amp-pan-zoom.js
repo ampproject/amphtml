@@ -542,7 +542,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * @param {!../../../src/gesture-recognizers.DoubletapDef} data
+   * @param {!../../../src/gesture-recognizers.PinchDef} data
    * @return {!Promise}
    * @visibleForTesting
    */
