@@ -1680,7 +1680,7 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} overflown
      * @param {number|undefined} requestedHeight
      * @param {number|undefined} requestedWidth
-     * @package @final @this {!Element}
+     * @this {!Element}
      */
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
@@ -1698,6 +1698,8 @@ function createBaseCustomElementClass(win) {
             resources./*OK*/changeSize(this, requestedHeight, requestedWidth);
             resources.mutateElement(this, () => {
               this.overflowCallback(
+                  /* overflown */ false, requestedHeight, requestedWidth);
+              this.implementation_.overflowCallback(
                   /* overflown */ false, requestedHeight, requestedWidth);
             });
           };
