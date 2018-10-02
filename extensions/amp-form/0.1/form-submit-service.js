@@ -27,7 +27,7 @@ export class FormSubmitService {
 
   /**
    * Used to register callbacks.
-   * @param {function(*)} cb
+   * @param {function(HTMLFormElement)} cb
    */
   beforeSubmit(cb) {
     this.observable_.add(cb);
