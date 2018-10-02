@@ -43,7 +43,7 @@ let IndividualResourceSpecDef;
  * the hostPattern).
  * @typedef{{
  *   hostPattern: !RegExp,
- *   resouces: !Array<{
+ *   resources: !Array<{
  *     name: string,
  *     pathPattern: !RegExp,
  *     queryPattern: !RegExp,
