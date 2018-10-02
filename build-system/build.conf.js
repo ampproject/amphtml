@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
+const defaultPlugins = [
+  require.resolve(
+      './babel-plugins/babel-plugin-transform-parenthesize-expression'),
+];
 
 module.exports = {
-  plugins: [
-    require.resolve(
-        './babel-plugins/babel-plugin-transform-parenthesize-expression'),
-  ],
+  plugins: isEsmBuild => {
+    if (isEsmBuild) {
+      return defaultPlugins.concat([
+        [require.resolve('babel-plugin-filter-imports'), {
+          'imports': {
+            './polyfills/fetch': ['installFetch'],
+          },
+        }],
+      ]);
+    }
+    return defaultPlugins;
+  },
 };

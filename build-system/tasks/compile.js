@@ -138,14 +138,8 @@ function compile(entryModuleFilenames, outputDir,
 
     // Add babel plugin to remove unwanted polyfills in esm build
     if (options.esmPassCompilation) {
-      compilationOptions['babel_plugins'] = [
-        [require.resolve('babel-plugin-filter-imports'), {
-          'imports': {
-            './polyfills/fetch': ['installFetch'],
-          },
-        }],
-      ];
       compilationOptions['dest'] = './dist/esm/';
+      define.push('ESM_BUILD=true');
     }
 
     // TODO(@cramforce): Run the post processing step

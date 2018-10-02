@@ -379,7 +379,7 @@ function transformPathsToTempDir(graph, config) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins.concat(config.babel_plugins),
+        plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
         babelrc: false,
         retainLines: true,
       });
@@ -432,11 +432,10 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: options.dest || './dist/',
+    writeTo: './dist/',
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-    babel_plugins: options['babel_plugins'] || [],
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
     fs.ensureDirSync('dist/v0');
