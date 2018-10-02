@@ -111,11 +111,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     let src = origin;
 
-    if (streamtype !== 'video') {
-      src += `${encodeURIComponent(streamtype)}/`;
-    }
-
     src += `${encodeURIComponent(client)}/`;
+    src += `${encodeURIComponent(streamtype)}/`;
     src += encodeURIComponent(mediaId);
     src += `?dataMode=${encodeURIComponent(mode)}&platform=amp`;
 
