@@ -16,21 +16,22 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {ExpansionOptions} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {Services} from '../../../../src/services';
 import {Transport} from '../transport';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
+const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
 
 describe('iframe transport', () => {
 
   it('Should not contain iframe transport if not whitelisted', () => {
-    for (const vendor in ANALYTICS_CONFIG) {
-      const vendorEntry = ANALYTICS_CONFIG[vendor];
+    for (const vendor in AnalyticsConfig) {
+      const vendorEntry = AnalyticsConfig[vendor];
       if (hasOwn(vendorEntry, 'transport') &&
           hasOwn(vendorEntry.transport, 'iframe')) {
         expect(vendorEntry['transport']['iframe'])
@@ -99,13 +100,15 @@ describes.realWin('amp-analytics', {
   }
 
   describe('vendor request tests', () => {
-    const actualResults = {};
-    for (const vendor in ANALYTICS_CONFIG) {
-      const config = ANALYTICS_CONFIG[vendor];
-      if (!config.requests) {
+    for (const vendor in AnalyticsConfig) {
+      if (vendor === 'default') {
         continue;
       }
-      actualResults[vendor] = {};
+      const config = AnalyticsConfig[vendor];
+      if (!config.requests) {
+        delete AnalyticsConfig[vendor];
+        continue;
+      }
       describe('analytics vendor: ' + vendor, function() {
         beforeEach(() => {
           // Remove all the triggers to prevent unwanted requests, for instance
@@ -124,27 +127,17 @@ describes.realWin('amp-analytics', {
             sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
-
                   const defaultValue = `_${name.toLowerCase()}_`;
-                  const extraMapping = VENDOR_REQUESTS[vendor][name];
                   return {
-                    sync: paramName => {
-                      if (!extraMapping ||
-                          extraMapping[paramName] === undefined) {
-                        return defaultValue;
-                      }
-                      return extraMapping[paramName];
-                    },
+                    sync: () => defaultValue,
                   };
                 });
 
-            const variables = variableServiceFor(ampdoc.win);
-            const {encodeVars} = variables;
-            sandbox.stub(variables, 'encodeVars').callsFake(
-                function(name, val) {
-                  val = encodeVars.call(this, name, val);
-                  if (val == '') {
-                    return '$' + name;
+            sandbox.stub(ExpansionOptions.prototype, 'getVar').callsFake(
+                function(name) {
+                  let val = this.vars[name];
+                  if (val == null || val == '') {
+                    val = '!' + name;
                   }
                   return val;
                 });
@@ -164,9 +157,8 @@ describes.realWin('amp-analytics', {
             });
             yield macroTask();
             expect(sendRequestSpy).to.be.calledOnce;
-            const url = sendRequestSpy.args[0][0];
+            let url = sendRequestSpy.args[0][0];
 
-            expect(sendRequestSpy).to.be.calledOnce;
             const vendorData = VENDOR_REQUESTS[vendor];
             if (!vendorData) {
               throw new Error('Add vendor ' + vendor +
@@ -174,16 +166,16 @@ describes.realWin('amp-analytics', {
             }
             const val = vendorData[name];
             if (val == '<ignore for test>') {
-              return;
+              url = '<ignore for test>';
             }
             if (val == null) {
               throw new Error('Define ' + vendor + '.' + name +
                   ' in vendor-requests.json. Expected value: ' + url);
             }
-            actualResults[vendor][name] = url;
+
             // Write this out for easy copy pasting.
-            // top.document.documentElement.setAttribute('json',
-            //     JSON.stringify(actualResults, null, '  '));
+            writeOutput(vendor, name, url);
+
             expect(url).to.equal(val);
           });
         }
@@ -191,3 +183,22 @@ describes.realWin('amp-analytics', {
     }
   });
 });
+
+const actualResults = {};
+
+function writeOutput(vendor, name, url) {
+  if (!actualResults[vendor]) {
+    actualResults[vendor] = {};
+  }
+  actualResults[vendor][name] = url;
+  const cnt = Object.keys(AnalyticsConfig[vendor]['requests']).length;
+  AnalyticsConfig[vendor].testCnt = (AnalyticsConfig[vendor].testCnt || 0) + 1;
+  if (cnt == AnalyticsConfig[vendor].testCnt) {
+    delete AnalyticsConfig[vendor];
+    if (Object.keys(AnalyticsConfig).length == 1) {
+      const out = top.document.createElement('div');
+      out.textContent = JSON.stringify(actualResults, null, '  ');
+      top.document.body.insertBefore(out, top.document.body.firstChild);
+    }
+  }
+}
