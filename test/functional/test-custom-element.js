@@ -2044,4 +2044,19 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     expect(overflowElement.onclick).to.not.exist;
     expect(overflowElement).to.not.have.class('amp-visible');
   });
+
+  it('should trigger overflow-clicked signal when clicked', () => {
+    element.overflowCallback(true, 117, 113);
+    expect(overflowElement).to.have.class('amp-visible');
+    resourcesMock.expects('changeSize').withExactArgs(element, 117, 113).once();
+
+    expect(overflowElement.onclick).to.exist;
+    expect(overflowElement).to.have.class('amp-visible');
+
+    overflowElement.onclick();
+    expect(element.signals().get('overflow-clicked')).to.be.ok;
+    return element.signals().whenSignal('overflow-clicked').then(() => {
+      expect(overflowElement).not.to.have.class('amp-visible');
+    });
+  });
 });
