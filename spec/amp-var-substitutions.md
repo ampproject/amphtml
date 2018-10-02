@@ -309,7 +309,7 @@ Pulls a value from the provided AMP state key.
 * **platform variable**: `AMP_STATE`
   *  Example: <br>
   ```html
-  <amp-pixel src="https://foo.com/pixel?bar=AMP_STATE(foo.bar)"</amp-pixel>
+  <amp-pixel src="https://foo.com/pixel?bar=AMP_STATE(foo.bar)"></amp-pixel>
   ```
   If `foo.bar` exists in the AMP state, the corresponding value is inserted into the pixel src.
 * **amp-analytics variable**: `${ampState}`
