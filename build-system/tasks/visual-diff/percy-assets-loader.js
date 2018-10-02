@@ -7,14 +7,14 @@ const MAX_FILE_SIZE_BYTES = 15728640;
 
 /*
  * Loader for assets that read from multiple directories in the file system.
+ *
+ * This is a modified version of the @percy/puppeteer#FileSystemAssetLoader
+ * class, rewritten with our style guide in mind and without the skipped assets
+ * feature, which we do not use.
  */
 class PercyAssetsLoader {
   /**
    * Construct a new PercyAssetsLoader.
-   *
-   * This is a modified version of the @percy/puppeteer#FileSystemAssetLoader
-   * class, rewritten with our style guide in mind and without the skipped
-   * assets feature, which we do not use.
    *
    * @param {Array<string>} assetDirs array of directories to load assets from.
    * @param {string} rootDir the root of the web server.
