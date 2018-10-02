@@ -165,7 +165,7 @@ export function withdrawRequest(win, id) {
 }
 
 export function createPointerEvent(type, x, y) {
-  const event = new /*OK*/CustomEvent(type);
+  const event = new /*OK*/CustomEvent(type, {bubbles: true});
   event.clientX = x;
   event.clientY = y;
   event.pageX = x;
