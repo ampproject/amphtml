@@ -145,6 +145,7 @@ function compile(entryModuleFilenames, outputDir,
           },
         }],
       ];
+      compilationOptions['dest'] = './dist/esm/';
     }
 
     // TODO(@cramforce): Run the post processing step
