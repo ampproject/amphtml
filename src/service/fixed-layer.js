@@ -192,9 +192,10 @@ export class FixedLayer {
   /**
    * Adds the element directly into the fixed/sticky layer, bypassing discovery.
    * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   * @param {boolean=} opt_forceTransfer If set to true, then the element needs
    *    to be forcefully transferred to the transfer layer. If false, then it
-   *    must be prevented from transferring.
+   *    will only receive top-padding compensation for the header and never be
+   *    transferred.
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
