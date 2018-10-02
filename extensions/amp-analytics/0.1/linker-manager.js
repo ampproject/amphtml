@@ -304,8 +304,8 @@ export class LinkerManager {
 
 
   /**
-   * Add the linker data to form. If action-xhr is present we can modify its
-   * value, if not we fallback to adding hidden inputs.
+   * Add the linker data to form. If action-xhr is present we can set a new
+   * linker-xhr to use, if not we fallback to adding hidden inputs.
    * @param {!Element} form
    * @param {string} linkerName
    */
@@ -315,7 +315,8 @@ export class LinkerManager {
       return;
     }
 
-    // Runtime controls submits with `action-xhr`, so we can reassign the value.
+    // Runtime controls submits with `action-xhr`, so we can point it at the new
+    // url set as linker-xhr attribute.
     const actionXhrUrl = form.getAttribute('action-xhr');
     if (actionXhrUrl) {
       form.setAttribute('linker-xhr',
