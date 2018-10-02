@@ -22,7 +22,7 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function adstir(global, data) {
   // TODO: check mandatory fields
-  validateData(data, [], ['appId', 'adSpot']);
+  validateData(data, ['appId', 'adSpot'], ['adType']);
 
   const v = '4.0';
 
@@ -31,6 +31,9 @@ export function adstir(global, data) {
   d.setAttribute('data-ver', v);
   d.setAttribute('data-app-id', data['appId']);
   d.setAttribute('data-ad-spot', data['adSpot']);
+  if (typeof data['adType'] !== 'undefined') {
+    d.setAttribute('data-type', data['adType']);
+  }
   d.setAttribute('data-amp', true);
   d.setAttribute('data-origin', global.context.location.href);
   global.document.getElementById('c').appendChild(d);
