@@ -51,5 +51,6 @@
   "doubleclickSraExp": 0,
   "doubleclickSraReportExcludedBlock": 0.1,
   "doubleclickIdleExp": 0.01,
-  "inabox-rov": 1
+  "inabox-rov": 1,
+  "ampdoc-closest": 0.01
 }
