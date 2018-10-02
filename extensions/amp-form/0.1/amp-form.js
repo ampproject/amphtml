@@ -626,10 +626,9 @@ export class AmpForm {
    * @private
    */
   doActionXhr_() {
-    // Since action-xhr can be modified by linker, don't use cached version.
-    return this.doXhr_(
-        dev().assertString(this.getXhrUrl_('action-xhr')),
-        this.method_);
+    // Prefer decorated linker url if it exists, otherwise use action-xhr.
+    const url = this.getXhrUrl_('linker-xhr') || this.xhrAction_;
+    return this.doXhr_(dev().assertString(url), this.method_);
   }
 
   /**

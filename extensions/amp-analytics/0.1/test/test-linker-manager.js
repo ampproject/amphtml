@@ -501,7 +501,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('if action-xhr and method=GET it should rewrite action-xhr', () => {
+    it('if action-xhr and method=GET it should add linker-xhr attr', () => {
       const linkerManager = new LinkerManager(ampdoc, {
         linkers: {
           testLinker: {
@@ -521,12 +521,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
         linkerManager.handleFormSubmit_(form);
 
-        const finalUrl = form.getAttribute('action-xhr');
+        const finalUrl = form.getAttribute('linker-xhr');
         return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
       });
     });
 
-    it('if action-xhr and method=POST it should rewrite action-xhr', () => {
+    it('if action-xhr and method=POST it should add linker-xhr attr', () => {
       const linkerManager = new LinkerManager(ampdoc, {
         linkers: {
           testLinker: {
@@ -546,8 +546,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
         linkerManager.handleFormSubmit_(form);
 
-        const finalUrl = form.getAttribute('action-xhr');
-        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
+        const finalUrl = form.getAttriute('linker-xhr');
+        return expect(finalUrl).to.mdatch(/testLinker=1\*\w{5,7}\*foo*\w+/);
       });
     });
 

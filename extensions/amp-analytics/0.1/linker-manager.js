@@ -318,7 +318,7 @@ export class LinkerManager {
     // Runtime controls submits with `action-xhr`, so we can reassign the value.
     const actionXhrUrl = form.getAttribute('action-xhr');
     if (actionXhrUrl) {
-      form.setAttribute('action-xhr',
+      form.setAttribute('linker-xhr',
           addParamToUrl(actionXhrUrl, linkerName, linkerValue));
       return;
     }
