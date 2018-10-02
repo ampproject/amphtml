@@ -20,6 +20,7 @@ import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 import {installVariableService} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
@@ -452,7 +453,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   }
 
   describe('form support', () => {
-    it('should register the `beforeSumbit` callback', () => {
+    it('should register the `beforeSubmit` callback', () => {
+      toggleExperiment(win, 'linker-form', true);
       const linkerManager = new LinkerManager(ampdoc, {
         linkers: {
           testLinker: {
@@ -466,6 +468,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return linkerManager.init().then(() => {
         expect(beforeSubmitStub.calledOnce).to.be.true;
+        toggleExperiment(win, 'linker-form', false);
         return expect(beforeSubmitStub).calledWith(sinon.match.func);
       });
     });
