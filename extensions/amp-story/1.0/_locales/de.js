@@ -92,6 +92,7 @@ export default {
     string: 'Diese Seite sieht am Besten im Hochformat aus',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Es tut uns leid, aber Ihr Browser unterstützt diese Format leider nicht.',
+    string: 'Es tut uns leid, aber Ihr Browser unterstützt diese Format ' +
+        'leider nicht.',
   },
 };
