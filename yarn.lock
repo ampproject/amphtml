@@ -6696,10 +6696,10 @@ google-closure-compiler-osx@^20180910.0.1:
   resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20180910.0.1.tgz#83e88bf892038655efd281fad61e3f6377a60afb"
   integrity sha512-HU2waANIOHBFtAJ205rzF8BGXiJaLT0s6qu4memI7D4ThBhAJLA/SwTlEjrby6OvS+ZRL4e0FYMPJW1/fhQKzg==
 
-google-closure-compiler@20180910.0.0:
-  version "20180910.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20180910.0.0.tgz#74f7fdb16931cce2ba6af17a447d264f46e10c47"
-  integrity sha512-vGhVE5M2ZY0DZWQP+NhpNxvhBP90OqDcNpQcjbRbINmWbfgN65WBnOw3c3x+Xp5siVJj1dyvRht3qplTL5rkTA==
+google-closure-compiler@20180910.1.0:
+  version "20180910.1.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20180910.1.0.tgz#e143178bf4fa73d4041338b02ecbba1effd855ec"
+  integrity sha512-4VdtHL5LoNmMxDgOixiRJmJejvcFCzpC/uX5R4oGquuQG08knb7bgzPQuIBieYjbHETyc03DyksPFR+kjW4LgA==
   dependencies:
     chalk "^1.0.0"
     minimist "^1.2.0"
