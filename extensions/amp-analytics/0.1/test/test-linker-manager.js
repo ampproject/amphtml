@@ -489,8 +489,10 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action', 'https://www.ampproject.com');
-        linkerManager.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
 
+        expect(setterSpy.notCalled).to.be.true;
         const el = form.firstChild;
         expect(el).to.be.ok;
         expect(el.tagName).to.equal('INPUT');
@@ -519,10 +521,14 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
         form.setAttribute('method', 'get');
 
-        linkerManager.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
 
-        const finalUrl = form.getAttribute('linker-xhr');
-        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
       });
     });
 
@@ -544,10 +550,14 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
         form.setAttribute('method', 'post');
 
-        linkerManager.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
 
-        const finalUrl = form.getAttribute('linker-xhr');
-        return expect(finalUrl).to.match(/testLinker=1\*\w{5,7}\*foo*\w+/);
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
       });
     });
 
@@ -568,7 +578,9 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
-        linkerManager.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
+        expect(setterSpy.notCalled).to.be.true;
         return expect(form.children.length).to.equal(0);
       });
     });
@@ -608,9 +620,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return Promise.all([p1, p2]).then(() => {
         const form = createForm();
         form.setAttribute('action', 'https://www.source.com');
-        manager1.handleFormSubmit_(form);
-        manager2.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        manager1.handleFormSubmit_({form, destinationSetter: setterSpy});
+        manager2.handleFormSubmit_({form, destinationSetter: setterSpy});
 
+        expect(setterSpy.notCalled).to.be.true;
         const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
 
         const firstChild = form.children[0];
