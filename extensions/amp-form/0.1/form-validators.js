@@ -171,7 +171,13 @@ export class PolyfillDefaultValidator extends FormValidator {
   }
 
   /** @override */
-  onBlur(unusedEvent) {
+  onBlur(e) {
+    // NOTE: IE11 focuses the submit button after submitting a form.
+    // Then amp-form focuses the first field with an error, which causes the
+    // submit button to blur. So we need to disregard the submit button blur.
+    if (e.target.type == 'submit') {
+      return;
+    }
     this.validationBubble_.hide();
   }
 
