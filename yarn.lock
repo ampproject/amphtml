@@ -5904,10 +5904,10 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fetch-mock@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.0.2.tgz#98875262bbad5a9be403a4cf2116bf6676531aeb"
-  integrity sha512-Ur+wY7HShnXfybYz1NgiO4dzOa9H67eaJuUg+y9iKM/vIV3P2cvhV/MQhKj9VQbiXEVLNdTubaU/94LFCCMmLA==
+fetch-mock@7.0.7:
+  version "7.0.7"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.0.7.tgz#f9795dd56cc1b2314c4961a7bf012982438c2c5c"
+  integrity sha512-9HfmHxlbUfKRdIqknHEq/NUcIuEz97iVLAgFbiMeRNiNSWV8dB8VX42Snyv9yN5VOqEeZSAyJAs6rX03KvZnOg==
   dependencies:
     babel-polyfill "^6.26.0"
     glob-to-regexp "^0.4.0"
