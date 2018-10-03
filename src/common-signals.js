@@ -50,4 +50,9 @@ export const CommonSignals = {
    * The element has been unlaid out.
    */
   UNLOAD: 'unload',
+
+  /**
+   * The element's overflow element was clicked.
+   */
+  OVERFLOW_CLICKED: 'overflow-clicked',
 };
