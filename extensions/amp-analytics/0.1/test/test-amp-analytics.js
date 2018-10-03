@@ -36,7 +36,6 @@ import {
   installUserNotificationManagerForTesting,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '../../../../testing/yield';
 
 describes.realWin('amp-analytics', {
   amp: {
@@ -198,24 +197,6 @@ describes.realWin('amp-analytics', {
       analytics.buildCallback();
       return analytics.layoutCallback().then(() => {
         expect(linkerStub.calledOnce).to.be.true;
-      });
-    });
-
-    it('Removes linker listeners.', () => {
-      sandbox.stub(Services, 'viewerForDoc').returns({
-        isVisible: () => false,
-      });
-      analytics.iniPromise_ = Promise.resolve();
-      const disposeStub = sandbox.stub();
-
-      analytics.linkerManager_ = {
-        dispose: disposeStub,
-      };
-
-      analytics.unlayoutCallback();
-      analytics.iniPromise_.then(function*() {
-        yield macroTask();
-        return expect(disposeStub.calledOnce).to.be.true;
       });
     });
   });
@@ -1412,8 +1393,6 @@ describes.realWin('amp-analytics', {
       });
 
       sandbox.stub(viewer, 'isVisible').returns(false);
-      analytics.linkerManager_ = {dispose: () => {}};
-
       analytics.layoutCallback();
       analytics.resumeCallback();
       analytics.unlayoutCallback();
