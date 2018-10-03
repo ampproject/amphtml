@@ -61,7 +61,7 @@ function setBundleSizeOfCommitInStorageRepo(repoDir, bundleSize) {
   bundleSizes[commitHash] = bundleSize;
   fs.writeJsonSync(bundleSizesJsonFullFile, bundleSizes);
   execOrDie(`git -C ${repoDir} commit --all ` +
-      `--message "Set bundle-size value of ${commitHash} to ${bundleSize}"`);
+      `--message "bundle-size: ${commitHash} (${bundleSize})`);
   execOrDie(`git -C ${repoDir} push`);
 }
 
@@ -128,8 +128,7 @@ gulp.task(
     checkBundleSize,
     {
       options: {
-        'store': '  Set this to store the bundle size in the AMP build '
-            + 'artifacts repository. Should only be executed for Travis push '
-            + 'builds on the master branch.',
+        'store': '  Store bundle size in AMP build artifacts repo (used only '
+            + 'for `master` builds)',
       },
     });

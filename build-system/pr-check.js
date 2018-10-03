@@ -318,8 +318,11 @@ const command = {
     timedExecOrDie(cmd);
   },
   runBundleSizeCheck: function(storeBundleSize = false) {
-    const extraArgs = storeBundleSize ? '--store' : '';
-    timedExecOrDie(`gulp bundle-size ${extraArgs}`);
+    let cmd = 'gulp bundle-size';
+    if (storeBundleSize) {
+      cmd += ' --store';
+    }
+    timedExecOrDie(cmd);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
