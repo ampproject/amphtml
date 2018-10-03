@@ -147,7 +147,7 @@
     "opn": "5.4.0",
     "path": "0.12.7",
     "plugin-error": "1.0.1",
-    "postcss": "7.0.2",
+    "postcss": "7.0.5",
     "postcss-import": "11.1.0",
     "preact": "8.3.1",
     "preact-compat": "3.18.4",
