@@ -220,12 +220,12 @@ describes.realWin('amp-story', {
           // Getting all the AmpStoryPage objects.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
-          const pages = Array.from(pageElements).map(el => el.getImpl());
-          Promise.all(pages);
           const oldPage = pageElements[0].implementation_;
           const newPage = pageElements[1].implementation_;
+
           const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
           const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+
           story.switchTo_('page-1').then(() => {
             expect(pauseOldPageStub).to.have.been.calledOnce;
             expect(resumeNewPageStub).to.have.been.calledOnce;
