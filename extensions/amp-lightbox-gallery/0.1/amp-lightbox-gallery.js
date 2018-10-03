@@ -979,7 +979,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
                   opacity: 0,
                 });
                 sourceElement.classList.add('i-amphtml-ghost');
-                this.element.ownerDocument.body.appendChild(transLayer);
+                this.getAmpDoc().getBody().appendChild(transLayer);
               });
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
@@ -988,7 +988,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
-                this.element.ownerDocument.body.removeChild(transLayer);
+                this.getAmpDoc().getBody().removeChild(transLayer);
               }
             });
           });
@@ -1127,7 +1127,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
-            this.element.ownerDocument.body.appendChild(transLayer);
+            this.getAmpDoc().getBody().appendChild(transLayer);
             setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
@@ -1147,7 +1147,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               });
               toggle(dev().assertElement(this.carousel_), false);
               toggle(this.element, false);
-              this.element.ownerDocument.body.removeChild(transLayer);
+              this.getAmpDoc().getBody().removeChild(transLayer);
             });
           });
         });
