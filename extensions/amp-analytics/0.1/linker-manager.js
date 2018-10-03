@@ -123,7 +123,7 @@ export class LinkerManager {
   /**
    * Remove any listeners created to manage form submission.
    */
-  removeListeners() {
+  dispose() {
     if (this.formSubmitUnlistener_) {
       this.formSubmitUnlistener_();
     }

@@ -183,10 +183,10 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.iniPromise_.then(() => {
         // Page was unloaded - free up owned resources.
         this.transport_.deleteIframeTransport();
+        this.linkerManager_.dispose();
       });
     }
 
-    this.linkerManager_.removeListeners();
 
     return super.unlayoutCallback();
   }
