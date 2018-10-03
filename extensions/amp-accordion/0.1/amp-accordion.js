@@ -98,7 +98,14 @@ class AmpAccordion extends AMP.BaseElement {
       content.classList.add('i-amphtml-accordion-content');
       let contentId = content.getAttribute('id');
       if (!contentId) {
-        contentId = this.element.id + '_AMP_content_' + index;
+        // To ensure that we pass Accessibility audits -
+        // we need to make sure that each accordion has a unique ID.
+        // In case the accordion doesn't have an ID we use a
+        // random number to ensure uniqueness.
+        const suffix = this.element.id ?
+          this.element.id :
+          Math.floor(Math.random() * Math.floor(100));
+        contentId = suffix + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
 
