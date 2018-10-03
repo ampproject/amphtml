@@ -200,8 +200,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?Response>} */
-    this.sraDeferred = new Deferred();
+    /** @protected {?Deferred<?Response>} */
+    this.sraDeferred = null;
 
     /** @private {?RefreshManager} */
     this.refreshManager_ = null;
@@ -569,6 +569,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(consentState, opt_rtcResponsesPromise) {
+    if (this.useSra) {
+      this.sraDeferred = this.sraDeferred || new Deferred();
+    }
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -1078,7 +1081,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
-    this.sraDeferred = new Deferred();
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
     // responses returned such that sraDeferred being non-null indicates this
@@ -1205,22 +1207,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
+                // Ensure deferred exists, may not if getAdUrl did not yet
+                // execute.
+                typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
+                  new Deferred();
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
               let sraUrl;
               // Construct and send SRA request.
-              // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given which is then passed to resolver used
-              // for sendXhrRequest.
-              const sraRequestAdUrlResolvers =
-              typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(
-                  (creative, headersObj, done) => {
-                    checkStillCurrent();
-                    sraBlockCallbackHandler(creative, headersObj, done,
-                        sraRequestAdUrlResolvers, sraUrl);
-                  });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
@@ -1234,6 +1229,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
+                    // Chunk handler called with metadata and creative for each
+                    // slot in order of URLs given which is then passed to
+                    // resolver used for sendXhrRequest.
+                    const sraRequestAdUrlResolvers =
+                    typeInstances.map(instance => instance.sraDeferred.resolve);
+                    const slotCallback = metaJsonCreativeGrouper(
+                        (creative, headersObj, done) => {
+                          checkStillCurrent();
+                          sraBlockCallbackHandler(creative, headersObj, done,
+                              sraRequestAdUrlResolvers, sraUrl);
+                        });
                     lineDelimitedStreamer(this.win, response, slotCallback);
                     return Promise.all(typeInstances.map(
                         instance => instance.sraDeferred.promise));

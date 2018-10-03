@@ -63,6 +63,18 @@ export class ExpansionOptions {
   freezeVar(str) {
     this.freezeVars[str] = true;
   }
+
+  /**
+   * @param {string} name
+   * @return {*}
+   */
+  getVar(name) {
+    let value = this.vars[name];
+    if (value == null) {
+      value = '';
+    }
+    return value;
+  }
 }
 
 
@@ -200,7 +212,7 @@ export class VariableService {
         return match;
       }
 
-      let value = options.vars[name] != null ? options.vars[name] : '';
+      let value = options.getVar(name);
 
       if (typeof value == 'string') {
         value = this.expandTemplateSync(value,
@@ -209,7 +221,7 @@ export class VariableService {
       }
 
       if (!options.noEncode) {
-        value = this.encodeVars(name, value);
+        value = encodeVars(/** @type {string|?Array<string>} */(value));
       }
       if (value) {
         value += argList;
@@ -218,23 +230,6 @@ export class VariableService {
     });
   }
 
-  /**
-   * @param {string} unusedName Name of the variable. Only used in tests.
-   * @param {string|?Array<string>} raw The values to URI encode.
-   * @return {string} The encoded value.
-   */
-  encodeVars(unusedName, raw) {
-    if (raw == null) {
-      return '';
-    }
-
-    if (isArray(raw)) {
-      return raw.map(this.encodeVars.bind(this, unusedName)).join(',');
-    }
-    // Separate out names and arguments from the value and encode the value.
-    const {name, argList} = getNameArgs(String(raw));
-    return encodeURIComponent(name) + argList;
-  }
 
   /**
    * @param {string} value
@@ -245,6 +240,22 @@ export class VariableService {
   }
 }
 
+/**
+ * @param {string|?Array<string>} raw The values to URI encode.
+ * @return {string} The encoded value.
+ */
+export function encodeVars(raw) {
+  if (raw == null) {
+    return '';
+  }
+
+  if (isArray(raw)) {
+    return raw.map(encodeVars).join(',');
+  }
+  // Separate out names and arguments from the value and encode the value.
+  const {name, argList} = getNameArgs(String(raw));
+  return encodeURIComponent(name) + argList;
+}
 
 /**
  * Returns an array containing two values: name and args parsed from the key.
