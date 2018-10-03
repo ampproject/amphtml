@@ -355,7 +355,7 @@ describes.realWin('amp-accordion', {
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        keyCode: KeyCodes.SPACE,
+        key: KeyCodes.SPACE,
         target: headerElements[0],
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -377,7 +377,7 @@ describes.realWin('amp-accordion', {
       const child = doc.createElement('div');
       headerElements[0].appendChild(child);
       const keyDownEvent = {
-        keyCode: KeyCodes.ENTER,
+        key: KeyCodes.ENTER,
         target: child,
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -397,7 +397,7 @@ describes.realWin('amp-accordion', {
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        keyCode: KeyCodes.ENTER,
+        key: KeyCodes.ENTER,
         target: headerElements[1],
         currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
@@ -421,7 +421,7 @@ describes.realWin('amp-accordion', {
       expect(doc.activeElement)
           .to.equal(headerElements[0]);
       const upArrowEvent = {
-        keyCode: KeyCodes.UP_ARROW,
+        key: KeyCodes.UP_ARROW,
         target: headerElements[0],
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -430,7 +430,7 @@ describes.realWin('amp-accordion', {
       expect(doc.activeElement)
           .to.equal(headerElements[headerElements.length - 1]);
       const downArrowEvent = {
-        keyCode: KeyCodes.DOWN_ARROW,
+        key: KeyCodes.DOWN_ARROW,
         target: headerElements[headerElements.length - 1],
         currentTarget: headerElements[headerElements.length - 1],
         preventDefault: sandbox.spy(),

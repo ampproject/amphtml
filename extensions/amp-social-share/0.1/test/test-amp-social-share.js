@@ -263,11 +263,11 @@ describes.realWin('amp-social-share', {
     return getShare('twitter').then(el => {
       const nonActivationEvent = {
         preventDefault: () => {},
-        keyCode: KeyCodes.RIGHT_ARROW,
+        key: KeyCodes.RIGHT_ARROW,
       };
       const activationEvent = {
         preventDefault: () => {},
-        keyCode: KeyCodes.SPACE,
+        key: KeyCodes.SPACE,
       };
       el.implementation_.handleKeyPress_(nonActivationEvent);
       expect(el.implementation_.win.open).to.not.have.been.called;

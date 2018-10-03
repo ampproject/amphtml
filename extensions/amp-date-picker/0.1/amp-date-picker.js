@@ -948,7 +948,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   handleDocumentKeydown_(e) {
-    if (e.keyCode == KeyCodes.ESCAPE &&
+    if (e.key == KeyCodes.ESCAPE &&
         this.mode_ == DatePickerMode.OVERLAY &&
         this.element.contains(this.document_.activeElement)) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
@@ -967,7 +967,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (e.keyCode == KeyCodes.DOWN_ARROW) {
+    if (e.key == KeyCodes.DOWN_ARROW) {
       this.updateDateFieldFocus_(target);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
       if (this.mode_ === DatePickerMode.STATIC) {
@@ -978,7 +978,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         }
       }
       e.preventDefault();
-    } else if (e.keyCode == KeyCodes.ESCAPE) {
+    } else if (e.key == KeyCodes.ESCAPE) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
     } else {
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);

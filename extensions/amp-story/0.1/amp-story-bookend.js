@@ -360,7 +360,7 @@ export class Bookend {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == KeyCodes.ESCAPE) {
         event.preventDefault();
         this.close_();
       }

@@ -286,8 +286,8 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
-        const {keyCode} = event;
-        if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
+        const {key} = event;
+        if (key == KeyCodes.ENTER || key == KeyCodes.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));

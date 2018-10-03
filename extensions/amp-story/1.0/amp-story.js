@@ -1152,7 +1152,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    switch (e.keyCode) {
+    switch (e.key) {
       case KeyCodes.LEFT_ARROW:
         rtlState ? this.next_() : this.previous_();
         break;

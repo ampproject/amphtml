@@ -431,8 +431,8 @@ export class AmpSelector extends AMP.BaseElement {
     if (this.element.hasAttribute('disabled')) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
+    const {key} = event;
+    switch (key) {
       case KeyCodes.LEFT_ARROW: /* fallthrough */
       case KeyCodes.UP_ARROW: /* fallthrough */
       case KeyCodes.RIGHT_ARROW: /* fallthrough */
@@ -456,7 +456,7 @@ export class AmpSelector extends AMP.BaseElement {
   navigationKeyDownHandler_(event) {
     const doc = this.win.document;
     let dir = 0;
-    switch (event.keyCode) {
+    switch (event.key) {
       case KeyCodes.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
@@ -506,8 +506,8 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   selectionKeyDownHandler_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == KeyCodes.SPACE || key == KeyCodes.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();
         const el = dev().assertElement(event.target);

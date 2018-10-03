@@ -133,8 +133,8 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == KeyCodes.SPACE || key == KeyCodes.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

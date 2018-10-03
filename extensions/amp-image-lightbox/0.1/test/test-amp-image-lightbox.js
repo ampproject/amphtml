@@ -190,7 +190,7 @@ describes.realWin('amp-image-lightbox component', {
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
       impl.activate({caller: ampImage});
-      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
+      impl.closeOnEscape_({key: KeyCodes.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly

@@ -967,7 +967,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    switch (e.keyCode) {
+    switch (e.key) {
       // TODO(newmuis): This will need to be flipped for RTL.
       case KeyCodes.LEFT_ARROW:
         this.previous_();

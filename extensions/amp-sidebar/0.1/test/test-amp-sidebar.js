@@ -321,7 +321,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
-        eventObj.keyCode = KeyCodes.ESCAPE;
+        eventObj.key = KeyCodes.ESCAPE;
         eventObj.which = KeyCodes.ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent ?

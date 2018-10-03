@@ -77,7 +77,7 @@ export class BaseCarousel extends AMP.BaseElement {
     button.classList.add(className);
     button.setAttribute('role', 'button');
     button.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
+      if (event.key == KeyCodes.ENTER || event.key == KeyCodes.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           onInteraction();

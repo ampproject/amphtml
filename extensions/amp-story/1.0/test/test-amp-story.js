@@ -279,7 +279,7 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.keyCode = KeyCodes.RIGHT_ARROW;
+    eventObj.key = KeyCodes.RIGHT_ARROW;
     eventObj.which = KeyCodes.RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?

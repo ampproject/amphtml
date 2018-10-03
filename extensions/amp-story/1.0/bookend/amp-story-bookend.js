@@ -267,7 +267,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == KeyCodes.ESCAPE) {
         event.preventDefault();
         this.close_();
       }

@@ -395,7 +395,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == KeyCodes.ESCAPE) {
+    if (event.key == KeyCodes.ESCAPE) {
       this.close();
     }
   }

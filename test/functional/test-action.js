@@ -1109,7 +1109,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: KeyCodes.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1125,7 +1125,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'option');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: KeyCodes.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1138,7 +1138,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1148,7 +1148,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(window.document.addEventListener).to.have.been.calledWith('keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('input');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: KeyCodes.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
