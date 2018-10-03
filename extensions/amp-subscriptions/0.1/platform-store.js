@@ -79,7 +79,7 @@ export class PlatformStore {
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
 
-    /** @private @canst {!./entitlement.Entitlement} */
+    /** @private @const {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
@@ -128,7 +128,7 @@ export class PlatformStore {
   }
 
   /**
-   * Returns the local platform;
+   * Returns the local platform
    * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
@@ -225,7 +225,7 @@ export class PlatformStore {
 
     this.grantStatusPromise_ = new Deferred();
 
-    // Check if current entitlements unblocks the reader
+    // Check if current entitlements unblock the reader
     for (const key in this.entitlements_) {
       const entitlement = (this.entitlements_[key]);
       if (entitlement.granted) {
@@ -235,7 +235,7 @@ export class PlatformStore {
     }
 
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if non of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
@@ -258,7 +258,7 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
-    // The entitlement will be stored either if its the first one to grant
+    // The entitlement will be stored if either it is the first one to grant
     // or the new one has full subscription but the last one didn't.
     if ((!this.grantStatusEntitlement_ && entitlement.granted)
         || (this.grantStatusEntitlement_
@@ -313,7 +313,7 @@ export class PlatformStore {
     }
     this.allResolvedPromise_ = new Deferred();
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if none of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.allResolvedPromise_.resolve(
           this.getAvailablePlatformsEntitlements_());
     } else {
@@ -387,7 +387,7 @@ export class PlatformStore {
    * weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
    * - base weight
-   * - weight factors the platform supports multiploed by score in the config
+   * - weight factors the platform supports multiplied by score in the config
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
@@ -401,7 +401,7 @@ export class PlatformStore {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    // Subscriber wins immediatly.
+    // Subscriber wins immediately.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
@@ -448,7 +448,7 @@ export class PlatformStore {
    * @private
    */
   calculatePlatformWeight_(platform, optionalFactor) {
-    const factorWeights = [0]; // reduce always needs somthing to work with
+    const factorWeights = [0]; // reduce always needs something to work with
 
     // Start with base score
     const weight = platform.getBaseScore();
