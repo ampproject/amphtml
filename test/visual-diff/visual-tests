@@ -19,15 +19,17 @@
  */
  {
   /**
-   * Path relative to amphtml/ that contains the assets for all test pages.
-   */
-  "assets_dir": "examples/visual-tests",
-
-  /**
-   * Path relative to webserver root where assets for all test pages are
-   * served.
-   */
-  "assets_base_url": "/examples/visual-tests",
+  * An array of glob strings to use to load assets to Percy, relative to
+  * the base amphtml/ directory.
+  *
+  * Note that if you add a new test from a sub-directory that is not matched
+  * by any glob string in this list, it will be missing its resources!
+  *
+  * See: glob primer https://github.com/isaacs/node-glob#glob-primer
+  */
+  "asset_globs": [
+    "examples/visual-tests/**",
+  ],
 
   /**
    * List of webpages used in tests.
@@ -36,7 +38,8 @@
   /**
    * Example of a webpage spec.
    * {
-   *   // Path of webpage relative to webserver root.
+   *   // Path of webpage relative to webserver root. Note that all assets for
+   *   // this test must be under the same directory as the AMPHTML file.
    *   "url": "examples/visual-tests/foo/foo.html",
    *
    *   // Name used to identify snapshots of webpage on Percy.

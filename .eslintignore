@@ -1,6 +1,6 @@
 node_modules
 build
-build-system/tasks/visual-diff-wrapper.snippet.js
+build-system/tasks/visual-diff/snippets/*.js
 build-system/babel-plugins/**/fixtures/**/*.js
 dist
 dist.3p
