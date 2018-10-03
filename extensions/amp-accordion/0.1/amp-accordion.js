@@ -64,7 +64,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {string} */
+    /** @private {number|string} */
     this.suffix_ = element.id ? element.id :
       Math.floor(Math.random() * Math.floor(100));
 
