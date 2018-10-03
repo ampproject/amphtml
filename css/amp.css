@@ -79,8 +79,13 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
 html.i-amphtml-singledoc > body,
 html.i-amphtml-fie > body {
   overflow: visible !important;
+}
+
+html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
+html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
 }
+
 
 /**
  * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
