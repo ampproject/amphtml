@@ -215,21 +215,30 @@ describes.realWin('amp-story', {
 
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
+    sandbox.stub(story, 'maybePreloadBookend_').returns();
+    let pauseOldPageStub;
+    let resumeNewPageStub;
+
     return story.layoutCallback()
         .then(() => {
           // Getting all the AmpStoryPage objects.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
-          const oldPage = pageElements[0].implementation_;
-          const newPage = pageElements[1].implementation_;
+          const pages = Array.from(pageElements).map(el => el.getImpl());
 
-          const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-          const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+          return Promise.all(pages);
+        })
+        .then(pages => {
+          const oldPage = pages[0];
+          const newPage = pages[1];
 
-          story.switchTo_('page-1').then(() => {
-            expect(pauseOldPageStub).to.have.been.calledOnce;
-            expect(resumeNewPageStub).to.have.been.calledOnce;
-          });
+          pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+          resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+        })
+        .then(() => story.switchTo_('page-1'))
+        .then(() => {
+          expect(pauseOldPageStub).to.have.been.calledOnce;
+          expect(resumeNewPageStub).to.have.been.calledOnce;
         });
   });
 
