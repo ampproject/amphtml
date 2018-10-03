@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
-import {KeyCodes} from '../utils/key-codes';
+import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -287,7 +287,7 @@ export class ActionService {
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
         const {key} = event;
-        if (key == KeyCodes.ENTER || key == KeyCodes.SPACE) {
+        if (key == Keys.ENTER || key == Keys.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));

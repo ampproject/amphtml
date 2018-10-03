@@ -52,7 +52,7 @@ import {
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
   LocalizationService,
@@ -969,10 +969,10 @@ export class AmpStory extends AMP.BaseElement {
 
     switch (e.key) {
       // TODO(newmuis): This will need to be flipped for RTL.
-      case KeyCodes.LEFT_ARROW:
+      case Keys.LEFT_ARROW:
         this.previous_();
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         this.next_();
         break;
     }

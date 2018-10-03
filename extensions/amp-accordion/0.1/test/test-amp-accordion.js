@@ -15,7 +15,7 @@
  */
 
 import '../amp-accordion';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {poll} from '../../../../testing/iframe';
 import {tryFocus} from '../../../../src/dom';
 
@@ -355,7 +355,7 @@ describes.realWin('amp-accordion', {
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        key: KeyCodes.SPACE,
+        key: Keys.SPACE,
         target: headerElements[0],
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -377,7 +377,7 @@ describes.realWin('amp-accordion', {
       const child = doc.createElement('div');
       headerElements[0].appendChild(child);
       const keyDownEvent = {
-        key: KeyCodes.ENTER,
+        key: Keys.ENTER,
         target: child,
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -397,7 +397,7 @@ describes.realWin('amp-accordion', {
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
       const keyDownEvent = {
-        key: KeyCodes.ENTER,
+        key: Keys.ENTER,
         target: headerElements[1],
         currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
@@ -421,7 +421,7 @@ describes.realWin('amp-accordion', {
       expect(doc.activeElement)
           .to.equal(headerElements[0]);
       const upArrowEvent = {
-        key: KeyCodes.UP_ARROW,
+        key: Keys.UP_ARROW,
         target: headerElements[0],
         currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
@@ -430,7 +430,7 @@ describes.realWin('amp-accordion', {
       expect(doc.activeElement)
           .to.equal(headerElements[headerElements.length - 1]);
       const downArrowEvent = {
-        key: KeyCodes.DOWN_ARROW,
+        key: Keys.DOWN_ARROW,
         target: headerElements[headerElements.length - 1],
         currentTarget: headerElements[headerElements.length - 1],
         preventDefault: sandbox.spy(),

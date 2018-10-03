@@ -17,7 +17,7 @@ import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -285,8 +285,8 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.key = KeyCodes.RIGHT_ARROW;
-    eventObj.which = KeyCodes.RIGHT_ARROW;
+    eventObj.key = Keys.RIGHT_ARROW;
+    eventObj.which = Keys.RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :

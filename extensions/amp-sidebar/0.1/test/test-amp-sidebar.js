@@ -17,7 +17,7 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 
@@ -321,8 +321,8 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
-        eventObj.key = KeyCodes.ESCAPE;
-        eventObj.which = KeyCodes.ESCAPE;
+        eventObj.key = Keys.ESCAPE;
+        eventObj.which = Keys.ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent ?
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
