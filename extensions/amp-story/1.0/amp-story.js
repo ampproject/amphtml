@@ -1319,7 +1319,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onPausedStateUpdate_(isPaused) {
-    if (!this.activePage_) {
+    // Make sure there is an active page and that the bookend is not open before
+    // proceeding.
+    if (!this.activePage_ ||
+        this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       return;
     }
 
