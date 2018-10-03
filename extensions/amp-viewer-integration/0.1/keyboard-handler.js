@@ -87,7 +87,7 @@ export class KeyboardHandler {
    * @private
    */
   handleEvent_(e) {
-    if (e.target && isHandledByEventTarget(e.keyCode, e.target)) {
+    if (isHandledByEventTarget(e)) {
       return;
     }
     this.forwardEventToViewer_(e);
@@ -104,23 +104,26 @@ export class KeyboardHandler {
 }
 
 /**
- * Checks whether the given key code is expected to be handled by the given
- * eventTarget.
+ * Checks whether the given keyboard event is expected to be handled by its
+ * event target.
  *
- * @param {number} keyCode
- * @param {!EventTarget} eventTarget
+ * @param {!Event} e
  * @return {boolean}
  */
-function isHandledByEventTarget(keyCode, eventTarget) {
-  if (keyCode == KeyCodes.ESCAPE) {
+function isHandledByEventTarget(e) {
+  if (e.defaultPrevented) {
+    // Various AMP components consume keyboard events by preventing the default.
+    return true;
+  }
+  if (e.keyCode == KeyCodes.ESCAPE) {
     // ESC is always a valid key for things like keyboard shortcuts, even if the
     // focus is on an input control, for example.
     return false;
   }
-  switch (eventTarget.nodeName) {
+  switch (e.target.nodeName) {
     case 'INPUT':
       // For checkboxes, only allow swallowing the space key event.
-      return eventTarget.type != 'checkbox' || keyCode == KeyCodes.SPACE;
+      return e.target.type != 'checkbox' || e.keyCode == KeyCodes.SPACE;
     case 'TEXTAREA':
     case 'BUTTON':
     case 'SELECT':
@@ -130,8 +133,8 @@ function isHandledByEventTarget(keyCode, eventTarget) {
 
   // Top-level event targets like `window` and `document` are not instance
   // of `Element` and do not have a `hasAttribute` function.
-  return eventTarget.hasAttribute &&
-      eventTarget.hasAttribute('contenteditable');
+  return e.target.hasAttribute &&
+      e.target.hasAttribute('contenteditable');
 }
 
 /**

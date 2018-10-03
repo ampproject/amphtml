@@ -71,6 +71,19 @@ describes.realWin('KeyboardHandler', {}, env => {
             data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
           }]);
         });
+
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          env.win.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
+        });
       });
 
       describe('when event targeted on document', () => {
@@ -92,6 +105,19 @@ describes.realWin('KeyboardHandler', {}, env => {
             name: eventType,
             data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
           }]);
+        });
+
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          env.win.document.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
         });
       });
 
@@ -115,6 +141,19 @@ describes.realWin('KeyboardHandler', {}, env => {
             data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
           }]);
         });
+
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          env.win.document.documentElement.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
+        });
       });
 
       describe('when event targeted on <body>', () => {
@@ -136,6 +175,19 @@ describes.realWin('KeyboardHandler', {}, env => {
             name: eventType,
             data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
           }]);
+        });
+
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          env.win.document.body.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
         });
       });
 
@@ -168,6 +220,19 @@ describes.realWin('KeyboardHandler', {}, env => {
           }]);
         });
 
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          checkbox.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
+        });
+
         it('does not forward space events', () => {
           checkbox.dispatchEvent(new KeyboardEvent(
               eventType, {bubbles: true, keyCode: KeyCodes.SPACE}));
@@ -193,6 +258,19 @@ describes.realWin('KeyboardHandler', {}, env => {
               name: eventType,
               data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
             }]);
+          });
+
+          it('does not forward events with default prevented', () => {
+            const e = new KeyboardEvent(eventType, {
+              bubbles: true,
+              cancelable: true,
+              keyCode: KeyCodes.ESCAPE,
+            });
+            e.preventDefault();
+
+            node.dispatchEvent(e);
+
+            expect(messages).to.be.empty;
           });
 
           it('does not forward non-ESC events', () => {
@@ -221,6 +299,19 @@ describes.realWin('KeyboardHandler', {}, env => {
             name: eventType,
             data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
           }]);
+        });
+
+        it('does not forward events with default prevented', () => {
+          const e = new KeyboardEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            keyCode: KeyCodes.ESCAPE,
+          });
+          e.preventDefault();
+
+          element.dispatchEvent(e);
+
+          expect(messages).to.be.empty;
         });
 
         it('does not forward non-ESC events', () => {
