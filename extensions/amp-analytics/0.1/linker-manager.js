@@ -110,7 +110,11 @@ export class LinkerManager {
     }
 
     return Promise.all(this.allLinkerPromises_)
-        .then(this.enableFormSupport_.bind(this));
+        .then(() => {
+          if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
+            this.enableFormSupport_();
+          }
+        });
   }
 
   /**
