@@ -34,6 +34,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
@@ -62,7 +63,6 @@ import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
-import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {
@@ -137,6 +137,7 @@ const Attributes = {
   PREVIOUS: 'i-amphtml-previous-page', // shown in left pane
   NEXT: 'i-amphtml-next-page', // shown in right pane
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
+  AUTO_ADVANCE_AFTER: 'auto-advance-after',
 };
 
 /**
@@ -196,6 +197,10 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!AmpStoryAnalytics} */
     this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
+
+    /** @private @const {!AdvancementConfig} */
+    this.advancement_ = AdvancementConfig.forElement(this);
+    this.advancement_.start();
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -522,10 +527,10 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-    this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
-      const direction = getDetail(e)['direction'];
-      this.performTapNavigation_(direction);
-    });
+    this.advancement_.addOnTapNavigationListener(
+        direction => {
+          this.performTapNavigation_(direction);
+        });
 
     this.element.addEventListener(EventType.DISPATCH_ACTION, e => {
       if (!getMode().test) {
@@ -535,16 +540,6 @@ export class AmpStory extends AMP.BaseElement {
       const action = getDetail(e)['action'];
       const data = getDetail(e)['data'];
       this.storeService_.dispatch(action, data);
-    });
-
-    this.element.addEventListener('click', event => {
-      const firstPageEl = user().assertElement(
-          this.element.querySelector('amp-story-page'),
-          'Story must have at least one page.');
-      const currentPage = this.getHistoryStatePageId_() || firstPageEl.id;
-      const page = this.getPageById(currentPage);
-
-      page.maybePerformNavigation(event);
     });
 
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
@@ -931,7 +926,7 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @param {!TapNavigationDirection} direction The direction to navigate.
+   * @param {number} direction The direction to navigate.
    * @private
    */
   performTapNavigation_(direction) {
@@ -1007,6 +1002,12 @@ export class AmpStory extends AMP.BaseElement {
 
           // Indication that this should be offscreen to left in desktop view.
           setAttributeInMutate(oldPage, Attributes.VISITED);
+        }
+
+        if (!targetPage.isAd() &&
+          !targetPage.element.hasAttribute(Attributes.AUTO_ADVANCE_AFTER)) {
+          // Indicates that page switch was triggered manually.
+          this.systemLayer_.updateProgress(targetPageId, 1);
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {

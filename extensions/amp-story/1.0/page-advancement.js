@@ -61,9 +61,6 @@ export class AdvancementConfig {
 
     /** @private {boolean} */
     this.isRunning_ = false;
-
-    /** @private {?Array<!AdvancementConfig>} */
-    this.advancementModes_ = null;
   }
 
   /**
@@ -130,18 +127,6 @@ export class AdvancementConfig {
     return 1;
   }
 
-  /**
-   * @return {?Array<!AdvancementConfig>}
-   */
-  getAdvancementModes() {
-    return this.advancementModes_;
-  }
-
-  /**
-   * @param {!Event} unusedEvent
-   */
-  maybePerformNavigation(unusedEvent) {}
-
   /** @protected */
   onProgressUpdate() {
     const progress = this.getProgress();
@@ -176,18 +161,18 @@ export class AdvancementConfig {
 
   /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage} page
+   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
    * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
    */
-  static forPage(page) {
-    const rootEl = page.element;
+  static forElement(element) {
+    const rootEl = element.element;
     const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootEl),
+      ManualAdvancement.fromElement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
-      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
+      MediaBasedAdvancement
+          .fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
 
     if (supportedAdvancementModes.length === 0) {
@@ -208,7 +193,7 @@ export class AdvancementConfig {
  * AdvancementConfig implementations by simply delegating all of its calls to
  * an array of underlying advancement modes.
  */
-export class MultipleAdvancementConfig extends AdvancementConfig {
+class MultipleAdvancementConfig extends AdvancementConfig {
   /**
    * @param {!Array<!AdvancementConfig>} advancementModes A list of
    *     AdvancementConfigs to which all calls should be delegated.
@@ -216,7 +201,7 @@ export class MultipleAdvancementConfig extends AdvancementConfig {
   constructor(advancementModes) {
     super();
 
-    /** @private {!Array<!AdvancementConfig>} */
+    /** @private @const {!Array<!AdvancementConfig>} */
     this.advancementModes_ = advancementModes;
   }
 
@@ -263,13 +248,6 @@ export class MultipleAdvancementConfig extends AdvancementConfig {
       advancementMode.stop();
     });
   }
-
-  /**
-   * Get the AdvancementConfigs array.
-   */
-  getAdvancementModes() {
-    return this.advancementModes_;
-  }
 }
 
 
@@ -277,7 +255,7 @@ export class MultipleAdvancementConfig extends AdvancementConfig {
  * Always provides a progress of 1.0.  Advances when the user taps the
  * corresponding section, depending on language settings.
  */
-export class ManualAdvancement extends AdvancementConfig {
+class ManualAdvancement extends AdvancementConfig {
   /**
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
@@ -285,6 +263,7 @@ export class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
+    this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
 
     if (element.ownerDocument.defaultView) {
@@ -315,6 +294,7 @@ export class ManualAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
+    this.element_.addEventListener('click', this.clickListener_, true);
     if (!this.hasAutoAdvanceStr_) {
       super.onProgressUpdate();
     }
@@ -323,6 +303,7 @@ export class ManualAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
+    this.element_.removeEventListener('click', this.clickListener_, true);
   }
 
   /** @override */
@@ -377,9 +358,8 @@ export class ManualAdvancement extends AdvancementConfig {
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
-   * @override
    */
-  maybePerformNavigation(event) {
+  maybePerformNavigation_(event) {
     if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event) ||
       !this.isAmpStoryPageDescendant_(event)) {
       // If the system doesn't need to handle this click, then we can simply
@@ -420,6 +400,19 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     return right.direction;
+  }
+
+  /**
+   * Gets an instance of ManualAdvancement based on the HTML tag of the element.
+   * @param {!Element} rootEl
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   *                              an amp-story tag.
+   */
+  static fromElement(rootEl) {
+    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+      return null;
+    }
+    return new ManualAdvancement(rootEl);
   }
 }
 

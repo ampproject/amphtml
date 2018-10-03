@@ -49,9 +49,8 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {findIndex} from '../../../src/utils/array';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -109,8 +108,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {(!AdvancementConfig|!./page-advancement.ManualAdvancement|!./page-advancement.MultipleAdvancementConfig)} **/
-    this.advancement_ = AdvancementConfig.forPage(this);
+    /** @private @const {!AdvancementConfig} */
+    this.advancement_ = AdvancementConfig.forElement(this);
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
@@ -196,8 +195,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
-    this.advancement_.addOnTapNavigationListener(
-        navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
   }
@@ -732,32 +729,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     return null;
   }
 
-  /**
-   * Performs navigation if click was meant to do so.
-   * @param {!Event} event The click event.
-   */
-  maybePerformNavigation(event) {
-    if (this.advancement_.constructor.name == 'MultipleAdvancementConfig') {
-      // Get manual advancement from the MultipleAdvancementConfig array.
-      const advancementModes = this.advancement_.getAdvancementModes();
-      if (!advancementModes) {
-        user().error(TAG, 'No advancement modes found in page navigation');
-        return;
-      }
-
-      const manualAdvIndex = findIndex(advancementModes,
-          mode => mode.constructor.name === 'ManualAdvancement');
-      if (manualAdvIndex < 0) {
-        user().error(TAG, 'No manual advancement mode found.');
-        return;
-      }
-
-      advancementModes[manualAdvIndex].maybePerformNavigation(event);
-    } else if (this.advancement_.constructor.name === 'ManualAdvancement') {
-      this.advancement_.maybePerformNavigation(event);
-    }
-  }
-
 
   /**
    * Navigates to the previous page in the story.
@@ -790,18 +761,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.switchTo_(pageId);
   }
 
-  /**
-   * Delegated the navigation decision to AMP-STORY via event.
-   * @param {number} direction The direction in which navigation needs to
-   * takes place.
-   */
-  navigateOnTap(direction) {
-    const payload = dict({'direction': direction});
-    const eventInit = {bubbles: true};
-    dispatch(this.win, this.element, EventType.TAP_NAVIGATION, payload,
-        eventInit);
-  }
-
 
   /**
    * @param {string} targetPageId
@@ -813,6 +772,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
   }
+
 
   /**
   * Checks if the page has any audio.
@@ -827,6 +787,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
   }
 
+
   /**
   * Checks if the page has any videos with audio.
   * @return {boolean}
@@ -837,6 +798,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return Array.prototype.some.call(
         ampVideoEls, video => !video.hasAttribute('noaudio'));
   }
+
 
   /**
    * @private
