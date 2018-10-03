@@ -27,9 +27,10 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../exec');
-const {FileSystemAssetLoader, Percy} = require('@percy/puppeteer');
-const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../git');
+const {execScriptAsync} = require('../../exec');
+const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
+const {PercyAssetsLoader} = require('./percy-assets-loader');
+const {Percy} = require('@percy/puppeteer');
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -53,8 +54,9 @@ const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
 const MASTER_BRANCHES_REGEXP = /^(?:master|release|canary|amp-release-.*)$/;
 const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 
+const ROOT_DIR = path.resolve(__dirname, '../../../');
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
-    path.resolve(__dirname, 'visual-diff-wrapper.snippet.js'), 'utf8');
+    path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 
 const preVisualDiffTasks =
     (argv.nobuild || argv.verify_status) ? [] : ['build'];
@@ -307,13 +309,14 @@ async function newPage(browser) {
 /**
  * Runs the visual tests.
  *
- * @param {!JsonObject} visualTestsConfig JSON object containing the config for
- *     the visual tests.
+ * @param {!Array<string>} assetGlobs an array of glob strings to load assets
+ *     from.
+ * @param {!Array<JsonObject>} webpages an array of JSON objects containing
+ *     details about the pages to snapshot.
  */
-async function runVisualTests(visualTestsConfig) {
+async function runVisualTests(assetGlobs, webpages) {
   // Create a Percy client and start a build.
-  const percy = createPercyPuppeteerController(
-      visualTestsConfig.assets_dir, visualTestsConfig.assets_base_url);
+  const percy = createPercyPuppeteerController(assetGlobs);
   await percy.startBuild();
   const {buildId} = percy;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
@@ -324,7 +327,7 @@ async function runVisualTests(visualTestsConfig) {
   }
 
   // Take the snapshots.
-  await generateSnapshots(percy, visualTestsConfig.webpages);
+  await generateSnapshots(percy, webpages);
 
   // Tell Percy we're finished taking snapshots and check if the build failed
   // early.
@@ -341,20 +344,14 @@ async function runVisualTests(visualTestsConfig) {
 /**
  * Create a new Percy-Puppeteer controller and return it.
  *
- * @param {string} assetsDir path to the assets dir.
- * @param {string} assetsBaseUrl the base URL for served assets.
+ * @param {!Array<string>} assetGlobs an array of glob strings to load assets
+ *     from.
  * @return {!Percy} a Percy-Puppeteer controller.
  */
-function createPercyPuppeteerController(assetsDir, assetsBaseUrl) {
+function createPercyPuppeteerController(assetGlobs) {
   if (!argv.percy_disabled) {
-    const buildDir = '../../' + assetsDir;
     return new Percy({
-      loaders: [
-        new FileSystemAssetLoader({
-          buildDir: path.resolve(__dirname, buildDir),
-          mountPath: assetsBaseUrl,
-        }),
-      ],
+      loaders: [new PercyAssetsLoader(assetGlobs, ROOT_DIR)],
     });
   } else {
     return {
@@ -668,13 +665,11 @@ function setDebuggingLevel() {
  */
 async function createEmptyBuild(page) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
-  const blankAssetsDir = '../../examples/visual-tests/blank-page';
+  const blankAssetsDir = '../../../examples/visual-tests/blank-page';
   const percy = new Percy({
     loaders: [
-      new FileSystemAssetLoader({
-        buildDir: path.resolve(__dirname, blankAssetsDir),
-        mountPath: '',
-      }),
+      new PercyAssetsLoader(
+          [path.resolve(__dirname, blankAssetsDir)], ROOT_DIR),
     ],
   });
   await percy.startBuild();
@@ -726,9 +721,10 @@ async function visualDiff() {
   // Load and parse the config. Use JSON5 due to JSON comments in file.
   const visualTestsConfig = JSON5.parse(
       fs.readFileSync(
-          path.resolve(__dirname, '../../test/visual-diff/visual-tests'),
+          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
           'utf8'));
-  await runVisualTests(visualTestsConfig);
+  await runVisualTests(
+      visualTestsConfig.asset_globs, visualTestsConfig.webpages);
   process.exit(0);
 }
 
