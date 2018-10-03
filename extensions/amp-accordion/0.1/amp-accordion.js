@@ -64,6 +64,11 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    /** @private {string} */
+    this.suffix_ = element.id ? element.id :
+      Math.floor(Math.random() * Math.floor(100));
+
+
   }
 
   /** @override */
@@ -102,10 +107,7 @@ class AmpAccordion extends AMP.BaseElement {
         // we need to make sure that each accordion has a unique ID.
         // In case the accordion doesn't have an ID we use a
         // random number to ensure uniqueness.
-        const suffix = this.element.id ?
-          this.element.id :
-          Math.floor(Math.random() * Math.floor(100));
-        contentId = suffix + '_AMP_content_' + index;
+        contentId = this.suffix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
 
