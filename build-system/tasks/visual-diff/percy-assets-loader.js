@@ -3,6 +3,7 @@ const glob = require('glob');
 const mime = require('mime-types');
 const path = require('path');
 
+// Based on recommended limitations from the original Percy loader.
 const MAX_FILE_SIZE_BYTES = 15728640;
 
 /*
