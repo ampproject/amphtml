@@ -132,7 +132,7 @@ module.exports = {
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
-    '!build-system/tasks/visual-diff-wrapper.snippet.js',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!third_party/**/*.*',
