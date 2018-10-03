@@ -277,13 +277,10 @@ function verifyBuildStatus(status, buildId) {
  */
 async function launchBrowser() {
   const browserOptions = {
-    args: ['--no-sandbox', '--disable-extensions'],
+    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
     dumpio: argv.chrome_debug,
+    headless: true,
   };
-  browserOptions.headless = !!argv.headless;
-  if (argv.headless) {
-    browserOptions['args'].push('--disable-gpu');
-  }
 
   browser_ = await puppeteer.launch(browserOptions)
       .catch(err => log('fatal', err));
@@ -764,7 +761,6 @@ gulp.task(
         'verify_status':
           '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
-        'headless': '  Runs Chrome in headless mode',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',

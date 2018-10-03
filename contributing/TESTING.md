@@ -104,9 +104,8 @@ Command                                                                 | Descri
 `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
-`gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
+`gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
 `gulp visual-diff --nobuild`                                            | Same as above, but without re-build.
-`gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode.
 `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.
 `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern.
 `gulp firebase`                                                         | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.
@@ -234,7 +233,7 @@ The technology stack used is:
 - [Percy](https://percy.io/), a visual regression testing service for webpages
 - [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
 - [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
-- [(Headless) Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome browser, optionally in headless mode
+- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
@@ -253,12 +252,7 @@ gulp visual-diff --nobuild
 ```
 Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
 
-The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome. You can see the results at `https://percy.io/<org>/<project>`.
-
-To run Chrome in headless mode, use:
-```
- gulp visual-diff --headless
-```
+The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
 
 To see debugging info during Percy runs, you can run:
 ```
