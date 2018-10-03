@@ -640,6 +640,11 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    const {element} = this;
+    const poster = element.getElementsByTagName('i-amphtml-poster');
+    if (poster.length > 0) {
+      element.removeChild(poster[0]);
+    }
   }
 
   /**
