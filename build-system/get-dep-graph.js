@@ -22,6 +22,7 @@ const colors = require('ansi-colors');
 const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
@@ -32,6 +33,14 @@ const {extensionBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+
+const argv = minimist(process.argv.slice(2));
+let singlePassDest = typeof argv.single_pass_dest === 'string' ?
+  argv.single_pass_dest : './dist/';
+
+if (!singlePassDest.endsWith('/')) {
+  singlePassDest = `${singlePassDest}/`;
+}
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
@@ -431,16 +440,16 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: './dist/',
+    writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
-    fs.ensureDirSync('dist/v0');
+    fs.ensureDirSync(`${singlePassDest}/v0`);
     return Promise.all([
-      move('dist/amp-*', 'dist/v0'),
-      move('dist/_base*', 'dist/v0'),
+      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
+      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
   });
 };
