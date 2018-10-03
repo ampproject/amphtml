@@ -34,14 +34,12 @@ const EXPAND_WHITELIST = {
 };
 
 const RESERVED_KEYS = {
-  'referralDomains': true,
+  'referrerDomains': true,
   'enabled': true,
   'cookiePath': true,
   'cookieMaxAge': true,
   'cookieSecure': true,
   'cookieDomain': true,
-  'cookieHttpOnly': true,
-  'cookieSameSite': true,
 };
 
 export class CookieWriter {
@@ -87,7 +85,7 @@ export class CookieWriter {
    * Parse the config and write to cookie
    * Config looks like
    * cookies: {
-   *   enabled: true/false,
+   *   enabled: true/false, //Default to true
    *   cookieNameA: {
    *     value: cookieValueA (QUERY_PARAM/LINKER_PARAM)
    *   },
@@ -132,7 +130,7 @@ export class CookieWriter {
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
-      if (this.isCookieValueObjectValid_(cookieName, cookieObj)) {
+      if (this.isValidCookieConfig_(cookieName, cookieObj)) {
         promises.push(this.expandAndWrite_(cookieName, cookieObj['value']));
       }
     }
@@ -149,25 +147,25 @@ export class CookieWriter {
    *  value: string (cookieValue),
    * }
    * @param {string} cookieName
-   * @param {*} cookieObj
+   * @param {*} cookieConfig
    * @return {boolean}
    */
-  isCookieValueObjectValid_(cookieName, cookieObj) {
+  isValidCookieConfig_(cookieName, cookieConfig) {
     if (RESERVED_KEYS[cookieName]) {
       return false;
     }
 
-    if (!isObject(cookieObj)) {
+    if (!isObject(cookieConfig)) {
       user().error(TAG, 'cookieValue must be configured in an object');
       return false;
     }
 
-    if (!hasOwn(cookieObj, 'value')) {
+    if (!hasOwn(cookieConfig, 'value')) {
       user().error(TAG, 'value is required in the cookieValue object');
       return false;
     }
 
-    const str = cookieObj['value'];
+    const str = cookieConfig['value'];
     // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
     const {name} = getNameArgs(str);
     if (!EXPAND_WHITELIST[name]) {

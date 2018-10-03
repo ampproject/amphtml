@@ -239,7 +239,7 @@ describes.realWin('amp-analytics.cookie-writer', {
       const config = dict({
         'cookies': {
           'testId': {
-            'value': 'QUERY_PARAM(abc)'
+            'value': 'QUERY_PARAM(abc)',
           },
         },
       });
