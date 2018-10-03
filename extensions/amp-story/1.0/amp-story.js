@@ -1319,10 +1319,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onPausedStateUpdate_(isPaused) {
-    // Make sure there is an active page and that the bookend is not open before
-    // proceeding.
-    if (!this.activePage_ ||
-        this.storeService_.get(StateProperty.BOOKEND_STATE)) {
+    if (!this.activePage_) {
       return;
     }
 
@@ -1480,15 +1477,6 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-
-    if (isActive) {
-      this.systemLayer_.hideDeveloperLog();
-      this.activePage_.setState(PageState.PAUSED);
-    }
-
-    if (!isActive) {
-      this.activePage_.setState(PageState.ACTIVE);
-    }
   }
 
 

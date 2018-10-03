@@ -165,6 +165,32 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should pause the story when bookend becomes active', () => {
+    createPages(story.element, 1, ['cover']);
+    sandbox.stub(story, 'maybePreloadBookend_').returns();
+    story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageById('cover').state_)
+              .to.equal(PageState.NOT_ACTIVE);
+        });
+  });
+
+  it('should keep the story paused when tab becomes active and bookend ' +
+  'is open', () => {
+    createPages(story.element, 1, ['cover']);
+    sandbox.stub(story, 'maybePreloadBookend_').returns();
+    story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+
+    return story.layoutCallback()
+        .then(() => {
+          story.pauseCallback();
+          story.resumeCallback();
+          expect(story.storeService_.get(StateProperty.PAUSED_STATE))
+              .to.be.true;
+        });
+  });
+
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
 
@@ -207,20 +233,6 @@ describes.realWin('amp-story', {
         .then(() => {
           expect(buildShareMenuStub).to.not.have.been.called;
         });
-  });
-
-  // TODO(#11639): Re-enable this test.
-  it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
-    const hideBookendStub = sandbox.stub(
-        element.implementation_, 'hideBookend_', NOOP);
-
-    appendEmptyPage(element);
-
-    element.build();
-
-    element.dispatchEvent(new Event(EventType.CLOSE_BOOKEND));
-
-    expect(hideBookendStub).to.have.been.calledOnce;
   });
 
   it('should return a valid page index', () => {
