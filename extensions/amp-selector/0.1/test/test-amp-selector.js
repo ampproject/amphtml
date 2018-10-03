@@ -88,7 +88,7 @@ describes.realWin('amp-selector', {
     function keyPress(ampSelector, key, opt_target) {
       const impl = ampSelector.implementation_;
       const event = {
-        key: key,
+        key,
         preventDefault: () => {},
         target: opt_target,
       };

@@ -1268,8 +1268,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.isActive_) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
+    const {key} = event;
+    switch (key) {
       case KeyCodes.ESCAPE:
         this.close_();
         break;
