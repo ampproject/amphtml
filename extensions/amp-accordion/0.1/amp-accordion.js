@@ -64,6 +64,11 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    /** @private {number|string} */
+    this.suffix_ = element.id ? element.id :
+      Math.floor(Math.random() * Math.floor(100));
+
+
   }
 
   /** @override */
@@ -98,7 +103,11 @@ class AmpAccordion extends AMP.BaseElement {
       content.classList.add('i-amphtml-accordion-content');
       let contentId = content.getAttribute('id');
       if (!contentId) {
-        contentId = this.element.id + '_AMP_content_' + index;
+        // To ensure that we pass Accessibility audits -
+        // we need to make sure that each accordion has a unique ID.
+        // In case the accordion doesn't have an ID we use a
+        // random number to ensure uniqueness.
+        contentId = this.suffix_ + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
 

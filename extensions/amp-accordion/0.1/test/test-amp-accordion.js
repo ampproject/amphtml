@@ -80,6 +80,20 @@ describes.realWin('amp-accordion', {
         });
       });
 
+  it('multiple accordions should not have the same IDs on content',
+      () => {
+        return getAmpAccordion().then(() => {
+          return getAmpAccordion().then(() => {
+            const contentElements =
+              doc.getElementsByClassName('i-amphtml-accordion-content');
+            for (let i = 0; i < contentElements.length; i++) {
+              expect(contentElements[i].id.startsWith(
+                  '_AMP_content_')).to.be.false;
+            }
+          });
+        });
+      });
+
   it('should collapse when toggle action is triggered on a expanded section',
       () => {
         return getAmpAccordion().then(ampAccordion => {
