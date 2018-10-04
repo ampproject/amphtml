@@ -44,6 +44,7 @@ function addToQueue(global, data) {
     // Create container
     createContainer(global, renderTo);
 
+    const {YandexZen} = global;
     const config = Object.assign(data, {
       clid: JSON.parse(data.clid),
       container: `#${renderTo}`,
@@ -53,13 +54,13 @@ function addToQueue(global, data) {
         }
       },
       failCallback: () => {
-        if (typeof data.successCallback === 'function') {
+        if (typeof data.failCallback === 'function') {
           data.failCallback();
         }
       },
     });
 
-    global.YandexZen.renderWidget(config);
+    YandexZen.renderWidget(config);
   });
 }
 
