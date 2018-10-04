@@ -30,7 +30,7 @@ module.exports = {
             './polyfills/document-contains': ['installDocContains'],
             './polyfills/math-sign': ['installMathSign'],
             './polyfills/object-assign': ['installObjectAssign'],
-            './polyfills/promise': ['installPromise']
+            './polyfills/promise': ['installPromise'],
           },
         }],
       ]);
