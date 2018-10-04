@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
@@ -487,14 +487,14 @@ class AmpAccordion extends AMP.BaseElement {
     if (event.defaultPrevented) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
-      case KeyCodes.UP_ARROW: /* fallthrough */
-      case KeyCodes.DOWN_ARROW:
+    const {key} = event;
+    switch (key) {
+      case Keys.UP_ARROW: /* fallthrough */
+      case Keys.DOWN_ARROW:
         this.navigationKeyDownHandler_(event);
         return;
-      case KeyCodes.ENTER: /* fallthrough */
-      case KeyCodes.SPACE:
+      case Keys.ENTER: /* fallthrough */
+      case Keys.SPACE:
         if (event.target == event.currentTarget) {
           // Only activate if header element was activated directly.
           // Do not respond to key presses on its children.
@@ -516,7 +516,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (index !== -1) {
       event.preventDefault();
       // Up and down are the same regardless of locale direction.
-      const diff = event.keyCode == KeyCodes.UP_ARROW ? -1 : 1;
+      const diff = event.key == Keys.UP_ARROW ? -1 : 1;
       // If user navigates one past the beginning or end, wrap around.
       let newFocusIndex = (index + diff) % this.headers_.length;
       if (newFocusIndex < 0) {
