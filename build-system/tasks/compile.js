@@ -347,6 +347,7 @@ function compile(entryModuleFilenames, outputDir,
           'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
+        module_resolution: 'NODE',
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.

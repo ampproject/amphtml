@@ -45,9 +45,14 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
 
   @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
+        // TODO(choumx): CC v20171023 throws "cannot find symbol" and
+        // "incompatible types" errors for JSTypeNative enums.
+        // new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
+        // new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
+        // new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
+        new AssertFunctionByTypeName("user.assert", "boolean"),
+        new AssertFunctionByTypeName("dev.assert", "boolean"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assert", "boolean"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
         new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")

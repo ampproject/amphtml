@@ -155,6 +155,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     arg1.setLength("self.AMP".length());
     arg1.useSourceInfoIfMissingFromForTree(func);
     Node newcall = IR.call(func);
+    // TODO(choumx): putBooleanProp() no longer exists.
     newcall.putBooleanProp(Node.FREE_CALL, true);
     newcall.addChildToBack(arg1);
     expr.replaceChild(n, newcall);
