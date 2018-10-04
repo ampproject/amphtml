@@ -25,7 +25,8 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 const IDENTITY_FN = x => x;
-
+// Represents the correct value of KeyboardEvent.which for the Right Arrow
+const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
 describes.realWin('amp-story', {
   amp: {
@@ -286,7 +287,7 @@ describes.realWin('amp-story', {
 
     const eventObj = createEvent('keydown');
     eventObj.key = Keys.RIGHT_ARROW;
-    eventObj.which = Keys.RIGHT_ARROW;
+    eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :
