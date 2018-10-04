@@ -25,7 +25,6 @@ import {
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
@@ -35,7 +34,6 @@ import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
-const NOOP = () => {};
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
@@ -50,21 +48,6 @@ describes.realWin('amp-story', {
   let element;
   let story;
   let replaceStateStub;
-
-  /**
-   * @param {!Element} container
-   * @param {boolean=} opt_active
-   * @return {!Element}
-   */
-  function appendEmptyPage(container, opt_active) {
-    const page = document.createElement('amp-story-page');
-    page.id = '-empty-page';
-    if (opt_active) {
-      page.setAttribute('active', true);
-    }
-    container.appendChild(page);
-    return page;
-  }
 
   /**
    * @param {!Element} container
@@ -165,32 +148,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should pause the story when bookend becomes active', () => {
-    createPages(story.element, 1, ['cover']);
-    sandbox.stub(story, 'maybePreloadBookend_').returns();
-    story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-    return story.layoutCallback()
-        .then(() => {
-          expect(story.getPageById('cover').state_)
-              .to.equal(PageState.NOT_ACTIVE);
-        });
-  });
-
-  it('should keep the story paused when tab becomes active and bookend ' +
-  'is open', () => {
-    createPages(story.element, 1, ['cover']);
-    sandbox.stub(story, 'maybePreloadBookend_').returns();
-    story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-
-    return story.layoutCallback()
-        .then(() => {
-          story.pauseCallback();
-          story.resumeCallback();
-          expect(story.storeService_.get(StateProperty.PAUSED_STATE))
-              .to.be.true;
-        });
-  });
-
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
 
@@ -253,7 +210,6 @@ describes.realWin('amp-story', {
           }
         });
   });
-
 
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
@@ -723,7 +679,6 @@ describes.realWin('amp-story', {
           });
     });
   });
-
 
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {
