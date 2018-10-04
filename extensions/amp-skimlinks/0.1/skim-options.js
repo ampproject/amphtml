@@ -30,7 +30,7 @@ const errors = {
 /**
  *
  * @param {*} condition
- * @param {*} message
+ * @param {string} message
  */
 function assertSkimOption(condition, message) {
   user().assert(condition, `<amp-skimlinks> Invalid option => ${message}`);
@@ -38,8 +38,9 @@ function assertSkimOption(condition, message) {
 
 /**
  *
- * @param {*} element
- * @param {*} docInfo
+ * @param {!Element} element
+ * @param {?../../../src/service/document-info-impl.DocumentInfoDef} docInfo
+ * @return {!Object}
  */
 export function getAmpSkimlinksOptions(element, docInfo) {
   return {
@@ -53,8 +54,8 @@ export function getAmpSkimlinksOptions(element, docInfo) {
 
 /**
  *
- * @param {*} element
- * @param {*} internalDomains
+ * @param {!Element} element
+ * @param {!Array<string>} internalDomains
  */
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
@@ -76,7 +77,8 @@ function getExcludedDomains_(element, internalDomains) {
 
 /**
  *
- * @param {*} element
+ * @param {!Element} element
+ * @return {string}
  */
 function getPubCode_(element) {
   const pubCode = element.getAttribute('publisher-code');
@@ -87,7 +89,8 @@ function getPubCode_(element) {
 
 /**
  *
- * @param {*} element
+ * @param {!Element} element
+ * @return {boolean}
  */
 function getTrackingStatus_(element) {
   const tracking = element.getAttribute('tracking');
@@ -102,7 +105,8 @@ function getTrackingStatus_(element) {
 
 /**
  *
- * @param {*} element
+ * @param {!Element} element
+ * @return {?string}
  */
 function getCustomTrackingId_(element) {
   const customTrackingId = element.getAttribute('custom-tracking-id');
@@ -117,7 +121,8 @@ function getCustomTrackingId_(element) {
 
 /**
  *
- * @param {*} element
+ * @param {!Element} element
+ * @return {?string}
  */
 function getLinkSelector_(element) {
   const linkSelector = element.getAttribute('link-selector');
@@ -127,7 +132,8 @@ function getLinkSelector_(element) {
 
 /**
  *
- * @param {*} docInfo
+ * @param {?../../../src/service/document-info-impl.DocumentInfoDef} docInfo
+ * @return {!Array<string>}
  */
 function getInternalDomains_(docInfo) {
   const internalDomains = [];

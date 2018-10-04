@@ -24,9 +24,9 @@ export class LinkReplacementCache {
    * Constructor
    */
   constructor() {
-    /** @private {Array<HTMLElement>} */
+    /** @private {!Array<!HTMLElement>} */
     this.anchorList_ = [];
-    /** @private {Array<?string>} */
+    /** @private {!Array<?string>} */
     this.replacementList_ = [];
   }
 
@@ -34,7 +34,7 @@ export class LinkReplacementCache {
    * @public
    * Reset the list of anchors to the new provided list but keep
    * the replacement values associated with pre-existing anchors.
-   * @param {Array<HTMLElement>} newAnchorList - array of "<a>".
+   * @param {!Array<!HTMLElement>} newAnchorList - array of "<a>".
    */
   updateLinkList(newAnchorList) {
     // Copy the previous replacement URL to the
@@ -64,7 +64,7 @@ export class LinkReplacementCache {
   /**
    * @public
    * Returns the replacement url associated with an anchor.
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {?string}
    */
   getReplacementUrlForAnchor(anchor) {
@@ -75,7 +75,7 @@ export class LinkReplacementCache {
 
   /**
    * @public
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean}
    */
   isInCache(anchor) {
@@ -90,7 +90,7 @@ export class LinkReplacementCache {
    */
   getAnchorReplacementList() {
     return this.anchorList_.map(anchor => {
-      return /** @type {{anchor: HTMLElement, replacementUrl: ?string}} */ ({
+      return /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
         anchor,
         replacementUrl: this.getReplacementUrlForAnchor(anchor),
       });

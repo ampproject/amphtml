@@ -22,10 +22,10 @@ import {Observable} from '../../../../src/observable';
 import {isTwoStepsResponse} from './link-rewriter-helpers';
 
 
-/** @typedef {!Array<{anchor: HTMLElement, replacementUrl: ?string}>}} */
+/** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
 
-/** @typedef {{syncResponse: ?AnchorReplacementList, asyncResponse: ?Promise<!AnchorReplacementList>}} */
+/** @typedef {!{syncResponse: ?AnchorReplacementList, asyncResponse: ?Promise<!AnchorReplacementList>}} */
 export let TwoStepsResponse;
 
 
@@ -61,11 +61,11 @@ export class LinkRewriter {
     /** @public {string} */
     this.id = id;
 
-    /** @private {Document} */
+    /** @private {!Document} */
     this.ampPageDocument_ = ampPageDocument;
 
 
-    /** @private {function(Array<HTMLElement>):TwoStepsResponse} */
+    /** @private {function(!Array<!HTMLElement>):TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
     /** @private {string} */
@@ -81,7 +81,7 @@ export class LinkRewriter {
   /**
    * @public
    * Get the replacement url associated with the anchor.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {?string}
    */
   getReplacementUrl(anchor) {
@@ -110,7 +110,7 @@ export class LinkRewriter {
    * inclusion/exclusion rules can be created by using the "linkSelector"
    * option. When using this option all the links not matching the css selector
    * will be ignored and isWatchingLink(anchor) will return false.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean}
    */
   isWatchingLink(anchor) {
@@ -125,7 +125,7 @@ export class LinkRewriter {
    * to handle the click on the anchor and navigate to the new url.
    * After 300ms, if the page is still open (target="_blank" scenario),
    * the link is restored to its initial value.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean} - 'true' if the linkRewriter has changed the url
    *  'false' otherwise.
    */
@@ -151,7 +151,7 @@ export class LinkRewriter {
    * Scan the page to find links and send "page_scanned" event when scan
    * is completed and we know the replacement url of all the links
    * currently in the DOM.
-   * @return {Promise}
+   * @return {!Promise}
    */
   onDomUpdated() {
     return this.scanLinksOnPage_().then(() => {
@@ -168,7 +168,7 @@ export class LinkRewriter {
    * function what is the replacement url for each anchor. The response
    * which can be synchronous, asynchronous or both at the same time will be
    * stored internally and used if a click on one of this anchor happens later.
-   * @return {Promise}
+   * @return {!Promise}
    */
   scanLinksOnPage_() {
     const anchorList = this.getLinksInDOM_();
@@ -214,7 +214,7 @@ export class LinkRewriter {
    * @private
    * Filter the list of anchors to returns only the ones
    * that were not in the page at the time of the last page scan.
-   * @param {*} anchorList
+   * @param {!Array<!HTMLElement>} anchorList
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
@@ -232,7 +232,7 @@ export class LinkRewriter {
    * @private
    * Get the list of anchors element in the page.
    * (Based on linkSelector option)
-   * @return {Array<HTMLElement>}
+   * @return {!Array<!HTMLElement>}
    */
   getLinksInDOM_() {
     const q = this.ampPageDocument_.querySelectorAll(this.linkSelector_);

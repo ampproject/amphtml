@@ -60,6 +60,7 @@ export function createTwoStepsResponse(syncResponse, asyncResponse) {
 /**
  *
  * @param {*} twoStepsResponse
+ * @return {boolean}
  */
 export function isTwoStepsResponse(twoStepsResponse) {
   const isValid =

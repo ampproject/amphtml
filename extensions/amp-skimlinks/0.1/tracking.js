@@ -39,8 +39,8 @@ export class Tracking {
   /**
    * Use tracking instance to track page impressions,
    * link impressions and non-affiliated clicks.
-   * @param {AmpElement} element
-   * @param {Object} skimOptions
+   * @param {!AmpElement} element
+   * @param {?Object} skimOptions
    */
   constructor(element, skimOptions) {
     /** @private {boolean} */
@@ -57,14 +57,16 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
     };
-    this.skimOptions_ = skimOptions;
+
+    /** @private {!Object} */
+    this.skimOptions_ = skimOptions || {};
     this.analytics_ = this.setupAnalytics_(element);
   }
 
   /**
    * Getter to access the tracking data from outside the class.
    * @public
-   * @return {Object}
+   * @return {!Object}
    */
   getTrackingInfo() {
     return this.trackingInfo_;
@@ -122,7 +124,7 @@ export class Tracking {
    * Sends tracking request to Skimlinks tracking API in order to
    * register non-affiliated click.
    * @public
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    */
   sendNaClickTracking(anchor) {
     if (!this.tracking_ || isExcludedUrl(anchor.href, this.skimOptions_)) {
@@ -162,7 +164,7 @@ export class Tracking {
    * Sends tracking request to Skimlinks tracking API in order to
    * register page impression request.
    * @private
-   * @param {Object} commonData
+   * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
@@ -191,9 +193,9 @@ export class Tracking {
    * Sends tracking request to Skimlinks tracking API in order to
    * register link impression request.
    * @private
-   * @param {Object} commonData
+   * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
-   * @param {Object} urls
+   * @param {!Object} urls
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = /** @type {!JsonObject} */ (Object.assign(
@@ -218,7 +220,7 @@ export class Tracking {
    * CommonSignals.LOAD_START has been triggered.
    * (See "initTracking_" in amp-skimlinks.js)
    * @private
-   * @param {AmpElement} element
+   * @param {!AmpElement} element
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
@@ -253,7 +255,7 @@ export class Tracking {
    * @private
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
-   * @return {{numberAffiliateLinks: number, urls: Object}}
+   * @return {!{numberAffiliateLinks: number, urls: !Object}}
    */
   extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;

@@ -56,20 +56,20 @@ export const AFFILIATE_STATUS = {
 export class AffiliateLinkResolver {
   /**
    * @param {!../../../src/service/xhr-impl.Xhr} xhr
-   * @param {Object} skimOptions
+   * @param {?Object} skimOptions
    * @param {!./waypoint.Waypoint} waypoint
    */
   constructor(xhr, skimOptions, waypoint) {
     /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
-    /** @private {Object} */
-    this.skimOptions_ = skimOptions;
+    /** @private {!Object} */
+    this.skimOptions_ = skimOptions || {};
 
     /** @private {!./waypoint.Waypoint} */
     this.waypoint_ = waypoint;
 
-    /** @private {Object<string,string>} */
+    /** @private {!Object<string,string>} */
     this.domains_ = {};
 
     /**
@@ -87,8 +87,8 @@ export class AffiliateLinkResolver {
    * This method is public since it can also be called externally in case
    * of the "beacon fallback". (see amp-skimlinks.js)
    * @public
-   * @param {Array<string>} domains
-   * @return {Promise}
+   * @param {!Array<string>} domains
+   * @return {!Promise}
    */
   fetchDomainResolverApi(domains) {
     const data = dict({
@@ -124,7 +124,7 @@ export class AffiliateLinkResolver {
    * }
    *
    * @public
-   * @param {Array<HTMLElement>} anchorList
+   * @param {!Array<!HTMLElement>} anchorList
    * @return {!./link-rewriter/link-rewriter.TwoStepsResponse}
    */
   resolveUnknownAnchors(anchorList) {
@@ -165,7 +165,7 @@ export class AffiliateLinkResolver {
    *  ]
    *
    * @private
-   * @param {Array<HTMLElement>} anchorList
+   * @param {!Array<!HTMLElement>} anchorList
    * @return {!./link-rewriter/link-rewriter.AnchorReplacementList}
    */
   associateWithReplacementUrl_(anchorList) {
@@ -207,8 +207,8 @@ export class AffiliateLinkResolver {
    * the list of domains that will be sent to the domain resolver API
    * (beaconAPI).
    * @private
-   * @param {Array<HTMLElement>} anchorList
-   * @return {Array<string>} - List of domains
+   * @param {!Array<!HTMLElement>} anchorList
+   * @return {!Array<string>} - List of domains
    */
   getNewDomains_(anchorList) {
     const domains = anchorList.map(this.getAnchorDomain_);
@@ -231,7 +231,7 @@ export class AffiliateLinkResolver {
    * the cache. This allows us to keep track of what domains have already been
    * sent to the API, even if the API hasn't come back yet.
    * @private
-   * @param {Array<string>} domains
+   * @param {!Array<string>} domains
    */
   markDomainsAsUnknown_(domains) {
     domains.forEach(domain => {
@@ -251,9 +251,9 @@ export class AffiliateLinkResolver {
    * Filters the list of anchors for which the domain of the href is
    * in the `unknownDomains` list.
    * @private
-   * @param {Array<HTMLElement>} anchorList
-   * @param {Array<string>} unknownDomains
-   * @return {Array<HTMLElement>}
+   * @param {!Array<!HTMLElement>} anchorList
+   * @param {!Array<string>} unknownDomains
+   * @return {!Array<!HTMLElement>}
    */
   getUnknownAnchors_(anchorList, unknownDomains) {
     return anchorList.filter(anchor => {
@@ -268,9 +268,9 @@ export class AffiliateLinkResolver {
    * Fetch the domain resolver api before determining the
    * AnchorReplacementList.
    * @private
-   * @param {Array<HTMLElement>} anchorList
-   * @param {Array<string>} domainsToAsk
-   * @return {Promise<!./link-rewriter/link-rewriter.AnchorReplacementList>}
+   * @param {!Array<HTMLElement>} anchorList
+   * @param {!Array<string>} domainsToAsk
+   * @return {!Promise<!./link-rewriter/link-rewriter.AnchorReplacementList>}
    */
   resolvedUnknownAnchorsAsync_(anchorList, domainsToAsk) {
     const promise = this.fetchDomainResolverApi(domainsToAsk);
@@ -290,8 +290,8 @@ export class AffiliateLinkResolver {
   /**
    * Updates the internal affiliate status cache (this.domains_).
    * @private
-   * @param {Array<string>} allDomains
-   * @param {Array<string>} affiliateDomains
+   * @param {!Array<string>} allDomains
+   * @param {!Array<string>} affiliateDomains
    */
   updateDomainsStatusMap_(allDomains, affiliateDomains) {
     allDomains.forEach(domain => {
@@ -305,7 +305,7 @@ export class AffiliateLinkResolver {
   /**
    * Extracts the domain (hostname) from an anchor.
    * @private
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {string} - Hostname, without protocol, without www.
    */
   getAnchorDomain_(anchor) {
