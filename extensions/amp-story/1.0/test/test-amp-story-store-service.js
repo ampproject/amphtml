@@ -181,16 +181,15 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should unpause the story when closing the bookend', () => {
-    const pausedListenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-
     // First open the bookend.
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
 
     // Close the bookend.
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
     storeService.dispatch(Action.TOGGLE_BOOKEND, false);
 
-    expect(pausedListenerSpy).to.have.been.calledTwice;
+    expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(false);
   });
 
