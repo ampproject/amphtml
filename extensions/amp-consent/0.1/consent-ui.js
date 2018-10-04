@@ -19,11 +19,12 @@ import {
   assertHttpsUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
 import {
+  elementByTag,
   insertAfterOrAtStart,
   removeElement,
 } from '../../../src/dom';
+import {getData} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
@@ -126,7 +127,9 @@ export class ConsentUI {
         // before resetIframe_. Because the iframe needs to be shown first
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
         // API before consent-response API.
-        this.showIframe_();
+        this.baseInstance_.mutateElement(() => {
+          this.showIframe_();
+        });
       });
     } else {
       toggle(this.ui_, true);
@@ -186,7 +189,6 @@ export class ConsentUI {
     const {classList} = placeholder;
     classList.add('i-amphtml-consent-fill');
     classList.add('i-amphtml-consent-placeholder');
-    insertAfterOrAtStart(this.parent_, placeholder, null);
     return placeholder;
   }
 
@@ -199,6 +201,9 @@ export class ConsentUI {
   loadIframe_() {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
+    if (!elementByTag(this.parent_, 'placeholder')) {
+      insertAfterOrAtStart(this.parent_, this.placeholder_, null);
+    }
     classList.add('loading');
     toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
