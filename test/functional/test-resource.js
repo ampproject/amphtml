@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {LayoutPriority} from '../../src/layout.js';
+import {Resource, ResourceState} from '../../src/service/resource.js';
+import {Resources} from '../../src/service/resources-impl.js';
+import {Services} from '../../src/services.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
 
 
 describes.realWin('Resource', {amp: true}, env => {

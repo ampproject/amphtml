@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../amp-social-share';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
+import '../amp-social-share.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {Services} from '../../../../src/services.js';
 
 const STRINGS = {
   'text': 'Hello world',

@@ -24,19 +24,19 @@ import {
   MANUAL_EXPERIMENT_ID,
   addExperimentIdToElement,
   extractUrlExperimentId,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {dev} from '../../../src/log';
+} from '../../../ads/google/a4a/traffic-experiments.js';
+import {dev} from '../../../src/log.js';
 import {
   forceExperimentBranch,
   getExperimentBranch,
-} from '../../../src/experiments';
+} from '../../../src/experiments.js';
 import {
   isCdnProxy,
   isGoogleAdsA4AValidEnvironment,
-} from '../../../ads/google/a4a/utils';
+} from '../../../ads/google/a4a/utils.js';
 import {
   selectAndSetExperiments,
-} from '../../../ads/google/a4a/experiment-utils';
+} from '../../../ads/google/a4a/experiment-utils.js';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';

@@ -28,9 +28,9 @@
  * </amp-soundcloud>
  */
 
-import {Layout} from '../../../src/layout';
-import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {dict} from '../../../src/utils/object.js';
+import {user} from '../../../src/log.js';
 
 
 class AmpSoundcloud extends AMP.BaseElement {

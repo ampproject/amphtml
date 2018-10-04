@@ -15,12 +15,12 @@
  */
 
 import * as lolex from 'lolex';
-import * as service from '../../src/service';
-import {createIframePromise} from '../../testing/iframe';
+import * as service from '../../src/service.js';
+import {createIframePromise} from '../../testing/iframe.js';
 import {
   hasRenderDelayingServices,
   waitForServices,
-} from '../../src/render-delaying-services';
+} from '../../src/render-delaying-services.js';
 
 describe('waitForServices', () => {
 

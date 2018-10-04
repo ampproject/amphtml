@@ -36,12 +36,12 @@
  */
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {FollowButton} from './follow-button';
-import {PinItButton} from './pinit-button';
+import {FollowButton} from './follow-button.js';
+import {PinItButton} from './pinit-button.js';
 
-import {PinWidget} from './pin-widget';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {PinWidget} from './pin-widget.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {user} from '../../../src/log.js';
 
 /**
  * AMP Pinterest

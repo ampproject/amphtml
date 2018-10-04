@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {Entitlement, GrantReason} from '../entitlement.js';
+import {LocalSubscriptionPlatform} from '../local-subscription-platform.js';
 import {
   PageConfig,
   PageConfigResolver,
-} from '../../../../third_party/subscriptions-project/config';
-import {PlatformStore} from '../platform-store';
-import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
-import {SubscriptionAnalyticsEvents} from '../analytics';
-import {SubscriptionPlatform} from '../subscription-platform';
-import {SubscriptionService} from '../amp-subscriptions';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+} from '../../../../third_party/subscriptions-project/config.js';
+import {PlatformStore} from '../platform-store.js';
+import {ServiceAdapter} from '../service-adapter.js';
+import {Services} from '../../../../src/services.js';
+import {SubscriptionAnalyticsEvents} from '../analytics.js';
+import {SubscriptionPlatform} from '../subscription-platform.js';
+import {SubscriptionService} from '../amp-subscriptions.js';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform.js';
 import {setTimeout} from 'timers';
 
 

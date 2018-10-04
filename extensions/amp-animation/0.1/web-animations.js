@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
-import {Observable} from '../../../src/observable';
+import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast.js';
+import {Observable} from '../../../src/observable.js';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -30,22 +30,22 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
   isWhitelistedProp,
-} from './web-animation-types';
+} from './web-animation-types.js';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
   getVendorJsPropertyName,
   setStyles,
-} from '../../../src/style';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
-import {dashToCamelCase, startsWith} from '../../../src/string';
-import {dev, user} from '../../../src/log';
-import {extractKeyframes} from './keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {parseCss} from './css-expr';
+} from '../../../src/style.js';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url.js';
+import {closestBySelector, matches} from '../../../src/dom.js';
+import {dashToCamelCase, startsWith} from '../../../src/string.js';
+import {dev, user} from '../../../src/log.js';
+import {extractKeyframes} from './keyframes-extractor.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject, toArray} from '../../../src/types.js';
+import {map} from '../../../src/utils/object.js';
+import {parseCss} from './css-expr.js';
 
 
 /** @const {string} */

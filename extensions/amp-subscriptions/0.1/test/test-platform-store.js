@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Entitlement, GrantReason} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement.js';
 
-import {PlatformStore} from '../platform-store';
-import {SubscriptionPlatform} from '../subscription-platform';
-import {user} from '../../../../src/log';
+import {PlatformStore} from '../platform-store.js';
+import {SubscriptionPlatform} from '../subscription-platform.js';
+import {user} from '../../../../src/log.js';
 
 describes.realWin('Platform store', {}, () => {
   let platformStore;

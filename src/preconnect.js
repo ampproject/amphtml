@@ -20,13 +20,13 @@
  */
 
 
-import {Services} from './services';
-import {dev} from './log';
-import {getService, registerServiceBuilder} from './service';
-import {htmlFor} from './static-template';
-import {parseUrlDeprecated} from './url';
-import {startsWith} from './string';
-import {toWin} from './types';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {getService, registerServiceBuilder} from './service.js';
+import {htmlFor} from './static-template.js';
+import {parseUrlDeprecated} from './url.js';
+import {startsWith} from './string.js';
+import {toWin} from './types.js';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;

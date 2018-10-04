@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as DocumentFetcher from '../../../../src/document-fetcher';
+import * as DocumentFetcher from '../../../../src/document-fetcher.js';
 import * as lolex from 'lolex';
-import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {getMode} from '../../../../src/mode';
-import {isUserErrorMessage} from '../../../../src/log';
-import {removeFragment, serializeQueryString} from '../../../../src/url';
+import {AccessServerJwtAdapter} from '../amp-access-server-jwt.js';
+import {getMode} from '../../../../src/mode.js';
+import {isUserErrorMessage} from '../../../../src/log.js';
+import {removeFragment, serializeQueryString} from '../../../../src/url.js';
 
 
 describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {

@@ -15,7 +15,7 @@
  */
 
 import {exponentialBackoff, exponentialBackoffClock}
-  from '../../src/exponential-backoff';
+  from '../../src/exponential-backoff.js';
 
 
 describe('exponentialBackoff', () => {

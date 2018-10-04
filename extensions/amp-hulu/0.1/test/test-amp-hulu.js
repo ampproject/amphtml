@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-hulu';
+import '../amp-hulu.js';
 
 
 describes.realWin('amp-hulu', {

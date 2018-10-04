@@ -19,7 +19,7 @@ import {
   parseSrcset,
   srcsetFromElement,
   srcsetFromSrc,
-} from '../../src/srcset';
+} from '../../src/srcset.js';
 
 
 describe('Srcset', () => {

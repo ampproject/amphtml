@@ -15,9 +15,9 @@
  */
 
 
-import {BatchingPluginFunctions} from '../batching-plugins';
-import {dict} from '../../../../src/utils/object';
-import {isArray} from '../../../../src/types';
+import {BatchingPluginFunctions} from '../batching-plugins.js';
+import {dict} from '../../../../src/utils/object.js';
+import {isArray} from '../../../../src/types.js';
 
 /**
  * Please add your custom test data here in alphabetic order.

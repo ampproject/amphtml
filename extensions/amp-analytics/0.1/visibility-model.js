@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Observable} from '../../../src/observable.js';
+import {dev} from '../../../src/log.js';
 
 /**
  * This class implements visibility calculations based on the

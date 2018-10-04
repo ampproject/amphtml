@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-playbuzz';
-import {toggleExperiment} from '../../../../src/experiments';
+import '../amp-playbuzz.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 function startsWith(string, searchString) {

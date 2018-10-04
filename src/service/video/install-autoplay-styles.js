@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {installStylesForDoc} from '../../style-installer';
+import {installStylesForDoc} from '../../style-installer.js';
 // Source for this constant is css/video-autoplay.css
 import {cssText} from '../../../build/video-autoplay.css.js';
 

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {NavigationState, StateChangeType} from '../navigation-state';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service.js';
+import {NavigationState, StateChangeType} from '../navigation-state.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {

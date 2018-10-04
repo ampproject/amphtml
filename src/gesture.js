@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
-import {Pass} from './pass';
-import {dev} from './log';
-import {findIndex} from './utils/array';
-import {toWin} from './types';
+import {Observable} from './observable.js';
+import {Pass} from './pass.js';
+import {dev} from './log.js';
+import {findIndex} from './utils/array.js';
+import {toWin} from './types.js';
 
 
 const PROP_ = '__AMP_Gestures';

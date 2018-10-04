@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
-import AmpViqeoPlayer from '../amp-viqeo-player';
+import {PlayingStates} from '../../../../src/video-interface.js';
+import {Services} from '../../../../src/services.js';
+import AmpViqeoPlayer from '../amp-viqeo-player.js';
 
 describes.realWin('amp-viqeo-player', {
   amp: {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
-import {rrulestr} from '../../../third_party/rrule/rrule';
+import {requireExternal} from '../../../src/module.js';
+import {rrulestr} from '../../../third_party/rrule/rrule.js';
 
 
 /** @enum {string} */

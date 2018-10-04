@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from '../../../src/url';
-import {user} from '../../../src/log';
+import {parseQueryString} from '../../../src/url.js';
+import {user} from '../../../src/log.js';
 
 /**
  * @typedef {{ancestorOrigin: function(string, string):string, fragmentParam: function(string, string):string}}

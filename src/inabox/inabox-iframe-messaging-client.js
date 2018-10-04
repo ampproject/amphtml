@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
-import {getService, registerServiceBuilder} from '../service';
-import {tryParseJson} from '../json';
+import {IframeMessagingClient} from '../../3p/iframe-messaging-client.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {tryParseJson} from '../json.js';
 
 /**
  * @param {!Window} win

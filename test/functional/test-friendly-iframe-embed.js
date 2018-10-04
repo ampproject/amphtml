@@ -23,13 +23,13 @@ import {
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
-} from '../../src/friendly-iframe-embed';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {installServiceInEmbedScope} from '../../src/service';
-import {isAnimationNone} from '../../testing/test-helper';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {loadPromise} from '../../src/event-helper';
+} from '../../src/friendly-iframe-embed.js';
+import {Services} from '../../src/services.js';
+import {Signals} from '../../src/utils/signals.js';
+import {installServiceInEmbedScope} from '../../src/service.js';
+import {isAnimationNone} from '../../testing/test-helper.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
+import {loadPromise} from '../../src/event-helper.js';
 
 
 describe('friendly-iframe-embed', () => {

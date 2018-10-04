@@ -14,76 +14,76 @@
  * limitations under the License.
  */
 
-import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
-import {hasOwn} from '../../../src/utils/object';
+import {IFRAME_TRANSPORTS} from './iframe-transport-vendors.js';
+import {hasOwn} from '../../../src/utils/object.js';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
-import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
-import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics';
-import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics';
-import {ATINTERNET_CONFIG} from './vendors/atinternet';
-import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics';
-import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
-import {BURT_CONFIG} from './vendors/burt';
-import {BYSIDE_CONFIG} from './vendors/byside';
-import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
-import {CLICKY_CONFIG} from './vendors/clicky';
-import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
-import {COMSCORE_CONFIG} from './vendors/comscore';
-import {CXENSE_CONFIG} from './vendors/cxense';
-import {DYNATRACE_CONFIG} from './vendors/dynatrace';
-import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
-import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel';
-import {GEMIUS_CONFIG} from './vendors/gemius';
-import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
-import {GTAG_CONFIG} from './vendors/gtag';
-import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
-import {KRUX_CONFIG} from './vendors/krux';
-import {IPLABEL_CONFIG} from './vendors/iplabel';
-import {LOTAME_CONFIG} from './vendors/lotame';
-import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware';
-import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie';
-import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics';
-import {MEDIATOR_CONFIG} from './vendors/mediator';
-import {METRIKA_CONFIG} from './vendors/metrika';
-import {MOBIFY_CONFIG} from './vendors/mobify';
-import {MPARTICLE_CONFIG} from './vendors/mparticle';
-import {NEWRELIC_CONFIG} from './vendors/newrelic';
-import {NIELSEN_CONFIG} from './vendors/nielsen';
+import {ACQUIALIFT_CONFIG} from './vendors/acquialift.js';
+import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics.js';
+import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics.js';
+import {ATINTERNET_CONFIG} from './vendors/atinternet.js';
+import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics.js';
+import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics.js';
+import {BURT_CONFIG} from './vendors/burt.js';
+import {BYSIDE_CONFIG} from './vendors/byside.js';
+import {CHARTBEAT_CONFIG} from './vendors/chartbeat.js';
+import {CLICKY_CONFIG} from './vendors/clicky.js';
+import {COLANALYTICS_CONFIG} from './vendors/colanalytics.js';
+import {COMSCORE_CONFIG} from './vendors/comscore.js';
+import {CXENSE_CONFIG} from './vendors/cxense.js';
+import {DYNATRACE_CONFIG} from './vendors/dynatrace.js';
+import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics.js';
+import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel.js';
+import {GEMIUS_CONFIG} from './vendors/gemius.js';
+import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords.js';
+import {GTAG_CONFIG} from './vendors/gtag.js';
+import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics.js';
+import {KRUX_CONFIG} from './vendors/krux.js';
+import {IPLABEL_CONFIG} from './vendors/iplabel.js';
+import {LOTAME_CONFIG} from './vendors/lotame.js';
+import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware.js';
+import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie.js';
+import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics.js';
+import {MEDIATOR_CONFIG} from './vendors/mediator.js';
+import {METRIKA_CONFIG} from './vendors/metrika.js';
+import {MOBIFY_CONFIG} from './vendors/mobify.js';
+import {MPARTICLE_CONFIG} from './vendors/mparticle.js';
+import {NEWRELIC_CONFIG} from './vendors/newrelic.js';
+import {NIELSEN_CONFIG} from './vendors/nielsen.js';
 import {
   NIELSEN_MARKETING_CLOUD_CONFIG,
-} from './vendors/nielsen-marketing-cloud';
-import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
-import {OEWA_CONFIG} from './vendors/oewa';
-import {PARSELY_CONFIG} from './vendors/parsely';
-import {PIANO_CONFIG} from './vendors/piano';
-import {PISTATS_CONFIG} from './vendors/piStats';
-import {QUANTCAST_CONFIG} from './vendors/quantcast';
-import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
+} from './vendors/nielsen-marketing-cloud.js';
+import {OEWADIRECT_CONFIG} from './vendors/oewadirect.js';
+import {OEWA_CONFIG} from './vendors/oewa.js';
+import {PARSELY_CONFIG} from './vendors/parsely.js';
+import {PIANO_CONFIG} from './vendors/piano.js';
+import {PISTATS_CONFIG} from './vendors/piStats.js';
+import {QUANTCAST_CONFIG} from './vendors/quantcast.js';
+import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics.js';
 import {
   ADOBEANALYTICS_NATIVECONFIG_CONFIG,
-} from './vendors/adobeanalytics_nativeConfig';
-import {INFONLINE_CONFIG} from './vendors/infonline';
-import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
-import {SEGMENT_CONFIG} from './vendors/segment';
-import {SHINYSTAT_CONFIG} from './vendors/shinystat';
-import {SNOWPLOW_CONFIG} from './vendors/snowplow';
-import {TOP100_CONFIG} from './vendors/top100';
-import {TREASUREDATA_CONFIG} from './vendors/treasuredata';
-import {WEBTREKK_CONFIG} from './vendors/webtrekk';
-import {WEBTREKK_V2_CONFIG} from './vendors/webtrekk_v2';
-import {MPULSE_CONFIG} from './vendors/mpulse';
-import {LINKPULSE_CONFIG} from './vendors/linkpulse';
-import {RAKAM_CONFIG} from './vendors/rakam';
-import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics';
-import {TOPMAILRU_CONFIG} from './vendors/topmailru';
+} from './vendors/adobeanalytics_nativeConfig.js';
+import {INFONLINE_CONFIG} from './vendors/infonline.js';
+import {SIMPLEREACH_CONFIG} from './vendors/simplereach.js';
+import {SEGMENT_CONFIG} from './vendors/segment.js';
+import {SHINYSTAT_CONFIG} from './vendors/shinystat.js';
+import {SNOWPLOW_CONFIG} from './vendors/snowplow.js';
+import {TOP100_CONFIG} from './vendors/top100.js';
+import {TREASUREDATA_CONFIG} from './vendors/treasuredata.js';
+import {WEBTREKK_CONFIG} from './vendors/webtrekk.js';
+import {WEBTREKK_V2_CONFIG} from './vendors/webtrekk_v2.js';
+import {MPULSE_CONFIG} from './vendors/mpulse.js';
+import {LINKPULSE_CONFIG} from './vendors/linkpulse.js';
+import {RAKAM_CONFIG} from './vendors/rakam.js';
+import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics.js';
+import {TOPMAILRU_CONFIG} from './vendors/topmailru.js';
 import {
   ORACLEINFINITYANALYTICS_CONFIG,
-} from './vendors/oracleInfinityAnalytics';
-import {MOAT_CONFIG} from './vendors/moat';
-import {BG_CONFIG} from './vendors/bg';
+} from './vendors/oracleInfinityAnalytics.js';
+import {MOAT_CONFIG} from './vendors/moat.js';
+import {BG_CONFIG} from './vendors/bg.js';
 
 /**
  * @const {!JsonObject}

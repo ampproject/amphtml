@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as st from '../../src/style';
+import * as st from '../../src/style.js';
 
 describe('Style', () => {
 

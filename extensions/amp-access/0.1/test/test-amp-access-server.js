@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as DocumentFetcher from '../../../../src/document-fetcher';
+import * as DocumentFetcher from '../../../../src/document-fetcher.js';
 import * as lolex from 'lolex';
-import {AccessServerAdapter} from '../amp-access-server';
-import {removeFragment} from '../../../../src/url';
+import {AccessServerAdapter} from '../amp-access-server.js';
+import {removeFragment} from '../../../../src/url.js';
 
 
 describes.realWin('AccessServerAdapter', {amp: true}, env => {

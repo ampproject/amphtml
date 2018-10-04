@@ -17,10 +17,10 @@
 import {
   LayoutElement,
   installLayersServiceForDoc,
-} from '../../src/service/layers-impl';
-import {Services} from '../../src/services';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installFriendlyIframeEmbed} from '../../src/friendly-iframe-embed';
+} from '../../src/service/layers-impl.js';
+import {Services} from '../../src/services.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
+import {installFriendlyIframeEmbed} from '../../src/friendly-iframe-embed.js';
 
 describes.realWin('Layers', {amp: true}, env => {
   describes.repeated('Layers', {

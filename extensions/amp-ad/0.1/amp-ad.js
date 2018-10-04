@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import {AmpAd3PImpl} from './amp-ad-3p-impl';
-import {AmpAdCustom} from './amp-ad-custom';
+import {AmpAd3PImpl} from './amp-ad-3p-impl.js';
+import {AmpAdCustom} from './amp-ad-custom.js';
 import {CSS} from '../../../build/amp-ad-0.1.css';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {hasOwn} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {adConfig} from '../../../ads/_config.js';
+import {getA4ARegistry} from '../../../ads/_a4a-config.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {user} from '../../../src/log.js';
 
 
 /**

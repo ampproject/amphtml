@@ -1,5 +1,5 @@
-import {Observable} from '../../../../src/observable';
-import {ViewerTracker} from '../viewer-tracker';
+import {Observable} from '../../../../src/observable.js';
+import {ViewerTracker} from '../viewer-tracker.js';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.

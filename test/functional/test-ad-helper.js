@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../src/style';
-import {createIframePromise} from '../../testing/iframe';
-import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
+import {computedStyle} from '../../src/style.js';
+import {createIframePromise} from '../../testing/iframe.js';
+import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper.js';
 
 describe('ad-helper', () => {
   describe('isAdPositionAllowed function', () => {

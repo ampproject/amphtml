@@ -18,30 +18,30 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad.js';
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+} from '../../../../ads/google/adsense-amp-auto-ads.js';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad.js';
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl.js'; // eslint-disable-line no-unused-vars
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Preconnect} from '../../../../src/preconnect';
-import {Services} from '../../../../src/services';
+} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
+import {Preconnect} from '../../../../src/preconnect.js';
+import {Services} from '../../../../src/services.js';
 import {
   addAttributesToElement,
   createElementWithAttributes,
-} from '../../../../src/dom';
+} from '../../../../src/dom.js';
 import {
   forceExperimentBranch,
   toggleExperiment,
-} from '../../../../src/experiments';
+} from '../../../../src/experiments.js';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';

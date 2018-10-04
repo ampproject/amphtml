@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isExperimentOn} from '../../../src/experiments';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {iterateCursor, templateContentClone} from '../../../src/dom.js';
 import {
   parse as mustacheParse,
   render as mustacheRender,
   setUnescapedSanitizer,
-} from '../../../third_party/mustache/mustache';
+} from '../../../third_party/mustache/mustache.js';
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
-} from '../../../src/sanitizer';
-import {user} from '../../../src/log';
+} from '../../../src/sanitizer.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-mustache';
 

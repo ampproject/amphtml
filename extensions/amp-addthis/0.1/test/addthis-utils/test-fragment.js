@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {clearOurFragment} from '../../addthis-utils/fragment';
+import {clearOurFragment} from '../../addthis-utils/fragment.js';
 
 describe('fragment', () => {
   it('clears AddThis fragments from an url', () => {

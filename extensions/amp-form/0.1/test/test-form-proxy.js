@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/services.js';
 import {
   installFormProxy,
   setBlacklistedPropertiesForTesting,
-} from '../form-proxy';
-import {parseUrlDeprecated} from '../../../../src/url';
+} from '../form-proxy.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
 
 const PROPS = ['id', 'action', 'method', 'style', 'acceptCharset',
   'attributes', 'elements', 'children', 'draggable', 'hidden',

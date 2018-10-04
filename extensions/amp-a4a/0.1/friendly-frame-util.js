@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
+} from '../../../src/friendly-iframe-embed.js';
 import {
   installUrlReplacementsForEmbed,
-} from '../../../src/service/url-replacements-impl';
-import {setStyle} from '../../../src/style';
+} from '../../../src/service/url-replacements-impl.js';
+import {setStyle} from '../../../src/style.js';
 
 /**
  * Renders a creative into a "NameFrame" iframe.

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpAnimation} from '../amp-animation';
-import {WebAnimationPlayState} from '../web-animation-types';
-import {WebAnimationRunner} from '../web-animations';
+import {AmpAnimation} from '../amp-animation.js';
+import {WebAnimationPlayState} from '../web-animation-types.js';
+import {WebAnimationRunner} from '../web-animations.js';
 
 
 describes.sandboxed('AmpAnimation', {}, () => {

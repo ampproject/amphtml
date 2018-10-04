@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../../../src/log';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {dev} from '../../../src/log.js';
+import {scopedQuerySelectorAll} from '../../../src/dom.js';
 
 /**
  * A map of elements to delay showing the page.  The key is a DOM query to find

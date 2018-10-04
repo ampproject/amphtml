@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {crc32} from '../crc32';
+import {crc32} from '../crc32.js';
 
 const testVectors = [
   {

@@ -15,9 +15,9 @@
  */
 
 import * as lolex from 'lolex';
-import {Services} from '../../src/services';
-import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {Services} from '../../src/services.js';
+import {getMode} from '../../src/mode.js';
+import {installPerformanceService} from '../../src/service/performance-impl.js';
 
 
 describes.realWin('performance', {amp: true}, env => {

@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad.js';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-} from '../../../amp-a4a/0.1/amp-a4a';
+} from '../../../amp-a4a/0.1/amp-a4a.js';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   resetSraStateForTesting,
-} from '../amp-ad-network-doubleclick-impl';
-import {BaseElement} from '../../../../src/base-element';
-import {Deferred} from '../../../../src/utils/promise';
+} from '../amp-ad-network-doubleclick-impl.js';
+import {BaseElement} from '../../../../src/base-element.js';
+import {Deferred} from '../../../../src/utils/promise.js';
 import {
   EXPERIMENT_ATTRIBUTE,
-} from '../../../../ads/google/a4a/utils';
+} from '../../../../ads/google/a4a/utils.js';
 import {
   MANUAL_EXPERIMENT_ID,
-} from '../../../../ads/google/a4a/traffic-experiments';
-import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+} from '../../../../ads/google/a4a/traffic-experiments.js';
+import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier.js';
 import {
   TFCD,
   combineInventoryUnits,
@@ -50,12 +50,12 @@ import {
   getTfcd,
   isAdTest,
   sraBlockCallbackHandler,
-} from '../sra-utils';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dev} from '../../../../src/log';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+} from '../sra-utils.js';
+import {Xhr} from '../../../../src/service/xhr-impl.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {dev} from '../../../../src/log.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect.js';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes.js';
 
 const config = {amp: true, allowExternalResources: true};
 

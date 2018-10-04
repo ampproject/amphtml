@@ -19,7 +19,7 @@ import {
   dashToCamelCase,
   endsWith,
   expandTemplate,
-} from '../../src/string';
+} from '../../src/string.js';
 
 describe('dashToCamelCase', () => {
   it('should transform dashes to camel case.', () => {

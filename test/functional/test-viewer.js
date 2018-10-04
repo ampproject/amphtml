@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {Viewer} from '../../src/service/viewer-impl';
-import {dev} from '../../src/log';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {Services} from '../../src/services.js';
+import {Viewer} from '../../src/service/viewer-impl.js';
+import {dev} from '../../src/log.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
 import {installDocumentInfoServiceForDoc} from
-  '../../src/service/document-info-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrlDeprecated, removeFragment} from '../../src/url';
+  '../../src/service/document-info-impl.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {parseUrlDeprecated, removeFragment} from '../../src/url.js';
 
 
 describe('Viewer', () => {

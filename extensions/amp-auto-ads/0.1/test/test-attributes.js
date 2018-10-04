@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getAttributesFromConfigObj} from '../attributes';
+import {getAttributesFromConfigObj} from '../attributes.js';
 
 describe('attributes', () => {
 

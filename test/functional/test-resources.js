@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {loadPromise} from '../../src/event-helper';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {LayoutPriority} from '../../src/layout.js';
+import {Resource, ResourceState} from '../../src/service/resource.js';
+import {Resources} from '../../src/service/resources-impl.js';
+import {Services} from '../../src/services.js';
+import {Signals} from '../../src/utils/signals.js';
+import {VisibilityState} from '../../src/visibility-state.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
+import {loadPromise} from '../../src/event-helper.js';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   ampWorkerForTesting,
   invokeWebWorker,
-} from '../../../src/web-worker/amp-worker';
-import {dev} from '../../../src/log';
-import {installXhrService} from '../../../src/service/xhr-impl';
+} from '../../../src/web-worker/amp-worker.js';
+import {dev} from '../../../src/log.js';
+import {installXhrService} from '../../../src/service/xhr-impl.js';
 
 describe('invokeWebWorker', () => {
   let sandbox;

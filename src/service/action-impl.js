@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
-import {KeyCodes} from '../utils/key-codes';
-import {Services} from '../services';
-import {debounce, throttle} from '../utils/rate-limit';
-import {dev, user} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
-import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants.js';
+import {KeyCodes} from '../utils/key-codes.js';
+import {Services} from '../services.js';
+import {debounce, throttle} from '../utils/rate-limit.js';
+import {dev, user} from '../log.js';
+import {dict, hasOwn, map} from '../utils/object.js';
+import {getDetail} from '../event-helper.js';
+import {getMode} from '../mode.js';
+import {getValueForExpr} from '../json.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
-import {isArray, isFiniteNumber, toWin} from '../types';
-import {isEnabled} from '../dom';
-import {reportError} from '../error';
+} from '../service.js';
+import {isArray, isFiniteNumber, toWin} from '../types.js';
+import {isEnabled} from '../dom.js';
+import {reportError} from '../error.js';
 
 /** @const {string} */
 const TAG_ = 'Action';

@@ -18,11 +18,11 @@ import {
   ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsResponsiveBranches,
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../adsense-amp-auto-ads-responsive';
+} from '../adsense-amp-auto-ads-responsive.js';
 import {
   RANDOM_NUMBER_GENERATORS,
   toggleExperiment,
-} from '../../../src/experiments';
+} from '../../../src/experiments.js';
 
 describes.realWin('adsense-amp-auto-ads-responsive', {}, env => {
   let win;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
+import {FriendlyFrameRenderer} from '../friendly-frame-renderer.js';
 
 const realWinConfig = {
   amp: {},

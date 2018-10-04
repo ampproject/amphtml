@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
+import {AmpAnalytics} from '../amp-analytics.js';
+import {AnalyticsConfig} from '../config.js';
 import {
   ClickEventTracker,
   VisibilityTracker,
-} from '../events';
-import {LayoutPriority} from '../../../../src/layout';
-import {LinkerManager} from '../linker-manager';
-import {Services} from '../../../../src/services';
-import {Transport} from '../transport';
+} from '../events.js';
+import {LayoutPriority} from '../../../../src/layout.js';
+import {LinkerManager} from '../linker-manager.js';
+import {Services} from '../../../../src/services.js';
+import {Transport} from '../transport.js';
 import {cidServiceForDocForTesting} from
-  '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl.js';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
+} from '../../../../src/service.js';
+import {installCryptoService} from '../../../../src/service/crypto-impl.js';
 import {
   installUserNotificationManagerForTesting,
-} from '../../../amp-user-notification/0.1/amp-user-notification';
-import {instrumentationServiceForDocForTesting} from '../instrumentation';
+} from '../../../amp-user-notification/0.1/amp-user-notification.js';
+import {instrumentationServiceForDocForTesting} from '../instrumentation.js';
 
 describes.realWin('amp-analytics', {
   amp: {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {setStyles} from '../src/style';
+import {loadScript, validateData} from '../3p/3p.js';
+import {setStyles} from '../src/style.js';
 
 /**
  * @param {!Window} global

@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
-import {BaseSlides} from './base-slides';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getStyle, setStyle} from '../../../src/style';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Animation} from '../../../src/animation.js';
+import {BaseSlides} from './base-slides.js';
+import {Services} from '../../../src/services.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getStyle, setStyle} from '../../../src/style.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isFiniteNumber} from '../../../src/types.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {numeric} from '../../../src/transition.js';
+import {startsWith} from '../../../src/string.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';

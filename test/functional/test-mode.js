@@ -18,8 +18,8 @@ import {
   getMode,
   getRtvVersionForTesting,
   resetRtvVersionForTesting,
-} from '../../src/mode';
-import {parseUrlDeprecated} from '../../src/url';
+} from '../../src/mode.js';
+import {parseUrlDeprecated} from '../../src/url.js';
 
 describe('getMode', () => {
   function getWin(url) {

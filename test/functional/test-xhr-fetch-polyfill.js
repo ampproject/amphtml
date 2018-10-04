@@ -15,8 +15,8 @@
  */
 
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
+import {FormDataWrapper} from '../../src/form-data-wrapper.js';
+import {Response, fetchPolyfill} from '../../src/polyfills/fetch.js';
 
 
 describes.sandboxed('fetch', {}, () => {

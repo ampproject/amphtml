@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../common-signals';
-import {FiniteStateMachine} from '../finite-state-machine';
-import {FocusHistory} from '../focus-history';
-import {Pass} from '../pass';
-import {Resource, ResourceState} from './resource';
-import {Services} from '../services';
-import {TaskQueue} from './task-queue';
-import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {computedStyle} from '../style';
-import {dev} from '../log';
-import {dict, hasOwn} from '../utils/object';
-import {getSourceUrl} from '../url';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {isArray} from '../types';
-import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
-import {loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
-import {tryResolve} from '../utils/promise';
+import {CommonSignals} from '../common-signals.js';
+import {FiniteStateMachine} from '../finite-state-machine.js';
+import {FocusHistory} from '../focus-history.js';
+import {Pass} from '../pass.js';
+import {Resource, ResourceState} from './resource.js';
+import {Services} from '../services.js';
+import {TaskQueue} from './task-queue.js';
+import {VisibilityState} from '../visibility-state.js';
+import {areMarginsChanged, expandLayoutRect} from '../layout-rect.js';
+import {closest, hasNextNodeInDocumentOrder} from '../dom.js';
+import {computedStyle} from '../style.js';
+import {dev} from '../log.js';
+import {dict, hasOwn} from '../utils/object.js';
+import {getSourceUrl} from '../url.js';
+import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug.js';
+import {isArray} from '../types.js';
+import {isBlockedByConsent, reportError} from '../error.js';
+import {isExperimentOn} from '../experiments.js';
+import {loadPromise} from '../event-helper.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {remove} from '../utils/array.js';
+import {tryResolve} from '../utils/promise.js';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';

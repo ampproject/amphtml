@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
-import {Renderer} from '../renderer';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {installStylesForDoc} from '../../../../src/style-installer';
+import {Renderer} from '../renderer.js';
+import {Services} from '../../../../src/services.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {installStylesForDoc} from '../../../../src/style-installer.js';
 
 
 function isDisplayed(el) {

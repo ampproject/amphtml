@@ -17,17 +17,17 @@
 import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
+} from '../../../ads/google/adsense-amp-auto-ads.js';
 import {
   AdSenseAmpAutoAdsResponsiveBranches,
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../../../ads/google/adsense-amp-auto-ads-responsive';
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/url-builder';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {parseUrlDeprecated} from '../../../src/url';
-import {tryParseJson} from '../../../src/json';
+} from '../../../ads/google/adsense-amp-auto-ads-responsive.js';
+import {Services} from '../../../src/services.js';
+import {buildUrl} from '../../../ads/google/a4a/url-builder.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {tryParseJson} from '../../../src/json.js';
 
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */

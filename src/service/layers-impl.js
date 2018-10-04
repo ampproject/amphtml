@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {computedStyle} from '../style';
-import {dev} from '../log';
-import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
-import {getMode} from '../mode';
-import {listen} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {remove} from '../utils/array';
-import {rootNodeFor} from '../dom';
+import {Services} from '../services.js';
+import {computedStyle} from '../style.js';
+import {dev} from '../log.js';
+import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed.js';
+import {getMode} from '../mode.js';
+import {listen} from '../event-helper.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {remove} from '../utils/array.js';
+import {rootNodeFor} from '../dom.js';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 

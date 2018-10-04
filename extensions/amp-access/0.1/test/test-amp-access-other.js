@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AccessOtherAdapter} from '../amp-access-other';
+import {AccessOtherAdapter} from '../amp-access-other.js';
 
 
 describes.realWin('AccessOtherAdapter', {amp: true}, env => {

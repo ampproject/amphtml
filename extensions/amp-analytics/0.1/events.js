@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
-import {Observable} from '../../../src/observable';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Observable} from '../../../src/observable.js';
 import {
   PlayingStates,
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
-} from '../../../src/video-interface';
-import {dev, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
-import {isEnumValue} from '../../../src/types';
-import {startsWith} from '../../../src/string';
+} from '../../../src/video-interface.js';
+import {dev, user} from '../../../src/log.js';
+import {getData} from '../../../src/event-helper.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isEnumValue} from '../../../src/types.js';
+import {startsWith} from '../../../src/string.js';
 
 
 const SCROLL_PRECISION_PERCENT = 5;

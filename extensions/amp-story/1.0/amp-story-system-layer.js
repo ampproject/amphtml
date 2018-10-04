@@ -18,23 +18,23 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
-} from './development-ui';
-import {LocalizedStringId} from './localization';
-import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {ShareWidget} from './amp-story-share';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getMode} from '../../../src/mode';
-import {matches} from '../../../src/dom';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+} from './development-ui.js';
+import {LocalizedStringId} from './localization.js';
+import {ProgressBar} from './progress-bar.js';
+import {Services} from '../../../src/services.js';
+import {ShareWidget} from './amp-story-share.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {getMode} from '../../../src/mode.js';
+import {matches} from '../../../src/dom.js';
+import {renderAsElement, renderSimpleTemplate} from './simple-template.js';
 
 
 /** @private @const {string} */

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {findSentences, markTextRangeList} from './findtext';
-import {listenOnce} from '../../../src/event-helper';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {parseJson} from '../../../src/json';
-import {parseQueryString} from '../../../src/url';
-import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
+import {Services} from '../../../src/services.js';
+import {dict} from '../../../src/utils/object.js';
+import {findSentences, markTextRangeList} from './findtext.js';
+import {listenOnce} from '../../../src/event-helper.js';
+import {moveLayoutRect} from '../../../src/layout-rect.js';
+import {parseJson} from '../../../src/json.js';
+import {parseQueryString} from '../../../src/url.js';
+import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style.js';
 
 /**
  * The message name sent by viewers to dismiss highlights.

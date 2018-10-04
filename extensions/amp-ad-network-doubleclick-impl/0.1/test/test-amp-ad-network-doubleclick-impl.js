@@ -18,36 +18,36 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad.js';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
+} from '../../../amp-a4a/0.1/signature-verifier.js';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   XORIGIN_MODE,
   signatureVerifierFor,
-} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+} from '../../../amp-a4a/0.1/amp-a4a.js';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad.js';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
   resetTokensToInstancesMap,
-} from '../amp-ad-network-doubleclick-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Deferred} from '../../../../src/utils/promise';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Layout} from '../../../../src/layout';
+} from '../amp-ad-network-doubleclick-impl.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
+import {Deferred} from '../../../../src/utils/promise.js';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed.js';
+import {Layout} from '../../../../src/layout.js';
 import {
   QQID_HEADER,
-} from '../../../../ads/google/a4a/utils';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Encode} from '../../../../src/utils/bytes';
+} from '../../../../ads/google/a4a/utils.js';
+import {Services} from '../../../../src/services.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
+import {utf8Encode} from '../../../../src/utils/bytes.js';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

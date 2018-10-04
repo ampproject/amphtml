@@ -20,7 +20,7 @@ import {
   getValueForExpr,
   recreateNonProtoObject,
   tryParseJson,
-} from '../../src/json';
+} from '../../src/json.js';
 
 describe('json', () => {
   describe('getValueForExpr', () => {

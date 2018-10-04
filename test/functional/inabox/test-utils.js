@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
 import {createElementWithAttributes} from '../../../src/dom.js';
-import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
+import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils.js';
 
 describes.realWin('inabox-utils', {}, env => {
   let getResourcesInRectStub;

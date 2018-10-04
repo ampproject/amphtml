@@ -17,12 +17,12 @@
 import {
   BookendComponentInterface,
   getSourceOriginForBookendComponent,
-} from './bookend-component-interface';
-import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+} from './bookend-component-interface.js';
+import {addAttributesToElement} from '../../../../../src/dom.js';
+import {dict} from '../../../../../src/utils/object.js';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template.js';
+import {user} from '../../../../../src/log.js';
+import {userAssertValidProtocol} from '../../utils.js';
 
 /**
  * @typedef {{

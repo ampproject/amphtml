@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './services.js';
 
 
 /**

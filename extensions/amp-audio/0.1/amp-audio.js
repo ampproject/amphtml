@@ -20,13 +20,13 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
-} from '../../../src/mediasession-helper';
-import {Layout} from '../../../src/layout';
-import {assertHttpsUrl} from '../../../src/url';
-import {closestByTag} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
+} from '../../../src/mediasession-helper.js';
+import {Layout} from '../../../src/layout.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {closestByTag} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {listen} from '../../../src/event-helper.js';
 
 const TAG = 'amp-audio';
 

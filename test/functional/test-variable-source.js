@@ -17,9 +17,9 @@
 import {
   VariableSource,
   getTimingDataAsync,
-} from '../../src/service/variable-source';
+} from '../../src/service/variable-source.js';
 
-import {createElementWithAttributes} from '../../src/dom';
+import {createElementWithAttributes} from '../../src/dom.js';
 
 
 describes.fakeWin('VariableSource', {

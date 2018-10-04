@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-jwplayer';
+import '../amp-jwplayer.js';
 
 
 describes.realWin('amp-jwplayer', {

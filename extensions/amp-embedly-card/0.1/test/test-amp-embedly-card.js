@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-embedly-card';
+import '../amp-embedly-card.js';
 
 describes.realWin('amp-embedly-card', {
   amp: {

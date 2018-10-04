@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../../../../third_party/react-dates/bundle';
+import '../../../../third_party/react-dates/bundle.js';
 import * as lolex from 'lolex';
-import {AmpDatePicker} from '../amp-date-picker';
+import {AmpDatePicker} from '../amp-date-picker.js';
 import {createElementWithAttributes} from '../../../../src/dom.js';
-import {requireExternal} from '../../../../src/module';
+import {requireExternal} from '../../../../src/module.js';
 
 describes.realWin('amp-date-picker', {
   amp: {

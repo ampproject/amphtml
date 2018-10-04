@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript} from '../3p/3p';
-import {doubleclick} from '../ads/google/doubleclick';
-import {tryParseJson} from '../src/json';
+import {computeInMasterFrame, loadScript} from '../3p/3p.js';
+import {doubleclick} from '../ads/google/doubleclick.js';
+import {tryParseJson} from '../src/json.js';
 
 /* global Criteo: false */
 

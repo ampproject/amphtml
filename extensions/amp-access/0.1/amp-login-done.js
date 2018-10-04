@@ -19,12 +19,12 @@
  * code back to AMP runtime using window messaging.
  */
 
-import '../../../src/polyfills';
-import {LoginDoneDialog} from './amp-login-done-dialog';
-import {bodyAlwaysVisible} from '../../../src/style-installer';
-import {initLogConstructor, setReportError} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-ready';
-import {reportError} from '../../../src/error';
+import '../../../src/polyfills.js';
+import {LoginDoneDialog} from './amp-login-done-dialog.js';
+import {bodyAlwaysVisible} from '../../../src/style-installer.js';
+import {initLogConstructor, setReportError} from '../../../src/log.js';
+import {onDocumentReady} from '../../../src/document-ready.js';
+import {reportError} from '../../../src/error.js';
 
 bodyAlwaysVisible(window);
 initLogConstructor();

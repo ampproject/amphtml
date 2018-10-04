@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../../../src/utils/lru-cache';
+import {LruCache} from '../../../src/utils/lru-cache.js';
 
 describe('LruCache', () => {
   let cache;

@@ -15,8 +15,8 @@
  */
 
 
-import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object.js';
+import {listen} from '../../../src/event-helper.js';
 
 
 /**

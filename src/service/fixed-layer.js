@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '../services.js';
 import {
   computedStyle,
   getStyle,
@@ -24,9 +24,9 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '../style';
-import {dev, user} from '../log';
-import {endsWith} from '../string';
+} from '../style.js';
+import {dev, user} from '../log.js';
+import {endsWith} from '../string.js';
 
 const TAG = 'FixedLayer';
 

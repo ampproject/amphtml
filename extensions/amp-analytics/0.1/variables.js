@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64.js';
+import {dev, user} from '../../../src/log.js';
+import {getService, registerServiceBuilder} from '../../../src/service.js';
+import {isArray, isFiniteNumber} from '../../../src/types.js';
 // TODO(calebcordry) remove this once experiment is launched
 // also remove from dep-check-config whitelist;
-import {isExperimentOn} from '../../../src/experiments';
-import {tryResolve} from '../../../src/utils/promise';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {tryResolve} from '../../../src/utils/promise.js';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';

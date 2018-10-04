@@ -18,8 +18,8 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
-import {EmbedMode, EmbedModeParam} from '../embed-mode';
+} from '../amp-story-store-service.js';
+import {EmbedMode, EmbedModeParam} from '../embed-mode.js';
 
 
 describes.fakeWin('amp-story-store-service', {}, env => {

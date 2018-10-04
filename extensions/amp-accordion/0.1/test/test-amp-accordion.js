@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-accordion';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {poll} from '../../../../testing/iframe';
-import {tryFocus} from '../../../../src/dom';
+import '../amp-accordion.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {poll} from '../../../../testing/iframe.js';
+import {tryFocus} from '../../../../src/dom.js';
 
 
 describes.realWin('amp-accordion', {

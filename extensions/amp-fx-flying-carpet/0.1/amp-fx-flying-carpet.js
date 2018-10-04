@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
-import {Layout} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {listen} from '../../../src/event-helper';
-import {setStyle} from '../../../src/style';
+import {Layout} from '../../../src/layout.js';
+import {dev, user} from '../../../src/log.js';
+import {listen} from '../../../src/event-helper.js';
+import {setStyle} from '../../../src/style.js';
 
 const TAG = 'amp-fx-flying-carpet';
 

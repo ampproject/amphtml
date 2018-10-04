@@ -25,8 +25,8 @@ import {
   randomlySelectUnsetExperiments,
   resetExperimentTogglesForTesting,
   toggleExperiment,
-} from '../../src/experiments';
-import {createElementWithAttributes} from '../../src/dom';
+} from '../../src/experiments.js';
+import {createElementWithAttributes} from '../../src/dom.js';
 
 describe('experimentToggles', () => {
   it('should return experiment status map', () => {

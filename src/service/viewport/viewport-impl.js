@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../animation';
-import {FixedLayer} from './../fixed-layer';
-import {Observable} from '../../observable';
-import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {Animation} from '../../animation.js';
+import {FixedLayer} from './../fixed-layer.js';
+import {Observable} from '../../observable.js';
+import {Services} from '../../services.js';
+import {ViewportBindingDef} from './viewport-binding-def.js';
 import {
   ViewportBindingIosEmbedShadowRoot_,
-} from './viewport-binding-ios-embed-sd';
+} from './viewport-binding-ios-embed-sd.js';
 import {
   ViewportBindingIosEmbedWrapper_,
-} from './viewport-binding-ios-embed-wrapper';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {VisibilityState} from '../../visibility-state';
-import {closestBySelector, isIframed} from '../../dom';
-import {dev} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
-import {getMode} from '../../mode';
+} from './viewport-binding-ios-embed-wrapper.js';
+import {ViewportBindingNatural_} from './viewport-binding-natural.js';
+import {VisibilityState} from '../../visibility-state.js';
+import {closestBySelector, isIframed} from '../../dom.js';
+import {dev} from '../../log.js';
+import {dict} from '../../utils/object.js';
+import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed.js';
+import {getMode} from '../../mode.js';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
-} from '../../service';
-import {installLayersServiceForDoc} from '../layers-impl';
-import {isExperimentOn} from '../../experiments';
+} from '../../service.js';
+import {installLayersServiceForDoc} from '../layers-impl.js';
+import {isExperimentOn} from '../../experiments.js';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../layout-rect';
-import {numeric} from '../../transition';
-import {setStyle} from '../../style';
-import {tryResolve} from '../../utils/promise';
+} from '../../layout-rect.js';
+import {numeric} from '../../transition.js';
+import {setStyle} from '../../style.js';
+import {tryResolve} from '../../utils/promise.js';
 
 
 const TAG_ = 'Viewport';

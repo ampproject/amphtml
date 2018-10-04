@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   VideoAnalyticsEvents,
   VideoEvents,
   VideoInterface,
-} from '../../src/video-interface';
-import {VideoUtils} from '../../src/utils/video';
+} from '../../src/video-interface.js';
+import {VideoUtils} from '../../src/utils/video.js';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
-} from '../../testing/iframe';
-import {getData, listenOncePromise} from '../../src/event-helper';
-import {removeElement} from '../../src/dom';
-import {toggleExperiment} from '../../src/experiments';
+} from '../../testing/iframe.js';
+import {getData, listenOncePromise} from '../../src/event-helper.js';
+import {removeElement} from '../../src/dom.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 
 function skipIfAutoplayUnsupported(win) {

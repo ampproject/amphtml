@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
 
 /**
  * @typedef {{

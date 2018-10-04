@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {isProtocolValid} from '../../src/url';
+import {Services} from '../../src/services.js';
+import {isProtocolValid} from '../../src/url.js';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
-} from '../../src/mediasession-helper';
+} from '../../src/mediasession-helper.js';
 
 const schemaTemplate = `
 {

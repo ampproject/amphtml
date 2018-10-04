@@ -21,7 +21,7 @@ import {
   stringToBytes,
   utf8Decode,
   utf8Encode,
-} from '../../../src/utils/bytes';
+} from '../../../src/utils/bytes.js';
 
 describe('stringToBytes', function() {
   let fakeWin;

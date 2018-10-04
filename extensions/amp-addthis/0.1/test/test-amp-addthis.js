@@ -19,16 +19,16 @@ import {
   CONFIGURATION_EVENT,
   ICON_SIZE,
   ORIGIN,
-} from '../constants';
-import {ConfigManager} from '../config-manager';
+} from '../constants.js';
+import {ConfigManager} from '../config-manager.js';
 
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
-import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
-import {getKeywordsString} from './../addthis-utils/classify';
-import {isDateInFuture} from '../addthis-utils/cuid';
-import {toArray} from '../../../../src/types';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getConfigManager} from '../amp-addthis.js';
+import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta.js';
+import {getKeywordsString} from './../addthis-utils/classify.js';
+import {isDateInFuture} from '../addthis-utils/cuid.js';
+import {toArray} from '../../../../src/types.js';
 
 describes.realWin('amp-addthis', {
   amp: {

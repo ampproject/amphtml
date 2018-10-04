@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {user} from '../../../src/log.js';
 
 class AmpKaltura extends AMP.BaseElement {
 

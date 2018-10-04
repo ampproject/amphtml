@@ -17,35 +17,35 @@
 import {
   ADSENSE_EXPERIMENTS,
   ADSENSE_EXP_NAMES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js';
 import {
   CONSTANTS,
   MessageType,
-} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '../../../src/common-signals';
-import {Deferred} from '../../../src/utils/promise';
+} from '../../../src/3p-frame-messaging.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   IntersectionObserver,
-} from '../../../src/intersection-observer';
-import {Services} from '../../../src/services';
+} from '../../../src/intersection-observer.js';
+import {Services} from '../../../src/services.js';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
-} from '../../../src/iframe-helper';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
+} from '../../../src/iframe-helper.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData} from '../../../src/event-helper.js';
 import {
   getExperimentBranch,
   isExperimentOn,
-} from '../../../src/experiments';
-import {getHtml} from '../../../src/get-html';
-import {removeElement} from '../../../src/dom';
-import {reportErrorToAnalytics} from '../../../src/error';
-import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
+} from '../../../src/experiments.js';
+import {getHtml} from '../../../src/get-html.js';
+import {removeElement} from '../../../src/dom.js';
+import {reportErrorToAnalytics} from '../../../src/error.js';
+import {setStyle} from '../../../src/style.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
 
 const VISIBILITY_TIMEOUT = 10000;
 

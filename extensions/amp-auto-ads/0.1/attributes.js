@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
-import {isArray, isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {startsWith} from '../../../src/string.js';
+import {user} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

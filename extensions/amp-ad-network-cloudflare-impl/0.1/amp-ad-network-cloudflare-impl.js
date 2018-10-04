@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {NETWORKS} from './vendors';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {startsWith} from '../../../src/string';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {NETWORKS} from './vendors.js';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url.js';
+import {startsWith} from '../../../src/string.js';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad

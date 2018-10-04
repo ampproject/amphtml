@@ -22,11 +22,11 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
   rewriteAttributeValue,
-} from './purifier';
-import {dict} from './utils/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {startsWith} from './string';
-import {user} from './log';
+} from './purifier.js';
+import {dict} from './utils/object.js';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer.js';
+import {startsWith} from './string.js';
+import {user} from './log.js';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';

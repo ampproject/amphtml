@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-vimeo';
+import '../amp-vimeo.js';
 
 
 describes.realWin('amp-vimeo', {

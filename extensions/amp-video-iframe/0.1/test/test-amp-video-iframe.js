@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import '../amp-video-iframe';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
+import '../amp-video-iframe.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {tryParseJson} from '../../../../src/json';
+} from '../../../../src/dom.js';
+import {htmlFor} from '../../../../src/static-template.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
+import {tryParseJson} from '../../../../src/json.js';
 
 function getIntersectionMessage(id) {
   return {data: {id, method: 'getIntersection'}};

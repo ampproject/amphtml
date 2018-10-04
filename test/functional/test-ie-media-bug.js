@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {checkAndFix} from '../../src/service/ie-media-bug';
-import {dev} from '../../src/log';
+import {checkAndFix} from '../../src/service/ie-media-bug.js';
+import {dev} from '../../src/log.js';
 
 
 describe('ie-media-bug', () => {

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
-import {Services} from '../../../src/services';
-import {buildUrl} from './url-builder';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint.js';
+import {Services} from '../../../src/services.js';
+import {buildUrl} from './url-builder.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   getBinaryType,
   isExperimentOn,
   toggleExperiment,
-} from '../../../src/experiments';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getMode} from '../../../src/mode';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getTimingDataSync} from '../../../src/service/variable-source';
-import {parseJson} from '../../../src/json';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+} from '../../../src/experiments.js';
+import {getConsentPolicyState} from '../../../src/consent.js';
+import {getMode} from '../../../src/mode.js';
+import {getOrCreateAdCid} from '../../../src/ad-cid.js';
+import {getTimingDataSync} from '../../../src/service/variable-source.js';
+import {parseJson} from '../../../src/json.js';
+import {whenUpgradedToCustomElement} from '../../../src/dom.js';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';

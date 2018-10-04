@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {debounce, throttle} from '../../../src/utils/rate-limit';
+import {debounce, throttle} from '../../../src/utils/rate-limit.js';
 
 describe('function utils', () => {
   describe('throttle', () => {

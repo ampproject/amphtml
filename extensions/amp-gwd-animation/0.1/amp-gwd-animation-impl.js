@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {escapeCssSelectorIdent} from '../../../src/dom.js';
+import {toArray} from '../../../src/types.js';
+import {user} from '../../../src/log.js';
 
 /**
  * CSS class used to deactivate animations.

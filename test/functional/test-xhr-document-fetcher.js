@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../src/services';
-import {fetchDocument} from '../../src/document-fetcher';
+import {Services} from '../../src/services.js';
+import {fetchDocument} from '../../src/document-fetcher.js';
 
 describes.realWin('DocumentFetcher', {amp: true}, function() {
   let xhrCreated;

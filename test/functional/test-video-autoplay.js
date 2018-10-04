@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AutoplayEntry} from '../../src/service/video/autoplay';
-import {Deferred} from '../../src/utils/promise';
-import {Services} from '../../src/services';
-import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
+import {AutoplayEntry} from '../../src/service/video/autoplay.js';
+import {Deferred} from '../../src/utils/promise.js';
+import {Services} from '../../src/services.js';
+import {createCustomEvent, listenOncePromise} from '../../src/event-helper.js';
 
 
 const noop = () => {};

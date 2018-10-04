@@ -23,9 +23,9 @@ import {
   SwapOutOfDomTask,
   UnmuteTask,
   UpdateSourcesTask,
-} from '../media-tasks';
-import {Sources} from '../sources';
-import {toArray} from '../../../../src/types';
+} from '../media-tasks.js';
+import {Sources} from '../sources.js';
+import {toArray} from '../../../../src/types.js';
 
 describes.realWin('media-tasks', {}, () => {
   let sandbox;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpFxCollection} from '../amp-fx-collection';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {AmpFxCollection} from '../amp-fx-collection.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
 
 describes.realWin('Creates the relevant fx presets correctly', {
   amp: {

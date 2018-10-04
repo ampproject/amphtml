@@ -15,33 +15,33 @@
  */
 
 import * as lolex from 'lolex';
-import * as url from '../../src/url';
-import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/services';
+import * as url from '../../src/url.js';
+import {Crypto, installCryptoService} from '../../src/service/crypto-impl.js';
+import {Services} from '../../src/services.js';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   isOptedOutOfCid,
   optOutOfCid,
-} from '../../src/service/cid-impl';
-import {getCookie, setCookie} from '../../src/cookies';
+} from '../../src/service/cid-impl.js';
+import {getCookie, setCookie} from '../../src/cookies.js';
 import {
   installCryptoPolyfill,
-} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
+} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
 import {
   installDocumentInfoServiceForDoc,
-} from '../../src/service/document-info-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+} from '../../src/service/document-info-impl.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
 import {
   installExtensionsService,
-} from '../../src/service/extensions-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {macroTask} from '../../testing/yield';
-import {parseUrlDeprecated} from '../../src/url';
-import {stubServiceForDoc} from '../../testing/test-helper';
+} from '../../src/service/extensions-impl.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl.js';
+import {macroTask} from '../../testing/yield.js';
+import {parseUrlDeprecated} from '../../src/url.js';
+import {stubServiceForDoc} from '../../testing/test-helper.js';
 
 const DAY = 24 * 3600 * 1000;
 

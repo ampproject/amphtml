@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {FxProvider} from './providers/fx-provider';
-import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {iterateCursor} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {FxProvider} from './providers/fx-provider.js';
+import {Services} from '../../../src/services.js';
+import {dev, rethrowAsync, user} from '../../../src/log.js';
+import {iterateCursor} from '../../../src/dom.js';
+import {listen} from '../../../src/event-helper.js';
+import {map} from '../../../src/utils/object.js';
 
 const TAG = 'amp-fx-collection';
 

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
-import {Gestures} from '../../../src/gesture';
-import {Services} from '../../../src/services';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {clamp} from '../../../src/utils/math';
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Services} from '../../../src/services.js';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers.js';
+import {clamp} from '../../../src/utils/math.js';
+import {dev, user} from '../../../src/log.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listen} from '../../../src/event-helper.js';
+import {setStyles} from '../../../src/style.js';
 
 export class AmpImageSlider extends AMP.BaseElement {
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-recaptcha-input';
-import {AmpRecaptchaService} from '../amp-recaptcha-service';
+import '../amp-recaptcha-input.js';
+import {AmpRecaptchaService} from '../amp-recaptcha-service.js';
 
 /**
  * Tests for the iframe communicatiuon will be done in

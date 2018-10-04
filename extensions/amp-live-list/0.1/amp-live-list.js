@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {Layout} from '../../../src/layout';
-import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
-import {childElementByAttr} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {LiveListManager, liveListManagerForDoc} from './live-list-manager.js';
+import {childElementByAttr} from '../../../src/dom.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {user} from '../../../src/log.js';
 
 
 /**

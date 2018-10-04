@@ -32,17 +32,17 @@
  * </code>
  */
 
-import * as utils from './utils';
+import * as utils from './utils.js';
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
+import {toWin} from '../../../src/types.js';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';

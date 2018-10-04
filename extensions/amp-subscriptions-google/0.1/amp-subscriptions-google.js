@@ -19,18 +19,18 @@ import {
   ConfiguredRuntime,
   Fetcher,
   SubscribeResponse,
-} from '../../../third_party/subscriptions-project/swg';
-import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
+} from '../../../third_party/subscriptions-project/swg.js';
+import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl.js';
 import {
   Entitlement,
   GrantReason,
-} from '../../amp-subscriptions/0.1/entitlement';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
+} from '../../amp-subscriptions/0.1/entitlement.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
 import {SubscriptionsScoreFactor}
   from '../../amp-subscriptions/0.1/score-factors.js';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {parseUrlDeprecated} from '../../../src/url';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';

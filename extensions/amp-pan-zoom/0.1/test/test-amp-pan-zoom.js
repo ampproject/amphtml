@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-pan-zoom';
-import {createPointerEvent} from '../../../../testing/test-helper';
-import {htmlFor} from '../../../../src/static-template';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-pan-zoom.js';
+import {createPointerEvent} from '../../../../testing/test-helper.js';
+import {htmlFor} from '../../../../src/static-template.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 describes.realWin('amp-pan-zoom', {
   amp: {

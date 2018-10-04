@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import '../amp-video';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
+import '../amp-video.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {VisibilityState} from '../../../../src/visibility-state.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
+import {mockServiceForDoc} from '../../../../testing/test-helper.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('amp-video', {
   amp: {

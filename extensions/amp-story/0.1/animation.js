@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   KeyframesDef,
   KeyframesOrFilterFnDef,
   StoryAnimationDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
-} from './animation-types';
-import {PRESETS, setStyleForPreset} from './animation-presets';
-import {Services} from '../../../src/services';
+} from './animation-types.js';
+import {PRESETS, setStyleForPreset} from './animation-presets.js';
+import {Services} from '../../../src/services.js';
 import {
   WebAnimationPlayState,
-} from '../../amp-animation/0.1/web-animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {dev, user} from '../../../src/log';
+} from '../../amp-animation/0.1/web-animation-types.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style.js';
+import {dev, user} from '../../../src/log.js';
 import {
   escapeCssSelectorIdent,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {map, omit} from '../../../src/utils/object';
-import {timeStrToMillis, unscaledClientRect} from './utils';
+} from '../../../src/dom.js';
+import {map, omit} from '../../../src/utils/object.js';
+import {timeStrToMillis, unscaledClientRect} from './utils.js';
 
 /** const {string} */
 export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';

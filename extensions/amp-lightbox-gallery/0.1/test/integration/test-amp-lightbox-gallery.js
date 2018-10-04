@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as analytics from '../../../../../src/analytics';
-import {poll} from '../../../../../testing/iframe';
+import * as analytics from '../../../../../src/analytics.js';
+import {poll} from '../../../../../testing/iframe.js';
 
 // TODO(cathyxz, #16822): This suite is flaky.
 describe.configure().skip('amp-lightbox-gallery', function() {

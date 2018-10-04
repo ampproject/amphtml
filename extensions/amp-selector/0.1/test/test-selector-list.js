@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
-import {AmpList} from '../../../amp-list/0.1/amp-list';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {AmpSelector} from '../amp-selector';
-import {Deferred} from '../../../../src/utils/promise';
-import {Services} from '../../../../src/services';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {poll} from '../../../../testing/iframe';
+import {AmpEvents} from '../../../../src/amp-events.js';
+import {AmpList} from '../../../amp-list/0.1/amp-list.js';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache.js';
+import {AmpSelector} from '../amp-selector.js';
+import {Deferred} from '../../../../src/utils/promise.js';
+import {Services} from '../../../../src/services.js';
+import {createCustomEvent} from '../../../../src/event-helper.js';
+import {poll} from '../../../../testing/iframe.js';
 
 // TODO(kevinkassimo): These tests appear to be failing at HEAD.
 describes.realWin('amp-selector amp-list interaction', {

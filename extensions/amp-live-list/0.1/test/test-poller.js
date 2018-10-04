@@ -15,8 +15,8 @@
  */
 
 
-import {Poller} from '../poller';
-import {Services} from '../../../../src/services';
+import {Poller} from '../poller.js';
+import {Services} from '../../../../src/services.js';
 
 
 describe('Poller', () => {

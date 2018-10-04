@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-recaptcha-input';
-import {toggleExperiment} from '../../../../src/experiments';
+import '../amp-recaptcha-input.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('amp-recaptcha-input', {
   amp: { /* amp spec */

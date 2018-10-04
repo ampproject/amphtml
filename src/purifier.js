@@ -21,13 +21,13 @@ import {
   isProxyOrigin,
   parseUrlDeprecated,
   resolveRelativeUrl,
-} from './url';
-import {dict} from './utils/object';
-import {parseSrcset} from './srcset';
-import {remove} from './utils/array';
-import {startsWith} from './string';
-import {urls} from './config';
-import {user} from './log';
+} from './url.js';
+import {dict} from './utils/object.js';
+import {parseSrcset} from './srcset.js';
+import {remove} from './utils/array.js';
+import {startsWith} from './string.js';
+import {urls} from './config.js';
+import {user} from './log.js';
 
 /** @private @const {string} */
 const TAG = 'purifier';

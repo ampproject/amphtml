@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TaskQueue} from '../../src/service/task-queue';
+import {TaskQueue} from '../../src/service/task-queue.js';
 
 
 describe('TaskQueue', () => {

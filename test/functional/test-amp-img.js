@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpImg, installImg} from '../../builtins/amp-img';
-import {BaseElement} from '../../src/base-element';
-import {LayoutPriority} from '../../src/layout';
-import {Services} from '../../src/services';
-import {createCustomEvent} from '../../src/event-helper';
-import {createIframePromise} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
+import {AmpImg, installImg} from '../../builtins/amp-img.js';
+import {BaseElement} from '../../src/base-element.js';
+import {LayoutPriority} from '../../src/layout.js';
+import {Services} from '../../src/services.js';
+import {createCustomEvent} from '../../src/event-helper.js';
+import {createIframePromise} from '../../testing/iframe.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 describe('amp-img', () => {
   let sandbox;

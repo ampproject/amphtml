@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {doubleclick} from '../ads/google/doubleclick';
-import {loadScript, validateData} from '../3p/3p';
+import {doubleclick} from '../ads/google/doubleclick.js';
+import {loadScript, validateData} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

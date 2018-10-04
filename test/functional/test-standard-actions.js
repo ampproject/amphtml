@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
-import {Services} from '../../src/services';
-import {StandardActions} from '../../src/service/standard-actions-impl';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {installHistoryServiceForDoc} from '../../src/service/history-impl';
-import {macroTask} from '../../testing/yield';
-import {setParentWindow} from '../../src/service';
-import {toggle} from '../../src/style';
-import {user} from '../../src/log';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants.js';
+import {Services} from '../../src/services.js';
+import {StandardActions} from '../../src/service/standard-actions-impl.js';
+import {cidServiceForDocForTesting} from '../../src/service/cid-impl.js';
+import {installHistoryServiceForDoc} from '../../src/service/history-impl.js';
+import {macroTask} from '../../testing/yield.js';
+import {setParentWindow} from '../../src/service.js';
+import {toggle} from '../../src/style.js';
+import {user} from '../../src/log.js';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;

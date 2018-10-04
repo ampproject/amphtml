@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   createFixtureIframe,
   poll,
-} from '../../testing/iframe';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
+} from '../../testing/iframe.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
 
 function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
-import {AmpEvents} from '../../../src/amp-events';
+import {AccessSource, AccessType} from './amp-access-source.js';
+import {AccessVars} from './access-vars.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {cancellation} from '../../../src/error';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {evaluateAccessExpr} from './access-expr';
-import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '../../../src/types';
-import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {cancellation} from '../../../src/error.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {evaluateAccessExpr} from './access-expr.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {getValueForExpr, tryParseJson} from '../../../src/json.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {isArray} from '../../../src/types.js';
+import {listenOnce} from '../../../src/event-helper.js';
+import {startsWith} from '../../../src/string.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 
 /** @const */

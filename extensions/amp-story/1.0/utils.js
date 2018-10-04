@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {closestBySelector} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {getMode} from '../../../src/mode';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {closestBySelector} from '../../../src/dom.js';
+import {createShadowRoot} from '../../../src/shadow-embed.js';
+import {getMode} from '../../../src/mode.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

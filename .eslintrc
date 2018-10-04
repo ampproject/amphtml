@@ -65,6 +65,7 @@
     "amphtml-internal/dict-string-keys": 2,
     "amphtml-internal/enforce-private-props": 2,
     "amphtml-internal/html-template": 2,
+    "amphtml-internal/imports-need-file-extension": 1,
     "amphtml-internal/is-experiment-on": 2,
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-deep-destructuring": 2,

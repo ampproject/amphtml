@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../amp-call-tracking';
-import {Services} from '../../../../src/services';
-import {clearResponseCacheForTesting} from '../amp-call-tracking';
+import '../amp-call-tracking.js';
+import {Services} from '../../../../src/services.js';
+import {clearResponseCacheForTesting} from '../amp-call-tracking.js';
 
 
 describes.realWin('amp-call-tracking', {

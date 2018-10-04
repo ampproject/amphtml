@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, GrantReason} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement.js';
 
 
 describes.realWin('EntitlementClass', {}, () => {

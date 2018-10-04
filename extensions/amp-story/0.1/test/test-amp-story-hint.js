@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryHint} from '../amp-story-hint';
-import {AmpStoryStoreService} from '../amp-story-store-service';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+import {AmpStoryHint} from '../amp-story-hint.js';
+import {AmpStoryStoreService} from '../amp-story-store-service.js';
+import {Services} from '../../../../src/services.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 const NOOP = () => {};
 

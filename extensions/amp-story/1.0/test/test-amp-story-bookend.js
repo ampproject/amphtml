@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Action} from '../amp-story-store-service';
-import {AmpStoryBookend} from '../bookend/amp-story-bookend';
-import {AmpStoryRequestService} from '../amp-story-request-service';
-import {ArticleComponent} from '../bookend/components/article';
-import {CtaLinkComponent} from '../bookend/components/cta-link';
-import {LandscapeComponent} from '../bookend/components/landscape';
-import {LocalizationService} from '../localization';
-import {PortraitComponent} from '../bookend/components/portrait';
-import {Services} from '../../../../src/services';
-import {TextBoxComponent} from '../bookend/components/text-box';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
-import {user} from '../../../../src/log';
+import {Action} from '../amp-story-store-service.js';
+import {AmpStoryBookend} from '../bookend/amp-story-bookend.js';
+import {AmpStoryRequestService} from '../amp-story-request-service.js';
+import {ArticleComponent} from '../bookend/components/article.js';
+import {CtaLinkComponent} from '../bookend/components/cta-link.js';
+import {LandscapeComponent} from '../bookend/components/landscape.js';
+import {LocalizationService} from '../localization.js';
+import {PortraitComponent} from '../bookend/components/portrait.js';
+import {Services} from '../../../../src/services.js';
+import {TextBoxComponent} from '../bookend/components/text-box.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
+import {user} from '../../../../src/log.js';
 
 describes.realWin('amp-story-bookend', {amp: true}, env => {
   let win;

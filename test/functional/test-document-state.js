@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import {DocumentState} from '../../src/service/document-state';
+import * as dom from '../../src/dom.js';
+import {DocumentState} from '../../src/service/document-state.js';
 
 
 describe('DocumentState', () => {

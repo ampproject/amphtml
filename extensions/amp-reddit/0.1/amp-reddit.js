@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {user} from '../../../src/log';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {user} from '../../../src/log.js';
 
 class AmpReddit extends AMP.BaseElement {
 

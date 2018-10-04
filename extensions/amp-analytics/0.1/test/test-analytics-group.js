@@ -28,7 +28,7 @@ import {
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
-} from '../events';
+} from '../events.js';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   let win;

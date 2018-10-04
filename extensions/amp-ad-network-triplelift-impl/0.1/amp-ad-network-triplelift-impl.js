@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
 
 /**
  * TripleLift base URL

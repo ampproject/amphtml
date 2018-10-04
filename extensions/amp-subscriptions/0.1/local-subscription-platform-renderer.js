@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
-import {Services} from '../../../src/services';
-import {evaluateExpr} from './expr';
+import {Entitlement} from './entitlement.js';
+import {Services} from '../../../src/services.js';
+import {evaluateExpr} from './expr.js';
 
 /**
  * This implements the rendering methods for local platform.

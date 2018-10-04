@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from './log';
+import {dev, user} from './log.js';
 
 
 /**

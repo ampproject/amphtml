@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {adsense} from '../adsense';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {adsense} from '../adsense.js';
 
 describes.realWin('adsenseDelayedFetch', {}, env => {
 

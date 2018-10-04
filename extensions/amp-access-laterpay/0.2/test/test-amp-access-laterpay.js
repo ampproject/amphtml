@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LaterpayVendor} from '../laterpay-impl';
+import {LaterpayVendor} from '../laterpay-impl.js';
 
 const TAG = 'amp-access-laterpay';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GestureRecognizer, Gestures} from '../../src/gesture';
+import {GestureRecognizer, Gestures} from '../../src/gesture.js';
 
 
 describe('Gestures', () => {

@@ -15,25 +15,25 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {Layout} from '../../../src/layout';
-import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {NextPageService} from './next-page-service.js';
+import {Services} from '../../../src/services.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {assertConfig} from './config';
+} from '../../../src/batched-json.js';
+import {assertConfig} from './config.js';
 import {
   childElementsByAttr,
   childElementsByTag,
   isJsonScriptTag,
   removeElement,
-} from '../../../src/dom';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+} from '../../../src/dom.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {tryParseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-next-page';
 

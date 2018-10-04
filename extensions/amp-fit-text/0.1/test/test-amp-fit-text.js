@@ -17,7 +17,7 @@
 import {
   calculateFontSize_,
   updateOverflow_,
-} from '../amp-fit-text';
+} from '../amp-fit-text.js';
 
 
 describes.realWin('amp-fit-text component', {

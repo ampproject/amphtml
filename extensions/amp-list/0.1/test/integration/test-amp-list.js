@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '../../../../../testing/iframe.js';
 
 const body =
     '<amp-list id="list" width=300 height=100 ' +

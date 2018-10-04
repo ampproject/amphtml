@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {getMode} from './mode.js';
 
 /**
  * Provides info about the current app. This return value may be cached and

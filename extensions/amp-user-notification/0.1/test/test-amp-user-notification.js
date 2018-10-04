@@ -17,14 +17,14 @@
 import {
   AmpUserNotification,
   UserNotificationManager,
-} from '../amp-user-notification';
+} from '../amp-user-notification.js';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {macroTask} from '../../../../testing/yield';
+} from '../../../../src/service.js';
+import {macroTask} from '../../../../testing/yield.js';
 
 
 describes.realWin('amp-user-notification', {

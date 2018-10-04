@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpStoryAccess, Type} from '../amp-story-access';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service.js';
+import {AmpStoryAccess, Type} from '../amp-story-access.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 describes.realWin('amp-story-access', {amp: true}, env => {
   let win;

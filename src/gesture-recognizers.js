@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {GestureRecognizer} from './gesture';
-import {calcVelocity} from './motion';
+import {GestureRecognizer} from './gesture.js';
+import {calcVelocity} from './motion.js';
 
 const DOUBLETAP_DELAY = 200;
 

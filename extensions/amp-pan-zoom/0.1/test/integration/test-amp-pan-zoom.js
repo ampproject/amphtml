@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/amp-events';
-import {createFixtureIframe} from '../../../../../testing/iframe';
-import {toggleExperiment} from '../../../../../src/experiments';
+import {AmpEvents} from '../../../../../src/amp-events.js';
+import {createFixtureIframe} from '../../../../../testing/iframe.js';
+import {toggleExperiment} from '../../../../../src/experiments.js';
 
 describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
   this.timeout(100000);

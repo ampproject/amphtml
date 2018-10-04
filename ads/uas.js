@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../src/utils/object';
-import {loadScript, validateData} from '../3p/3p';
-import {setStyles} from '../src/style';
+import {hasOwn} from '../src/utils/object.js';
+import {loadScript, validateData} from '../3p/3p.js';
+import {setStyles} from '../src/style.js';
 
 /**
  * @param {!Object} theObject

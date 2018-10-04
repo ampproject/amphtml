@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-selector';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import '../amp-selector.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {closestByTag, removeElement} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {listen} from '../../../src/event-helper';
-import {removeFragment} from '../../../src/url';
-import {toggle} from '../../../src/style';
+import {Services} from '../../../src/services.js';
+import {closestByTag, removeElement} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {listen} from '../../../src/event-helper.js';
+import {removeFragment} from '../../../src/url.js';
+import {toggle} from '../../../src/style.js';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';

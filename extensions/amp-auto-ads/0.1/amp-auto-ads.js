@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AdStrategy} from './ad-strategy';
+import {AdStrategy} from './ad-strategy.js';
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
   getExistingAds,
-} from './ad-tracker';
-import {AnchorAdStrategy} from './anchor-ad-strategy';
-import {Services} from '../../../src/services';
-import {getAdNetworkConfig} from './ad-network-config';
-import {getAttributesFromConfigObj} from './attributes';
-import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
+} from './ad-tracker.js';
+import {AnchorAdStrategy} from './anchor-ad-strategy.js';
+import {Services} from '../../../src/services.js';
+import {getAdNetworkConfig} from './ad-network-config.js';
+import {getAttributesFromConfigObj} from './attributes.js';
+import {getPlacementsFromConfigObj} from './placement.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {user} from '../../../src/log.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

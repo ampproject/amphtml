@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {DayPickerPhrases} from './defaultPhrases';
-import {map} from '../../../src/utils/object';
-import {requireExternal} from '../../../src/module';
-import {withDatePickerCommon} from './date-picker-common';
+import {DayPickerPhrases} from './defaultPhrases.js';
+import {map} from '../../../src/utils/object.js';
+import {requireExternal} from '../../../src/module.js';
+import {withDatePickerCommon} from './date-picker-common.js';
 
 
 /**

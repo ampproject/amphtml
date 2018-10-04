@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
-import {LayoutPriority} from '../../src/layout';
-import {Resource} from '../../src/service/resource';
-import {Services} from '../../src/services';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {listenOncePromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
+import {BaseElement} from '../../src/base-element.js';
+import {LayoutPriority} from '../../src/layout.js';
+import {Resource} from '../../src/service/resource.js';
+import {Services} from '../../src/services.js';
+import {createAmpElementForTesting} from '../../src/custom-element.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
+import {listenOncePromise} from '../../src/event-helper.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {

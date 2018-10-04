@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ValidationBubble} from '../validation-bubble';
+import {ValidationBubble} from '../validation-bubble.js';
 
 describes.realWin('validation-bubble', {amp: true}, env => {
   it('should append a dom element to the document', () => {

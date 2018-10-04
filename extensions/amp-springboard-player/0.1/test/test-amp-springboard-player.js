@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-springboard-player';
+import '../amp-springboard-player.js';
 
 
 describes.realWin('amp-springboard-player', {

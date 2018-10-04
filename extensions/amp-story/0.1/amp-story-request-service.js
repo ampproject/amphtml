@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {getAmpdoc} from '../../../src/service';
-import {once} from '../../../src/utils/function';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {once} from '../../../src/utils/function.js';
+import {user} from '../../../src/log.js';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';

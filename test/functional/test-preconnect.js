@@ -15,9 +15,9 @@
  */
 
 import * as lolex from 'lolex';
-import {createIframePromise} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe.js';
 import {preconnectForElement, setPreconnectFeaturesForTesting} from
-  '../../src/preconnect';
+  '../../src/preconnect.js';
 
 describe('preconnect', () => {
 

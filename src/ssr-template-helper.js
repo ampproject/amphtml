@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
+import {dict} from './utils/object.js';
 import {
   fromStructuredCloneable,
   toStructuredCloneable,
   verifyAmpCORSHeaders,
-} from './utils/xhr-utils';
+} from './utils/xhr-utils.js';
 
 /**
  * @typedef {{

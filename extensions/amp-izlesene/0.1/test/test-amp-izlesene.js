@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-izlesene';
+import '../amp-izlesene.js';
 
 
 describes.realWin('amp-izlesene', {

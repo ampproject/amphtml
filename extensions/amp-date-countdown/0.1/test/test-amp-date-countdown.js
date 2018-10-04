@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../amp-date-countdown';
+import '../amp-date-countdown.js';
 //import {Services} from '../../../../src/services';
 
 describes.realWin('amp-date-countdown', {

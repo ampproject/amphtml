@@ -19,10 +19,10 @@ import {
   getSourceUrl,
   parseQueryString,
   parseUrlDeprecated,
-} from '../url';
-import {isArray} from '../types';
-import {map} from '../utils/object';
-import {registerServiceBuilderForDoc} from '../service';
+} from '../url.js';
+import {isArray} from '../types.js';
+import {map} from '../utils/object.js';
+import {registerServiceBuilderForDoc} from '../service.js';
 
 /** @private @const {!Array<string>} */
 const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];

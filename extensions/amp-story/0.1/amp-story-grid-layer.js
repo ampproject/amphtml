@@ -26,9 +26,9 @@
  * </code>
  */
 
-import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {AmpStoryBaseLayer} from './amp-story-base-layer.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style.js';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom.js';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid

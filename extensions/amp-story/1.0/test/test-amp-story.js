@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import * as consent from '../../../../src/consent';
-import * as utils from '../utils';
+import * as consent from '../../../../src/consent.js';
+import * as utils from '../utils.js';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
   UIType,
-} from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
-import {AmpStory} from '../amp-story';
-import {AmpStoryConsent} from '../amp-story-consent';
-import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../localization';
-import {MediaType} from '../media-pool';
-import {PageState} from '../amp-story-page';
-import {PaginationButtons} from '../pagination-buttons';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+} from '../amp-story-store-service.js';
+import {ActionTrust} from '../../../../src/action-constants.js';
+import {AmpStory} from '../amp-story.js';
+import {AmpStoryConsent} from '../amp-story-consent.js';
+import {EventType} from '../events.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {LocalizationService} from '../localization.js';
+import {MediaType} from '../media-pool.js';
+import {PageState} from '../amp-story-page.js';
+import {PaginationButtons} from '../pagination-buttons.js';
+import {Services} from '../../../../src/services.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 const NOOP = () => {};

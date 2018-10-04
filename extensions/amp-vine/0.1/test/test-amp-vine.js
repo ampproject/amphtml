@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-vine';
+import '../amp-vine.js';
 
 
 describes.realWin('amp-vine', {

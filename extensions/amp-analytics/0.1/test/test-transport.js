@@ -15,9 +15,9 @@
  */
 
 import * as lolex from 'lolex';
-import {Transport} from '../transport';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {loadPromise} from '../../../../src/event-helper';
+import {Transport} from '../transport.js';
+import {installTimerService} from '../../../../src/service/timer-impl.js';
+import {loadPromise} from '../../../../src/event-helper.js';
 
 describes.realWin('amp-analytics.transport', {
   amp: false,

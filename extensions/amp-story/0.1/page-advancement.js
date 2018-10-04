@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {closest, escapeCssSelectorIdent} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {hasTapAction, timeStrToMillis} from './utils.js';
+import {listenOnce} from '../../../src/event-helper.js';
+import {map} from '../../../src/utils/object.js';
 
 
 /** @private @const {number} */

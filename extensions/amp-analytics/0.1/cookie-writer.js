@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
-import {Services} from '../../../src/services';
-import {getMode} from '../../../src/mode';
-import {getNameArgs} from './variables';
-import {hasOwn} from '../../../src/utils/object';
-import {isInFie} from '../../../src/friendly-iframe-embed';
-import {isObject} from '../../../src/types';
-import {isProxyOrigin} from '../../../src/url';
-import {linkerReaderServiceFor} from './linker-reader';
-import {setCookie} from '../../../src/cookies';
-import {user} from '../../../src/log';
+import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl.js';
+import {Services} from '../../../src/services.js';
+import {getMode} from '../../../src/mode.js';
+import {getNameArgs} from './variables.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isInFie} from '../../../src/friendly-iframe-embed.js';
+import {isObject} from '../../../src/types.js';
+import {isProxyOrigin} from '../../../src/url.js';
+import {linkerReaderServiceFor} from './linker-reader.js';
+import {setCookie} from '../../../src/cookies.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-analytics/cookie-writer';
 

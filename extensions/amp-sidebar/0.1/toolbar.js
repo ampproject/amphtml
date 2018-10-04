@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {toggle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {toggle} from '../../../src/style.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Class representing toolbar behavior in sidebar

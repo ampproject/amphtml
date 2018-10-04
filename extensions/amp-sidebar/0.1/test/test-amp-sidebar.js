@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import '../amp-sidebar';
+import '../amp-sidebar.js';
 import * as lolex from 'lolex';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
-import {assertScreenReaderElement} from '../../../../testing/test-helper';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {Services} from '../../../../src/services.js';
+import {assertScreenReaderElement} from '../../../../testing/test-helper.js';
 
 describes.realWin('amp-sidebar 0.1 version', {
   win: { /* window spec */

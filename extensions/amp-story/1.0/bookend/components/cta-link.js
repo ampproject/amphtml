@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
-import {addAttributesToElement} from '../../../../../src/dom';
-import {dict} from '../../../../../src/utils/object';
-import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {isArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
+import {BookendComponentInterface} from './bookend-component-interface.js';
+import {addAttributesToElement} from '../../../../../src/dom.js';
+import {dict} from '../../../../../src/utils/object.js';
+import {htmlFor, htmlRefs} from '../../../../../src/static-template.js';
+import {isArray} from '../../../../../src/types.js';
+import {user} from '../../../../../src/log.js';
+import {userAssertValidProtocol} from '../../utils.js';
 
 /**
  * @typedef {{

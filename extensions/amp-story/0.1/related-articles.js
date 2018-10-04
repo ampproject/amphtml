@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, user} from '../../../src/log';
+import {dev, user} from '../../../src/log.js';
 import {
   getSourceOrigin,
   isProtocolValid,
   parseUrlDeprecated,
-} from '../../../src/url';
+} from '../../../src/url.js';
 
 
 const TAG = 'amp-story';

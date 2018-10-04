@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import * as ext from '../../src/service/extensions-impl';
-import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {ElementStub} from '../../src/element-stub';
-import {Services} from '../../src/services';
+import * as dom from '../../src/dom.js';
+import * as ext from '../../src/service/extensions-impl.js';
+import * as styles from '../../src/style-installer.js';
+import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {ElementStub} from '../../src/element-stub.js';
+import {Services} from '../../src/services.js';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
-} from '../../src/runtime';
-import {createShadowRoot} from '../../src/shadow-embed';
-import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
+} from '../../src/runtime.js';
+import {createShadowRoot} from '../../src/shadow-embed.js';
+import {deactivateChunking, runChunksForTesting} from '../../src/chunk.js';
 import {
   getServiceForDoc,
   getServicePromise,
   getServicePromiseOrNullForDoc,
-} from '../../src/service';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {toggleExperiment} from '../../src/experiments';
-import {vsyncForTesting} from '../../src/service/vsync-impl';
+} from '../../src/service.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {toggleExperiment} from '../../src/experiments.js';
+import {vsyncForTesting} from '../../src/service/vsync-impl.js';
 
 
 describes.fakeWin('runtime', {

@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
-import * as mode from '../../../../src/mode';
-import {AccessClientAdapter} from '../amp-access-client';
+import * as mode from '../../../../src/mode.js';
+import {AccessClientAdapter} from '../amp-access-client.js';
 
 
 describes.realWin('AccessClientAdapter', {

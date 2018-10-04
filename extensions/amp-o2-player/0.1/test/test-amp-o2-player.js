@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-o2-player';
+import '../amp-o2-player.js';
 
 
 describes.realWin('amp-o2-player', {

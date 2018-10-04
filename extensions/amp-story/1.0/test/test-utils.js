@@ -18,7 +18,7 @@ import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
   timeStrToMillis,
-} from '../utils';
+} from '../utils.js';
 
 describes.fakeWin('amp-story utils', {}, () => {
   describe('timeStrToMillis', () => {

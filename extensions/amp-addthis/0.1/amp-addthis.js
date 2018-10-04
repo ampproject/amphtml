@@ -41,27 +41,27 @@ import {
   SHARECOUNTER_SERVER,
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
-} from './constants';
+} from './constants.js';
 import {
   ActiveToolsMonitor,
-} from './addthis-utils/monitors/active-tools-monitor';
-import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
-import {ConfigManager} from './config-manager';
-import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
-import {PostMessageDispatcher} from './post-message-dispatcher';
-import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {Services} from '../../../src/services';
+} from './addthis-utils/monitors/active-tools-monitor.js';
+import {ClickMonitor} from './addthis-utils/monitors/click-monitor.js';
+import {ConfigManager} from './config-manager.js';
+import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor.js';
+import {PostMessageDispatcher} from './post-message-dispatcher.js';
+import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor.js';
+import {Services} from '../../../src/services.js';
 
-import {callEng} from './addthis-utils/eng';
-import {callLojson} from './addthis-utils/lojson';
-import {callPjson} from './addthis-utils/pjson';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {callEng} from './addthis-utils/eng.js';
+import {callLojson} from './addthis-utils/lojson.js';
+import {callPjson} from './addthis-utils/pjson.js';
+import {createElementWithAttributes, removeElement} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listen} from '../../../src/event-helper.js';
+import {parseUrlDeprecated} from '../../../src/url.js';
+import {setStyle} from '../../../src/style.js';
+import {user} from '../../../src/log.js';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
 // prevent unnecessary HTTP requests, get accurate analytics, etc., and hence

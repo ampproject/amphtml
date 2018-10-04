@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
-import {AnchorAdStrategy} from '../anchor-ad-strategy';
-import {Services} from '../../../../src/services';
-import {waitForChild} from '../../../../src/dom';
+import '../../../amp-ad/0.1/amp-ad.js';
+import {AnchorAdStrategy} from '../anchor-ad-strategy.js';
+import {Services} from '../../../../src/services.js';
+import {waitForChild} from '../../../../src/dom.js';
 
 
 describes.realWin('anchor-ad-strategy', {

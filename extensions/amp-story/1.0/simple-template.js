@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from './localization'; // eslint-disable-line no-unused-vars
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
-import {isArray, toWin} from '../../../src/types';
+import {LocalizedStringId} from './localization.js'; // eslint-disable-line no-unused-vars
+import {Services} from '../../../src/services.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dev} from '../../../src/log.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isArray, toWin} from '../../../src/types.js';
 
 
 /**

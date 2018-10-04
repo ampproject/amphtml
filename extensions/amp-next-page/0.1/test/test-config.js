@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../../src/services';
-import {assertConfig} from '../config';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {Services} from '../../../../src/services.js';
+import {assertConfig} from '../config.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
 
 
 describe('amp-next-page config', () => {

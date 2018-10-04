@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {VisibilityState} from '../../src/visibility-state';
-import {createCustomEvent} from '../../src/event-helper';
-import {getVendorJsPropertyName} from '../../src/style';
-import {whenUpgradedToCustomElement} from '../../src/dom';
+import {Services} from '../../src/services.js';
+import {VisibilityState} from '../../src/visibility-state.js';
+import {createCustomEvent} from '../../src/event-helper.js';
+import {getVendorJsPropertyName} from '../../src/style.js';
+import {whenUpgradedToCustomElement} from '../../src/dom.js';
 
 describe.configure().skipIfPropertiesObfuscated()
     .ifNewChrome().run('Viewer Visibility State', () => {

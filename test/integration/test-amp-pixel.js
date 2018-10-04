@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpPixel} from '../../builtins/amp-pixel';
-import {Services} from '../../src/services';
-import {createElementWithAttributes} from '../../src/dom';
+import {AmpPixel} from '../../builtins/amp-pixel.js';
+import {Services} from '../../src/services.js';
+import {createElementWithAttributes} from '../../src/dom.js';
 import {
   depositRequestUrl,
   withdrawRequest,
-} from '../../testing/test-helper';
+} from '../../testing/test-helper.js';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);

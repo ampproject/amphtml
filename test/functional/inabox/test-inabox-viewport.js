@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   ViewportBindingInabox,
   prepareBodyForOverlay,
   resetBodyForOverlay,
-} from '../../../src/inabox/inabox-viewport';
+} from '../../../src/inabox/inabox-viewport.js';
 import {
   installIframeMessagingClient,
-} from '../../../src/inabox/inabox-iframe-messaging-client';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+} from '../../../src/inabox/inabox-iframe-messaging-client.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
 
 
 const NOOP = () => {};

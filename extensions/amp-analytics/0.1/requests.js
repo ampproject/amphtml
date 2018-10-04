@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
+import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins.js';
 import {
   ExpansionOptions,
   encodeVars,
   variableServiceFor,
-} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
-import {Services} from '../../../src/services';
+} from './variables.js';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist.js';
+import {Services} from '../../../src/services.js';
 import {
   appendEncodedParamStringToUrl,
   parseQueryString,
-} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber} from '../../../src/types';
-import {remove} from '../../../src/utils/array';
+} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict, map} from '../../../src/utils/object.js';
+import {getResourceTiming} from './resource-timing.js';
+import {isArray, isFiniteNumber} from '../../../src/types.js';
+import {remove} from '../../../src/utils/array.js';
 
 const TAG = 'amp-analytics/requests';
 

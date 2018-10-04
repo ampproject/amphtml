@@ -19,28 +19,28 @@ import {
   StateProperty,
   UIType,
   getStoreService,
-} from '../amp-story-store-service';
-import {ActionTrust} from '../../../../src/action-constants';
-import {BookendComponent} from './bookend-component';
+} from '../amp-story-store-service.js';
+import {ActionTrust} from '../../../../src/action-constants.js';
+import {BookendComponent} from './bookend-component.js';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
   SHARE_PROVIDERS_KEY,
   ScrollableShareWidget,
-} from '../amp-story-share';
-import {EventType, dispatch} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {LocalizedStringId} from '../localization';
-import {Services} from '../../../../src/services';
-import {closest} from '../../../../src/dom';
-import {createShadowRootWithStyle} from '../utils';
-import {dev, user} from '../../../../src/log';
-import {dict} from '../../../../src/utils/object';
-import {getAmpdoc} from '../../../../src/service';
-import {getJsonLd} from '../jsonld';
-import {getRequestService} from '../amp-story-request-service';
-import {isArray} from '../../../../src/types';
-import {renderAsElement} from '../simple-template';
+} from '../amp-story-share.js';
+import {EventType, dispatch} from '../events.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {LocalizedStringId} from '../localization.js';
+import {Services} from '../../../../src/services.js';
+import {closest} from '../../../../src/dom.js';
+import {createShadowRootWithStyle} from '../utils.js';
+import {dev, user} from '../../../../src/log.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getAmpdoc} from '../../../../src/service.js';
+import {getJsonLd} from '../jsonld.js';
+import {getRequestService} from '../amp-story-request-service.js';
+import {isArray} from '../../../../src/types.js';
+import {renderAsElement} from '../simple-template.js';
 
 
 /** @private @const {string} */

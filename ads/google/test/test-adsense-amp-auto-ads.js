@@ -18,11 +18,11 @@ import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
-} from '../adsense-amp-auto-ads';
+} from '../adsense-amp-auto-ads.js';
 import {
   RANDOM_NUMBER_GENERATORS,
   toggleExperiment,
-} from '../../../src/experiments';
+} from '../../../src/experiments.js';
 
 describes.realWin('adsense-amp-auto-ads', {}, env => {
   let win;

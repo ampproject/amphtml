@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {user} from '../../src/log';
+import {user} from '../../src/log.js';
 
 /**
  * Approved height for AdSense full-width responsive ads.

@@ -19,10 +19,10 @@
  * its embed AMP content (such as an ad created in AMP).
  */
 
-import {InaboxMessagingHost} from './inabox-messaging-host';
-import {dev, initLogConstructor, setReportError, user} from '../../src/log';
-import {getData} from '../../src/event-helper';
-import {reportError} from '../../src/error';
+import {InaboxMessagingHost} from './inabox-messaging-host.js';
+import {dev, initLogConstructor, setReportError, user} from '../../src/log.js';
+import {getData} from '../../src/event-helper.js';
+import {reportError} from '../../src/error.js';
 
 /** @const {string} */
 const TAG = 'inabox-host';

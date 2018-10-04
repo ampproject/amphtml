@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {COOKIELESS_API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
-import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {dict} from '../../../../src/utils/object';
-import {getData} from '../../../../src/event-helper';
-import {isObject} from '../../../../src/types';
-import {parseJson} from '../../../../src/json';
+import {COOKIELESS_API_SERVER} from '../constants.js';
+import {Services} from '../../../../src/services.js';
+import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {dict} from '../../../../src/utils/object.js';
+import {getData} from '../../../../src/event-helper.js';
+import {isObject} from '../../../../src/types.js';
+import {parseJson} from '../../../../src/json.js';
 
-import {setStyles, toggle} from '../../../../src/style';
+import {setStyles, toggle} from '../../../../src/style.js';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';

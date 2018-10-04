@@ -16,14 +16,14 @@
 
 import {
   assertHttpsUrl,
-} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
 import {
   insertAfterOrAtStart,
   removeElement,
-} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+} from '../../../src/dom.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {toggle} from '../../../src/style.js';
 
 const TAG = 'amp-consent-ui';
 

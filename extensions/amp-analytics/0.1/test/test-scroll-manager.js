@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {ScrollManager} from '../scroll-manager';
+import {AmpdocAnalyticsRoot} from '../analytics-root.js';
+import {ScrollManager} from '../scroll-manager.js';
 
 
 describes.realWin('ScrollManager', {amp: 1}, env => {

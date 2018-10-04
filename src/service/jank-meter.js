@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dev, user} from '../log';
-import {htmlFor} from '../static-template';
-import {isExperimentOn} from '../experiments';
+import {Services} from '../services.js';
+import {dev, user} from '../log.js';
+import {htmlFor} from '../static-template.js';
+import {isExperimentOn} from '../experiments.js';
 
 /** @const {number} */
 const NTH_FRAME = 200;

@@ -18,17 +18,17 @@ import {
   Action,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service';
+} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Services} from '../../../src/services';
-import {ShareWidget} from './amp-story-share';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {renderAsElement} from './simple-template';
-import {toggle} from '../../../src/style';
+import {Services} from '../../../src/services.js';
+import {ShareWidget} from './amp-story-share.js';
+import {closest} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {renderAsElement} from './simple-template.js';
+import {toggle} from '../../../src/style.js';
 
 
 /** @const {string} Class to toggle the share menu. */

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
+import {KeyCodes} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
 
 /**
  * @abstract

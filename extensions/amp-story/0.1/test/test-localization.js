@@ -19,7 +19,7 @@ import {
   LocalizedStringId,
   createPseudoLocale,
   getLanguageCodesFromString,
-} from '../localization';
+} from '../localization.js';
 
 describes.fakeWin('localization', {}, env => {
   describe('localized string IDs', () => {

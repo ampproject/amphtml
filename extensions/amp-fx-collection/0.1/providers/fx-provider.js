@@ -16,18 +16,18 @@
 
 import {
   PositionObserverFidelity,
-} from '../../../../src/service/position-observer/position-observer-worker';
-import {Presets} from './amp-fx-presets';
-import {Services} from '../../../../src/services';
-import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
+} from '../../../../src/service/position-observer/position-observer-worker.js';
+import {Presets} from './amp-fx-presets.js';
+import {Services} from '../../../../src/services.js';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style.js';
 import {convertEasingKeyword, defaultDurationValues,
   defaultEasingValues, defaultFlyInDistanceValues,
   defaultMarginValues, installStyles, resolvePercentageToNumber}
-  from './amp-fx-presets-utils';
-import {getServiceForDoc} from '../../../../src/service';
+  from './amp-fx-presets-utils.js';
+import {getServiceForDoc} from '../../../../src/service.js';
 import {
   installPositionObserverServiceForDoc,
-} from '../../../../src/service/position-observer/position-observer-impl';
+} from '../../../../src/service/position-observer/position-observer-impl.js';
 
 /**
  * Class that implements the various preset animation providers.

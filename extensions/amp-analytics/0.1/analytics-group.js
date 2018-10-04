@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {dev, user} from '../../../src/log.js';
 import {
   getTrackerKeyName,
   getTrackerTypesForParentType,
-} from './events';
+} from './events.js';
 
 /**
  * Represents the group of analytics triggers for a single config. All triggers

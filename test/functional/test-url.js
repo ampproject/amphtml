@@ -38,7 +38,7 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-} from '../../src/url';
+} from '../../src/url.js';
 
 describe('getWinOrigin', () => {
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-bind';
-import {Services} from '../../../../src/services';
+import '../amp-bind.js';
+import {Services} from '../../../../src/services.js';
 
 describes.realWin('AmpState', {
   amp: {

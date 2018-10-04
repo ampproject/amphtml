@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {isEnumValue} from '../../../src/types';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {dev} from '../../../src/log.js';
+import {isEnumValue} from '../../../src/types.js';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';

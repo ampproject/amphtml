@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as IframeHelper from '../../src/iframe-helper';
-import {createIframePromise} from '../../testing/iframe';
+import * as IframeHelper from '../../src/iframe-helper.js';
+import {createIframePromise} from '../../testing/iframe.js';
 import {generateSentinel} from '../../src/3p-frame.js';
 
 describe('iframe-helper', function() {

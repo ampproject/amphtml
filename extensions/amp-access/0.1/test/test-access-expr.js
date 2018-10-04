@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {evaluateAccessExpr} from '../access-expr';
+import {evaluateAccessExpr} from '../access-expr.js';
 
 
 describe('evaluateAccessExpr', () => {

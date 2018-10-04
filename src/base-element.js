@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-constants';
-import {Layout, LayoutPriority} from './layout';
-import {Services} from './services';
-import {dev, user} from './log';
-import {getData, listen, loadPromise} from './event-helper';
-import {getMode} from './mode';
-import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
-import {preconnectForElement} from './preconnect';
+import {ActionTrust} from './action-constants.js';
+import {Layout, LayoutPriority} from './layout.js';
+import {Services} from './services.js';
+import {dev, user} from './log.js';
+import {getData, listen, loadPromise} from './event-helper.js';
+import {getMode} from './mode.js';
+import {isArray, toWin} from './types.js';
+import {isExperimentOn} from './experiments.js';
+import {preconnectForElement} from './preconnect.js';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

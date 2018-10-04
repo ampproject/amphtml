@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../amp-riddle-quiz';
+import '../amp-riddle-quiz.js';
 
 
 describes.realWin('amp-riddle-quiz', {

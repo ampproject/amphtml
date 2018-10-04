@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   getExtraParamsUrl,
   getTrackImpressionPromise,
@@ -22,10 +22,10 @@ import {
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
-} from '../../src/impression';
-import {macroTask} from '../../testing/yield';
-import {toggleExperiment} from '../../src/experiments';
-import {user} from '../../src/log';
+} from '../../src/impression.js';
+import {macroTask} from '../../testing/yield.js';
+import {toggleExperiment} from '../../src/experiments.js';
+import {user} from '../../src/log.js';
 
 describe('impression', () => {
 

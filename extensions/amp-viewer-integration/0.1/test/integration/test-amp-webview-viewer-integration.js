@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegration} from '../../amp-viewer-integration';
+import {AmpViewerIntegration} from '../../amp-viewer-integration.js';
 import {WebviewViewerForTesting} from '../webview-viewer-for-testing.js';
 
 

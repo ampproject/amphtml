@@ -19,31 +19,31 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills.js'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {Services} from './services';
+import {Services} from './services.js';
 import {
   adopt,
   installAmpdocServices,
   installBuiltins,
   installRuntimeServices,
-} from './runtime';
-import {cssText} from '../build/css';
-import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {installDocService} from './service/ampdoc-impl';
-import {installErrorReporting} from './error';
-import {installPerformanceService} from './service/performance-impl';
-import {installPlatformService} from './service/platform-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
+} from './runtime.js';
+import {cssText} from '../build/css.js';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout.js';
+import {installDocService} from './service/ampdoc-impl.js';
+import {installErrorReporting} from './error.js';
+import {installPerformanceService} from './service/performance-impl.js';
+import {installPlatformService} from './service/platform-impl.js';
+import {installPullToRefreshBlocker} from './pull-to-refresh.js';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
-} from './style-installer';
-import {maybeTrackImpression} from './impression';
-import {maybeValidate} from './validator-integration';
-import {startupChunk} from './chunk';
-import {stubElementsForDoc} from './service/custom-element-registry';
+} from './style-installer.js';
+import {maybeTrackImpression} from './impression.js';
+import {maybeValidate} from './validator-integration.js';
+import {startupChunk} from './chunk.js';
+import {stubElementsForDoc} from './service/custom-element-registry.js';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070

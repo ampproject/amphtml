@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {Signals} from '../utils/signals';
-import {dev} from '../log';
+import {Deferred} from '../utils/promise.js';
+import {Signals} from '../utils/signals.js';
+import {dev} from '../log.js';
 import {
   getParentWindowFrameElement,
   registerServiceBuilder,
-} from '../service';
-import {getShadowRootNode} from '../shadow-embed';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isExperimentOn} from '../experiments';
-import {waitForBodyPromise} from '../dom';
+} from '../service.js';
+import {getShadowRootNode} from '../shadow-embed.js';
+import {isDocumentReady, whenDocumentReady} from '../document-ready.js';
+import {isExperimentOn} from '../experiments.js';
+import {waitForBodyPromise} from '../dom.js';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import * as service from '../../src/service';
+import * as service from '../../src/service.js';
 import {
   AmpDocShadow,
   AmpDocShell,
   installDocService,
-} from '../../src/service/ampdoc-impl';
-import {BaseElement} from '../../src/base-element';
-import {ElementStub} from '../../src/element-stub';
+} from '../../src/service/ampdoc-impl.js';
+import {BaseElement} from '../../src/base-element.js';
+import {ElementStub} from '../../src/element-stub.js';
 import {
   Extensions,
   adoptStandardServicesForEmbed,
   installExtensionsService,
-} from '../../src/service/extensions-impl';
-import {Services} from '../../src/services';
-import {getServiceForDoc, registerServiceBuilder} from '../../src/service';
-import {installTimerService} from '../../src/service/timer-impl';
-import {loadPromise} from '../../src/event-helper';
+} from '../../src/service/extensions-impl.js';
+import {Services} from '../../src/services.js';
+import {getServiceForDoc, registerServiceBuilder} from '../../src/service.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {loadPromise} from '../../src/event-helper.js';
 import {
   resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
+} from '../../src/service/custom-element-registry.js';
 
 
 class AmpTest extends BaseElement {}

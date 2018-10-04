@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-3d-gltf';
-import {createIframeWithMessageStub} from '../../../../testing/iframe';
+import '../amp-3d-gltf.js';
+import {createIframeWithMessageStub} from '../../../../testing/iframe.js';
 
 describes.realWin('amp-3d-gltf', {
   amp: {

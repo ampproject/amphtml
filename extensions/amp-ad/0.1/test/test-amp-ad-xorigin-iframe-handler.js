@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
-import {BaseElement} from '../../../../src/base-element';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/utils/signals';
+import {AmpAdUIHandler} from '../amp-ad-ui.js';
+import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler.js';
+import {BaseElement} from '../../../../src/base-element.js';
+import {Services} from '../../../../src/services.js';
+import {Signals} from '../../../../src/utils/signals.js';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
-} from '../../../../testing/iframe';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../testing/iframe.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 describe('amp-ad-xorigin-iframe-handler', () => {

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {closest} from '../../../src/dom';
-import {parseJson} from '../../../src/json';
+import {closest} from '../../../src/dom.js';
+import {parseJson} from '../../../src/json.js';
 
 
 /**

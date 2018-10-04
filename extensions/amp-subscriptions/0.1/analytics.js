@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor

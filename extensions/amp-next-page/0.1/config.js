@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {isArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {isArray} from '../../../src/types.js';
+import {user} from '../../../src/log.js';
 
 /**
  * @typedef {{

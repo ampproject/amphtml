@@ -15,15 +15,15 @@
  */
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
-} from '../../../src/style';
-import {dev,user} from '../../../src/log';
-import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
+} from '../../../src/style.js';
+import {dev,user} from '../../../src/log.js';
+import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom.js';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */

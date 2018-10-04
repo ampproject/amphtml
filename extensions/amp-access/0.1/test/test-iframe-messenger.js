@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messenger} from '../iframe-api/messenger';
+import {Messenger} from '../iframe-api/messenger.js';
 
 
 describes.fakeWin('Messenger', {}, env => {

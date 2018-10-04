@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {DomFingerprint} from './utils/dom-fingerprint';
-import {Services} from './services';
+import {DomFingerprint} from './utils/dom-fingerprint.js';
+import {Services} from './services.js';
 import {dict} from './utils/object.js';
-import {experimentToggles, isCanary} from './experiments';
-import {getLengthNumeral} from './layout';
-import {getModeObject} from './mode-object';
-import {urls} from './config';
+import {experimentToggles, isCanary} from './experiments.js';
+import {getLengthNumeral} from './layout.js';
+import {getModeObject} from './mode-object.js';
+import {urls} from './config.js';
 
 /**
  * Produces the attributes for the ad template.

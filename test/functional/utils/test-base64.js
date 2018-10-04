@@ -21,12 +21,12 @@ import {
   base64UrlDecodeToBytes,
   base64UrlEncodeFromBytes,
   base64UrlEncodeFromString,
-} from '../../../src/utils/base64';
+} from '../../../src/utils/base64.js';
 import {
   stringToBytes,
   utf8Decode,
   utf8Encode,
-} from '../../../src/utils/bytes';
+} from '../../../src/utils/bytes.js';
 
 describe('base64 <> utf-8 encode/decode', () => {
   const testCases = [

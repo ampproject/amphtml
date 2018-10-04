@@ -15,45 +15,45 @@
  */
 
 
-import {Animation} from '../../../src/animation';
+import {Animation} from '../../../src/animation.js';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
   LightboxThumbnailDataDef,
   LightboxedCarouselMetadataDef,
   VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {bezierCurve} from '../../../src/curve';
+} from './service/lightbox-manager-impl.js';
+import {Gestures} from '../../../src/gesture.js';
+import {KeyCodes} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {SwipeYRecognizer} from '../../../src/gesture-recognizers.js';
+import {bezierCurve} from '../../../src/curve.js';
 import {
   childElementByTag,
   closest,
   closestBySelector,
   elementByTag,
   escapeCssSelectorIdent,
-} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+} from '../../../src/dom.js';
+import {clamp} from '../../../src/utils/math.js';
 import {
   concat as concatTransition,
   numeric,
   scale,
   setStyles as setStylesTransition,
   translate,
-} from '../../../src/transition';
-import {dev, user} from '../../../src/log';
-import {getData, isLoaded, listen} from '../../../src/event-helper';
+} from '../../../src/transition.js';
+import {dev, user} from '../../../src/log.js';
+import {getData, isLoaded, listen} from '../../../src/event-helper.js';
 import {
   getElementServiceForDoc,
-} from '../../../src/element-service';
-import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {px, setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+} from '../../../src/element-service.js';
+import {layoutRectFromDomRect} from '../../../src/layout-rect.js';
+import {px, setStyles, toggle} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';

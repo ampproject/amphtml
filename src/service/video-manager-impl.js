@@ -14,50 +14,50 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
+import {ActionTrust} from '../action-constants.js';
 import {
   EMPTY_METADATA,
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
-} from '../mediasession-helper';
+} from '../mediasession-helper.js';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
-} from '../video-interface';
-import {Services} from '../services';
-import {VideoDocking} from './video/docking';
+} from '../video-interface.js';
+import {Services} from '../services.js';
+import {VideoDocking} from './video/docking.js';
 import {
   VideoServiceInterface,
   VideoServiceSignals,
-} from './video-service-interface';
+} from './video-service-interface.js';
 import {
   VideoServiceSync,
   setVideoComponentClassname,
-} from './video-service-sync-impl';
-import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
+} from './video-service-sync-impl.js';
+import {VideoSessionManager} from './video-session-manager.js';
+import {VideoUtils, getInternalVideoElementFor} from '../utils/video.js';
 import {
   createCustomEvent,
   getData,
   listen,
   listenOncePromise,
-} from '../event-helper';
-import {dev, user} from '../log';
-import {dict, map} from '../utils/object';
-import {getMode} from '../mode';
-import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
-import {once} from '../utils/function';
-import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
-import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {startsWith} from '../string';
-import {toggle} from '../style';
+} from '../event-helper.js';
+import {dev, user} from '../log.js';
+import {dict, map} from '../utils/object.js';
+import {getMode} from '../mode.js';
+import {installAutoplayStylesForDoc} from './video/install-autoplay-styles.js';
+import {isFiniteNumber} from '../types.js';
+import {once} from '../utils/function.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {removeElement} from '../dom.js';
+import {renderIcon, renderInteractionOverlay} from './video/autoplay.js';
+import {startsWith} from '../string.js';
+import {toggle} from '../style.js';
 
 
 /** @private @const {string} */

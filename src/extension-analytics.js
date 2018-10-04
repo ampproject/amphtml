@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Services} from './services';
+import {CommonSignals} from './common-signals.js';
+import {Services} from './services.js';
 import {
   createElementWithAttributes,
   removeElement,
-} from './dom';
-import {dev} from './log';
-import {dict} from './utils/object';
-import {isArray, toWin} from './types';
-import {triggerAnalyticsEvent} from './analytics';
+} from './dom.js';
+import {dev} from './log.js';
+import {dict} from './utils/object.js';
+import {isArray, toWin} from './types.js';
+import {triggerAnalyticsEvent} from './analytics.js';
 
 /**
  * Method to create scoped analytics element for any element.

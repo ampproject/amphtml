@@ -18,15 +18,15 @@ import {
   DEFAULT_THRESHOLD,
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../src/intersection-observer-polyfill';
-import {Services} from '../../../src/services';
-import {VisibilityModel} from './visibility-model';
-import {dev, user} from '../../../src/log';
-import {getMinOpacity} from './opacity';
-import {getMode} from '../../../src/mode';
-import {isArray, isFiniteNumber} from '../../../src/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
+} from '../../../src/intersection-observer-polyfill.js';
+import {Services} from '../../../src/services.js';
+import {VisibilityModel} from './visibility-model.js';
+import {dev, user} from '../../../src/log.js';
+import {getMinOpacity} from './opacity.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isFiniteNumber} from '../../../src/types.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {map} from '../../../src/utils/object.js';
 
 const TAG = 'amp-analytics/visibility-manager';
 

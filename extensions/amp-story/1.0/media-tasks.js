@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {Sources} from './sources';
-import {isConnectedNode} from '../../../src/dom';
+import {Deferred, tryResolve} from '../../../src/utils/promise.js';
+import {Sources} from './sources.js';
+import {isConnectedNode} from '../../../src/dom.js';
 
 
 

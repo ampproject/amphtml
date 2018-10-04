@@ -18,14 +18,14 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
+} from '../amp-story-store-service.js';
 import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
-} from '../amp-story-info-dialog';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
+} from '../amp-story-info-dialog.js';
+import {Services} from '../../../../src/services.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {

@@ -18,7 +18,7 @@
  * @fileoverview Export of IFrame API.
  */
 
-import '../../../../src/polyfills';
-import {AmpAccessIframeApi} from './iframe-api';
+import '../../../../src/polyfills.js';
+import {AmpAccessIframeApi} from './iframe-api.js';
 
 export default AmpAccessIframeApi;

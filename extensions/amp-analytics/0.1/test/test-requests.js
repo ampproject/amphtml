@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as ResourceTiming from '../resource-timing';
+import * as ResourceTiming from '../resource-timing.js';
 import * as lolex from 'lolex';
-import {ExpansionOptions, installVariableService} from '../variables';
-import {RequestHandler, expandPostMessage} from '../requests';
-import {dict} from '../../../../src/utils/object';
-import {macroTask} from '../../../../testing/yield';
+import {ExpansionOptions, installVariableService} from '../variables.js';
+import {RequestHandler, expandPostMessage} from '../requests.js';
+import {dict} from '../../../../src/utils/object.js';
+import {macroTask} from '../../../../testing/yield.js';
 
 describes.realWin('Requests', {amp: 1}, env => {
   let ampdoc;

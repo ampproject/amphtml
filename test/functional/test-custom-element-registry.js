@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {BaseElement} from '../../src/base-element';
-import {ElementStub} from '../../src/element-stub';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {BaseElement} from '../../src/base-element.js';
+import {ElementStub} from '../../src/element-stub.js';
 import {
   copyElementToChildWindow,
   getElementClassForTesting,
@@ -25,9 +25,9 @@ import {
   stubElementIfNotKnown,
   stubElementsForDoc,
   upgradeOrRegisterElement,
-} from '../../src/service/custom-element-registry';
-import {createElementWithAttributes} from '../../src/dom';
-import {installDocumentStateService} from '../../src/service/document-state';
+} from '../../src/service/custom-element-registry.js';
+import {createElementWithAttributes} from '../../src/dom.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
 
 
 describes.realWin('CustomElement register', {amp: true}, env => {

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
-import {SystemLayer} from '../amp-story-system-layer';
-import {registerServiceBuilder} from '../../../../src/service';
+import {ProgressBar} from '../progress-bar.js';
+import {Services} from '../../../../src/services.js';
+import {SystemLayer} from '../amp-story-system-layer.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 const NOOP = () => {};

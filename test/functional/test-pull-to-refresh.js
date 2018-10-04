@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
+import {PullToRefreshBlocker} from '../../src/pull-to-refresh.js';
 
 
 describe('PullToRefreshBlocker', () => {

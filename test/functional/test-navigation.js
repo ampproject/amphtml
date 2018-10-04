@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
-import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/dom';
+import * as Impression from '../../src/impression.js';
+import {Services} from '../../src/services.js';
+import {addParamToUrl} from '../../src/url.js';
+import {createElementWithAttributes} from '../../src/dom.js';
 import {
   installUrlReplacementsServiceForDoc,
-} from '../../src/service/url-replacements-impl';
-import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
+} from '../../src/service/url-replacements-impl.js';
+import {macroTask} from '../../testing/yield.js';
+import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation.js';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;

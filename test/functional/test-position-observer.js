@@ -17,14 +17,14 @@
 import * as lolex from 'lolex';
 import {
   PositionObserver,
-} from '../../src/service/position-observer/position-observer-impl';
+} from '../../src/service/position-observer/position-observer-impl.js';
 import {
   PositionObserverFidelity,
-} from '../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../src/services';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {macroTask} from '../../testing/yield';
-import {setStyles} from '../../src/style';
+} from '../../src/service/position-observer/position-observer-worker.js';
+import {Services} from '../../src/services.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
+import {macroTask} from '../../testing/yield.js';
+import {setStyles} from '../../src/style.js';
 
 describes.realWin('PositionObserver', {amp: 1}, env => {
   let win;

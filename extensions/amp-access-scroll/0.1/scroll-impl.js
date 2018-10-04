@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
+import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client.js';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/url';
+import {Services} from '../../../src/services.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {parseQueryString} from '../../../src/url.js';
 
 const TAG = 'amp-access-scroll-elt';
 

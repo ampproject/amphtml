@@ -18,11 +18,11 @@ import {
   calculateEntryPointScriptUrl,
   calculateExtensionScriptUrl,
   parseExtensionUrl,
-} from '../../src/service/extension-location';
+} from '../../src/service/extension-location.js';
 import {
   initLogConstructor,
   resetLogConstructorForTesting,
-} from '../../src/log';
+} from '../../src/log.js';
 
 describes.sandboxed('Extension Location', {}, () => {
   describe('get correct script source', () => {

@@ -16,19 +16,19 @@
 
 import {
   AmpDocShadow,
-} from '../../../../src/service/ampdoc-impl';
+} from '../../../../src/service/ampdoc-impl.js';
 import {
   AmpdocAnalyticsRoot,
   EmbedAnalyticsRoot,
-} from '../analytics-root';
+} from '../analytics-root.js';
 import {
   CustomEventTracker,
-} from '../events';
-import {ScrollManager} from '../scroll-manager';
+} from '../events.js';
+import {ScrollManager} from '../scroll-manager.js';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
-} from '../visibility-manager';
+} from '../visibility-manager.js';
 
 
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {

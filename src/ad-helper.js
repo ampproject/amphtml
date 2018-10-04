@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {computedStyle} from './style';
-import {dev} from './log';
-import {getParentWindowFrameElement} from './service';
+import {computedStyle} from './style.js';
+import {dev} from './log.js';
+import {getParentWindowFrameElement} from './service.js';
 
 const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AccessController} from '../iframe-api/access-controller';
-import {AmpAccessIframeApi} from '../iframe-api/iframe-api';
+import {AccessController} from '../iframe-api/access-controller.js';
+import {AmpAccessIframeApi} from '../iframe-api/iframe-api.js';
 
 
 describes.fakeWin('AmpAccessIframeApi', {

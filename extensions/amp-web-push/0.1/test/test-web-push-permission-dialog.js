@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
-import {WebPushConfigAttributes} from '../amp-web-push-config';
-import {WebPushService} from '../web-push-service';
-import {WindowMessenger} from '../window-messenger';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog.js';
+import {WebPushConfigAttributes} from '../amp-web-push-config.js';
+import {WebPushService} from '../web-push-service.js';
+import {WindowMessenger} from '../window-messenger.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';

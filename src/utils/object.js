@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isObject} from '../types';
+import {isObject} from '../types.js';
 
 /* @const */
 const hasOwn_ = Object.prototype.hasOwnProperty;

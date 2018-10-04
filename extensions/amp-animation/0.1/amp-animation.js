@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Builder} from './web-animations';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {WebAnimationPlayState} from './web-animation-types';
-import {WebAnimationService} from './web-animation-service';
-import {childElementByTag} from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Builder} from './web-animations.js';
+import {Pass} from '../../../src/pass.js';
+import {Services} from '../../../src/services.js';
+import {WebAnimationPlayState} from './web-animation-types.js';
+import {WebAnimationService} from './web-animation-service.js';
+import {childElementByTag} from '../../../src/dom.js';
+import {clamp} from '../../../src/utils/math.js';
 import {getFriendlyIframeEmbedOptional}
-  from '../../../src/friendly-iframe-embed';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
-import {isFiniteNumber} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
-import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+  from '../../../src/friendly-iframe-embed.js';
+import {getParentWindowFrameElement} from '../../../src/service.js';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill.js';
+import {isFiniteNumber} from '../../../src/types.js';
+import {listen} from '../../../src/event-helper.js';
+import {setInitialDisplay, setStyles, toggle} from '../../../src/style.js';
+import {tryParseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-animation';
 

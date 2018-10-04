@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {install} from '../../src/polyfills/domtokenlist-toggle';
-import {toArray} from '../../src/types';
+import {install} from '../../src/polyfills/domtokenlist-toggle.js';
+import {toArray} from '../../src/types.js';
 
 
 describes.fakeWin('DOMTokenList.toggle on non-IE', {

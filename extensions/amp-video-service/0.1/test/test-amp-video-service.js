@@ -21,10 +21,10 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import {Observable} from '../../../../src/observable';
-import {Services} from '../../../../src/services';
-import {VideoEntry} from '../amp-video-service';
-import {VideoEvents} from '../../../../src/video-interface';
+import {Observable} from '../../../../src/observable.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEntry} from '../amp-video-service.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
 
 
 describes.fakeWin('VideoEntry', {

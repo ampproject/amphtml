@@ -15,22 +15,22 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {MultidocManager} from '../../../src/runtime';
+import {MultidocManager} from '../../../src/runtime.js';
 import {
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getAmpdoc, getServiceForDoc} from '../../../src/service';
+} from '../../../src/service/position-observer/position-observer-worker.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {fetchDocument} from '../../../src/document-fetcher.js';
+import {getAmpdoc, getServiceForDoc} from '../../../src/service.js';
 import {
   installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {removeElement} from '../../../src/dom';
-import {setStyle, toggle} from '../../../src/style';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+} from '../../../src/service/position-observer/position-observer-impl.js';
+import {installStylesForDoc} from '../../../src/style-installer.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyle, toggle} from '../../../src/style.js';
+import {triggerAnalyticsEvent} from '../../../src/analytics.js';
 
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;

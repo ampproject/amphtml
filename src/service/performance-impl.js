@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dict, map} from '../utils/object';
-import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
-import {isCanary} from '../experiments';
-import {layoutRectLtwh} from '../layout-rect';
-import {throttle} from '../utils/rate-limit';
-import {whenDocumentComplete} from '../document-ready';
+import {Services} from '../services.js';
+import {dict, map} from '../utils/object.js';
+import {getMode} from '../mode.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {isCanary} from '../experiments.js';
+import {layoutRectLtwh} from '../layout-rect.js';
+import {throttle} from '../utils/rate-limit.js';
+import {whenDocumentComplete} from '../document-ready.js';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

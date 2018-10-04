@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow} from '../../src/service/ampdoc-impl.js';
 import {
   ShadowDomVersion,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '../../src/web-components.js';
 import {
   ShadowDomWriterBulk,
   ShadowDomWriterStreamer,
@@ -30,9 +30,9 @@ import {
   isShadowRoot,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
-} from '../../src/shadow-embed';
-import {installStylesForDoc} from '../../src/style-installer';
-import {toArray} from '../../src/types';
+} from '../../src/shadow-embed.js';
+import {installStylesForDoc} from '../../src/style-installer.js';
+import {toArray} from '../../src/types.js';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {

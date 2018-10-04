@@ -17,11 +17,11 @@
 import {
   PositionObserverFidelity, // eslint-disable-line no-unused-vars
   PositionObserverWorker, // eslint-disable-line no-unused-vars
-} from './position-observer-worker';
-import {Services} from '../../services';
-import {debounce} from '../../utils/rate-limit';
-import {dev} from '../../log';
-import {registerServiceBuilderForDoc} from '../../service';
+} from './position-observer-worker.js';
+import {Services} from '../../services.js';
+import {debounce} from '../../utils/rate-limit.js';
+import {dev} from '../../log.js';
+import {registerServiceBuilderForDoc} from '../../service.js';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';

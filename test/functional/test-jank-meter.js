@@ -15,7 +15,7 @@
  */
 
 import * as lolex from 'lolex';
-import {JankMeter} from '../../src/service/jank-meter';
+import {JankMeter} from '../../src/service/jank-meter.js';
 
 
 describes.realWin('jank-meter', {}, env => {

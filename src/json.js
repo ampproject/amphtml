@@ -19,8 +19,8 @@
  * {@link http://json.org/}.
  */
 
-import {childElementsByTag, isJsonScriptTag} from './dom';
-import {isObject} from './types';
+import {childElementsByTag, isJsonScriptTag} from './dom.js';
+import {isObject} from './types.js';
 
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FontLoader} from '../fontloader';
+import {FontLoader} from '../fontloader.js';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},

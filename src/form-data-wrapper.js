@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-import {getFormAsObject} from './form';
-import {map} from './utils/object';
+import {dev} from './log.js';
+import {getFormAsObject} from './form.js';
+import {map} from './utils/object.js';
 
 /**
  * A wrapper for a native `FormData` object that allows the retrieval of entries

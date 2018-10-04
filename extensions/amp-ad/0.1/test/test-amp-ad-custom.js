@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
+import {AmpAdCustom} from '../amp-ad-custom.js';
+import {LayoutPriority} from '../../../../src/layout.js';
+import {Services} from '../../../../src/services.js';
 import {
   createElementWithAttributes,
   removeChildren,
-} from '../../../../src/dom';
+} from '../../../../src/dom.js';
 
 describe('Amp custom ad', () => {
   let sandbox;

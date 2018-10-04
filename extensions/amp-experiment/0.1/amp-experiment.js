@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Layout} from '../../../src/layout';
-import {allocateVariant} from './variant';
-import {dev, user} from '../../../src/log';
-import {parseJson} from '../../../src/json';
-import {waitForBodyPromise} from '../../../src/dom';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Layout} from '../../../src/layout.js';
+import {allocateVariant} from './variant.js';
+import {dev, user} from '../../../src/log.js';
+import {parseJson} from '../../../src/json.js';
+import {waitForBodyPromise} from '../../../src/dom.js';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';

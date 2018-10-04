@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Services} from '../../../src/services.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dict} from '../../../src/utils/object.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-orientation-observer';
 const DEVICE_REST_ORIENTATION_ALPHA_VALUE = 180;

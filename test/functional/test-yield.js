@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import 'regenerator-runtime/runtime';
+import 'regenerator-runtime/runtime.js';
 import * as lolex from 'lolex';
-import {macroTask} from '../../testing/yield';
+import {macroTask} from '../../testing/yield.js';
 
 describes.realWin('yield', {}, env => {
 

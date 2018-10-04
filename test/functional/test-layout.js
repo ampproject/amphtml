@@ -16,7 +16,7 @@
 
 import {Layout, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
-  isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
+  isLoadingAllowed, parseLayout, parseLength} from '../../src/layout.js';
 
 
 describe('Layout', () => {

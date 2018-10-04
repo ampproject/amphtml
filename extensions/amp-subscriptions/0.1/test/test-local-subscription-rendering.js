@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
+import {Dialog} from '../dialog.js';
+import {Entitlement} from '../entitlement.js';
 import {
   LocalSubscriptionPlatformRenderer,
-} from '../local-subscription-platform-renderer';
-import {ServiceAdapter} from '../service-adapter';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
+} from '../local-subscription-platform-renderer.js';
+import {ServiceAdapter} from '../service-adapter.js';
+import {Services} from '../../../../src/services.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   let win, doc, ampdoc;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {createCUID} from './cuid';
+import {createCUID} from './cuid.js';
 
 const sessionId = createCUID();
 export const getSessionId = () => sessionId;

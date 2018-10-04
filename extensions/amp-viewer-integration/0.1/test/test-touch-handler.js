@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Messaging} from '../messaging/messaging';
-import {TouchHandler} from '../touch-handler';
+import {Messaging} from '../messaging/messaging.js';
+import {TouchHandler} from '../touch-handler.js';
 
 function fakeTouchEvent(type) {
   return {

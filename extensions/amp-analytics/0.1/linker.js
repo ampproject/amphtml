@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../../../src/window-interface';
+import {WindowInterface} from '../../../src/window-interface.js';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
-} from '../../../src/utils/base64';
-import {crc32} from './crc32';
-import {user} from '../../../src/log';
+} from '../../../src/utils/base64.js';
+import {crc32} from './crc32.js';
+import {user} from '../../../src/log.js';
 
 /** @const {string} */
 const DELIMITER = '*';

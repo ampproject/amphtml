@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as _3p from '../../../3p/3p';
+import * as _3p from '../../../3p/3p.js';
 import {
   AD_TYPE,
   callbackWithBackfill,
@@ -23,8 +23,8 @@ import {
   resizeDeniedHandler,
   resizeIframe,
   resizeSuccessHandler,
-} from '../../../ads/google/csa';
-import {createIframePromise} from '../../../testing/iframe';
+} from '../../../ads/google/csa.js';
+import {createIframePromise} from '../../../testing/iframe.js';
 
 
 function getAds(type) {

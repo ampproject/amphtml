@@ -18,12 +18,12 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
-import {Services} from '../../../../src/services';
-import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
-import {ShareWidget} from '../amp-story-share';
-import {registerServiceBuilder} from '../../../../src/service';
+} from '../amp-story-store-service.js';
+import {LocalizationService} from '../localization.js';
+import {Services} from '../../../../src/services.js';
+import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu.js';
+import {ShareWidget} from '../amp-story-share.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {

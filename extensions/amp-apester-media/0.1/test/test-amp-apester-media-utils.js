@@ -19,7 +19,7 @@ import {
   extractElementTags,
   extractTags,
   extratctTitle,
-} from '../utils';
+} from '../utils.js';
 
 describes.realWin('amp-apester-media-utils', {}, unused => {
 

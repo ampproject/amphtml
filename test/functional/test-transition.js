@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as tr from '../../src/transition';
+import * as tr from '../../src/transition.js';
 
 describe('Transition', () => {
 

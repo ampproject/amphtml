@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action} from './amp-story-store-service';
-import {EventType, dispatch} from './events';
-import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {Action} from './amp-story-store-service.js';
+import {EventType, dispatch} from './events.js';
+import {Services} from '../../../src/services.js';
+import {StateChangeType} from './navigation-state.js';
+import {dev} from '../../../src/log.js';
+import {dict} from './../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */

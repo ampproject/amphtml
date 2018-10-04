@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../../src/log';
+import {dev} from '../../src/log.js';
 
 const TAG = 'DOUBLECLICK - DEPRECATED';
 /**

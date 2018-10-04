@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../src/dom';
-import {dict} from '../src/utils/object';
-import {user} from '../src/log';
+import {createElementWithAttributes} from '../src/dom.js';
+import {dict} from '../src/utils/object.js';
+import {user} from '../src/log.js';
 
 /** @const {string} */
 const TAG = 'pixel';

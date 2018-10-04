@@ -17,7 +17,7 @@
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service.js';
 
 const ServiceNames = {
   VISIBILITY: 'host-visibility',

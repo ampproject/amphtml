@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
-import {Layout, getLayoutClass} from '../layout';
-import {Services} from '../services';
-import {computedStyle, toggle} from '../style';
-import {dev, user} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
-import {startsWith} from '../string';
-import {toWin} from '../types';
-import {tryFocus} from '../dom';
+import {ActionTrust} from '../action-constants.js';
+import {Layout, getLayoutClass} from '../layout.js';
+import {Services} from '../services.js';
+import {computedStyle, toggle} from '../style.js';
+import {dev, user} from '../log.js';
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service.js';
+import {startsWith} from '../string.js';
+import {toWin} from '../types.js';
+import {tryFocus} from '../dom.js';
 
 /**
  * @param {!Element} element

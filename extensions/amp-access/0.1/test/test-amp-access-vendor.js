@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AccessVendor} from '../access-vendor';
-import {AccessVendorAdapter} from '../amp-access-vendor';
+import {AccessVendor} from '../access-vendor.js';
+import {AccessVendorAdapter} from '../amp-access-vendor.js';
 
 
 describes.realWin('AccessVendorAdapter', {amp: true}, env => {

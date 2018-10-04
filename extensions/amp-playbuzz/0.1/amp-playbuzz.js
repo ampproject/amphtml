@@ -38,21 +38,21 @@
  * the example above and will produce the correct aspect ratio.
  */
 
-import * as events from '../../../src/event-helper';
-import * as utils from './utils';
+import * as events from '../../../src/event-helper.js';
+import * as utils from './utils.js';
 import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   parseUrlDeprecated,
   removeFragment,
-} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {logo, showMoreArrow} from './images';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+} from '../../../src/url.js';
+import {dict} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {logo, showMoreArrow} from './images.js';
+import {removeElement} from '../../../src/dom.js';
+import {user} from '../../../src/log.js';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 

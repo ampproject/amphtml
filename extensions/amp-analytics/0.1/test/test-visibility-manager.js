@@ -17,14 +17,14 @@
 import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../../src/intersection-observer-polyfill';
-import {Services} from '../../../../src/services';
+} from '../../../../src/intersection-observer-polyfill.js';
+import {Services} from '../../../../src/services.js';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
-} from '../visibility-manager';
-import {VisibilityState} from '../../../../src/visibility-state';
-import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+} from '../visibility-manager.js';
+import {VisibilityState} from '../../../../src/visibility-state.js';
+import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect.js';
 
 class IntersectionObserverStub {
 

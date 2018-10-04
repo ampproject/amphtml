@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {endsWith} from './string';
+import {endsWith} from './string.js';
 import {
   isProxyOrigin,
   parseUrlDeprecated,
   tryDecodeUriComponent,
-} from './url';
-import {urls} from './config';
+} from './url.js';
+import {urls} from './config.js';
 
 
 /**

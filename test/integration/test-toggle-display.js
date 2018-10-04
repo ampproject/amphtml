@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/amp-events.js';
 import {
   createFixtureIframe,
 } from '../../testing/iframe.js';
 import {
   setInitialDisplay,
   toggle,
-} from '../../src/style';
+} from '../../src/style.js';
 
 describe.configure().retryOnSaucelabs().run('toggle display helper', () => {
   let fixture;

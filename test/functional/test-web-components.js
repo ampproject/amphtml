@@ -20,7 +20,7 @@ import {
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
+} from '../../src/web-components.js';
 
 
 describe('web components', () => {

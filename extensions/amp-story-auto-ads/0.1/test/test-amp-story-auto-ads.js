@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as analytics from '../../../../src/analytics';
-import {AmpStoryAutoAds} from '../amp-story-auto-ads';
-import {macroTask} from '../../../../testing/yield';
+import * as analytics from '../../../../src/analytics.js';
+import {AmpStoryAutoAds} from '../amp-story-auto-ads.js';
+import {macroTask} from '../../../../testing/yield.js';
 
 const NOOP = () => {};
 

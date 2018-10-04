@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../src/log';
-import {validateData} from '../3p/3p';
+import {dev, user} from '../src/log.js';
+import {validateData} from '../3p/3p.js';
 
 /**
  * A fake ad network integration that is mainly used for testing

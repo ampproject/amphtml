@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-wistia-player';
+import '../amp-wistia-player.js';
 
 describes.realWin('amp-wistia-player', {
   amp: {

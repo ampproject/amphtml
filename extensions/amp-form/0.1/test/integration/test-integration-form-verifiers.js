@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '../../../../../testing/iframe.js';
 
 const baseUrl = 'http://localhost:31862';
 

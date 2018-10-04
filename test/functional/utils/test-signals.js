@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Signals} from '../../../src/utils/signals';
+import {Signals} from '../../../src/utils/signals.js';
 
 
 describes.sandboxed('Signals', {}, () => {

@@ -15,30 +15,30 @@
  */
 
 // This must load before all other tests.
-import '../src/polyfills';
+import '../src/polyfills.js';
 import 'babel-polyfill';
-import * as describes from '../testing/describes';
-import * as log from '../src/log';
-import {Services} from '../src/services';
-import {activateChunkingForTesting} from '../src/chunk';
+import * as describes from '../testing/describes.js';
+import * as log from '../src/log.js';
+import {Services} from '../src/services.js';
+import {activateChunkingForTesting} from '../src/chunk.js';
 import {
   adopt,
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/runtime';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installYieldIt} from '../testing/yield';
-import {removeElement} from '../src/dom';
+} from '../src/runtime.js';
+import {installDocService} from '../src/service/ampdoc-impl.js';
+import {installYieldIt} from '../testing/yield.js';
+import {removeElement} from '../src/dom.js';
 import {
   reportError,
   resetAccumulatedErrorMessagesForTesting,
-} from '../src/error';
+} from '../src/error.js';
 import {
   resetEvtListenerOptsSupportForTesting,
-} from '../src/event-helper-listen';
-import {resetExperimentTogglesForTesting} from '../src/experiments';
-import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {setReportError} from '../src/log';
+} from '../src/event-helper-listen.js';
+import {resetExperimentTogglesForTesting} from '../src/experiments.js';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame.js';
+import {setReportError} from '../src/log.js';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.

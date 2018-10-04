@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {NotificationPermission, StorageKeys} from './vars';
-import {WindowMessenger} from './window-messenger';
-import {escapeCssSelectorIdent} from '../../../src/dom';
-import {getMode} from '../../../src/mode';
+import {NotificationPermission, StorageKeys} from './vars.js';
+import {WindowMessenger} from './window-messenger.js';
+import {escapeCssSelectorIdent} from '../../../src/dom.js';
+import {getMode} from '../../../src/mode.js';
 import {
   parseQueryString,
   parseUrlDeprecated,

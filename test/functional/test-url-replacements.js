@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import * as trackPromise from '../../src/impression';
-import {Observable} from '../../src/observable';
-import {Services} from '../../src/services';
+import * as trackPromise from '../../src/impression.js';
+import {Observable} from '../../src/observable.js';
+import {Services} from '../../src/services.js';
 import {cidServiceForDocForTesting} from
-  '../../src/service/cid-impl';
-import {createIframePromise} from '../../testing/iframe';
+  '../../src/service/cid-impl.js';
+import {createIframePromise} from '../../testing/iframe.js';
 import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
-} from '../../src/service/url-replacements-impl';
-import {getMode} from '../../src/mode';
+} from '../../src/service/url-replacements-impl.js';
+import {getMode} from '../../src/mode.js';
 import {
   installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
+} from '../../extensions/amp-analytics/0.1/activity-impl.js';
+import {installCryptoService} from '../../src/service/crypto-impl.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
 import {installDocumentInfoServiceForDoc} from
-  '../../src/service/document-info-impl';
+  '../../src/service/document-info-impl.js';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
+} from '../../src/service/custom-element-registry.js';
 import {
   mockWindowInterface,
   stubServiceForDoc,
-} from '../../testing/test-helper';
-import {parseUrlDeprecated} from '../../src/url';
-import {registerServiceBuilder} from '../../src/service';
-import {setCookie} from '../../src/cookies';
-import {user} from '../../src/log';
+} from '../../testing/test-helper.js';
+import {parseUrlDeprecated} from '../../src/url.js';
+import {registerServiceBuilder} from '../../src/service.js';
+import {setCookie} from '../../src/cookies.js';
+import {user} from '../../src/log.js';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {

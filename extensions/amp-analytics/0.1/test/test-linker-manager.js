@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as experiments from '../../../../src/experiments';
-import {LinkerManager, areFriendlyDomains} from '../linker-manager';
-import {Priority} from '../../../../src/service/navigation';
-import {Services} from '../../../../src/services';
-import {installVariableService} from '../variables';
-import {mockWindowInterface} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
+import * as experiments from '../../../../src/experiments.js';
+import {LinkerManager, areFriendlyDomains} from '../linker-manager.js';
+import {Priority} from '../../../../src/service/navigation.js';
+import {Services} from '../../../../src/services.js';
+import {installVariableService} from '../variables.js';
+import {mockWindowInterface} from '../../../../testing/test-helper.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;

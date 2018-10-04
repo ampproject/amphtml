@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {dict} from '../utils/object';
-import {parseUrlDeprecated} from '../url';
+import {Services} from '../services.js';
+import {dict} from '../utils/object.js';
+import {parseUrlDeprecated} from '../url.js';
 
 /**
  * Exposes CID API if provided by the Viewer.

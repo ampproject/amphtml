@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {numeric} from '../../../src/transition';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Animation} from '../../../src/animation.js';
+import {BaseCarousel} from './base-carousel.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {numeric} from '../../../src/transition.js';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';

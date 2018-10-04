@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {JwtHelper} from '../jwt';
-import {pemToBytes} from '../../../../src/utils/pem';
+import {JwtHelper} from '../jwt.js';
+import {pemToBytes} from '../../../../src/utils/pem.js';
 
 
 describe('JwtHelper', () => {

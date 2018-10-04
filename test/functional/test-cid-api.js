@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {GoogleCidApi} from '../../src/service/cid-api';
-import {getCookie, setCookie} from '../../src/cookies';
-import {mockWindowInterface, stubService} from '../../testing/test-helper';
+import {GoogleCidApi} from '../../src/service/cid-api.js';
+import {getCookie, setCookie} from '../../src/cookies.js';
+import {mockWindowInterface, stubService} from '../../testing/test-helper.js';
 
 describes.realWin('test-cid-api', {amp: true}, env => {
 

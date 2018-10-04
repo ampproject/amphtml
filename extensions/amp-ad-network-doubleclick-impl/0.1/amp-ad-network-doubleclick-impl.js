@@ -20,13 +20,13 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
+import '../../amp-a4a/0.1/real-time-config-manager.js';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
   XORIGIN_MODE,
   assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
+} from '../../amp-a4a/0.1/amp-a4a.js';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
@@ -46,57 +46,57 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
   truncAndTimeUrl,
-} from '../../../ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+} from '../../../ads/google/a4a/utils.js';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
 import {
   DUMMY_FLUID_SIZE,
   getMultiSizeDimensions,
-} from '../../../ads/google/utils';
-import {Deferred} from '../../../src/utils/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+} from '../../../ads/google/utils.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Navigation} from '../../../src/service/navigation.js';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors.js';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {SafeframeHostApi} from './safeframe-host';
-import {Services} from '../../../src/services';
+} from '../../amp-a4a/0.1/refresh-manager.js';
+import {SafeframeHostApi} from './safeframe-host.js';
+import {Services} from '../../../src/services.js';
 import {
   TFCD,
   constructSRABlockParameters,
   serializeTargeting,
   sraBlockCallbackHandler,
-} from './sra-utils';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+} from './sra-utils.js';
+import {createElementWithAttributes, removeElement} from '../../../src/dom.js';
+import {deepMerge, dict} from '../../../src/utils/object.js';
+import {dev, user} from '../../../src/log.js';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint.js';
 import {
   extractUrlExperimentId,
   isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {getMode} from '../../../src/mode';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
+} from '../../../ads/google/a4a/traffic-experiments.js';
+import {getMode} from '../../../src/mode.js';
+import {getOrCreateAdCid} from '../../../src/ad-cid.js';
 import {
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
-} from '../../amp-ad/0.1/concurrent-load';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {isCancellation} from '../../../src/error';
+} from '../../amp-ad/0.1/concurrent-load.js';
+import {insertAnalyticsElement} from '../../../src/extension-analytics.js';
+import {isCancellation} from '../../../src/error.js';
 import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
+} from '../../../src/experiments.js';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
-import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
-import {stringHash32} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
+} from '../../../ads/google/a4a/line-delimited-response-handler.js';
+import {parseQueryString} from '../../../src/url.js';
+import {setStyles} from '../../../src/style.js';
+import {stringHash32} from '../../../src/string.js';
+import {tryParseJson} from '../../../src/json.js';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

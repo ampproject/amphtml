@@ -15,9 +15,9 @@
  */
 
 import * as lolex from 'lolex';
-import {LayoutDelayMeter} from '../../src/layout-delay-meter';
-import {Services} from '../../src/services';
-import {installPerformanceService} from '../../src/service/performance-impl';
+import {LayoutDelayMeter} from '../../src/layout-delay-meter.js';
+import {Services} from '../../src/services.js';
+import {installPerformanceService} from '../../src/service/performance-impl.js';
 
 describes.realWin('layout-delay-meter', {
   amp: {

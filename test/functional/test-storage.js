@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
 import {
   LocalStorageBinding,
   Storage,
   Store,
   ViewerStorageBinding,
-} from '../../src/service/storage-impl';
-import {dev} from '../../src/log';
+} from '../../src/service/storage-impl.js';
+import {dev} from '../../src/log.js';
 
 
 describe('Storage', () => {

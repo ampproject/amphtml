@@ -17,25 +17,25 @@
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
-} from '../../video-interface';
+} from '../../video-interface.js';
 import {
   PositionObserverFidelity,
-} from '../position-observer/position-observer-worker';
-import {Services} from '../../services';
-import {VideoServiceSignals} from '../video-service-interface';
-import {VideoUtils} from '../../utils/video';
-import {dev} from '../../log';
-import {getData, listen, listenOnce} from '../../event-helper';
-import {getMode} from '../../mode';
-import {getServiceForDoc} from '../../service';
-import {htmlFor} from '../../static-template';
-import {installAutoplayStylesForDoc} from './install-autoplay-styles';
+} from '../position-observer/position-observer-worker.js';
+import {Services} from '../../services.js';
+import {VideoServiceSignals} from '../video-service-interface.js';
+import {VideoUtils} from '../../utils/video.js';
+import {dev} from '../../log.js';
+import {getData, listen, listenOnce} from '../../event-helper.js';
+import {getMode} from '../../mode.js';
+import {getServiceForDoc} from '../../service.js';
+import {htmlFor} from '../../static-template.js';
+import {installAutoplayStylesForDoc} from './install-autoplay-styles.js';
 import {
   installPositionObserverServiceForDoc,
-} from '../position-observer/position-observer-impl';
-import {isFiniteNumber} from '../../types';
-import {once} from '../../utils/function';
-import {removeElement} from '../../dom';
+} from '../position-observer/position-observer-impl.js';
+import {isFiniteNumber} from '../../types.js';
+import {once} from '../../utils/function.js';
+import {removeElement} from '../../dom.js';
 
 
 /** @private @enum {string} */

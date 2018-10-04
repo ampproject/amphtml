@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {FixedLayer} from '../../src/service/fixed-layer';
-import {endsWith} from '../../src/string';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {toggle} from '../../src/style';
-import {user} from '../../src/log';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {FixedLayer} from '../../src/service/fixed-layer.js';
+import {endsWith} from '../../src/string.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {toggle} from '../../src/style.js';
+import {user} from '../../src/log.js';
 
 
 describes.sandboxed('FixedLayer', {}, () => {

@@ -17,14 +17,14 @@
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   getAmpAdTemplateHelper,
-} from '../../../amp-a4a/0.1/template-validator';
-import {AmpAdTemplate} from '../amp-ad-custom';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
+} from '../../../amp-a4a/0.1/template-validator.js';
+import {AmpAdTemplate} from '../amp-ad-custom.js';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache.js';
 import {
   data,
 } from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
-import {tryParseJson} from '../../../../src/json';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {tryParseJson} from '../../../../src/json.js';
+import {utf8Encode} from '../../../../src/utils/bytes.js';
 
 const realWinConfig = {
   amp: {},

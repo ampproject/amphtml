@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-twitter';
-import {cleanupTweetId_, twitter} from '../../../../3p/twitter';
+import '../amp-twitter.js';
+import {cleanupTweetId_, twitter} from '../../../../3p/twitter.js';
 
 describes.realWin('amp-twitter', {
   amp: {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getResourceTiming} from '../resource-timing';
-import {installVariableService} from '../variables';
+import {getResourceTiming} from '../resource-timing.js';
+import {installVariableService} from '../variables.js';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.

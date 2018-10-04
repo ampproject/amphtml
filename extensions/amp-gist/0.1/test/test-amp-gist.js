@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-gist';
+import '../amp-gist.js';
 
 
 describes.realWin('amp-gist', {

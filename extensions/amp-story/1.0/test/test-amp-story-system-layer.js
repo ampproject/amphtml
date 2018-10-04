@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
-import {SystemLayer} from '../amp-story-system-layer';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service.js';
+import {ProgressBar} from '../progress-bar.js';
+import {Services} from '../../../../src/services.js';
+import {SystemLayer} from '../amp-story-system-layer.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 const NOOP = () => {};

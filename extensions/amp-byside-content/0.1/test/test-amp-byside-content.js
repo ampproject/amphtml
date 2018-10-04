@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-byside-content';
+import '../amp-byside-content.js';
 
 describes.realWin('amp-byside-content', {
   amp: {

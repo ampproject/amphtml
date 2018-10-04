@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
+import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog.js';
 
 
 describe('LoginDoneDialog', () => {

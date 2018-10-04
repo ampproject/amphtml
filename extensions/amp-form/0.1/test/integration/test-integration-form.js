@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/amp-events';
-import {AmpForm, AmpFormService} from '../../amp-form';
-import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {Services} from '../../../../../src/services';
+import {AmpEvents} from '../../../../../src/amp-events.js';
+import {AmpForm, AmpFormService} from '../../amp-form.js';
+import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache.js';
+import {Services} from '../../../../../src/services.js';
 import {
   installGlobalSubmitListenerForDoc,
-} from '../../../../../src/document-submit';
-import {listenOncePromise} from '../../../../../src/event-helper';
-import {poll} from '../../../../../testing/iframe';
+} from '../../../../../src/document-submit.js';
+import {listenOncePromise} from '../../../../../src/event-helper.js';
+import {poll} from '../../../../../testing/iframe.js';
 import {registerExtendedTemplate} from
-  '../../../../../src/service/template-impl';
+  '../../../../../src/service/template-impl.js';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;

@@ -17,9 +17,9 @@
  * limitations under the License.
  */
 
-import * as eventHelper from '../../src/event-helper';
-import * as mode from '../../src/mode';
-import {maybeValidate} from '../../src/validator-integration';
+import * as eventHelper from '../../src/event-helper.js';
+import * as mode from '../../src/mode.js';
+import {maybeValidate} from '../../src/validator-integration.js';
 
 describes.fakeWin('validator-integration', {}, env => {
   let loadScriptStub;

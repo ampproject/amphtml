@@ -15,11 +15,11 @@
  */
 
 import {IframeTransport, getIframeTransportScriptUrl}
-  from '../iframe-transport';
-import {addParamsToUrl} from '../../../../src/url';
+  from '../iframe-transport.js';
+import {addParamsToUrl} from '../../../../src/url.js';
 import {expectPostMessage} from '../../../../testing/iframe.js';
-import {urls} from '../../../../src/config';
-import {user} from '../../../../src/log';
+import {urls} from '../../../../src/config.js';
+import {user} from '../../../../src/log.js';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 

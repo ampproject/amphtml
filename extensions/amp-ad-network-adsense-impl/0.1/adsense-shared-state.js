@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev} from '../../../src/log.js';
 
 /**
  * Maintains state in between different AdSense slots on the same page. This

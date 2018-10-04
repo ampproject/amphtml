@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../../../../third_party/react-dates/bundle';
-import {DatesList} from '../dates-list';
-import {requireExternal} from '../../../../src/module';
+import '../../../../third_party/react-dates/bundle.js';
+import {DatesList} from '../dates-list.js';
+import {requireExternal} from '../../../../src/module.js';
 
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');

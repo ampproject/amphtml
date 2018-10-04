@@ -16,7 +16,7 @@
 
 import {
   pemToBytes,
-} from '../../../src/utils/pem';
+} from '../../../src/utils/pem.js';
 
 describe('pemToBytes', () => {
   const PLAIN_TEXT =

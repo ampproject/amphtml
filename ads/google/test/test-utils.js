@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMultiSizeDimensions} from '../utils';
+import {getMultiSizeDimensions} from '../utils.js';
 
 describe('#getMultiSizeDimensions', () => {
 

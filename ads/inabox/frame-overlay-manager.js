@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {collapseFrame, expandFrame} from './frame-overlay-helper';
+import {collapseFrame, expandFrame} from './frame-overlay-helper.js';
 
 
 /**

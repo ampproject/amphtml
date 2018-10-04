@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SizeList, parseSizeList} from '../../src/size-list';
+import {SizeList, parseSizeList} from '../../src/size-list.js';
 
 
 describe('SizeList parseSizeList', () => {

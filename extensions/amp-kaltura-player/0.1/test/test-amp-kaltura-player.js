@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-kaltura-player';
+import '../amp-kaltura-player.js';
 
 
 describes.realWin('amp-kaltura-player', {

@@ -15,14 +15,14 @@
  */
 
 
-import {Entitlement, GrantReason} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {LocalSubscriptionPlatform} from './local-subscription-platform';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {Entitlement, GrantReason} from './entitlement.js';
+import {JwtHelper} from '../../amp-access/0.1/jwt.js';
+import {LocalSubscriptionPlatform} from './local-subscription-platform.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getSourceOrigin, getWinOrigin} from '../../../src/url.js';
 
 
 /**

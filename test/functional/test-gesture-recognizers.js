@@ -15,8 +15,8 @@
  */
 
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
-  TapzoomRecognizer} from '../../src/gesture-recognizers';
-import {Gestures} from '../../src/gesture';
+  TapzoomRecognizer} from '../../src/gesture-recognizers.js';
+import {Gestures} from '../../src/gesture.js';
 
 
 describe('TapRecognizer', () => {

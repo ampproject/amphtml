@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegrationVariableService} from './variable-service';
+import {AmpViewerIntegrationVariableService} from './variable-service.js';
 import {
   HighlightHandler,
   HighlightInfoDef,
   getHighlightParam,
-} from './highlight-handler';
+} from './highlight-handler.js';
 import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
-} from './messaging/messaging';
-import {Services} from '../../../src/services';
-import {TouchHandler} from './touch-handler';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from './messaging/messaging.js';
+import {Services} from '../../../src/services.js';
+import {TouchHandler} from './touch-handler.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   getAmpdoc,
   registerServiceBuilder,
-} from '../../../src/service';
-import {getData, listen, listenOnce} from '../../../src/event-helper';
-import {getSourceUrl} from '../../../src/url';
-import {isIframed} from '../../../src/dom';
+} from '../../../src/service.js';
+import {getData, listen, listenOnce} from '../../../src/event-helper.js';
+import {getSourceUrl} from '../../../src/url.js';
+import {isIframed} from '../../../src/dom.js';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

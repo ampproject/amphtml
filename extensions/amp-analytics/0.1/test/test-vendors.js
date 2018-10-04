@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
-import {AmpAnalytics} from '../amp-analytics';
-import {ExpansionOptions} from '../variables';
-import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
-import {Services} from '../../../../src/services';
-import {Transport} from '../transport';
-import {hasOwn} from '../../../../src/utils/object';
-import {macroTask} from '../../../../testing/yield';
+import {ANALYTICS_CONFIG} from '../vendors.js';
+import {AmpAnalytics} from '../amp-analytics.js';
+import {ExpansionOptions} from '../variables.js';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors.js';
+import {Services} from '../../../../src/services.js';
+import {Transport} from '../transport.js';
+import {hasOwn} from '../../../../src/utils/object.js';
+import {macroTask} from '../../../../testing/yield.js';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');

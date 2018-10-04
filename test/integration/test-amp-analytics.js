@@ -17,7 +17,7 @@
 import {
   depositRequestUrl,
   withdrawRequest,
-} from '../../testing/test-helper';
+} from '../../testing/test-helper.js';
 
 describe.configure()
     .skipIfPropertiesObfuscated().run('amp-analytics', function() {

@@ -15,9 +15,9 @@
  */
 
 import * as lolex from 'lolex';
-import {AccessIframeAdapter} from '../amp-access-iframe';
-import {Messenger} from '../iframe-api/messenger';
-import {dev} from '../../../../src/log';
+import {AccessIframeAdapter} from '../amp-access-iframe.js';
+import {Messenger} from '../iframe-api/messenger.js';
+import {dev} from '../../../../src/log.js';
 
 
 describes.fakeWin('AccessIframeAdapter', {

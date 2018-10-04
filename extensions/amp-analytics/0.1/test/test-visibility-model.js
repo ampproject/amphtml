@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {VisibilityModel} from '../visibility-model';
+import {VisibilityModel} from '../visibility-model.js';
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;

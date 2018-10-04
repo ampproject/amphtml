@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-ima-video';
-import * as imaVideoObj from '../../../../ads/google/imaVideo';
+import '../amp-ima-video.js';
+import * as imaVideoObj from '../../../../ads/google/imaVideo.js';
 
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
 
 
 describes.realWin('amp-ima-video', {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Curves, bezierCurve, getCurve} from '../../src/curve';
+import {Curves, bezierCurve, getCurve} from '../../src/curve.js';
 
 describe('Curve', () => {
 

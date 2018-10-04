@@ -16,8 +16,8 @@
 
 import {
   fontStylesheetTimeout,
-} from '../../src/font-stylesheet-timeout';
-import {toggleExperiment} from '../../src/experiments';
+} from '../../src/font-stylesheet-timeout.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 describes.realWin('font-stylesheet-timeout', {
   amp: true,

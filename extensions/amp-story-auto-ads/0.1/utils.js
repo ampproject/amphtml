@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes.js';
 
 
 /**

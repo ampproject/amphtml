@@ -15,22 +15,22 @@
  */
 
 
-import {ActionTrust} from '../../../../src/action-constants';
+import {ActionTrust} from '../../../../src/action-constants.js';
 import {
   AmpIframe,
   setTrackingIframeTimeoutForTesting,
-} from '../amp-iframe';
-import {CommonSignals} from '../../../../src/common-signals';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
+} from '../amp-iframe.js';
+import {CommonSignals} from '../../../../src/common-signals.js';
+import {LayoutPriority} from '../../../../src/layout.js';
+import {Services} from '../../../../src/services.js';
 import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
-} from '../../../../src/dom';
-import {isAdLike} from '../../../../src/iframe-helper';
-import {poll} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
-import {user} from '../../../../src/log';
+} from '../../../../src/dom.js';
+import {isAdLike} from '../../../../src/iframe-helper.js';
+import {poll} from '../../../../testing/iframe.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
+import {user} from '../../../../src/log.js';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;

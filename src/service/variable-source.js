@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev} from '../log';
-import {isFiniteNumber} from '../types';
-import {loadPromise} from '../event-helper';
+import {dev} from '../log.js';
+import {isFiniteNumber} from '../types.js';
+import {loadPromise} from '../event-helper.js';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;

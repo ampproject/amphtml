@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import * as docready from '../../src/document-ready';
-import * as dom from '../../src/dom';
+import * as docready from '../../src/document-ready.js';
+import * as dom from '../../src/dom.js';
 import {
   AmpDocService,
   AmpDocShadow,
   AmpDocShell,
   AmpDocSingle,
-} from '../../src/service/ampdoc-impl';
+} from '../../src/service/ampdoc-impl.js';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '../../src/web-components';
-import {createShadowRoot} from '../../src/shadow-embed';
-import {toggleExperiment} from '../../src/experiments';
+} from '../../src/web-components.js';
+import {createShadowRoot} from '../../src/shadow-embed.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 
 describe('AmpDocService', () => {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as adHelper from '../../../../src/ad-helper';
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {BaseElement} from '../../../../src/base-element';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {setStyles} from '../../../../src/style';
+import * as adHelper from '../../../../src/ad-helper.js';
+import {AmpAdUIHandler} from '../amp-ad-ui.js';
+import {BaseElement} from '../../../../src/base-element.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {setStyles} from '../../../../src/style.js';
 
 describes.realWin('amp-ad-ui handler', {
   amp: {

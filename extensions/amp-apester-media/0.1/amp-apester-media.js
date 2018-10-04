@@ -16,21 +16,21 @@
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {
   IntersectionObserverApi,
-} from '../../../src/intersection-observer-polyfill';
-import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/intersection-observer-polyfill.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   extractTags,
   getPlatform,
   registerEvent,
   setFullscreenOff,
   setFullscreenOn,
-} from './utils';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+} from './utils.js';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
 
 /** @const */
 const TAG = 'amp-apester-media';

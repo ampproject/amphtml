@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../src/amp-events';
+import {AmpEvents} from '../../src/amp-events.js';
 import {createFixtureIframe} from '../../testing/iframe.js';
 
 describe.configure().enableIe().run('Configuration', function() {

@@ -19,15 +19,15 @@ import {
   ADSENSE_EXP_NAMES,
   URL_EXPERIMENT_MAPPING,
   adsenseIsA4AEnabled,
-} from '../adsense-a4a-config';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {forceExperimentBranch} from '../../../../src/experiments';
+} from '../adsense-a4a-config.js';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils.js';
+import {createIframePromise} from '../../../../testing/iframe.js';
+import {forceExperimentBranch} from '../../../../src/experiments.js';
 import {
   isInExperiment,
-} from '../../../../ads/google/a4a/traffic-experiments';
-import {isProxyOrigin, parseUrlDeprecated} from '../../../../src/url';
-import {urls} from '../../../../src/config';
+} from '../../../../ads/google/a4a/traffic-experiments.js';
+import {isProxyOrigin, parseUrlDeprecated} from '../../../../src/url.js';
+import {urls} from '../../../../src/config.js';
 
 describe('adsense-a4a-config', () => {
   let sandbox;

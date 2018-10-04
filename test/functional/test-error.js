@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as analytics from '../../src/analytics';
-import {Services} from '../../src/services';
+import * as analytics from '../../src/analytics.js';
+import {Services} from '../../src/services.js';
 import {
   blockedByConsentError,
   cancellation,
@@ -28,16 +28,16 @@ import {
   maybeReportErrorToViewer,
   reportError,
   reportErrorToAnalytics,
-} from '../../src/error';
+} from '../../src/error.js';
 import {
   getMode,
   getRtvVersionForTesting,
-} from '../../src/mode';
+} from '../../src/mode.js';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
-} from '../../src/experiments';
-import {user} from '../../src/log';
+} from '../../src/experiments.js';
+import {user} from '../../src/log.js';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;

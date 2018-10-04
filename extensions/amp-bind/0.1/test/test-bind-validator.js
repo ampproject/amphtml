@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BindValidator} from '../bind-validator';
+import {BindValidator} from '../bind-validator.js';
 
 describe('BindValidator', () => {
   let val;

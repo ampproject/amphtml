@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-brightcove';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../../src/url';
+import '../amp-brightcove.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
+import {parseUrlDeprecated} from '../../../../src/url.js';
 
 
 describes.realWin('amp-brightcove', {

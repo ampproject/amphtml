@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Animation} from '../../../src/animation';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {bezierCurve} from '../../../src/curve';
-import {clamp} from '../../../src/utils/math';
-import {closest, tryFocus} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {Animation} from '../../../src/animation.js';
+import {KeyCodes} from '../../../src/utils/key-codes.js';
+import {Layout} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {clamp} from '../../../src/utils/math.js';
+import {closest, tryFocus} from '../../../src/dom.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
-} from '../../../src/transition';
-import {parseJson} from '../../../src/json';
-import {removeFragment} from '../../../src/url';
-import {setImportantStyles, setStyles} from '../../../src/style';
+} from '../../../src/transition.js';
+import {parseJson} from '../../../src/json.js';
+import {removeFragment} from '../../../src/url.js';
+import {setImportantStyles, setStyles} from '../../../src/style.js';
 
 const TAG = 'amp-accordion';
 const MAX_TRANSITION_DURATION = 500; // ms

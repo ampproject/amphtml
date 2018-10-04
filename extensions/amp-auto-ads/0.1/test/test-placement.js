@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
-import {AdTracker} from '../ad-tracker';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
-import {Services} from '../../../../src/services';
+import '../../../amp-ad/0.1/amp-ad.js';
+import {AdTracker} from '../ad-tracker.js';
+import {PlacementState, getPlacementsFromConfigObj} from '../placement.js';
+import {Services} from '../../../../src/services.js';
 
 describes.realWin('placement', {
   amp: {

@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {openWindowDialog, removeElement} from '../../../src/dom';
+import {Services} from '../../../src/services.js';
+import {dev, rethrowAsync, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {openWindowDialog, removeElement} from '../../../src/dom.js';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;

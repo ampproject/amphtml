@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Poller} from './poller';
-import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
-import {fetchDocument} from '../../../src/document-fetcher';
-import {getMode} from '../../../src/mode';
+import {Poller} from './poller.js';
+import {Services} from '../../../src/services.js';
+import {addParamToUrl} from '../../../src/url.js';
+import {fetchDocument} from '../../../src/document-fetcher.js';
+import {getMode} from '../../../src/mode.js';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {toArray} from '../../../src/types';
-import {user} from '../../../src/log';
+} from '../../../src/service.js';
+import {toArray} from '../../../src/types.js';
+import {user} from '../../../src/log.js';
 
 const SERVICE_ID = 'liveListManager';
 

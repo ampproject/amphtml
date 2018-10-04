@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Input} from '../../src/input';
+import {Input} from '../../src/input.js';
 import {installTimerService} from '../../src/service/timer-impl.js';
 
 

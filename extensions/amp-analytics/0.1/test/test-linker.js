@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {createLinker, parseLinker} from '../linker';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+import {createLinker, parseLinker} from '../linker.js';
+import {mockWindowInterface} from '../../../../testing/test-helper.js';
 
 const TAG = '[amp-analytics/linker]';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {htmlFor, htmlRefs} from '../../src/static-template';
+import {htmlFor, htmlRefs} from '../../src/static-template.js';
 
 describe('Static Template', () => {
   describe('html', () => {

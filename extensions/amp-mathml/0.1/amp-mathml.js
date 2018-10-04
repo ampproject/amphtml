@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-mathml-0.1.css';
-import {Layout} from '../../../src/layout';
-import {getIframe} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {Layout} from '../../../src/layout.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
 
 export class AmpMathml extends AMP.BaseElement {
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {FrameOverlayManager} from './frame-overlay-manager';
+import {FrameOverlayManager} from './frame-overlay-manager.js';
 import {
   MessageType,
   deserializeMessage,
   serializeMessage,
-} from '../../src/3p-frame-messaging';
-import {PositionObserver} from './position-observer';
-import {dev} from '../../src/log';
-import {dict} from '../../src/utils/object';
-import {getData} from '../../src/event-helper';
-import {layoutRectFromDomRect} from '../../src/layout-rect';
+} from '../../src/3p-frame-messaging.js';
+import {PositionObserver} from './position-observer.js';
+import {dev} from '../../src/log.js';
+import {dict} from '../../src/utils/object.js';
+import {getData} from '../../src/event-helper.js';
+import {layoutRectFromDomRect} from '../../src/layout-rect.js';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';

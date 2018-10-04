@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
 
 /** @const */
 const TAG = 'amp-beopinion';

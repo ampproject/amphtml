@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FakeWindow} from '../../testing/fake-dom';
+import {FakeWindow} from '../../testing/fake-dom.js';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -22,18 +22,18 @@ import {
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
   isExtensionScriptInNode,
-} from '../../src/element-service';
+} from '../../src/element-service.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
   setParentWindow,
-} from '../../src/service';
+} from '../../src/service.js';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
+} from '../../src/service/custom-element-registry.js';
 
 describe('getElementServiceIfAvailable()', () => {
   let doc;

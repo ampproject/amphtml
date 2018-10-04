@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RE_ALPHA} from '../../constants';
+import {RE_ALPHA} from '../../constants.js';
 
 const RE_NUMDASH = /[0-9\-].*/;
 

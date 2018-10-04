@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkGmosspImpl} from '../amp-ad-network-gmossp-impl';
+import {AmpAdNetworkGmosspImpl} from '../amp-ad-network-gmossp-impl.js';
 import {
   AmpAdUIHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-ui';
+} from '../../../amp-ad/0.1/amp-ad-ui.js';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
+} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {gmosspIsA4AEnabled} from '../gmossp-a4a-config.js';
 
 
 describes.realWin('gmossp-a4a-config', {amp: false}, env => {

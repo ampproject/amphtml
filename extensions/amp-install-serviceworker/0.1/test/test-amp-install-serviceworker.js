@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
-import {Services} from '../../../../src/services';
+import {AmpInstallServiceWorker} from '../amp-install-serviceworker.js';
+import {Services} from '../../../../src/services.js';
 import {
   assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   isSecureUrlDeprecated,
   parseUrlDeprecated,
-} from '../../../../src/url';
-import {loadPromise} from '../../../../src/event-helper';
+} from '../../../../src/url.js';
+import {loadPromise} from '../../../../src/event-helper.js';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service.js';
 
 
 function stubUrlService(sandbox) {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl} from '../src/url';
-import {loadScript, validateData} from '../3p/3p';
-import {parseJson} from '../src/json';
+import {addParamsToUrl} from '../src/url.js';
+import {loadScript, validateData} from '../3p/3p.js';
+import {parseJson} from '../src/json.js';
 
 /**
  * @param {!Window} global

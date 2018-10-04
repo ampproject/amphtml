@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAudio} from '../amp-audio';
-import {naturalDimensions_} from '../../../../src/layout';
+import {AmpAudio} from '../amp-audio.js';
+import {naturalDimensions_} from '../../../../src/layout.js';
 
 
 describes.realWin('amp-audio', {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SubscriptionAnalytics} from '../analytics';
+import {SubscriptionAnalytics} from '../analytics.js';
 
 
 describes.realWin('SubscriptionAnalytics', {amp: true}, env => {

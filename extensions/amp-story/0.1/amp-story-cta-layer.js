@@ -29,7 +29,7 @@
  * ...
  */
 
-import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {AmpStoryBaseLayer} from './amp-story-base-layer.js';
 
 /**
  * Call to action button layer template.

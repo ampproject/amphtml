@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../amp-apester-media';
-import {Services} from '../../../../src/services';
+import '../amp-apester-media.js';
+import {Services} from '../../../../src/services.js';
 
 describes.realWin(
     'amp-apester-media',

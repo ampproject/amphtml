@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rot13Array} from '../../addthis-utils/rot13';
+import {rot13Array} from '../../addthis-utils/rot13.js';
 
 describe('rot13', () => {
   it('should properly rotate alphabetical characters', () => {

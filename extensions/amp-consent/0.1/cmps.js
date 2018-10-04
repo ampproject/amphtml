@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
+import {getMode} from '../../../src/mode.js';
 
 /**
  * The CMP config should looks like

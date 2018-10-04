@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import '../../../amp-mustache/0.1/amp-mustache';
-import '../../../amp-selector/0.1/amp-selector';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
-import {AmpEvents} from '../../../../src/amp-events';
+import '../../../amp-mustache/0.1/amp-mustache.js';
+import '../../../amp-selector/0.1/amp-selector.js';
+import * as xhrUtils from '../../../../src/utils/xhr-utils.js';
+import {AmpEvents} from '../../../../src/amp-events.js';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
-} from '../amp-form';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
-import {Services} from '../../../../src/services';
+} from '../amp-form.js';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper.js';
+import {Services} from '../../../../src/services.js';
 import {
   cidServiceForDocForTesting,
-} from '../../../../src/service/cid-impl';
-import {fromIterator} from '../../../../src/utils/array';
+} from '../../../../src/service/cid-impl.js';
+import {fromIterator} from '../../../../src/utils/array.js';
 import {
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
-} from '../form-validators';
-import {user} from '../../../../src/log';
+} from '../form-validators.js';
+import {user} from '../../../../src/log.js';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.repeated('', {

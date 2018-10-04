@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Observable} from '../../src/observable';
-import {Services} from '../../src/services';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {Observable} from '../../src/observable.js';
+import {Services} from '../../src/services.js';
 import {
   installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
+} from '../../extensions/amp-analytics/0.1/activity-impl.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl.js';
 import {
   installViewportServiceForDoc,
-} from '../../src/service/viewport/viewport-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
+} from '../../src/service/viewport/viewport-impl.js';
+import {installVsyncService} from '../../src/service/vsync-impl.js';
 import {
   markElementScheduledForTesting,
-} from '../../src/service/custom-element-registry';
+} from '../../src/service/custom-element-registry.js';
 
 describe('Activity getTotalEngagedTime', () => {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-google-document-embed';
+import '../amp-google-document-embed.js';
 
 describes.realWin('amp-google-document-embed', {
   amp: {

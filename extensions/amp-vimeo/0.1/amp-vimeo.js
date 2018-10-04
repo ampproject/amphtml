@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {VideoUtils} from '../../../src/utils/video';
-import {addParamToUrl} from '../../../src/url';
+import {Services} from '../../../src/services.js';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface.js';
+import {VideoUtils} from '../../../src/utils/video.js';
+import {addParamToUrl} from '../../../src/url.js';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -24,17 +24,17 @@ import {
   objOrParseJson,
   originMatches,
   redispatch,
-} from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
+} from '../../../src/iframe-video.js';
+import {dict} from '../../../src/utils/object.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {getMode} from '../../../src/mode.js';
 import {
   installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {once} from '../../../src/utils/function';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+} from '../../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {once} from '../../../src/utils/function.js';
+import {removeElement} from '../../../src/dom.js';
+import {user} from '../../../src/log.js';
 
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '../../../../../testing/iframe.js';
 
 describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
   // Extend timeout slightly for flakes on Windows environments

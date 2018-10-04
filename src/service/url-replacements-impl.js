@@ -22,10 +22,10 @@ import {
   getNavigationData,
   getTimingDataAsync,
   getTimingDataSync,
-} from './variable-source';
-import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
+} from './variable-source.js';
+import {Expander, NOENCODE_WHITELIST} from './url-expander/expander.js';
+import {Services} from '../services.js';
+import {WindowInterface} from '../window-interface.js';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -35,17 +35,17 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-} from '../url';
-import {dev, rethrowAsync, user} from '../log';
-import {getMode} from '../mode';
+} from '../url.js';
+import {dev, rethrowAsync, user} from '../log.js';
+import {getMode} from '../mode.js';
 import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
+import {hasOwn} from '../utils/object.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
-import {isExperimentOn} from '../experiments';
-import {tryResolve} from '../utils/promise';
+} from '../service.js';
+import {isExperimentOn} from '../experiments.js';
+import {tryResolve} from '../utils/promise.js';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

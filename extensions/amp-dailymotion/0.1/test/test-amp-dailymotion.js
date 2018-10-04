@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-dailymotion';
+import '../amp-dailymotion.js';
 
 
 describes.realWin('amp-dailymotion', {

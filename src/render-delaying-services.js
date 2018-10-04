@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {dev} from './log';
-import {getServicePromise} from './service';
+import {Services} from './services.js';
+import {dev} from './log.js';
+import {getServicePromise} from './service.js';
 
 /**
  * A map of services that delay rendering. The key is the name of the service

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {closestBySelector} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {user} from '../../../src/log';
+import {closestBySelector} from '../../../src/dom.js';
+import {createShadowRoot} from '../../../src/shadow-embed.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

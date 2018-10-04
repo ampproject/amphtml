@@ -17,7 +17,7 @@
 import {
   validateData,
   validateSrcPrefix,
-  writeScript} from '../3p/3p';
+  writeScript} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

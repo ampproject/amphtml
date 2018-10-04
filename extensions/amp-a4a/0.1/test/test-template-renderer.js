@@ -18,12 +18,12 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
   getAmpAdTemplateHelper,
-} from '../template-validator';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {TemplateRenderer} from '../template-renderer';
-import {ValidatorResult} from '../amp-ad-type-defs';
+} from '../template-validator.js';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache.js';
+import {TemplateRenderer} from '../template-renderer.js';
+import {ValidatorResult} from '../amp-ad-type-defs.js';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes.js';
 
 const realWinConfig = {
   amp: {},

@@ -16,8 +16,8 @@
 
 import {
   IntersectionObserverPolyfill,
-} from '../../../src/intersection-observer-polyfill';
-import {dev} from '../../../src/log';
+} from '../../../src/intersection-observer-polyfill.js';
+import {dev} from '../../../src/log.js';
 
 export class RefreshIntersectionObserverWrapper {
   /**

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {parseUrlDeprecated} from '../src/url';
+import {loadScript, validateData} from '../3p/3p.js';
+import {parseUrlDeprecated} from '../src/url.js';
 
 /* global
 __kxamp: false,

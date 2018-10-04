@@ -20,7 +20,7 @@ import {
   fromIterator,
   pushIfNotExist,
   remove,
-} from '../../../src/utils/array';
+} from '../../../src/utils/array.js';
 
 describe('areEqualOrdered', function() {
   it('should return true on empty arrays',

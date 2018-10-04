@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FiniteStateMachine} from '../../src/finite-state-machine';
+import {FiniteStateMachine} from '../../src/finite-state-machine.js';
 
 describe('Finite State Machine', () => {
 

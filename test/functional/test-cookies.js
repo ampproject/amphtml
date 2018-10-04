@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../../src/cookies';
+import {getCookie, setCookie} from '../../src/cookies.js';
 
 
 describe('cookies', () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {UrlBuilder} from '../url-builder';
+import {UrlBuilder} from '../url-builder.js';
 
 describes.fakeWin('UrlBuilder', {amp: true}, env => {
   let ampdoc;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Renderer} from './amp-ad-type-defs';
-import {dev} from '../../../src/log';
-import {getAmpAdTemplateHelper} from './template-validator';
-import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
+import {Renderer} from './amp-ad-type-defs.js';
+import {dev} from '../../../src/log.js';
+import {getAmpAdTemplateHelper} from './template-validator.js';
+import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util.js';
 
 /**
  * @typedef {{

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpFlyingCarpet} from '../amp-fx-flying-carpet';
-import {Resource} from '../../../../src/service/resource';
-import {Services} from '../../../../src/services';
+import {AmpFlyingCarpet} from '../amp-fx-flying-carpet.js';
+import {Resource} from '../../../../src/service/resource.js';
+import {Services} from '../../../../src/services.js';
 
 
 describes.realWin('amp-fx-flying-carpet', {

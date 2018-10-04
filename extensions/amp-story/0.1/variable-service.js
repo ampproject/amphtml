@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from './navigation-state';
+import {StateChangeType} from './navigation-state.js';
 
 /**
  * @typedef {!Object<string, *>}

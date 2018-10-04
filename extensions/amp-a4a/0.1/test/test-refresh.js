@@ -20,11 +20,11 @@ import {
   METATAG_NAME,
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
-} from '../refresh-manager';
+} from '../refresh-manager.js';
 import {
   RefreshIntersectionObserverWrapper,
-} from '../refresh-intersection-observer-wrapper';
-import {Services} from '../../../../src/services';
+} from '../refresh-intersection-observer-wrapper.js';
+import {Services} from '../../../../src/services.js';
 
 function getTestElement() {
   const div = window.document.createElement('div');

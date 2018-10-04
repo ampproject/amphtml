@@ -79,41 +79,41 @@
  * and `integration` below.
  */
 
-import {BaseElement} from '../src/base-element';
+import {BaseElement} from '../src/base-element.js';
 import {CSS} from '../build/amp-ad-0.1.css.js';
 import {
   FakeCustomElements,
   FakeLocation,
   FakeWindow,
   interceptEventListeners,
-} from './fake-dom';
-import {Services} from '../src/services';
-import {addParamsToUrl} from '../src/url';
+} from './fake-dom.js';
+import {Services} from '../src/services.js';
+import {addParamsToUrl} from '../src/url.js';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/runtime';
-import {createAmpElementForTesting} from '../src/custom-element';
-import {createElementWithAttributes} from '../src/dom';
-import {cssText} from '../build/css';
-import {doNotLoadExternalResourcesInTest} from './iframe';
+} from '../src/runtime.js';
+import {createAmpElementForTesting} from '../src/custom-element.js';
+import {createElementWithAttributes} from '../src/dom.js';
+import {cssText} from '../build/css.js';
+import {doNotLoadExternalResourcesInTest} from './iframe.js';
 import {
   installBuiltinElements,
   installExtensionsService,
-} from '../src/service/extensions-impl';
+} from '../src/service/extensions-impl.js';
 import {
   install as installCustomElements,
-} from '../src/polyfills/custom-elements';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
-import {maybeTrackImpression} from '../src/impression';
+} from '../src/polyfills/custom-elements.js';
+import {installDocService} from '../src/service/ampdoc-impl.js';
+import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed.js';
+import {maybeTrackImpression} from '../src/impression.js';
 import {
   resetScheduledElementForTesting,
-} from '../src/service/custom-element-registry';
-import {setStyles} from '../src/style';
-import {stubService} from './test-helper';
+} from '../src/service/custom-element-registry.js';
+import {setStyles} from '../src/style.js';
+import {stubService} from './test-helper.js';
 import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */

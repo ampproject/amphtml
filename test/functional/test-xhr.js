@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {Services} from '../../src/services';
-import {assertSuccess} from '../../src/utils/xhr-utils';
-import {fetchPolyfill} from '../../src/polyfills/fetch';
-import {getCookie} from '../../src/cookies';
-import {user} from '../../src/log';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {FormDataWrapper} from '../../src/form-data-wrapper.js';
+import {Services} from '../../src/services.js';
+import {assertSuccess} from '../../src/utils/xhr-utils.js';
+import {fetchPolyfill} from '../../src/polyfills/fetch.js';
+import {getCookie} from '../../src/cookies.js';
+import {user} from '../../src/log.js';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a.js';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl.js';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {

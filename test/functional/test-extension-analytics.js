@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
+import {BaseElement} from '../../src/base-element.js';
 import {
   CustomEventReporterBuilder,
   insertAnalyticsElement,
   useAnalyticsInSandbox,
-} from '../../src/extension-analytics';
-import {Services} from '../../src/services';
+} from '../../src/extension-analytics.js';
+import {Services} from '../../src/services.js';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../../src/service';
-import {macroTask} from '../../testing/yield';
-import {registerElement} from '../../src/service/custom-element-registry';
+} from '../../src/service.js';
+import {macroTask} from '../../testing/yield.js';
+import {registerElement} from '../../src/service/custom-element-registry.js';
 
 
 describes.realWin('extension-analytics', {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {dev} from '../log.js';
 
 /**
  * Interpret a byte array as a UTF-8 string.

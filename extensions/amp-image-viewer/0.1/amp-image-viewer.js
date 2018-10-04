@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {Animation} from '../../../src/animation';
+import * as st from '../../../src/style.js';
+import * as tr from '../../../src/transition.js';
+import {Animation} from '../../../src/animation.js';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '../../../src/common-signals.js';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
-} from '../../../src/gesture-recognizers';
-import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {bezierCurve} from '../../../src/curve';
-import {continueMotion} from '../../../src/motion';
-import {dev, user} from '../../../src/log';
-import {elementByTag} from '../../../src/dom';
+} from '../../../src/gesture-recognizers.js';
+import {Gestures} from '../../../src/gesture.js';
+import {Layout} from '../../../src/layout.js';
+import {bezierCurve} from '../../../src/curve.js';
+import {continueMotion} from '../../../src/motion.js';
+import {dev, user} from '../../../src/log.js';
+import {elementByTag} from '../../../src/dom.js';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
-import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+} from '../../../src/layout-rect.js';
+import {setStyles} from '../../../src/style.js';
+import {srcsetFromElement} from '../../../src/srcset.js';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

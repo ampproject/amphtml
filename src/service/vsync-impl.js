@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../utils/promise';
-import {JankMeter} from './jank-meter';
-import {Pass} from '../pass';
-import {Services} from '../services';
-import {cancellation} from '../error';
-import {dev, rethrowAsync} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {installTimerService} from './timer-impl';
+import {Deferred} from '../utils/promise.js';
+import {JankMeter} from './jank-meter.js';
+import {Pass} from '../pass.js';
+import {Services} from '../services.js';
+import {cancellation} from '../error.js';
+import {dev, rethrowAsync} from '../log.js';
+import {getService, registerServiceBuilder} from '../service.js';
+import {installTimerService} from './timer-impl.js';
 
 /** @const {time} */
 const FRAME_TIME = 16;

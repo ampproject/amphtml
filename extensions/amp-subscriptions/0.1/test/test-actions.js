@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Actions} from '../actions';
-import {SubscriptionAnalytics} from '../analytics';
-import {UrlBuilder} from '../url-builder';
-import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
+import {Actions} from '../actions.js';
+import {SubscriptionAnalytics} from '../analytics.js';
+import {UrlBuilder} from '../url-builder.js';
+import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog.js';
 
 
 describes.realWin('Actions', {amp: true}, env => {

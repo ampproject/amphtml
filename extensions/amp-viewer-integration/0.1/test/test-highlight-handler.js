@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {HighlightHandler, getHighlightParam} from '../highlight-handler';
-import {Messaging, WindowPortEmulator} from '../messaging/messaging';
-import {Services} from '../../../../src/services';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {HighlightHandler, getHighlightParam} from '../highlight-handler.js';
+import {Messaging, WindowPortEmulator} from '../messaging/messaging.js';
+import {Services} from '../../../../src/services.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect.js';
 
 describes.fakeWin('getHighlightParam', {
   amp: {

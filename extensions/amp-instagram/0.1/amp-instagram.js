@@ -37,14 +37,14 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {getData, listen} from '../../../src/event-helper.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {isObject} from '../../../src/types.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyles} from '../../../src/style.js';
+import {startsWith} from '../../../src/string.js';
+import {tryParseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 class AmpInstagram extends AMP.BaseElement {
 

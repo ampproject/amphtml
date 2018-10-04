@@ -17,13 +17,13 @@ import {
   CONSENT_ITEM_STATE,
   ConsentInstance,
   ConsentStateManager,
-} from '../consent-state-manager';
-import {dev} from '../../../../src/log';
-import {macroTask} from '../../../../testing/yield';
+} from '../consent-state-manager.js';
+import {dev} from '../../../../src/log.js';
+import {macroTask} from '../../../../testing/yield.js';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
+} from '../../../../src/service.js';
 
 
 describes.realWin('ConsentStateManager', {amp: 1}, env => {

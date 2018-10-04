@@ -22,7 +22,7 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
-import {Deferred} from '../../../../src/utils/promise';
+import {Deferred} from '../../../../src/utils/promise.js';
 
 const SENTINEL = '__AMP__';
 

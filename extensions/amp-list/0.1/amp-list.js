@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import * as setDOM from 'set-dom/src/index';
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
-import {Deferred} from '../../../src/utils/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import * as setDOM from 'set-dom/src/index.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Pass} from '../../../src/pass.js';
+import {Services} from '../../../src/services.js';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
   requestForBatchFetch,
-} from '../../../src/batched-json';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
-import {isArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {removeChildren} from '../../../src/dom';
-import {setStyles, toggle} from '../../../src/style';
+} from '../../../src/batched-json.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getMode} from '../../../src/mode.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {isArray} from '../../../src/types.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {removeChildren} from '../../../src/dom.js';
+import {setStyles, toggle} from '../../../src/style.js';
 import {
   setupAMPCors,
   setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+} from '../../../src/utils/xhr-utils.js';
 
 /** @const {string} */
 const TAG = 'amp-list';

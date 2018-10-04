@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as bytes from '../../../../src/utils/bytes';
-import {AmpShareTracking} from '../amp-share-tracking';
-import {History} from '../../../../src/service/history-impl';
-import {Services} from '../../../../src/services';
-import {Xhr} from '../../../../src/service/xhr-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+import * as bytes from '../../../../src/utils/bytes.js';
+import {AmpShareTracking} from '../amp-share-tracking.js';
+import {History} from '../../../../src/service/history-impl.js';
+import {Services} from '../../../../src/services.js';
+import {Xhr} from '../../../../src/service/xhr-impl.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.fakeWin('amp-share-tracking', {
   amp: {

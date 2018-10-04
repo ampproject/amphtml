@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../amp-events';
-import {Deferred} from '../utils/promise';
-import {Layout} from '../layout';
-import {computedStyle, toggle} from '../style';
-import {dev} from '../log';
-import {isBlockedByConsent} from '../error';
-import {isExperimentOn} from '../experiments';
+import {AmpEvents} from '../amp-events.js';
+import {Deferred} from '../utils/promise.js';
+import {Layout} from '../layout.js';
+import {computedStyle, toggle} from '../style.js';
+import {dev} from '../log.js';
+import {isBlockedByConsent} from '../error.js';
+import {isExperimentOn} from '../experiments.js';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutRectsOverlap,
   moveLayoutRect,
-} from '../layout-rect';
-import {startsWith} from '../string';
-import {toWin} from '../types';
+} from '../layout-rect.js';
+import {startsWith} from '../string.js';
+import {toWin} from '../types.js';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

@@ -17,17 +17,17 @@
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
+} from '../../../../ads/google/adsense-amp-auto-ads.js';
 import {
   ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsResponsiveBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads-responsive';
-import {Services} from '../../../../src/services';
+} from '../../../../ads/google/adsense-amp-auto-ads-responsive.js';
+import {Services} from '../../../../src/services.js';
 import {
   forceExperimentBranch,
   toggleExperiment,
-} from '../../../../src/experiments';
-import {getAdNetworkConfig} from '../ad-network-config';
+} from '../../../../src/experiments.js';
+import {getAdNetworkConfig} from '../ad-network-config.js';
 
 describes.realWin('ad-network-config', {
   amp: {

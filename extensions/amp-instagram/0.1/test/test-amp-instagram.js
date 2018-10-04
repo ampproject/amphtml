@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-instagram';
+import '../amp-instagram.js';
 
 
 describes.realWin('amp-instagram', {

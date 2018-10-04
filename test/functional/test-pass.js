@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Pass} from '../../src/pass';
-import {Services} from '../../src/services';
+import {Pass} from '../../src/pass.js';
+import {Services} from '../../src/services.js';
 
 describe('Pass', () => {
 

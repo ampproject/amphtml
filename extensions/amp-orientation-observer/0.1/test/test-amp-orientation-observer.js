@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpOrientationObserver} from '../amp-orientation-observer';
+import {AmpOrientationObserver} from '../amp-orientation-observer.js';
 
 describes.realWin('Creates the relevant fx presets correctly', {
   amp: {

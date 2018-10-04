@@ -18,8 +18,8 @@
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
-} from '../linker-reader';
-import {mockWindowInterface} from '../../../../testing/test-helper';
+} from '../linker-reader.js';
+import {mockWindowInterface} from '../../../../testing/test-helper.js';
 
 describe('LinkerReader', () => {
   let sandbox;

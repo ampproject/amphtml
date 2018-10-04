@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
-import {AmpAdNetworkFakeImpl} from '../amp-ad-network-fake-impl';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad.js'; // eslint-disable-line no-unused-vars
+import {AmpAdNetworkFakeImpl} from '../amp-ad-network-fake-impl.js';
 
 describes.realWin('amp-ad-network-fake-impl', {
   amp: {

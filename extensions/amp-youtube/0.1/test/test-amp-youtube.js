@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-youtube';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-youtube.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';

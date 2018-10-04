@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user} from '../../log';
-import {tryResolve} from '../../utils/promise';
+import {hasOwn} from '../../utils/object.js';
+import {rethrowAsync, user} from '../../log.js';
+import {tryResolve} from '../../utils/promise.js';
 
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';

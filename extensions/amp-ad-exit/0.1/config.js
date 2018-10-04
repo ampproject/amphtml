@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {FilterType} from './filters/filter';
+import {FilterType} from './filters/filter.js';
 import {
   IFRAME_TRANSPORTS,
-} from '../../amp-analytics/0.1/iframe-transport-vendors';
-import {user} from '../../../src/log';
+} from '../../amp-analytics/0.1/iframe-transport-vendors.js';
+import {user} from '../../../src/log.js';
 
 /**
  * @typedef {{

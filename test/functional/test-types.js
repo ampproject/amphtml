@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as types from '../../src/types';
+import * as types from '../../src/types.js';
 
 describe('Types', () => {
   describe('toArray', () => {

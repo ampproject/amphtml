@@ -21,14 +21,14 @@
  */
 
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {Layout} from '../../../src/layout';
+import {Layout} from '../../../src/layout.js';
 import {
   installRecaptchaService,
   recaptchaServiceFor,
-} from './amp-recaptcha-service';
-import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, toggle} from '../../../src/style';
-import {user} from '../../../src/log';
+} from './amp-recaptcha-service.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {user} from '../../../src/log.js';
 
 
 /** @const */

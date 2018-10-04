@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {fromIterator} from '../../src/utils/array';
+import {FormDataWrapper} from '../../src/form-data-wrapper.js';
+import {fromIterator} from '../../src/utils/array.js';
 
 describes.realWin('FormDataWrapper', {}, env => {
   describe('entries', () => {

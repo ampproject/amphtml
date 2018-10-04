@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {extractKeyframes} from '../keyframes-extractor';
-import {poll} from '../../../../testing/iframe';
+import {extractKeyframes} from '../keyframes-extractor.js';
+import {poll} from '../../../../testing/iframe.js';
 
 
 describes.realWin('extractKeyframes', {amp: 1}, env => {

@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   ViewportBindingIosEmbedShadowRoot_,
-} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
+} from '../../src/service/viewport/viewport-binding-ios-embed-sd.js';
 import {
   ViewportBindingIosEmbedWrapper_,
-} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
+} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper.js';
 import {
   ViewportBindingNatural_,
-} from '../../src/service/viewport/viewport-binding-natural';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {whenDocumentReady} from '../../src/document-ready';
+} from '../../src/service/viewport/viewport-binding-natural.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
+import {installDocumentStateService} from '../../src/service/document-state.js';
+import {installPlatformService} from '../../src/service/platform-impl.js';
+import {installVsyncService} from '../../src/service/vsync-impl.js';
+import {whenDocumentReady} from '../../src/document-ready.js';
 
 describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;

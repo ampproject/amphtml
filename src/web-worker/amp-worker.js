@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
-import {calculateEntryPointScriptUrl} from '../service/extension-location';
-import {dev} from '../log';
-import {getMode} from '../mode';
-import {getService, registerServiceBuilder} from '../service';
+import {Services} from '../services.js';
+import {calculateEntryPointScriptUrl} from '../service/extension-location.js';
+import {dev} from '../log.js';
+import {getMode} from '../mode.js';
+import {getService, registerServiceBuilder} from '../service.js';
 
 const TAG = 'web-worker';
 

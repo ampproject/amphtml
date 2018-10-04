@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
-import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
-import * as adCid from '../../../../src/ad-cid';
-import * as consent from '../../../../src/consent';
+import '../../../amp-ad/0.1/amp-ad.js';
+import '../../../amp-sticky-ad/1.0/amp-sticky-ad.js';
+import * as adCid from '../../../../src/ad-cid.js';
+import * as consent from '../../../../src/consent.js';
 import * as lolex from 'lolex';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {LayoutPriority} from '../../../../src/layout';
-import {Services} from '../../../../src/services';
-import {adConfig} from '../../../../ads/_config';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {stubService} from '../../../../testing/test-helper';
-import {user} from '../../../../src/log';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
+import {LayoutPriority} from '../../../../src/layout.js';
+import {Services} from '../../../../src/services.js';
+import {adConfig} from '../../../../ads/_config.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {macroTask} from '../../../../testing/yield.js';
+import {stubService} from '../../../../testing/test-helper.js';
+import {user} from '../../../../src/log.js';
 
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../amp-dynamic-css-classes';
-import {Services} from '../../../../src/services';
-import {vsyncForTesting} from '../../../../src/service/vsync-impl';
+import '../amp-dynamic-css-classes.js';
+import {Services} from '../../../../src/services.js';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl.js';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +

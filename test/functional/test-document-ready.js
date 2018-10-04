@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {isDocumentReady,
   onDocumentReady,
   whenDocumentComplete,
   whenDocumentReady,
-} from '../../src/document-ready';
+} from '../../src/document-ready.js';
 
 
 describe('documentReady', () => {

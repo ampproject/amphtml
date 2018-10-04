@@ -22,12 +22,12 @@
 import {
   KeyframesDef,
   StoryAnimationDimsDef,
-} from './animation-types';
+} from './animation-types.js';
 import {
   rotate,
   scale,
   translate,
-} from '../../../src/style';
+} from '../../../src/style.js';
 
 /**
  * Translates the element on the 2d plane according to the given points.

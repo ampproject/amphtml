@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-imgur';
+import '../amp-imgur.js';
 
 
 describes.realWin('amp-imgur', {

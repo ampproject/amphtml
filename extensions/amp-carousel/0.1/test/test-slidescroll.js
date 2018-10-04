@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-carousel';
+import '../amp-carousel.js';
 
 
 describes.realWin('SlideScroll', {

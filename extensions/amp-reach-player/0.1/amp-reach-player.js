@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 class AmpReachPlayer extends AMP.BaseElement {
 

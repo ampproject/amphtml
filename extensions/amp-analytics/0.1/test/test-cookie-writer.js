@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as cookie from '../../../../src/cookies';
-import {CookieWriter} from '../cookie-writer';
-import {dict} from '../../../../src/utils/object';
-import {installLinkerReaderService} from '../linker-reader';
+import * as cookie from '../../../../src/cookies.js';
+import {CookieWriter} from '../cookie-writer.js';
+import {dict} from '../../../../src/utils/object.js';
+import {installLinkerReaderService} from '../linker-reader.js';
 
 
 

@@ -13,43 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../action-constants';
+import {ActionTrust} from '../../action-constants.js';
 import {
   PlayingStates,
   VideoAttributes,
   VideoEvents,
-} from '../../video-interface';
+} from '../../video-interface.js';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
-} from '../position-observer/position-observer-impl';
+} from '../position-observer/position-observer-impl.js';
 import {
   PositionObserverFidelity,
-} from '../position-observer/position-observer-worker';
-import {Services} from '../../services';
-import {closestBySelector, isRTL, removeElement} from '../../dom';
-import {createCustomEvent, listen, listenOnce} from '../../event-helper';
+} from '../position-observer/position-observer-worker.js';
+import {Services} from '../../services.js';
+import {closestBySelector, isRTL, removeElement} from '../../dom.js';
+import {createCustomEvent, listen, listenOnce} from '../../event-helper.js';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
-import {dev, user} from '../../log';
-import {dict} from '../../utils/object';
-import {getInternalVideoElementFor} from '../../utils/video';
-import {getServiceForDoc} from '../../service';
-import {htmlFor, htmlRefs} from '../../static-template';
-import {installStylesForDoc} from '../../style-installer';
-import {isExperimentOn} from '../../experiments';
-import {isFiniteNumber} from '../../types';
-import {mapRange} from '../../utils/math';
-import {moveLayoutRect} from '../../layout-rect';
-import {once} from '../../utils/function';
+import {dev, user} from '../../log.js';
+import {dict} from '../../utils/object.js';
+import {getInternalVideoElementFor} from '../../utils/video.js';
+import {getServiceForDoc} from '../../service.js';
+import {htmlFor, htmlRefs} from '../../static-template.js';
+import {installStylesForDoc} from '../../style-installer.js';
+import {isExperimentOn} from '../../experiments.js';
+import {isFiniteNumber} from '../../types.js';
+import {mapRange} from '../../utils/math.js';
+import {moveLayoutRect} from '../../layout-rect.js';
+import {once} from '../../utils/function.js';
 import {
   px,
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
-} from '../../style';
-import {urls} from '../../config';
+} from '../../style.js';
+import {urls} from '../../config.js';
 
 
 /** @private @const {number} */

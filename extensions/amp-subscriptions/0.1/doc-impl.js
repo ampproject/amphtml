@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Doc} from '../../../third_party/subscriptions-project/config';
-import {dev} from '../../../src/log';
+import {Doc} from '../../../third_party/subscriptions-project/config.js';
+import {dev} from '../../../src/log.js';
 
 
 /**

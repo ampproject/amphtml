@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BindEvaluator} from '../bind-evaluator';
-import {BindExpression} from '../bind-expression';
+import {BindEvaluator} from '../bind-evaluator.js';
+import {BindExpression} from '../bind-expression.js';
 
 describe('BindEvaluator', () => {
   let evaluator;

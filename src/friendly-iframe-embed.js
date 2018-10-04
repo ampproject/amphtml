@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from './common-signals';
-import {Observable} from './observable';
-import {Services} from './services';
-import {Signals} from './utils/signals';
-import {closestBySelector, escapeHtml} from './dom';
-import {dev, rethrowAsync, user} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
-import {isDocumentReady} from './document-ready';
-import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
-import {loadPromise} from './event-helper';
+import {CommonSignals} from './common-signals.js';
+import {Observable} from './observable.js';
+import {Services} from './services.js';
+import {Signals} from './utils/signals.js';
+import {closestBySelector, escapeHtml} from './dom.js';
+import {dev, rethrowAsync, user} from './log.js';
+import {disposeServicesForEmbed, getTopWindow} from './service.js';
+import {isDocumentReady} from './document-ready.js';
+import {layoutRectLtwh, moveLayoutRect} from './layout-rect.js';
+import {loadPromise} from './event-helper.js';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from './style';
-import {toWin} from './types';
+} from './style.js';
+import {toWin} from './types.js';
 
 
 /** @const {string} */

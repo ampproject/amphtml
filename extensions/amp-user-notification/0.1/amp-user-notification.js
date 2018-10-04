@@ -15,20 +15,20 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../src/service/notification-ui-manager';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/service/notification-ui-manager.js';
+import {Services} from '../../../src/services.js';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url.js';
+import {dev, rethrowAsync, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
-import {toggle} from '../../../src/style';
+} from '../../../src/service.js';
+import {toggle} from '../../../src/style.js';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

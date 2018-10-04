@@ -16,7 +16,7 @@
 
 // Imported just for the side effect of getting the `types` it exports into
 // the type system during compile time.
-import './time';
+import './time.js';
 
 
 /**

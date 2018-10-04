@@ -15,10 +15,10 @@
  */
 
 
-import '../amp-mowplayer';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-mowplayer.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 const EXAMPLE_VIDEOID = 'myfwarfx4tb';
 const EXAMPLE_VIDEOID_URL = 'https://cdn.mowplayer.com/player.html?code=myfwarfx4tb';

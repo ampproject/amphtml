@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {dev, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
-import {map} from './utils/object';
-import {setStyles} from './style';
-import {waitForServices} from './render-delaying-services';
+import {Services} from './services.js';
+import {dev, rethrowAsync} from './log.js';
+import {insertAfterOrAtStart, waitForBodyPromise} from './dom.js';
+import {map} from './utils/object.js';
+import {setStyles} from './style.js';
+import {waitForServices} from './render-delaying-services.js';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';

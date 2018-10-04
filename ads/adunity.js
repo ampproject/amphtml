@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
-import {startsWith} from '../src/string';
+import {loadScript, validateData} from '../3p/3p.js';
+import {startsWith} from '../src/string.js';
 
 /**
  * @param {!Window} global

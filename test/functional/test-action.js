@@ -20,13 +20,13 @@ import {
   DeferredEvent,
   dereferenceExprsInArgs,
   parseActionMap,
-} from '../../src/service/action-impl';
-import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {KeyCodes} from '../../src/utils/key-codes';
-import {createCustomEvent} from '../../src/event-helper';
-import {createElementWithAttributes} from '../../src/dom';
-import {setParentWindow} from '../../src/service';
+} from '../../src/service/action-impl.js';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants.js';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
+import {KeyCodes} from '../../src/utils/key-codes.js';
+import {createCustomEvent} from '../../src/event-helper.js';
+import {createElementWithAttributes} from '../../src/dom.js';
+import {setParentWindow} from '../../src/service.js';
 
 
 /**

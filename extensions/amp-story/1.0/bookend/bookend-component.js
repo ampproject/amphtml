@@ -15,15 +15,15 @@
  */
 
 
-import {ArticleComponent} from './components/article';
-import {CtaLinkComponent} from './components/cta-link';
-import {HeadingComponent} from './components/heading';
-import {LandscapeComponent} from './components/landscape';
-import {LocalizedStringId} from '../localization';
-import {PortraitComponent} from './components/portrait';
-import {TextBoxComponent} from './components/text-box';
-import {dev} from '../../../../src/log';
-import {htmlFor} from '../../../../src/static-template';
+import {ArticleComponent} from './components/article.js';
+import {CtaLinkComponent} from './components/cta-link.js';
+import {HeadingComponent} from './components/heading.js';
+import {LandscapeComponent} from './components/landscape.js';
+import {LocalizedStringId} from '../localization.js';
+import {PortraitComponent} from './components/portrait.js';
+import {TextBoxComponent} from './components/text-box.js';
+import {dev} from '../../../../src/log.js';
+import {htmlFor} from '../../../../src/static-template.js';
 
 /** @type {string} */
 export const TAG = 'amp-story-bookend';

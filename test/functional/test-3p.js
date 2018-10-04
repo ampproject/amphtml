@@ -21,7 +21,7 @@ import {
   validateData,
   validateSrcContains,
   validateSrcPrefix,
-} from '../../3p/3p';
+} from '../../3p/3p.js';
 
 describe('3p', () => {
 

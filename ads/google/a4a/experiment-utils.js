@@ -19,10 +19,10 @@ import {
   forceExperimentBranch,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
+} from '../../../src/experiments.js';
 import {
   addExperimentIdToElement,
-} from './traffic-experiments';
+} from './traffic-experiments.js';
 
 /**
  * Attempts to select into experiment and forces branch if selected.

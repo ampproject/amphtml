@@ -17,13 +17,13 @@
 import {
   Builder,
   WebAnimationRunner,
-} from '../web-animations';
+} from '../web-animations.js';
 import {
   WebAnimationPlayState,
-} from '../web-animation-types';
-import {isArray, isObject} from '../../../../src/types';
-import {poll} from '../../../../testing/iframe';
-import {user} from '../../../../src/log';
+} from '../web-animation-types.js';
+import {isArray, isObject} from '../../../../src/types.js';
+import {poll} from '../../../../testing/iframe.js';
+import {user} from '../../../../src/log.js';
 
 
 describes.realWin('MeasureScanner', {amp: 1}, env => {

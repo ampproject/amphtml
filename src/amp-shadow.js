@@ -20,27 +20,27 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills.js'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {Services} from './services';
+import {Services} from './services.js';
 import {
   adoptShadowMode,
   installAmpdocServices,
   installBuiltins,
   installRuntimeServices,
-} from './runtime';
+} from './runtime.js';
 import {
   bodyAlwaysVisible,
   installStylesForDoc,
   makeBodyVisible,
-} from './style-installer';
-import {cssText} from '../build/css';
-import {deactivateChunking} from './chunk';
-import {doNotTrackImpression} from './impression';
-import {installDocService} from './service/ampdoc-impl';
-import {installPerformanceService} from './service/performance-impl';
-import {isExperimentOn} from './experiments';
-import {stubElementsForDoc} from './service/custom-element-registry';
+} from './style-installer.js';
+import {cssText} from '../build/css.js';
+import {deactivateChunking} from './chunk.js';
+import {doNotTrackImpression} from './impression.js';
+import {installDocService} from './service/ampdoc-impl.js';
+import {installPerformanceService} from './service/performance-impl.js';
+import {isExperimentOn} from './experiments.js';
+import {stubElementsForDoc} from './service/custom-element-registry.js';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../src/base-element';
-import {dev} from '../src/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {isExperimentOn} from '../src/experiments';
-import {isLayoutSizeDefined} from '../src/layout';
-import {listen} from '../src/event-helper';
-import {registerElement} from '../src/service/custom-element-registry';
-import {setImportantStyles} from '../src/style';
+import {BaseElement} from '../src/base-element.js';
+import {dev} from '../src/log.js';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img.js';
+import {isExperimentOn} from '../src/experiments.js';
+import {isLayoutSizeDefined} from '../src/layout.js';
+import {listen} from '../src/event-helper.js';
+import {registerElement} from '../src/service/custom-element-registry.js';
+import {setImportantStyles} from '../src/style.js';
 
 /**
  * Attributes to propagate to internal image when changed externally.

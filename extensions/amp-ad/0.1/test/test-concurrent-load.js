@@ -15,15 +15,15 @@
  */
 
 import * as lolex from 'lolex';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes} from '../../../../src/dom.js';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
-} from '../concurrent-load';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {macroTask} from '../../../../testing/yield';
+} from '../concurrent-load.js';
+import {installTimerService} from '../../../../src/service/timer-impl.js';
+import {macroTask} from '../../../../testing/yield.js';
 
 describes.realWin('concurrent-load', {}, env => {
 

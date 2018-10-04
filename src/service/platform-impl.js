@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder} from '../service';
+import {registerServiceBuilder} from '../service.js';
 
 
 /**

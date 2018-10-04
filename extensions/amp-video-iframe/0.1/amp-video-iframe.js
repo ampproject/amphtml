@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise.js';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents,
-} from '../../../src/video-interface';
+} from '../../../src/video-interface.js';
 import {
   SandboxOptions,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
-} from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '../../../src/iframe-video.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 import {
   disableScrollingOnIframe,
   isAdLike,
   looksLikeTrackingIframe,
-} from '../../../src/iframe-helper';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
+} from '../../../src/iframe-helper.js';
+import {getData, listen} from '../../../src/event-helper.js';
+import {htmlFor} from '../../../src/static-template.js';
 import {
   installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isFullscreenElement, removeElement} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+} from '../../../src/service/video-manager-impl.js';
+import {isFullscreenElement, removeElement} from '../../../src/dom.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';

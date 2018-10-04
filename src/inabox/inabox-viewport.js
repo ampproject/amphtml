@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {Viewport} from '../service/viewport/viewport-impl';
-import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {dev} from '../log';
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isExperimentOn} from '../experiments';
+import {MessageType} from '../../src/3p-frame-messaging.js';
+import {Observable} from '../observable.js';
+import {Services} from '../services.js';
+import {Viewport} from '../service/viewport/viewport-impl.js';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def.js';
+import {dev} from '../log.js';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client.js';
+import {isExperimentOn} from '../experiments.js';
 import {
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
-import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../utils/rate-limit';
+} from '../layout-rect.js';
+import {px, resetStyles, setImportantStyles} from '../style.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {throttle} from '../utils/rate-limit.js';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';

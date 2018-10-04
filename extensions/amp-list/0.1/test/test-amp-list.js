@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../src/amp-events';
-import {AmpList} from '../amp-list';
-import {Deferred} from '../../../../src/utils/promise';
-import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
+import {AmpEvents} from '../../../../src/amp-events.js';
+import {AmpList} from '../amp-list.js';
+import {Deferred} from '../../../../src/utils/promise.js';
+import {Services} from '../../../../src/services.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('amp-list component', {
   amp: {

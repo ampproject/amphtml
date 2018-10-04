@@ -15,15 +15,15 @@
  */
 
 
-import {dict} from './../../../src/utils/object';
-import {getData} from './../../../src/event-helper';
-import {parseJson} from './../../../src/json';
+import {dict} from './../../../src/utils/object.js';
+import {getData} from './../../../src/event-helper.js';
+import {parseJson} from './../../../src/json.js';
 import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
-} from '../../../src/url';
-import {rethrowAsync} from './../../../src/log';
+} from '../../../src/url.js';
+import {rethrowAsync} from './../../../src/log.js';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not

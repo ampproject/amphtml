@@ -21,16 +21,16 @@ import {
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
-} from '../amp-gwd-animation-impl';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+} from '../amp-gwd-animation-impl.js';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl.js';
 import {
   GWD_PAGEDECK_ID,
   TAG,
   addAction,
-} from '../amp-gwd-animation';
-import {Services} from '../../../../src/services';
-import {createCustomEvent} from '../../../../src/event-helper';
-import {getServiceForDoc} from '../../../../src/service';
+} from '../amp-gwd-animation.js';
+import {Services} from '../../../../src/services.js';
+import {createCustomEvent} from '../../../../src/event-helper.js';
+import {getServiceForDoc} from '../../../../src/service.js';
 
 describe('AMP GWD Animation', () => {
   /**

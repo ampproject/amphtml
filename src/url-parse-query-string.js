@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component.js';
 
 const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 

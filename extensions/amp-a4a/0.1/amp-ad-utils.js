@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {isArray, isObject} from '../../../src/types';
-import {isSecureUrlDeprecated} from '../../../src/url';
-import {parseJson} from '../../../src/json';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {isSecureUrlDeprecated} from '../../../src/url.js';
+import {parseJson} from '../../../src/json.js';
 
 const TAG = 'amp-ad-util';
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
-import {dev, user} from '../src/log';
-import {tryParseJson} from '../src/json';
+import {IframeMessagingClient} from './iframe-messaging-client.js';
+import {MessageType} from '../src/3p-frame-messaging.js';
+import {dev, user} from '../src/log.js';
+import {tryParseJson} from '../src/json.js';
 
 /** @private @const {string} */
 const TAG_ = 'iframe-transport-client';

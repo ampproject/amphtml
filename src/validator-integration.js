@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
-import {loadPromise} from './event-helper';
-import {parseQueryString} from './url';
-import {startsWith} from './string';
-import {urls} from './config';
+import {getMode} from './mode.js';
+import {loadPromise} from './event-helper.js';
+import {parseQueryString} from './url.js';
+import {startsWith} from './string.js';
+import {urls} from './config.js';
 
 /**
  * Triggers validation for the current document if there is a script in the

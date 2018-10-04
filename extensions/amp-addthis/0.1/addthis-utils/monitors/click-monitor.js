@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {listen} from '../../../../../src/event-helper';
+import {listen} from '../../../../../src/event-helper.js';
 
 export class ClickMonitor {
   /**

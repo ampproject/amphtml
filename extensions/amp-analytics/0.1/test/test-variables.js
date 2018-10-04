@@ -22,9 +22,9 @@ import {
   getNameArgsForTesting,
   installVariableService,
   variableServiceFor,
-} from '../variables';
-import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../variables.js';
+import {Services} from '../../../../src/services.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describe('amp-analytics.VariableService', function() {
   let variables;

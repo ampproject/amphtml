@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
 
 /**
  * This interface is intended to be implemented by Subscription platforms to

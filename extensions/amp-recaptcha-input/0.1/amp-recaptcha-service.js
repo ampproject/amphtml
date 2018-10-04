@@ -19,14 +19,14 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getIframe} from '../../../src/3p-frame';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '../../../src/dom';
+import {Deferred} from '../../../src/utils/promise.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getIframe} from '../../../src/3p-frame.js';
+import {getService, registerServiceBuilder} from '../../../src/service.js';
+import {listenFor, postMessage} from '../../../src/iframe-helper.js';
+import {loadPromise} from '../../../src/event-helper.js';
+import {removeElement} from '../../../src/dom.js';
 
 /**
  * @fileoverview

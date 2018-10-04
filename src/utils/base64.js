@@ -19,7 +19,7 @@ import {
   stringToBytes,
   utf8Decode,
   utf8Encode,
-} from './bytes';
+} from './bytes.js';
 
 /**
  * Character mapping from base64url to base64.

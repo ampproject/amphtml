@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DocImpl} from '../doc-impl';
+import {DocImpl} from '../doc-impl.js';
 
 
 describes.realWin('DocImpl', {amp: true}, env => {

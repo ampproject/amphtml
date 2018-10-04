@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as ast from '../css-expr-ast';
-import {parseCss} from '../css-expr';
+import * as ast from '../css-expr-ast.js';
+import {parseCss} from '../css-expr.js';
 
 
 describe('CSS parse', () => {

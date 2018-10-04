@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as dom from '../../src/dom';
-import {BaseElement} from '../../src/base-element';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {loadPromise} from '../../src/event-helper';
-import {toArray} from '../../src/types';
+import * as dom from '../../src/dom.js';
+import {BaseElement} from '../../src/base-element.js';
+import {createAmpElementForTesting} from '../../src/custom-element.js';
+import {loadPromise} from '../../src/event-helper.js';
+import {toArray} from '../../src/types.js';
 
 
 describes.sandboxed('DOM', {}, env => {

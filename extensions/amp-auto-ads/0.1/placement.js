@@ -17,19 +17,19 @@
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
-import {clamp} from '../../../src/utils/math';
+} from '../../../src/layout-rect.js';
+import {Services} from '../../../src/services.js';
+import {clamp} from '../../../src/utils/math.js';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
+} from '../../../src/dom.js';
+import {computedStyle} from '../../../src/style.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getAttributesFromConfigObj} from './attributes.js';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpEvents} from '../../../../src/amp-events';
-import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
-import {LiveListManager} from '../live-list-manager';
-import {toggleExperiment} from '../../../../src/experiments';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl.js';
+import {AmpEvents} from '../../../../src/amp-events.js';
+import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list.js';
+import {LiveListManager} from '../live-list-manager.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 describes.realWin('amp-live-list', {

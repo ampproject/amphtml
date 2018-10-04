@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
-import {Dialog} from '../dialog';
-import {Services} from '../../../../src/services';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {installStylesForDoc} from '../../../../src/style-installer';
+import {Dialog} from '../dialog.js';
+import {Services} from '../../../../src/services.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {installStylesForDoc} from '../../../../src/style-installer.js';
 
 
 describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {

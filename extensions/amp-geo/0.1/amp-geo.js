@@ -36,8 +36,8 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '../../../src/utils/promise.js';
+import {Services} from '../../../src/services.js';
 
 /**
  * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT
@@ -46,14 +46,14 @@ import {Services} from '../../../src/services';
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-import {ampGeoPresets} from './amp-geo-presets';
+import {ampGeoPresets} from './amp-geo-presets.js';
 
-import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject} from '../../../src/types.js';
+import {isCanary} from '../../../src/experiments.js';
+import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom.js';
+import {tryParseJson} from '../../../src/json.js';
+import {user} from '../../../src/log.js';
 
 /**
  * @enum {number}

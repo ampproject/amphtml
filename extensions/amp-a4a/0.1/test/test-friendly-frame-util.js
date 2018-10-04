@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {renderCreativeIntoFriendlyFrame} from '../friendly-frame-util';
+import {renderCreativeIntoFriendlyFrame} from '../friendly-frame-util.js';
 
 const realWinConfig = {
   amp: {},

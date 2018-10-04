@@ -17,7 +17,7 @@
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
-} from '../../src/sanitizer';
+} from '../../src/sanitizer.js';
 
 describe('Caja-based', () => {
   runSanitizerTests();

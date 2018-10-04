@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-beopinion';
-import {beopinion} from '../../../../3p/beopinion';
+import '../amp-beopinion.js';
+import {beopinion} from '../../../../3p/beopinion.js';
 
 describes.realWin('amp-beopinion', {
   amp: {

@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-} from './amp-gwd-animation-impl';
+} from './amp-gwd-animation-impl.js';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {Services} from '../../../src/services';
-import {getDetail} from '../../../src/event-helper';
-import {getServiceForDoc} from '../../../src/service';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services.js';
+import {getDetail} from '../../../src/event-helper.js';
+import {getServiceForDoc} from '../../../src/service.js';
+import {user} from '../../../src/log.js';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation

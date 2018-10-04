@@ -17,7 +17,7 @@
 import {
   AmpStoryRequestService,
   BOOKEND_CONFIG_ATTRIBUTE_NAME,
-} from '../amp-story-request-service';
+} from '../amp-story-request-service.js';
 
 
 describes.fakeWin('amp-story-store-service', {amp: true}, env => {

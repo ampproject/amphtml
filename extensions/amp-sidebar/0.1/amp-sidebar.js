@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {Toolbar} from './toolbar';
-import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {removeFragment} from '../../../src/url';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
+import {KeyCodes} from '../../../src/utils/key-codes.js';
+import {Services} from '../../../src/services.js';
+import {Toolbar} from './toolbar.js';
+import {closestByTag, isRTL, tryFocus} from '../../../src/dom.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {removeFragment} from '../../../src/url.js';
+import {setStyles, toggle} from '../../../src/style.js';
+import {toArray} from '../../../src/types.js';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';

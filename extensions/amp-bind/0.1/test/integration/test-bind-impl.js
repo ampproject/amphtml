@@ -20,14 +20,14 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpEvents} from '../../../../../src/amp-events';
-import {Bind} from '../../bind-impl';
-import {BindEvents} from '../../bind-events';
-import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
-import {Services} from '../../../../../src/services';
-import {chunkInstanceForTesting} from '../../../../../src/chunk';
-import {dev, user} from '../../../../../src/log';
-import {toArray} from '../../../../../src/types';
+import {AmpEvents} from '../../../../../src/amp-events.js';
+import {Bind} from '../../bind-impl.js';
+import {BindEvents} from '../../bind-events.js';
+import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants.js';
+import {Services} from '../../../../../src/services.js';
+import {chunkInstanceForTesting} from '../../../../../src/chunk.js';
+import {dev, user} from '../../../../../src/log.js';
+import {toArray} from '../../../../../src/types.js';
 
 /**
  * @param {!Object} env

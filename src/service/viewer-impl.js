@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {VisibilityState} from '../visibility-state';
-import {dev, duplicateErrorIfNecessary} from '../log';
-import {findIndex} from '../utils/array';
+import {Deferred, tryResolve} from '../utils/promise.js';
+import {Observable} from '../observable.js';
+import {Services} from '../services.js';
+import {VisibilityState} from '../visibility-state.js';
+import {dev, duplicateErrorIfNecessary} from '../log.js';
+import {findIndex} from '../utils/array.js';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -27,12 +27,12 @@ import {
   parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
-} from '../url';
-import {isIframed} from '../dom';
-import {map} from '../utils/object';
-import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
-import {startsWith} from '../string';
+} from '../url.js';
+import {isIframed} from '../dom.js';
+import {map} from '../utils/object.js';
+import {registerServiceBuilderForDoc} from '../service.js';
+import {reportError} from '../error.js';
+import {startsWith} from '../string.js';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';

@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {Activity} from './activity-impl';
-import {AnalyticsConfig, mergeObjects} from './config';
-import {AnalyticsEventType} from './events';
-import {CookieWriter} from './cookie-writer';
+import {Activity} from './activity-impl.js';
+import {AnalyticsConfig, mergeObjects} from './config.js';
+import {AnalyticsEventType} from './events.js';
+import {CookieWriter} from './cookie-writer.js';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
-} from './variables';
+} from './variables.js';
 import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
-} from './instrumentation';
-import {LayoutPriority} from '../../../src/layout';
-import {LinkerManager} from './linker-manager';
+} from './instrumentation.js';
+import {LayoutPriority} from '../../../src/layout.js';
+import {LinkerManager} from './linker-manager.js';
 import {
   RequestHandler,
   expandPostMessage,
-} from './requests';
-import {Services} from '../../../src/services';
-import {Transport} from './transport';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
-import {expandTemplate} from '../../../src/string';
-import {getMode} from '../../../src/mode';
-import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '../../../src/types';
-import {isIframed} from '../../../src/dom';
-import {toggle} from '../../../src/style';
+} from './requests.js';
+import {Services} from '../../../src/services.js';
+import {Transport} from './transport.js';
+import {dev, rethrowAsync, user} from '../../../src/log.js';
+import {dict, hasOwn, map} from '../../../src/utils/object.js';
+import {expandTemplate} from '../../../src/string.js';
+import {getMode} from '../../../src/mode.js';
+import {installLinkerReaderService} from './linker-reader.js';
+import {isArray, isEnumValue} from '../../../src/types.js';
+import {isIframed} from '../../../src/dom.js';
+import {toggle} from '../../../src/style.js';
 
 const TAG = 'amp-analytics';
 

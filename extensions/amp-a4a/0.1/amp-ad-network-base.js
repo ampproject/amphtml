@@ -17,12 +17,12 @@
 import {
   FailureType,
   RecoveryModeType,
-} from './amp-ad-type-defs';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {map} from '../../../src/utils/object';
-import {sendXhrRequest} from './amp-ad-utils';
+} from './amp-ad-type-defs.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {map} from '../../../src/utils/object.js';
+import {sendXhrRequest} from './amp-ad-utils.js';
 
 const TAG = 'amp-ad-network-base';
 

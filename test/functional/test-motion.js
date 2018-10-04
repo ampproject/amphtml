@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {calcVelocity, continueMotion} from '../../src/motion';
+import {calcVelocity, continueMotion} from '../../src/motion.js';
 
 
 describe('Motion calcVelocity', () => {

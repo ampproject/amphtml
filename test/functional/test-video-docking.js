@@ -16,10 +16,10 @@
 import {
   Direction,
   VideoDocking,
-} from '../../src/service/video/docking';
-import {PlayingStates} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {layoutRectLtwh} from '../../src/layout-rect';
+} from '../../src/service/video/docking.js';
+import {PlayingStates} from '../../src/video-interface.js';
+import {Services} from '../../src/services.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
 
 
 const noop = () => {};

@@ -20,7 +20,7 @@ import {
   resolveUrlAttr,
   rewriteAttributeValue,
   rewriteAttributesForElement,
-} from '../../src/purifier';
+} from '../../src/purifier.js';
 
 /**
  * Helper that serializes output of purifyHtml() to string.

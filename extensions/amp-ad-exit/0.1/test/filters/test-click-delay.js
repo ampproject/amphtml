@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ClickDelayFilter} from '../../filters/click-delay';
-import {FilterType} from '../../filters/filter';
+import {ClickDelayFilter} from '../../filters/click-delay.js';
+import {FilterType} from '../../filters/filter.js';
 
 describe('click-delay', () => {
   const DEFAULT_CONFIG = {

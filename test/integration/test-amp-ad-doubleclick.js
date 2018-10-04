@@ -18,7 +18,7 @@ import {
   createFixtureIframe,
   poll,
   pollForLayout,
-} from '../../testing/iframe';
+} from '../../testing/iframe.js';
 
 describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
     ' one ad', () => {

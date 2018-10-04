@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
+import {AmpStoryCtaLayer} from '../amp-story-cta-layer.js';
 
 describes.realWin('amp-story-cta-layer', {
   amp: {

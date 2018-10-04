@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action} from '../amp-story-store-service';
-import {AmpStory} from '../amp-story';
-import {AmpStoryPage} from '../amp-story-page';
-import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../localization';
-import {PaginationButtons} from '../pagination-buttons';
-import {registerServiceBuilder} from '../../../../src/service';
+import {Action} from '../amp-story-store-service.js';
+import {AmpStory} from '../amp-story.js';
+import {AmpStoryPage} from '../amp-story-page.js';
+import {EventType} from '../events.js';
+import {KeyCodes} from '../../../../src/utils/key-codes.js';
+import {LocalizationService} from '../localization.js';
+import {PaginationButtons} from '../pagination-buttons.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 const NOOP = () => {};

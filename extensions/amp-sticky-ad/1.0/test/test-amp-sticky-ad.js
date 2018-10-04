@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
-import '../amp-sticky-ad';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {poll} from '../../../../testing/iframe';
+import '../../../amp-ad/0.1/amp-ad.js';
+import '../amp-sticky-ad.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {macroTask} from '../../../../testing/yield.js';
+import {poll} from '../../../../testing/iframe.js';
 
 describes.realWin('amp-sticky-ad 1.0 version', {
   win: { /* window spec */

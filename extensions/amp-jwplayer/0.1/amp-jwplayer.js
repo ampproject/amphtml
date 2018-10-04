@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {removeElement} from '../../../src/dom.js';
+import {user} from '../../../src/log.js';
 
 class AmpJWPlayer extends AMP.BaseElement {
 

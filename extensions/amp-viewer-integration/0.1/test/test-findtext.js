@@ -21,7 +21,7 @@ import {
   findSentences,
   markTextRangeList,
   textPosChar,
-} from '../findtext';
+} from '../findtext.js';
 
 describe('CircularBuffer', () => {
   it('add and get', () => {

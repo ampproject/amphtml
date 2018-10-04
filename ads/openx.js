@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {doubleclick} from '../ads/google/doubleclick';
-import {loadScript, validateData, writeScript} from '../3p/3p';
-import {startsWith} from '../src/string';
+import {doubleclick} from '../ads/google/doubleclick.js';
+import {loadScript, validateData, writeScript} from '../3p/3p.js';
+import {startsWith} from '../src/string.js';
 
 const {hasOwnProperty} = Object.prototype;
 

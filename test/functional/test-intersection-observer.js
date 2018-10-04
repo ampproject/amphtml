@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../src/base-element';
+import {BaseElement} from '../../src/base-element.js';
 import {
   IntersectionObserver,
   getIntersectionChangeEntry,
-} from '../../src/intersection-observer';
-import {createAmpElementForTesting} from '../../src/custom-element';
-import {layoutRectLtwh} from '../../src/layout-rect';
+} from '../../src/intersection-observer.js';
+import {createAmpElementForTesting} from '../../src/custom-element.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
 
 
 describe('getIntersectionChangeEntry', () => {

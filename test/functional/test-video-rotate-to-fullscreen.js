@@ -15,9 +15,9 @@
  */
 import {
   AutoFullscreenManager,
-} from '../../src/service/video-manager-impl';
-import {PlayingStates} from '../../src/video-interface';
-import {Services} from '../../src/services';
+} from '../../src/service/video-manager-impl.js';
+import {PlayingStates} from '../../src/video-interface.js';
+import {Services} from '../../src/services.js';
 
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom';
-import {hasOwn, map} from '../../../src/utils/object';
-import {scale, setImportantStyles} from '../../../src/style';
+import {POLL_INTERVAL_MS} from './page-advancement.js';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom.js';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {scale, setImportantStyles} from '../../../src/style.js';
 
 
 /**

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   activateChunkingForTesting,
   chunkInstanceForTesting,
   deactivateChunking,
   onIdle,
   startupChunk,
-} from '../../src/chunk';
-import {installDocService} from '../../src/service/ampdoc-impl';
+} from '../../src/chunk.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
 
 
 describe('chunk', () => {

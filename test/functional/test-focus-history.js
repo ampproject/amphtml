@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {FocusHistory} from '../../src/focus-history';
-import {installTimerService} from '../../src/service/timer-impl';
+import {FocusHistory} from '../../src/focus-history.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
 
 
 describe('FocusHistory', () => {

@@ -15,13 +15,13 @@
  */
 
 import * as lolex from 'lolex';
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {loadPromise} from '../../src/event-helper';
+import {Services} from '../../src/services.js';
+import {createIframePromise} from '../../testing/iframe.js';
+import {loadPromise} from '../../src/event-helper.js';
 import {
   manageWin,
   setInViewportForTesting,
-} from '../../3p/environment';
+} from '../../3p/environment.js';
 
 describe('3p environment', () => {
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {startsWith} from '../../../src/string';
-import {toWin} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {dev} from '../../../src/log.js';
+import {startsWith} from '../../../src/string.js';
+import {toWin} from '../../../src/types.js';
 
 
 /**

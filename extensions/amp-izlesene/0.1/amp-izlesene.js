@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {addParamsToUrl} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getDataParamsFromAttributes} from '../../../src/dom.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
 
 
 class AmpIzlesene extends AMP.BaseElement {

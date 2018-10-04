@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../amp-nexxtv-player';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-nexxtv-player.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 
 describes.realWin('amp-nexxtv-player', {

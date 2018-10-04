@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-reach-player';
+import '../amp-reach-player.js';
 
 
 describes.realWin('amp-reach-player', {

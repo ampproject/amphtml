@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
+import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs.js';
 import {
   CryptographicValidator,
   SIGNATURE_VERIFIER_PROPERTY_NAME,
-} from '../cryptographic-validator';
-import {VerificationStatus} from '../signature-verifier';
+} from '../cryptographic-validator.js';
+import {VerificationStatus} from '../signature-verifier.js';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {user} from '../../../../src/log';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {user} from '../../../../src/log.js';
+import {utf8Encode} from '../../../../src/utils/bytes.js';
 
 const realWinConfig = {
   amp: {},

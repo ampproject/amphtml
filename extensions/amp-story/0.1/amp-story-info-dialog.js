@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {Action, StateProperty} from './amp-story-store-service.js';
 import {CSS} from '../../../build/amp-story-info-dialog-0.1.css';
-import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
+import {LocalizedStringId} from './localization.js';
+import {Services} from '../../../src/services.js';
+import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url.js';
+import {closest} from '../../../src/dom.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dev} from '../../../src/log.js';
+import {getAmpdoc} from '../../../src/service.js';
+import {htmlFor} from '../../../src/static-template.js';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';

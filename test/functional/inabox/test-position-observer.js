@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {PositionObserver} from '../../../ads/inabox/position-observer';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {PositionObserver} from '../../../ads/inabox/position-observer.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
 

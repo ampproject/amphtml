@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
-import {cssEscape} from '../third_party/css-escape/css-escape';
-import {dev} from './log';
-import {dict} from './utils/object';
-import {startsWith} from './string';
-import {toWin} from './types';
+import {Deferred} from './utils/promise.js';
+import {cssEscape} from '../third_party/css-escape/css-escape.js';
+import {dev} from './log.js';
+import {dict} from './utils/object.js';
+import {startsWith} from './string.js';
+import {toWin} from './types.js';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getChildJsonConfig} from '../../../src/json';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, toWin} from '../../../src/types';
+import {ANALYTICS_CONFIG} from './vendors.js';
+import {Services} from '../../../src/services.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict, hasOwn} from '../../../src/utils/object.js';
+import {getChildJsonConfig} from '../../../src/json.js';
+import {getMode} from '../../../src/mode.js';
+import {isArray, isObject, toWin} from '../../../src/types.js';
 
 const TAG = 'amp-analytics/config';
 

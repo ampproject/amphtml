@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import '../amp-gfycat';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-gfycat.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 describes.realWin('amp-gfycat', {
   amp: {

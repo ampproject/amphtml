@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {openLoginDialog} from '../../amp-access/0.1/login-dialog.js';
 
 /** @const */
 const TAG = 'amp-subscriptions';

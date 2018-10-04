@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
-import {hasOwn} from '../../../src/utils/object';
-import {isObject} from '../../../src/types';
+import {Services} from '../../../src/services.js';
+import {dev, user} from '../../../src/log.js';
+import {hasOwn} from '../../../src/utils/object.js';
+import {isObject} from '../../../src/types.js';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

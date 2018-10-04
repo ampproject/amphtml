@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createPointerEvent} from '../../../../../testing/test-helper';
+import {createPointerEvent} from '../../../../../testing/test-helper.js';
 
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {

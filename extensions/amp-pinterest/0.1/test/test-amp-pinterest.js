@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-pinterest';
+import '../amp-pinterest.js';
 
 describes.realWin('amp-pinterest', {
   amp: {

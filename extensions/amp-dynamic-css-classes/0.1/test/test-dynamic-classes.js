@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {referrers_} from '../amp-dynamic-css-classes';
+import {referrers_} from '../amp-dynamic-css-classes.js';
 
 describe('amp-dynamic-css-classes', () => {
   describe('referrers_', () => {

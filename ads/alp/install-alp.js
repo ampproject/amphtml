@@ -16,9 +16,9 @@
 
 // Utility file that generates URLs suitable for AMP's impression tracking.
 
-import {initLogConstructor, setReportError} from '../../src/log';
-import {installAlpClickHandler, warmupStatic} from './handler';
-import {reportError} from '../../src/error';
+import {initLogConstructor, setReportError} from '../../src/log.js';
+import {installAlpClickHandler, warmupStatic} from './handler.js';
+import {reportError} from '../../src/error.js';
 
 initLogConstructor();
 setReportError(reportError);

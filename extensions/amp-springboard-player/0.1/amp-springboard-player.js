@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {user} from '../../../src/log.js';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
 

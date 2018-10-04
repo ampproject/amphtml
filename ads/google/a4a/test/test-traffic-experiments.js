@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {EXPERIMENT_ATTRIBUTE} from '../utils';
+import {EXPERIMENT_ATTRIBUTE} from '../utils.js';
 import {
   addExperimentIdToElement,
   isInExperiment,
   validateExperimentIds,
-} from '../traffic-experiments';
+} from '../traffic-experiments.js';
 
 describe('all-traffic-experiments-tests', () => {
   describe('#validateExperimentIds', () => {

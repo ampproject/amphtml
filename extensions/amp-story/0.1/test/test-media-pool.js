@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {MediaPool, MediaType} from '../media-pool';
-import {Services} from '../../../../src/services';
-import {findIndex} from '../../../../src/utils/array';
+import {MediaPool, MediaType} from '../media-pool.js';
+import {Services} from '../../../../src/services.js';
+import {findIndex} from '../../../../src/utils/array.js';
 
 const NOOP = () => {};
 

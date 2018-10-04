@@ -19,7 +19,7 @@ import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-} from '../../src/experiments';
+} from '../../src/experiments.js';
 
 
 /** @const {string} */

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdExit} from '../amp-ad-exit';
-import {FilterType} from '../filters/filter';
+import {AmpAdExit} from '../amp-ad-exit.js';
+import {FilterType} from '../filters/filter.js';
 import {
   IFRAME_TRANSPORTS,
-} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {setParentWindow} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../amp-analytics/0.1/iframe-transport-vendors.js';
+import {installPlatformService} from '../../../../src/service/platform-impl.js';
+import {installTimerService} from '../../../../src/service/timer-impl.js';
+import {setParentWindow} from '../../../../src/service.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 const TEST_3P_VENDOR = '3p-vendor';
 

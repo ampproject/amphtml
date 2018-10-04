@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl.js';
 import {
   History,
   HistoryBindingNatural_,
   HistoryBindingVirtual_,
   installHistoryServiceForDoc,
-} from '../../src/service/history-impl';
-import {Services} from '../../src/services';
-import {installTimerService} from '../../src/service/timer-impl';
-import {listenOncePromise} from '../../src/event-helper';
-import {parseUrlDeprecated} from '../../src/url';
+} from '../../src/service/history-impl.js';
+import {Services} from '../../src/services.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {listenOncePromise} from '../../src/event-helper.js';
+import {parseUrlDeprecated} from '../../src/url.js';
 
 
 describes.fakeWin('History', {

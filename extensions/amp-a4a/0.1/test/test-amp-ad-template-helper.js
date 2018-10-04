@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {Xhr} from '../../../../src/service/xhr-impl';
+import {AmpAdTemplateHelper} from '../amp-ad-template-helper.js';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache.js';
+import {Xhr} from '../../../../src/service/xhr-impl.js';
 
 
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, env => {

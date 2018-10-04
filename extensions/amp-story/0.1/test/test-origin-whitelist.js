@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ORIGIN_WHITELIST} from '../origin-whitelist';
+import {ORIGIN_WHITELIST} from '../origin-whitelist.js';
 
 describes.fakeWin('amp-story origin whitelist', {}, () => {
   it('should not have duplicates', () => {

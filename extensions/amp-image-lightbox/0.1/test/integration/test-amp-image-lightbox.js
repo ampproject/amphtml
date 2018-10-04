@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from '../../../../../testing/iframe';
+import {poll} from '../../../../../testing/iframe.js';
 
 describe.configure().run('amp-image-lightbox', function() {
   this.timeout(5000);

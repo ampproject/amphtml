@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getData} from '../../../../src/event-helper';
-import {parseJson} from '../../../../src/json';
+import {getData} from '../../../../src/event-helper.js';
+import {parseJson} from '../../../../src/json.js';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LoadingSpinner} from '../loading-spinner';
+import {LoadingSpinner} from '../loading-spinner.js';
 
 describes.realWin('loading-spinner', {}, env => {
   let win;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {startsWith} from '../../../src/string.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 

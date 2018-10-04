@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FormSubmitService} from '../form-submit-service';
+import {FormSubmitService} from '../form-submit-service.js';
 
 describe('form-submit-service', () => {
   let submitService;

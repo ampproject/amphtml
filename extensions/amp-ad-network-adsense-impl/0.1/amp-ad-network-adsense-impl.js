@@ -24,11 +24,11 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
-} from '../../../ads/google/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
+} from '../../../ads/google/utils.js';
+import {AdsenseSharedState} from './adsense-shared-state.js';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a.js';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {Navigation} from '../../../src/service/navigation.js';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -44,35 +44,35 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-} from '../../../ads/google/a4a/utils';
-import {Services} from '../../../src/services';
+} from '../../../ads/google/a4a/utils.js';
+import {Services} from '../../../src/services.js';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
+} from '../../../ads/google/a4a/traffic-experiments.js';
+import {clamp} from '../../../src/utils/math.js';
 import {
   computedStyle,
   setStyle,
   setStyles,
-} from '../../../src/style';
-import {dev, user} from '../../../src/log';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+} from '../../../src/style.js';
+import {dev, user} from '../../../src/log.js';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint.js';
 import {
   getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
+} from '../../../ads/google/adsense-amp-auto-ads.js';
 import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../../../ads/google/adsense-amp-auto-ads-responsive';
-import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+} from '../../../ads/google/adsense-amp-auto-ads-responsive.js';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame.js';
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {removeElement} from '../../../src/dom';
-import {stringHash32} from '../../../src/string';
+} from '../../../src/experiments.js';
+import {getMode} from '../../../src/mode.js';
+import {insertAnalyticsElement} from '../../../src/extension-analytics.js';
+import {removeElement} from '../../../src/dom.js';
+import {stringHash32} from '../../../src/string.js';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';

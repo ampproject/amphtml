@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {installLightboxGallery} from '../amp-lightbox-gallery';
+import {installLightboxGallery} from '../amp-lightbox-gallery.js';
 
 const TAG = 'amp-lightbox-gallery';
 

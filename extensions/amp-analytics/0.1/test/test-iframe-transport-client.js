@@ -16,9 +16,9 @@
 
 import {
   IframeTransportClient, IframeTransportContext,
-} from '../../../../3p/iframe-transport-client';
-import {MessageType} from '../../../../src/3p-frame-messaging';
-import {adopt} from '../../../../src/runtime';
+} from '../../../../3p/iframe-transport-client.js';
+import {MessageType} from '../../../../src/3p-frame-messaging.js';
+import {adopt} from '../../../../src/runtime.js';
 
 adopt(window);
 

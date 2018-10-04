@@ -16,10 +16,10 @@
 
 import {
   ConsentUI,
-} from '../consent-ui';
-import {dict} from '../../../../src/utils/object';
-import {elementByTag} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../consent-ui.js';
+import {dict} from '../../../../src/utils/object.js';
+import {elementByTag} from '../../../../src/dom.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('consent-ui', {
   amp: {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import '../../../../extensions/amp-ad/0.1/amp-ad-ui.js';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
@@ -35,20 +35,20 @@ import {
   groupAmpAdsByType,
   maybeAppendErrorParameter,
   mergeExperimentIds,
-} from '../utils';
+} from '../utils.js';
 import {
   MockA4AImpl,
-} from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Services} from '../../../../src/services';
-import {buildUrl} from '../url-builder';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {createIframePromise} from '../../../../testing/iframe';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+} from '../../../../extensions/amp-a4a/0.1/test/utils.js';
+import {Services} from '../../../../src/services.js';
+import {buildUrl} from '../url-builder.js';
+import {createElementWithAttributes} from '../../../../src/dom.js';
+import {createIframePromise} from '../../../../testing/iframe.js';
+import {installDocService} from '../../../../src/service/ampdoc-impl.js';
 import {
   installExtensionsService,
-} from '../../../../src/service/extensions-impl';
-import {installXhrService} from '../../../../src/service/xhr-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../src/service/extensions-impl.js';
+import {installXhrService} from '../../../../src/service/xhr-impl.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);

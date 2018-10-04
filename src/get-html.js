@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
+import {startsWith} from './string.js';
 
 /** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];

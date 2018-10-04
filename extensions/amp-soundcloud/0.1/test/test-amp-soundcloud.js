@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-soundcloud';
+import '../amp-soundcloud.js';
 
 
 describes.realWin('amp-soundcloud', {

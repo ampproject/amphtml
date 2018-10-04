@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {Layout} from '../../../src/layout.js';
+import {user} from '../../../src/log.js';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';

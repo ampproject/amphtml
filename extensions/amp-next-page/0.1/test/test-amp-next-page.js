@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as DocFetcher from '../../../../src/document-fetcher';
-import {AmpNextPage} from '../amp-next-page';
-import {Services} from '../../../../src/services';
-import {getServicePromiseForDoc} from '../../../../src/service';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
-import {setStyle} from '../../../../src/style';
-import {toggleExperiment} from '../../../../src/experiments';
+import * as DocFetcher from '../../../../src/document-fetcher.js';
+import {AmpNextPage} from '../amp-next-page.js';
+import {Services} from '../../../../src/services.js';
+import {getServicePromiseForDoc} from '../../../../src/service.js';
+import {layoutRectLtwh} from '../../../../src/layout-rect.js';
+import {macroTask} from '../../../../testing/yield.js';
+import {setStyle} from '../../../../src/style.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('amp-next-page component', {
   amp: {

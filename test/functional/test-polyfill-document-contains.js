@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {install} from '../../src/polyfills/document-contains';
+import {install} from '../../src/polyfills/document-contains.js';
 
 
 describe('HTMLDocument.contains', () => {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Deferred} from './promise';
-import {map} from './object';
+import {Deferred} from './promise.js';
+import {map} from './object.js';
 
 
 /**

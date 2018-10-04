@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from './variables';
-import {Priority} from '../../../src/service/navigation';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '../../../src/dom';
-import {createLinker} from './linker';
-import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/types';
-import {user} from '../../../src/log';
+import {ExpansionOptions, variableServiceFor} from './variables.js';
+import {Priority} from '../../../src/service/navigation.js';
+import {Services} from '../../../src/services.js';
+import {WindowInterface} from '../../../src/window-interface.js';
+import {addParamToUrl} from '../../../src/url.js';
+import {createElementWithAttributes} from '../../../src/dom.js';
+import {createLinker} from './linker.js';
+import {dict} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isObject} from '../../../src/types.js';
+import {user} from '../../../src/log.js';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';

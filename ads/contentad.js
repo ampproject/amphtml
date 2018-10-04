@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated} from '../src/url';
-import {validateData, writeScript} from '../3p/3p';
+import {parseUrlDeprecated} from '../src/url.js';
+import {validateData, writeScript} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

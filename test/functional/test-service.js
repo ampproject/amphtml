@@ -36,8 +36,8 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
   setParentWindow,
-} from '../../src/service';
-import {loadPromise} from '../../src/event-helper';
+} from '../../src/service.js';
+import {loadPromise} from '../../src/event-helper.js';
 
 
 describe('service', () => {

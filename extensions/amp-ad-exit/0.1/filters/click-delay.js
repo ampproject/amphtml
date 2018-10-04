@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Filter, FilterType} from './filter';
-import {dev, user} from '../../../../src/log';
+import {Filter, FilterType} from './filter.js';
+import {dev, user} from '../../../../src/log.js';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';

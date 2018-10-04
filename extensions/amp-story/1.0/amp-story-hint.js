@@ -15,16 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
-import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from './localization.js';
+import {Services} from '../../../src/services.js';
 import {
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+} from './amp-story-store-service.js';
+import {createShadowRootWithStyle} from './utils.js';
+import {dict} from '../../../src/utils/object.js';
+import {renderAsElement} from './simple-template.js';
 
 
 /** @private @const {!./simple-template.ElementDef} */

@@ -18,7 +18,7 @@ import {
   AsyncVerifier,
   DefaultVerifier,
   getFormVerifier,
-} from '../form-verifiers';
+} from '../form-verifiers.js';
 
 describes.fakeWin('amp-form async verification', {}, env => {
   function stubValidationMessage(input) {

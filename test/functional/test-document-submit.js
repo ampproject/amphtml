@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
+import {Services} from '../../src/services.js';
 import {
   installGlobalSubmitListenerForDoc,
   onDocumentFormSubmit_,
-} from '../../src/document-submit';
+} from '../../src/document-submit.js';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CONFIGURATION_EVENT, ORIGIN} from './constants';
+import {CONFIGURATION_EVENT, ORIGIN} from './constants.js';
 
-import {dict} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object.js';
 
 /**
  * Configuration request status enum.

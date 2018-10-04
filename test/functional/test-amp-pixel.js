@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {VariableSource} from '../../src/service/variable-source';
+import {VariableSource} from '../../src/service/variable-source.js';
 import {
   installUrlReplacementsForEmbed,
-} from '../../src/service/url-replacements-impl';
+} from '../../src/service/url-replacements-impl.js';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;

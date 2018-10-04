@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {BaseCarousel} from './base-carousel';
-import {Services} from '../../../src/services';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {BaseCarousel} from './base-carousel.js';
+import {Services} from '../../../src/services.js';
 
 export class BaseSlides extends BaseCarousel {
 

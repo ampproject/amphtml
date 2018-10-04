@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../ads/_config';
-import {hasOwn} from '../../src/utils/object';
+import {adConfig} from '../../ads/_config.js';
+import {hasOwn} from '../../src/utils/object.js';
 
 describe('test-ads-config', () => {
 

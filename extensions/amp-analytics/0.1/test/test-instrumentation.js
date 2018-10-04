@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CustomEventTracker} from '../events';
+import {CustomEventTracker} from '../events.js';
 
 import {
   InstrumentationService,

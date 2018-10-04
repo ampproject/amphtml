@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {addAttributesToElement, closestBySelector} from './dom';
-import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
-import {dev} from './log';
-import {dict} from './utils/object';
-import {getData} from './event-helper';
-import {parseUrlDeprecated} from './url';
-import {remove} from './utils/array';
-import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {addAttributesToElement, closestBySelector} from './dom.js';
+import {deserializeMessage, isAmpMessage} from './3p-frame-messaging.js';
+import {dev} from './log.js';
+import {dict} from './utils/object.js';
+import {getData} from './event-helper.js';
+import {parseUrlDeprecated} from './url.js';
+import {remove} from './utils/array.js';
+import {setStyle} from './style.js';
+import {tryParseJson} from './json.js';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.

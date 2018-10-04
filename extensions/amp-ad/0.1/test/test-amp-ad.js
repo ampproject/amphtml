@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../amp-ad';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {Services} from '../../../../src/services';
-import {adConfig} from '../../../../ads/_config';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {stubService} from '../../../../testing/test-helper';
+import {AmpAd} from '../amp-ad.js';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl.js';
+import {Services} from '../../../../src/services.js';
+import {adConfig} from '../../../../ads/_config.js';
+import {getA4ARegistry} from '../../../../ads/_a4a-config.js';
+import {stubService} from '../../../../testing/test-helper.js';
 
 
 describes.realWin('Ad loader', {amp: true}, env => {

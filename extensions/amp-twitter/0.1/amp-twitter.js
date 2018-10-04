@@ -16,14 +16,14 @@
 
 
 import {CSS} from '../../../build/amp-twitter-0.1.css';
-import {MessageType} from '../../../src/3p-frame-messaging';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {MessageType} from '../../../src/3p-frame-messaging.js';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame.js';
+import {htmlFor} from '../../../src/static-template.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isLayoutSizeDefined} from '../../../src/layout.js';
+import {listenFor} from '../../../src/iframe-helper.js';
+import {removeElement} from '../../../src/dom.js';
+import {setStyle} from '../../../src/style.js';
 
 /**
  * @param {!Window} win

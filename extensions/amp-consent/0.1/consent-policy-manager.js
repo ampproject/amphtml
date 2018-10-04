@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE} from './consent-state-manager';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
-import {dev, user} from '../../../src/log';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {hasOwn, map} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber, isObject} from '../../../src/types';
+import {CONSENT_ITEM_STATE} from './consent-state-manager.js';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {dev, user} from '../../../src/log.js';
+import {getServicePromiseForDoc} from '../../../src/service.js';
+import {hasOwn, map} from '../../../src/utils/object.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {isFiniteNumber, isObject} from '../../../src/types.js';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';

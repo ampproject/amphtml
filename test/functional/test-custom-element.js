@@ -15,13 +15,13 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpEvents} from '../../src/amp-events';
-import {BaseElement} from '../../src/base-element';
-import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {ResourceState} from '../../src/service/resource';
-import {Services} from '../../src/services';
-import {createAmpElementForTesting} from '../../src/custom-element';
+import {AmpEvents} from '../../src/amp-events.js';
+import {BaseElement} from '../../src/base-element.js';
+import {ElementStub} from '../../src/element-stub.js';
+import {LOADING_ELEMENTS_, Layout} from '../../src/layout.js';
+import {ResourceState} from '../../src/service/resource.js';
+import {Services} from '../../src/services.js';
+import {createAmpElementForTesting} from '../../src/custom-element.js';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {

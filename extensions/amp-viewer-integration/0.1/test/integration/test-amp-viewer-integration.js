@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegration} from '../../amp-viewer-integration';
+import {AmpViewerIntegration} from '../../amp-viewer-integration.js';
 import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
-} from '../../messaging/messaging';
-import {ViewerForTesting} from '../viewer-for-testing';
-import {getSourceUrl} from '../../../../../src/url';
+} from '../../messaging/messaging.js';
+import {ViewerForTesting} from '../viewer-for-testing.js';
+import {getSourceUrl} from '../../../../../src/url.js';
 
 
 describes.sandboxed('AmpViewerIntegration', {}, () => {

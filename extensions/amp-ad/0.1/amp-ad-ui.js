@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getAdContainer} from '../../../src/ad-helper';
+import {getAdContainer} from '../../../src/ad-helper.js';
 
 export class AmpAdUIHandler {
 

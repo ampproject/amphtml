@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {LayoutPriority} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {dev, user} from '../../../src/log';
-import {getSourceOrigin} from '../../../src/url';
-import {isJsonScriptTag} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
-import {toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+} from '../../../src/batched-json.js';
+import {dev, user} from '../../../src/log.js';
+import {getSourceOrigin} from '../../../src/url.js';
+import {isJsonScriptTag} from '../../../src/dom.js';
+import {map} from '../../../src/utils/object.js';
+import {toggle} from '../../../src/style.js';
+import {tryParseJson} from '../../../src/json.js';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */

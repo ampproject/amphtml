@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import '../../../third_party/react-dates/bundle';
-import {ActionTrust} from '../../../src/action-constants';
-import {AmpEvents} from '../../../src/amp-events';
+import '../../../third_party/react-dates/bundle.js';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {AmpEvents} from '../../../src/amp-events.js';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
-import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
-import {DatesList} from './dates-list';
-import {Deferred} from '../../../src/utils/promise';
-import {FiniteStateMachine} from '../../../src/finite-state-machine';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
-import {computedStyle} from '../../../src/style';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {createDateRangePicker} from './date-range-picker';
-import {createDeferred} from './react-utils';
-import {createSingleDatePicker} from './single-date-picker';
-import {dashToCamelCase} from '../../../src/string';
-import {dev, user} from '../../../src/log';
+import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants.js';
+import {DatesList} from './dates-list.js';
+import {Deferred} from '../../../src/utils/promise.js';
+import {FiniteStateMachine} from '../../../src/finite-state-machine.js';
+import {KeyCodes} from '../../../src/utils/key-codes.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout.js';
+import {Services} from '../../../src/services.js';
+import {batchFetchJsonFor} from '../../../src/batched-json.js';
+import {computedStyle} from '../../../src/style.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {createDateRangePicker} from './date-range-picker.js';
+import {createDeferred} from './react-utils.js';
+import {createSingleDatePicker} from './single-date-picker.js';
+import {dashToCamelCase} from '../../../src/string.js';
+import {dev, user} from '../../../src/log.js';
 import {
   escapeCssSelectorIdent,
   isRTL,
   iterateCursor,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
-import {once} from '../../../src/utils/function';
-import {requireExternal} from '../../../src/module';
+} from '../../../src/dom.js';
+import {map} from '../../../src/utils/object.js';
+import {once} from '../../../src/utils/function.js';
+import {requireExternal} from '../../../src/module.js';
 
 
 /**

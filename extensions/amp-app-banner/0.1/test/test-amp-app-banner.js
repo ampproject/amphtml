@@ -19,8 +19,8 @@ import {
   AmpAndroidAppBanner,
   AmpAppBanner,
   AmpIosAppBanner,
-} from '../amp-app-banner';
-import {Services} from '../../../../src/services';
+} from '../amp-app-banner.js';
+import {Services} from '../../../../src/services.js';
 
 
 describes.realWin('amp-app-banner', {

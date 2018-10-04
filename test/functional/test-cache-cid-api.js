@@ -16,9 +16,9 @@
 
 
 import * as lolex from 'lolex';
-import {CacheCidApi} from '../../src/service/cache-cid-api';
-import {installTimerService} from '../../src/service/timer-impl';
-import {mockServiceForDoc, stubService} from '../../testing/test-helper';
+import {CacheCidApi} from '../../src/service/cache-cid-api.js';
+import {installTimerService} from '../../src/service/timer-impl.js';
+import {mockServiceForDoc, stubService} from '../../testing/test-helper.js';
 
 describes.realWin('cacheCidApi', {amp: true}, env => {
   let ampdoc;

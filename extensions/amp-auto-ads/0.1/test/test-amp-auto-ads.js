@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import '../../../amp-ad/0.1/amp-ad';
-import '../amp-auto-ads';
-import {Services} from '../../../../src/services';
+import '../../../amp-ad/0.1/amp-ad.js';
+import '../amp-auto-ads.js';
+import {Services} from '../../../../src/services.js';
 import {
   toggleExperiment,
-} from '../../../../src/experiments';
-import {waitForChild} from '../../../../src/dom';
+} from '../../../../src/experiments.js';
+import {waitForChild} from '../../../../src/dom.js';
 
 describes.realWin('amp-auto-ads', {
   amp: {

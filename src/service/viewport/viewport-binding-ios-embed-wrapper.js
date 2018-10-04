@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../observable';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {dev} from '../../log';
-import {isExperimentOn} from '../../experiments';
-import {layoutRectLtwh} from '../../layout-rect';
-import {px, setImportantStyles} from '../../style';
-import {waitForBody} from '../../dom';
-import {whenDocumentReady} from '../../document-ready';
+import {Observable} from '../../observable.js';
+import {ViewportBindingDef} from './viewport-binding-def.js';
+import {dev} from '../../log.js';
+import {isExperimentOn} from '../../experiments.js';
+import {layoutRectLtwh} from '../../layout-rect.js';
+import {px, setImportantStyles} from '../../style.js';
+import {waitForBody} from '../../dom.js';
+import {whenDocumentReady} from '../../document-ready.js';
 
 const TAG_ = 'Viewport';
 

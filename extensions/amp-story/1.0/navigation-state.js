@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Observable} from '../../../src/observable';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {Observable} from '../../../src/observable.js';
+import {StateProperty, getStoreService} from './amp-story-store-service.js';
 
 
 /**

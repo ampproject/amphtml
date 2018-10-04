@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BindExpression} from '../bind-expression';
-import {BindMacro} from '../bind-macro';
+import {BindExpression} from '../bind-expression.js';
+import {BindMacro} from '../bind-macro.js';
 
 describe('BindExpression', () => {
   const argumentTypeError = 'Unexpected argument type';

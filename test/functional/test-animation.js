@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../src/animation';
+import {Animation} from '../../src/animation.js';
 
 describe('Animation', () => {
 

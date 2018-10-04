@@ -17,7 +17,7 @@
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
-} from '../line-delimited-response-handler';
+} from '../line-delimited-response-handler.js';
 
 describe('#line-delimited-response-handler', () => {
 

@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
-import {htmlFor} from '../../../../../src/static-template';
-import {poll} from '../../../../../testing/iframe';
+import {htmlFor} from '../../../../../src/static-template.js';
+import {poll} from '../../../../../testing/iframe.js';
 
 const config = describe.configure().ifNewChrome().skipSinglePass();
 config.run('amp-date-picker', function() {

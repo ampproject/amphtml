@@ -15,12 +15,12 @@
  */
 
 import * as lolex from 'lolex';
-import {Services} from '../../src/services';
-import {adConfig} from '../../ads/_config';
+import {Services} from '../../src/services.js';
+import {adConfig} from '../../ads/_config.js';
 import {
   cidServiceForDocForTesting,
-} from '../../src/service/cid-impl';
-import {getAdCid} from '../../src/ad-cid';
+} from '../../src/service/cid-impl.js';
+import {getAdCid} from '../../src/ad-cid.js';
 
 describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';

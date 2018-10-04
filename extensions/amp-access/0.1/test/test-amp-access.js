@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../amp-access-client';
-import {AccessService} from '../amp-access';
-import {AmpEvents} from '../../../../src/amp-events';
-import {Observable} from '../../../../src/observable';
+import {AccessClientAdapter} from '../amp-access-client.js';
+import {AccessService} from '../amp-access.js';
+import {AmpEvents} from '../../../../src/amp-events.js';
+import {Observable} from '../../../../src/observable.js';
 import {cidServiceForDocForTesting} from
-  '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl.js';
 import {installPerformanceService} from
-  '../../../../src/service/performance-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+  '../../../../src/service/performance-impl.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 describes.fakeWin('AccessService', {

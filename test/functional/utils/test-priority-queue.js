@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import PriorityQueue from '../../../src/utils/priority-queue';
+import PriorityQueue from '../../../src/utils/priority-queue.js';
 
 describe('PriorityQueue', function() {
   let pq;

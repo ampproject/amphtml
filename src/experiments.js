@@ -21,9 +21,9 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {getCookie, setCookie} from './cookies';
-import {hasOwn} from './utils/object';
-import {parseQueryString} from './url';
+import {getCookie, setCookie} from './cookies.js';
+import {hasOwn} from './utils/object.js';
+import {parseQueryString} from './url.js';
 
 /** @const {string} */
 const COOKIE_NAME = 'AMP_EXP';

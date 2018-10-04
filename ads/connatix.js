@@ -16,7 +16,7 @@
 
 import {hasOwn} from '../src/utils/object.js';
 import {tryParseJson} from '../src/json.js';
-import {validateData} from '../3p/3p';
+import {validateData} from '../3p/3p.js';
 
 /**
  * @param {!Window} global

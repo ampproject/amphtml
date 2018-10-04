@@ -27,9 +27,9 @@ const POLL_PARAMS = {
   'poll-id': '274086843_1a2a465f60fff4699f',
 };
 
-import '../amp-vk';
-import {Layout} from '../../../../src/layout';
-import {Resource} from '../../../../src/service/resource';
+import '../amp-vk.js';
+import {Layout} from '../../../../src/layout.js';
+import {Resource} from '../../../../src/service/resource.js';
 
 describes.realWin('amp-vk', {
   amp: {

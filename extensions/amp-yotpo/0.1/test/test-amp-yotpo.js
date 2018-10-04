@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-yotpo';
-import {yotpo} from '../../../../3p/yotpo';
+import '../amp-yotpo.js';
+import {yotpo} from '../../../../3p/yotpo.js';
 
 describes.realWin('amp-yotpo', {
   amp: {

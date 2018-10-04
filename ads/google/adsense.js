@@ -18,13 +18,13 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
-} from './utils';
-import {CONSENT_POLICY_STATE} from '../../src/consent-state';
-import {camelCaseToDash} from '../../src/string';
-import {hasOwn} from '../../src/utils/object';
-import {setStyles} from '../../src/style';
-import {user} from '../../src/log';
-import {validateData} from '../../3p/3p';
+} from './utils.js';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state.js';
+import {camelCaseToDash} from '../../src/string.js';
+import {hasOwn} from '../../src/utils/object.js';
+import {setStyles} from '../../src/style.js';
+import {user} from '../../src/log.js';
+import {validateData} from '../../3p/3p.js';
 
 /**
  * Make an adsense iframe.

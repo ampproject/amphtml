@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from './3p';
+import {loadScript} from './3p.js';
 
 /**
  * Get the correct script for the container.

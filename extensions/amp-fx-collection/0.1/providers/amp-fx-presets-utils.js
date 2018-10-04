@@ -19,10 +19,10 @@
  * presets.
  */
 
-import {Services} from '../../../../src/services';
-import {mapRange} from '../../../../src/utils/math';
-import {startsWith} from '../../../../src/string';
-import {user} from '../../../../src/log';
+import {Services} from '../../../../src/services.js';
+import {mapRange} from '../../../../src/utils/math.js';
+import {startsWith} from '../../../../src/string.js';
+import {user} from '../../../../src/log.js';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;

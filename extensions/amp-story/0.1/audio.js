@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url.js';
 
 /**
  * @const {string}

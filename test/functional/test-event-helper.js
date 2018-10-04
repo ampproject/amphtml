@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../src/observable';
+import {Observable} from '../../src/observable.js';
 import {
   createCustomEvent,
   isLoaded,
@@ -22,11 +22,11 @@ import {
   listenOnce,
   listenOncePromise,
   loadPromise,
-} from '../../src/event-helper';
+} from '../../src/event-helper.js';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
-} from '../../src/event-helper-listen';
+} from '../../src/event-helper-listen.js';
 
 describe('EventHelper', () => {
 

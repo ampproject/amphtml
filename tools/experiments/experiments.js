@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import '../../src/polyfills';
-import '../../src/service/timer-impl';
-import {Deferred} from '../../src/utils/promise';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {getCookie, setCookie} from '../../src/cookies';
-import {getMode} from '../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
-import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-ready';
+import '../../src/polyfills.js';
+import '../../src/service/timer-impl.js';
+import {Deferred} from '../../src/utils/promise.js';
+import {dev, initLogConstructor, setReportError} from '../../src/log.js';
+import {getCookie, setCookie} from '../../src/cookies.js';
+import {getMode} from '../../src/mode.js';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments.js';
+import {listenOnce} from '../../src/event-helper.js';
+import {onDocumentReady} from '../../src/document-ready.js';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import {reportError} from '../../src/error';
+import {reportError} from '../../src/error.js';
 
 initLogConstructor();
 setReportError(reportError);

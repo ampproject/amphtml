@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
+import {getMode} from '../../../src/mode.js';
 
 /** @typedef {{
  *    trigger: string,

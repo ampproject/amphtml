@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {AmpStoryPage, PageState} from '../amp-story-page';
-import {AmpStoryStoreService} from '../amp-story-store-service';
-import {MediaType} from '../media-pool';
-import {registerServiceBuilder} from '../../../../src/service';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl.js';
+import {AmpStoryPage, PageState} from '../amp-story-page.js';
+import {AmpStoryStoreService} from '../amp-story-store-service.js';
+import {MediaType} from '../media-pool.js';
+import {registerServiceBuilder} from '../../../../src/service.js';
 
 
 describes.realWin('amp-story-page', {amp: true}, env => {

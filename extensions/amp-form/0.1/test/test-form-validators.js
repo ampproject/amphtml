@@ -24,9 +24,9 @@ import {
   ShowFirstOnSubmitValidator,
   getFormValidator,
   setReportValiditySupportedForTesting,
-} from '../form-validators';
-import {Services} from '../../../../src/services';
-import {ValidationBubble} from '../validation-bubble';
+} from '../form-validators.js';
+import {Services} from '../../../../src/services.js';
+import {ValidationBubble} from '../validation-bubble.js';
 
 describes.realWin('form-validators', {amp: true}, env => {
   let sandbox;

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '../../../src/services.js';
 import {
   assertDoesNotContainDisplay,
   px,
   setImportantStyles,
   setStyle,
-} from '../../../src/style';
-import {childElementsByTag, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {throttle} from '../../../src/utils/rate-limit';
-import {toArray, toWin} from '../../../src/types';
-import {tryResolve} from '../../../src/utils/promise';
-import {unscaledClientRect} from './utils';
+} from '../../../src/style.js';
+import {childElementsByTag, matches} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {isExperimentOn} from '../../../src/experiments.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
+import {toArray, toWin} from '../../../src/types.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {unscaledClientRect} from './utils.js';
 
 
 /** @private @const {number} */

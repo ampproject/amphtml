@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {WindowInterface} from '../src/window-interface';
+import {WindowInterface} from '../src/window-interface.js';
 import {
   getService,
   getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../src/service';
-import {getStyle} from '../src/style';
-import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
+} from '../src/service.js';
+import {getStyle} from '../src/style.js';
+import {poll} from './iframe.js';
+import {xhrServiceForTesting} from '../src/service/xhr-impl.js';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.

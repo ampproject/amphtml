@@ -25,7 +25,7 @@ import {
   rethrowAsync,
   setReportError,
   user,
-} from '../../src/log';
+} from '../../src/log.js';
 
 describe('Logging', () => {
 

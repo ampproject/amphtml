@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import '../amp-3q-player';
-import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-3q-player.js';
+import {Services} from '../../../../src/services.js';
+import {VideoEvents} from '../../../../src/video-interface.js';
+import {listenOncePromise} from '../../../../src/event-helper.js';
 
 
 describes.realWin('amp-3q-player', {

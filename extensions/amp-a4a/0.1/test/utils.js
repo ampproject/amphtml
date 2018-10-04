@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../amp-a4a';
-import {dict} from '../../../../src/utils/object';
+import {AmpA4A} from '../amp-a4a.js';
+import {dict} from '../../../../src/utils/object.js';
 
 /** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +

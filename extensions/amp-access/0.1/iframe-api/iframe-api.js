@@ -20,9 +20,9 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
-import {AccessController} from './access-controller';
-import {Deferred} from '../../../../src/utils/promise';
-import {Messenger} from './messenger';
+import {AccessController} from './access-controller.js';
+import {Deferred} from '../../../../src/utils/promise.js';
+import {Messenger} from './messenger.js';
 
 
 /**

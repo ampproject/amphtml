@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {stringHash32} from '../string';
+import {stringHash32} from '../string.js';
 
 
 /**

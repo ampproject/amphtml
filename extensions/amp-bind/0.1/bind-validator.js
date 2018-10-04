@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {hasOwn, ownProperty} from '../../../src/utils/object';
-import {parseSrcset} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {hasOwn, ownProperty} from '../../../src/utils/object.js';
+import {parseSrcset} from '../../../src/srcset.js';
+import {startsWith} from '../../../src/string.js';
+import {user} from '../../../src/log.js';
 
 const TAG = 'amp-bind';
 

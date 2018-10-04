@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '../../../src/event-helper';
+import {Services} from '../../../src/services.js';
+import {StateProperty, getStoreService} from './amp-story-store-service.js';
+import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl.js';
+import {VideoEvents} from '../../../src/video-interface.js';
+import {closest, escapeCssSelectorIdent} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {hasTapAction, timeStrToMillis} from './utils.js';
+import {listenOnce} from '../../../src/event-helper.js';
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;

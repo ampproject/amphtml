@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
-import {loadScript, validateData} from './3p';
+import {dev} from '../src/log.js';
+import {loadScript, validateData} from './3p.js';
 
 /**
  * @fileoverview

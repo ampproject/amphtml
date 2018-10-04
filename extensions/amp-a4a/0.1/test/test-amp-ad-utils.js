@@ -15,7 +15,7 @@
  */
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdMetadata} from '../amp-ad-utils';
+import {getAmpAdMetadata} from '../amp-ad-utils.js';
 
 describe('getAmpAdMetadata', () => {
 

@@ -17,21 +17,21 @@
 import {
   AmpdocAnalyticsRoot,
   EmbedAnalyticsRoot,
-} from './analytics-root';
+} from './analytics-root.js';
 import {
   AnalyticsEvent,
   CustomEventTracker,
-} from './events';
-import {AnalyticsGroup} from './analytics-group';
+} from './events.js';
+import {AnalyticsGroup} from './analytics-group.js';
 import {
   getFriendlyIframeEmbedOptional,
-} from '../../../src/friendly-iframe-embed';
+} from '../../../src/friendly-iframe-embed.js';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
-} from '../../../src/service';
+} from '../../../src/service.js';
 
 const PROP = '__AMP_AN_ROOT';
 

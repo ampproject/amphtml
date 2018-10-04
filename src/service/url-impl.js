@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LruCache} from '../utils/lru-cache';
+import {LruCache} from '../utils/lru-cache.js';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -23,11 +23,11 @@ import {
   isProxyOrigin,
   isSecureUrlDeprecated,
   parseUrlWithA,
-} from '../url';
+} from '../url.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
-} from '../service';
+} from '../service.js';
 
 const SERVICE = 'url';
 

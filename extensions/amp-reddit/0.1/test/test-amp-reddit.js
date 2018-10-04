@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-reddit';
-import {reddit} from '../../../../3p/reddit';
+import '../amp-reddit.js';
+import {reddit} from '../../../../3p/reddit.js';
 
 
 describes.realWin('amp-reddit', {

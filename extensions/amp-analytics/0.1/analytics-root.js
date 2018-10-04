@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {ScrollManager} from './scroll-manager';
-import {Services} from '../../../src/services';
+import {ScrollManager} from './scroll-manager.js';
+import {Services} from '../../../src/services.js';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
-} from './visibility-manager';
+} from './visibility-manager.js';
 import {
   closestBySelector,
   matches,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
-import {tryResolve} from '../../../src/utils/promise';
-import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
+} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {getMode} from '../../../src/mode.js';
+import {layoutRectLtwh} from '../../../src/layout-rect.js';
+import {map} from '../../../src/utils/object.js';
+import {tryResolve} from '../../../src/utils/promise.js';
+import {whenContentIniLoad} from '../../../src/friendly-iframe-embed.js';
 
 const TAG = 'amp-analytics/analytics-root';
 

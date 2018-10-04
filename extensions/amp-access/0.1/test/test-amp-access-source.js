@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../amp-access-client';
-import {AccessIframeAdapter} from '../amp-access-iframe';
-import {AccessOtherAdapter} from '../amp-access-other';
-import {AccessServerAdapter} from '../amp-access-server';
-import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {AccessSource} from '../amp-access-source';
-import {AccessVendorAdapter} from '../amp-access-vendor';
+import {AccessClientAdapter} from '../amp-access-client.js';
+import {AccessIframeAdapter} from '../amp-access-iframe.js';
+import {AccessOtherAdapter} from '../amp-access-other.js';
+import {AccessServerAdapter} from '../amp-access-server.js';
+import {AccessServerJwtAdapter} from '../amp-access-server-jwt.js';
+import {AccessSource} from '../amp-access-source.js';
+import {AccessVendorAdapter} from '../amp-access-vendor.js';
 import {cidServiceForDocForTesting} from
-  '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl.js';
 import {installPerformanceService} from
-  '../../../../src/service/performance-impl';
-import {toggleExperiment} from '../../../../src/experiments';
+  '../../../../src/service/performance-impl.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 describes.fakeWin('AccessSource', {

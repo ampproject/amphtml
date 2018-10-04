@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {PlayingStates, VideoEvents} from '../../src/video-interface';
-import {Services} from '../../src/services';
-import {VideoUtils} from '../../src/utils/video';
+import {PlayingStates, VideoEvents} from '../../src/video-interface.js';
+import {Services} from '../../src/services.js';
+import {VideoUtils} from '../../src/utils/video.js';
 import {
   installVideoManagerForDoc,
-} from '../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../src/layout';
-import {listenOncePromise} from '../../src/event-helper';
+} from '../../src/service/video-manager-impl.js';
+import {isLayoutSizeDefined} from '../../src/layout.js';
+import {listenOncePromise} from '../../src/event-helper.js';
 import {
   runVideoPlayerIntegrationTests,
-} from './test-video-players-helper';
-import {toArray} from '../../src/types';
+} from './test-video-players-helper.js';
+import {toArray} from '../../src/types.js';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.

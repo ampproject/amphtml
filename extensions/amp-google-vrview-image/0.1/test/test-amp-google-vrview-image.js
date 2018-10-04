@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../amp-google-vrview-image';
-import {toggleExperiment} from '../../../../src/experiments';
+import '../amp-google-vrview-image.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 
 describes.realWin('amp-google-vrview-image', {

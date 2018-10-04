@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
-import {Toast} from './toast';
+import {LocalizedStringId} from './localization.js';
+import {Services} from '../../../src/services.js';
+import {Toast} from './toast.js';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
-} from '../../../src/clipboard';
-import {dev, user} from '../../../src/log';
-import {dict, map} from './../../../src/utils/object';
-import {isObject} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
-import {px, setImportantStyles} from '../../../src/style';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
+} from '../../../src/clipboard.js';
+import {dev, user} from '../../../src/log.js';
+import {dict, map} from './../../../src/utils/object.js';
+import {isObject} from '../../../src/types.js';
+import {listen} from '../../../src/event-helper.js';
+import {px, setImportantStyles} from '../../../src/style.js';
+import {renderAsElement, renderSimpleTemplate} from './simple-template.js';
+import {throttle} from '../../../src/utils/rate-limit.js';
 
 
 /**

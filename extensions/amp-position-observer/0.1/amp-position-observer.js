@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '../../../src/action-constants.js';
 import {
   PositionObserverFidelity,
-} from '../../../src/service/position-observer/position-observer-worker';
+} from '../../../src/service/position-observer/position-observer-worker.js';
 import {
   RelativePositions,
   layoutRectLtwh,
   layoutRectsRelativePos,
-} from '../../../src/layout-rect';
-import {Services} from '../../../src/services';
+} from '../../../src/layout-rect.js';
+import {Services} from '../../../src/services.js';
 import {
   assertLength,
   getLengthNumeral,
   getLengthUnits,
   parseLength,
-} from '../../../src/layout';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getServiceForDoc} from '../../../src/service';
+} from '../../../src/layout.js';
+import {createCustomEvent} from '../../../src/event-helper.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {getServiceForDoc} from '../../../src/service.js';
 import {
   installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
+} from '../../../src/service/position-observer/position-observer-impl.js';
 
 const TAG = 'amp-position-observer';
 

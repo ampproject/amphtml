@@ -20,8 +20,8 @@ import {
   IntersectionObserverPolyfill,
   getIntersectionChangeEntry,
   getThresholdSlot,
-} from '../../src/intersection-observer-polyfill';
-import {layoutRectLtwh} from '../../src/layout-rect';
+} from '../../src/intersection-observer-polyfill.js';
+import {layoutRectLtwh} from '../../src/layout-rect.js';
 
 describe('IntersectionObserverApi', () => {
   let sandbox;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {RTC_VENDORS} from '../callout-vendors';
-import {isSecureUrlDeprecated} from '../../../../src/url';
+import {RTC_VENDORS} from '../callout-vendors.js';
+import {isSecureUrlDeprecated} from '../../../../src/url.js';
 
 // The keys of RTC_VENDORS are not allowed to have any capital letters.
 // This test acts as a presubmit to enforce that.

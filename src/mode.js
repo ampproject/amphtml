@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString_} from './url-parse-query-string';
+import {parseQueryString_} from './url-parse-query-string.js';
 
 /**
  * @typedef {{

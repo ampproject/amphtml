@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {installDocService} from '../../src/service/ampdoc-impl';
+import {Services} from '../../src/services.js';
+import {createIframePromise} from '../../testing/iframe.js';
+import {installDocService} from '../../src/service/ampdoc-impl.js';
 import {installDocumentInfoServiceForDoc} from
-  '../../src/service/document-info-impl';
+  '../../src/service/document-info-impl.js';
 
 describe('document-info', () => {
   let sandbox;

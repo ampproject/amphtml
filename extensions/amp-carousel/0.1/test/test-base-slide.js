@@ -30,7 +30,7 @@
  * limitations under the License.
  */
 
-import {BaseSlides} from '../base-slides';
+import {BaseSlides} from '../base-slides.js';
 
 describes.fakeWin('BaseSlides', {amp: true}, env => {
   let win, doc;

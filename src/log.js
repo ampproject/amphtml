@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
-import {getModeObject} from './mode-object';
-import {isEnumValue} from './types';
+import {getMode} from './mode.js';
+import {getModeObject} from './mode-object.js';
+import {isEnumValue} from './types.js';
 
 /**
  * Triple zero width space.

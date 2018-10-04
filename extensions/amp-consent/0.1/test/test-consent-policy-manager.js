@@ -15,18 +15,18 @@
  */
 
 import * as lolex from 'lolex';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {CONSENT_ITEM_STATE} from '../consent-state-manager.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
-} from '../consent-policy-manager';
-import {macroTask} from '../../../../testing/yield';
+} from '../consent-policy-manager.js';
+import {macroTask} from '../../../../testing/yield.js';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../src/service.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('ConsentStateManager', {amp: 1}, env => {
   let win;

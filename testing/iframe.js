@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../src/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FakeLocation} from './fake-dom';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
-import {Services} from '../src/services';
-import {cssText} from '../build/css';
-import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {AmpEvents} from '../src/amp-events.js';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events.js';
+import {FakeLocation} from './fake-dom.js';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events.js';
+import {Services} from '../src/services.js';
+import {cssText} from '../build/css.js';
+import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging.js';
 import {
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/runtime';
+} from '../src/runtime.js';
 import {
   install as installCustomElements,
-} from '../src/polyfills/custom-elements';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
-import {installStylesLegacy} from '../src/style-installer';
-import {parseIfNeeded} from '../src/iframe-helper';
+} from '../src/polyfills/custom-elements.js';
+import {installDocService} from '../src/service/ampdoc-impl.js';
+import {installExtensionsService} from '../src/service/extensions-impl.js';
+import {installStylesLegacy} from '../src/style-installer.js';
+import {parseIfNeeded} from '../src/iframe-helper.js';
 
 let iframeCount = 0;
 

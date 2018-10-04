@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpViewerIntegrationVariableService} from '../variable-service';
+import {AmpViewerIntegrationVariableService} from '../variable-service.js';
 
 
 describes.fakeWin('amp-viewer-integration variable service', {}, () => {

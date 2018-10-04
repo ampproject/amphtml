@@ -21,18 +21,18 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
-import {CommonSignals} from '../../../src/common-signals';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {ActionTrust} from '../../../src/action-constants.js';
+import {CommonSignals} from '../../../src/common-signals.js';
+import {Observable} from '../../../src/observable.js';
+import {Services} from '../../../src/services.js';
+import {VideoEvents} from '../../../src/video-interface.js';
 import {
   VideoServiceSignals,
-} from '../../../src/service/video-service-interface';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {isFiniteNumber} from '../../../src/types';
+} from '../../../src/service/video-service-interface.js';
+import {createCustomEvent, listen} from '../../../src/event-helper.js';
+import {dev} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
+import {isFiniteNumber} from '../../../src/types.js';
 
 
 /** @private @const {string} */

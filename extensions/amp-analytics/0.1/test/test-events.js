@@ -15,7 +15,7 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
+import {AmpdocAnalyticsRoot} from '../analytics-root.js';
 import {
   AnalyticsEvent,
   ClickEventTracker,
@@ -25,8 +25,8 @@ import {
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
-} from '../events';
-import {Signals} from '../../../../src/utils/signals';
+} from '../events.js';
+import {Signals} from '../../../../src/utils/signals.js';
 
 
 describes.realWin('Events', {amp: 1}, env => {

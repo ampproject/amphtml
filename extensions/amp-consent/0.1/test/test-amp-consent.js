@@ -17,16 +17,16 @@
 import {
   ACTION_TYPE,
   AmpConsent,
-} from '../amp-consent';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {dict} from '../../../../src/utils/object';
-import {macroTask} from '../../../../testing/yield';
+} from '../amp-consent.js';
+import {CONSENT_ITEM_STATE} from '../consent-state-manager.js';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state.js';
+import {dict} from '../../../../src/utils/object.js';
+import {macroTask} from '../../../../testing/yield.js';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
-} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+} from '../../../../src/service.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
 describes.realWin('amp-consent', {
   amp: {

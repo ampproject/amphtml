@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMinOpacity} from '../opacity';
+import {getMinOpacity} from '../opacity.js';
 
 describes.realWin('getMinOpacity', {amp: true}, env => {
   let win;

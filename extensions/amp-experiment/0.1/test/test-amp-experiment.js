@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as variant from '../variant';
-import {AmpExperiment} from '../amp-experiment';
-import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import * as variant from '../variant.js';
+import {AmpExperiment} from '../amp-experiment.js';
+import {Services} from '../../../../src/services.js';
+import {hasOwn} from '../../../../src/utils/object.js';
 
 
 describes.realWin('amp-experiment', {

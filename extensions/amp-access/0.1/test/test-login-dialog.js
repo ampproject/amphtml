@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../src/services';
+import {Services} from '../../../../src/services.js';
 import {
   WebLoginDialog,
   openLoginDialog,
-} from '../login-dialog';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+} from '../login-dialog.js';
+import {installDocService} from '../../../../src/service/ampdoc-impl.js';
 
 const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
     '/amp-access/0.1/amp-login-done.html?url=' +

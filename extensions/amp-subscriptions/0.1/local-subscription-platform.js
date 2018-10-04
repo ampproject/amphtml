@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Actions} from './actions';
-import {Entitlement} from './entitlement';
+import {Actions} from './actions.js';
+import {Entitlement} from './entitlement.js';
 import {
   LocalSubscriptionPlatformRenderer,
-} from './local-subscription-platform-renderer';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {Services} from '../../../src/services';
-import {UrlBuilder} from './url-builder';
-import {assertHttpsUrl} from '../../../src/url';
-import {closestBySelector} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from './local-subscription-platform-renderer.js';
+import {PageConfig} from '../../../third_party/subscriptions-project/config.js';
+import {Services} from '../../../src/services.js';
+import {UrlBuilder} from './url-builder.js';
+import {assertHttpsUrl} from '../../../src/url.js';
+import {closestBySelector} from '../../../src/dom.js';
+import {dev, user} from '../../../src/log.js';
+import {dict} from '../../../src/utils/object.js';
 
 
 /**

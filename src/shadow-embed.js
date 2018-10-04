@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
+import {Services} from './services.js';
+import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS.js';
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
   isShadowDomSupported,
-} from './web-components';
+} from './web-components.js';
 import {
   childElementsByTag,
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
-} from './dom';
-import {dev} from './log';
-import {installCssTransformer} from './style-installer';
-import {setInitialDisplay, setStyle} from './style';
-import {toArray, toWin} from './types';
+} from './dom.js';
+import {dev} from './log.js';
+import {installCssTransformer} from './style-installer.js';
+import {setInitialDisplay, setStyle} from './style.js';
+import {toArray, toWin} from './types.js';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.

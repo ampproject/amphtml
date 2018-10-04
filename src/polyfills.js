@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
-import {install as installArrayIncludes} from './polyfills/array-includes';
-import {install as installCustomElements} from './polyfills/custom-elements';
+import {getMode} from './mode.js';
+import {install as installArrayIncludes} from './polyfills/array-includes.js';
+import {install as installCustomElements} from './polyfills/custom-elements.js';
 import {
   install as installDOMTokenListToggle,
-} from './polyfills/domtokenlist-toggle';
-import {install as installDocContains} from './polyfills/document-contains';
-import {install as installFetch} from './polyfills/fetch';
-import {install as installMathSign} from './polyfills/math-sign';
-import {install as installObjectAssign} from './polyfills/object-assign';
-import {install as installPromise} from './polyfills/promise';
+} from './polyfills/domtokenlist-toggle.js';
+import {install as installDocContains} from './polyfills/document-contains.js';
+import {install as installFetch} from './polyfills/fetch.js';
+import {install as installMathSign} from './polyfills/math-sign.js';
+import {install as installObjectAssign} from './polyfills/object-assign.js';
+import {install as installPromise} from './polyfills/promise.js';
 import {installCustomElements as installRegisterElement} from
   'document-register-element/build/document-register-element.patched';
-import {isExperimentOn} from './experiments';
+import {isExperimentOn} from './experiments.js';
 
 installDOMTokenListToggle(self);
 installFetch(self);

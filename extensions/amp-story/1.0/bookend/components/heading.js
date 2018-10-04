@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
-import {htmlFor} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
+import {BookendComponentInterface} from './bookend-component-interface.js';
+import {htmlFor} from '../../../../../src/static-template.js';
+import {user} from '../../../../../src/log.js';
 
 /**
  * @typedef {{

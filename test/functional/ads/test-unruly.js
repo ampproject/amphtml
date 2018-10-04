@@ -16,7 +16,7 @@
 
 import {
   unruly,
-} from '../../../ads/unruly';
+} from '../../../ads/unruly.js';
 
 describe('unruly', () => {
 

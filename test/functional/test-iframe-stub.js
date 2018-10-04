@@ -17,7 +17,7 @@
 import {
   createIframeWithMessageStub,
   expectPostMessage,
-} from '../../testing/iframe';
+} from '../../testing/iframe.js';
 
 describe('test-iframe-createIframeWithMessageStub', () => {
 

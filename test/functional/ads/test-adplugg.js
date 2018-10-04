@@ -16,8 +16,8 @@
 
 import {
   adplugg,
-} from '../../../ads/adplugg';
-import {createIframePromise} from '../../../testing/iframe';
+} from '../../../ads/adplugg.js';
+import {createIframePromise} from '../../../testing/iframe.js';
 
 describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
   let sandbox;

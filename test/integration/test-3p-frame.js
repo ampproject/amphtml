@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {DomFingerprint} from '../../src/utils/dom-fingerprint';
-import {Services} from '../../src/services';
+import {DomFingerprint} from '../../src/utils/dom-fingerprint.js';
+import {Services} from '../../src/services.js';
 import {
   addDataAndJsonAttributes_,
   applySandbox,
@@ -26,15 +26,15 @@ import {
   preloadBootstrap,
   resetBootstrapBaseUrlForTesting,
   resetCountForTesting,
-} from '../../src/3p-frame';
+} from '../../src/3p-frame.js';
 import {
   deserializeMessage,
   serializeMessage,
-} from '../../src/3p-frame-messaging';
-import {dev} from '../../src/log';
-import {loadPromise} from '../../src/event-helper';
-import {preconnectForElement} from '../../src/preconnect';
-import {toggleExperiment} from '../../src/experiments';
+} from '../../src/3p-frame-messaging.js';
+import {dev} from '../../src/log.js';
+import {loadPromise} from '../../src/event-helper.js';
+import {preconnectForElement} from '../../src/preconnect.js';
+import {toggleExperiment} from '../../src/experiments.js';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 

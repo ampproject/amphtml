@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-ooyala-player';
+import '../amp-ooyala-player.js';
 
 
 describes.realWin('amp-ooyala-player', {
