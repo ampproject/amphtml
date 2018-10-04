@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -133,8 +133,8 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

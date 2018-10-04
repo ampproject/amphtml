@@ -17,9 +17,12 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
+
+// Represents the correct value of KeyboardEvent.which for the Escape key
+const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
 
 describes.realWin('amp-sidebar 0.1 version', {
   win: { /* window spec */
@@ -321,8 +324,8 @@ describes.realWin('amp-sidebar 0.1 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
-        eventObj.keyCode = KeyCodes.ESCAPE;
-        eventObj.which = KeyCodes.ESCAPE;
+        eventObj.key = Keys.ESCAPE;
+        eventObj.which = KEYBOARD_EVENT_WHICH_ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent ?
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
