@@ -147,6 +147,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Make a fallback call to beacon if no links were founds on the page.
    * Send the impression tracking once we have the beacon API response.
    * @return {Promise}
+   * @private
    */
   onPageScanned_() {
     // .firstRequest may be null if the page doesn't have any non-excluded
@@ -161,6 +162,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /**
    * Initialise Skimlinks LinkRewriter
    * @return {!./link-rewriter/link-rewriter.LinkRewriter}
+   * @private
    */
   initSkimlinksLinkRewriter_() {
     const options = {

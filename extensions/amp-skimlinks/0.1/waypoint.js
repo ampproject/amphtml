@@ -51,9 +51,9 @@ export class Waypoint {
 
   /**
    * Creates the go.skimresources.com version of the anchor's url.
-   * @public
    * @param {?HTMLElement} anchor
    * @return {?string}
+   * @public
    */
   getAffiliateUrl(anchor) {
     if (!anchor) {

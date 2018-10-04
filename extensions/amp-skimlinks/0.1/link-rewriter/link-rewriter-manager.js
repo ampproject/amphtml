@@ -82,7 +82,6 @@ export class LinkRewriterManager {
 
 
   /**
-   * @public
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
    * @param {!function(Array<HTMLElement>): !./link-rewriter.TwoStepsResponse} resolveUnknownLinks
@@ -97,6 +96,7 @@ export class LinkRewriterManager {
    *    found on the page.
    *
    * @return {!./link-rewriter.LinkRewriter}
+   * @public
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(
@@ -115,7 +115,6 @@ export class LinkRewriterManager {
 
 
   /**
-   * @public
    * Notify the LinkRewriteService that a click has happened on an anchor.
    * This is the chance for one of the registered LinkRewriter to rewrite the
    * url before the browser handles the click and navigates to the link url.
@@ -131,6 +130,7 @@ export class LinkRewriterManager {
    * mutate the anchor!
    * @param {!HTMLElement} anchor
    * @param {string} clickType - 'click' or 'contextmenu'
+   * @public
    */
   maybeRewriteLink(anchor, clickType = 'click') {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(anchor);
@@ -168,12 +168,12 @@ export class LinkRewriterManager {
   }
 
   /**
-   * @private
    * Extract the priority list from the optional html meta tag.
    * The meta tag should contain a whitespace separated list of
    * LinkRewriter Ids.
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Array<string>}
+   * @private
    */
   getPriorityList_(ampdoc) {
     const docInfo = Services.documentInfoForDoc(ampdoc);
@@ -183,9 +183,9 @@ export class LinkRewriterManager {
   }
 
   /**
-   * @private
    * Listen for DOM_UPDATE event.
    * @param {!Document} ampPageDocument
+   * @private
    */
   installGlobalEventListener_(ampPageDocument) {
     ampPageDocument.addEventListener(AmpEvents.DOM_UPDATE,
@@ -193,10 +193,10 @@ export class LinkRewriterManager {
   }
 
   /**
-   * @private
    * Notify all the registered LinkRewriter when new elements have been added
    * to the page so they can re-scan the page to find potential new links to
    * replace.
+   * @private
    */
   onDomChanged_() {
     this.linkRewriters_.forEach(linkRewriter => {
@@ -206,12 +206,12 @@ export class LinkRewriterManager {
 
 
   /**
-   * @private
    * Extract the optional priority list for this specific anchor
    * from its attribute. The 'data-link-rewriters' attribute should
    * contain a whitespace separated list of LinkRewriter Ids.
    * @param {!HTMLElement} anchor
    * @return {!Array<string>}
+   * @private
    */
   parseLinkRewriterPriorityForAnchor_(anchor) {
     const dataValue = anchor.hasAttribute('data-link-rewriters')
@@ -225,7 +225,6 @@ export class LinkRewriterManager {
   }
 
   /**
-   * @private
    * Mutate linkRewriterList to insert a new LinkRewriter in the list
    * while keeping the list in order of priority as defined by the
    * idPriorityList.
@@ -233,6 +232,7 @@ export class LinkRewriterManager {
    * @param {!./link-rewriter.LinkRewriter} linkRewriter
    * @param {!Array<string>} idPriorityList
    * @return {!Array<./link-rewriter.LinkRewriter>} - Mutated linkRewriterList param.
+   * @private
    */
   insertInListBasedOnPriority_(linkRewriterList, linkRewriter, idPriorityList) {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Description
@@ -266,11 +266,11 @@ export class LinkRewriterManager {
   }
 
   /**
-   * @private
    * Get the list of all the link rewriter "watching" a specific anchor.
    * See LinkRewriter.isWatchingLink for more details.
    * @param {!HTMLElement} anchor
    * @return {!Array<./link-rewriter.LinkRewriter>}
+   * @private
    */
   getSuitableLinkRewritersForLink_(anchor) {
     const linkPriorityList = this.parseLinkRewriterPriorityForAnchor_(anchor);

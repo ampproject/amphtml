@@ -65,8 +65,8 @@ export class Tracking {
 
   /**
    * Getter to access the tracking data from outside the class.
-   * @public
    * @return {!Object}
+   * @public
    */
   getTrackingInfo() {
     return this.trackingInfo_;
@@ -75,8 +75,8 @@ export class Tracking {
   /**
    * Setter to update the tracking data from outside the class.
    * This is mainly used for setting the guid that we receive from beaconAPI.
-   * @public
    * @param {!Object} newInfo
+   * @public
    */
   setTrackingInfo(newInfo) {
     Object.assign(this.trackingInfo_, newInfo);
@@ -84,8 +84,8 @@ export class Tracking {
 
   /**
    * Sends "Page impression" and "Link impression" tracking requests (POST).
-   * @public
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
+   * @public
    */
   sendImpressionTracking(anchorReplacementList) {
     if (!this.tracking_) {
@@ -123,8 +123,8 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register non-affiliated click.
-   * @public
    * @param {!HTMLElement} anchor
+   * @public
    */
   sendNaClickTracking(anchor) {
     if (!this.tracking_ || isExcludedUrl(anchor.href, this.skimOptions_)) {
@@ -163,9 +163,9 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register page impression request.
-   * @private
    * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
+   * @private
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
@@ -192,10 +192,10 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register link impression request.
-   * @private
    * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
    * @param {!Object} urls
+   * @private
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = /** @type {!JsonObject} */ (Object.assign(
@@ -219,8 +219,8 @@ export class Tracking {
    * Warning: Analytics API will not send any request until
    * CommonSignals.LOAD_START has been triggered.
    * (See "initTracking_" in amp-skimlinks.js)
-   * @private
    * @param {!AmpElement} element
+   * @private
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
@@ -252,10 +252,10 @@ export class Tracking {
    * - A map of each url seen on the page associated with some information:
    *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
-   * @private
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {!{numberAffiliateLinks: number, urls: !Object}}
+   * @private
    */
   extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;
