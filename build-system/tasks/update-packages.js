@@ -51,7 +51,7 @@ function patchWebAnimations() {
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
   // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
+  file = 'export function installWebAnimations(window) {\n' +
       'var document = window.document;\n' +
       file.replace(/requestAnimationFrame/g, function(a, b) {
         if (file.charAt(b - 1) == '.') {
@@ -94,7 +94,7 @@ function patchRegisterElement() {
         'to appear in document-register-element');
   }
   file = file.replace('module.exports = installCustomElements;',
-      'exports.installCustomElements = installCustomElements;');
+      'export {installCustomElements};');
   writeIfUpdated(patchedName, file);
 }
 

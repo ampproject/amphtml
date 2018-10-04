@@ -241,7 +241,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
-      'node_modules/dompurify/dist/purify.cjs.js',
+      'node_modules/dompurify/dist/purify.ejs.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
@@ -357,12 +357,13 @@ function compile(entryModuleFilenames, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        jscomp_error: [],
+        jscomp_warning: ['moduleLoad'],
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
         jscomp_off: ['unknownDefines'],
         define,
         hide_warnings_for: hideWarningsFor,
-        jscomp_error: [],
       },
     };
 
