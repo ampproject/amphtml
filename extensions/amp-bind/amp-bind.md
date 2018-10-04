@@ -447,7 +447,7 @@ Only binding to the following components and attributes are allowed:
   </tr>
   <tr>
     <td><code>&lt;amp-selector&gt;</code></td>
-    <td><code>[selected]</code><sup>*</sup></td>
+    <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
     <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
   </tr>
   <tr>
