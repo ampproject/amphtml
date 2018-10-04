@@ -156,6 +156,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+
+    if (this.linkerManager_) {
+      this.linkerManager_.dispose();
+    }
+
     for (let i = 0; i < this.requests_.length; i++) {
       this.requests_[i].dispose();
       delete this.requests_[i];
@@ -168,6 +173,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.iniPromise_.then(() => {
         this.transport_.maybeInitIframeTransport(
             this.getAmpDoc().win, this.element);
+        this.linkerManager_.enableFormSupport();
       });
     }
   }

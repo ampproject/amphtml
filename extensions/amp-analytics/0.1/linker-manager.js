@@ -115,7 +115,7 @@ export class LinkerManager {
     return Promise.all(this.allLinkerPromises_)
         .then(() => {
           if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-            this.enableFormSupport_();
+            this.enableFormSupport();
           }
         });
   }
@@ -293,7 +293,11 @@ export class LinkerManager {
   /**
    * Register callback that will handle form sumbits.
    */
-  enableFormSupport_() {
+  enableFormSupport() {
+    if (this.formSubmitUnlistener_) {
+      return;
+    }
+
     this.formSubmitService_.then(formService => {
       this.formSubmitUnlistener_ =
           formService.beforeSubmit(this.handleFormSubmit_.bind(this));
