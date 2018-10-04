@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+/*
+ gulp lint --files extensions/amp-geolocation/0.1/amp-geolocation.js
+ */
+
 import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
 import {waitForBodyPromise} from '../../../src/dom';
 
 /** @const */
@@ -37,12 +40,15 @@ export class AmpGeolocation extends AMP.BaseElement {
 
   }
 
-  /** @private */
-  getCurrentPosition_(currentPositon) {
-    this.latitude_= currentPositon.coords.latitude;
-    this.longitude_= currentPositon.coords.longitude;
+  /**
+  * @param {Object} currentPosition
+  * @private
+  */
+  getCurrentPosition_(currentPosition) {
+    this.latitude_ = currentPosition.coords.latitude;
+    this.longitude_ = currentPosition.coords.longitude;
 
-    /** @type {!Promise<!GeoDef>} */
+    /** @type {!Promise<!GeolocationDef>} */
     const geo = this.addToBody_();
 
     geolocationDeferred.resolve(geo);
@@ -51,9 +57,15 @@ export class AmpGeolocation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    window.navigator.geolocation.getCurrentPosition(this.getCurrentPosition_.bind(this));
+    window.navigator.geolocation.getCurrentPosition(
+        this.getCurrentPosition_.bind(this)
+    );
   }
 
+  /**
+   * @return {!Promise<!GeolocationDef>}
+   * @private
+   */
   addToBody_() {
     const doc = this.win.document;
     /** @type {Object} */
