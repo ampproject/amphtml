@@ -36,7 +36,8 @@
     "allowConsoleError": false,
     "expectAsyncConsoleError": false,
     "restoreAsyncErrorThrows": false,
-    "stubAsyncErrorThrows": false
+    "stubAsyncErrorThrows": false,
+    "module": false
   },
   "settings": {
     "jsdoc": {

@@ -23,7 +23,12 @@ gulp.task('compile-bind-expr', function() {
   const path = 'extensions/amp-bind/0.1/';
 
   const bnf = fs.readFileSync(path + 'bind-expr-impl.jison', 'utf8');
-  const settings = {type: 'lalr', debug: false, moduleType: 'js'};
+  const settings = {
+    type: 'lalr',
+    debug: false,
+    moduleType: 'js',
+    'token-stack': true,
+  };
   const generator = new jison.Generator(bnf, settings);
   const jsModule = generator.generate(settings);
 

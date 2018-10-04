@@ -62,17 +62,7 @@ module.exports = {
     watch: true,
     debug: true,
     basedir: __dirname + '/../../',
-    transform: [
-      [
-        'babelify', {
-          compact: false,
-          // Transform files in node_modules since deps use ES6 export.
-          // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
-          global: true,
-          sourceMapsAbsolute: true,
-        },
-      ],
-    ],
+    transform: ['babelify'],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },

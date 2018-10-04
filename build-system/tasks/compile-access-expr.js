@@ -23,7 +23,12 @@ gulp.task('compile-access-expr', function() {
   const path = 'extensions/amp-access/0.1/';
 
   const bnf = fs.readFileSync(path + 'access-expr-impl.jison', 'utf8');
-  const settings = {type: 'lalr', debug: false, moduleType: 'js'};
+  const settings = {
+    type: 'lalr',
+    debug: false,
+    moduleType: 'js',
+    'token-stack': true,
+  };
   const generator = new jison.Generator(bnf, settings);
   const jsModule = generator.generate(settings);
 

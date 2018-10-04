@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;

@@ -23,6 +23,14 @@ const {exec, execOrDie, getStderr} = require('../exec');
 
 const yarnExecutable = 'npx yarn';
 
+// Transform files in node_modules since deps use ES6 export.
+// https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+const es6Packages = [
+  'document-register-element',
+  'dompurify',
+  'web-animations-js',
+];
+
 /**
  * Writes the given contents to the patched file if updated
  * @param {string} patchedName Name of patched file
@@ -102,6 +110,27 @@ function patchRegisterElement() {
 }
 
 /**
+ * Makes sure ES6 packages in node_modules that are used by the runtime will be
+ * transformed by babelify. This is a no-op if transforms are already enabled.
+ */
+function transformEs6Packages() {
+  es6Packages.forEach(es6Package => {
+    const packageJsonFile = 'node_modules/' + es6Package + '/package.json';
+    const packageJsonContents = fs.readFileSync(packageJsonFile, 'utf8');
+    const packageJson = JSON.parse(packageJsonContents);
+    if (!packageJson['browserify']) {
+      packageJson['browserify'] = {'transform': ['babelify']};
+      const updatedPackageJson = JSON.stringify(packageJson, null, 2);
+      fs.writeFileSync(packageJsonFile, updatedPackageJson, 'utf8');
+      if (!process.env.TRAVIS) {
+        log(colors.green('Enabled ES6 transforms for'),
+            colors.cyan(es6Package));
+      }
+    }
+  });
+}
+
+/**
  * Installs custom lint rules from build-system/eslint-rules to node_modules.
  */
 function installCustomEslintRules() {
@@ -146,6 +175,7 @@ function updatePackages() {
   }
   patchWebAnimations();
   patchRegisterElement();
+  transformEs6Packages();
 }
 
 gulp.task(
