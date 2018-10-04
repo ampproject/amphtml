@@ -16,23 +16,16 @@
 
 import * as mustache from '../../../../third_party/mustache/mustache';
 import * as purifier from '../../../../src/purifier';
-import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 
 describe('amp-mustache 0.2', () => {
   let sandbox;
   let templateElement;
   let template;
-  let viewerCanRenderTemplates = false;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
     templateElement = document.createElement('template');
-    const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
-    getServiceForDocStub.returns({
-      hasCapability: unused => viewerCanRenderTemplates,
-    });
-
     template = new AmpMustache(templateElement);
   });
 
@@ -419,11 +412,7 @@ describe('amp-mustache 0.2', () => {
     });
   });
 
-  describe('viewer can render templates', () => {
-    beforeEach(() => {
-      viewerCanRenderTemplates = true;
-    });
-
+  describe('insert', () => {
     it('should not call mustache parsing', () => {
       sandbox.spy(mustache, 'parse');
       template.compileCallback();
@@ -433,7 +422,7 @@ describe('amp-mustache 0.2', () => {
     it('should not mustache render but still purify html', () => {
       sandbox.spy(purifier, 'purifyHtml');
       sandbox.spy(mustache, 'render');
-      template.render();
+      template.insert('<div>test</div>');
       expect(mustache.render).to.have.not.been.called;
       expect(purifier.purifyHtml).to.have.been.called;
     });
@@ -442,7 +431,7 @@ describe('amp-mustache 0.2', () => {
   it('should unwrap output', () => {
     templateElement./*OK*/innerHTML = '<a>abc</a>';
     template.compileCallback();
-    const result = template.render({});
+    const result = template.insert('<a>abc</a>');
     expect(result.tagName).to.equal('A');
     expect(result./*OK*/innerHTML).to.equal('abc');
   });

@@ -154,7 +154,7 @@ export class Templates {
   }
 
   /**
-   * Renders the specified template element using the supplied data.
+   * Inserts the specified template element.
    * @param {!Element} templateElement
    * @param {string} html
    * @return {!Promise<!Element>}

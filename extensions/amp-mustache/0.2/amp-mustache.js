@@ -111,6 +111,16 @@ export class AmpMustache extends AMP.BaseTemplate {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
 >>>>>>> changes
     }
+    const html = mustacheRender(this.template_, mustacheData);
+
+    return this.purifyHtmlAndSet_(html);
+  }
+
+  /**
+   * Purify the html and inserts it in the DOM.
+   * @param {string} html
+   */
+  purifyHtmlAndSet_(html) {
     const diffing = isExperimentOn(self, 'amp-list-diffing');
     const body = purifyHtml(html, diffing);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
