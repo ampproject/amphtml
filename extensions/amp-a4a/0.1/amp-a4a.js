@@ -47,6 +47,7 @@ import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
+  preloadExtensions,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
 import {
@@ -55,7 +56,6 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

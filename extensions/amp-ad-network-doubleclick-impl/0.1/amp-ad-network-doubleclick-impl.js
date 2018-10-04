@@ -915,8 +915,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
-        !hasExtensionId(
-            creativeMetaData.customElementExtensions, 'amp-ad-exit')) {
+        !hasExtensionId(creativeMetaData, 'amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);

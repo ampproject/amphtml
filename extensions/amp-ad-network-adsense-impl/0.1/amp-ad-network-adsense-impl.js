@@ -464,9 +464,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
-    if (creativeMetaData &&
-        !hasExtensionId(
-            creativeMetaData.customElementExtensions, 'amp-ad-exit')) {
+    if (creativeMetaData && !hasExtensionId(creativeMetaData, 'amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);

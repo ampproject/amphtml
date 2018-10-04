@@ -24,6 +24,7 @@ import {getAmpAdMetadata} from './amp-ad-utils';
 import {hasExtensionId} from '../../../src/service/extensions-impl';
 import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
+import {urls} from '../../../src/config';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -79,10 +80,8 @@ export class TemplateValidator extends Validator {
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
           const creativeMetadata = getAmpAdMetadata(template);
-          const extensions = creativeMetadata['extensions']
-              || creativeMetadata['customElementExtensions'] || [];
           this.addAnalyticsOrMustacheIfApplicable(
-              extensions, parsedResponseBody);
+              creativeMetadata, parsedResponseBody);
           preloadExtensions(creativeMetadata, context.win);
           // TODO(levitzky) Add preload logic for fonts / images.
           return Promise.resolve(
@@ -101,21 +100,41 @@ export class TemplateValidator extends Validator {
    * Adds the mustache or analytics extensions if not already installed.
    * TODO(alabiaga): If not installed we load the 0.1 versions of the
    * extensions. Should we default to the latest version?
-   * @param {!Array<!../../../src/friendly-iframe-embed.CustomElementExtensionDef|string>} extensions
+   * @param {?../../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
    * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
    */
-  addAnalyticsOrMustacheIfApplicable(extensions, parsedResponseBody) {
+  addAnalyticsOrMustacheIfApplicable(creativeMetadata, parsedResponseBody) {
     if (parsedResponseBody.analytics) {
-      const analyticsTag = 'amp-analytics';
-      const ampAnalyticsExt = hasExtensionId(extensions, analyticsTag);
-      if (!ampAnalyticsExt) {
-        extensions.push(analyticsTag);
-      }
+      this.addExtensionIfApplicable_(
+          creativeMetadata,
+          'amp-analytics',
+          urls.cdn + '/v0/amp-analytics-0.1.js');
     }
-    const ampMustacheTag = 'amp-mustache';
-    const ampMustacheExt = hasExtensionId(extensions, ampMustacheTag);
-    if (!ampMustacheExt) {
-      extensions.push(ampMustacheTag);
+    this.addExtensionIfApplicable_(
+        creativeMetadata,
+        'amp-mustache',
+        urls.cdn + '/v0/amp-mustache-0.1.js');
+  }
+
+  /**
+   * @param {?../../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
+   * @param {string} extensionId
+   * @param {string} extensionSrc
+   */
+  addExtensionIfApplicable_(creativeMetadata, extensionId, extensionSrc) {
+    if (creativeMetadata) {
+      const {customElementExtensions, extensions} = creativeMetadata;
+      if (!hasExtensionId(creativeMetadata, extensionId)) {
+        if (extensions) {
+          extensions.push({
+            'custom-element': extensionId,
+            'src': extensionSrc,
+          });
+        }
+        if (customElementExtensions) {
+          customElementExtensions.push(extensionId);
+        }
+      }
     }
   }
 }

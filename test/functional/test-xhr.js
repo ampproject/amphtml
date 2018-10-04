@@ -225,6 +225,9 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should deny AMP origin for different origin in response', () => {
+          const error = 'Returned AMP-Access-Control-Allow-Source-Origin is '
+              + 'not equal to the current: https://other.com vs https://acme.com';
+          expectAsyncConsoleError(error);
           const promise = xhr.fetchJson('/get');
           xhrCreated.then(
               xhr => xhr.respond(
@@ -244,6 +247,8 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should require AMP origin in response for when request', () => {
+          expectAsyncConsoleError('Response must contain the '
+              + 'AMP-Access-Control-Allow-Source-Origin header');
           const promise = xhr.fetchJson('/get');
           xhrCreated.then(
               xhr => xhr.respond(
@@ -826,6 +831,7 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should be rejected when response undefined', () => {
+      expectAsyncConsoleError(/Object expected/);
       sendMessageStub.returns(Promise.resolve());
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -834,6 +840,7 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should be rejected when response null', () => {
+      expectAsyncConsoleError(/Object expected/);
       sendMessageStub.returns(Promise.resolve(null));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -842,6 +849,7 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should be rejected when response is string', () => {
+      expectAsyncConsoleError(/Object expected/);
       sendMessageStub.returns(Promise.resolve('response text'));
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 

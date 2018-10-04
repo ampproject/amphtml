@@ -117,8 +117,21 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
             expect(validatorOutput).to.be.ok;
             expect(validatorOutput.creativeData).to.be.ok;
             const {creativeMetadata} = validatorOutput.creativeData;
+            // should populate the deprecated customElementExtensions field.
             expect(creativeMetadata.customElementExtensions)
                 .to.deep.equal(['amp-analytics', 'amp-mustache']);
+            // Should populate the extensions metadata.
+            expect(creativeMetadata.extensions)
+                .to.deep.equal([
+                  {
+                    'custom-element': 'amp-analytics',
+                    'src': 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js',
+                  },
+                  {
+                    'custom-element': 'amp-mustache',
+                    'src': 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js',
+                  }]
+                );
           });
         });
   });

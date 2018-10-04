@@ -638,13 +638,20 @@ export class Extensions {
 }
 
 /**
- * @param {!Array<!../friendly-iframe-embed.CustomElementExtensionDef|string>} customElementExtensions
+ * @param {!../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} metadata
  * @param {string} extensionId
  * @return {boolean}
  */
-export function hasExtensionId(customElementExtensions, extensionId) {
-  for (let i = 0; i < customElementExtensions.length; i++) {
-    const extensionDefOrId = customElementExtensions[i];
+export function hasExtensionId(metadata, extensionId) {
+  let ext = [];
+  const {extensions, customElementExtensions} = metadata;
+  if (extensions && extensions.length) {
+    ext = extensions;
+  } else if (customElementExtensions && customElementExtensions.length) {
+    ext = customElementExtensions;
+  }
+  for (let i = 0; i < ext.length; i++) {
+    const extensionDefOrId = ext[i];
     if ((extensionDefOrId && typeof extensionDefOrId == 'object'
         && extensionId === extensionDefOrId['custom-element'])
         || (extensionDefOrId === extensionId)) {

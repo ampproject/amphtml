@@ -46,7 +46,8 @@ const EXCLUDE_INI_LOAD =
  * - html: The complete content of an AMP embed, which is itself an AMP
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
- *   array of `extensionIds`.
+ *   array of `extensionIds` via customElementExtensions field or an array of
+ *   extensionIds with their version via extensions field.
  * - customElementExtensions: An optional array of AMP extension IDs.
  *     used in this embed.
  * - extensions: An optional array of AMP extension IDs w/wo versions
@@ -148,8 +149,6 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
-  // Pre-load extensions. The extensions field is the preferred
-  // means of settings extensions as it allows for versions.
   preloadExtensions(spec, win);
 
   const html = mergeHtml(spec);
@@ -644,15 +643,17 @@ export function isInFie(element) {
 }
 
 /**
- * @param {!../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef|!FriendlyIframeSpec} metaData
+ * Preloads extensions. The extensions field is the preferred means as it
+ * supports versions.
+ * @param {?../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef|!FriendlyIframeSpec} metaData
  * @param {!Window} win
  */
 export function preloadExtensions(metaData, win) {
   if (metaData.extensions && metaData.extensions.length) {
     metaData.extensions.forEach(
-        extensionDefOrId => {
-          const extensionId = extensionDefOrId['custom-element'];
-          const version = extensionDefOrId['src'];
+        extensionDef => {
+          const extensionId = extensionDef['custom-element'];
+          const version = extensionDef['src'];
           Services.extensionsFor(win)
               ./*OK*/preloadExtension(extensionId, version);
         });

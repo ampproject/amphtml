@@ -1708,6 +1708,7 @@ describe('amp-a4a', () => {
           {href: 'https://fonts.googleapis.com/css?foobar'},
           {href: 'https://fonts.com/css?helloworld'},
         ],
+        extensions: [],
         images: ['https://some.image.com/a=b', 'https://other.image.com'],
       };
       return createIframePromise().then(fixture => {

@@ -87,16 +87,17 @@ export function getAmpAdMetadata(creative) {
       throw new Error('Invalid runtime offsets');
     }
     const metaData = {};
-    if (metaDataObj['extensions']) {
+    if (metaDataObj['extensions'] && metaDataObj['extensions'].length) {
       metaData.extensions = metaDataObj['extensions'];
       if (!isArray(metaData.extensions)) {
         throw new Error(
             'Invalid extensions', metaData.extensions);
       }
     } else {
-      metaData.customElementExtensions = [];
+      metaData.extensions = [];
     }
-    if (metaDataObj['customElementExtensions']) {
+    if (metaDataObj['customElementExtensions']
+        && metaDataObj['customElementExtensions'].length) {
       metaData.customElementExtensions =
         metaDataObj['customElementExtensions'];
       if (!isArray(metaData.customElementExtensions)) {

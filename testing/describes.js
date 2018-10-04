@@ -671,14 +671,9 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
-<<<<<<< HEAD
     maybeTrackImpression(self);
-    const extensionIds = [];
-    if (spec.extensions) {
-=======
     const extensions = [];
     if (spec.extensions && spec.extensions.length) {
->>>>>>> changes
       spec.extensions.forEach(extensionIdWithVersion => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
