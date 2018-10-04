@@ -532,6 +532,9 @@ export class AmpStory extends AMP.BaseElement {
           this.performTapNavigation_(direction);
         });
 
+    this.advancement_.addProgressListener(
+        (progress, pageId) => this.emitProgress_(progress, pageId));
+
     this.element.addEventListener(EventType.DISPATCH_ACTION, e => {
       if (!getMode().test) {
         return;
@@ -944,6 +947,26 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
+   * Emits an event indicating that the progress of the current page has changed
+   * to the specified value.
+   * @param {number} progress The progress from 0.0 to 1.0.
+   * @param {string} targetPageId Page to update progress for.
+   */
+  emitProgress_(progress, targetPageId) {
+    const targetPage = this.getPageById(targetPageId);
+    const isAutoAdvance =
+      targetPage.element.hasAttribute(Attributes.AUTO_ADVANCE_AFTER);
+    // Don't emit progress for ads, since the progress bar is hidden.
+    // Don't emit progress for auto advance pages, since they have their own
+    // gradual advance mechanism.
+    if (targetPage.isAd() || isAutoAdvance) {
+      return;
+    }
+    this.systemLayer_.updateProgress(targetPageId, progress);
+  }
+
+
+  /**
    * Switches to a particular page.
    * @param {string} targetPageId
    * @return {!Promise}
@@ -1004,11 +1027,8 @@ export class AmpStory extends AMP.BaseElement {
           setAttributeInMutate(oldPage, Attributes.VISITED);
         }
 
-        if (!targetPage.isAd() &&
-          !targetPage.element.hasAttribute(Attributes.AUTO_ADVANCE_AFTER)) {
-          // Indicates that page switch was triggered manually.
-          this.systemLayer_.updateProgress(targetPageId, 1);
-        }
+        // Start progress bar update for target page.
+        this.advancement_.updateProgress(targetPageId);
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
           id: targetPageId,
