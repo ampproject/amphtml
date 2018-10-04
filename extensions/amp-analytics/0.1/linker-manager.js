@@ -112,12 +112,10 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
-    return Promise.all(this.allLinkerPromises_)
-        .then(() => {
-          if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-            this.enableFormSupport();
-          }
-        });
+
+    this.maybeEnableFormSupport();
+
+    return this.allLinkerPromises_;
   }
 
   /**
@@ -291,9 +289,20 @@ export class LinkerManager {
   }
 
   /**
+   * Enable form support if experiment is on.
+   * TODO(ccordry): remove this method and make `enableFormSupport_` public
+   * when fully launched.
+   */
+  maybeEnableFormSupport() {
+    if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
+      this.enableFormSupport_();
+    }
+  }
+
+  /**
    * Register callback that will handle form sumbits.
    */
-  enableFormSupport() {
+  enableFormSupport_() {
     if (this.formSubmitUnlistener_) {
       return;
     }
