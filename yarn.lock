@@ -1633,7 +1633,7 @@ babel-plugin-espower@^2.3.2:
     espurify "^1.6.0"
     estraverse "^4.1.1"
 
-babel-plugin-filter-imports@^2.0.3:
+babel-plugin-filter-imports@2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/babel-plugin-filter-imports/-/babel-plugin-filter-imports-2.0.3.tgz#21f2773d0d74558986dd7af89f6f753d5fa92da3"
   integrity sha512-s2vbul45NHOI665jcJvvIdzZLMIKgUdhofGEbxXn7GxfEB6SePCUbj2qBPjV9oqHuYBQucih/tRhO/GJu8mPkg==
