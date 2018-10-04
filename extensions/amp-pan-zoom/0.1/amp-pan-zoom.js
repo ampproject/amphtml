@@ -44,12 +44,12 @@ const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
 const MAX_ANIMATION_DURATION = 250;
 
-
 const ELIGIBLE_TAGS = {
   'svg': true,
   'DIV': true,
   'AMP-IMG': true,
   'AMP-LAYOUT': true,
+  'AMP-SELECTOR': true,
 };
 
 const SUPPORT_VALIDATION_MSG = `${TAG} should
