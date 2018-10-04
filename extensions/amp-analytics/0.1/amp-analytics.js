@@ -173,7 +173,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.iniPromise_.then(() => {
         this.transport_.maybeInitIframeTransport(
             this.getAmpDoc().win, this.element);
-        this.linkerManager_.enableFormSupport();
+        this.linkerManager_.maybeEnableFormSupport();
       });
     }
   }
