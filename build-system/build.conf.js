@@ -26,6 +26,11 @@ module.exports = {
         [require.resolve('babel-plugin-filter-imports'), {
           'imports': {
             './polyfills/fetch': ['installFetch'],
+            './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+            './polyfills/document-contains': ['installDocContains'],
+            './polyfills/math-sign': ['installMathSign'],
+            './polyfills/object-assign': ['installObjectAssign'],
+            './polyfills/promise': ['installPromise']
           },
         }],
       ]);
