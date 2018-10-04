@@ -84,19 +84,16 @@ export class AmpSkimlinks extends AMP.BaseElement {
      * extension using it we can instanciate it here for now.
      */
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
-
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
-    return Promise.all([
-      whenDocumentReady(
-          /** @type {!Document} */ (this.ampDoc_.getRootNode())
-      ),
-      this.viewer_.getReferrerUrl(),
-    ]).then(promiseResults => {
-      // Get second promise result.
-      this.referrer_ = promiseResults[1];
-      this.startSkimcore_();
-    });
+    return whenDocumentReady(
+        /** @type {!Document} */(this.ampDoc_.getRootNode())
+    )
+        .then(() => this.viewer_.getReferrerUrl())
+        .then(referrer => {
+          this.referrer_ = referrer;
+          this.startSkimcore_();
+        });
   }
 
   /**
@@ -176,16 +173,18 @@ export class AmpSkimlinks extends AMP.BaseElement {
         options
     );
 
-    // We are only interested in the first page scan.
-    linkRewriter.events.on(
-        linkRewriterEvents.PAGE_SCANNED,
-        once(this.onPageScanned_.bind(this))
-    );
+    const eventHandlers = {
+      // We are only interested in the first page scan.
+      [linkRewriterEvents.PAGE_SCANNED]: once(this.onPageScanned_.bind(this)),
+      [linkRewriterEvents.CLICK]: this.onClick_.bind(this),
+    };
 
-    linkRewriter.events.on(
-        linkRewriterEvents.CLICK,
-        this.onClick_.bind(this)
-    );
+    linkRewriter.events.add(event => {
+      const handler = eventHandlers[event.type];
+      if (handler) {
+        handler(event.eventData);
+      }
+    });
 
     return linkRewriter;
   }

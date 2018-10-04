@@ -15,10 +15,8 @@
  */
 
 import {
+  AFFILIATE_STATUS,
   AffiliateLinkResolver,
-  STATUS__AFFILIATE,
-  STATUS__NON_AFFILIATE,
-  STATUS__UNKNOWN,
 } from '../affiliate-link-resolver';
 import {DOMAIN_RESOLVER_API_URL} from '../constants';
 import {Services} from '../../../../src/services';
@@ -57,9 +55,9 @@ describes.fakeWin(
 
       describe('resolveUnknownAnchors', () => {
         const alreadyResolvedDomains = {
-          'merchant1.com': STATUS__AFFILIATE,
-          'non-merchant.com': STATUS__NON_AFFILIATE,
-          'merchant2.com': STATUS__AFFILIATE,
+          'merchant1.com': AFFILIATE_STATUS.AFFILIATE,
+          'non-merchant.com': AFFILIATE_STATUS.NON_AFFILIATE,
+          'merchant2.com': AFFILIATE_STATUS.AFFILIATE,
         };
         let resolver;
         let anchorList;
@@ -191,9 +189,9 @@ describes.fakeWin(
                 resolver.resolveUnknownAnchors(anchorList);
                 expect(requestIsPending).to.be.true;
                 expect(resolver.domains_).to.deep.equal({
-                  'merchant1.com': STATUS__UNKNOWN,
-                  'non-merchant.com': STATUS__UNKNOWN,
-                  'merchant2.com': STATUS__UNKNOWN,
+                  'merchant1.com': AFFILIATE_STATUS.UNKNOWN,
+                  'non-merchant.com': AFFILIATE_STATUS.UNKNOWN,
+                  'merchant2.com': AFFILIATE_STATUS.UNKNOWN,
                 });
               });
         });
@@ -246,7 +244,6 @@ describes.fakeWin(
             const fetchOptions = {
               method: 'GET',
               // Disabled AMP CORS
-              requireAmpResponseSourceOrigin: false,
               ampCors: false,
               // Allow beacon API to set cookies
               credentials: 'include',
@@ -373,7 +370,7 @@ describes.fakeWin(
                     'https://initial-merchant.com'
                 );
                 resolver.domains_ = {
-                  'initial-merchant.com': STATUS__AFFILIATE,
+                  'initial-merchant.com': AFFILIATE_STATUS.AFFILIATE,
                 };
                 // Initial anchor should not be in the asyncResponse list
                 const expectedAsyncData = [

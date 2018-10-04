@@ -19,16 +19,20 @@ import {createTwoStepsResponse} from './link-rewriter/link-rewriter-helpers';
 import {dict} from '../../../src/utils/object';
 import {getNormalizedHostnameFromUrl, isExcludedDomain} from './utils';
 
-
-// Can be monetized
-export const STATUS__AFFILIATE = 'affiliate';
-// Can't be monetized but can be tracked
-export const STATUS__NON_AFFILIATE = 'non-affiliate';
-// Can't be monetized and can't be tracked
-export const STATUS__IGNORE_LINK = 'ignore';
-// We don't know yet if the link can me monetized. Will be considered as
-// 'can be monetized' until we have the answer from the API.
-export const STATUS__UNKNOWN = 'unknown';
+/**
+ * @enum {string}
+ */
+export const AFFILIATE_STATUS = {
+  // Can be monetized
+  AFFILIATE: 'affiliate',
+  // Can't be monetized but can be tracked
+  NON_AFFILIATE: 'non-affiliate',
+  // Can't be monetized and can't be tracked
+  IGNORE: 'ignore',
+  // We don't know yet if the link can me monetized. Will be considered as
+  // 'can be monetized' until we have the answer from the API.
+  UNKNOWN: 'unknown',
+};
 
 /**
  * The AffiliateLinkResolver class is in charge of "resolving"
@@ -97,15 +101,13 @@ export class AffiliateLinkResolver {
     const fetchOptions = {
       method: 'GET',
       // Disabling AMP CORS since API does not support it.
-      requireAmpResponseSourceOrigin: false,
       ampCors: false,
       // Allowing beacon API to set cookies.
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, fetchOptions).then(res => {
-      return res.json();
-    });
+    return this.xhr_.fetchJson(beaconUrl, fetchOptions)
+        .then(res => res.json());
   }
 
   /**
@@ -132,7 +134,8 @@ export class AffiliateLinkResolver {
 
     const domainsToAsk = this.getNewDomains_(anchorList);
     if (domainsToAsk.length) {
-      // Set domains to STATUS__UNKNOWN to mark them as already requested.
+      // Set domains to AFFILIATE_STATUS.UNKNOWN to mark them as already
+      // requested.
       this.markDomainsAsUnknown_(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const unknownAnchors = this.getUnknownAnchors_(anchorList, domainsToAsk);
@@ -172,7 +175,9 @@ export class AffiliateLinkResolver {
           this.getAnchorDomain_(anchor));
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
-      if (status === STATUS__AFFILIATE || status === STATUS__UNKNOWN) {
+      const shouldReplace = status === AFFILIATE_STATUS.AFFILIATE ||
+                            status === AFFILIATE_STATUS.UNKNOWN;
+      if (shouldReplace) {
         replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
 
@@ -190,10 +195,10 @@ export class AffiliateLinkResolver {
    */
   getDomainAffiliateStatus_(domain) {
     if (isExcludedDomain(domain, this.skimOptions_)) {
-      return STATUS__IGNORE_LINK;
+      return AFFILIATE_STATUS.IGNORE;
     }
 
-    return this.domains_[domain] || STATUS__UNKNOWN;
+    return this.domains_[domain] || AFFILIATE_STATUS.UNKNOWN;
   }
 
   /**
@@ -235,10 +240,10 @@ export class AffiliateLinkResolver {
       }
 
       if (isExcludedDomain(domain, this.skimOptions_)) {
-        this.domains_[domain] = STATUS__IGNORE_LINK;
+        this.domains_[domain] = AFFILIATE_STATUS.IGNORE;
       }
 
-      this.domains_[domain] = STATUS__UNKNOWN;
+      this.domains_[domain] = AFFILIATE_STATUS.UNKNOWN;
     });
   }
 
@@ -292,8 +297,8 @@ export class AffiliateLinkResolver {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
       this.domains_[domain] = isAffiliateDomain ?
-        STATUS__AFFILIATE :
-        STATUS__NON_AFFILIATE;
+        AFFILIATE_STATUS.AFFILIATE :
+        AFFILIATE_STATUS.NON_AFFILIATE;
     });
   }
 

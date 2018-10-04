@@ -17,8 +17,8 @@
 import {user} from '../../../../src/log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
-import {EventMessenger} from './event-messenger';
 import {LinkReplacementCache} from './link-replacement-cache';
+import {Observable} from '../../../../src/observable';
 import {isTwoStepsResponse} from './link-rewriter-helpers';
 
 
@@ -55,8 +55,8 @@ export class LinkRewriter {
    * @param {?{linkSelector: string}=} options
    */
   constructor(ampPageDocument, id, resolveUnknownLinks, options) {
-    /** @public {!./event-messenger.EventMessenger} */
-    this.events = new EventMessenger();
+    /** @public {!../../../../src/observable.Observable} */
+    this.events = new Observable();
 
     /** @public {string} */
     this.id = id;
@@ -155,7 +155,9 @@ export class LinkRewriter {
    */
   onDomUpdated() {
     return this.scanLinksOnPage_().then(() => {
-      this.events.send(EVENTS.PAGE_SCANNED);
+      this.events.fire({
+        type: EVENTS.PAGE_SCANNED,
+      });
     });
   }
 

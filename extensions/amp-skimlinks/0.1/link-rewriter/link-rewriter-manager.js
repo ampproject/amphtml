@@ -157,7 +157,12 @@ export class LinkRewriterManager {
       };
 
       suitableLinkRewriters.forEach(linkRewriter => {
-        linkRewriter.events.send(EVENTS.CLICK, eventData);
+        const event = {
+          type: EVENTS.CLICK,
+          eventData,
+        };
+
+        linkRewriter.events.fire(event);
       });
     }
   }
