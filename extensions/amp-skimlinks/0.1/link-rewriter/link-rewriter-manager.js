@@ -69,7 +69,7 @@ export class LinkRewriterManager {
 
     /**
      * @private {!Array<./link-rewriter.LinkRewriter>}
-     * The list of all the LinkRewriter instances registed
+     * The list of all the LinkRewriter instances registered
      * in the page.
      */
     this.linkRewriters_ = [];

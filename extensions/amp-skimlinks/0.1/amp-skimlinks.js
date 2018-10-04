@@ -52,8 +52,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
-    /** @private {?Object} */
-    this.skimOptions_ = null;
+    /** @private {!Object} */
+    this.skimOptions_ = {};
 
     /** @private {?./tracking.Tracking} */
     this.trackingService_ = null;

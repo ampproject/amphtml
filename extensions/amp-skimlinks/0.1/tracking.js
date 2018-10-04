@@ -40,7 +40,7 @@ export class Tracking {
    * Use tracking instance to track page impressions,
    * link impressions and non-affiliated clicks.
    * @param {!AmpElement} element
-   * @param {?Object} skimOptions
+   * @param {!Object} skimOptions
    */
   constructor(element, skimOptions) {
     /** @private {boolean} */
@@ -59,7 +59,7 @@ export class Tracking {
     };
 
     /** @private {!Object} */
-    this.skimOptions_ = skimOptions || {};
+    this.skimOptions_ = skimOptions;
     this.analytics_ = this.setupAnalytics_(element);
   }
 
@@ -274,7 +274,7 @@ export class Tracking {
       urls[anchor.href].count += 1;
 
       if (urls[anchor.href].ae === 1) {
-        numberAffiliateLinks = numberAffiliateLinks + 1;
+        numberAffiliateLinks += 1;
       }
     });
 

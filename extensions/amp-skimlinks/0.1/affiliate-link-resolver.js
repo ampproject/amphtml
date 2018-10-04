@@ -56,7 +56,7 @@ export const AFFILIATE_STATUS = {
 export class AffiliateLinkResolver {
   /**
    * @param {!../../../src/service/xhr-impl.Xhr} xhr
-   * @param {?Object} skimOptions
+   * @param {!Object} skimOptions
    * @param {!./waypoint.Waypoint} waypoint
    */
   constructor(xhr, skimOptions, waypoint) {
@@ -64,13 +64,13 @@ export class AffiliateLinkResolver {
     this.xhr_ = xhr;
 
     /** @private {!Object} */
-    this.skimOptions_ = skimOptions || {};
+    this.skimOptions_ = skimOptions;
 
     /** @private {!./waypoint.Waypoint} */
     this.waypoint_ = waypoint;
 
-    /** @private {!Object<string,string>} */
-    this.domains_ = {};
+    /** @private {!JsonObject} */
+    this.domains_ = dict({});
 
     /**
      * @public {?Promise}
@@ -87,7 +87,7 @@ export class AffiliateLinkResolver {
    * This method is public since it can also be called externally in case
    * of the "beacon fallback". (see amp-skimlinks.js)
    * @param {!Array<string>} domains
-   * @return {!Promise}
+   * @return {!Promise<!JsonObject>}
    * @public
    */
   fetchDomainResolverApi(domains) {
