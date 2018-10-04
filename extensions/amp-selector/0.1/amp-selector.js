@@ -17,7 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
@@ -431,18 +431,18 @@ export class AmpSelector extends AMP.BaseElement {
     if (this.element.hasAttribute('disabled')) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
-      case KeyCodes.LEFT_ARROW: /* fallthrough */
-      case KeyCodes.UP_ARROW: /* fallthrough */
-      case KeyCodes.RIGHT_ARROW: /* fallthrough */
-      case KeyCodes.DOWN_ARROW:
+    const {key} = event;
+    switch (key) {
+      case Keys.LEFT_ARROW: /* fallthrough */
+      case Keys.UP_ARROW: /* fallthrough */
+      case Keys.RIGHT_ARROW: /* fallthrough */
+      case Keys.DOWN_ARROW:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           this.navigationKeyDownHandler_(event);
         }
         return;
-      case KeyCodes.ENTER: /* fallthrough */
-      case KeyCodes.SPACE:
+      case Keys.ENTER: /* fallthrough */
+      case Keys.SPACE:
         this.selectionKeyDownHandler_(event);
         return;
     }
@@ -456,20 +456,20 @@ export class AmpSelector extends AMP.BaseElement {
   navigationKeyDownHandler_(event) {
     const doc = this.win.document;
     let dir = 0;
-    switch (event.keyCode) {
-      case KeyCodes.LEFT_ARROW:
+    switch (event.key) {
+      case Keys.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
         break;
-      case KeyCodes.UP_ARROW:
+      case Keys.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isRTL(doc) ? -1 : 1;
         break;
-      case KeyCodes.DOWN_ARROW:
+      case Keys.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
@@ -506,8 +506,8 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   selectionKeyDownHandler_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();
         const el = dev().assertElement(event.target);

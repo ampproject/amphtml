@@ -15,7 +15,7 @@
  */
 
 import '../amp-selector';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
@@ -88,7 +88,7 @@ describes.realWin('amp-selector', {
     function keyPress(ampSelector, key, opt_target) {
       const impl = ampSelector.implementation_;
       const event = {
-        keyCode: key,
+        key,
         preventDefault: () => {},
         target: opt_target,
       };
@@ -557,14 +557,14 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
       expect(impl.options_[3].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
       expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -585,19 +585,19 @@ describes.realWin('amp-selector', {
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
       expect(impl.options_[4].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.not.have.been.called;
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
       expect(impl.options_[4].hasAttribute('selected')).to.be.false;
       expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[2]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[2]);
       expect(impl.options_[2].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
       expect(setSelectionSpy).to.have.been.calledTwice;
@@ -620,7 +620,7 @@ describes.realWin('amp-selector', {
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.element.children[0]);
+      keyPress(ampSelector, Keys.SPACE, impl.element.children[0]);
       expect(setSelectionSpy).to.not.have.been.called;
       expect(clearSelectionSpy).to.not.have.been.called;
     });
@@ -943,7 +943,7 @@ describes.realWin('amp-selector', {
             ampSelector.implementation_,
             'navigationKeyDownHandler_');
         ampSelector.build();
-        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        keyPress(ampSelector, Keys.RIGHT_ARROW);
         expect(spy).to.not.have.been.called;
       });
 
@@ -961,11 +961,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
-        keyPress(ampSelector, KeyCodes.LEFT_ARROW);
+        keyPress(ampSelector, Keys.LEFT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(-1);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(0);
-        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        keyPress(ampSelector, Keys.RIGHT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1021,11 +1021,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        keyPress(ampSelector, KeyCodes.DOWN_ARROW);
+        keyPress(ampSelector, Keys.DOWN_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        keyPress(ampSelector, KeyCodes.UP_ARROW);
+        keyPress(ampSelector, Keys.UP_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;

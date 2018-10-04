@@ -49,7 +49,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
   LocalizationService,
@@ -1152,11 +1152,11 @@ export class AmpStory extends AMP.BaseElement {
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    switch (e.keyCode) {
-      case KeyCodes.LEFT_ARROW:
+    switch (e.key) {
+      case Keys.LEFT_ARROW:
         rtlState ? this.next_() : this.previous_();
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         rtlState ? this.previous_() : this.next_();
         break;
     }

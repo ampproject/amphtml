@@ -15,7 +15,7 @@
  */
 
 import '../amp-social-share';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 
 const STRINGS = {
@@ -263,11 +263,11 @@ describes.realWin('amp-social-share', {
     return getShare('twitter').then(el => {
       const nonActivationEvent = {
         preventDefault: () => {},
-        keyCode: KeyCodes.RIGHT_ARROW,
+        key: Keys.RIGHT_ARROW,
       };
       const activationEvent = {
         preventDefault: () => {},
-        keyCode: KeyCodes.SPACE,
+        key: Keys.SPACE,
       };
       el.implementation_.handleKeyPress_(nonActivationEvent);
       expect(el.implementation_.win.open).to.not.have.been.called;
