@@ -72,6 +72,10 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
@@ -85,9 +89,6 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -199,8 +200,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?Response>} */
-    this.sraDeferred = new Deferred();
+    /** @protected {?Deferred<?Response>} */
+    this.sraDeferred = null;
 
     /** @private {?RefreshManager} */
     this.refreshManager_ = null;
@@ -336,12 +337,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Executes page level experiment diversion and pushes any experiment IDs
    * onto this.experimentIds.
+   * @param {?string} urlExperimentId
    * @visibleForTesting
    */
-  setPageLevelExperiments() {
+  setPageLevelExperiments(urlExperimentId) {
     if (!isCdnProxy(this.win) && !isExperimentOn(
         this.win, 'expDfpInvOrigDeprecated')) {
       this.experimentIds.push('21060933');
+    }
+    let forcedExperimentId;
+    if (urlExperimentId) {
+      forcedExperimentId = {
+        // SRA
+        '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
+        '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+        '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+
+      }[urlExperimentId];
+      if (forcedExperimentId) {
+        this.experimentIds.push(forcedExperimentId);
+      }
     }
     const experimentInfoMap =
     /** @type {!Object<string,
@@ -349,10 +364,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // Only select into SRA experiments if SRA not already explicitly
         // enabled and refresh is not being used by any slot.
         [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () => !this.win.document./*OK*/querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'),
+          isTrafficEligible: () => !forcedExperimentId &&
+              !this.win.document./*OK*/querySelector(
+                  'meta[name=amp-ad-enable-refresh], ' +
+                  'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                  'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
@@ -374,6 +390,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   randomlySelectUnsetExperiments_(experimentInfoMap) {
     return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  }
+
+  /**
+   * For easier unit testing.
+   * @return {?string}
+   */
+  extractUrlExperimentId_() {
+    return extractUrlExperimentId(this.win, this.element);
   }
 
   /** @private */
@@ -400,14 +424,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
-    this.setPageLevelExperiments();
+    this.setPageLevelExperiments(this.extractUrlExperimentId_());
     this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search)) ||
         !!this.win.document.querySelector(
             'meta[name=amp-ad-doubleclick-sra]') ||
-        !!this.experimentIds.filter(exp =>
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA ||
-          exp == DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER).length;
+        [DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER].some(
+            eid => this.experimentIds.indexOf(eid) >= 0);
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
         .whenFirstVisible().then(() =>
           getIdentityToken(
@@ -545,6 +569,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(consentState, opt_rtcResponsesPromise) {
+    if (this.useSra) {
+      this.sraDeferred = this.sraDeferred || new Deferred();
+    }
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -1054,7 +1081,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
-    this.sraDeferred = new Deferred();
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
     // responses returned such that sraDeferred being non-null indicates this
@@ -1181,22 +1207,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
+                // Ensure deferred exists, may not if getAdUrl did not yet
+                // execute.
+                typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
+                  new Deferred();
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
               let sraUrl;
               // Construct and send SRA request.
-              // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given which is then passed to resolver used
-              // for sendXhrRequest.
-              const sraRequestAdUrlResolvers =
-              typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(
-                  (creative, headersObj, done) => {
-                    checkStillCurrent();
-                    sraBlockCallbackHandler(creative, headersObj, done,
-                        sraRequestAdUrlResolvers, sraUrl);
-                  });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
@@ -1210,6 +1229,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
+                    // Chunk handler called with metadata and creative for each
+                    // slot in order of URLs given which is then passed to
+                    // resolver used for sendXhrRequest.
+                    const sraRequestAdUrlResolvers =
+                    typeInstances.map(instance => instance.sraDeferred.resolve);
+                    const slotCallback = metaJsonCreativeGrouper(
+                        (creative, headersObj, done) => {
+                          checkStillCurrent();
+                          sraBlockCallbackHandler(creative, headersObj, done,
+                              sraRequestAdUrlResolvers, sraUrl);
+                        });
                     lineDelimitedStreamer(this.win, response, slotCallback);
                     return Promise.all(typeInstances.map(
                         instance => instance.sraDeferred.promise));

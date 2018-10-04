@@ -250,28 +250,94 @@ describes.realWin('amp-pan-zoom', {
   });
 
   describe('gestures', () => {
-    it('should pan correctly via mouse when zoomed', () => {
-      return getPanZoom()
-          .then(() => el.layoutCallback())
-          .then(() => impl.transform(0, 0, 2))
-          .then(() => {
-            expect(svg.style.transform).to
-                .equal('translate(0px, 0px) scale(2)');
-
-            const mouseDown = createPointerEvent('mousedown', 10, 10);
-            const mouseMove = createPointerEvent('mousemove', 20, 20);
-            const mouseUp = createPointerEvent('mouseup', 20, 20);
-            const transformEndPromise = listenOncePromise(el, 'transformEnd');
-
-            el.dispatchEvent(mouseDown);
-            el.dispatchEvent(mouseMove);
-            el.dispatchEvent(mouseUp);
-            return transformEndPromise;
-          }).then(() => {
-            expect(svg.style.transform).to
-                .equal('translate(10px, 10px) scale(2)');
-          });
+    it('should pan correctly via mouse when zoomed', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      await impl.transform(0, 0, 2);
+      expect(svg.style.transform).to.equal('translate(0px, 0px) scale(2)');
+      const mouseDown = createPointerEvent('mousedown', 10, 10);
+      const mouseMove = createPointerEvent('mousemove', 20, 20);
+      const mouseUp = createPointerEvent('mouseup', 20, 20);
+      const transformEndPromise = listenOncePromise(el, 'transformEnd');
+      el.dispatchEvent(mouseDown);
+      el.dispatchEvent(mouseMove);
+      el.dispatchEvent(mouseUp);
+      await transformEndPromise;
+      expect(svg.style.transform).to.equal('translate(10px, 10px) scale(2)');
     });
   });
 
+  describe('transformEnd', () => {
+    it('should trigger only once after double tap zoom', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      const transformEndPromise = listenOncePromise(el, 'transformEnd');
+      const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+      impl.handleDoubleTap({clientX: 10, clientY: 10});
+      await transformEndPromise;
+      expect(actionTriggerSpy).to.be.calledOnce;
+    });
+
+    it('should not trigger while pinch zooming', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+      await impl.handlePinch({
+        centerClientX: 10,
+        centerClientY: 10,
+        deltaX: 10,
+        deltaY: 10,
+        dir: 1,
+        last: false,
+      });
+      expect(actionTriggerSpy).not.to.be.called;
+    });
+
+    it('should trigger exactly once after pinch zoom ends', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      const transformEndPromise = listenOncePromise(el, 'transformEnd');
+      const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+      impl.handlePinch({
+        centerClientX: 10,
+        centerClientY: 10,
+        deltaX: 10,
+        deltaY: 10,
+        dir: 1,
+        last: true, // This indicates zoom ended
+      });
+      await transformEndPromise;
+      expect(actionTriggerSpy).to.be.calledOnce;
+    });
+
+    it('should not trigger while panning', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+      await impl.handleSwipe({
+        deltaX: 10,
+        deltaY: 10,
+        last: false,
+        velocityX: 10,
+        velocityY: 10,
+      });
+      expect(actionTriggerSpy).not.to.be.called;
+    });
+
+    it('should trigger exactly once after panning ends', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      const transformEndPromise = listenOncePromise(el, 'transformEnd');
+      const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+      impl.handleSwipe({
+        deltaX: 10,
+        deltaY: 10,
+        last: true, // This indicates panning ended.
+        velocityX: 10,
+        velocityY: 10,
+      });
+      await transformEndPromise;
+      expect(actionTriggerSpy).to.be.calledOnce;
+    });
+  });
 });
