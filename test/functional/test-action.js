@@ -23,7 +23,7 @@ import {
 } from '../../src/service/action-impl';
 import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {KeyCodes} from '../../src/utils/key-codes';
+import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
@@ -1109,7 +1109,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1125,7 +1125,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'option');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1138,7 +1138,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: Keys.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1148,7 +1148,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(window.document.addEventListener).to.have.been.calledWith('keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('input');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: Keys.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
