@@ -22,10 +22,11 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
@@ -35,7 +36,8 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
-
+// Represents the correct value of KeyboardEvent.which for the Right Arrow
+const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
 describes.realWin('amp-story', {
   amp: {
@@ -278,8 +280,8 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.keyCode = KeyCodes.RIGHT_ARROW;
-    eventObj.which = KeyCodes.RIGHT_ARROW;
+    eventObj.key = Keys.RIGHT_ARROW;
+    eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :
@@ -644,6 +646,68 @@ describes.realWin('amp-story', {
             expect(dispatchStub).to.have.been.calledWith(
                 Action.TOGGLE_SUPPORTED_BROWSER, true
             );
+          });
+    });
+  });
+
+  describe('amp-story custom sidebar', () => {
+    it('should show the sidebar control if a sidebar exists', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(story.storeService_
+                .get(StateProperty.HAS_SIDEBAR_STATE)).to.be.true;
+          });
+    });
+
+    it('should open the sidebar on button click', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      const executeSpy = sandbox.spy();
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: executeSpy,
+          });
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+            expect(executeSpy).to.have.been.calledWith(story.sidebar_, 'open',
+                null, null, null, null, ActionTrust.HIGH);
+          });
+    });
+
+    it('should unpause the story when the sidebar is closed', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+          }).then(() => {
+            story.sidebar_.removeAttribute('open');
+          }).then(() => {
+            expect(story.storeService_.get(StateProperty.SIDEBAR_STATE))
+                .to.be.false;
           });
     });
   });

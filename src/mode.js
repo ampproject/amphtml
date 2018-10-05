@@ -27,6 +27,8 @@ import {parseQueryString_} from './url-parse-query-string';
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
+ *   runtime: (null|string|undefined),
+ *   a4aId: (null|string|undefined),
  * }}
  */
 export let ModeDef;
