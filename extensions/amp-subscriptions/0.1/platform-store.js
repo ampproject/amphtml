@@ -29,6 +29,15 @@ export let EntitlementChangeEventDef;
 /** @const */
 const TAG = 'amp-subscriptions';
 
+/**
+ * @typedef {{
+ *   platform: !./subscription-platform.SubscriptionPlatform,
+ *   weight: number,
+ * }}
+ */
+let PlatformWeightDef;
+
+
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -395,8 +404,6 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatform_() {
-    const localPlatform = this.getLocalPlatform();
-
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
@@ -411,21 +418,12 @@ export class PlatformStore {
       }
     }
 
-    const platformWeights = this.getAllPlatformWeights_();
-    platformWeights.sort((platform1, platform2) => {
-      // Force local platform to win ties
-      if (platform2.weight == platform1.weight &&
-        platform2.platform == localPlatform) {
-        return 1;
-      }
-      return platform2.weight - platform1.weight;
-    });
-    return platformWeights[0].platform;
+    return this.rankPlatformsByWeight_(this.getAllPlatformWeights_());
   }
 
   /**
    * Calculate and return weights for all platforms
-   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
+   * @return {!Array<!PlatformWeightDef>}
    * @private
    */
   getAllPlatformWeights_() {
@@ -461,6 +459,24 @@ export class PlatformStore {
   }
 
   /**
+   * @param {!Array<!PlatformWeightDef>} platformWeights
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  rankPlatformsByWeight_(platformWeights) {
+    const localPlatform = this.getLocalPlatform();
+    platformWeights.sort((platform1, platform2) => {
+      // Force local platform to win ties
+      if (platform2.weight == platform1.weight &&
+        platform2.platform == localPlatform) {
+        return 1;
+      }
+      return platform2.weight - platform1.weight;
+    });
+    return platformWeights[0].platform;
+  }
+
+  /**
    * Returns most qualified platform for the specified factor.
    *
    * In the end candidate with max weight is selected. However if candidate's
@@ -471,22 +487,13 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    const localPlatform = this.getLocalPlatform();
-    /** @type {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>} */
+    /** @type {!Array<!PlatformWeightDef>} */
     const platformWeights = this.getAvailablePlatforms().map(platform => {
       const factorValue = platform.getSupportedScoreFactor(factor);
       const weight = (typeof factorValue == 'number') ? factorValue : 0;
       return {platform, weight};
     });
-    platformWeights.sort((platform1, platform2) => {
-      // Force local platform to win ties.
-      if (platform2.weight == platform1.weight &&
-        platform2.platform == localPlatform) {
-        return 1;
-      }
-      return platform2.weight - platform1.weight;
-    });
-    return platformWeights[0].platform;
+    return this.rankPlatformsByWeight_(platformWeights);
   }
 
   /**
