@@ -52,7 +52,8 @@ export const CommonSignals = {
   UNLOAD: 'unload',
 
   /**
-   * The element's size has changed and it now manages it's own size
+   * The changeSize function has been called on the element and it is now
+   * responsible for managing its own size.
    */
-  SIZE_CHANGED: 'size-changed',
+  CHANGE_SIZE_END: 'change-size-end',
 };

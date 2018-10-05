@@ -1205,8 +1205,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should signal size-changed when size changed', () => {
       const element = new ElementClass();
       element.changeSize();
-      expect(element.signals().get(CommonSignals.SIZE_CHANGED)).to.be.ok;
-      return element.signals().whenSignal(CommonSignals.SIZE_CHANGED);
+      expect(element.signals().get(CommonSignals.CHANGE_SIZE_END)).to.be.ok;
+      return element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END);
     });
 
     describe('unlayoutCallback', () => {
