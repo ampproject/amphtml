@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 
@@ -115,7 +115,7 @@ function isHandledByEventTarget(e) {
     // Various AMP components consume keyboard events by preventing the default.
     return true;
   }
-  if (e.keyCode == KeyCodes.ESCAPE) {
+  if (e.key == Keys.ESCAPE) {
     // ESC is always a valid key for things like keyboard shortcuts, even if the
     // focus is on an input control, for example.
     return false;
@@ -123,7 +123,7 @@ function isHandledByEventTarget(e) {
   switch (e.target.nodeName) {
     case 'INPUT':
       // For checkboxes, only allow swallowing the space key event.
-      return e.target.type != 'checkbox' || e.keyCode == KeyCodes.SPACE;
+      return e.target.type != 'checkbox' || e.key == Keys.SPACE;
     case 'TEXTAREA':
     case 'BUTTON':
     case 'SELECT':
