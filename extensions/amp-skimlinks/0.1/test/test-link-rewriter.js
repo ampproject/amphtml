@@ -24,8 +24,8 @@ import {
   EVENTS as linkRewriterEvents,
 } from '../link-rewriter/constants';
 import {Services} from '../../../../src/services';
+import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {createTwoStepsResponse} from '../link-rewriter/link-rewriter-helpers';
 
 describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
   let rootDocument, linkRewriterManager, win;
@@ -412,7 +412,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     rootDocument = env.ampdoc.getRootNode();
 
     createResolveResponseHelper = (syncData, asyncData) => {
-      const twoStepsResponse = createTwoStepsResponse(syncData, asyncData);
+      const twoStepsResponse = new TwoStepsResponse(syncData, asyncData);
       return env.sandbox.stub().returns(twoStepsResponse);
     };
 
@@ -445,9 +445,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         expect(() => {
           createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
         }).to.throw(
-            'Invalid response from provided resolveUnknownLinks, use the ' +
-            'return value of ' +
-            'createTwoStepsResponse(syncResponse, asyncResponse)'
+            'Invalid response from provided "resolveUnknownLinks" function.' +
+          '"resolveUnknownLinks" should return an instance of TwoStepsResponse'
         )
       );
     });

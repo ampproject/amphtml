@@ -84,10 +84,9 @@ export class LinkRewriterManager {
   /**
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
-   * @param {!function(Array<HTMLElement>): !./link-rewriter.TwoStepsResponse} resolveUnknownLinks
+   * @param {!function(Array<HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
    *   - Function to determine which anchor should be replaced and by what URL.
-   *     See './link-rewriter-helper.createTwoStepsResponse' to create
-   *     your `TwoStepsResponse` object.
+   *     Should return an instance of './two-steps-response.TwoStepsResponse'
    * @param {?{linkSelector: string}=} options
    *   - linkSelector is an optional CSS selector to restrict
    *    which anchors the link rewriter should handle.

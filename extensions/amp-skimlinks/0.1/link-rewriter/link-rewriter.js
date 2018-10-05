@@ -19,14 +19,11 @@ import {user} from '../../../../src/log';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
-import {isTwoStepsResponse} from './link-rewriter-helpers';
+import {TwoStepsResponse} from './two-steps-response';
 
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
-
-/** @typedef {!{syncResponse: ?AnchorReplacementList, asyncResponse: ?Promise<!AnchorReplacementList>}} */
-export let TwoStepsResponse;
 
 
 /**
@@ -51,7 +48,7 @@ export class LinkRewriter {
   /**
    * @param {!Document} ampPageDocument - Document of the iframe when loaded in viewer
    * @param {string} id
-   * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
+   * @param {function(Array<HTMLElement>):!TwoStepsResponse} resolveUnknownLinks
    * @param {?{linkSelector: string}=} options
    */
   constructor(ampPageDocument, id, resolveUnknownLinks, options) {
@@ -65,7 +62,7 @@ export class LinkRewriter {
     this.ampPageDocument_ = ampPageDocument;
 
 
-    /** @private {function(!Array<!HTMLElement>):TwoStepsResponse} */
+    /** @private {function(!Array<!HTMLElement>):!TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
     /** @private {string} */
@@ -191,9 +188,9 @@ export class LinkRewriter {
         unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-    user().assert(isTwoStepsResponse(twoStepsResponse),
-        'Invalid response from provided resolveUnknownLinks, use the return ' +
-        'value of createTwoStepsResponse(syncResponse, asyncResponse)');
+    user().assert(twoStepsResponse instanceof TwoStepsResponse,
+        'Invalid response from provided "resolveUnknownLinks" function.' +
+        '"resolveUnknownLinks" should return an instance of TwoStepsResponse');
 
     if (twoStepsResponse.syncResponse) {
       this.anchorReplacementCache_.updateReplacementUrls(

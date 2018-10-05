@@ -15,7 +15,7 @@
  */
 
 import {DOMAIN_RESOLVER_API_URL} from './constants';
-import {createTwoStepsResponse} from './link-rewriter/link-rewriter-helpers';
+import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {dict} from '../../../src/utils/object';
 import {getNormalizedHostnameFromUrl, isExcludedDomain} from './utils';
 
@@ -124,7 +124,7 @@ export class AffiliateLinkResolver {
    * }
    *
    * @param {!Array<!HTMLElement>} anchorList
-   * @return {!./link-rewriter/link-rewriter.TwoStepsResponse}
+   * @return {!./link-rewriter/two-steps-response.TwoStepsResponse}
    * @public
    */
   resolveUnknownAnchors(anchorList) {
@@ -144,7 +144,7 @@ export class AffiliateLinkResolver {
     }
 
     // Returns an object with a sync reponse and an async response.
-    return createTwoStepsResponse(alreadyResolvedResponse,
+    return new TwoStepsResponse(alreadyResolvedResponse,
         willBeResolvedPromise);
   }
 
