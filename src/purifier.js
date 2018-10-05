@@ -27,7 +27,7 @@ import {remove} from './utils/array';
 import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
-import purify from 'dompurify/dist/purify.ejs';
+import purify from 'dompurify/dist/purify.es';
 
 /** @private @const {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}} */
 const DOMPurify = purify(self);
