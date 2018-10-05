@@ -115,7 +115,7 @@ export class LinkerManager {
 
     this.maybeEnableFormSupport();
 
-    return this.allLinkerPromises_;
+    return Promise.all(this.allLinkerPromises_);
   }
 
   /**
