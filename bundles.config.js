@@ -133,6 +133,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-geo', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-geolocation',version: '0.1',type: TYPES.MISC},
   {name: 'amp-gfycat', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-gist', version: '0.1', type: TYPES.MISC},
   {
