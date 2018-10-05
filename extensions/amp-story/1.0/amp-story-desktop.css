@@ -91,7 +91,9 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[distance="0"],
-[desktop] amp-story-page[distance="1"] {
+[desktop] amp-story-page[distance="1"],
+[desktop] amp-story-page[distance="2"],
+ {
   /* TODO(alanorozco): Enable transition for distance = 2.
    * For some reason, enabling it breaks layout scheduling. */
   transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
@@ -154,8 +156,10 @@ amp-story[standalone][desktop] {
   left: 0 !important;
 }
 
-[desktop] amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
+[desktop] amp-story-page[i-amphtml-two-previous-page],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-two-next-page]{
+  /* -150% + 30% */
+  transform: scale(0.9) translateX(calc(-300% - 128px)) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[i-amphtml-previous-page],
@@ -177,6 +181,13 @@ amp-story[standalone][desktop] {
 [dir=rtl] .prev-container > .i-amphtml-story-page-sentinel {
   /* 50% - 15% */
   transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
+}
+
+
+[desktop] amp-story-page[i-amphtml-two-next-page],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-two-previous-page] {
+  /* 150% - 30% */
+  transform: scale(0.9) translate(calc(150% + 128px), 0%) !important;
 }
 
 /**

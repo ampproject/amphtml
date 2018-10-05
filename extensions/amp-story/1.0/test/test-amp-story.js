@@ -714,43 +714,23 @@ describes.realWin('amp-story', {
 
 
   describe('desktop attributes', () => {
-    it('should add next page attribute', () => {
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
-
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page1 = pages[1];
-      return story.layoutCallback()
-          .then(() => {
-            expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
-          });
-    });
-
-    it('should add previous page attribute', () => {
+    it('should add all the distance dependedent page attributes', () => {
       sandbox.stub(story, 'maybePreloadBookend_').returns();
       sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
-
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page0 = pages[0];
+      const pages = createPages(
+          story.element, 3, ['page-0', 'page-1', 'page-2']);
+      story.buildCallback();
       return story.layoutCallback()
-          .then(() => story.switchTo_('page-1'))
           .then(() => {
-            expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
-          });
-    });
-
-    it('should add previous visited attribute', () => {
-      sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
-
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page0 = pages[0];
-      return story.layoutCallback()
-          .then(() => story.switchTo_('page-1'))
+            expect(pages[1].hasAttribute('i-amphtml-next-page')).to.be.true;
+            expect(pages[2].hasAttribute('i-amphtml-two-next-page')).to.be.true;
+          })
+          .then(() => story.switchTo_('page-2'))
           .then(() => {
-            expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
+            expect(pages[1].hasAttribute('i-amphtml-previous-page')).to.be.true;
+            expect(pages[0].hasAttribute('i-amphtml-two-previous-page'))
+                .to.be.true;
           });
     });
   });

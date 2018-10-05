@@ -136,7 +136,8 @@ const Attributes = {
   // Attributes that desktop css looks for to decide where pages will be placed
   PREVIOUS: 'i-amphtml-previous-page', // shown in left pane
   NEXT: 'i-amphtml-next-page', // shown in right pane
-  VISITED: 'i-amphtml-visited', // stacked offscreen to left
+  TWO_PREVIOUS: 'i-amphtml-two-previous-page', // shown in left pane
+  TWO_NEXT: 'i-amphtml-two-next-page', // shown in right pane
 };
 
 /**
@@ -234,6 +235,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.nextPage_ = null;
+
+    /** @private {?./amp-story-page.AmpStoryPage} */
+    this.nMinus2Page_ = null;
+
+    /** @private {?./amp-story-page.AmpStoryPage} */
+    this.nPlus2Page_ = null;
 
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
@@ -994,9 +1001,6 @@ export class AmpStory extends AMP.BaseElement {
       () => {
         if (oldPage) {
           oldPage.setState(PageState.NOT_ACTIVE);
-
-          // Indication that this should be offscreen to left in desktop view.
-          setAttributeInMutate(oldPage, Attributes.VISITED);
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
@@ -1067,8 +1071,8 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * Clear existing preview attributes, Check to see if there is a next or
-   * previous page, set new attributes.
+   * Clear existing preview attributes, checks to see if there are any pages
+   * within a page distance of 2 from the target, set new attributes.
    * @param {!./amp-story-page.AmpStoryPage} targetPage
    * @private
    */
@@ -1083,10 +1087,26 @@ export class AmpStory extends AMP.BaseElement {
       this.nextPage_ = null;
     }
 
+    if (this.nMinus2Page_) {
+      removeAttributeInMutate(this.nMinus2Page_, Attributes.TWO_PREVIOUS);
+      this.nMinus2Page_ = null;
+    }
+
+    if (this.nPlus2Page_) {
+      removeAttributeInMutate(this.nPlus2Page_, Attributes.TWO_NEXT);
+      this.nPlus2Page_ = null;
+    }
+
     const prevPageId = targetPage.getPreviousPageId();
     if (prevPageId) {
       this.previousPage_ = this.getPageById(prevPageId);
       setAttributeInMutate(this.previousPage_, Attributes.PREVIOUS);
+
+      const prevTwoID = this.previousPage_.getPreviousPageId();
+      if (prevTwoID) {
+        this.nMinus2Page_ = this.getPageById(prevTwoID);
+        setAttributeInMutate(this.nMinus2Page_, Attributes.TWO_PREVIOUS);
+      }
     }
 
     const nextPageId = targetPage.getNextPageId(
@@ -1094,6 +1114,13 @@ export class AmpStory extends AMP.BaseElement {
     if (nextPageId) {
       this.nextPage_ = this.getPageById(nextPageId);
       setAttributeInMutate(this.nextPage_, Attributes.NEXT);
+
+      const nextTwoID = this.nextPage_.getNextPageId(
+          /* opt_isAutomaticAdvance */ false);
+      if (nextTwoID) {
+        this.nPlus2Page_ = this.getPageById(nextTwoID);
+        setAttributeInMutate(this.nPlus2Page_, Attributes.TWO_NEXT);
+      }
     }
   }
 
@@ -1896,15 +1923,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    const switchPromise = this.switchTo_(
-        dev().assertElement(this.pages_[0].element).id);
-
-    // Reset all pages so that they are offscreen to right instead of left in
-    // desktop view.
-    switchPromise.then((() => {
-      this.pages_.forEach(page =>
-        removeAttributeInMutate(page, Attributes.VISITED));
-    }));
+    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 
 
