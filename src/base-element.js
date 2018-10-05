@@ -508,6 +508,13 @@ export class BaseElement {
   }
 
   /**
+   * Called when requested to overflow
+   */
+  overflowCallback() {
+
+  }
+
+  /**
    * Requests the element to unload any expensive resources when the element
    * goes into non-visible state. The scope is up to the actual component.
    * The component must return `true` if it'd like to later receive

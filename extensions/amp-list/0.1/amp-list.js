@@ -189,6 +189,16 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  overflowCallback() {
+    if (this.element.hasAttribute('auto-resize')) {
+      this.applyAutoResize_();
+    }
+  }
+
+
+  /**
    * Creates and returns <div> that contains the template-rendered children.
    * @return {!Element}
    * @private
@@ -467,46 +477,50 @@ export class AmpList extends AMP.BaseElement {
       this.container_.dispatchEvent(event);
 
       // Attempt to resize to fit new rendered contents.
-      this.attemptToFit_(this.container_, () => {
-        // If auto-resize is set, then change to container layout instead of
-        // changing height (with one exception).
-        if (this.element.hasAttribute('auto-resize')) {
-          const layout = this.element.getAttribute('layout');
-          if (layout == Layout.FLEX_ITEM) {
-            // TODO(cathyxz, #17824): Flex-item + reset-on-refresh will add
-            // an invisible loader that fills the amp-list and shoves all
-            // list items out of the amp-list.
-            return true;
-          } else if (layout !== Layout.CONTAINER) {
-            this.changeToLayoutContainer_(layout);
-          }
-          return false;
-        }
-        return true;
-      });
+      this.attemptToFit_(this.container_)
+          .then(() => {
+            // If changeHeight succeeded, change to container layout
+            // if the auto-resize attribute is set.
+            if (this.element.hasAttribute('auto-resize')) {
+              this.applyAutoResize_();
+            }
+          })
+          .catch(() => {});
     });
+  }
+
+  /**
+   * If the element has the auto-resize attribute, changes to layout container
+   * for all layouts except FLEX_ITEM.
+   * @private
+   */
+  applyAutoResize_() {
+    const layout = this.element.getAttribute('layout');
+    if (layout == Layout.FLEX_ITEM) {
+      // TODO(cathyxz, #17824): Flex-item + reset-on-refresh will add
+      // an invisible loader that fills the amp-list and shoves all
+      // list items out of the amp-list.
+      return true;
+    } else if (layout !== Layout.CONTAINER) {
+      this.changeToLayoutContainer_(layout);
+    }
   }
 
   /**
    * Attempts to change the height of the amp-list to fit a target child.
    *
-   * If the target's height is greater than the amp-list's height, and
-   * opt_decider returns truthy (or is not provided), then attempt to change the
-   * amp-list's height to fit the target.
+   * If the target's height is greater than the amp-list's height, attempt
+   * to change the amp-list's height to fit the target.
    *
    * @param {!Element} target
-   * @param {function():boolean=} opt_decider
    * @private
    */
-  attemptToFit_(target, opt_decider) {
-    this.measureElement(() => {
+  attemptToFit_(target) {
+    return this.measureElement(() => {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        const shouldResize = !opt_decider || opt_decider();
-        if (shouldResize) {
-          this.attemptChangeHeight(scrollHeight).catch(() => {});
-        }
+        return this.attemptChangeHeight(scrollHeight);
       }
     });
   }

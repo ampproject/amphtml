@@ -1680,7 +1680,7 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} overflown
      * @param {number|undefined} requestedHeight
      * @param {number|undefined} requestedWidth
-     * @package @final @this {!Element}
+     * @final @package @this {!Element}
      */
     overflowCallback(overflown, requestedHeight, requestedWidth) {
       this.getOverflowElement();
@@ -1697,7 +1697,8 @@ function createBaseCustomElementClass(win) {
             const resources = this.getResources();
             resources./*OK*/changeSize(this, requestedHeight, requestedWidth);
             resources.mutateElement(this, () => {
-              this.overflowCallback(
+              this.hideOverflow_();
+              this.implementation_.overflowCallback(
                   /* overflown */ false, requestedHeight, requestedWidth);
             });
           };
@@ -1705,6 +1706,14 @@ function createBaseCustomElementClass(win) {
           this.overflowElement_.onclick = null;
         }
       }
+    }
+
+    /**
+     * Helper function for hiding the overflow element
+     */
+    hideOverflow_() {
+      this.overflowElement_.classList.toggle('amp-visible', false);
+      this.overflowElement_.onclick = null;
     }
 
     /**
