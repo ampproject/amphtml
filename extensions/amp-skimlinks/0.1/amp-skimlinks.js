@@ -120,12 +120,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Fires impression tracking after beacon API request.
-   * @param {!Object} beaconData - Json response from Beacon API.
+   * @param {!JsonObject} beaconData - Json response from Beacon API.
    * @private
    */
-  sendImpressionTracking_({guid}) {
+  sendImpressionTracking_(beaconData) {
     // Update tracking service with extra info.
-    this.trackingService_.setTrackingInfo({guid});
+    this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
     const viewer = Services.viewerForDoc(
         /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_)

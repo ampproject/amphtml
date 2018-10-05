@@ -15,6 +15,7 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedUrl} from './utils';
 
 import {
@@ -100,14 +101,14 @@ export class Tracking {
     } = this.trackingInfo_;
 
     // This data is common to both page & link impression requests.
-    const commonData = {
-      pub: pubcode,
-      pag: pageUrl,
-      guid,
-      uuid: pageImpressionId,
-      tz: timezone,
-      platform: PLATFORM_NAME,
-    };
+    const commonData = dict({
+      'pub': pubcode,
+      'pag': pageUrl,
+      'guid': guid,
+      'uuid': pageImpressionId,
+      'tz': timezone,
+      'platform': PLATFORM_NAME,
+    });
 
     const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
         anchorReplacementList
@@ -139,25 +140,25 @@ export class Tracking {
       customTrackingId,
     } = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ ({
-      pubcode,
-      referrer: pageUrl,
-      pref: referrer,
-      site: 'false',
-      url: anchor.href,
-      custom: anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId,
-      xtz: timezone,
-      uuid: pageImpressionId,
-      product: '1',
-      platform: PLATFORM_NAME,
+    const data = dict({
+      'pubcode': pubcode,
+      'referrer': pageUrl,
+      'pref': referrer,
+      'site': 'false',
+      'url': anchor.href,
+      'custom': anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId,
+      'xtz': timezone,
+      'uuid': pageImpressionId,
+      'product': '1',
+      'platform': PLATFORM_NAME,
     });
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in NA_CLICK_TRACKING_URL.
-    this.analytics_.trigger('non-affiliate-click', {
-      data: JSON.stringify(data),
-      rnd: 'RANDOM',
-    });
+    this.analytics_.trigger('non-affiliate-click', dict({
+      'data': JSON.stringify(data),
+      'rnd': 'RANDOM',
+    }));
   }
 
   /**
@@ -171,22 +172,22 @@ export class Tracking {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
     const data = /** @type {!JsonObject} */ (Object.assign(
-        {
-          slc: numberAffiliateLinks,
-          // Javascript load time, not relevent in AMP context.
-          jsl: 0,
-          pref: referrer,
-          uc: customTrackingId,
-          t: 1,
-        },
+        dict({
+          'slc': numberAffiliateLinks,
+          // Javascript load time, not relevant in AMP context.
+          'jsl': 0,
+          'pref': referrer,
+          'uc': customTrackingId,
+          't': 1,
+        }),
         commonData
     ));
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
-    this.analytics_.trigger('page-impressions', {
-      data: JSON.stringify(data),
-    });
+    this.analytics_.trigger('page-impressions', dict({
+      'data': JSON.stringify(data),
+    }));
   }
 
   /**
@@ -199,19 +200,19 @@ export class Tracking {
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = /** @type {!JsonObject} */ (Object.assign(
-        {
-          dl: urls,
-          hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-          typ: 'l',
-        },
+        dict({
+          'dl': urls,
+          'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
+          'typ': 'l',
+        }),
         commonData
     ));
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
-    this.analytics_.trigger('link-impressions', {
-      data: JSON.stringify(data),
-    });
+    this.analytics_.trigger('link-impressions', dict({
+      'data': JSON.stringify(data),
+    }));
   }
 
   /**
@@ -240,7 +241,8 @@ export class Tracking {
       TODO: add optional config param to .build() so we don't need to mutate
       a private property from outside.
     */
-    analytics.config_.transport = {beacon: true};
+    // Bracket because analytics.config_ is of type JsonObject.
+    analytics.config_['transport'] = dict({'beacon': true});
 
     return analytics;
   }
@@ -254,26 +256,26 @@ export class Tracking {
    *
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
-   * @return {!{numberAffiliateLinks: number, urls: !Object}}
+   * @return {!{numberAffiliateLinks: number, urls: !JsonObject}}
    * @private
    */
   extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;
-    const urls = {};
+    const urls = dict({});
 
     anchorReplacementList.forEach(({replacementUrl, anchor}) => {
       if (isExcludedUrl(anchor.href, this.skimOptions_)) {
         return;
       }
 
-      urls[anchor.href] = urls[anchor.href] || {
-        ae: replacementUrl ? 1 : 0,
-        count: 0,
-      };
+      urls[anchor.href] = urls[anchor.href] || dict({
+        'ae': replacementUrl ? 1 : 0,
+        'count': 0,
+      });
 
-      urls[anchor.href].count += 1;
+      urls[anchor.href]['count'] += 1;
 
-      if (urls[anchor.href].ae === 1) {
+      if (urls[anchor.href]['ae'] === 1) {
         numberAffiliateLinks += 1;
       }
     });

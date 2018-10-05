@@ -280,7 +280,7 @@ export class AffiliateLinkResolver {
     }
 
     return promise.then(data => {
-      const merchantDomains = data.merchant_domains || [];
+      const merchantDomains = data['merchant_domains'] || [];
       this.updateDomainsStatusMap_(domainsToAsk, merchantDomains);
 
       return this.associateWithReplacementUrl_(anchorList);
