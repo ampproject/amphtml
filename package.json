@@ -46,6 +46,7 @@
     "ava": "0.25.0",
     "babel-core": "6.26.3",
     "babel-eslint": "10.0.1",
+    "babel-plugin-filter-imports": "^2.0.3",
     "babel-plugin-istanbul": "5.0.1",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
