@@ -64,7 +64,6 @@ export class AmpGeolocation extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise<!GeolocationDef>}
    * @private
    */
   addToBody_() {
