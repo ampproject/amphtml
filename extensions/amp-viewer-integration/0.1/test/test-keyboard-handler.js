@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {KeyCodes, Keys} from '../../../../src/utils/key-codes';
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';
 
@@ -49,26 +49,34 @@ describes.realWin('KeyboardHandler', {}, env => {
             env.win, new WindowPortEmulator(env.win, 'origin doesnt matter')));
   });
 
-  ['keydown', 'keypress', 'keyup'].forEach(eventType => {
+  ['keydown'].forEach(eventType => {
     describe(`for ${eventType} events`, () => {
       describe('when event targeted on window', () => {
         it('forwards ESC events', () => {
           env.win.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
         it('forwards non-ESC events', () => {
           env.win.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+              eventType,
+              {bubbles: true,
+                key: Keys.LEFT_ARROW,
+                keyCode: KeyCodes.LEFT_ARROW}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           }]);
         });
 
@@ -76,7 +84,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -89,21 +97,29 @@ describes.realWin('KeyboardHandler', {}, env => {
       describe('when event targeted on document', () => {
         it('forwards ESC events', () => {
           env.win.document.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
         it('forwards non-ESC events', () => {
           env.win.document.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+              eventType,
+              {bubbles: true,
+                key: Keys.LEFT_ARROW,
+                keyCode: KeyCodes.LEFT_ARROW}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           }]);
         });
 
@@ -111,7 +127,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -124,21 +140,29 @@ describes.realWin('KeyboardHandler', {}, env => {
       describe('when event targeted on <html>', () => {
         it('forwards ESC events', () => {
           env.win.document.documentElement.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
         it('forwards non-ESC events', () => {
           env.win.document.documentElement.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+              eventType,
+              {bubbles: true,
+                key: Keys.LEFT_ARROW,
+                keyCode: KeyCodes.LEFT_ARROW}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           }]);
         });
 
@@ -146,7 +170,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -159,21 +183,29 @@ describes.realWin('KeyboardHandler', {}, env => {
       describe('when event targeted on <body>', () => {
         it('forwards ESC events', () => {
           env.win.document.body.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
         it('forwards non-ESC events', () => {
           env.win.document.body.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+              eventType,
+              {bubbles: true,
+                key: Keys.LEFT_ARROW,
+                keyCode: KeyCodes.LEFT_ARROW}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           }]);
         });
 
@@ -181,7 +213,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -202,21 +234,29 @@ describes.realWin('KeyboardHandler', {}, env => {
 
         it('forwards ESC events', () => {
           checkbox.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
         it('forwards non-ESC non-space events', () => {
           checkbox.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+              eventType,
+              {bubbles: true,
+                key: Keys.LEFT_ARROW,
+                keyCode: KeyCodes.LEFT_ARROW}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           }]);
         });
 
@@ -224,7 +264,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -235,7 +275,10 @@ describes.realWin('KeyboardHandler', {}, env => {
 
         it('does not forward space events', () => {
           checkbox.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.SPACE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.SPACE,
+                keyCode: KeyCodes.SPACE}));
 
           expect(messages).to.be.empty;
         });
@@ -252,11 +295,15 @@ describes.realWin('KeyboardHandler', {}, env => {
 
           it('forwards ESC events', () => {
             node.dispatchEvent(new KeyboardEvent(
-                eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+                eventType,
+                {bubbles: true,
+                  key: Keys.ESCAPE,
+                  keyCode: KeyCodes.ESCAPE}));
 
             expect(messages).to.have.deep.members([{
               name: eventType,
-              data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+              data: createKeyboardEventInitWithKeyCode(
+                  Keys.ESCAPE, KeyCodes.ESCAPE),
             }]);
           });
 
@@ -264,7 +311,7 @@ describes.realWin('KeyboardHandler', {}, env => {
             const e = new KeyboardEvent(eventType, {
               bubbles: true,
               cancelable: true,
-              keyCode: KeyCodes.ESCAPE,
+              key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
             });
             e.preventDefault();
 
@@ -275,7 +322,10 @@ describes.realWin('KeyboardHandler', {}, env => {
 
           it('does not forward non-ESC events', () => {
             node.dispatchEvent(new KeyboardEvent(
-                eventType, {bubbles: true, keyCode: KeyCodes.SPACE}));
+                eventType,
+                {bubbles: true,
+                  key: Keys.SPACE,
+                  keyCode: KeyCodes.SPACE}));
 
             expect(messages).to.be.empty;
           });
@@ -293,11 +343,15 @@ describes.realWin('KeyboardHandler', {}, env => {
 
         it('forwards ESC events', () => {
           element.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.ESCAPE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.ESCAPE,
+                keyCode: KeyCodes.ESCAPE}));
 
           expect(messages).to.have.deep.members([{
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.ESCAPE),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.ESCAPE, KeyCodes.ESCAPE),
           }]);
         });
 
@@ -305,7 +359,7 @@ describes.realWin('KeyboardHandler', {}, env => {
           const e = new KeyboardEvent(eventType, {
             bubbles: true,
             cancelable: true,
-            keyCode: KeyCodes.ESCAPE,
+            key: Keys.ESCAPE, keyCode: KeyCodes.ESCAPE,
           });
           e.preventDefault();
 
@@ -316,7 +370,10 @@ describes.realWin('KeyboardHandler', {}, env => {
 
         it('does not forward non-ESC events', () => {
           element.dispatchEvent(new KeyboardEvent(
-              eventType, {bubbles: true, keyCode: KeyCodes.SPACE}));
+              eventType,
+              {bubbles: true,
+                key: Keys.SPACE,
+                keyCode: KeyCodes.SPACE}));
 
           expect(messages).to.be.empty;
         });
@@ -325,18 +382,26 @@ describes.realWin('KeyboardHandler', {}, env => {
 
       it('forwards multiple events', () => {
         env.win.document.documentElement.dispatchEvent(new KeyboardEvent(
-            eventType, {bubbles: true, keyCode: KeyCodes.LEFT_ARROW}));
+            eventType,
+            {bubbles: true,
+              key: Keys.LEFT_ARROW,
+              keyCode: KeyCodes.LEFT_ARROW}));
         env.win.document.body.dispatchEvent(new KeyboardEvent(
-            eventType, {bubbles: true, keyCode: KeyCodes.RIGHT_ARROW}));
+            eventType,
+            {bubbles: true,
+              key: Keys.RIGHT_ARROW,
+              keyCode: KeyCodes.RIGHT_ARROW}));
 
         expect(messages).to.have.deep.members([
           {
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.LEFT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.LEFT_ARROW, KeyCodes.LEFT_ARROW),
           },
           {
             name: eventType,
-            data: createKeyboardEventInitWithKeyCode(KeyCodes.RIGHT_ARROW),
+            data: createKeyboardEventInitWithKeyCode(
+                Keys.RIGHT_ARROW, KeyCodes.RIGHT_ARROW),
           },
         ]);
       });
@@ -387,11 +452,12 @@ describes.realWin('KeyboardHandler', {}, env => {
  * Creates a `KeyboardEventInit` object with default properties overridden by
  * the given key code.
  *
+ * @param {string} key
  * @param {number} keyCode
  * @return {!JsonObject}
  */
-function createKeyboardEventInitWithKeyCode(keyCode) {
-  return createKeyboardEventInit({keyCode, which: keyCode});
+function createKeyboardEventInitWithKeyCode(key, keyCode) {
+  return createKeyboardEventInit({key, keyCode, which: keyCode});
 }
 
 /**
