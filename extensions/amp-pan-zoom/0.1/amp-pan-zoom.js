@@ -371,21 +371,28 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   resetContentDimensions_() {
-    const content = dev().assertElement(this.content_);
     return this.mutateElement(() => this.clearDimensions_())
-        .then(() => {
-          return this.measureMutateElement(
-              () => this.measure_(),
-              () => this.setDimensions_(), content).then(() => {
-            const contentBox =
-              layoutRectFromDomRect(content./*OK*/getBoundingClientRect());
-            // Set content positions to offset from element box
-            this.contentBox_.top = contentBox.top - this.elementBox_.top;
-            this.contentBox_.left = contentBox.left - this.elementBox_.left;
-            this.updatePanZoomBounds_(this.scale_);
-            return this.updatePanZoom_();
-          });
+        .then(() => this.measureMutateElement(
+            () => this.measure_(),
+            () => this.setDimensions_(), dev().assertElement(this.content_))
+        ).then(() => {
+          this.setContentBoxOffsets_();
+          this.updatePanZoomBounds_(this.scale_);
+          return this.updatePanZoom_();
         });
+  }
+
+  /**
+   * Sets the top and left values of the contentBox as offset from
+   * pan-zoom container
+   */
+  setContentBoxOffsets_() {
+    const contentBox =
+    layoutRectFromDomRect(dev().assertElement(this.content_)
+        ./*OK*/getBoundingClientRect());
+    // Set content positions to offset from element box
+    this.contentBox_.top = contentBox.top - this.elementBox_.top;
+    this.contentBox_.left = contentBox.left - this.elementBox_.left;
   }
 
   /**
