@@ -358,6 +358,8 @@ function compile(entryModuleFilenames, outputDir,
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
         jscomp_error: [],
+        // Demote "module not found" from error to warning to ignore missing
+        // files in type declarations in the swg.js bundle.
         jscomp_warning: ['moduleLoad'],
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
