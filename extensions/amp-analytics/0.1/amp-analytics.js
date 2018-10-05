@@ -17,6 +17,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   installVariableService,
@@ -38,9 +39,9 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
-import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -100,13 +101,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
-
-    /**
-     * Maximum time (since epoch) to report resource timing metrics.
-     * We stop reporting after 1 minute.
-     * @private @const {number}
-     */
-    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
   }
 
   /** @override */
@@ -167,8 +161,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.transport_.maybeInitIframeTransport(
-        this.getAmpDoc().win, this.element);
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        this.transport_.maybeInitIframeTransport(
+            this.getAmpDoc().win, this.element);
+      });
+    }
   }
 
   /** @override */
@@ -178,8 +176,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return false;
     }
 
-    // Page was unloaded - free up owned resources.
-    this.transport_.deleteIframeTransport();
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        // Page was unloaded - free up owned resources.
+        this.transport_.deleteIframeTransport();
+      });
+    }
+
     return super.unlayoutCallback();
   }
 
@@ -211,6 +214,10 @@ export class AmpAnalytics extends AMP.BaseElement {
             })
             .then(config => {
               this.config_ = config;
+              return new CookieWriter(this.win,
+                  this.element, this.config_).write();
+            })
+            .then(() => {
               this.transport_ =
                   new Transport(this.win, this.config_['transport'] || {});
             })
@@ -512,30 +519,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
-   * @private
-   */
-  getDynamicVariableBindings_(trigger, expansionOptions) {
-    const dynamicBindings = {};
-    const resourceTimingSpec = trigger['resourceTimingSpec'];
-    if (resourceTimingSpec) {
-      // Check if we're done reporting resource timing metrics before binding
-      // before binding the resource timing variable.
-      if (!resourceTimingSpec['done'] &&
-          Date.now() < this.maxResourceTimingReportingTime_) {
-        const binding = 'RESOURCE_TIMING';
-        const analyticsVar = 'resourceTiming';
-        dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec);
-        expansionOptions.vars[analyticsVar] = binding;
-      }
-    }
-    return dynamicBindings;
-  }
-
-  /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
@@ -547,11 +530,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    const dynamicBindings =
-        this.getDynamicVariableBindings_(trigger, expansionOptions);
-    request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions,
-        dynamicBindings);
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
   }
 
   /**
@@ -568,12 +547,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(
-        this,
-        msg,
-        this.config_['extraUrlParams'],
-        trigger['extraUrlParams'],
-        expansionOptions,
-        this.getDynamicVariableBindings_(trigger, expansionOptions))
+        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
@@ -639,7 +613,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks result of 'enabled' spec evaluation. Returns false if spec is
    * provided and value resolves to a falsey value (empty string, 0, false,
    * null, NaN or undefined).
-   * @param {string} spec Expression that will be evaluated.
+   * @param {string|boolean} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<boolean>} False only if spec is provided and value is
    * falsey.
@@ -649,6 +623,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Spec absence always resolves to true.
     if (spec === undefined) {
       return Promise.resolve(true);
+    }
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
@@ -704,6 +682,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });

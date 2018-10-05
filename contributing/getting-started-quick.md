@@ -71,7 +71,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 11.  Fetch data from the `upstream` remote:
      
      ```shell
-     git fetch upstream
+     git fetch upstream master
      ```
     
 12.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
