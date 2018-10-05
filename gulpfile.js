@@ -1190,13 +1190,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify, {
         compact: false,
-        presets: [
-          ['env', {
-            targets: {
-              browsers: ['last 2 versions', 'safari >= 9'],
-            },
-          }],
-        ],
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
       })
       .once('transform', () => {
         endBuildStep('Transformed', srcFilename, startTime);
