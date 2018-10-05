@@ -51,7 +51,6 @@ export const CommonSignals = {
    */
   UNLOAD: 'unload',
 
-
   /**
    * The element's size has changed and it now manages it's own size
    */
