@@ -359,7 +359,10 @@ export class FixedLayer {
             } else if (forceTransfer === false) {
               isTransferrable = false;
             } else {
-              isTransferrable = (opacity > 0 && !!(top || bottom));
+              isTransferrable = (
+                opacity > 0 &&
+                offsetHeight < 300 &&
+                !!(top || bottom));
             }
           }
           if (isTransferrable) {
