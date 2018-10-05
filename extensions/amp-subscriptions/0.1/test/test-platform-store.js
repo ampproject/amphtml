@@ -398,6 +398,55 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('selectPlatformForLogin', () => {
+    let localPlatform, localFactors;
+    let anotherPlatform, anotherFactors;
+
+    beforeEach(() => {
+      localFactors = {};
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(localPlatform, 'getBaseScore')
+          .callsFake(() => 10000);  // base score does not matter.
+      sandbox.stub(localPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => localFactors[factor]);
+      anotherFactors = {};
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => 0);
+      sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
+          .callsFake(factor => anotherFactors[factor]);
+      platformStore.resolvePlatform('local', localPlatform);
+      platformStore.resolvePlatform('another', anotherPlatform);
+    });
+
+    it('should chose local platform by default', () => {
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(localPlatform);
+    });
+
+    it('should chose platform based on the viewer factor', () => {
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(anotherPlatform);
+    });
+
+    it('should tie-break to local', () => {
+      localFactors['supportsViewer'] = 1;
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(localPlatform);
+    });
+
+    it('should rank factors as numbers', () => {
+      localFactors['supportsViewer'] = 0.99999;
+      anotherFactors['supportsViewer'] = 1;
+      expect(platformStore.selectPlatformForLogin())
+          .to.equal(anotherPlatform);
+    });
+  });
+
   describe('reportPlatformFailure_', () => {
     let errorSpy;
     beforeEach(() => {
