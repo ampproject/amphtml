@@ -22,6 +22,7 @@ import {
   setMediaSession,
 } from '../../../src/mediasession-helper';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestByTag} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
@@ -58,40 +59,47 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => {
+      console.log('hello there');
+      const audio = this.element.ownerDocument.createElement('audio');
+      if (!audio.play) {
+        this.toggleFallback(true);
+        return Promise.resolve();
+      }
+
+      // Force controls otherwise there is no player UI.
+      audio.controls = true;
+
+      //TODO (nainar): Should we be overriding the user set values for
+      // `preload` and `autoplay` attributes?
+      const src = this.getElementAttribute_('src');
+      if (src) {
+        assertHttpsUrl(src, this.element);
+      }
+      this.propagateAttributes(
+          ['src', 'preload', 'autoplay', 'muted', 'loop', 'aria-label',
+            'aria-describedby', 'aria-labelledby', 'controlsList'],
+          audio);
+
+      this.applyFillContent(audio);
+      this.getRealChildNodes().forEach(child => {
+        if (child.getAttribute && child.getAttribute('src')) {
+          assertHttpsUrl(child.getAttribute('src'),
+              dev().assertElement(child));
+        }
+        audio.appendChild(child);
+      });
+      this.element.appendChild(audio);
+      this.audio_ = audio;
+    });
+
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
   }
 
   /** @override */
   layoutCallback() {
-    const audio = this.element.ownerDocument.createElement('audio');
-    if (!audio.play) {
-      this.toggleFallback(true);
-      return Promise.resolve();
-    }
-
-    // Force controls otherwise there is no player UI.
-    audio.controls = true;
-    const src = this.getElementAttribute_('src');
-    if (src) {
-      assertHttpsUrl(src, this.element);
-    }
-    this.propagateAttributes(
-        ['src', 'preload', 'autoplay', 'muted', 'loop', 'aria-label',
-          'aria-describedby', 'aria-labelledby', 'controlsList'],
-        audio);
-
-    this.applyFillContent(audio);
-    this.getRealChildNodes().forEach(child => {
-      if (child.getAttribute && child.getAttribute('src')) {
-        assertHttpsUrl(child.getAttribute('src'),
-            dev().assertElement(child));
-      }
-      audio.appendChild(child);
-    });
-    this.element.appendChild(audio);
-    this.audio_ = audio;
-
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
@@ -111,7 +119,7 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
-    return this.loadPromise(audio);
+    return this.loadPromise(this.audio_);
   }
 
   /**
@@ -162,6 +170,7 @@ export class AmpAudio extends AMP.BaseElement {
    * Play action for <amp-audio>.
    */
   play_() {
+    console.log('hello');
     if (!this.isInvocationValid_()) {
       return;
     }
