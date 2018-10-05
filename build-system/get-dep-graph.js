@@ -80,7 +80,7 @@ exports.getFlags = function(config) {
     ],
     //new_type_inf: true,
     language_in: 'ES6',
-    language_out: 'ES5',
+    language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: config.externs,
     define: config.define,
@@ -305,7 +305,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
-    transformPathsToTempDir(graph);
+    transformPathsToTempDir(graph, config);
     resolve(graph);
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -377,8 +377,9 @@ function setupBundles(graph) {
  * to a temporary directory where we can run babel transformations.
  *
  * @param {!Object} graph
+ * @param {!Object} config
  */
-function transformPathsToTempDir(graph) {
+function transformPathsToTempDir(graph, config) {
   console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -387,7 +388,7 @@ function transformPathsToTempDir(graph) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins,
+        plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
         babelrc: false,
         retainLines: true,
       });
