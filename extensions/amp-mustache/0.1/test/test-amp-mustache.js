@@ -16,16 +16,21 @@
 
 import * as mustache from '../../../../third_party/mustache/mustache';
 import * as sanitizer from '../../../../src/sanitizer';
+import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 
 describe('amp-mustache 0.1', () => {
   let sandbox;
   let templateElement;
   let template;
+  let viewerCanRenderTemplates = false;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
     templateElement = document.createElement('template');
+    const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+    getServiceForDocStub.returns({
+      hasCapability: unused => viewerCanRenderTemplates});
     template = new AmpMustache(templateElement);
   });
 
@@ -419,7 +424,11 @@ describe('amp-mustache 0.1', () => {
     });
   });
 
-  describe('insert', () => {
+  describe('viewer can render templates', () => {
+    beforeEach(() => {
+      viewerCanRenderTemplates = true;
+    });
+
     it('should not call mustache parsing', () => {
       sandbox.spy(mustache, 'parse');
       template.compileCallback();
