@@ -36,7 +36,6 @@ describes.realWin('amp-geolocation', {
   });
 
   it('will fix this if this extension makes sense', () => {
-    console.trace(element);
     comp.buildCallback();
     expect('amp-geolocation').to.equal('amp-geolocation');
   });

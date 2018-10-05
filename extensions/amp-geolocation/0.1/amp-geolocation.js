@@ -16,6 +16,8 @@
 
 /*
  gulp lint --files extensions/amp-geolocation/0.1/amp-geolocation.js
+ gulp check-types --files extensions/amp-geolocation/0.1/amp-geolocation.js
+ gulp presubmit --files extensions/amp-geolocation/0.1/amp-geolocation.js
  */
 
 import {Deferred} from '../../../src/utils/promise';
@@ -48,7 +50,6 @@ export class AmpGeolocation extends AMP.BaseElement {
     this.latitude_ = currentPosition.coords.latitude;
     this.longitude_ = currentPosition.coords.longitude;
 
-    /** @type {!Promise<!GeolocationDef>} */
     const geo = this.addToBody_();
 
     geolocationDeferred.resolve(geo);
