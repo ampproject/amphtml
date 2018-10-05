@@ -61,7 +61,6 @@ export class AmpAudio extends AMP.BaseElement {
   buildCallback() {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
-      console.log('hello there');
       const audio = this.element.ownerDocument.createElement('audio');
       if (!audio.play) {
         this.toggleFallback(true);
@@ -170,7 +169,6 @@ export class AmpAudio extends AMP.BaseElement {
    * Play action for <amp-audio>.
    */
   play_() {
-    console.log('hello');
     if (!this.isInvocationValid_()) {
       return;
     }
