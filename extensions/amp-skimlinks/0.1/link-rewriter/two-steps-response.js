@@ -16,6 +16,7 @@
 
 
 /**
+ * Create an object containing an synchronous and an asynchronous response.
  * LinkRewriter expect 'resolveUnknownAnchors()' to return an
  * instance of TwoStepsResponse class.
  *
