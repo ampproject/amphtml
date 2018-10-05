@@ -406,8 +406,9 @@ describes.realWin('Platform store', {}, () => {
       localFactors = {};
       localPlatform = new SubscriptionPlatform();
       sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      // Base score does not matter.
       sandbox.stub(localPlatform, 'getBaseScore')
-          .callsFake(() => 10000);  // base score does not matter.
+          .callsFake(() => 10000);
       sandbox.stub(localPlatform, 'getSupportedScoreFactor')
           .callsFake(factor => localFactors[factor]);
       anotherFactors = {};
@@ -417,8 +418,9 @@ describes.realWin('Platform store', {}, () => {
           .callsFake(() => 0);
       sandbox.stub(anotherPlatform, 'getSupportedScoreFactor')
           .callsFake(factor => anotherFactors[factor]);
-      platformStore.resolvePlatform('local', localPlatform);
+      // Local is ordered last in this case intentionally.
       platformStore.resolvePlatform('another', anotherPlatform);
+      platformStore.resolvePlatform('local', localPlatform);
     });
 
     it('should chose local platform by default', () => {
