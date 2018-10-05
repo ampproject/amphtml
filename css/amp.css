@@ -492,8 +492,8 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
-amp-list > .i-amphtml-loading-container.amp-hidden {
-  display: none !important;
+amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
+  display: none;
 }
 
 .i-amphtml-loader-line {
