@@ -319,14 +319,19 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
     reportingBackoff(() => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', urls.errorReporting, true);
-      xhr.send(JSON.stringify(data));
+      // Report the error to viewer if it has the capability. The data passed
+      // to the viewer is exactly the same as the data passed to the server
+      // below.
+      maybeReportErrorToViewer(this, data).then(reportedErrorToViewer => {
+        if (!reportedErrorToViewer) {
+          // Only report to StackDriver if it's not reported to viewer, as
+          // such XHRs will triger CSP violation for AMP4EMAIL.
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', urls.errorReporting, true);
+          xhr.send(JSON.stringify(data));
+        }
+      });
     });
   }
 }
