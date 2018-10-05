@@ -50,4 +50,10 @@ export const CommonSignals = {
    * The element has been unlaid out.
    */
   UNLOAD: 'unload',
+
+
+  /**
+   * The element's size has changed and it now manages it's own size
+   */
+  SIZE_CHANGED: 'size-changed',
 };

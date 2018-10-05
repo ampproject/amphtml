@@ -718,6 +718,7 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
+      this.signals_.signal(CommonSignals.SIZE_CHANGED);
     }
 
     /**
@@ -1263,6 +1264,7 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.reset(CommonSignals.SIZE_CHANGED);
     }
 
     /**
