@@ -325,8 +325,6 @@ function reportErrorToServer(message, filename, line, col, error) {
       // below.
       maybeReportErrorToViewer(this, data).then(reportedErrorToViewer => {
         if (!reportedErrorToViewer) {
-          // Only report to StackDriver if it's not reported to viewer, as
-          // such XHRs will trigger CSP violation for AMP4EMAIL.
           const xhr = new XMLHttpRequest();
           xhr.open('POST', urls.errorReporting, true);
           xhr.send(JSON.stringify(data));
