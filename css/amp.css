@@ -473,7 +473,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 .i-amphtml-loading-container {
-  display: block;
+  display: block !important;
   z-index: 1;
 }
 
@@ -493,7 +493,7 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 }
 
 amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-loader-line {
