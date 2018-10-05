@@ -371,23 +371,48 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   resetContentDimensions_() {
-    const content = dev().assertElement(this.content_);
-    return this.measureMutateElement(
-        () => this.measure_(),
-        () => {
-          // Set the actual dimensions of the content
-          setStyles(content, {
-            width: px(this.contentBox_.width),
-            height: px(this.contentBox_.height),
-          });
-        }, content).then(() => {
-      const contentBox =
-        layoutRectFromDomRect(this.content_./*OK*/getBoundingClientRect());
-      // Set content positions to offset from element box
-      this.contentBox_.top = contentBox.top - this.elementBox_.top;
-      this.contentBox_.left = contentBox.left - this.elementBox_.left;
-      this.updatePanZoomBounds_(this.scale_);
-      return this.updatePanZoom_();
+    return this.mutateElement(() => this.clearDimensions_())
+        .then(() => this.measureMutateElement(
+            () => this.measure_(),
+            () => this.setDimensions_(), dev().assertElement(this.content_))
+        ).then(() => {
+          this.setContentBoxOffsets_();
+          this.updatePanZoomBounds_(this.scale_);
+          return this.updatePanZoom_();
+        });
+  }
+
+  /**
+   * Sets the top and left values of the contentBox as offset from
+   * pan-zoom container
+   */
+  setContentBoxOffsets_() {
+    const contentBox =
+    layoutRectFromDomRect(dev().assertElement(this.content_)
+        ./*OK*/getBoundingClientRect());
+    // Set content positions to offset from element box
+    this.contentBox_.top = contentBox.top - this.elementBox_.top;
+    this.contentBox_.left = contentBox.left - this.elementBox_.left;
+  }
+
+  /**
+   * Set content dimensions so that they fit exactly within
+   * amp-pan-zoom.
+   */
+  setDimensions_() {
+    setStyles(dev().assertElement(this.content_), {
+      width: px(this.contentBox_.width),
+      height: px(this.contentBox_.height),
+    });
+  }
+
+  /**
+   * Clears content dimensions if any
+   */
+  clearDimensions_() {
+    setStyles(dev().assertElement(this.content_), {
+      width: '',
+      height: '',
     });
   }
 

@@ -18,6 +18,7 @@ import '../amp-pan-zoom';
 import {createPointerEvent} from '../../../../testing/test-helper';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-pan-zoom', {
   amp: {
@@ -247,6 +248,24 @@ describes.realWin('amp-pan-zoom', {
           expect(svg.style.transform)
               .to.equal('translate(10px, 20px) scale(2)');
         });
+  });
+
+  describe('reset-on-resize', () => {
+    it('should clear inline width/height before measuring', async function() {
+      await getPanZoom();
+      await el.layoutCallback();
+      expect(svg.style.width).to.equal('300px');
+      expect(svg.style.height).to.equal('300px');
+      setStyles(svg, {
+        'width': '50px',
+        'height': '400px',
+      });
+      expect(svg.style.width).to.equal('50px');
+      expect(svg.style.height).to.equal('400px');
+      await impl.resetContentDimensions_();
+      expect(svg.style.width).to.equal('300px');
+      expect(svg.style.height).to.equal('300px');
+    });
   });
 
   describe('gestures', () => {

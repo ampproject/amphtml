@@ -100,6 +100,7 @@
     svg {
       background-color: #4682B4;
       opacity: 0.3;
+      padding-top: 30px;
     }
 
   </style>
@@ -139,8 +140,8 @@
   <p>The content here is bottom aligned. </p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
     <amp-layout layout="responsive" height="1" width="1">
-      <amp-pan-zoom id="bottom-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
-      <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
+      <amp-pan-zoom id="bottom-align" reset-on-resize layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <svg id="hasPadding" viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
           <rect class="area-half" x="5" y="5" />
           <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
               <rect class="seat-selected" [class]="seat == 1 ? 'seat-selected' : 'seat-free'" on="tap:AMP.setState({seat: 1})" x="10" y="10" tabindex="0" role="button" />
@@ -180,7 +181,7 @@
   <p>The content here is top aligned. </p>
   <p [text]="'Current scale: ' + scale">Current scale: 1</p>
     <amp-layout layout="responsive" height="1" width="1">
-      <amp-pan-zoom id="top-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
+      <amp-pan-zoom reset-on-resize id="top-align" layout="fill" on="transformEnd:AMP.setState({scale: event.scale})">
       <svg viewBox="0 0 190 110" preserveAspectRatio="xMidYMin slice">
           <rect class="area-half" x="5" y="5" />
           <g class="hide" [class]="scale < 2 ? 'hide' : ''" >
