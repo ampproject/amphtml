@@ -139,7 +139,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define.push('ESM_BUILD=true');
     }
 
-    console.assert(typeof entryModuleFilenames == 'string');
+    console/*OK*/.assert(typeof entryModuleFilenames == 'string');
     const entryModule = entryModuleFilenames;
     // TODO(@cramforce): Run the post processing step
     return singlePassCompile(
