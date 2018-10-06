@@ -319,11 +319,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
     reportingBackoff(() => {
+      // Report the error to viewer if it has the capability. The data passed
+      // to the viewer is exactly the same as the data passed to the server
+      // below.
+      maybeReportErrorToViewer(this, dev().assert(data));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
