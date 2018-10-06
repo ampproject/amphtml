@@ -480,18 +480,12 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * If the element has the auto-resize attribute, changes to layout container
-   * for all layouts except FLEX_ITEM.
+   * If the element has the auto-resize attribute, change to layout container.
    * @private
    */
   applyAutoResize_() {
     const layout = this.element.getAttribute('layout');
-    if (layout == Layout.FLEX_ITEM) {
-      // TODO(cathyxz, #17824): Flex-item + reset-on-refresh will add
-      // an invisible loader that fills the amp-list and shoves all
-      // list items out of the amp-list.
-      return true;
-    } else if (layout !== Layout.CONTAINER) {
+    if (layout !== Layout.CONTAINER) {
       this.changeToLayoutContainer_(layout);
     }
   }
@@ -523,6 +517,16 @@ export class AmpList extends AMP.BaseElement {
     switch (previousLayout) {
       case Layout.RESPONSIVE:
         this.element.classList.remove('i-amphtml-layout-responsive');
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
+        break;
+      case Layout.FLEX_ITEM:
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
         break;
       case Layout.FIXED:
         this.element.classList.remove('i-amphtml-layout-fixed');
