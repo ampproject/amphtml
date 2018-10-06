@@ -26,7 +26,7 @@ const rename = require('gulp-rename');
 const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
-// const {highlight} = require('cli-highlight');
+const {highlight} = require('cli-highlight');
 const {singlePassCompile} = require('../get-dep-graph');
 
 const isProdBuild = !!argv.type;
@@ -54,7 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error:'), e.message);
+            console./*OK*/error(colors.red('Compilation error:'), e.message);
             process.exit(1);
           });
     }
@@ -89,8 +89,7 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function formatClosureCompilerError(message) {
   const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
   message = message.replace(javaInvocationLine, '');
-  // TODO(rsimha): highlight() hangs and never terminates on some inputs.
-  // message = highlight(message, {ignoreIllegals: true});
+  message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
   return message;
