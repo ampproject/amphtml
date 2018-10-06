@@ -87,6 +87,7 @@ export class AmpAudio extends AMP.BaseElement {
     this.element.appendChild(audio);
     this.audio_ = audio;
 
+    listen(this.audio_, 'playing', () => this.audioPlaying_());
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
   }
@@ -111,7 +112,6 @@ export class AmpAudio extends AMP.BaseElement {
       artwork: [{src: artwork}],
     };
 
-    listen(this.audio_, 'playing', () => this.audioPlaying_());
     return this.loadPromise(this.audio_);
   }
 
