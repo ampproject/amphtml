@@ -128,14 +128,25 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
-    // TODO(@cramforce): Run the post processing step
-    console.assert(typeof entryModuleFilenames == 'string');
-    const entryModule = entryModuleFilenames;
-    return singlePassCompile(entryModule, {
+    const compilationOptions = {
       define,
       externs: baseExterns,
       hideWarningsFor,
-    }).then(() => {
+    };
+
+    // Add babel plugin to remove unwanted polyfills in esm build
+    if (options.esmPassCompilation) {
+      compilationOptions['dest'] = './dist/esm/';
+      define.push('ESM_BUILD=true');
+    }
+
+    console.assert(typeof entryModuleFilenames == 'string');
+    const entryModule = entryModuleFilenames;
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(
+        entryModule,
+        compilationOptions
+    ).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
         stream.on('end', resolve);
