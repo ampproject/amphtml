@@ -26,7 +26,7 @@ const rename = require('gulp-rename');
 const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
-const {highlight} = require('cli-highlight');
+// const {highlight} = require('cli-highlight');
 const {singlePassCompile} = require('../get-dep-graph');
 
 const isProdBuild = !!argv.type;
@@ -89,7 +89,8 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function formatClosureCompilerError(message) {
   const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
   message = message.replace(javaInvocationLine, '');
-  message = highlight(message, {ignoreIllegals: true}); // never throws
+  // TODO(rsimha): highlight() hangs and never terminates on some inputs.
+  // message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
   return message;
@@ -391,10 +392,18 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red(
-              'Compiler error for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(err.message));
-          process.exit(1);
+          const {message} = err;
+          console./*OK*/error(colors.red(
+              'Compiler issues for ' + outputFilename + ':\n') +
+              formatClosureCompilerError(message));
+          // Exit on type errors, continue on type warnings.
+          const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
+          const matches = re.exec(message);
+          if (!matches || matches[1] !== '0') {
+            process.exit(1);
+          } else {
+            resolve();
+          }
         });
 
     // If we're only doing type checking, no need to output the files.
