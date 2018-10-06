@@ -54,7 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error:', e.message));
+            console./* OK*/error(colors.red('Compilation error:'), e.message);
             process.exit(1);
           });
     }
@@ -96,8 +96,7 @@ function formatClosureCompilerError(message) {
   return message;
 }
 
-function compile(entryModuleFilenames, outputDir,
-  outputFilename, options) {
+function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -115,10 +114,8 @@ function compile(entryModuleFilenames, outputDir,
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
-
   const baseExterns = [
     'build-system/amp.extern.js',
-    'third_party/closure-compiler/externs/performance_observer.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -132,7 +129,9 @@ function compile(entryModuleFilenames, outputDir,
   }
   if (options.singlePassCompilation) {
     // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(entryModuleFilenames, {
+    console.assert(typeof entryModuleFilenames == 'string');
+    const entryModule = entryModuleFilenames;
+    return singlePassCompile(entryModule, {
       define,
       externs: baseExterns,
       hideWarningsFor,
@@ -359,8 +358,8 @@ function compile(entryModuleFilenames, outputDir,
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
         jscomp_error: [],
-        // Demote "module not found" from error to warning to ignore missing
-        // files in type declarations in the swg.js bundle.
+        // moduleLoad: Demote "module not found" errors to ignore missing files
+        //     in type declarations in the swg.js bundle.
         jscomp_warning: ['moduleLoad'],
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
@@ -396,10 +395,12 @@ function compile(entryModuleFilenames, outputDir,
           console./*OK*/error(colors.red(
               'Compiler issues for ' + outputFilename + ':\n') +
               formatClosureCompilerError(message));
-          // Exit on type errors, continue on type warnings.
-          const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
-          const matches = re.exec(message);
-          if (!matches || matches[1] !== '0') {
+          // Exit on type errors and "unexpected" type warnings, but continue on
+          // "expected" type warnings. This is a temporary workaround for
+          // a Closure Compiler upgrade that causes backwards-incompatible
+          // changes. See #18552.
+          if (hasClosureTypeErrors(message)
+            || hasUnexpectedClosureTypeWarnings(message)) {
             process.exit(1);
           } else {
             resolve();
@@ -424,4 +425,32 @@ function compile(entryModuleFilenames, outputDir,
     }
     return stream;
   });
+}
+
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+function hasClosureTypeErrors(message) {
+  const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
+  const matches = re.exec(message);
+  const errors = matches[1];
+  return !matches || errors !== '0';
+}
+
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+function hasUnexpectedClosureTypeWarnings(message) {
+  const re = /^([^:\n]+):(\d+): (WARNING|ERROR) - (.*)$/gm;
+  let matches;
+  while ((matches = re.exec(message)) !== null) {
+    const source = matches[1];
+    // Only allow type warnings from swg.js.
+    if (source !== 'third_party/subscriptions-project/swg.js') {
+      return true;
+    }
+  }
+  return false;
 }
