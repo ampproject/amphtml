@@ -54,7 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error:', e.message));
+            console./*OK*/error(colors.red('Compilation error:'), e.message);
             process.exit(1);
           });
     }
