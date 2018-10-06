@@ -59,7 +59,6 @@
     "bundlesize": "0.17.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "cli-highlight": "2.0.0",
     "codecov": "3.1.0",
     "connect-header": "0.0.5",
     "cssnano": "4.1.4",
