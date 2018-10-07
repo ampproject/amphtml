@@ -26,10 +26,8 @@ export const SubscriptionsScoreFactor = {
 };
 
 /**
- * Default value for supportsViewer, requied by selectPlatformForLogin().
  * All other score factors are ignored if not specifed in the publisher
  * config so adding a default here would be meaningless.
  */
 export const DEFAULT_SCORE_CONFIG = {
-  supportsViewer: 10,
 };

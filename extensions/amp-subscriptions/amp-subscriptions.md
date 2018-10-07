@@ -166,7 +166,7 @@ The score is calculated by taking the `baseScore` in the service configuration a
 
 Available scoring factors:
 
-1. `supportsViewer` Indicates that a service can cooperate with the current AMP viewer environment for this page view.
+1. `supportsViewer` Indicates that a service can cooperate with the current AMP viewer environment for this page view. Default value is 0 (no preference).
 
 In addition to the dynamic scoring factors, each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.
 
