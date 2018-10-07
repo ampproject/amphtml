@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +14,35 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
 import {hasOwn} from '../src/utils/object';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
-const mandatoryParams = [], 
-      optionalParams = [
-        'regionurl', 'amzn_assoc_ad_mode', 'divid', 'recomtype', 
-        'amzn_assoc_placement', 'amzn_assoc_tracking_id', 'amzn_assoc_ad_type', 'amzn_assoc_marketplace', 'amzn_assoc_region',
-        'amzn_assoc_title', 'amzn_assoc_default_search_phrase', 'amzn_assoc_default_category',
-        'amzn_assoc_linkid', 'amzn_assoc_search_bar', 'amzn_assoc_search_bar_position',
-        'amzn_assoc_rows', 'amzn_assoc_design', 'amzn_assoc_asins', 'adinstanceid', 'amzn_assoc_debug',
-        'amzn_assoc_aax_src_id', 'amzn_assoc_header_style', 'amzn_assoc_link_style', 'amzn_assoc_link_hover_style',
-        'amzn_assoc_text_style', 'amzn_assoc_random_permute', 'amzn_assoc_render_full_page',
-        'amzn_assoc_fallback_mode', 'amzn_assoc_url', 'amzn_assoc_axf_exp_name', 'amzn_assoc_axf_treatment',
-        'amzn_assoc_disable_borders', 'amzn_assoc_attributes', 'amzn_assoc_carousel', 'amzn_assoc_feedback_enable',
-        'amzn_assoc_max_ads_in_a_row', 'amzn_assoc_list_price', 'amzn_assoc_prime', 'amzn_assoc_prime_position',
-        'amzn_assoc_widget_padding', 'amzn_assoc_strike_text_style', 'amzn_assoc_brand_text_link', 'amzn_assoc_brand_position',
-        'amzn_assoc_large_rating', 'amzn_assoc_rating_position', 'amzn_assoc_max_title_height', 
-        'amzn_assoc_enable_swipe_on_mobile', 'amzn_assoc_overrides', 'amzn_assoc_ead', 'amzn_assoc_force_win_bid'
-      ];
+const mandatoryParams = [],
+    optionalParams = [
+      'regionurl', 'amzn_assoc_ad_mode', 'divid', 'recomtype',
+      'amzn_assoc_placement', 'amzn_assoc_tracking_id', 'amzn_assoc_ad_type',
+      'amzn_assoc_marketplace', 'amzn_assoc_region','amzn_assoc_title',
+      'amzn_assoc_default_search_phrase', 'amzn_assoc_default_category',
+      'amzn_assoc_linkid', 'amzn_assoc_search_bar',
+      'amzn_assoc_search_bar_position', 'amzn_assoc_rows',
+      'amzn_assoc_design', 'amzn_assoc_asins', 'adinstanceid',
+      'amzn_assoc_debug', 'amzn_assoc_aax_src_id', 'amzn_assoc_header_style',
+      'amzn_assoc_link_style', 'amzn_assoc_link_hover_style',
+      'amzn_assoc_text_style', 'amzn_assoc_random_permute',
+      'amzn_assoc_render_full_page', 'amzn_assoc_fallback_mode',
+      'amzn_assoc_url', 'amzn_assoc_axf_exp_name',
+      'amzn_assoc_axf_treatment',
+      'amzn_assoc_disable_borders', 'amzn_assoc_attributes',
+      'amzn_assoc_carousel', 'amzn_assoc_feedback_enable',
+      'amzn_assoc_max_ads_in_a_row', 'amzn_assoc_list_price',
+      'amzn_assoc_prime',
+      'amzn_assoc_prime_position', 'amzn_assoc_widget_padding',
+      'amzn_assoc_strike_text_style', 'amzn_assoc_brand_text_link',
+      'amzn_assoc_brand_position', 'amzn_assoc_large_rating',
+      'amzn_assoc_rating_position', 'amzn_assoc_max_title_height',
+      'amzn_assoc_enable_swipe_on_mobile', 'amzn_assoc_overrides',
+      'amzn_assoc_ead', 'amzn_assoc_force_win_bid',
+    ];
 
 /**
  * @param {!Window} global
@@ -41,19 +51,21 @@ const mandatoryParams = [],
 export function a9(global, data) {
   validateData(data, mandatoryParams, optionalParams);
 
-  if( data.amzn_assoc_ad_mode ) {
-      if (data.amzn_assoc_ad_mode === 'auto') { 
-      if (data.adinstanceid && data.adinstanceid!=='') {
-          loadRecTag(global, data);
+  if (data.amzn_assoc_ad_mode) {
+    if (data.amzn_assoc_ad_mode === 'auto') {
+      if (data.adinstanceid &&
+      (data.adinstanceid !== '')) {
+        loadRecTag(global, data);
       }
       else {
-          loadSearTag(global, data);
+        loadSearTag(global, data);
       }
     }
-    else if ( (data.amzn_assoc_ad_mode === 'search') || (data.amzn_assoc_ad_mode === 'manual') ) {
+    else if ((data.amzn_assoc_ad_mode === 'search')
+    || (data.amzn_assoc_ad_mode === 'manual')) {
       loadSearTag(global, data);
     }
-  }  
+  }
   else {
     loadSearTag(global, data);
   }
@@ -62,9 +74,9 @@ export function a9(global, data) {
 /**
  * @param {!Object} data
  */
-function getURL(data){
-  let url = "//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US";
-  if( data.regionurl && data.regionurl!=="" ){
+function getURL(data) {
+  let url = '//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
+  if (data.regionurl && (data.regionurl !== '')) {
     url = data.regionurl;
   }
 
@@ -76,19 +88,17 @@ function getURL(data){
  * @param {!Object} data
  */
 function loadRecTag(global, data) {
-  
   let url = getURL(data);
   url += '&adInstanceId=' + data.adinstanceid;
-  
-  if( data.recomtype === 'sync' ) { 
-     writeScript(global, url);
+  if (data.recomtype === 'sync') {
+    writeScript(global, url);
   }
-  else if( data.recomtype === 'async' ) {
-     const d = global.document.createElement('div');
-     d.setAttribute('id', data.divid);
-     global.document.getElementById('c').appendChild(d);  
-     loadScript(global, url);
-  }  
+  else if (data.recomtype === 'async') {
+    const d = global.document.createElement('div');
+    d.setAttribute('id', data.divid);
+    global.document.getElementById('c').appendChild(d);
+    loadScript(global, url);
+  }
 }
 
 /**
@@ -102,31 +112,34 @@ function loadSearTag(global, data) {
   */
   function setMacro(type) {
     if (!type) {
-       return;
+      return;
     }
     if (hasOwn(data, type)) {
-       global[type] = data[type];
+      global[type] = data[type];
     }
   }
 
+  /**
+  * Sets the params.
+  */
   function setParams() {
-    let url = getURL(data);
- 
+    const url = getURL(data);
+
     setMacro('amzn_assoc_ad_mode');
     setMacro('amzn_assoc_placement');
     setMacro('amzn_assoc_tracking_id');
     setMacro('amzn_assoc_ad_type');
     setMacro('amzn_assoc_marketplace');
     setMacro('amzn_assoc_region');
-    setMacro('amzn_assoc_title');   
+    setMacro('amzn_assoc_title');
     setMacro('amzn_assoc_default_search_phrase');
     setMacro('amzn_assoc_default_category');
-    setMacro('amzn_assoc_linkid');   
+    setMacro('amzn_assoc_linkid');
     setMacro('amzn_assoc_search_bar');
-    setMacro('amzn_assoc_search_bar_position');  
-    setMacro('amzn_assoc_rows');  
+    setMacro('amzn_assoc_search_bar_position');
+    setMacro('amzn_assoc_rows');
     setMacro('amzn_assoc_design');
-    setMacro('amzn_assoc_asins');     
+    setMacro('amzn_assoc_asins');
     setMacro('amzn_assoc_aax_src_id');
     setMacro('amzn_assoc_header_style');
     setMacro('amzn_assoc_link_style');
@@ -156,22 +169,22 @@ function loadSearTag(global, data) {
     setMacro('amzn_assoc_ead');
     setMacro('amzn_assoc_force_win_bid');
 
-    if( data.amzn_assoc_fallback_mode ) {
-      var str = (data.amzn_assoc_fallback_mode).split(",");
-      var type_s = str[0].split(":");
-      var type_v = str[1].split(":");
-      type_s = JSON.parse(type_s[1]);
-      type_v = JSON.parse(type_v[1]);
+    if (data.amzn_assoc_fallback_mode) {
+      const str = (data.amzn_assoc_fallback_mode).split(',');
+      let types = str[0].split(':');
+      let typev = str[1].split(':');
+      types = JSON.parse(types[1]);
+      typev = JSON.parse(typev[1]);
       global['amzn_assoc_fallback_mode'] = {
-          "type": type_s, 
-          "value": type_v 
-      }
+        'type': types,
+        'value': typev,
+      };
     }
-    if( data.amzn_assoc_url ){
+    if (data.amzn_assoc_url) {
       global['amzn_assoc_URL'] = data['amzn_assoc_url'];
     }
 
-    writeScript(global, url); 
+    writeScript(global, url);
   }
 
   /**
@@ -181,5 +194,5 @@ function loadSearTag(global, data) {
     setParams();
   }
 
-  init();  
+  init();
 }
