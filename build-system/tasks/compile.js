@@ -54,7 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error:', e.message));
+            console./*OK*/error(colors.red('Compilation error:'), e.message);
             process.exit(1);
           });
     }
@@ -89,14 +89,13 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function formatClosureCompilerError(message) {
   const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
   message = message.replace(javaInvocationLine, '');
-  message = highlight(message, {ignoreIllegals: true}); // never throws
+  message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
   return message;
 }
 
-function compile(entryModuleFilenames, outputDir,
-  outputFilename, options) {
+function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
@@ -114,10 +113,8 @@ function compile(entryModuleFilenames, outputDir,
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
-
   const baseExterns = [
     'build-system/amp.extern.js',
-    'third_party/closure-compiler/externs/performance_observer.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -142,9 +139,11 @@ function compile(entryModuleFilenames, outputDir,
       define.push('ESM_BUILD=true');
     }
 
+    console/*OK*/.assert(typeof entryModuleFilenames == 'string');
+    const entryModule = entryModuleFilenames;
     // TODO(@cramforce): Run the post processing step
     return singlePassCompile(
-        entryModuleFilenames,
+        entryModule,
         compilationOptions
     ).then(() => {
       return new Promise((resolve, reject) => {
@@ -252,7 +251,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
-      'node_modules/dompurify/dist/purify.cjs.js',
+      'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
@@ -358,6 +357,7 @@ function compile(entryModuleFilenames, outputDir,
           'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
+        module_resolution: 'NODE',
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -367,12 +367,15 @@ function compile(entryModuleFilenames, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        jscomp_error: [],
+        // moduleLoad: Demote "module not found" errors to ignore missing files
+        //     in type declarations in the swg.js bundle.
+        jscomp_warning: ['moduleLoad'],
         // Turn off warning for "Unknown @define" since we use define to pass
         // args such as FORTESTING to our runner.
         jscomp_off: ['unknownDefines'],
         define,
         hide_warnings_for: hideWarningsFor,
-        jscomp_error: [],
       },
     };
 
@@ -398,10 +401,20 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red(
-              'Compiler error for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(err.message));
-          process.exit(1);
+          const {message} = err;
+          console./*OK*/error(colors.red(
+              'Compiler issues for ' + outputFilename + ':\n') +
+              formatClosureCompilerError(message));
+          // Exit on type errors and "unexpected" type warnings, but continue on
+          // "expected" type warnings. This is a temporary workaround for
+          // a Closure Compiler upgrade that causes backwards-incompatible
+          // changes. See #18552.
+          if (hasClosureTypeErrors(message)
+            || hasUnexpectedClosureTypeWarnings(message)) {
+            process.exit(1);
+          } else {
+            resolve();
+          }
         });
 
     // If we're only doing type checking, no need to output the files.
@@ -422,4 +435,32 @@ function compile(entryModuleFilenames, outputDir,
     }
     return stream;
   });
+}
+
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+function hasClosureTypeErrors(message) {
+  const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
+  const matches = re.exec(message);
+  const errors = matches[1];
+  return !matches || errors !== '0';
+}
+
+/**
+ * @param {string} message
+ * @return {boolean}
+ */
+function hasUnexpectedClosureTypeWarnings(message) {
+  const re = /^([^:\n]+):(\d+): (WARNING|ERROR) - (.*)$/gm;
+  let matches;
+  while ((matches = re.exec(message)) !== null) {
+    const source = matches[1];
+    // Only allow type warnings from swg.js.
+    if (source !== 'third_party/subscriptions-project/swg.js') {
+      return true;
+    }
+  }
+  return false;
 }
