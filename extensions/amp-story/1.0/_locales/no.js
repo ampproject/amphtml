@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Norwegian strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Aksepter',
   },
@@ -95,4 +95,4 @@ export default {
     string: 'Beklager, det ser ut for at nettleseren din ikke støtter denne ' +
         'opplevelsen',
   },
-};
+});
