@@ -474,20 +474,9 @@ export class AmpList extends AMP.BaseElement {
         // If the element's size was changed, change to container layout
         // if the auto-resize attribute is set.
         this.element.signals().whenSignal(CommonSignals.SIZE_CHANGED)
-            .then(() => this.applyAutoResize_());
+            .then(() => this.changeToLayoutContainer_());
       }
     });
-  }
-
-  /**
-   * If the element has the auto-resize attribute, change to layout container.
-   * @private
-   */
-  applyAutoResize_() {
-    const layout = this.element.getAttribute('layout');
-    if (layout !== Layout.CONTAINER) {
-      this.changeToLayoutContainer_(layout);
-    }
   }
 
   /**
@@ -553,10 +542,14 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Converts the amp-list to de facto layout container. Must be called in
    * mutation context.
-   * @param {string} previousLayout
    * @private
    */
-  changeToLayoutContainer_(previousLayout) {
+  changeToLayoutContainer_() {
+    const previousLayout = this.element.getAttribute('layout');
+    // If we have already changed to layout container, no need to run again.
+    if (previousLayout == Layout.CONTAINER) {
+      return;
+    }
     this.undoPreviousLayout_(previousLayout);
     this.container_.classList.remove(
         'i-amphtml-fill-content',
@@ -569,7 +562,6 @@ export class AmpList extends AMP.BaseElement {
     if (overflowElement) {
       toggle(overflowElement, false);
     }
-
     this.element.setAttribute('layout', 'container');
   }
 
