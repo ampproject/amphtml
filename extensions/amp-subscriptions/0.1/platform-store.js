@@ -29,6 +29,15 @@ export let EntitlementChangeEventDef;
 /** @const */
 const TAG = 'amp-subscriptions';
 
+/**
+ * @typedef {{
+ *   platform: !./subscription-platform.SubscriptionPlatform,
+ *   weight: number,
+ * }}
+ */
+let PlatformWeightDef;
+
+
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -392,12 +401,9 @@ export class PlatformStore {
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
    * @return {!./subscription-platform.SubscriptionPlatform}
-   * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
-  selectApplicablePlatform_(optionalFactor) {
-    const localPlatform = this.getLocalPlatform();
-
+  selectApplicablePlatform_() {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
@@ -412,7 +418,53 @@ export class PlatformStore {
       }
     }
 
-    const platformWeights = this.getAllPlatformWeights_(optionalFactor);
+    return this.rankPlatformsByWeight_(this.getAllPlatformWeights_());
+  }
+
+  /**
+   * Calculate and return weights for all platforms
+   * @return {!Array<!PlatformWeightDef>}
+   * @private
+   */
+  getAllPlatformWeights_() {
+    // Get weights for all of the platforms.
+    return this.getAvailablePlatforms().map(platform => {
+      return {
+        platform,
+        weight: this.calculatePlatformWeight_(platform),
+      };
+    });
+  }
+
+  /**
+   * Calculate platform weight
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @return {number}
+   * @private
+   */
+  calculatePlatformWeight_(platform) {
+    const factorWeights = [0]; // reduce always needs something to work with
+
+    // Start with base score
+    const weight = platform.getBaseScore();
+
+    // Iterate score factors checking service support
+    for (const factor in this.scoreConfig_) {
+      if (hasOwn(this.scoreConfig_, factor)) {
+        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
+      }
+    }
+
+    return weight + factorWeights.reduce((a, b) => { return a + b; });
+  }
+
+  /**
+   * @param {!Array<!PlatformWeightDef>} platformWeights
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  rankPlatformsByWeight_(platformWeights) {
+    const localPlatform = this.getLocalPlatform();
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
       if (platform2.weight == platform1.weight &&
@@ -425,43 +477,23 @@ export class PlatformStore {
   }
 
   /**
-   * Calculate and return weights for all platforms
-   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
-   * @param {string=} optionalFactor if present only use this factor for calculation
+   * Returns most qualified platform for the specified factor.
+   *
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
+   *
+   * @param {string} factor
+   * @return {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
-  getAllPlatformWeights_(optionalFactor) {
-    // Get weights for all of the platforms
-    return this.getAvailablePlatforms().map(platform => {
-      return {
-        platform,
-        weight: this.calculatePlatformWeight_(platform, optionalFactor),
-      };
+  selectApplicablePlatformForFactor_(factor) {
+    /** @type {!Array<!PlatformWeightDef>} */
+    const platformWeights = this.getAvailablePlatforms().map(platform => {
+      const factorValue = platform.getSupportedScoreFactor(factor);
+      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      return {platform, weight};
     });
-  }
-
-  /**
-   * Calculate platform weight
-   * @param {!./subscription-platform.SubscriptionPlatform} platform
-   * @param {string=} optionalFactor if specified only calculate this factor
-   * @return {number}
-   * @private
-   */
-  calculatePlatformWeight_(platform, optionalFactor) {
-    const factorWeights = [0]; // reduce always needs something to work with
-
-    // Start with base score
-    const weight = platform.getBaseScore();
-
-    // Iterate score factors checking service support
-    for (const factor in this.scoreConfig_) {
-      if (hasOwn(this.scoreConfig_, factor) &&
-        (!optionalFactor || optionalFactor === factor)) {
-        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
-      }
-    }
-
-    return weight + factorWeights.reduce((a, b) => { return a + b; });
+    return this.rankPlatformsByWeight_(platformWeights);
   }
 
   /**
@@ -487,7 +519,7 @@ export class PlatformStore {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    return this.selectApplicablePlatform_(
+    return this.selectApplicablePlatformForFactor_(
         SubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }

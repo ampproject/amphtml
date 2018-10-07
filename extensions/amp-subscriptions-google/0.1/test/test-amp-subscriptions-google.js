@@ -338,6 +338,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should link accounts if login action is delegated', () => {
+    const executeStub = platform.runtime_.linkAccount;
+    platform.executeAction('login');
+    expect(executeStub).to.be.calledWith();
+  });
+
   describe('getEntitlements', () => {
     it('should convert granted entitlements to internal shape', () => {
       const entitlementResponse = {
