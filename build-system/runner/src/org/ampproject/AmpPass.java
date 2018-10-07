@@ -158,7 +158,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     newcall.putBooleanProp(Node.FREE_CALL, true);
     newcall.addChildToBack(arg1);
     expr.replaceChild(n, newcall);
-    compiler.reportCodeChange();
+    compiler.reportChangeToEnclosingScope(expr);
   }
 
   private Node getAmpExtensionCallback(Node n) {
@@ -226,7 +226,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
         for (Map.Entry<String, Node> mapping : map.entrySet()) {
           if (varNode.getString() == mapping.getKey()) {
             varNode.replaceChild(varNode.getFirstChild(), mapping.getValue());
-            compiler.reportCodeChange();
+            compiler.reportChangeToEnclosingScope(varNode);
             return;
           }
         }
@@ -276,17 +276,19 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     Node booleanNode = bool ? IR.trueNode() : IR.falseNode();
     booleanNode.useSourceInfoIfMissingFrom(n);
     parent.replaceChild(n, booleanNode);
-    compiler.reportCodeChange();
+    compiler.reportChangeToEnclosingScope(parent);
   }
 
   private void removeExpression(Node n, Node parent) {
+    Node scope = parent;
     if (parent.isExprResult()) {
       Node grandparent = parent.getParent();
       grandparent.removeChild(parent);
+      scope = grandparent;
     } else {
       parent.removeChild(n);
     }
-    compiler.reportCodeChange();
+    compiler.reportChangeToEnclosingScope(scope);
   }
 
   private void maybeEliminateCallExceptFirstParam(Node call, Node parent) {
@@ -306,7 +308,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
     firstArg.detachFromParent();
     parent.replaceChild(call, firstArg);
-    compiler.reportCodeChange();
+    compiler.reportChangeToEnclosingScope(parent);
   }
 
   /**

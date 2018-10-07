@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
   },
@@ -73,4 +73,4 @@ export default {
     string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
         'this experience',
   },
-};
+});

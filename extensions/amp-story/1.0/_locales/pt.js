@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Portuguese strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Aceitar',
   },
@@ -95,4 +95,4 @@ export default {
     string: 'Lamentamos, mas parece que seu navegador não suporta essa ' +
         'experiência',
   },
-};
+});
