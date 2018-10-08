@@ -58,6 +58,21 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // If layout="nodisplay" force autoplay to off
+    const layout = this.getElementAttribute_('layout');
+    if (layout === Layout.NODISPLAY) {
+      this.element.removeAttribute('autoplay');
+      this.buildAudioElement();
+    }
+
+    this.registerAction('play', this.play_.bind(this));
+    this.registerAction('pause', this.pause_.bind(this));
+  }
+
+  /**
+   * Builds the internal <audio> element
+   */
+  buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
@@ -66,7 +81,6 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Force controls otherwise there is no player UI.
     audio.controls = true;
-
     const src = this.getElementAttribute_('src');
     if (src) {
       assertHttpsUrl(src, this.element);
@@ -88,12 +102,15 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
-    this.registerAction('play', this.play_.bind(this));
-    this.registerAction('pause', this.pause_.bind(this));
   }
 
   /** @override */
   layoutCallback() {
+    const layout = this.getElementAttribute_('layout');
+    if (layout !== Layout.NODISPLAY) {
+      this.buildAudioElement();
+    }
+
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
@@ -113,6 +130,11 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     return this.loadPromise(this.audio_);
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    return true;
   }
 
   /**

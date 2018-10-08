@@ -207,7 +207,7 @@ describes.realWin('amp-audio', {
     const element = doc.createElement('div');
     element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
-    const promise = audio.buildCallback();
+    const promise = audio.buildAudioElement();
     doc.createElement = savedCreateElement;
     return promise.then(() => {
       expect(element.toggleFallback).to.be.calledOnce;
