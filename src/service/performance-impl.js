@@ -225,8 +225,8 @@ export class Performance {
     if (!this.win.PerformancePaintTiming
         && this.win.chrome
         && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = (this.win.chrome.loadTimes().firstPaintTime
-          * 1000) - this.win.performance.timing.navigationStart;
+      const fpTime = (this.win.chrome.loadTimes()['firstPaintTime'] * 1000)
+          - this.win.performance.timing.navigationStart;
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
