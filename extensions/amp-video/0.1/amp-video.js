@@ -26,6 +26,7 @@ import {
   fullscreenExit,
   insertAfterOrAtStart,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -640,6 +641,19 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    this.removePosterForAndroidBug_();
+  }
+
+  /**
+   * See `createPosterForAndroidBug_`.
+   * @private
+   */
+  removePosterForAndroidBug_() {
+    const poster = this.element.querySelector('i-amphtml-poster');
+    if (!poster) {
+      return;
+    }
+    removeElement(poster);
   }
 
   /**
