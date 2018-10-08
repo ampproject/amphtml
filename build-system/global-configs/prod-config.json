@@ -48,5 +48,6 @@
   "no-sync-xhr-in-ads": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "inabox-rov": 1
+  "inabox-rov": 1,
+  "ampdoc-closest": 0.01
 }
