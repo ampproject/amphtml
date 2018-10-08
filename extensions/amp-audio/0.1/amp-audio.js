@@ -59,7 +59,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     // If layout="nodisplay" force autoplay to off
-    const layout = this.getElementAttribute_('layout');
+    const layout = this.getLayout();
     if (layout === Layout.NODISPLAY) {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
@@ -106,7 +106,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const layout = this.getElementAttribute_('layout');
+    const layout = this.getLayout();
     if (layout !== Layout.NODISPLAY) {
       this.buildAudioElement();
     }
