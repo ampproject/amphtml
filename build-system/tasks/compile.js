@@ -408,8 +408,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           // Exit on type errors and warnings _except_ warnings from swg.js.
           // This is a temporary workaround for a Closure Compiler upgrade that
           // causes backwards-incompatible changes. See #18552.
-          if (hasClosureTypeErrors(message)
-            || hasNonSwgErrorsOrWarnings(message)) {
+          if (hasClosureTypeErrors(message)) {
+            console./*OK*/error('Exiting due to type errors.');
+            process.exit(1);
+          } else if (hasNonSwgErrorsOrWarnings(message)) {
+            console./*OK*/error('Exiting due to non-swg type warnings.');
             process.exit(1);
           } else {
             resolve();
@@ -441,7 +444,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
  * @return {boolean}
  */
 function hasClosureTypeErrors(message) {
-  const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
+  const re = /^(\d+) error\(s\), (\d+) warning\(s\)(.*)$/gm;
   const matches = re.exec(message);
   return !matches || matches[1] !== '0';
 }
