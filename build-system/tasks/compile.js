@@ -398,12 +398,12 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red(
-              'Compiler error for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(err.message));
+          const {message} = err;
+          console./*OK*/error(colors.red(
+              'Compiler issues for ' + outputFilename + ':\n') +
+              formatClosureCompilerError(message));
           process.exit(1);
         });
-
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream

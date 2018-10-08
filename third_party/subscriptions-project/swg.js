@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.28 */
+/** Version: 0.1.22.29 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -3893,7 +3893,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.28',
+    '_client': 'SwG 0.1.22.29',
   });
 }
 
@@ -4310,8 +4310,8 @@ class DeferredAccountFlow {
         idToken,
         /** @type {!Object} */ (new JwtHelper().decode(idToken)));
     const purchaseData = new PurchaseData(
-        data['purchaseData'],
-        data['purchaseDataSignature']);
+        data['purchaseData']['data'],
+        data['purchaseData']['signature']);
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -5691,6 +5691,17 @@ class EntitlementsManager {
     if (opt_expectPositive) {
       this.storage_.remove(ENTS_STORAGE_KEY);
     }
+  }
+
+  /**
+   * Clears all of the entitlements state and cache.
+   */
+  clear() {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = 0;
+    this.unblockNextNotification();
+    this.storage_.remove(ENTS_STORAGE_KEY);
+    this.storage_.remove(TOAST_STORAGE_KEY);
   }
 
   /**
@@ -7785,6 +7796,12 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
+    this.dialogManager_.completeAll();
+  }
+
+  /** @override */
+  clear() {
+    this.entitlementsManager_.clear();
     this.dialogManager_.completeAll();
   }
 
