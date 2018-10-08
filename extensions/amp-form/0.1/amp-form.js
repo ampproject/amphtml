@@ -637,9 +637,7 @@ export class AmpForm {
    * @private
    */
   doActionXhr_() {
-    // Prefer decorated linker url if it exists, otherwise use action-xhr.
-    const url = this.getXhrUrl_('linker-xhr') || this.xhrAction_;
-    return this.doXhr_(dev().assertString(url), this.method_);
+    return this.doXhr_(dev().assertString(this.xhrAction_), this.method_);
   }
 
   /**
