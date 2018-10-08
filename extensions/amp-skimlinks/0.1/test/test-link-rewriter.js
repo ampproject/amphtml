@@ -24,8 +24,8 @@ import {
   EVENTS as linkRewriterEvents,
 } from '../link-rewriter/constants';
 import {Services} from '../../../../src/services';
+import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {createTwoStepsResponse} from '../link-rewriter/link-rewriter-helpers';
 
 describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
   let rootDocument, linkRewriterManager, win;
@@ -210,7 +210,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       let linkRewriterVendor1, linkRewriterVendor2, linkRewriterVendor3;
 
       function getEventData() {
-        return linkRewriterVendor1.events.send.firstCall.args[1];
+        return linkRewriterVendor1.events.fire.firstCall.args[0].eventData;
       }
 
       beforeEach(() => {
@@ -219,19 +219,19 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
 
         env.sandbox.stub(linkRewriterVendor1, 'isWatchingLink').returns(true);
-        env.sandbox.stub(linkRewriterVendor1.events, 'send');
+        env.sandbox.stub(linkRewriterVendor1.events, 'fire');
         env.sandbox.stub(linkRewriterVendor2, 'isWatchingLink').returns(false);
-        env.sandbox.stub(linkRewriterVendor2.events, 'send');
+        env.sandbox.stub(linkRewriterVendor2.events, 'fire');
         env.sandbox.stub(linkRewriterVendor3, 'isWatchingLink').returns(true);
-        env.sandbox.stub(linkRewriterVendor3.events, 'send');
+        env.sandbox.stub(linkRewriterVendor3.events, 'fire');
       });
 
       it('Should only send click event to suitable link rewriters', () => {
         linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
 
-        expect(linkRewriterVendor1.events.send.calledOnce).to.be.true;
-        expect(linkRewriterVendor2.events.send.called).to.be.false;
-        expect(linkRewriterVendor3.events.send.calledOnce).to.be.true;
+        expect(linkRewriterVendor1.events.fire.calledOnce).to.be.true;
+        expect(linkRewriterVendor2.events.fire.called).to.be.false;
+        expect(linkRewriterVendor3.events.fire.calledOnce).to.be.true;
       });
 
       it('Should contain the name of the chosen link rewriter', () => {
@@ -305,13 +305,13 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
 
           env.sandbox.stub(linkRewriterVendor1, 'isWatchingLink').returns(true);
-          env.sandbox.stub(linkRewriterVendor1.events, 'send');
+          env.sandbox.stub(linkRewriterVendor1.events, 'fire');
           env.sandbox
               .stub(linkRewriterVendor2, 'isWatchingLink')
               .returns(false);
-          env.sandbox.stub(linkRewriterVendor2.events, 'send');
+          env.sandbox.stub(linkRewriterVendor2.events, 'fire');
           env.sandbox.stub(linkRewriterVendor3, 'isWatchingLink').returns(true);
-          env.sandbox.stub(linkRewriterVendor3.events, 'send');
+          env.sandbox.stub(linkRewriterVendor3.events, 'fire');
         });
 
         it('Should ignore not suitable link rewriter', () => {
@@ -412,7 +412,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
     rootDocument = env.ampdoc.getRootNode();
 
     createResolveResponseHelper = (syncData, asyncData) => {
-      const twoStepsResponse = createTwoStepsResponse(syncData, asyncData);
+      const twoStepsResponse = new TwoStepsResponse(syncData, asyncData);
       return env.sandbox.stub().returns(twoStepsResponse);
     };
 
@@ -445,9 +445,8 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
         expect(() => {
           createLinkRewriterHelper(resolveFunction).scanLinksOnPage_();
         }).to.throw(
-            'Invalid response from provided resolveUnknownLinks, use the ' +
-            'return value of ' +
-            'createTwoStepsResponse(syncResponse, asyncResponse)'
+            'Invalid response from provided "resolveUnknownLinks" function.' +
+          '"resolveUnknownLinks" should return an instance of TwoStepsResponse'
         )
       );
     });
@@ -617,11 +616,14 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
 
       it('Should send PAGE_SCANNED event when onDomUpdated() is called', () => {
         const linkRewriter = createLinkRewriterHelper();
-        env.sandbox.stub(linkRewriter.events, 'send');
-        const stub = linkRewriter.events.send;
+        env.sandbox.stub(linkRewriter.events, 'fire');
+        const stub = linkRewriter.events.fire;
+        const args = {
+          type: linkRewriterEvents.PAGE_SCANNED,
+        };
 
         return linkRewriter.onDomUpdated().then(() => {
-          expect(stub.withArgs(linkRewriterEvents.PAGE_SCANNED).calledOnce).to
+          expect(stub.withArgs(args).calledOnce).to
               .be.true;
         });
       });

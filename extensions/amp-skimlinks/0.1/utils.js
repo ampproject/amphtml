@@ -19,7 +19,7 @@ import {user} from '../../../src/log';
 /**
  * Get function from an object attached with the object as its context
  * @param {*} context
- * @param {*} functionName
+ * @param {string} functionName
  */
 export function getBoundFunction(context, functionName) {
   const validFunction = context[functionName] && context[functionName].bind;
@@ -30,6 +30,7 @@ export function getBoundFunction(context, functionName) {
 
 /**
  * Generate random id of 32 chars.
+ * @return {string}
  */
 export function generatePageImpressionId() {
   let str = '';
@@ -58,27 +59,19 @@ export function getNormalizedHostnameFromUrl(url) {
  * 'excluded-domains' skim-option & the internal domains.
  * (See skim-options.js)
  * @param {string} domain
- * @param {Object} skimOptions
+ * @param {!Object} skimOptions
  * @return {boolean}
  */
 export function isExcludedDomain(domain, skimOptions) {
   const {excludedDomains} = skimOptions;
-  if (!excludedDomains || !excludedDomains.length) {
-    return false;
-  }
 
-  // TODO: Validate subdomain (*.nordstrom.com)
-  if (excludedDomains.indexOf(domain) === -1) {
-    return false;
-  }
-
-  return true;
+  return excludedDomains && excludedDomains.indexOf(domain) !== -1;
 }
 
 /**
  * Check if a url belongs to an excluded domain.
  * @param {string} url
- * @param {Object} skimOptions
+ * @param {!Object} skimOptions
  * @return {boolean}
  */
 export function isExcludedUrl(url, skimOptions) {

@@ -150,17 +150,26 @@ describes.fakeWin(
           });
 
           it('Should setup click callback', () => {
-            const data = {};
+            const eventData = {};
             // Send fake click.
-            linkRewriter.events.send(linkRewriterEvents.CLICK, data);
+            const event = {
+              type: linkRewriterEvents.CLICK,
+              eventData,
+            };
+            linkRewriter.events.fire(event);
 
-            expect(ampSkimlinks.onClick_.withArgs(data).calledOnce).to.be.true;
+            expect(ampSkimlinks.onClick_.withArgs(eventData).calledOnce)
+                .to.be.true;
           });
 
-          it("Should call 'onPageScanned_' callback just once once", () => {
-            const data = {};
-            linkRewriter.events.send(linkRewriterEvents.PAGE_SCANNED, data);
-            linkRewriter.events.send(linkRewriterEvents.PAGE_SCANNED, data);
+          it("Should call 'onPageScanned_' callback just once", () => {
+            const eventData = {};
+            const event = {
+              type: linkRewriterEvents.PAGE_SCANNED,
+              eventData,
+            };
+            linkRewriter.events.fire(event);
+            linkRewriter.events.fire(event);
             expect(ampSkimlinks.onPageScanned_.calledOnce).to.be.true;
           });
         });

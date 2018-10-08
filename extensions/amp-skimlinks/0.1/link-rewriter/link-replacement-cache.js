@@ -24,17 +24,17 @@ export class LinkReplacementCache {
    * Constructor
    */
   constructor() {
-    /** @private {Array<HTMLElement>} */
+    /** @private {!Array<!HTMLElement>} */
     this.anchorList_ = [];
-    /** @private {Array<?string>} */
+    /** @private {!Array<?string>} */
     this.replacementList_ = [];
   }
 
   /**
-   * @public
    * Reset the list of anchors to the new provided list but keep
    * the replacement values associated with pre-existing anchors.
-   * @param {Array<HTMLElement>} newAnchorList - array of "<a>".
+   * @param {!Array<!HTMLElement>} newAnchorList - array of "<a>".
+   * @public
    */
   updateLinkList(newAnchorList) {
     // Copy the previous replacement URL to the
@@ -49,8 +49,8 @@ export class LinkReplacementCache {
   }
 
   /**
-   * @public
    * @param {!./link-rewriter.AnchorReplacementList} replacementList
+   * @public
    */
   updateReplacementUrls(replacementList) {
     replacementList.forEach(({anchor, replacementUrl}) => {
@@ -62,10 +62,10 @@ export class LinkReplacementCache {
   }
 
   /**
-   * @public
    * Returns the replacement url associated with an anchor.
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {?string}
+   * @public
    */
   getReplacementUrlForAnchor(anchor) {
     const index = this.anchorList_.indexOf(anchor);
@@ -74,23 +74,23 @@ export class LinkReplacementCache {
   }
 
   /**
-   * @public
-   * @param {HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean}
+   * @public
    */
   isInCache(anchor) {
     return this.anchorList_.indexOf(anchor) !== -1;
   }
 
   /**
-   * @public
    * Get the list of all the anchors present in the cache, associated with their
    * replacementUrl
    * @return {!./link-rewriter.AnchorReplacementList}
+   * @public
    */
   getAnchorReplacementList() {
     return this.anchorList_.map(anchor => {
-      return /** @type {{anchor: HTMLElement, replacementUrl: ?string}} */ ({
+      return /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
         anchor,
         replacementUrl: this.getReplacementUrlForAnchor(anchor),
       });

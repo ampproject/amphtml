@@ -52,8 +52,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
     this.linkRewriterService_ = null;
 
-    /** @private {?Object} */
-    this.skimOptions_ = null;
+    /** @private {!Object} */
+    this.skimOptions_ = {};
 
     /** @private {?./tracking.Tracking} */
     this.trackingService_ = null;
@@ -84,19 +84,16 @@ export class AmpSkimlinks extends AMP.BaseElement {
      * extension using it we can instanciate it here for now.
      */
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
-
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
-    return Promise.all([
-      whenDocumentReady(
-          /** @type {!Document} */ (this.ampDoc_.getRootNode())
-      ),
-      this.viewer_.getReferrerUrl(),
-    ]).then(promiseResults => {
-      // Get second promise result.
-      this.referrer_ = promiseResults[1];
-      this.startSkimcore_();
-    });
+    return whenDocumentReady(
+        /** @type {!Document} */(this.ampDoc_.getRootNode())
+    )
+        .then(() => this.viewer_.getReferrerUrl())
+        .then(referrer => {
+          this.referrer_ = referrer;
+          this.startSkimcore_();
+        });
   }
 
   /**
@@ -123,12 +120,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
   /**
    * Fires impression tracking after beacon API request.
-   * @param {!Object} beaconData - Json response from Beacon API.
+   * @param {!JsonObject} beaconData - Json response from Beacon API.
    * @private
    */
-  sendImpressionTracking_({guid}) {
+  sendImpressionTracking_(beaconData) {
     // Update tracking service with extra info.
-    this.trackingService_.setTrackingInfo({guid});
+    this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
     const viewer = Services.viewerForDoc(
         /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_)
@@ -150,6 +147,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Make a fallback call to beacon if no links were founds on the page.
    * Send the impression tracking once we have the beacon API response.
    * @return {Promise}
+   * @private
    */
   onPageScanned_() {
     // .firstRequest may be null if the page doesn't have any non-excluded
@@ -164,6 +162,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   /**
    * Initialise Skimlinks LinkRewriter
    * @return {!./link-rewriter/link-rewriter.LinkRewriter}
+   * @private
    */
   initSkimlinksLinkRewriter_() {
     const options = {
@@ -176,16 +175,18 @@ export class AmpSkimlinks extends AMP.BaseElement {
         options
     );
 
-    // We are only interested in the first page scan.
-    linkRewriter.events.on(
-        linkRewriterEvents.PAGE_SCANNED,
-        once(this.onPageScanned_.bind(this))
-    );
+    const eventHandlers = {
+      // We are only interested in the first page scan.
+      [linkRewriterEvents.PAGE_SCANNED]: once(this.onPageScanned_.bind(this)),
+      [linkRewriterEvents.CLICK]: this.onClick_.bind(this),
+    };
 
-    linkRewriter.events.on(
-        linkRewriterEvents.CLICK,
-        this.onClick_.bind(this)
-    );
+    linkRewriter.events.add(event => {
+      const handler = eventHandlers[event.type];
+      if (handler) {
+        handler(event.eventData);
+      }
+    });
 
     return linkRewriter;
   }
@@ -202,7 +203,10 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // we are using layout = 'nodisplay', 'layoutCallback' is never called.
     // We need to call it manually to have CustomEventReporterBuilder working.
     this.signals().signal(CommonSignals.LOAD_START);
-    return new Tracking(this.element, this.skimOptions_);
+    return new Tracking(
+        this.element,
+        this.skimOptions_
+    );
   }
 
   /**

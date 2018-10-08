@@ -15,6 +15,7 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedUrl} from './utils';
 
 import {
@@ -39,8 +40,8 @@ export class Tracking {
   /**
    * Use tracking instance to track page impressions,
    * link impressions and non-affiliated clicks.
-   * @param {AmpElement} element
-   * @param {Object} skimOptions
+   * @param {!AmpElement} element
+   * @param {!Object} skimOptions
    */
   constructor(element, skimOptions) {
     /** @private {boolean} */
@@ -57,14 +58,16 @@ export class Tracking {
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
     };
+
+    /** @private {!Object} */
     this.skimOptions_ = skimOptions;
     this.analytics_ = this.setupAnalytics_(element);
   }
 
   /**
    * Getter to access the tracking data from outside the class.
+   * @return {!Object}
    * @public
-   * @return {Object}
    */
   getTrackingInfo() {
     return this.trackingInfo_;
@@ -73,8 +76,8 @@ export class Tracking {
   /**
    * Setter to update the tracking data from outside the class.
    * This is mainly used for setting the guid that we receive from beaconAPI.
-   * @public
    * @param {!Object} newInfo
+   * @public
    */
   setTrackingInfo(newInfo) {
     Object.assign(this.trackingInfo_, newInfo);
@@ -82,8 +85,8 @@ export class Tracking {
 
   /**
    * Sends "Page impression" and "Link impression" tracking requests (POST).
-   * @public
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList
+   * @public
    */
   sendImpressionTracking(anchorReplacementList) {
     if (!this.tracking_) {
@@ -98,14 +101,14 @@ export class Tracking {
     } = this.trackingInfo_;
 
     // This data is common to both page & link impression requests.
-    const commonData = {
-      pub: pubcode,
-      pag: pageUrl,
-      guid,
-      uuid: pageImpressionId,
-      tz: timezone,
-      platform: PLATFORM_NAME,
-    };
+    const commonData = dict({
+      'pub': pubcode,
+      'pag': pageUrl,
+      'guid': guid,
+      'uuid': pageImpressionId,
+      'tz': timezone,
+      'platform': PLATFORM_NAME,
+    });
 
     const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
         anchorReplacementList
@@ -121,8 +124,8 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register non-affiliated click.
+   * @param {!HTMLElement} anchor
    * @public
-   * @param {HTMLElement} anchor
    */
   sendNaClickTracking(anchor) {
     if (!this.tracking_ || isExcludedUrl(anchor.href, this.skimOptions_)) {
@@ -137,79 +140,79 @@ export class Tracking {
       customTrackingId,
     } = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ ({
-      pubcode,
-      referrer: pageUrl,
-      pref: referrer,
-      site: 'false',
-      url: anchor.href,
-      custom: anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId,
-      xtz: timezone,
-      uuid: pageImpressionId,
-      product: '1',
-      platform: PLATFORM_NAME,
+    const data = dict({
+      'pubcode': pubcode,
+      'referrer': pageUrl,
+      'pref': referrer,
+      'site': 'false',
+      'url': anchor.href,
+      'custom': anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId,
+      'xtz': timezone,
+      'uuid': pageImpressionId,
+      'product': '1',
+      'platform': PLATFORM_NAME,
     });
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in NA_CLICK_TRACKING_URL.
-    this.analytics_.trigger('non-affiliate-click', {
-      data: JSON.stringify(data),
-      rnd: 'RANDOM',
-    });
+    this.analytics_.trigger('non-affiliate-click', dict({
+      'data': JSON.stringify(data),
+      'rnd': 'RANDOM',
+    }));
   }
 
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register page impression request.
-   * @private
-   * @param {Object} commonData
+   * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
+   * @private
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
     const data = /** @type {!JsonObject} */ (Object.assign(
-        {
-          slc: numberAffiliateLinks,
-          // Javascript load time, not relevent in AMP context.
-          jsl: 0,
-          pref: referrer,
-          uc: customTrackingId,
-          t: 1,
-        },
+        dict({
+          'slc': numberAffiliateLinks,
+          // Javascript load time, not relevant in AMP context.
+          'jsl': 0,
+          'pref': referrer,
+          'uc': customTrackingId,
+          't': 1,
+        }),
         commonData
     ));
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
-    this.analytics_.trigger('page-impressions', {
-      data: JSON.stringify(data),
-    });
+    this.analytics_.trigger('page-impressions', dict({
+      'data': JSON.stringify(data),
+    }));
   }
 
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register link impression request.
-   * @private
-   * @param {Object} commonData
+   * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
-   * @param {Object} urls
+   * @param {!Object} urls
+   * @private
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
     const data = /** @type {!JsonObject} */ (Object.assign(
-        {
-          dl: urls,
-          hae: numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-          typ: 'l',
-        },
+        dict({
+          'dl': urls,
+          'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
+          'typ': 'l',
+        }),
         commonData
     ));
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
-    this.analytics_.trigger('link-impressions', {
-      data: JSON.stringify(data),
-    });
+    this.analytics_.trigger('link-impressions', dict({
+      'data': JSON.stringify(data),
+    }));
   }
 
   /**
@@ -217,8 +220,8 @@ export class Tracking {
    * Warning: Analytics API will not send any request until
    * CommonSignals.LOAD_START has been triggered.
    * (See "initTracking_" in amp-skimlinks.js)
+   * @param {!AmpElement} element
    * @private
-   * @param {AmpElement} element
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
@@ -238,7 +241,8 @@ export class Tracking {
       TODO: add optional config param to .build() so we don't need to mutate
       a private property from outside.
     */
-    analytics.config_.transport = {beacon: true};
+    // Bracket because analytics.config_ is of type JsonObject.
+    analytics.config_['transport'] = dict({'beacon': true});
 
     return analytics;
   }
@@ -250,29 +254,29 @@ export class Tracking {
    * - A map of each url seen on the page associated with some information:
    *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
    *
-   * @private
    * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
    *    associated with their potential replacement url.
-   * @return {{numberAffiliateLinks: number, urls: Object}}
+   * @return {!{numberAffiliateLinks: number, urls: !JsonObject}}
+   * @private
    */
   extractAnchorTrackingInfo_(anchorReplacementList) {
     let numberAffiliateLinks = 0;
-    const urls = {};
+    const urls = dict({});
 
     anchorReplacementList.forEach(({replacementUrl, anchor}) => {
       if (isExcludedUrl(anchor.href, this.skimOptions_)) {
         return;
       }
 
-      urls[anchor.href] = urls[anchor.href] || {
-        ae: replacementUrl ? 1 : 0,
-        count: 0,
-      };
+      urls[anchor.href] = urls[anchor.href] || dict({
+        'ae': replacementUrl ? 1 : 0,
+        'count': 0,
+      });
 
-      urls[anchor.href].count += 1;
+      urls[anchor.href]['count'] += 1;
 
-      if (urls[anchor.href].ae === 1) {
-        numberAffiliateLinks = numberAffiliateLinks + 1;
+      if (urls[anchor.href]['ae'] === 1) {
+        numberAffiliateLinks += 1;
       }
     });
 

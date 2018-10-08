@@ -17,16 +17,13 @@
 import {user} from '../../../../src/log';
 
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
-import {EventMessenger} from './event-messenger';
 import {LinkReplacementCache} from './link-replacement-cache';
-import {isTwoStepsResponse} from './link-rewriter-helpers';
+import {Observable} from '../../../../src/observable';
+import {TwoStepsResponse} from './two-steps-response';
 
 
-/** @typedef {!Array<{anchor: HTMLElement, replacementUrl: ?string}>}} */
+/** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
-
-/** @typedef {{syncResponse: ?AnchorReplacementList, asyncResponse: ?Promise<!AnchorReplacementList>}} */
-export let TwoStepsResponse;
 
 
 /**
@@ -51,21 +48,21 @@ export class LinkRewriter {
   /**
    * @param {!Document} ampPageDocument - Document of the iframe when loaded in viewer
    * @param {string} id
-   * @param {function(Array<HTMLElement>):TwoStepsResponse} resolveUnknownLinks
+   * @param {function(Array<HTMLElement>):!TwoStepsResponse} resolveUnknownLinks
    * @param {?{linkSelector: string}=} options
    */
   constructor(ampPageDocument, id, resolveUnknownLinks, options) {
-    /** @public {!./event-messenger.EventMessenger} */
-    this.events = new EventMessenger();
+    /** @public {!../../../../src/observable.Observable} */
+    this.events = new Observable();
 
     /** @public {string} */
     this.id = id;
 
-    /** @private {Document} */
+    /** @private {!Document} */
     this.ampPageDocument_ = ampPageDocument;
 
 
-    /** @private {function(Array<HTMLElement>):TwoStepsResponse} */
+    /** @private {function(!Array<!HTMLElement>):!TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 
     /** @private {string} */
@@ -79,10 +76,10 @@ export class LinkRewriter {
   }
 
   /**
-   * @public
    * Get the replacement url associated with the anchor.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {?string}
+   * @public
    */
   getReplacementUrl(anchor) {
     if (!this.isWatchingLink(anchor)) {
@@ -93,41 +90,41 @@ export class LinkRewriter {
   }
 
   /**
-   * @public
    * Get the anchor to replacement url cache.
    * Useful to extract information for tracking purposes.
    * @return {!AnchorReplacementList}
+   * @public
    */
   getAnchorReplacementList() {
     return this.anchorReplacementCache_.getAnchorReplacementList();
   }
 
   /**
-   * @public
    * Returns True if the LinkRewriter instance is supposed to handle
    * this particular anchor.
    * By default LinkRewriter handles all the links on the page but
    * inclusion/exclusion rules can be created by using the "linkSelector"
    * option. When using this option all the links not matching the css selector
    * will be ignored and isWatchingLink(anchor) will return false.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean}
+   * @public
    */
   isWatchingLink(anchor) {
     return this.anchorReplacementCache_.isInCache(anchor);
   }
 
   /**
-   * @public
    * This function is called when the user clicks on a link.
    * It swaps temporarly the href of an anchor by its associated
    * replacement url but only for the time needed by the browser
    * to handle the click on the anchor and navigate to the new url.
    * After 300ms, if the page is still open (target="_blank" scenario),
    * the link is restored to its initial value.
-   * @param {?HTMLElement} anchor
+   * @param {!HTMLElement} anchor
    * @return {boolean} - 'true' if the linkRewriter has changed the url
    *  'false' otherwise.
+   * @public
    */
   rewriteAnchorUrl(anchor) {
     const newUrl = this.getReplacementUrl(anchor);
@@ -147,26 +144,28 @@ export class LinkRewriter {
   }
 
   /**
-   * @public
    * Scan the page to find links and send "page_scanned" event when scan
    * is completed and we know the replacement url of all the links
    * currently in the DOM.
-   * @return {Promise}
+   * @return {!Promise}
+   * @public
    */
   onDomUpdated() {
     return this.scanLinksOnPage_().then(() => {
-      this.events.send(EVENTS.PAGE_SCANNED);
+      this.events.fire({
+        type: EVENTS.PAGE_SCANNED,
+      });
     });
   }
 
   /**
-   * @private
    * Scan the page to find all the links on the page.
    * If new anchors are discovered, ask to the "resolveUnknownLinks"
    * function what is the replacement url for each anchor. The response
    * which can be synchronous, asynchronous or both at the same time will be
    * stored internally and used if a click on one of this anchor happens later.
-   * @return {Promise}
+   * @return {!Promise}
+   * @private
    */
   scanLinksOnPage_() {
     const anchorList = this.getLinksInDOM_();
@@ -189,9 +188,9 @@ export class LinkRewriter {
         unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
-    user().assert(isTwoStepsResponse(twoStepsResponse),
-        'Invalid response from provided resolveUnknownLinks, use the return ' +
-        'value of createTwoStepsResponse(syncResponse, asyncResponse)');
+    user().assert(twoStepsResponse instanceof TwoStepsResponse,
+        'Invalid response from provided "resolveUnknownLinks" function.' +
+        '"resolveUnknownLinks" should return an instance of TwoStepsResponse');
 
     if (twoStepsResponse.syncResponse) {
       this.anchorReplacementCache_.updateReplacementUrls(
@@ -209,10 +208,10 @@ export class LinkRewriter {
   }
 
   /**
-   * @private
    * Filter the list of anchors to returns only the ones
    * that were not in the page at the time of the last page scan.
-   * @param {*} anchorList
+   * @param {!Array<!HTMLElement>} anchorList
+   * @private
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
@@ -227,10 +226,10 @@ export class LinkRewriter {
   }
 
   /**
-   * @private
    * Get the list of anchors element in the page.
    * (Based on linkSelector option)
-   * @return {Array<HTMLElement>}
+   * @return {!Array<!HTMLElement>}
+   * @private
    */
   getLinksInDOM_() {
     const q = this.ampPageDocument_.querySelectorAll(this.linkSelector_);
