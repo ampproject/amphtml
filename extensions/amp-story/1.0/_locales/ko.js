@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Korean strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+export default {
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: '수락',
   },
@@ -93,4 +93,4 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: '죄송합니다. 사용하고 계신 브라우저는 stories를 서포트 하지 않습니다. ',
   },
-});
+};
