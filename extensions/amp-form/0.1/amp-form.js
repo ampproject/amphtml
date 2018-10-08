@@ -460,7 +460,7 @@ export class AmpForm {
     try {
       const event = {
         form: this.form_,
-        destinationSetter: this.setXhrAction.bind(this),
+        actionXhrMutator: this.setXhrAction.bind(this),
       };
       this.formSubmitService_.fire(event);
     } catch (e) {

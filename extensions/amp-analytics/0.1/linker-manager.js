@@ -292,7 +292,7 @@ export class LinkerManager {
    * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
   handleFormSubmit_(event) {
-    const {form, destinationSetter} = event;
+    const {form, actionXhrMutator} = event;
 
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];
@@ -303,7 +303,7 @@ export class LinkerManager {
       const {hostname} = this.urlService_.parse(url);
 
       if (this.isDomainMatch_(hostname, domains)) {
-        this.addDataToForm_(form, destinationSetter, linkerName);
+        this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
   }
@@ -313,10 +313,10 @@ export class LinkerManager {
    * Add the linker data to form. If action-xhr is present we can update the
    * action-xhr, if not we fallback to adding hidden inputs.
    * @param {!Element} form
-   * @param {function(string)} destinationSetter
+   * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
    */
-  addDataToForm_(form, destinationSetter, linkerName) {
+  addDataToForm_(form, actionXhrMutator, linkerName) {
     const linkerValue = this.resolvedLinkers_[linkerName];
     if (!linkerValue) {
       return;
@@ -327,7 +327,7 @@ export class LinkerManager {
     const actionXhrUrl = form.getAttribute('action-xhr');
     if (actionXhrUrl) {
       const decoratedUrl = addParamToUrl(actionXhrUrl, linkerName, linkerValue);
-      return destinationSetter(decoratedUrl);
+      return actionXhrMutator(decoratedUrl);
     }
 
     // If we are not using `action-xhr` it must be a GET request using the

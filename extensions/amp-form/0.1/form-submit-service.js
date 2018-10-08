@@ -20,7 +20,7 @@ import {Observable} from '../../../src/observable';
 /**
  * @typedef {{
  *   form: HTMLFormElement,
- *   destinationSetter: function(string)
+ *   actionXhrMutator: function(string)
  * }}
  */
 export let FormSubmitEventDef;
