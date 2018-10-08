@@ -4,6 +4,7 @@
     "amp-next-page",
     "ampdoc-shell",
     "disable-amp-story-desktop",
+    "inabox-rov",
     "url-replacement-v2",
     "linker-meta-opt-in"
   ],
@@ -48,5 +49,6 @@
   "no-sync-xhr-in-ads": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "doubleclickIdleExp": 0.01
+  "doubleclickIdleExp": 0.01,
+  "inabox-rov": 1
 }
