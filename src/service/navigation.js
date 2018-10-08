@@ -40,6 +40,7 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+const VALID_TARGETS = ['_top', '_blank'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -101,9 +102,11 @@ export class Navigation {
     /** @private @const {!./history-impl.History} */
     this.history_ = Services.historyForDoc(this.ampdoc);
 
-    const platform = Services.platformFor(this.ampdoc.win);
+    /** @private @const {!./platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.ampdoc.win);
+
     /** @private @const {boolean} */
-    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+    this.isIosSafari_ = this.platform_.isIos() && this.platform_.isSafari();
 
     /** @private @const {boolean} */
     this.isIframed_ =
@@ -169,6 +172,33 @@ export class Navigation {
   }
 
   /**
+   * Opens a new window with the specified target.
+   *
+   * @param {!Window} win A window to use to open a new window.
+   * @param {string} url THe URL to open.
+   * @param {string} target The target for the newly opened window.
+   * @param {boolean} opener Whether or not the new window should have acccess
+   *   to the opener (win).
+   */
+  openWindow(win, url, target, opener) {
+    let options = '';
+    // We don't pass noopener for Chrome since it opens a new window without
+    // tabs. Instead, we remove the opener property from the newly opened
+    // window.
+    // Note: for Safari, we need to use noopener instead of clearing the opener
+    // property.
+    if ((this.platform_.isIos() || !this.platform_.isChrome()) && !opener) {
+      options += 'noopener';
+    }
+
+    const newWin = win.top.open(url, target, options);
+    // For Chrome, since we cannot use noopener.
+    if (newWin && !opener) {
+      newWin.opener = null;
+    }
+  }
+
+  /**
    * Navigates a window to a URL.
    *
    * If opt_requestedBy matches a feature name in a <meta> tag with attribute
@@ -177,11 +207,27 @@ export class Navigation {
    * @param {!Window} win
    * @param {string} url
    * @param {string=} opt_requestedBy
+   * @param {!{
+   *   target: (string|undefined),
+   *   opener: (boolean|undefined),
+   * }=} opt_options
    */
-  navigateTo(win, url, opt_requestedBy) {
+  navigateTo(
+    win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
     const urlService = Services.urlForDoc(this.ampdoc);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+
+    user().assert(
+        VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
+
+    // If we have a target of "_blank", we will want to open a new window. A
+    // target of "_top" should behave like it would on an anchor tag and
+    // update the URL.
+    if (target == '_blank') {
+      this.openWindow(win, url, target, opener);
       return;
     }
 
