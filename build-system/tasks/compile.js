@@ -351,7 +351,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         rewrite_polyfills: false,
         externs,
         js_module_root: [
-          'node_modules/',
+          // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
+          // resolution or bad things will happen (#18600).
           'build/patched-module/',
           'build/fake-module/',
           'build/fake-polyfills/',

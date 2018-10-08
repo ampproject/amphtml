@@ -211,7 +211,8 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
+  // Do _not_ include 'node_modules/' in js_module_root with 'NODE' resolution
+  // or bad things will happen (#18600).
   flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
