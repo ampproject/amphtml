@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+export default {
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
   },
@@ -94,4 +94,4 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
         'this experience',
   },
-});
+};
