@@ -6,15 +6,16 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
+import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
-import com.google.javascript.jscomp.CompilerTestCase;
+import com.google.javascript.jscomp.Es6CompilerTestCase;
 
 
 /**
  * Tests {@link AmpPass}.
  */
-public class AmpPassTestEnvTest extends CompilerTestCase {
+public class AmpPassTestEnvTest extends Es6CompilerTestCase {
 
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
@@ -96,7 +97,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
   }
 
   public void testOptimizeGetModeFunction() throws Exception {
-    test(
+    testEs6(
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",
