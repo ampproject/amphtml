@@ -21,7 +21,6 @@ import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {
