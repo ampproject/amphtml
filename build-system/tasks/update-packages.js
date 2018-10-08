@@ -51,7 +51,7 @@ function patchWebAnimations() {
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
   // Wrap the contents inside the install function.
-  file = 'export function installWebAnimations(window) {\n' +
+  file = 'exports.installWebAnimations = function(window) {\n' +
       'var document = window.document;\n' +
       file.replace(/requestAnimationFrame/g, function(a, b) {
         if (file.charAt(b - 1) == '.') {
@@ -80,14 +80,12 @@ function patchRegisterElement() {
   file = fs.readFileSync(
       'node_modules/document-register-element/build/' +
       'document-register-element.node.js').toString();
-
   // Eliminate the immediate side effect.
   if (!/installCustomElements\(global\);/.test(file)) {
     throw new Error('Expected "installCustomElements(global);" ' +
         'to appear in document-register-element');
   }
   file = file.replace('installCustomElements(global);', '');
-
   // Closure Compiler does not generate a `default` property even though
   // to interop CommonJS and ES6 modules. This is the same issue typescript
   // ran into here https://github.com/Microsoft/TypeScript/issues/2719
@@ -96,8 +94,7 @@ function patchRegisterElement() {
         'to appear in document-register-element');
   }
   file = file.replace('module.exports = installCustomElements;',
-      'export {installCustomElements};');
-
+      'exports.installCustomElements = installCustomElements;');
   writeIfUpdated(patchedName, file);
 }
 

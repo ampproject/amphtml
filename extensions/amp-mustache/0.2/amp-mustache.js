@@ -61,7 +61,7 @@ export class AmpMustache extends AMP.BaseTemplate {
 
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_, /* tags */ undefined);
+    mustacheParse(this.template_);
   }
 
   /**
@@ -96,8 +96,7 @@ export class AmpMustache extends AMP.BaseTemplate {
       if (typeof data === 'object') {
         mustacheData = Object.assign({}, data, this.nestedTemplates_);
       }
-      html = mustacheRender(this.template_, mustacheData,
-          /* partials */ undefined);
+      html = mustacheRender(this.template_, mustacheData);
     }
     const diffing = isExperimentOn(self, 'amp-list-diffing');
     const body = purifyHtml(html, diffing);
