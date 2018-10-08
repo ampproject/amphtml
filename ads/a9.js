@@ -89,13 +89,13 @@ function getURL(data) {
  */
 function loadRecTag(global, data) {
   let url = getURL(data);
-  url += '&adInstanceId=' + data.adinstanceid;
-  if (data.recomtype === 'sync') {
+  url += '&adInstanceId=' + data['adinstanceid'];
+  if (data['recomtype'] === 'sync') {
     writeScript(global, url);
   }
-  else if (data.recomtype === 'async') {
+  else if (data['recomtype'] === 'async') {
     const d = global.document.createElement('div');
-    d.setAttribute('id', data.divid);
+    d.setAttribute('id', data['divid']);
     global.document.getElementById('c').appendChild(d);
     loadScript(global, url);
   }
