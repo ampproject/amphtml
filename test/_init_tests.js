@@ -401,7 +401,7 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -545,8 +545,8 @@ chai.Assertion.addMethod('display', function(display) {
   const tagName = obj.tagName.toLowerCase();
   this.assert(
       value === display,
-      'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
-      'expected element \'' + tagName + '\' not to be #{act}.',
+      'expected element \'' + tagName + '\' to be display #{exp}, got #{act}.',
+      'expected element \'' + tagName + '\' not to be display #{act}.',
       display,
       value
   );

@@ -62,6 +62,7 @@ export const RTC_VENDORS = {
   lotame: {
     url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
     macros: ['CLIENT_ID', 'AD_NETWORK'],
+    disableKeyAppend: true,
   },
   yieldbot: {
     url: 'https://i.yldbt.com/m/YB_PSN/v1/amp/init?curl=CANONICAL_URL&sn=YB_SLOT&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&aup=ATTR(data-slot)&pvi=PAGEVIEWID&tgt=TGT&adcid=ADCID&href=HREF',

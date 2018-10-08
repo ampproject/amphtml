@@ -29,6 +29,7 @@ import {
 } from '../runtime';
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
@@ -43,11 +44,11 @@ import {
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
-import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
+getMode(self).a4aId = getA4AId(self);
 
 // TODO(lannka): only install the necessary services.
 

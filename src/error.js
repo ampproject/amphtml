@@ -25,10 +25,14 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';
@@ -484,6 +488,11 @@ export function getErrorReportData(message, filename, line, col, error,
     runtime = getMode().runtime;
   }
   data['rt'] = runtime;
+
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.

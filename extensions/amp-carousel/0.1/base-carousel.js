@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
 
 /**
  * @abstract
@@ -70,17 +69,15 @@ export class BaseCarousel extends AMP.BaseElement {
    * Builds a carousel button for next/prev.
    * @param {string} className
    * @param {function()} onInteraction
-   * @param {string} internalStyles
    */
-  buildButton(className, onInteraction, internalStyles) {
+  buildButton(className, onInteraction) {
     const button = this.element.ownerDocument.createElement('div');
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
-    button.classList.add(internalStyles);
     button.classList.add(className);
     button.setAttribute('role', 'button');
     button.onkeydown = event => {
-      if (event.keyCode == KeyCodes.ENTER || event.keyCode == KeyCodes.SPACE) {
+      if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           onInteraction();
@@ -98,16 +95,12 @@ export class BaseCarousel extends AMP.BaseElement {
   buildButtons() {
     this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
-    }, isExperimentOn(this.win, 'amp-carousel-new-arrows') ?
-      'i-amphtml-carousel-button-prev-new' :
-      'i-amphtml-carousel-button-prev-legacy');
+    });
     this.element.appendChild(this.prevButton_);
 
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
-    }, isExperimentOn(this.win, 'amp-carousel-new-arrows') ?
-      'i-amphtml-carousel-button-next-new' :
-      'i-amphtml-carousel-button-next-legacy');
+    });
     this.element.appendChild(this.nextButton_);
   }
 

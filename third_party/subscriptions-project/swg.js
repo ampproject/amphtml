@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.25 */
+/** Version: 0.1.22.29 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2142,6 +2142,17 @@ function createElement(doc, tagName, attributes, opt_content) {
 
 
 /**
+ * Removes the element.
+ * @param {!Element} element
+ */
+function removeElement(element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+}
+
+
+/**
  * Removes all children from the parent element.
  * @param {!Element} parent
  */
@@ -2326,7 +2337,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2648,6 +2659,12 @@ class View {
    * @abstract
    */
   shouldFadeBody() {}
+
+  /**
+   * @return {boolean}
+   * @abstract
+   */
+  hasLoadingIndicator() {}
 }
 
 /**
@@ -2712,13 +2729,15 @@ class ActivityIframeView extends View {
    * @param {string} src
    * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
+   * @param {boolean=} hasLoadingIndicator
    */
   constructor(
       win,
       activityPorts,
       src,
       args,
-      shouldFadeBody = false) {
+      shouldFadeBody = false,
+      hasLoadingIndicator = false) {
     super();
 
     /** @private @const {!Window} */
@@ -2743,6 +2762,9 @@ class ActivityIframeView extends View {
 
     /** @private @const {boolean} */
     this.shouldFadeBody_ = shouldFadeBody;
+
+    /** @private @const {boolean} */
+    this.hasLoadingIndicator_ = hasLoadingIndicator;
 
     /** @private {?web-activities/activity-ports.ActivityIframePort} */
     this.port_ = null;
@@ -2779,6 +2801,14 @@ class ActivityIframeView extends View {
    */
   shouldFadeBody() {
     return this.shouldFadeBody_;
+  }
+
+  /**
+   * Returns if the view shows loading indicator.
+   * @return {boolean}
+   */
+  hasLoadingIndicator() {
+    return this.hasLoadingIndicator_;
   }
 
   /**
@@ -2887,14 +2917,19 @@ class Entitlements {
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
    * @param {function(!Entitlements)} ackHandler
+   * @param {?boolean|undefined} isReadyToPay
    */
-  constructor(service, raw, entitlements, currentProduct, ackHandler) {
+  constructor(service, raw, entitlements, currentProduct, ackHandler,
+    isReadyToPay) {
+
     /** @const {string} */
     this.service = service;
     /** @const {string} */
     this.raw = raw;
     /** @const {!Array<!Entitlement>} */
     this.entitlements = entitlements;
+    /** @const {boolean} */
+    this.isReadyToPay = isReadyToPay || false;
 
     /** @private @const {?string} */
     this.product_ = currentProduct;
@@ -2911,7 +2946,8 @@ class Entitlements {
         this.raw,
         this.entitlements.map(ent => ent.clone()),
         this.product_,
-        this.ackHandler_);
+        this.ackHandler_,
+        this.isReadyToPay);
   }
 
   /**
@@ -2921,6 +2957,7 @@ class Entitlements {
     return {
       'service': this.service,
       'entitlements': this.entitlements.map(item => item.json()),
+      'isReadyToPay': this.isReadyToPay,
     };
   }
 
@@ -3191,15 +3228,18 @@ class SubscribeResponse {
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
+   * @param {?Entitlements} entitlements
    * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData, completeHandler) {
+  constructor(raw, purchaseData, userData, entitlements, completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
     /** @const {?UserData} */
     this.userData = userData;
+    /** @const {?Entitlements} */
+    this.entitlements = entitlements;
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3212,6 +3252,7 @@ class SubscribeResponse {
         this.raw,
         this.purchaseData,
         this.userData,
+        this.entitlements,
         this.completeHandler_);
   }
 
@@ -3222,6 +3263,7 @@ class SubscribeResponse {
     return {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
+      'entitlements': this.entitlements ? this.entitlements.json() : null,
     };
   }
 
@@ -3795,366 +3837,6 @@ function addQueryParam(url, param, value) {
  * limitations under the License.
  */
 
-
-/** @private @const {!Array<string>} */
-const allowedMethods_ = ['GET', 'POST'];
-
-/** @private @enum {number} Allowed fetch responses. */
-const allowedFetchTypes_ = {
-  document: 1,
-  text: 2,
-};
-
-
-/**
- * A class that polyfills Fetch API.
- */
-class Xhr {
-
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
-  }
-
-  /**
-   * We want to call `fetch_` unbound from any context since it could
-   * be either the native fetch or our polyfill.
-   *
-   * @param {string} input
-   * @param {!FetchInitDef} init
-   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
-   * @private
-   */
-  fetch_(input, init) {
-    // TODO(avimehta): Should the requests go through when page is not visible?
-    assert(typeof input == 'string', 'Only URL supported: %s', input);
-    // In particular, Firefox does not tolerate `null` values for
-    // `credentials`.
-    const creds = init.credentials;
-    assert(
-        creds === undefined || creds == 'include' || creds == 'omit',
-        'Only credentials=include|omit support: %s', creds);
-    // Fallback to xhr polyfill since `fetch` api does not support
-    // responseType = 'document'. We do this so we don't have to do any parsing
-    // and document construction on the UI thread which would be expensive.
-    if (init.responseType == 'document') {
-      return fetchPolyfill(input, init);
-    }
-    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
-  }
-
-  /**
-   * @param {string} input URL
-   * @param {?FetchInitDef} opt_init Fetch options object.
-   * @return {!Promise<!FetchResponse>}
-   */
-  fetch(input, opt_init) {
-    // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
-    const init = setupInit(opt_init);
-    return this.fetch_(input, init).then(response => response, reason => {
-      const targetOrigin = parseUrl$1(input).origin;
-      throw new Error('XHR Failed fetching' +
-          ` (${targetOrigin}/...):`, reason && reason.message);
-    }).then(response => assertSuccess(response));
-  }
-}
-
-/**
- * Normalized method name by uppercasing.
- * @param {string|undefined} method
- * @return {string}
- * @private
- */
-function normalizeMethod_(method) {
-  if (method === undefined) {
-    return 'GET';
-  }
-  method = method.toUpperCase();
-
-  assert(
-      allowedMethods_.includes(method),
-      'Only one of %s is currently allowed. Got %s',
-      allowedMethods_.join(', '),
-      method
-  );
-
-  return method;
-}
-
-/**
- * Sets up and normalizes the FetchInitDef
- *
- * @param {?FetchInitDef=} opt_init Fetch options object.
- * @param {string=} opt_accept The HTTP Accept header value.
- * @return {!FetchInitDef}
- */
-function setupInit(opt_init, opt_accept) {
-  const init = opt_init || /** @type {FetchInitDef} */ ({});
-  init.method = normalizeMethod_(init.method);
-  init.headers = init.headers || {};
-  if (opt_accept) {
-    init.headers['Accept'] = opt_accept;
-  }
-  return init;
-}
-
-
-/**
- * A minimal polyfill of Fetch API. It only polyfills what we currently use.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- *
- * Notice that the "fetch" method itself is not exported as that would require
- * us to immediately support a much wide API.
- *
- * @param {string} input
- * @param {!FetchInitDef} init
- * @return {!Promise<!FetchResponse>}
- * @private Visible for testing
- */
-function fetchPolyfill(input, init) {
-  return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input);
-
-    if (init.credentials == 'include') {
-      xhr.withCredentials = true;
-    }
-
-    if (init.responseType in allowedFetchTypes_) {
-      xhr.responseType = init.responseType;
-    }
-
-    if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
-        xhr.setRequestHeader(header, init.headers[header]);
-      });
-    }
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
-        return;
-      }
-      if (xhr.status < 100 || xhr.status > 599) {
-        xhr.onreadystatechange = null;
-        reject(new Error(`Unknown HTTP status ${xhr.status}`));
-        return;
-      }
-
-      // TODO(dvoytenko): This is currently simplified: we will wait for the
-      // whole document loading to complete. This is fine for the use cases
-      // we have now, but may need to be reimplemented later.
-      if (xhr.readyState == /* COMPLETE */ 4) {
-        resolve(new FetchResponse(xhr));
-      }
-    };
-    xhr.onerror = () => {
-      reject(new Error('Network failure'));
-    };
-    xhr.onabort = () => {
-      reject(new Error('Request aborted'));
-    };
-
-    if (init.method == 'POST') {
-      xhr.send(init.body);
-    } else {
-      xhr.send();
-    }
-  });
-}
-
-/**
- * @param {string} method
- * @param {string} url
- * @return {!XMLHttpRequest}
- * @private
- */
-function createXhrRequest(method, url) {
-  const xhr = new XMLHttpRequest();
-  // TODO(avimehta): IE 8/9 don't support XHR (with CORS). Use XDR instead
-  // if we plan to support those browsers.
-  if ('withCredentials' in xhr) {
-    xhr.open(method, url, true);
-  } else {
-    throw new Error('CORS is not supported');
-  }
-  return xhr;
-}
-
-/**
- * If 415 or in the 5xx range.
- * @param {number} status
- */
-function isRetriable(status) {
-  return status == 415 || (status >= 500 && status < 600);
-}
-
-
-/**
- * Returns the response if successful or otherwise throws an error.
- * @param {!FetchResponse} response
- * @return {!Promise<!FetchResponse>}
- * @private Visible for testing
- */
-function assertSuccess(response) {
-  return new Promise(resolve => {
-    if (response.ok) {
-      return resolve(response);
-    }
-
-    const {status} = response;
-    const err = new Error(`HTTP error ${status}`);
-    err.retriable = isRetriable(status);
-    // TODO(@jridgewell, #9448): Callers who need the response should
-    // skip processing.
-    err.response = response;
-    throw err;
-  });
-}
-
-
-/**
- * Response object in the Fetch API.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
- */
-class FetchResponse {
-  /**
-   * @param {!XMLHttpRequest} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
-    this.xhr_ = xhr;
-
-    /** @const {number} */
-    this.status = this.xhr_.status;
-
-    /** @const {boolean} */
-    this.ok = this.status >= 200 && this.status < 300;
-
-    /** @const {!FetchResponseHeaders} */
-    this.headers = new FetchResponseHeaders(xhr);
-
-    /** @type {boolean} */
-    this.bodyUsed = false;
-
-    /** @type {?ReadableStream} */
-    this.body = null;
-  }
-
-  /**
-   * Create a copy of the response and return it.
-   * @return {!FetchResponse}
-   */
-  clone() {
-    assert(!this.bodyUsed, 'Body already used');
-    return new FetchResponse(this.xhr_);
-  }
-
-  /**
-   * Drains the response and returns the text.
-   * @return {!Promise<string>}
-   * @private
-   */
-  drainText_() {
-    assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    return Promise.resolve(this.xhr_.responseText);
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * text.
-   * @return {!Promise<string>}
-   */
-  text() {
-    return this.drainText_();
-  }
-
-  /**
-   * Drains the response and returns the JSON object.
-   * @return {!Promise<!JsonObject>}
-   */
-  json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-        this.drainText_().then(parseJson));
-  }
-
-  /**
-   * Reads the xhr responseXML.
-   * @return {!Promise<!Document>}
-   * @private
-   */
-  document_() {
-    assert(!this.bodyUsed, 'Body already used');
-    this.bodyUsed = true;
-    assert(this.xhr_.responseXML,
-        'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
-    return /** @type {!Promise<!Document>} */ (
-        Promise.resolve(assert(this.xhr_.responseXML)));
-  }
-
-  /**
-   * Drains the response and returns a promise that resolves with the response
-   * ArrayBuffer.
-   * @return {!Promise<!ArrayBuffer>}
-   */
-  arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.drainText_().then(utf8EncodeSync));
-  }
-}
-
-
-/**
- * Provides access to the response headers as defined in the Fetch API.
- * @private Visible for testing.
- */
-class FetchResponseHeaders {
-  /**
-   * @param {!XMLHttpRequest} xhr
-   */
-  constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
-    this.xhr_ = xhr;
-  }
-
-  /**
-   * @param {string} name
-   * @return {string}
-   */
-  get(name) {
-    return this.xhr_.getResponseHeader(name);
-  }
-
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
-  has(name) {
-    return this.xhr_.getResponseHeader(name) != null;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * Have to put these in the map to avoid compiler optimization. Due to
  * optimization issues, this map only allows property-style keys. E.g. "hr1",
@@ -4211,7 +3893,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.25',
+    '_client': 'SwG 0.1.22.29',
   });
 }
 
@@ -4249,52 +3931,11 @@ function cacheParam(cacheKey) {
  * limitations under the License.
  */
 
-const PAY_REQUEST_ID = 'swg-pay';
-
-/**
- * @const {!Object<string, string>}
- * @package Visible for testing only.
- */
-const PAY_ORIGIN = {
-  'PRODUCTION': 'https://pay.google.com',
-  'SANDBOX': 'https://pay.sandbox.google.com',
-};
-
-
-/** @return {string} */
-function payOrigin() {
-  return PAY_ORIGIN['PRODUCTION'];
-}
-
-/** @return {string} */
-function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
-}
-
-/** @return {string} */
-function payDecryptUrl() {
-  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
-}
-
 
 /**
  * The flow to initiate payment process.
  */
 class PayStartFlow {
-
-  /**
-   * @param {!../utils/preconnect.Preconnect} pre
-   */
-  static preconnect(pre) {
-    pre.prefetch(payUrl());
-    pre.prefetch(
-        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
-    pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
-    pre.preconnect('https://www.gstatic.com/');
-    pre.preconnect('https://fonts.googleapis.com/');
-    pre.preconnect('https://www.google.com/');
-  }
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {string} sku
@@ -4303,8 +3944,8 @@ class PayStartFlow {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
+    /** @private @const {!./pay-client.PayClient} */
+    this.payClient_ = deps.payClient();
 
     /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
@@ -4326,24 +3967,23 @@ class PayStartFlow {
       'sku': this.sku_,
     });
 
-    // TODO(dvoytenko): switch to gpay async client.
-    const forceRedirect =
-        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
-    const opener = this.activityPorts_.open(
-        PAY_REQUEST_ID,
-        payUrl(),
-        forceRedirect ? '_top' : '_blank',
-        feArgs({
-          'apiVersion': 1,
-          'allowedPaymentMethods': ['CARD'],
-          'environment': 'PRODUCTION',
-          'playEnvironment': 'PROD',
-          'swg': {
-            'publicationId': this.pageConfig_.getPublicationId(),
-            'skuId': this.sku_,
-          },
-        }), {});
-    this.dialogManager_.popupOpened(opener && opener.targetWin);
+    const opener = this.payClient_.start({
+      'apiVersion': 1,
+      'allowedPaymentMethods': ['CARD'],
+      'environment': 'PRODUCTION',
+      'playEnvironment': 'PROD',
+      'swg': {
+        'publicationId': this.pageConfig_.getPublicationId(),
+        'skuId': this.sku_,
+      },
+      'i': {
+        'startTimeMs': Date.now(),
+      },
+    }, {
+      forceRedirect:
+          this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
+    });
+    this.dialogManager_.popupOpened(opener);
     return Promise.resolve();
   }
 }
@@ -4358,12 +3998,12 @@ class PayCompleteFlow {
    * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
-    deps.activities().onResult(PAY_REQUEST_ID, port => {
+    deps.payClient().onResponse(payPromise => {
       deps.dialogManager().popupClosed();
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(
-          deps.win(), port, flow.complete.bind(flow));
+      const promise =
+          validatePayResponse(deps, payPromise, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -4410,14 +4050,22 @@ class PayCompleteFlow {
   start(response) {
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
+    const args = {
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+    };
+    // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
+    if (response.userData && response.entitlements) {
+      args['idToken'] = response.userData.idToken;
+      this.deps_.entitlementsManager().pushNextEntitlements(
+          response.entitlements.raw);
+    } else {
+      args['loginHint'] = response.userData && response.userData.email;
+    }
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
         feUrl('/payconfirmiframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'loginHint': response.userData && response.userData.email,
-        }),
+        feArgs(args),
         /* shouldFadeBody */ true);
     this.activityIframeView_.onMessage(data => {
       if (data['entitlements']) {
@@ -4452,47 +4100,24 @@ class PayCompleteFlow {
 
 
 /**
- * @param {!Window} win
- * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {!./deps.DepsDef} deps
+ * @param {!Promise<!Object>} payPromise
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
- * @package Visible for testing only.
  */
-function validatePayResponse(win, port, completeHandler) {
-  // Do not require security immediately: it will be checked below.
-  return port.acceptResult().then(result => {
-    if (result.origin != payOrigin()) {
-      throw new Error('channel mismatch');
-    }
-    const data = /** @type {!Object} */ (result.data);
-    if (data['redirectEncryptedCallbackData']) {
-      // Data is supplied as an encrypted blob.
-      const xhr = new Xhr(win);
-      const url = payDecryptUrl();
-      const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-        method: 'post',
-        headers: {'Accept': 'text/plain, application/json'},
-        credentials: 'include',
-        body: data['redirectEncryptedCallbackData'],
-        mode: 'cors',
-      });
-      return xhr.fetch(url, init).then(response => response.json());
-    }
-    // Data is supplied directly: must be a verified and secure channel.
-    if (result.originVerified && result.secureChannel) {
-      return data;
-    }
-    throw new Error('channel mismatch');
-  }).then(data => parseSubscriptionResponse(data, completeHandler));
+function validatePayResponse(deps, payPromise, completeHandler) {
+  return payPromise.then(data =>
+      parseSubscriptionResponse(deps, data, completeHandler));
 }
 
 
 /**
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
  */
-function parseSubscriptionResponse(data, completeHandler) {
+function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
   if (data) {
@@ -4524,6 +4149,7 @@ function parseSubscriptionResponse(data, completeHandler) {
       raw,
       parsePurchaseData(swgData),
       parseUserData(swgData),
+      parseEntitlements(deps, swgData),
       completeHandler);
 }
 
@@ -4551,6 +4177,20 @@ function parseUserData(swgData) {
   }
   const jwt = /** @type {!Object} */ (new JwtHelper().decode(idToken));
   return new UserData(idToken, jwt);
+}
+
+
+/**
+ * @param {!./deps.DepsDef} deps
+ * @param {!Object} swgData
+ * @return {?../api/entitlements.Entitlements}
+ * @package Visible for testing.
+ */
+function parseEntitlements(deps, swgData) {
+  if (swgData['signedEntitlements']) {
+    return deps.entitlementsManager().parseEntitlements(swgData);
+  }
+  return null;
 }
 
 /**
@@ -4670,8 +4310,8 @@ class DeferredAccountFlow {
         idToken,
         /** @type {!Object} */ (new JwtHelper().decode(idToken)));
     const purchaseData = new PurchaseData(
-        data['purchaseData'],
-        data['purchaseDataSignature']);
+        data['purchaseData']['data'],
+        data['purchaseData']['signature']);
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -4689,6 +4329,7 @@ class DeferredAccountFlow {
         '',  // raw field doesn't matter in this case
         purchaseData,
         userData,
+        entitlements,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
     ));
     return response;
@@ -5156,6 +4797,9 @@ class Dialog {
 
     /** @private {boolean} */
     this.hidden_ = false;
+
+    /** @private {?./view.View} */
+    this.previousProgressView_ = null;
   }
 
   /**
@@ -5263,12 +4907,31 @@ class Dialog {
   }
 
   /**
-   * Whether to display loading indicator.
-   * @param {boolean} isLoading
+   * Transitions to the next view.
+   * @private
    */
-  setLoading(isLoading) {
-    if (isLoading) {
+  entryTransitionToNextView_() {
+    if (this.view_ && this.view_.hasLoadingIndicator()) {
+      // Temporarily cache the old view.
+      this.previousProgressView_ = this.view_;
+    } else {
+      // Since loading indicator will be shown, remove contents of old view.
+      removeChildren(this.getContainer());
+      // When loading indicator was not displayed in the previous view,
+      // loading indicator must be displayed while transitioning to new view.
       this.loadingView_.show();
+    }
+  }
+
+   /**
+   * Transition out of an old view.
+   * @private
+   */
+  exitTransitionFromOldView_() {
+    // If previous view is still around, remove it.
+    if (this.previousProgressView_) {
+      removeElement(this.previousProgressView_.getElement());
+      this.previousProgressView_ = null;
     } else {
       this.loadingView_.hide();
     }
@@ -5285,14 +4948,10 @@ class Dialog {
    * @return {!Promise}
    */
   openView(view) {
-    if (this.view_) {
-      // TODO(dparikh): Maybe I need to keep it until the new one is ready.
-      removeChildren(this.getContainer());
-    }
-    this.view_ = view;
-
     setImportantStyles(view.getElement(), resetViewStyles);
-    this.setLoading(true);
+    this.entryTransitionToNextView_();
+
+    this.view_ = view;
     this.getContainer().appendChild(view.getElement());
 
     // If the current view should fade the parent document.
@@ -5310,12 +4969,12 @@ class Dialog {
         }
         this.show_();
       }
-      this.setLoading(false);
+      this.exitTransitionFromOldView_();
     });
   }
 
   /**
-   * Show the iframe
+   * Show the iframe.
    * @private
    */
   show_() {
@@ -6035,6 +5694,17 @@ class EntitlementsManager {
   }
 
   /**
+   * Clears all of the entitlements state and cache.
+   */
+  clear() {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = 0;
+    this.unblockNextNotification();
+    this.storage_.remove(ENTS_STORAGE_KEY);
+    this.storage_.remove(TOAST_STORAGE_KEY);
+  }
+
+  /**
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
@@ -6046,11 +5716,12 @@ class EntitlementsManager {
 
   /**
    * @param {string} raw
+   * @param {boolean=} opt_isReadyToPay
    * @return {boolean}
    */
-  pushNextEntitlements(raw) {
+  pushNextEntitlements(raw, opt_isReadyToPay) {
     const entitlements = this.getValidJwtEntitlements_(
-        raw, /* requireNonExpired */ true);
+        raw, /* requireNonExpired */ true, opt_isReadyToPay);
     if (entitlements && entitlements.enablesThis()) {
       this.storage_.set(ENTS_STORAGE_KEY, raw);
       return true;
@@ -6146,30 +5817,32 @@ class EntitlementsManager {
    * @return {!Entitlements}
    */
   parseEntitlements(json) {
+    const isReadyToPay = json['isReadyToPay'];
     const signedData = json['signedEntitlements'];
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
-          signedData, /* requireNonExpired */ false);
+          signedData, /* requireNonExpired */ false, isReadyToPay);
       if (entitlements) {
         return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        return this.createEntitlements_('', plainEntitlements);
+        return this.createEntitlements_('', plainEntitlements, isReadyToPay);
       }
     }
     // Empty response.
-    return this.createEntitlements_('', []);
+    return this.createEntitlements_('', [], isReadyToPay);
   }
 
   /**
    * @param {string} raw
    * @param {boolean} requireNonExpired
+   * @param {boolean=} opt_isReadyToPay
    * @return {?Entitlements}
    * @private
    */
-  getValidJwtEntitlements_(raw, requireNonExpired) {
+  getValidJwtEntitlements_(raw, requireNonExpired, opt_isReadyToPay) {
     try {
       const jwt = this.jwtHelper_.decode(raw);
       if (requireNonExpired) {
@@ -6180,8 +5853,8 @@ class EntitlementsManager {
         }
       }
       const entitlementsClaim = jwt['entitlements'];
-      return entitlementsClaim &&
-          this.createEntitlements_(raw, entitlementsClaim) || null;
+      return entitlementsClaim && this.createEntitlements_(
+          raw, entitlementsClaim, opt_isReadyToPay) || null;
     } catch (e) {
       // Ignore the error.
       this.win_.setTimeout(() => {throw e;});
@@ -6192,16 +5865,18 @@ class EntitlementsManager {
   /**
    * @param {string} raw
    * @param {!Object|!Array<!Object>} json
+   * @param {boolean=} opt_isReadyToPay
    * @return {!Entitlements}
    * @private
    */
-  createEntitlements_(raw, json) {
+  createEntitlements_(raw, json, opt_isReadyToPay) {
     return new Entitlements(
         SERVICE_ID,
         raw,
         Entitlement.parseListFromJson(json),
         this.config_.getProductId(),
-        this.ack_.bind(this));
+        this.ack_.bind(this),
+        opt_isReadyToPay);
   }
 
   /**
@@ -6281,6 +5956,366 @@ class EntitlementsManager {
         '/entitlements');
     return this.fetcher_.fetchCredentialedJson(url)
         .then(json => this.parseEntitlements(json));
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @private @const {!Array<string>} */
+const allowedMethods_ = ['GET', 'POST'];
+
+/** @private @enum {number} Allowed fetch responses. */
+const allowedFetchTypes_ = {
+  document: 1,
+  text: 2,
+};
+
+
+/**
+ * A class that polyfills Fetch API.
+ */
+class Xhr {
+
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const {!Window} */
+    this.win = win;
+  }
+
+  /**
+   * We want to call `fetch_` unbound from any context since it could
+   * be either the native fetch or our polyfill.
+   *
+   * @param {string} input
+   * @param {!FetchInitDef} init
+   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
+   * @private
+   */
+  fetch_(input, init) {
+    // TODO(avimehta): Should the requests go through when page is not visible?
+    assert(typeof input == 'string', 'Only URL supported: %s', input);
+    // In particular, Firefox does not tolerate `null` values for
+    // `credentials`.
+    const creds = init.credentials;
+    assert(
+        creds === undefined || creds == 'include' || creds == 'omit',
+        'Only credentials=include|omit support: %s', creds);
+    // Fallback to xhr polyfill since `fetch` api does not support
+    // responseType = 'document'. We do this so we don't have to do any parsing
+    // and document construction on the UI thread which would be expensive.
+    if (init.responseType == 'document') {
+      return fetchPolyfill(input, init);
+    }
+    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+  }
+
+  /**
+   * @param {string} input URL
+   * @param {?FetchInitDef} opt_init Fetch options object.
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetch(input, opt_init) {
+    // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
+    const init = setupInit(opt_init);
+    return this.fetch_(input, init).then(response => response, reason => {
+      const targetOrigin = parseUrl$1(input).origin;
+      throw new Error('XHR Failed fetching' +
+          ` (${targetOrigin}/...):`, reason && reason.message);
+    }).then(response => assertSuccess(response));
+  }
+}
+
+/**
+ * Normalized method name by uppercasing.
+ * @param {string|undefined} method
+ * @return {string}
+ * @private
+ */
+function normalizeMethod_(method) {
+  if (method === undefined) {
+    return 'GET';
+  }
+  method = method.toUpperCase();
+
+  assert(
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
+  );
+
+  return method;
+}
+
+/**
+ * Sets up and normalizes the FetchInitDef
+ *
+ * @param {?FetchInitDef=} opt_init Fetch options object.
+ * @param {string=} opt_accept The HTTP Accept header value.
+ * @return {!FetchInitDef}
+ */
+function setupInit(opt_init, opt_accept) {
+  const init = opt_init || /** @type {FetchInitDef} */ ({});
+  init.method = normalizeMethod_(init.method);
+  init.headers = init.headers || {};
+  if (opt_accept) {
+    init.headers['Accept'] = opt_accept;
+  }
+  return init;
+}
+
+
+/**
+ * A minimal polyfill of Fetch API. It only polyfills what we currently use.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * Notice that the "fetch" method itself is not exported as that would require
+ * us to immediately support a much wide API.
+ *
+ * @param {string} input
+ * @param {!FetchInitDef} init
+ * @return {!Promise<!FetchResponse>}
+ * @private Visible for testing
+ */
+function fetchPolyfill(input, init) {
+  return new Promise(function(resolve, reject) {
+    const xhr = createXhrRequest(init.method || 'GET', input);
+
+    if (init.credentials == 'include') {
+      xhr.withCredentials = true;
+    }
+
+    if (init.responseType in allowedFetchTypes_) {
+      xhr.responseType = init.responseType;
+    }
+
+    if (init.headers) {
+      Object.keys(init.headers).forEach(function(header) {
+        xhr.setRequestHeader(header, init.headers[header]);
+      });
+    }
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
+        return;
+      }
+      if (xhr.status < 100 || xhr.status > 599) {
+        xhr.onreadystatechange = null;
+        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        return;
+      }
+
+      // TODO(dvoytenko): This is currently simplified: we will wait for the
+      // whole document loading to complete. This is fine for the use cases
+      // we have now, but may need to be reimplemented later.
+      if (xhr.readyState == /* COMPLETE */ 4) {
+        resolve(new FetchResponse(xhr));
+      }
+    };
+    xhr.onerror = () => {
+      reject(new Error('Network failure'));
+    };
+    xhr.onabort = () => {
+      reject(new Error('Request aborted'));
+    };
+
+    if (init.method == 'POST') {
+      xhr.send(init.body);
+    } else {
+      xhr.send();
+    }
+  });
+}
+
+/**
+ * @param {string} method
+ * @param {string} url
+ * @return {!XMLHttpRequest}
+ * @private
+ */
+function createXhrRequest(method, url) {
+  const xhr = new XMLHttpRequest();
+  // TODO(avimehta): IE 8/9 don't support XHR (with CORS). Use XDR instead
+  // if we plan to support those browsers.
+  if ('withCredentials' in xhr) {
+    xhr.open(method, url, true);
+  } else {
+    throw new Error('CORS is not supported');
+  }
+  return xhr;
+}
+
+/**
+ * If 415 or in the 5xx range.
+ * @param {number} status
+ */
+function isRetriable(status) {
+  return status == 415 || (status >= 500 && status < 600);
+}
+
+
+/**
+ * Returns the response if successful or otherwise throws an error.
+ * @param {!FetchResponse} response
+ * @return {!Promise<!FetchResponse>}
+ * @private Visible for testing
+ */
+function assertSuccess(response) {
+  return new Promise(resolve => {
+    if (response.ok) {
+      return resolve(response);
+    }
+
+    const {status} = response;
+    const err = new Error(`HTTP error ${status}`);
+    err.retriable = isRetriable(status);
+    // TODO(@jridgewell, #9448): Callers who need the response should
+    // skip processing.
+    err.response = response;
+    throw err;
+  });
+}
+
+
+/**
+ * Response object in the Fetch API.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ */
+class FetchResponse {
+  /**
+   * @param {!XMLHttpRequest} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest} */
+    this.xhr_ = xhr;
+
+    /** @const {number} */
+    this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
+
+    /** @const {!FetchResponseHeaders} */
+    this.headers = new FetchResponseHeaders(xhr);
+
+    /** @type {boolean} */
+    this.bodyUsed = false;
+
+    /** @type {?ReadableStream} */
+    this.body = null;
+  }
+
+  /**
+   * Create a copy of the response and return it.
+   * @return {!FetchResponse}
+   */
+  clone() {
+    assert(!this.bodyUsed, 'Body already used');
+    return new FetchResponse(this.xhr_);
+  }
+
+  /**
+   * Drains the response and returns the text.
+   * @return {!Promise<string>}
+   * @private
+   */
+  drainText_() {
+    assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    return Promise.resolve(this.xhr_.responseText);
+  }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * text.
+   * @return {!Promise<string>}
+   */
+  text() {
+    return this.drainText_();
+  }
+
+  /**
+   * Drains the response and returns the JSON object.
+   * @return {!Promise<!JsonObject>}
+   */
+  json() {
+    return /** @type {!Promise<!JsonObject>} */ (
+        this.drainText_().then(parseJson));
+  }
+
+  /**
+   * Reads the xhr responseXML.
+   * @return {!Promise<!Document>}
+   * @private
+   */
+  document_() {
+    assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    assert(this.xhr_.responseXML,
+        'responseXML should exist. Make sure to return ' +
+        'Content-Type: text/html header.');
+    return /** @type {!Promise<!Document>} */ (
+        Promise.resolve(assert(this.xhr_.responseXML)));
+  }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * ArrayBuffer.
+   * @return {!Promise<!ArrayBuffer>}
+   */
+  arrayBuffer() {
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+        this.drainText_().then(utf8EncodeSync));
+  }
+}
+
+
+/**
+ * Provides access to the response headers as defined in the Fetch API.
+ * @private Visible for testing.
+ */
+class FetchResponseHeaders {
+  /**
+   * @param {!XMLHttpRequest} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest} */
+    this.xhr_ = xhr;
+  }
+
+  /**
+   * @param {string} name
+   * @return {string}
+   */
+  get(name) {
+    return this.xhr_.getResponseHeader(name);
+  }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  has(name) {
+    return this.xhr_.getResponseHeader(name) != null;
   }
 }
 
@@ -6834,6 +6869,172 @@ class LoginNotificationApi {
  * limitations under the License.
  */
 
+const PAY_REQUEST_ID = 'swg-pay';
+
+/**
+ * @const {!Object<string, string>}
+ * @package Visible for testing only.
+ */
+const PAY_ORIGIN = {
+  'PRODUCTION': 'https://pay.google.com',
+  'SANDBOX': 'https://pay.sandbox.google.com',
+};
+
+/** @return {string} */
+function payOrigin() {
+  return PAY_ORIGIN['PRODUCTION'];
+}
+
+/** @return {string} */
+function payUrl() {
+  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+}
+
+/** @return {string} */
+function payDecryptUrl() {
+  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
+}
+
+
+/**
+ */
+class PayClient {
+  /**
+   * @param {!Window} win
+   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   */
+  constructor(win, activityPorts) {
+    // TODO(dvoytenko, #406): Support GPay API.
+    this.binding_ = new PayClientBindingSwg(win, activityPorts);
+  }
+
+  /**
+   * @param {!../utils/preconnect.Preconnect} pre
+   */
+  preconnect(pre) {
+    pre.prefetch(payUrl());
+    pre.prefetch(
+        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
+    pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
+    pre.preconnect('https://www.gstatic.com/');
+    pre.preconnect('https://fonts.googleapis.com/');
+    pre.preconnect('https://www.google.com/');
+  }
+
+  /**
+   * @return {string}
+   */
+  getType() {
+    // TODO(dvoytenko, #406): remove once GPay API is launched.
+    return this.binding_.getType();
+  }
+
+  /**
+   * @param {!Object} paymentRequest
+   * @param {!PayOptionsDef=} options
+   * @return {?Window}  popup window, if any.
+   */
+  start(paymentRequest, options = {}) {
+    return this.binding_.start(paymentRequest, options);
+  }
+
+  /**
+   * @param {function(!Promise<!Object>)} callback
+   */
+  onResponse(callback) {
+    this.binding_.onResponse(callback);
+  }
+}
+
+
+/**
+ * @implements {PayClientBindingDef}
+ */
+class PayClientBindingSwg {
+  /**
+   * @param {!Window} win
+   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   */
+  constructor(win, activityPorts) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = activityPorts;
+  }
+
+  /** @override */
+  getType() {
+    return 'SWG';
+  }
+
+  /** @override */
+  start(paymentRequest, options) {
+    const opener = this.activityPorts_.open(
+        PAY_REQUEST_ID,
+        payUrl(),
+        options.forceRedirect ? '_top' : '_blank',
+        feArgs(paymentRequest),
+        {});
+    return opener && opener.targetWin || null;
+  }
+
+  /** @override */
+  onResponse(callback) {
+    this.activityPorts_.onResult(PAY_REQUEST_ID, port => {
+      callback(this.validatePayResponse_(port));
+    });
+  }
+
+  /**
+   * @param {!web-activities/activity-ports.ActivityPort} port
+   * @return {!Promise<!Object>}
+   * @private
+   */
+  validatePayResponse_(port) {
+    // Do not require security immediately: it will be checked below.
+    return port.acceptResult().then(result => {
+      if (result.origin != payOrigin()) {
+        throw new Error('channel mismatch');
+      }
+      const data = /** @type {!Object} */ (result.data);
+      if (data['redirectEncryptedCallbackData']) {
+        // Data is supplied as an encrypted blob.
+        const xhr = new Xhr(this.win_);
+        const url = payDecryptUrl();
+        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+          method: 'post',
+          headers: {'Accept': 'text/plain, application/json'},
+          credentials: 'include',
+          body: data['redirectEncryptedCallbackData'],
+          mode: 'cors',
+        });
+        return xhr.fetch(url, init).then(response => response.json());
+      }
+      // Data is supplied directly: must be a verified and secure channel.
+      if (result.originVerified && result.secureChannel) {
+        return data;
+      }
+      throw new Error('channel mismatch');
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 class WaitForSubscriptionLookupApi {
   /**
@@ -6868,7 +7069,8 @@ class WaitForSubscriptionLookupApi {
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
         }),
-        /* shouldFadeBody */ true
+        /* shouldFadeBody */ true,
+        /* hasLoadingIndicator */ true
     );
   }
 
@@ -7489,6 +7691,9 @@ class ConfiguredRuntime {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = new activityPorts_1(this.win_);
 
+    /** @private @const {!PayClient} */
+    this.payClient_ = new PayClient(this.win_, this.activityPorts_);
+
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
@@ -7506,7 +7711,7 @@ class ConfiguredRuntime {
 
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    PayStartFlow.preconnect(preconnect);
+    this.payClient_.preconnect(preconnect);
 
     injectStyleSheet(this.win_.document, CSS);
   }
@@ -7529,6 +7734,11 @@ class ConfiguredRuntime {
   /** @override */
   activities() {
     return this.activityPorts_;
+  }
+
+  /** @override */
+  payClient() {
+    return this.payClient_;
   }
 
   /** @override */
@@ -7586,6 +7796,12 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
+    this.dialogManager_.completeAll();
+  }
+
+  /** @override */
+  clear() {
+    this.entitlementsManager_.clear();
     this.dialogManager_.completeAll();
   }
 

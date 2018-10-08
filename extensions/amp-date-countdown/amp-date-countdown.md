@@ -83,10 +83,10 @@ m | minute - 0, 1, 2,...12, 13..Infinity
 mm | minute - 01, 01, 02, 03..Infinity
 s | second - 0, 1, 2,...12, 13..Infinity
 ss | second - 00, 01, 02, 03..Infinity
-days | i18n string for day or days
-hours | i18n string for hour or hours
-minutes | i18n string for minute or minutes
-seconds | i18n string for second or seconds
+days | internationalization string for day or days
+hours | internationalization string for hour or hours
+minutes | internationalization string for minute or minutes
+seconds | internationalization string for second or seconds
 
 #### Samples of formatted values
 
@@ -105,7 +105,7 @@ Format | Sample Output | Remarks
 
 ## Attributes
 
-You must specify at least one of these required attributes: `end-date`, `timestamp-ms`, `timestamp-seconds`.
+You must specify at least one of these required attributes: `end-date`, `timeleft-ms`, `timestamp-ms`, `timestamp-seconds`.
 
 ##### end-date
 
@@ -119,6 +119,10 @@ A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `t
 
 A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
 
+##### timeleft-ms
+
+A value in milliseconds left to be counting down. For example, 48 hours left `timeleft-ms="172800000"`.
+
 ##### offset-seconds (optional)
 
 A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
@@ -129,7 +133,7 @@ Specifies whether to stop the timer when it reaches 0 seconds. The value can be 
 
 ##### locale (optional)
 
-An i18n language string for each timer unit. The default value is `en` (for English).
+An internationalization language string for each timer unit. The default value is `en` (for English).
 Supported values:
 
 Code | Language

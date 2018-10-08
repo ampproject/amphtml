@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, getStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
@@ -29,8 +29,7 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return getStyle(element, 'display') == 'none'
-      || element.hasAttribute('hidden');
+  return element.hasAttribute('hidden');
 }
 
 /** @const {string} */
@@ -130,6 +129,15 @@ export class StandardActions {
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
+
+      case 'scrollTo':
+        user().assert(args['id'],
+            'AMP.scrollTo must provide element ID');
+        invocation.node = dev().assertElement(
+            getAmpdoc(node).getElementById(args['id']),
+            'scrollTo element ID must exist on page'
+        );
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -250,7 +258,6 @@ export class StandardActions {
         target./*OK*/expand();
       } else {
         toggle(target, true);
-        target.removeAttribute('hidden');
       }
     });
 

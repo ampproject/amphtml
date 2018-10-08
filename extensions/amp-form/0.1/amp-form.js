@@ -17,13 +17,14 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
 import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
+import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -31,7 +32,9 @@ import {
   ancestorElementsByTag,
   childElementByAttr,
   escapeCssSelectorIdent,
+  iterateCursor,
   removeElement,
+  tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {deepMerge, dict} from '../../../src/utils/object';
@@ -49,16 +52,12 @@ import {getMode} from '../../../src/mode';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
-  iterateCursor,
-  tryFocus,
-} from '../../../src/dom';
-import {
   setupAMPCors,
   setupInit,
+  setupInput,
 } from '../../../src/utils/xhr-utils';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 
 
 /** @type {string} */
@@ -205,6 +204,9 @@ export class AmpForm {
 
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
+
+    /** @private {./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = Services.formSubmitForDoc(element);
   }
 
   /**
@@ -230,7 +232,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!../../../src/service/xhr-impl.FetchRequestDef}
+   * @return {!FetchRequestDef}
    */
   requestForFormFetch(url, method, opt_extraFields) {
     let xhrUrl, body;
@@ -448,6 +450,12 @@ export class AmpForm {
    * @private
    */
   submit_(trust) {
+    try {
+      this.formSubmitService_.fire(this.form_);
+    } catch (e) {
+      dev().error(TAG, `Form submit service failed: ${e}`);
+    }
+
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields, trust);
@@ -529,8 +537,11 @@ export class AmpForm {
         }).then(() => {
           request = this.requestForFormFetch(
               dev().assertString(this.xhrAction_), this.method_);
-          setupInit(request.fetchOpt);
-          setupAMPCors(this.win_, request.xhrUrl, request.fetchOpt);
+          request.fetchOpt = setupInit(request.fetchOpt);
+          request.fetchOpt = setupAMPCors(
+              this.win_, request.xhrUrl, request.fetchOpt);
+          request.xhrUrl = setupInput(
+              this.win_, request.xhrUrl, request.fetchOpt);
           return this.ssrTemplateHelper_.fetchAndRenderTemplate(
               this.form_,
               request,
@@ -611,7 +622,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's action endpoint.
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doActionXhr_() {
@@ -620,7 +631,7 @@ export class AmpForm {
 
   /**
    * Send a request to the form's verify endpoint.
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doVerifyXhr_() {
@@ -633,7 +644,7 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!Promise<!../../../src/utils/xhr-utils.FetchResponse>}
+   * @return {!Promise<!Response>}
    * @private
    */
   doXhr_(url, method, opt_extraFields) {
@@ -645,7 +656,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject|string|undefined} response
-   * @param {!../../../src/service/xhr-impl.FetchRequestDef} request
+   * @param {!FetchRequestDef} request
    * @return {!Promise}
    * @private visible for testing
    */
@@ -656,16 +667,14 @@ export class AmpForm {
     return this.handleSubmitSuccess_(tryResolve(() => response['html']));
   }
 
-
-
   /**
    * Transition the form to the submit success state.
-   * @param {!../../../src/utils/xhr-utils.FetchResponse} response
+   * @param {!Response} response
    * @return {!Promise}
    * @private visible for testing
    */
   handleXhrSubmitSuccess_(response) {
-    return this.handleSubmitSuccess_(response.json()).then(() => {
+    return this.handleSubmitSuccess_(/** @type {!Promise<!JsonObject>}*/(response.json())).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
@@ -782,7 +791,7 @@ export class AmpForm {
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
-   * @param {!../../../src/utils/xhr-utils.FetchResponse} response
+   * @param {!Response} response
    * @private
    */
   maybeHandleRedirect_(response) {
@@ -1168,4 +1177,5 @@ export class AmpFormService {
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(TAG, AmpFormService);
+  AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
 });

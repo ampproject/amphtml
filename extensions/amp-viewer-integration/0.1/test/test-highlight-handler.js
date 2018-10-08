@@ -125,6 +125,7 @@ describes.realWin('HighlightHandler', {
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args.length).to.equal(1);
     expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal('none');
+    expect(scrollStub.firstCall.args[0].style.display).to.equal('block');
 
     // For some reason, expect(args).to.deep.equal does not work.
     expect(sendMsgStub.callCount).to.equal(2);
