@@ -113,7 +113,7 @@ export class LinkerManager {
     }
 
 
-    this.maybeEnableFormSupport();
+    this.maybeEnableFormSupport_();
 
     return Promise.all(this.allLinkerPromises_);
   }
@@ -290,10 +290,11 @@ export class LinkerManager {
 
   /**
    * Enable form support if experiment is on.
-   * TODO(ccordry): remove this method and make `enableFormSupport_` public
-   * when fully launched.
+   * TODO(ccordry): remove this method and use `enableFormSupport_` when fully
+   * launched.
+   * @private
    */
-  maybeEnableFormSupport() {
+  maybeEnableFormSupport_() {
     if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
       this.enableFormSupport_();
     }
