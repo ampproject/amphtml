@@ -405,17 +405,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           console./*OK*/error(colors.red(
               'Compiler issues for ' + outputFilename + ':\n') +
               formatClosureCompilerError(message));
-          // Exit on type errors and warnings _except_ warnings from swg.js.
-          // This is a temporary workaround for a Closure Compiler upgrade that
-          // causes backwards-incompatible changes. See #18552.
-          if (hasClosureTypeErrors(message)
-            || hasNonSwgErrorsOrWarnings(message)) {
-            process.exit(1);
-          } else {
-            resolve();
-          }
+          process.exit(1);
         });
-
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
@@ -434,31 +425,4 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
     return stream;
   });
-}
-
-/**
- * @param {string} message
- * @return {boolean}
- */
-function hasClosureTypeErrors(message) {
-  const re = /\n(\d+) error\(s\), (\d+) warning\(s\), (\d*\d\.\d)% typed\n/g;
-  const matches = re.exec(message);
-  return !matches || matches[1] !== '0';
-}
-
-/**
- * @param {string} message
- * @return {boolean}
- */
-function hasNonSwgErrorsOrWarnings(message) {
-  const re = /^([^:\n]+):(\d+): (WARNING|ERROR) - (.*)$/gm;
-  let matches;
-  while ((matches = re.exec(message)) !== null) {
-    const source = matches[1];
-    // Only allow type errors/warnings from swg.js.
-    if (source !== 'third_party/subscriptions-project/swg.js') {
-      return true;
-    }
-  }
-  return false;
 }
