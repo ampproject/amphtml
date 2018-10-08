@@ -439,13 +439,13 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    const oldBox = this.getPageLayoutBox();
+    const oldBox = this.layoutBox_;
     if (this.useLayers_) {
       this.measureViaLayers_();
     } else {
       this.measureViaResources_();
     }
-    const box = this.getPageLayoutBox();
+    const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, box);
@@ -516,6 +516,7 @@ export class Resource {
      * for both 2 and 3, we need for force it.
      */
     layers.remeasure(element, /* opt_force */ true);
+    this.layoutBox_ = this.getPageLayoutBox();
   }
 
   /**
