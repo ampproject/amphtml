@@ -68,6 +68,15 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    const datetime = mutations['datetime'];
+    if (datetime !== undefined) {
+      this.datetime_ = datetime;
+      this.setFuzzyTimestampValue_();
+    }
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }

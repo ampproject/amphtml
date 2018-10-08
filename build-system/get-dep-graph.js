@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-const babel = require('babelify');
+const babel = require('babel-core');
+const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
+const colors = require('ansi-colors');
+const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+
+const argv = minimist(process.argv.slice(2));
+let singlePassDest = typeof argv.single_pass_dest === 'string' ?
+  argv.single_pass_dest : './dist/';
+
+if (!singlePassDest.endsWith('/')) {
+  singlePassDest = `${singlePassDest}/`;
+}
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
@@ -67,7 +80,7 @@ exports.getFlags = function(config) {
     ],
     //new_type_inf: true,
     language_in: 'ES6',
-    language_out: 'ES5',
+    language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     externs: config.externs,
     define: config.define,
@@ -133,7 +146,7 @@ exports.getBundleFlags = function(g) {
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     bundle.modules.forEach(function(js) {
-      flagsArray.push('--js', js);
+      flagsArray.push('--js', `${g.tmp}/${js}`);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -193,9 +206,8 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', './build/patched-module/');
-  flagsArray.push('--js_module_root', './node_modules/');
-  flagsArray.push('--js_module_root', './');
+  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
+  flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
 
@@ -226,6 +238,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
+    tmp: tempy.directory(),
   };
 
   TYPES_VALUES.forEach(type => {
@@ -246,7 +259,7 @@ exports.getGraph = function(entryModules, config) {
   })
   // The second stage are transforms that closure compiler supports
   // directly and which we don't want to apply during deps finding.
-      .transform(babel, {
+      .transform(babelify, {
         babelrc: false,
         compact: false,
         plugins: [
@@ -292,6 +305,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
+    transformPathsToTempDir(graph, config);
     resolve(graph);
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -358,6 +372,31 @@ function setupBundles(graph) {
   });
 }
 
+/**
+ * Takes all of the nodes in the dependency graph and transfers them
+ * to a temporary directory where we can run babel transformations.
+ *
+ * @param {!Object} graph
+ * @param {!Object} config
+ */
+function transformPathsToTempDir(graph, config) {
+  console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
+  // `sorted` will always have the files that we need.
+  graph.sorted.forEach(f => {
+    // Don't transform node_module files for now and just copy it.
+    if (f.startsWith('node_modules/')) {
+      fs.copySync(f, `${graph.tmp}/${f}`);
+    } else {
+      const {code} = babel.transformFileSync(f, {
+        plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
+        babelrc: false,
+        retainLines: true,
+      });
+      fs.outputFileSync(`${graph.tmp}/${f}`, code);
+    }
+  });
+}
+
 // Returns the extension bundle config for the given filename or null.
 function getExtensionBundleConfig(filename) {
   const basename = path.basename(filename, '.js');
@@ -402,16 +441,16 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: './dist/',
+    writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
-    fs.ensureDirSync('dist/v0');
+    fs.ensureDirSync(`${singlePassDest}/v0`);
     return Promise.all([
-      move('dist/amp*', 'dist/v0'),
-      move('dist/_base*', 'dist/v0'),
+      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
+      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
   });
 };

@@ -39,6 +39,7 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -612,7 +613,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks result of 'enabled' spec evaluation. Returns false if spec is
    * provided and value resolves to a falsey value (empty string, 0, false,
    * null, NaN or undefined).
-   * @param {string} spec Expression that will be evaluated.
+   * @param {string|boolean} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<boolean>} False only if spec is provided and value is
    * falsey.
@@ -622,6 +623,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Spec absence always resolves to true.
     if (spec === undefined) {
       return Promise.resolve(true);
+    }
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
@@ -677,6 +682,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });
