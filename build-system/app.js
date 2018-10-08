@@ -31,6 +31,7 @@ const path = require('path');
 const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
+const runVideoTestBench = require('./app-video-testbench');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -735,6 +736,11 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
+
+/**
+ * Video testbench endpoint
+ */
+app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
