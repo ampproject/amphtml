@@ -120,12 +120,12 @@
   transform-origin: right !important;
 }
 
-[info] .i-amphtml-message-container {
+.first-page-active[info] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: 48px !important;
 }
 
-[info][dir=rtl] .i-amphtml-message-container {
+.first-page-active[info][dir=rtl] .i-amphtml-message-container {
   /* 48px for info button, add width to padding for additional story buttons. */
   padding-right: auto !important;
   padding-left: 48px !important;
