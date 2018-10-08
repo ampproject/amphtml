@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Hindi strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+export default {
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'स्वीकार करना',
   },
@@ -95,4 +95,4 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'हमें खेद है, ऐसा लगता है कि आपका ब्राउज़र इस अनुभव का समर्थन ' +
         'नहीं करता है',
   },
-});
+};

@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Vietnamese strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+export default {
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Chấp nhận',
   },
@@ -95,4 +95,4 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Chúng tôi xin lỗi, hình như là trình duyệt của ' +
         'bạn không hỗ trợ thử nghiệm này',
   },
-});
+};
