@@ -550,7 +550,9 @@ export function getErrorReportData(message, filename, line, col, error,
       data['s'] = error.stack;
     }
 
-    error.message += ' _reported_';
+    if (error.message) {
+      error.message += ' _reported_';
+    }
   } else {
     data['f'] = filename || '';
     data['l'] = line || '';

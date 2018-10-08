@@ -411,7 +411,7 @@ describes.realWin('Resource', {amp: true}, env => {
     });
 
     it('should support abnormal case with no parent', () => {
-      delete element.parentElement;
+      element = Object.assign({}, element, {parentElement: undefined});
 
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();
@@ -421,7 +421,8 @@ describes.realWin('Resource', {amp: true}, env => {
     });
 
     it('should support abnormal case with non-AMP parent', () => {
-      element.parentElement = document.createElement('div');
+      element = Object.assign(
+          {}, element, {parentElement: document.createElement('div')});
 
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();

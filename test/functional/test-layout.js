@@ -400,7 +400,7 @@ describe('Layout', () => {
   it('layout=fluid - default', () => {
     div.setAttribute('height', 'fluid');
     const parentDiv = document.createElement('div');
-    div.parentElement = parentDiv;
+    Object.defineProperty(div, 'parentElement', {value: parentDiv});
     parentDiv.appendChild(div);
     expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');

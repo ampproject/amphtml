@@ -498,5 +498,6 @@ export class AmpGwdRuntimeService {
  * @param {!Element} element
  */
 function reflow(element) {
-  element./*OK*/offsetWidth = element./*OK*/offsetWidth;
+  Object.defineProperty(
+      element, 'offsetWidth', {value: element./*OK*/offsetWidth});
 }

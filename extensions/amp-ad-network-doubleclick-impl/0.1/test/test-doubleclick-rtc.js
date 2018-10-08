@@ -305,7 +305,6 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
-      env.win.document.referrer = 'https://www.google.com/';
       const docInfo = Services.documentInfoForDoc(element);
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
