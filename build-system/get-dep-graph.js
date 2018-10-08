@@ -452,6 +452,10 @@ exports.singlePassCompile = function(entryModule, options) {
       move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
       move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
+  }, e => {
+    // NOTE: passing the message here to colors.red breaks the output.
+    console./*OK*/error(e.message);
+    process.exit(1);
   });
 };
 
