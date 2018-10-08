@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.28 */
+/** Version: 0.1.22.29 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2270,10 +2270,10 @@ const TITLE_LANG_MAP = {
 class ButtonApi {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
   }
 
@@ -2383,14 +2383,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
    */
   setOnEntitlementsResponse(callback) {
     this.setCallback_(CallbackId.ENTITLEMENTS, callback);
   }
 
   /**
-   * @param {!Promise<*>} promise
+   * @param {!Promise<!../api/entitlements.Entitlements>} promise
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
@@ -2406,14 +2406,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(*)} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
-   * @param {*} request
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
   triggerLoginRequest(request) {
@@ -2483,14 +2483,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
     this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerSubscribeResponse(responsePromise) {
@@ -2634,7 +2634,7 @@ class View {
   getElement() {}
 
   /**
-   * @param {*} unusedDialog
+   * @param {!./dialog.Dialog} unusedDialog
    * @return {!Promise}
    * @abstract
    */
@@ -2813,7 +2813,7 @@ class ActivityIframeView extends View {
 
   /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
-   * @param {*} dialog
+   * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
@@ -3893,7 +3893,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.28',
+    '_client': 'SwG 0.1.22.29',
   });
 }
 
@@ -3937,20 +3937,20 @@ function cacheParam(cacheKey) {
  */
 class PayStartFlow {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
   constructor(deps, sku) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!./pay-client.PayClient} */
     this.payClient_ = deps.payClient();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {string} */
@@ -3995,7 +3995,7 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.payClient().onResponse(payPromise => {
@@ -4017,19 +4017,19 @@ class PayCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -4100,7 +4100,7 @@ class PayCompleteFlow {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
@@ -4112,7 +4112,7 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
@@ -4181,9 +4181,9 @@ function parseUserData(swgData) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Object} swgData
- * @return {*}
+ * @return {?../api/entitlements.Entitlements}
  * @package Visible for testing.
  */
 function parseEntitlements(deps, swgData) {
@@ -4217,11 +4217,11 @@ function parseEntitlements(deps, swgData) {
 class DeferredAccountFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -4230,7 +4230,7 @@ class DeferredAccountFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -4239,12 +4239,12 @@ class DeferredAccountFlow {
     /** @private {?Promise} */
     this.openPromise_ = null;
 
-    /** @type {*} */
+    /** @type {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     const defaultOptions = {
       entitlements: null,
       consent: true,
     };
-    /** @private @const {*} */
+    /** @private @const {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     this.options_ = Object.assign(defaultOptions, options || {});
   }
 
@@ -4310,8 +4310,8 @@ class DeferredAccountFlow {
         idToken,
         /** @type {!Object} */ (new JwtHelper().decode(idToken)));
     const purchaseData = new PurchaseData(
-        data['purchaseData'],
-        data['purchaseDataSignature']);
+        data['purchaseData']['data'],
+        data['purchaseData']['signature']);
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -4416,11 +4416,11 @@ function transition(el, props, durationMillis, curve) {
 class Graypane {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
    */
   constructor(doc, zIndex) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
@@ -4761,12 +4761,12 @@ class Dialog {
 
   /**
    * Create a dialog for the provided doc.
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
   constructor(doc, importantStyles = {}, styles = {}) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
@@ -4789,7 +4789,7 @@ class Dialog {
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.view_ = null;
 
     /** @private {?Promise} */
@@ -4798,7 +4798,7 @@ class Dialog {
     /** @private {boolean} */
     this.hidden_ = false;
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.previousProgressView_ = null;
   }
 
@@ -4937,14 +4937,14 @@ class Dialog {
     }
   }
 
-  /** @return {*} */
+  /** @return {?./view.View} */
   getCurrentView() {
     return this.view_;
   }
 
   /**
    * Opens the given view and removes existing view from the DOM if any.
-   * @param {*} view
+   * @param {!./view.View} view
    * @return {!Promise}
    */
   openView(view) {
@@ -4995,7 +4995,7 @@ class Dialog {
 
   /**
    * Resizes the dialog container.
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {number} height
    * @param {boolean=} animated
    * @return {?Promise}
@@ -5181,10 +5181,10 @@ const POPUP_Z_INDEX = 2147483647;
 class DialogManager {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private {?Dialog} */
@@ -5223,7 +5223,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {boolean=} hidden
    * @return {!Promise}
    */
@@ -5240,7 +5240,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -5496,13 +5496,13 @@ const iframeAttributes$1 = {
 class Toast {
 
   /**
-   * @param {*} deps
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
@@ -5645,24 +5645,24 @@ class EntitlementsManager {
 
   /**
    * @param {!Window} win
-   * @param {*} config
-   * @param {*} fetcher
-   * @param {*} deps
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
    */
   constructor(win, config, fetcher, deps) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
     /** @private @const {string} */
     this.publicationId_ = this.config_.getPublicationId();
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!JwtHelper} */
@@ -5677,7 +5677,7 @@ class EntitlementsManager {
     /** @private {boolean} */
     this.blockNextNotification_ = false;
 
-    /** @private @const {*} */
+    /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
   }
 
@@ -5691,6 +5691,17 @@ class EntitlementsManager {
     if (opt_expectPositive) {
       this.storage_.remove(ENTS_STORAGE_KEY);
     }
+  }
+
+  /**
+   * Clears all of the entitlements state and cache.
+   */
+  clear() {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = 0;
+    this.unblockNextNotification();
+    this.storage_.remove(ENTS_STORAGE_KEY);
+    this.storage_.remove(TOAST_STORAGE_KEY);
   }
 
   /**
@@ -6353,7 +6364,7 @@ class XhrFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
@@ -6426,19 +6437,19 @@ const LINK_REQUEST_ID = 'swg-link';
 class LinkbackFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
   }
 
@@ -6469,7 +6480,7 @@ class LinkbackFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     /**
@@ -6497,7 +6508,7 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Object} response
    */
   constructor(deps, response) {
@@ -6507,13 +6518,13 @@ class LinkCompleteFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
     this.entitlementsManager_ = deps.entitlementsManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
     const index = response && response['index'] || '0';
@@ -6592,26 +6603,26 @@ class LinkCompleteFlow {
 class LinkSaveFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} callback
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
    */
   constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {*} */
+    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
     this.callback_ = callback;
 
-    /** @private {?Promise<*>} */
+    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
     this.requestPromise_ = null;
 
     /** @private {?ActivityIframeView} */
@@ -6619,7 +6630,7 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise<*>}
+   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
    * @package Visible for testing.
    */
   getRequestPromise() {
@@ -6708,10 +6719,10 @@ class LinkSaveFlow {
 
 class LoginPromptApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6720,7 +6731,7 @@ class LoginPromptApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6787,10 +6798,10 @@ class LoginPromptApi {
 
 class LoginNotificationApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6799,7 +6810,7 @@ class LoginNotificationApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6898,7 +6909,7 @@ class PayClient {
   }
 
   /**
-   * @param {*} pre
+   * @param {!../utils/preconnect.Preconnect} pre
    */
   preconnect(pre) {
     pre.prefetch(payUrl());
@@ -6990,7 +7001,7 @@ class PayClientBindingSwg {
         // Data is supplied as an encrypted blob.
         const xhr = new Xhr(this.win_);
         const url = payDecryptUrl();
-        const init = /** @type {*} */ ({
+        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
           method: 'post',
           headers: {'Accept': 'text/plain, application/json'},
           credentials: 'include',
@@ -7027,11 +7038,11 @@ class PayClientBindingSwg {
 
 class WaitForSubscriptionLookupApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
    */
   constructor(deps, accountPromise) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -7040,7 +7051,7 @@ class WaitForSubscriptionLookupApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -7102,20 +7113,20 @@ class WaitForSubscriptionLookupApi {
 class OffersApi {
 
   /**
-   * @param {*} config
-   * @param {*} fetcher
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
    */
   constructor(config, fetcher) {
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
   }
 
   /**
    * @param {string=} opt_productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    */
   getOffers(opt_productId) {
     const productId = opt_productId || this.config_.getProductId();
@@ -7127,7 +7138,7 @@ class OffersApi {
 
   /**
    * @param {string} productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    * @private
    */
   fetch_(productId) {
@@ -7171,11 +7182,11 @@ const OFFERS_VIEW_CLOSABLE = true;
 class OffersFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -7184,7 +7195,7 @@ class OffersFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     let isClosable = options && options.isClosable;
@@ -7253,21 +7264,21 @@ class OffersFlow {
 class SubscribeOptionFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7333,15 +7344,15 @@ class SubscribeOptionFlow {
 class AbbrvOfferFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest=} options
    */
   constructor(deps, options = {}) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
@@ -7350,7 +7361,7 @@ class AbbrvOfferFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7646,7 +7657,7 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
@@ -7658,10 +7669,10 @@ class ConfiguredRuntime {
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {!Promise} */
@@ -7785,6 +7796,12 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
+    this.dialogManager_.completeAll();
+  }
+
+  /** @override */
+  clear() {
+    this.entitlementsManager_.clear();
     this.dialogManager_.completeAll();
   }
 
