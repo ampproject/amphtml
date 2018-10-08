@@ -40,7 +40,7 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
-const VALID_TARGETS = ['_self', '_blank'];
+const VALID_TARGETS = ['_top', '_blank'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -213,7 +213,7 @@ export class Navigation {
    * }=} opt_options
    */
   navigateTo(
-    win, url, opt_requestedBy, {target = '_self', opener = false} = {}) {
+    win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
     const urlService = Services.urlForDoc(this.ampdoc);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
@@ -224,7 +224,7 @@ export class Navigation {
         VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
 
     // If we have a target of "_blank", we will want to open a new window. A
-    // target of "_self" should behave like it would on an anchor tag and
+    // target of "_top" should behave like it would on an anchor tag and
     // update the URL.
     if (target == '_blank') {
       this.openWindow(win, url, target, opener);
