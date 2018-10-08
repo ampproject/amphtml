@@ -95,6 +95,9 @@ let progressMarkerDiv;
 // Div for fullscreen icon.
 let fullscreenDiv;
 
+// Div for mute/unmute icon.
+let muteUnmuteDiv;
+
 // Div for ad container.
 let adContainerDiv;
 
@@ -317,7 +320,7 @@ export function imaVideo(global, data) {
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
-  
+
   // Mute/Unmute button
   muteUnmuteDiv = createIcon(global, 'volume_max');
   muteUnmuteDiv.id = 'ima-mute-unmute';
@@ -431,7 +434,7 @@ export function imaVideo(global, data) {
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
-  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick)
+  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
   fullscreenDiv.addEventListener(interactEvent,
       toggleFullscreen.bind(null, global));
 
@@ -973,7 +976,7 @@ export function pauseVideo(event = null) {
 }
 
 /**
- * @param {Object} global
+ * Handler when the mute/unmute button is clicked
  */
 export function onMuteUnmuteClick() {
   if (videoPlayer.muted) {
@@ -984,7 +987,7 @@ export function onMuteUnmuteClick() {
 }
 
 /**
- * @param {Object} global
+ * Function to mute the video
  */
 export function muteVideo() {
   if (!videoPlayer.muted) {
@@ -1001,7 +1004,7 @@ export function muteVideo() {
 }
 
 /**
- * @param {Object} global
+ * Function to unmute the video
  */
 export function unmuteVideo() {
   if (videoPlayer.muted) {

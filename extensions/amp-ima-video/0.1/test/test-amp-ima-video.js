@@ -696,7 +696,7 @@ describes.realWin('amp-ima-video', {
     imaVideoObj.setAdsManagerForTesting(adsManagerMock);
     imaVideoObj.setVideoPlayerMutedForTesting(false);
     //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
-   
+
     imaVideoObj.onMuteUnmuteClick();
 
     const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
