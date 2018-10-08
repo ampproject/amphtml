@@ -69,6 +69,7 @@ amp-story[standalone][desktop] {
   left: -150px !important;
   opacity: 0 !important;
   filter: blur(50px) !important;
+  transform: scale(1.2) !important;
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
