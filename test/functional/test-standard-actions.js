@@ -358,7 +358,7 @@ describes.sandboxed('StandardActions', {}, () => {
         return standardActions.handleAmpTarget(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
-              win, 'http://bar.com', 'AMP.navigateTo');
+              win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
         });
       });
 
@@ -369,7 +369,21 @@ describes.sandboxed('StandardActions', {}, () => {
         return standardActions.handleAmpTarget(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
-              win, 'http://bar.com', 'AMP.navigateTo');
+              win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
+        });
+      });
+
+      it('should pass if node does not have throwIfCannotNavigate(), ' +
+        'given target', () => {
+        invocation.caller.tagName = 'AMP-FOO';
+        invocation.caller.getImpl = () => Promise.resolve({});
+        invocation.args['target'] = '_blank';
+        invocation.args['opener'] = true;
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo', {target: '_blank', opener: true});
         });
       });
 
@@ -383,7 +397,7 @@ describes.sandboxed('StandardActions', {}, () => {
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledOnce;
         expect(navigator.navigateTo).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+            win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
 
         // Should succeed if throwIfCannotNavigate() returns null.
         invocation.caller.getImpl = () => Promise.resolve({
@@ -392,7 +406,7 @@ describes.sandboxed('StandardActions', {}, () => {
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+            win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
 
         // Should fail if throwIfCannotNavigate() throws an error.
         invocation.caller.getImpl = () => Promise.resolve({
