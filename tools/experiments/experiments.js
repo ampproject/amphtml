@@ -242,12 +242,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-navigation-performance',
-    name: 'amp-story page to page navigation performance improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/17017',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
-  },
-  {
     id: 'amp-story-scroll',
     name: 'Scrollable experience for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/16465',
