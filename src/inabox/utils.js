@@ -38,3 +38,20 @@ export function registerIniLoadListener(ampdoc) {
         }
       });
 }
+
+/**
+ * Function to get the amp4ads-identifier from the meta tag on the document
+ * @param {!Window} win
+ * @return {?string}
+ */
+export function getA4AId(win) {
+
+  const a4aIdMetaTag = win.document.head
+      .querySelector('meta[name="amp4ads-id"]');
+
+  if (a4aIdMetaTag) {
+    return a4aIdMetaTag.getAttribute('content');
+  }
+
+  return null;
+}

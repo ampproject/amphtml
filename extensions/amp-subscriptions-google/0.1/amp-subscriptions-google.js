@@ -259,8 +259,12 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   executeAction(action) {
-    if (action === 'subscribe') {
+    if (action == 'subscribe') {
       this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
+    if (action == 'login') {
+      this.runtime_.linkAccount();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
