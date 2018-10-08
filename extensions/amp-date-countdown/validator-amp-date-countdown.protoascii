@@ -19,8 +19,8 @@ tags: {  # amp-date-countdown
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-date-countdown"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -31,33 +31,60 @@ tags: {  # <amp-date-countdown>
   requires_extension: "amp-date-countdown"
   attrs: {
     name: "biggest-unit"
-    value_regex_casei: "days|hours|minutes|seconds"
+    value_casei: "days"
+    value_casei: "hours"
+    value_casei: "minutes"
+    value_casei: "seconds"
   }
   attrs: {
     name: "end-date"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])"
   }
   attrs: {
     name: "locale"
-    value_regex_casei: "de|en|es|fr|id|it|ja|ko|nl|pt|ru|th|tr|vi|zh-cn|zh-tw"
+    value_casei: "de"
+    value_casei: "en"
+    value_casei: "es"
+    value_casei: "fr"
+    value_casei: "id"
+    value_casei: "it"
+    value_casei: "ja"
+    value_casei: "ko"
+    value_casei: "nl"
+    value_casei: "pt"
+    value_casei: "ru"
+    value_casei: "th"
+    value_casei: "tr"
+    value_casei: "vi"
+    value_casei: "zh-cn"
+    value_casei: "zh-tw"
   }
   attrs: {
     name: "offset-seconds"
     value_regex: "-?\\d+"
   }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
+  attrs: {
+    name: "timeleft-ms"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
   attrs: {
     name: "timestamp-ms"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{13}"
   }
   attrs: {
     name: "timestamp-seconds"
-    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "\\d{10}"
   }
   attrs: {
     name: "when-ended"
+    value_casei: "continue"
     value_casei: "stop"
   }
   attr_lists: "extended-amp-global"

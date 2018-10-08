@@ -58,9 +58,9 @@ describes.sandboxed('amp-position-observer', {}, () => {
   }
 
   function resetSpies() {
-    enterSpy.reset();
-    exitSpy.reset();
-    scrollSpy.reset();
+    enterSpy.resetHistory();
+    exitSpy.resetHistory();
+    scrollSpy.resetHistory();
   }
 
   function setPosition(top) {

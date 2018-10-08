@@ -161,8 +161,13 @@ This example demonstrates using a overlay date picker in a form where the user c
   </form>
 ```
 
-<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
+On touch devices, an `amp-date-picker` in overlay mode automatically adds the
+`readonly` attribute to its `<input>` elements.
+This prevents the device's on-screen keyboard from opening unncessesarily.
+To opt-out of this behavior, add the `touch-keyboard-editable` attribute to the
+`<amp-date-picker>` element.
 
+<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
 
 ## Selection types
 
@@ -338,6 +343,11 @@ If no `week-day-format` is present, the weekdays display as the first character 
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
 
+##### minimum-nights
+
+The number of nights that the user must select in a date range. The default is `"1"`.
+A value of `"0"` allows users to select the same date for the start and end dates.
+
 ##### number-of-months
 
 The number of months to display at one time in the calendar view. The default is `"1"`.
@@ -348,11 +358,11 @@ The day to specify as the first day of the week (0-6). The default value is `"0"
 
 ##### blocked
 
-A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
 
 ##### highlighted
 
-A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
 Default styling is a blue dot on the date.
 
 ##### day-size

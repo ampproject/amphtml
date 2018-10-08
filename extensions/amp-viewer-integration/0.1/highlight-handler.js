@@ -18,9 +18,10 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
+import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {resetStyles, setStyles} from '../../../src/style';
+import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -182,8 +183,10 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
-      n['style']['backgroundColor'] = '#ff0';
-      n['style']['color'] = '#333';
+      setStyles(n, {
+        backgroundColor: '#ff0',
+        color: '#333',
+      });
     }
 
     const visibility = this.viewer_.getVisibilityState();
@@ -220,15 +223,20 @@ export class HighlightHandler {
     const viewport = Services.viewportForDoc(this.ampdoc_);
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
+    const paddingTop = viewport.getPaddingTop();
     for (let i = 0; i < nodes.length; i++) {
-      const {top, bottom} = viewport.getLayoutRect(nodes[i]);
+      // top and bottom returned by getLayoutRect includes the header padding
+      // size. We need to cancel the padding to calculate the positions in
+      // document.body like Viewport.animateScrollIntoView does.
+      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]),
+          0, -paddingTop);
       minTop = Math.min(minTop, top);
       maxBottom = Math.max(maxBottom, bottom);
     }
     if (minTop >= maxBottom) {
       return 0;
     }
-    const height = viewport.getHeight() - viewport.getPaddingTop();
+    const height = viewport.getHeight() - paddingTop;
     if (maxBottom - minTop > height) {
       return minTop;
     }
@@ -242,12 +250,21 @@ export class HighlightHandler {
    */
   animateScrollToTop_(top) {
     const sentinel = this.ampdoc_.win.document.createElement('div');
+    // Notes:
+    // The CSS of sentinel can be overwritten by user custom CSS.
+    // We need to set display:block and other CSS fields explicitly here
+    // so that these CSS won't be overwritten.
+    // We use top and height here because they precede bottom
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/bottom
+    //
+    // TODO(yunabe): Revisit the safer way to implement scroll-animation.
+    setInitialDisplay(sentinel, 'block');
     setStyles(sentinel, {
       'position': 'absolute',
       'top': Math.floor(top) + 'px',
-      'bottom': '0',
+      'height': '1px',
       'left': '0',
-      'right': '0',
+      'width': '1px',
       'pointer-events': 'none',
     });
     const body = this.ampdoc_.getBody();

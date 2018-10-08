@@ -27,22 +27,24 @@ import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
+  addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
+  isProtocolValid,
   parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
+import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
-import {isProtocolValid} from '../url';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
@@ -86,19 +88,6 @@ function dateMethod(method) {
  */
 function screenProperty(screen, property) {
   return () => screen[property];
-}
-
-/**
- * Returns a function that executes method on the viewport. This is a byte
- * saving hack.
- *
- * @param {!./viewport/viewport-impl.Viewport} viewport
- * @param {string} method
- * @return {!SyncResolverDef}
- */
-function viewportMethod(viewport, method) {
-  // Convert to object to allow dynamic access.
-  return () => /** @type {!Object} */(viewport)[method]();
 }
 
 /**
@@ -269,6 +258,11 @@ export class GlobalVariableSource extends VariableSource {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback' +
           /*OK*/' Cookie name, is required');
+
+      if (getMode().runtime == 'inabox') {
+        return /** @type {!Promise<ResolverReturnDef>} */(Promise.resolve(null));
+      }
+
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -384,22 +378,22 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
+    this.set('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', viewportMethod(viewport, 'getScrollLeft'));
+    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', viewportMethod(viewport, 'getScrollHeight'));
+    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', viewportMethod(viewport, 'getScrollWidth'));
+    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
 
     // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', viewportMethod(viewport, 'getHeight'));
+    this.set('VIEWPORT_HEIGHT', () => viewport.getHeight());
 
     // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
+    this.set('VIEWPORT_WIDTH', () => viewport.getWidth());
 
 
     const {screen} = this.ampdoc.win;
@@ -593,10 +587,10 @@ export class GlobalVariableSource extends VariableSource {
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
     /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
-    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
-    const params = parseQueryString(url.search);
-    return addParamsToUrl(removeSearch(orig),
-        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
+    if (!replaceParams) {
+      return orig;
+    }
+    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
   }
 
   /**
@@ -661,7 +655,7 @@ export class GlobalVariableSource extends VariableSource {
     if (typeof params[key] !== 'undefined') {
       return params[key];
     }
-    if (typeof replaceParams[key] !== 'undefined') {
+    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
       return /** @type {string} */(replaceParams[key]);
     }
     return defaultValue;
@@ -810,10 +804,13 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} source
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList
    * @return {!Promise<string>}
    */
-  expandStringAsync(source, opt_bindings) {
-    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings));
+  expandStringAsync(source, opt_bindings, opt_whiteList) {
+    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ undefined, opt_whiteList));
   }
 
   /**
@@ -919,7 +916,7 @@ export class UrlReplacements {
     const requestedReplacements = {};
     whitelist.trim().split(/\s+/).forEach(replacement => {
       if (!opt_supportedReplacement ||
-          opt_supportedReplacement.hasOwnProperty(replacement)) {
+          hasOwn(opt_supportedReplacement, replacement)) {
         requestedReplacements[replacement] = true;
       } else {
         user().warn('URL', 'Ignoring unsupported replacement', replacement);

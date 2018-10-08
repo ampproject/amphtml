@@ -19,9 +19,24 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const {exec, getStderr} = require('../exec');
+const {exec, execOrDie, getStderr} = require('../exec');
 
 const yarnExecutable = 'npx yarn';
+
+/**
+ * Writes the given contents to the patched file if updated
+ * @param {string} patchedName Name of patched file
+ * @param {string} file Contents to write
+ */
+function writeIfUpdated(patchedName, file) {
+  if (!fs.existsSync(patchedName) ||
+      fs.readFileSync(patchedName) != file) {
+    fs.writeFileSync(patchedName, file);
+    if (!process.env.TRAVIS) {
+      log(colors.green('Patched'), colors.cyan(patchedName));
+    }
+  }
+}
 
 /**
  * Patches Web Animations API by wrapping its body into `install` function.
@@ -32,14 +47,11 @@ function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
   const patchedName = 'node_modules/web-animations-js/' +
       'web-animations.install.js';
-  if (fs.existsSync(patchedName)) {
-    return;
-  }
   let file = fs.readFileSync(
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
   // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
+  file = 'export function installWebAnimations(window) {\n' +
       'var document = window.document;\n' +
       file.replace(/requestAnimationFrame/g, function(a, b) {
         if (file.charAt(b - 1) == '.') {
@@ -49,19 +61,55 @@ function patchWebAnimations() {
       }) +
       '\n' +
       '}\n';
-  fs.writeFileSync(patchedName, file);
-  if (!process.env.TRAVIS) {
-    log(colors.green('Patched'), colors.cyan(patchedName));
-  }
+  writeIfUpdated(patchedName, file);
 }
 
 /**
- * Installs custom lint rules in build-system/eslint-rules to node_modules.
+ * Creates a version of document-register-element that can be installed
+ * without side effects.
+ */
+function patchRegisterElement() {
+  let file;
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const patchedName = 'node_modules/document-register-element' +
+      '/build/document-register-element.patched.js';
+  file = fs.readFileSync(
+      'node_modules/document-register-element/build/' +
+      'document-register-element.node.js').toString();
+
+  // Eliminate the immediate side effect.
+  if (!/installCustomElements\(global\);/.test(file)) {
+    throw new Error('Expected "installCustomElements(global);" ' +
+        'to appear in document-register-element');
+  }
+  file = file.replace('installCustomElements(global);', '');
+
+  // Closure Compiler does not generate a `default` property even though
+  // to interop CommonJS and ES6 modules. This is the same issue typescript
+  // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+  if (!/module.exports = installCustomElements;/.test(file)) {
+    throw new Error('Expected "module.exports = installCustomElements;" ' +
+        'to appear in document-register-element');
+  }
+  file = file.replace('module.exports = installCustomElements;',
+      'export {installCustomElements};');
+
+  writeIfUpdated(patchedName, file);
+}
+
+/**
+ * Installs custom lint rules from build-system/eslint-rules to node_modules.
  */
 function installCustomEslintRules() {
   const customRuleDir = 'build-system/eslint-rules';
   const customRuleName = 'eslint-plugin-amphtml-internal';
+  exec(yarnExecutable + ' unlink', {'stdio': 'ignore', 'cwd': customRuleDir});
   exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
+  exec(yarnExecutable + ' unlink ' + customRuleName, {'stdio': 'ignore'});
   exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
   if (!process.env.TRAVIS) {
     log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
@@ -80,7 +128,7 @@ function runYarnCheck() {
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-    exec(yarnExecutable);
+    execOrDie(yarnExecutable); // Stop execution when Ctrl + C is detected.
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));
@@ -89,7 +137,7 @@ function runYarnCheck() {
 
 /**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
- * web-animations-js if necessary.
+ * web-animations-js and document-register-element if necessary.
  */
 function updatePackages() {
   installCustomEslintRules();
@@ -97,6 +145,7 @@ function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchRegisterElement();
 }
 
 gulp.task(

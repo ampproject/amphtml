@@ -30,6 +30,8 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 5 * 60,
 };
 
+const preprocessors = ['browserify'];
+
 /**
  * @param {!Object} config
  */
@@ -40,14 +42,15 @@ module.exports = {
     'mocha',
     'sinon-chai',
     'chai',
+    'source-map-support',
   ],
 
   preprocessors: {
     './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['browserify'],
-    './ads/**/test/test-*.js': ['browserify'],
-    './extensions/**/test/**/*.js': ['browserify'],
-    './testing/**/*.js': ['browserify'],
+    './test/**/*.js': preprocessors,
+    './ads/**/test/test-*.js': preprocessors,
+    './extensions/**/test/**/*.js': preprocessors,
+    './testing/**/*.js': preprocessors,
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -60,9 +63,18 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      ['babelify', {compact: false}],
+      [
+        'babelify', {
+          compact: false,
+          // Transform files in node_modules since deps use ES6 export.
+          // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+          global: true,
+          sourceMapsAbsolute: true,
+        },
+      ],
     ],
-    bundleDelay: 1200,
+    // Prevent "cannot find module" errors on Travis. See #14166.
+    bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -224,19 +236,18 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    // TODO(rsimha, #14406): Remove this after all tests are fixed.
-    failOnConsoleError: !process.env.TRAVIS && !process.env.LOCAL_PR_CHECK,
-    // TODO(rsimha, #14432): Set to false after all tests are fixed.
     captureConsole: true,
     verboseLogging: false,
   },
 
   singleRun: true,
   browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
@@ -244,6 +255,7 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
+    'karma-source-map-support',
     'karma-chrome-launcher',
     'karma-edge-launcher',
     'karma-firefox-launcher',

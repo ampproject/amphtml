@@ -16,7 +16,6 @@
 
 import * as dom from '../../src/dom';
 import * as ext from '../../src/service/extensions-impl';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
@@ -27,7 +26,7 @@ import {
   installAmpdocServices,
 } from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {deactivateChunking} from '../../src/chunk';
+import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
   getServiceForDoc,
   getServicePromise,
@@ -36,7 +35,6 @@ import {
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -295,9 +293,18 @@ describes.fakeWin('runtime', {
     });
     expect(queueExtensions).to.have.length(2);
     expect(progress).to.equal('');
-    adopt(win);
-    expect(queueExtensions).to.have.length(0);
-    return setTimeout(() => {
+    const promise = adopt(win);
+    return promise.then(() => {
+      // Notice the queue is down to 0 but there is a micro task to execute
+      // raw and high prio functions. Also notice that no `runChunksForTesting`
+      // was called to process the queue.
+      expect(queueExtensions).to.have.length(0);
+      expect(progress).to.equal('');
+      // Even though raw functions and high priority don't go through chunking
+      // there is a micro task for its queue.
+      return Promise.resolve();
+    }).then(() => {
+      expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('1HIGH');
       win.AMP.push({
         n: 'ext1',
@@ -307,32 +314,124 @@ describes.fakeWin('runtime', {
         },
       });
       runChunksForTesting(win.document);
-      expect(progress).to.equal('1HIGHA');
+      return promise.then(() => {
+        expect(progress).to.equal('1HIGHA');
+      });
+    });
+  });
 
-      // Runtime mode.
-      win.AMP.push(amp => {
+  it('loads and waits for a single intermediate bundles', () => {
+    // New format: {n:string, f:function(), i: <string|Array<string>}.
+    let progress = '';
+    const queueExtensions = win.AMP;
+
+    win.AMP.push({
+      n: 'ext2',
+      f: amp => {
         expect(amp).to.equal(win.AMP);
-        progress += '2';
-      });
-      win.AMP.push({
-        n: 'ext2',
-        f: amp => {
-          expect(amp).to.equal(win.AMP);
-          progress += 'B';
-        },
-      });
-      return setTimeout(() => {
-        expect(queueExtensions).to.have.length(0);
+        progress += 'C';
+      },
+      i: 'ext1',
+    });
+    win.AMP.push({
+      n: 'ext1',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'A';
+      },
+      i: '_base_ext',
+    });
 
-        expect(progress).to.equal('1HIGHAB2');
+    win.AMP.push({
+      n: '_base_ext',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'B';
+      },
+    });
 
-        ext.installExtensionsService(win);
-        const extensions = Services.extensionsFor(win);
-        const ext1 = extensions.waitForExtension(win, 'ext1');
-        const ext2 = extensions.waitForExtension(win, 'ext2');
-        return Promise.all([ext1, ext2]);
-      }, 0);
-    }, 0);
+    let script = win.document.querySelector('[data-script=_base_ext]');
+    expect(script).to.be.null;
+    const promise = adopt(win);
+    const e = Services.extensionsFor(win);
+
+    expect(queueExtensions).to.have.length(0);
+    expect(progress).to.equal('');
+    runChunksForTesting(win.document);
+    script = win.document.querySelector('[data-script=_base_ext]');
+    expect(script).to.be.not.null;
+    return promise.then(() => {
+      // ext1 should not be executed yet and needs to wait on _base_ext
+      expect(progress).to.equal('B');
+      return e.waitForExtension(win, '_base_ext').then(() => {
+        return e.waitForExtension(win, 'ext1').then(() => {
+          expect(progress).to.equal('BA');
+          return e.waitForExtension(win, 'ext2').then(() => {
+            expect(progress).to.equal('BAC');
+          });
+        });
+      });
+    });
+  });
+
+  it('loads and waits for a multiple intermediate bundles', () => {
+    // New format: {n:string, f:function(), i: <string|Array<string>}.
+    let progress = '';
+    const queueExtensions = win.AMP;
+    win.AMP.push({
+      n: 'ext1',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'A';
+      },
+      i: ['_base_ext1', '_base_ext2'],
+    });
+
+    win.AMP.push({
+      n: '_base_ext2',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'B';
+      },
+      i: ['_base_ext1'],
+    });
+
+    win.AMP.push({
+      n: '_base_ext1',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += 'C';
+      },
+    });
+
+    let script1 = win.document.querySelector('[data-script=_base_ext1]');
+    let script2 = win.document.querySelector('[data-script=_base_ext2]');
+    expect(script1).to.be.null;
+    expect(script2).to.be.null;
+    const promise = adopt(win);
+    const e = Services.extensionsFor(win);
+
+    expect(queueExtensions).to.have.length(0);
+    expect(progress).to.equal('');
+    runChunksForTesting(win.document);
+    script1 = win.document.querySelector('[data-script=_base_ext1]');
+    script2 = win.document.querySelector('[data-script=_base_ext2]');
+    expect(script1).to.not.be.null;
+    expect(script2).to.not.be.null;
+
+    return promise.then(() => {
+      // ext1 should not be executed yet and needs to wait on _base_ext
+      // Notice that ext0 executes before A
+      expect(progress).to.equal('C');
+      runChunksForTesting(win.document);
+      return e.waitForExtension(win, '_base_ext2').then(() => {
+        expect(progress).to.equal('CB');
+      }).then(() => {
+        return e.waitForExtension(win, 'ext1').then(() => {
+          expect(progress).to.equal('CBA');
+        });
+      });
+    });
   });
 
   it('should wait for body before processing extensions', function* () {

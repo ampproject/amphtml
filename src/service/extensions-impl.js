@@ -23,7 +23,10 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
-import {calculateExtensionScriptUrl} from './extension-location';
+import {
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
+} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -32,6 +35,7 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
+import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
@@ -39,11 +43,13 @@ import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
+import {installCustomElements as installRegisterElement} from
+  'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
+import {startsWith} from '../string';
 import {toWin} from '../types';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -108,6 +114,14 @@ export function isTemplateExtension(extensionId) {
 }
 
 /**
+ * @param {string} extensionId
+ * @return {boolean}
+ */
+function isIntermediateExtension(extensionId) {
+  return startsWith(extensionId, '_');
+}
+
+/**
  * Install extensions service.
  * @param {!Window} window
  * @restricted
@@ -146,7 +160,7 @@ export class Extensions {
    * services and document factories. This method is called by the extension's
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
-   * @param {function(!Object)} factory
+   * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
@@ -154,7 +168,7 @@ export class Extensions {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
-      factory(arg);
+      factory(arg, arg['_']);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;
@@ -248,7 +262,8 @@ export class Extensions {
     }
     oldScriptElement.removeAttribute('custom-element');
     oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    return this.preloadExtension(extensionId);
+    const urlParts = parseExtensionUrl(oldScriptElement.src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
@@ -411,7 +426,7 @@ export class Extensions {
     setParentWindow(childWin, parentWin);
 
     // Install necessary polyfills.
-    installPolyfillsInChildWindow(childWin);
+    installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
     installStylesLegacy(childWin.document, cssText, /* callback */ null,
@@ -594,9 +609,15 @@ export class Extensions {
   createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute(
-        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
-        extensionId);
+    if (isIntermediateExtension(extensionId)) {
+      opt_extensionVersion = '';
+    } else {
+      scriptElement.setAttribute(
+          isTemplateExtension(extensionId)
+            ? 'custom-template'
+            : 'custom-element',
+          extensionId);
+    }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
@@ -645,20 +666,26 @@ export function stubLegacyElements(win) {
 
 /**
  * Install polyfills in the child window (friendly iframe).
+ * @param {!Window} parentWin
  * @param {!Window} childWin
  */
-function installPolyfillsInChildWindow(childWin) {
+function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
+    installCustomElements(childWin, class {});
+  } else {
+    installRegisterElement(childWin, 'auto');
+  }
 }
 
 
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
+ * @visibleForTesting
  */
-function adoptStandardServicesForEmbed(childWin) {
+export function adoptStandardServicesForEmbed(childWin) {
   // The order of service adoptations is important.
   // TODO(dvoytenko): Refactor service registration if this set becomes
   // to pass the "embeddable" flag if this set becomes too unwieldy.
@@ -666,6 +693,7 @@ function adoptStandardServicesForEmbed(childWin) {
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
   adoptServiceForEmbed(childWin, 'navigation');
+  adoptServiceForEmbed(childWin, 'timer');
 }
 
 

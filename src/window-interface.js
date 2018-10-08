@@ -24,6 +24,15 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
+   * @return {!Location}
+   */
+  static getLocation(win) {
+    return win.location;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
    * @return {string}
    */
   static getDocumentReferrer(win) {
@@ -37,5 +46,23 @@ export class WindowInterface {
    */
   static getHostname(win) {
     return win.location.hostname;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
+  static getUserAgent(win) {
+    return win.navigator.userAgent;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {string}
+   */
+  static getUserLanguage(win) {
+    return win.navigator.userLanguage || win.navigator.language;
   }
 }

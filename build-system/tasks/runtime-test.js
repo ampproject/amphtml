@@ -40,7 +40,6 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-const tooManyTestsToFix = 15;
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -458,9 +457,6 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    if (testsToRun.length < tooManyTestsToFix) {
-      c.client.failOnConsoleError = true;
-    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -482,8 +478,10 @@ function runTests() {
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: (!!argv.saucelabs) || (!!argv.saucelabs_lite),
+    singlePass: !!argv.single_pass,
     adTypes: getAdTypes(),
     mochaTimeout: c.client.mocha.timeout,
+    propertiesObfuscated: !!argv.single_pass,
   };
 
   if (argv.compiled) {
@@ -503,6 +501,9 @@ function runTests() {
     c.browserify.transform = [
       ['babelify', {
         compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [
@@ -564,8 +565,6 @@ function runTests() {
     }
     if (argv.coverage) {
       if (process.env.TRAVIS) {
-        log(green('INFO: ') + 'Uploading code coverage report to ' +
-            cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
         const codecovCmd =
             './node_modules/.bin/codecov --file=test/coverage/lcov.info';
         let flags = '';
@@ -574,6 +573,9 @@ function runTests() {
         } else if (argv.integration) {
           flags = ' --flags=integration_tests';
         }
+        log(green('INFO: ') + 'Uploading code coverage report to ' +
+            cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+            cyan(codecovCmd + flags) + '...');
         const output = getStdout(codecovCmd + flags);
         const viewReportPrefix = 'View report at: ';
         const viewReport = output.match(viewReportPrefix + '.*');
@@ -616,8 +618,15 @@ function runTests() {
       console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
+    const result = browser.lastResult;
+    // Prevent cases where Karma detects zero tests and still passes. #16851.
+    if (result.total == 0) {
+      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+      if (!argv.watch) {
+        process.exit(1);
+      }
+    }
     if (shouldCollapseSummary) {
-      const result = browser.lastResult;
       let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';

@@ -22,12 +22,13 @@ import {
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
+import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 
-const TAG = 'VISIBILITY-MANAGER';
+const TAG = 'amp-analytics/visibility-manager';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -165,6 +166,14 @@ export class VisibilityManager {
    * @abstract
    */
   isBackgroundedAtStart() {}
+
+  /**
+  * Returns the root's, root's parent's and root's children's
+  * lowest opacity value
+  * @return {number}
+  * @abstract
+  */
+  getRootMinOpacity() {}
 
   /**
    * Returns the root's layout rect.
@@ -338,6 +347,7 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
+        state['opacity'] = getMinOpacity(opt_element);
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
@@ -352,6 +362,7 @@ export class VisibilityManager {
         });
 
       } else {
+        state['opacity'] = this.getRootMinOpacity();
         layoutBox = this.getRootLayoutBox();
       }
       model.maybeDispose();
@@ -499,6 +510,14 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /** @override */
+  getRootMinOpacity() {
+    const root = this.ampdoc.getRootNode();
+    const rootElement = dev().assertElement(
+        root.documentElement || root.body || root);
+    return getMinOpacity(rootElement);
+  }
+
+  /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
     const root = this.ampdoc.getRootNode();
@@ -549,7 +568,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     }
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
-    return trackedElement && trackedElement.intersectionRatio || 0;
+    return (trackedElement && trackedElement.intersectionRatio) || 0;
   }
 
   /**
@@ -705,6 +724,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
   /** @override */
   isBackgroundedAtStart() {
     return this.backgroundedAtStart_;
+  }
+
+  /** @override */
+  getRootMinOpacity() {
+    const rootElement = dev().assertElement(this.embed.iframe);
+    return getMinOpacity(rootElement);
   }
 
   /**

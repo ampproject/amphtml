@@ -63,6 +63,21 @@ export let ValidatorOutput;
     }} */
 export let CreativeMetaDataDef;
 
+/** @typedef {{
+      templateUrl: string,
+      data: (JsonObject|undefined),
+      analytics: (JsonObject|undefined),
+    }} */
+export let AmpTemplateCreativeDef;
+
+/** @typedef {{
+      creative: (string|undefined),
+      rawCreativeBytes: (!ArrayBuffer|undefined),
+      sentinel: (string|undefined),
+      additionalContextMetadata: (!JsonObject|undefined),
+    }} */
+export let CrossDomainDataDef;
+
 /**
  * @abstract
  */
@@ -70,7 +85,7 @@ export class Validator {
   /**
    * @param {!Object} unusedContext
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
+   * @param {!Headers} unusedHeaders
    * @return {!Promise<!ValidatorOutput>}
    * @abstract
    */

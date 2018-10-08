@@ -19,8 +19,8 @@ tags: {  # amp-brightcove
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-brightcove"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -45,6 +45,7 @@ tags: {  # <amp-brightcove>
   attrs: { name: "[data-player]" }
   attrs: { name: "[data-playlist-id]" }
   attrs: { name: "[data-video-id]" }
+  attrs: { name: "[data-referrer]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-brightcove"
   amp_layout: {

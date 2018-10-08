@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -30,7 +29,9 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {
+  installDocumentInfoServiceForDoc,
+} from '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
@@ -66,7 +67,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -106,6 +107,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
       Math: window.Math,
+      Promise: window.Promise,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -716,7 +718,6 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
-    expectAsyncConsoleError('[CID] Viewer does not provide cap=cid');
     allowConsoleError(() => { expect(() => {
       getProxySourceOrigin(parseUrlDeprecated('https://abc.org/v/foo.com/'));
     }).to.throw(/Expected proxy origin/); });
@@ -730,7 +731,6 @@ describes.realWin('cid', {amp: true}, env => {
   let sandbox;
   let clock;
   const hasConsent = Promise.resolve();
-  const doesNotProvideError = '[CID] Viewer does not provide cap=cid';
 
   beforeEach(() => {
     win = env.win;
@@ -747,6 +747,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('should store CID in cookie when not in Viewer', function *() {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
     setCookie(win, 'foo', '', 0);
     const fooCid = yield cid.get({
       scope: 'foo',
@@ -761,6 +763,8 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should return CID when in Viewer ', () => {
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(Promise.resolve('cid-from-viewer'));
@@ -774,12 +778,15 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should time out when in Viewer', function *() {
-    expectAsyncConsoleError(doesNotProvideError);
+    sandbox.stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
+    const storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
     sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
@@ -792,10 +799,8 @@ describes.realWin('cid', {amp: true}, env => {
     clock.tick(9999);
     yield macroTask();
     expect(resolved).to.be.false;
-    clock.tick(1);
-    yield macroTask();
-    expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
+    yield macroTask();
   });
 
   describe('pub origin, CID API opt in', () => {
@@ -889,10 +894,10 @@ describes.realWin('cid', {amp: true}, env => {
     it('should not work if vendor not whitelisted', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+      allowConsoleError(() => {
+        expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+      });
     });
-
-
   });
 });
 

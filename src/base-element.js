@@ -398,6 +398,10 @@ export class BaseElement {
   /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
    * @return {boolean}
    */
   prerenderAllowed() {
@@ -673,15 +677,6 @@ export class BaseElement {
       }));
 
     return () => unlisteners.forEach(unlisten => unlisten());
-  }
-
-  /**
-   * Must be executed in the mutate context. Removes `display:none` from the
-   * element set via `layout=nodisplay`.
-   * @param {boolean} displayOn
-   */
-  toggleLayoutDisplay(displayOn) {
-    this.element.toggleLayoutDisplay(displayOn);
   }
 
   /**
@@ -1071,5 +1066,3 @@ export class BaseElement {
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }
-
-

@@ -27,6 +27,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
+const config = require('./config');
+const minimatch = require('minimatch');
 const path = require('path');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
@@ -186,8 +188,19 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.js' ||
-          filename == 'visual-tests.js' ||
+          filename == 'visual-tests' ||
           filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
+ * Determines if the given file is a unit test.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isUnitTest(filePath) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -196,7 +209,9 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.includes('test/integration/');
+  return config.integrationTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -223,6 +238,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR_WEBUI',
       'VALIDATOR',
       'RUNTIME',
+      'UNIT_TEST',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -241,6 +257,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
       targetSet.add('FLAG_CONFIG');
+    } else if (isUnitTest(p)) {
+      targetSet.add('UNIT_TEST');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -259,19 +277,20 @@ function startSauceConnect() {
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
-  exec(startScCmd);
+  execOrDie(startScCmd);
 }
 
 function stopSauceConnect() {
   const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
   console.log('\n' + fileLogPrefix,
       'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
-  exec(stopScCmd);
+  execOrDie(stopScCmd);
 }
 
 const command = {
   testBuildSystem: function() {
     timedExecOrDie('gulp ava');
+    timedExecOrDie('node node_modules/jest/bin/jest.js');
   },
   testDocumentLinks: function() {
     timedExecOrDie('gulp check-links');
@@ -344,6 +363,13 @@ const command = {
       timedExecOrDie(cmd + ' --headless');
     }
   },
+  runSinglePassCompiledIntegrationTests: function() {
+    timedExecOrDie('rm -R dist');
+    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp test --integration --nobuild --headless '
+        + '--compiled --single_pass');
+    timedExecOrDie('rm -R dist');
+  },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
       process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
@@ -354,7 +380,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --nobuild --headless';
+    let cmd = 'gulp visual-diff --nobuild';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -363,10 +389,7 @@ const command = {
     const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found errors while running', colors.cyan(cmd) +
-          '. Here are the last 100 lines from',
-          colors.cyan('chromedriver.log') + ':\n');
-      exec('tail -n 100 chromedriver.log');
+          'Found errors while running', colors.cyan(cmd));
     }
   },
   verifyVisualDiffTests: function() {
@@ -389,11 +412,15 @@ const command = {
   buildValidator: function() {
     timedExecOrDie('gulp validator');
   },
+  updatePackages: function() {
+    timedExecOrDie('gulp update-packages');
+  },
 };
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
@@ -409,6 +436,7 @@ function runAllCommands() {
     command.buildValidator();
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
     // Disable bundle-size check on release branch builds.
@@ -417,6 +445,7 @@ function runAllCommands() {
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
+    command.runSinglePassCompiledIntegrationTests();
   }
 }
 
@@ -544,6 +573,7 @@ function main() {
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     if (buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
@@ -553,23 +583,28 @@ function main() {
       command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
-      // Run unit tests only if the PR contains runtime changes.
+      // Run unit tests only if the PR contains runtime or build-system changes.
       if (buildTargets.has('RUNTIME') ||
           buildTargets.has('BUILD_SYSTEM')) {
         // Before running all tests, run tests modified by the PR. (Fail early.)
         command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
+      } else if (buildTargets.has('UNIT_TEST')) {
+        // PR contains only test changes. Run just the modified unit tests.
+        command.runUnitTestsOnLocalChanges();
       }
     }
   }
 
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
         buildTargets.has('VISUAL_DIFF') ||
@@ -577,9 +612,11 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.buildRuntimeMinified(/* extensions */ false);
-      command.runBundleSizeCheck();
       command.runVisualDiffTests();
+      if (buildTargets.has('RUNTIME')) {
+        command.buildRuntimeMinified(/* extensions */ false);
+        command.runBundleSizeCheck();
+      }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
@@ -603,6 +640,11 @@ function main() {
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
     }
   }
 

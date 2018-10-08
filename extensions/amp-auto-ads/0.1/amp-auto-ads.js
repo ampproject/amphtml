@@ -75,10 +75,15 @@ export class AmpAutoAds extends AMP.BaseElement {
       const attributes = /** @type {!JsonObject} */ (
         Object.assign(adNetwork.getAttributes(),
             getAttributesFromConfigObj(configObj)));
+      const sizing = adNetwork.getSizing();
       const adConstraints = getAdConstraintsFromConfigObj(ampdoc, configObj) ||
           adNetwork.getDefaultAdConstraints();
       const adTracker = new AdTracker(getExistingAds(ampdoc), adConstraints);
-      new AdStrategy(placements, attributes, adTracker).run();
+      new AdStrategy(placements,
+          attributes,
+          sizing,
+          adTracker,
+          adNetwork.isResponsiveEnabled(this.win)).run();
       new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });
   }

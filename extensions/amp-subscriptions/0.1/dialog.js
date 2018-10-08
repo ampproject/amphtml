@@ -51,6 +51,7 @@ export class Dialog {
         'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
           'role': 'dialog',
         }));
+    toggle(this.wrapper_, false);
 
     /** @private @const {!Element} */
     this.closeButton_ = createElementWithAttributes(
@@ -67,7 +68,6 @@ export class Dialog {
     // Start hidden.
     this.ampdoc_.getBody().appendChild(this.wrapper_);
     setImportantStyles(this.wrapper_, {
-      display: 'none',
       transform: 'translateY(100%)',
     });
   }
@@ -104,9 +104,7 @@ export class Dialog {
     }
     this.visible_ = true;
     return this.vsync_.mutatePromise(() => {
-      setImportantStyles(this.wrapper_, {
-        display: 'block',
-      });
+      toggle(this.wrapper_, true);
       this.showCloseAction(/** @type {boolean} */ (showCloseAction));
     }).then(() => {
       // Animate to display.
@@ -145,9 +143,7 @@ export class Dialog {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {
-        setImportantStyles(this.wrapper_, {
-          display: 'none',
-        });
+        toggle(this.wrapper_, false);
         this.viewport_.updatePaddingBottom(0);
         this.visible_ = false;
       });

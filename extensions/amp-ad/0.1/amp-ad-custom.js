@@ -16,15 +16,15 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {ancestorElementsByTag} from '../../../src/dom';
 import {
+  ancestorElementsByTag,
   childElementByTag,
   removeChildren,
 } from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {hasOwn} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
@@ -52,7 +52,7 @@ export class AmpAdCustom extends AMP.BaseElement {
      *  responses will be keyed by slot */
     this.slot_ = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
   }
 
@@ -98,7 +98,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
+        templateData = hasOwn(data, this.slot_) ? data[this.slot_] :
           null;
       }
 

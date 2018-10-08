@@ -16,9 +16,12 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -26,7 +29,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -42,7 +45,7 @@ const TAG = 'amp-next-page';
  * @typedef {{
  *   ampUrl: string,
  *   amp: ?Object,
- *   recUnit: ?Element,
+ *   recUnit: {el: ?Element, isObserving: boolean},
  *   cancelled: boolean
  * }}
  */
@@ -85,8 +88,8 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
@@ -135,7 +138,6 @@ export class NextPageService {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
-    this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
@@ -145,12 +147,9 @@ export class NextPageService {
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
-    this.documentRefs_.push({
-      ampUrl: win.document.location.href,
-      amp: {title: win.document.title},
-      recUnit: null,
-      cancelled: false,
-    });
+    const documentRef =
+        createDocumentRef(win.document.location.href, win.document.title);
+    this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
     this.viewport_.onScroll(() => this.scrollHandler_());
@@ -219,12 +218,7 @@ export class NextPageService {
   appendNextArticle_() {
     if (this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = {
-        ampUrl: next.ampUrl,
-        amp: null,
-        recUnit: null,
-        cancelled: false,
-      };
+      const documentRef = createDocumentRef(next.ampUrl);
       this.documentRefs_.push(documentRef);
 
       const container = this.win_.document.createElement('div');
@@ -235,7 +229,7 @@ export class NextPageService {
 
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
-      documentRef.recUnit = articleLinks;
+      documentRef.recUnit.el = articleLinks;
 
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
@@ -256,8 +250,7 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
-          .fetchDocument(next.ampUrl, {ampCors: false})
+      fetchDocument(/** @type {!Window} */ (this.win_), next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
@@ -265,13 +258,16 @@ export class NextPageService {
               return;
             }
 
-            this.positionObserver_.unobserve(articleLinks);
+            if (documentRef.recUnit.isObserving) {
+              this.positionObserver_.unobserve(articleLinks);
+              documentRef.recUnit.isObserving = true;
+            }
             this.resources_.mutateElement(container, () => {
               try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit, 'display', 'none');
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {
@@ -319,7 +315,7 @@ export class NextPageService {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
         const a2a =
-            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+            this.navigation_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
         if (a2a) {
           // A2A is enabled, don't navigate the browser.
           e.preventDefault();
@@ -415,8 +411,10 @@ export class NextPageService {
    */
   articleLinksPositionUpdate_(documentRef) {
     documentRef.cancelled = true;
-    if (documentRef.recUnit) {
-      this.positionObserver_.unobserve(documentRef.recUnit);
+    if (documentRef.recUnit.isObserving) {
+      this.positionObserver_.unobserve(
+          dev().assertElement(documentRef.recUnit.el));
+      documentRef.recUnit.isObserving = false;
     }
   }
 
@@ -463,4 +461,23 @@ export class NextPageService {
     const vars = {toURL, fromURL};
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
+}
+
+/**
+ * Creates a new {@link DocumentRef} for the specified URL.
+ * @param {string} ampUrl AMP URL of the document.
+ * @param {string=} title Document title, if known before loading.
+ * @return {!DocumentRef} Ref object initialised with the given URL.
+ */
+function createDocumentRef(ampUrl, title) {
+  const amp = (title) ? {title} : null;
+  return {
+    ampUrl,
+    amp,
+    recUnit: {
+      el: null,
+      isObserving: false,
+    },
+    cancelled: false,
+  };
 }

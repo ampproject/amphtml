@@ -24,15 +24,20 @@ import {
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
+import {dict} from './utils/object';
+import {
+  experimentTogglesOrNull,
+  getBinaryType,
+  isCanary,
+  isExperimentOn,
+} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';
 import {isProxyOrigin} from './url';
-import {makeBodyVisible} from './style-installer';
+import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
@@ -294,7 +299,7 @@ export function installErrorReporting(win) {
 function reportErrorToServer(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
-    makeBodyVisible(this.document);
+    makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
     return;
@@ -361,9 +366,49 @@ export function maybeReportErrorToViewer(win, data) {
     if (!viewerTrusted) {
       return false;
     }
-    viewer.sendMessage('error', data);
+
+    viewer.sendMessage('error', errorReportingDataForViewer(data));
     return true;
   });
+}
+
+/**
+ * Strips down the error reporting data to a minimal set
+ * to be sent to the viewer.
+ * @param {!JsonObject} errorReportData
+ * @return {!JsonObject}
+ * @visibleForTesting
+ */
+export function errorReportingDataForViewer(errorReportData) {
+  return dict({
+    'm': errorReportData['m'], // message
+    'a': errorReportData['a'], // isUserError
+    's': errorReportData['s'], // error stack
+    'el': errorReportData['el'], // tagName
+    'v': errorReportData['v'], // runtime
+    'jse': errorReportData['jse'], // detectedJsEngine
+  });
+}
+
+/**
+ * @param {string|undefined}  message
+ * @param {*|undefined} error
+ * @return {string}
+ */
+function buildErrorMessage_(message, error) {
+  if (error) {
+    if (error.message) {
+      message = error.message;
+    } else {
+      // This should never be a string, but sometimes it is.
+      message = String(error);
+    }
+  }
+  if (!message) {
+    message = 'Unknown error';
+  }
+
+  return message;
 }
 
 /**
@@ -379,27 +424,14 @@ export function maybeReportErrorToViewer(win, data) {
  */
 export function getErrorReportData(message, filename, line, col, error,
   hasNonAmpJs) {
-  let expected = false;
-  if (error) {
-    if (error.message) {
-      message = error.message;
-    } else {
-      // This should never be a string, but sometimes it is.
-      message = String(error);
-    }
-    // An "expected" error is still an error, i.e. some features are disabled
-    // or not functioning fully because of it. However, it's an expected
-    // error. E.g. as is the case with some browser API missing (storage).
-    // Thus, the error can be classified differently by log aggregators.
-    // The main goal is to monitor that an "expected" error doesn't deteriorate
-    // over time. It's impossible to completely eliminate it.
-    if (error.expected) {
-      expected = true;
-    }
-  }
-  if (!message) {
-    message = 'Unknown error';
-  }
+  message = buildErrorMessage_(message, error);
+  // An "expected" error is still an error, i.e. some features are disabled
+  // or not functioning fully because of it. However, it's an expected
+  // error. E.g. as is the case with some browser API missing (storage).
+  // Thus, the error can be classified differently by log aggregators.
+  // The main goal is to monitor that an "expected" error doesn't deteriorate
+  // over time. It's impossible to completely eliminate it.
+  let expected = !!(error && error.expected);
   if (/_reported_/.test(message)) {
     return;
   }
@@ -456,6 +488,11 @@ export function getErrorReportData(message, filename, line, col, error,
     runtime = getMode().runtime;
   }
   data['rt'] = runtime;
+
+  // Add our a4a id if we are inabox
+  if (runtime === 'inabox') {
+    data['adid'] = getMode().a4aId;
+  }
 
   // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
   // identify js binary type.

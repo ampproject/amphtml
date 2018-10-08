@@ -65,9 +65,11 @@
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>iplabel</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
+      <option>marinsoftware</option>
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
@@ -79,6 +81,7 @@
       <option>nielsen-marketing-cloud</option>
       <option>oewa</option>
       <option>oewadirect</option>
+      <option>oracleInfinityAnalytics</option>
       <option>parsely</option>
       <option>piano</option>
       <option>piStats</option>
@@ -531,7 +534,8 @@ For complete documentation and additional examples please see: https://marketing
   "vars": {
     "st":  "angebotskennung",
     "co":  "comment",
-    "cp":  "code"
+    "cp":  "code",
+    "ps":  "lin"
   },
   "requests": {
     "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline.html"
@@ -541,6 +545,23 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End INFOnline example -->
 
+<!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
+<amp-analytics type="iplabel" id="iplabel" >
+<script type="application/json">
+{
+  "vars": {
+   "trackerId":"ampTrackerId",
+   "customdim":"",
+   "business":"",
+   "abtesting":"",
+   "infrastructure":"",
+   "customer":"",
+   "clientip":"",
+   "urlgroup":""
+  }
+}
+</script>
+</amp-analytics>
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -589,6 +610,43 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Lotame example -->
+
+<!-- Marin Software tracking.
+  Configure tracker id (required)
+  Configure anonymizeIp to "set" if ip should be anonymized (optional)
+-->
+<amp-analytics type="marinsoftware" id="marinsoftware">
+<script type="application/json">
+  {
+    "vars": {
+      "trackerId": "123"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageView"
+      },
+      "trackConversion": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "conversion",
+        "vars": {
+          "orderId": "orderId",
+          "marinConversionType": "marinConversionType",
+          "productName": "productName",
+          "category": "category",
+          "price": "price",
+          "quantity": "quantity"
+        }
+      }
+    },
+    "extraUrlParams": {
+      "anonymizeIp": "set"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Marin Software tracking -->
 
 <!-- Mediametrie tracking
   serial is the account id (required)
@@ -784,7 +842,37 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End OEWADIRECT example -->
-
+<!-- Oracle Infinity Analytics example -->
+<amp-analytics type="oracleInfinityAnalytics" id="oracleInfinity" class="i-amphtml-element i-amphtml-layout-fixed i-amphtml-layout-size-defined" style="width: 1px; height: 1px;" aria-hidden="true">
+  <script type="application/json">
+{
+  "vars": {
+    "guid": "_amp_test_guid_"
+  },
+  "triggers": {
+    "clickOnTest1Trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "event",
+      "vars": {
+        "dl": "99",
+        "ti": "clicked-test1"
+      }
+    },
+    "clickOnTopTrigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "event",
+      "vars": {
+        "dl": "99",
+        "ti": "clicked-header"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- end Oracle Infinity Analytics example -->
 <!-- Parsely tracking -->
 <amp-analytics type="parsely" id="parsely">
 <script type="application/json">
@@ -845,7 +933,7 @@ For complete documentation and additional examples please see: https://marketing
     }
   </script>
 </amp-analytics>
-<!-- End piStats example -->  
+<!-- End piStats example -->
 
 <!-- Quantcast tracking -->
 <amp-analytics type="quantcast" id="quantcast">

@@ -22,35 +22,51 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-list component', {
   amp: {
+    ampdoc: 'single',
     extensions: ['amp-list'],
   },
 }, env => {
-  let win, doc, ampdoc;
-  let templatesMock;
-  let element;
-  let list;
-  let listMock;
+  let win, doc, ampdoc, sandbox;
+  let element, list, listMock;
   let setBindService;
+  let ssrTemplateHelper;
+  let templates;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
 
-    const templates = Services.templatesFor(win);
-    templatesMock = sandbox.mock(templates);
+    templates = {
+      findAndRenderTemplate: sandbox.stub(),
+      findAndRenderTemplateArray: sandbox.stub(),
+    };
+    sandbox.stub(Services, 'templatesFor').returns(templates);
 
     element = doc.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
+    element.getPlaceholder = () => null;
+
+    const template = doc.createElement('template');
+    template.content.appendChild(doc.createTextNode('{{template}}'));
+    element.appendChild(template);
 
     const {promise, resolve} = new Deferred();
     sandbox.stub(Services, 'bindForDocOrNull').returns(promise);
     setBindService = resolve;
 
+    ssrTemplateHelper = {
+      isSupported: () => false,
+      fetchAndRenderTemplate: () => Promise.resolve(),
+      verifySsrResponse: () => Promise.resolve(),
+    };
+
     list = new AmpList(element);
     list.buildCallback();
+    list.ssrTemplateHelper_ = ssrTemplateHelper;
     listMock = sandbox.mock(list);
 
     element.style.height = '10px';
@@ -58,7 +74,7 @@ describes.realWin('amp-list component', {
   });
 
   afterEach(() => {
-    templatesMock.verify();
+    // There should only be one mock to verify.
     listMock.verify();
   });
 
@@ -66,6 +82,7 @@ describes.realWin('amp-list component', {
     expr: 'items',
     maxItems: 0,
     singleItem: false,
+    refresh: false,
     resetOnRefresh: false,
   };
 
@@ -76,17 +93,19 @@ describes.realWin('amp-list component', {
    * @return {!Promise}
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
-    const fetch = Promise.resolve(fetched);
+    // Mock the actual network request.
     listMock.expects('fetch_')
-        .withExactArgs(opts.expr).returns(fetch).atLeast(1);
+        .withExactArgs(opts.expr || DEFAULT_LIST_OPTS.expr, !!opts.refresh)
+        .returns(Promise.resolve(fetched))
+        .atLeast(1);
 
+    // If "reset-on-refresh" is set, show loading/placeholder before fetch.
     if (opts.resetOnRefresh) {
       listMock.expects('togglePlaceholder').withExactArgs(true).once();
       listMock.expects('toggleLoading').withExactArgs(true, true).once();
     }
-    listMock.expects('toggleLoading').withExactArgs(false).once();
-    listMock.expects('togglePlaceholder').withExactArgs(false).once();
 
+    // Stub the rendering of the template.
     let itemsToRender = fetched;
     if (opts.singleItem) {
       expect(fetched).to.be.a('object');
@@ -94,13 +113,21 @@ describes.realWin('amp-list component', {
     } else if (opts.maxItems > 0) {
       itemsToRender = fetched.slice(0, opts.maxItems);
     }
-    const render = Promise.resolve(rendered);
-    templatesMock.expects('findAndRenderTemplateArray')
-        .withExactArgs(element, itemsToRender).returns(render).atLeast(1);
+    templates.findAndRenderTemplateArray
+        .withArgs(element, itemsToRender)
+        .returns(Promise.resolve(rendered));
 
-    listMock.expects('mutateElement')
-        .callsFake(mutator => mutator())
-        .atLeast(1);
+    expectRender();
+  }
+
+  function expectRender() {
+    // Call mutate/measure during render.
+    listMock.expects('mutateElement').callsFake(m => m()).atLeast(1);
+    listMock.expects('measureElement').callsFake(m => m()).atLeast(1);
+
+    // Hide loading/placeholder during render.
+    listMock.expects('toggleLoading').withExactArgs(false).atLeast(1);
+    listMock.expects('togglePlaceholder').withExactArgs(false).atLeast(1);
   }
 
   describe('without amp-bind', () => {
@@ -109,31 +136,38 @@ describes.realWin('amp-list component', {
     });
 
     it('should fetch and render', () => {
-      const items = [
-        {title: 'Title1'},
-      ];
+      const items = [{title: 'Title1'}];
       const itemElement = doc.createElement('div');
-      expectFetchAndRender(items, [itemElement]);
-      return list.layoutCallback().then(() => {
+      const rendered = expectFetchAndRender(items, [itemElement]);
+      return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
     });
 
-    it('should attemptChangeHeight after render', () => {
-      const items = [
-        {title: 'Title1'},
-      ];
+    it('should attemptChangeHeight the placeholder, if present', () => {
+      const items = [{title: 'Title1'}];
+      const itemElement = doc.createElement('div');
+
+      const placeholder = doc.createElement('div');
+      placeholder.style.height = '1337px';
+      element.appendChild(placeholder);
+      element.getPlaceholder = () => placeholder;
+
+      expectFetchAndRender(items, [itemElement]);
+
+      listMock.expects('attemptChangeHeight')
+          .withExactArgs(1337)
+          .returns(Promise.resolve());
+
+      return list.layoutCallback();
+    });
+
+    it('should attemptChangeHeight rendered contents', () => {
+      const items = [{title: 'Title1'}];
       const itemElement = doc.createElement('div');
       itemElement.style.height = '1337px';
 
       expectFetchAndRender(items, [itemElement]);
-
-      let measureFunc;
-      listMock.expects('getVsync').returns({
-        measure: func => {
-          measureFunc = func;
-        },
-      }).once();
 
       listMock.expects('attemptChangeHeight')
           .withExactArgs(1337)
@@ -141,8 +175,6 @@ describes.realWin('amp-list component', {
 
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
-        expect(measureFunc).to.exist;
-        measureFunc();
       });
     });
 
@@ -151,10 +183,23 @@ describes.realWin('amp-list component', {
       const itemElement = doc.createElement('div');
       element.setAttribute('single-item', 'true');
 
-      expectFetchAndRender(
-          items, [itemElement], {expr: 'items', singleItem: true});
+      expectFetchAndRender(items, [itemElement], {singleItem: true});
 
       return list.layoutCallback().then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+      });
+    });
+
+
+    it('should fetch and render non-array if single-item is set', () => {
+      const items = {title: 'Title1'};
+      const itemElement = doc.createElement('div');
+      element.setAttribute('single-item', 'true');
+
+      const rendered = expectFetchAndRender(
+          items, [itemElement], {expr: 'items', singleItem: true});
+
+      return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
     });
@@ -170,6 +215,22 @@ describes.realWin('amp-list component', {
 
       expectFetchAndRender(
           items, [itemElement], {expr: 'items', maxItems: 2});
+
+      return list.layoutCallback().then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+      });
+    });
+
+    it('should trim the results to max-items', () => {
+      const items = [
+        {title: 'Title1'},
+        {title: 'Title2'},
+        {title: 'Title3'},
+      ];
+      const itemElement = doc.createElement('div');
+      element.setAttribute('max-items', '2');
+
+      expectFetchAndRender(items, [itemElement], {maxItems: 2});
 
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
@@ -192,7 +253,7 @@ describes.realWin('amp-list component', {
       });
     });
 
-    // TODO(#14772): Flaky.
+    // TODO(choumx, #14772): Flaky.
     it.skip('should only process one result at a time for rendering', () => {
       const doRenderPassSpy = sandbox.spy(list, 'doRenderPass_');
       const scheduleRenderSpy = sandbox.spy(list.renderPass_, 'schedule');
@@ -232,34 +293,31 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(foo)).to.be.true;
 
-        const renderedAgain = expectFetchAndRender(items, [foo]);
+        expectFetchAndRender(items, [foo], {refresh: true});
 
-        list.executeAction({
+        return list.executeAction({
           method: 'refresh',
           satisfiesTrust: () => true,
         });
-        return renderedAgain;
       });
     });
 
-    it('should show placeholder and loading while refreshing when ' +
-      'reset-on-refresh is set', () => {
-      element.setAttribute('reset-on-refresh', 'true');
+    it('should reset on refresh if `reset-on-refresh` is set', () => {
+      element.setAttribute('reset-on-refresh', '');
       const items = [{title: 'foo'}];
       const foo = doc.createElement('div');
-      const opts = {expr: 'items', resetOnRefresh: true};
-      expectFetchAndRender(items, [foo], opts);
+      expectFetchAndRender(items, [foo]);
 
       return list.layoutCallback().then(() => {
         expect(list.container_.contains(foo)).to.be.true;
 
-        const renderedAgain = expectFetchAndRender(items, [foo], opts);
+        const opts = {refresh: true, resetOnRefresh: true};
+        expectFetchAndRender(items, [foo], opts);
 
-        list.executeAction({
+        return list.executeAction({
           method: 'refresh',
           satisfiesTrust: () => true,
         });
-        return renderedAgain;
       });
     });
 
@@ -275,7 +333,6 @@ describes.realWin('amp-list component', {
     it('should fail to load b/c data array is absent', () => {
       listMock.expects('fetch_').returns(Promise.resolve({})).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
-      templatesMock.expects('findAndRenderTemplateArray').never();
       return expect(list.layoutCallback()).to.eventually.be
           .rejectedWith(/Response must contain an array/);
     });
@@ -284,7 +341,6 @@ describes.realWin('amp-list component', {
       element.setAttribute('single-item', 'true');
       listMock.expects('fetch_').returns(Promise.resolve()).once();
       listMock.expects('toggleLoading').withExactArgs(false).once();
-      templatesMock.expects('findAndRenderTemplateArray').never();
       return expect(list.layoutCallback()).to.eventually.be
           .rejectedWith(/Response must contain an array or object/);
     });
@@ -332,6 +388,103 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().catch(() => {});
     });
 
+    describe('DOM diffing', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-list-diffing', true, true);
+      });
+
+      it('should keep unchanged elements', function*() {
+        const items = [{title: 'Title1'}];
+        const itemElement = doc.createElement('div');
+        const rendered = expectFetchAndRender(items, [itemElement]);
+        yield list.layoutCallback().then(() => rendered);
+
+        const newItems = [{title: 'Title2'}];
+        const newItemElement = doc.createElement('div');
+        templates.findAndRenderTemplateArray
+            .withArgs(element, newItems)
+            .returns(Promise.resolve([newItemElement]));
+        yield list.mutatedAttributesCallback({src: newItems});
+
+        expect(list.container_.contains(itemElement)).to.be.true;
+        expect(list.container_.contains(newItemElement)).to.be.false;
+      });
+
+      it('should use i-amphtml-key as a replacement key', function*() {
+        const items = [{title: 'Title1'}];
+        const itemElement = doc.createElement('div');
+        itemElement.setAttribute('i-amphtml-key', '1');
+        const rendered = expectFetchAndRender(items, [itemElement]);
+        yield list.layoutCallback().then(() => rendered);
+
+        const newItems = [{title: 'Title2'}];
+        const newItemElement = doc.createElement('div');
+        newItemElement.setAttribute('i-amphtml-key', '2');
+        templates.findAndRenderTemplateArray
+            .withArgs(element, newItems)
+            .returns(Promise.resolve([newItemElement]));
+        yield list.mutatedAttributesCallback({src: newItems});
+
+        expect(list.container_.contains(itemElement)).to.be.false;
+        expect(list.container_.contains(newItemElement)).to.be.true;
+      });
+    });
+
+    describe('SSR templates', () => {
+      beforeEach(() => {
+        sandbox.stub(ssrTemplateHelper, 'isSupported').returns(true);
+      });
+
+      it('should error if proxied fetch fails', () => {
+        sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+            .returns(Promise.reject());
+
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        return expect(list.layoutCallback()).to.eventually.be
+            .rejectedWith(/Error proxying amp-list templates/);
+      });
+
+      it('should error if proxied fetch returns invalid data', () => {
+        sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+            .returns(Promise.resolve(undefined));
+
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        return expect(list.layoutCallback()).to.eventually.be.rejected;
+      });
+
+      it('should delegate template rendering to viewer', function*() {
+        sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+            .returns(Promise.resolve({html: '<p>foo</p>'}));
+
+        // Expects mutate/measure and hiding of loading/placeholder indicators.
+        expectRender();
+
+        const rendered = doc.createElement('p');
+        templates.findAndRenderTemplate
+            .withArgs(element, '<p>foo</p>')
+            .returns(Promise.resolve(rendered));
+
+        yield list.layoutCallback();
+
+        const request = sinon.match({
+          xhrUrl: 'https://data.com/list.json',
+          fetchOpt: sinon.match({
+            method: 'GET',
+          }),
+        });
+        const attrs = sinon.match({
+          ampListAttributes: sinon.match({items: 'items'}),
+        });
+        expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
+        expect(ssrTemplateHelper.fetchAndRenderTemplate)
+            .to.be.calledWithExactly(element, request, null, attrs);
+
+        expect(list.container_.contains(rendered)).to.be.true;
+      });
+    });
+
     // TODO(aghassemi, #12476): Make this test work with sinon 4.0.
     describe.skip('with fallback', () => {
       beforeEach(() => {
@@ -347,8 +500,7 @@ describes.realWin('amp-list component', {
       it('should hide fallback element on fetch success', () => {
         // Stub fetch and render to succeed.
         listMock.expects('fetch_').returns(Promise.resolve([])).once();
-        templatesMock.expects('findAndRenderTemplateArray')
-            .returns(Promise.resolve([]));
+        templates.findAndRenderTemplateArray.returns(Promise.resolve([]));
         // Act as if a fallback is already displayed.
         sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
 
@@ -399,10 +551,69 @@ describes.realWin('amp-list component', {
         expect(list.container_.contains(foo)).to.be.true;
 
         listMock.expects('fetchList_').never();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
 
         element.setAttribute('src', 'https://new.com/list.json');
         list.mutatedAttributesCallback({'src': items});
         expect(element.getAttribute('src')).to.equal('');
+      });
+    });
+
+    it('should reset if `reset-on-refresh` is set (new URL)', () => {
+      element.setAttribute('reset-on-refresh', '');
+      const items = [{title: 'foo'}];
+      const foo = doc.createElement('div');
+      expectFetchAndRender(items, [foo]);
+
+      return list.layoutCallback().then(() => {
+        expect(list.container_.contains(foo)).to.be.true;
+
+        expectFetchAndRender(items, [foo], {resetOnRefresh: true});
+        element.setAttribute('src', 'https://new.com/list.json');
+        list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+      });
+    });
+
+    it('should not reset if `reset-on-refresh=""` (new data)', () => {
+      element.setAttribute('reset-on-refresh', '');
+      const items = [{title: 'foo'}];
+      const foo = doc.createElement('div');
+      expectFetchAndRender(items, [foo]);
+
+      return list.layoutCallback().then(() => {
+        expect(list.container_.contains(foo)).to.be.true;
+
+        listMock.expects('fetchList_').never();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        element.setAttribute('src', 'https://new.com/list.json');
+        list.mutatedAttributesCallback({'src': items});
+      });
+    });
+
+    it('should reset if `reset-on-refresh="always"` (new data)', () => {
+      element.setAttribute('reset-on-refresh', 'always');
+      const items = [{title: 'foo'}];
+      const foo = doc.createElement('div');
+      expectFetchAndRender(items, [foo]);
+
+      return list.layoutCallback().then(() => {
+        expect(list.container_.contains(foo)).to.be.true;
+
+        listMock.expects('fetchList_').never();
+        // Expect display of placeholder/loading before render.
+        listMock.expects('togglePlaceholder').withExactArgs(true).once();
+        listMock.expects('toggleLoading').withExactArgs(true, true).once();
+        // Expect hiding of placeholder/loading after render.
+        listMock.expects('togglePlaceholder').withExactArgs(false).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        element.setAttribute('src', 'https://new.com/list.json');
+        list.mutatedAttributesCallback({'src': items});
       });
     });
 
@@ -422,9 +633,33 @@ describes.realWin('amp-list component', {
       });
     });
 
-    describe('`fast-amp-list` experiment', () => {
+    describe('no `binding` attribute', () => {
+      it('should call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.have.been.calledOnce;
+      });
+    });
+
+    describe('binding="always"', () => {
       beforeEach(() => {
-        toggleExperiment(win, 'fast-amp-list', true, true);
+        element.setAttribute('binding', 'always');
+      });
+
+      it('should call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.have.been.calledOnce;
+      });
+    });
+
+    describe('binding="refresh"', () => {
+      beforeEach(() => {
+        element.setAttribute('binding', 'refresh');
       });
 
       it('should not call scanAndApply() before FIRST_MUTATE', function*() {
@@ -432,7 +667,6 @@ describes.realWin('amp-list component', {
         const output = [doc.createElement('div')];
         expectFetchAndRender(items, output);
         yield list.layoutCallback();
-
         expect(bind.scanAndApply).to.not.have.been.called;
       });
 
@@ -440,14 +674,26 @@ describes.realWin('amp-list component', {
         bind.signals = () => {
           return {get: name => (name === 'FIRST_MUTATE')};
         };
-
         const items = [{title: 'Title1'}];
         const output = [doc.createElement('div')];
         expectFetchAndRender(items, output);
         yield list.layoutCallback();
-
         expect(bind.scanAndApply).to.have.been.calledOnce;
         expect(bind.scanAndApply).calledWithExactly(output, [list.container_]);
+      });
+    });
+
+    describe('binding="no"', () => {
+      beforeEach(() => {
+        element.setAttribute('binding', 'no');
+      });
+
+      it('should not call scanAndApply()', function*() {
+        const items = [{title: 'Title1'}];
+        const output = [doc.createElement('div')];
+        expectFetchAndRender(items, output);
+        yield list.layoutCallback();
+        expect(bind.scanAndApply).to.not.have.been.called;
       });
     });
   }); // with amp-bind

@@ -15,19 +15,24 @@
 #
 tags: {  # amp-pan-zoom
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-pan-zoom"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-pan-zoom>
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "AMP-PAN-ZOOM"
   requires_extension: "amp-pan-zoom"
-
+  attrs: {
+    name: "disable-double-tap"
+    value: ""
+  }
   attrs: {
     name: "initial-scale"
     value_regex: "[0-9]+(\\.[0-9]+)?"

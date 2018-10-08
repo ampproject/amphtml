@@ -15,38 +15,91 @@
  */
 
 import {
-  filterSplice,
+  areEqualOrdered,
   findIndex,
   fromIterator,
   pushIfNotExist,
+  remove,
 } from '../../../src/utils/array';
 
-describe('filterSplice', function() {
+describe('areEqualOrdered', function() {
+  it('should return true on empty arrays',
+      () => {
+        const result = areEqualOrdered([], []);
+        expect(result).to.be.true;
+      });
+
+  it('should return true on same array with primitive types of same seq',
+      () => {
+        const result = areEqualOrdered(
+            [1, 'string', true, undefined, null],
+            [1, 'string', true, undefined, null]
+        );
+        expect(result).to.be.true;
+      });
+
+  it('should return true on same array with objects of same seq',
+      () => {
+        const o1 = {a: 1};
+        const o2 = () => { return 'arrow func'; };
+        const o3 = new Function('whatever');
+        const o4 = {};
+        const o5 = [];
+        const result = areEqualOrdered(
+            [o1, o2, o3, o4, o5],
+            [o1, o2, o3, o4, o5]
+        );
+        expect(result).to.be.true;
+      });
+
+  it('should return false on same array with primitive types of different seq',
+      () => {
+        const result = areEqualOrdered(
+            [null, true, 'string', undefined, 1],
+            [1, 'string', true, undefined, null]
+        );
+        expect(result).to.be.false;
+      });
+
+  it('should return false on same array with objects of different seq',
+      () => {
+        const o1 = {a: 1};
+        const o2 = () => { return 'arrow func'; };
+        const o3 = new Function('whatever');
+        const o4 = {};
+        const o5 = [];
+        const result = areEqualOrdered(
+            [o4, o5, o3, o2, o1],
+            [o1, o2, o3, o4, o5]
+        );
+        expect(result).to.be.false;
+      });
+
+  it('should return false on array of different length', () => {
+    const result = areEqualOrdered([1, 2, 3], [1, 2, 3, 3]);
+    expect(result).to.be.false;
+  });
+});
+
+describe('remove', function() {
   let array;
   beforeEach(() => {
     array = [1, 2, 3, 4, 5];
   });
 
-  it('should splice elements that filter true', () => {
-    filterSplice(array, i => i > 2);
-    expect(array).to.deep.equal([3, 4, 5]);
-  });
-
-  it('should return filtered elements', () => {
-    const filtered = filterSplice(array, i => i > 2);
-    expect(filtered).to.deep.equal([1, 2]);
+  it('should remove elements that return true', () => {
+    remove(array, i => i > 2);
+    expect(array).to.deep.equal([1, 2]);
   });
 
   it('handles no removals', () => {
-    const filtered = filterSplice(array, () => true);
+    remove(array, () => false);
     expect(array).to.deep.equal([1, 2, 3, 4, 5]);
-    expect(filtered).to.deep.equal([]);
   });
 
   it('handles consecutive removals', () => {
-    const filtered = filterSplice(array, () => false);
+    remove(array, () => true);
     expect(array).to.deep.equal([]);
-    expect(filtered).to.deep.equal([1, 2, 3, 4, 5]);
   });
 });
 

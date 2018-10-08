@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -25,7 +24,7 @@ describe('document-info', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -267,7 +266,7 @@ describe('document-info', () => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentInfoServiceForDoc(win.document);
     expect(Services.documentInfoForDoc(win.document).replaceParams)
-        .to.deep.equal({});
+        .to.be.null;
   });
 
   it('should not provide the replaceParams if invalid', () => {

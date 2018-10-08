@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
@@ -26,7 +25,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
       fixture = f;
@@ -35,6 +34,10 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     });
   });
+
+  function waitForDisplay(element, display) {
+    return () => fixture.win.getComputedStyle(element)['display'] === display;
+  }
 
   afterEach(() => {
     sandbox.restore();
@@ -46,7 +49,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('hideBtn');
 
       button.click();
-      yield poll('#spanToHide hidden', () => span.style['display'] === 'none');
+      yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
     });
 
     it('<AMP element>.toggleVisibility', function*() {
@@ -54,24 +57,28 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('toggleBtn');
 
       button.click();
-      yield poll('#imgToToggle hidden', () => img.style['display'] === 'none');
+      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
 
       button.click();
-      yield poll('#imgToToggle displayed', () => img.style['display'] === '');
+      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
     });
 
-    it('AMP.navigateTo(url=)', function*() {
-      const button = fixture.doc.getElementById('navigateBtn');
+    describe.configure().skipIfPropertiesObfuscated().run('navigate',
+        function() {
+          it('AMP.navigateTo(url=)', function*() {
+            const button = fixture.doc.getElementById('navigateBtn');
 
-      // This is brittle but I don't know how else to stub window navigation.
-      const navigationService = fixture.win.services.navigation.obj;
-      const navigateTo = sandbox.stub(navigationService, 'navigateTo');
+            // This is brittle but I don't know how else to stub
+            // window navigation.
+            const navigationService = fixture.win.services.navigation.obj;
+            const navigateTo = sandbox.stub(navigationService, 'navigateTo');
 
-      button.click();
-      yield poll('navigateTo() called with correct args', () => {
-        return navigateTo.calledWith(fixture.win, 'https://google.com');
-      });
-    });
+            button.click();
+            yield poll('navigateTo() called with correct args', () => {
+              return navigateTo.calledWith(fixture.win, 'https://google.com');
+            });
+          });
+        });
 
     it('AMP.print()', function*() {
       const button = fixture.doc.getElementById('printBtn');

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
-import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';

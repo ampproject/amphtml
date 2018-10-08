@@ -29,21 +29,26 @@ import {
 } from '../runtime';
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible} from '../style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
-import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
+getMode(self).a4aId = getA4AId(self);
 
 // TODO(lannka): only install the necessary services.
 
@@ -54,7 +59,7 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self); // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
@@ -62,7 +67,7 @@ try {
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document);
+  makeBodyVisibleRecovery(self.document);
   throw e;
 }
 startupChunk(self.document, function initial() {
@@ -107,7 +112,7 @@ startupChunk(self.document, function initial() {
     startupChunk(self.document, function final() {
       Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
+      makeBodyVisible(self.document);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

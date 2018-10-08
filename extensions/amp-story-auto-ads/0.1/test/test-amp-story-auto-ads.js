@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as analytics from '../../../../src/analytics';
-import * as sinon from 'sinon';
 import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 import {macroTask} from '../../../../testing/yield';
 
@@ -71,6 +70,7 @@ describes.realWin('amp-story-auto-ads', {
   describe('analytics triggers', () => {
     it('should fire "story-ad-insert" upon insertion', () => {
       autoAds.uniquePagesCount_ = 10;
+      autoAds.adPagesCreated_ = 1;
       sandbox.stub(autoAds, 'startNextPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
@@ -82,6 +82,7 @@ describes.realWin('amp-story-auto-ads', {
 
     it('should fire "story-ad-discard" upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
+      autoAds.adPagesCreated_ = 1;
       sandbox.stub(autoAds, 'startNextPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
@@ -98,6 +99,10 @@ describes.realWin('amp-story-auto-ads', {
       ad.getImpl = () => Promise.resolve(fakeImpl);
       sandbox.stub(autoAds, 'createAdElement_').returns(ad);
       autoAds.adPageEls_ = [ad];
+
+      const page = win.document.createElement('amp-story-page');
+      sandbox.stub(autoAds, 'createPageElement_').returns(page);
+      page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
 
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.createAdPage_();
@@ -130,7 +135,7 @@ describes.realWin('amp-story-auto-ads', {
         element: storyElement,
         addPage: NOOP,
       };
-
+      autoAds.adPagesCreated_ = 1;
       const page = win.document.createElement('amp-story-page');
       sandbox.stub(autoAds, 'createAdPage_').returns(page);
       page.getImpl = () => Promise.resolve();
@@ -149,7 +154,7 @@ describes.realWin('amp-story-auto-ads', {
         element: storyElement,
         addPage: NOOP,
       };
-
+      autoAds.adPagesCreated_ = 1;
       const page = win.document.createElement('amp-story-page');
       sandbox.stub(autoAds, 'createAdPage_').returns(page);
       page.getImpl = () => Promise.resolve();

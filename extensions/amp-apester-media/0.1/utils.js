@@ -15,6 +15,9 @@
  */
 
 import * as events from '../../../src/event-helper';
+import {isJsonLdScriptTag} from '../../../src/dom';
+import {toArray} from '../../../src/types';
+import {tryParseJson} from '../../../src/json';
 
 const rules = [
   // if it says it's a webview, let's go with that
@@ -70,10 +73,10 @@ export function getPlatform() {
 
 /**
  * Extracts tags from a given element .
- * @param {!Element} element
+ * @param {!Node} element
  */
-function extractElementTags(element) {
-  const tagsAttribute = element.getAttribute('data-apester-tags');
+export function extractElementTags(element) {
+  const tagsAttribute = element && element.getAttribute('data-apester-tags');
   if (tagsAttribute) {
     return tagsAttribute.split(',').map(tag => tag.trim()) || [];
   }
@@ -81,15 +84,63 @@ function extractElementTags(element) {
 }
 
 /**
+ * Extract article's first 5 words from the title and use them for tags.
+ * @param {!Node} root
+ * @return {!Array<string>}
+ */
+export function extratctTitle(root) {
+  const scriptTags = toArray(root.querySelectorAll(
+      'script[type="application/ld+json"]')
+  );
+  return scriptTags.map(scriptTag => {
+    if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
+      return {};
+    }
+    return tryParseJson(scriptTag.textContent) || {};
+  }).map(jsonLd => jsonLd && jsonLd['headline'])
+      .filter(e => typeof e === 'string')
+      .map(title =>
+        title
+            .trim()
+            .split(' ')
+            .filter(w => w.length > 2)
+      )
+      .reduce((result, headline) => {
+        return result.concat(headline);
+      }, [])
+      .slice(0, 5);
+}
+/**
+ * Extracts article meta keywords
+ * @param {*} root
+ */
+export function extractArticleTags(root) {
+  const metaKeywords = root.querySelector('meta[name="keywords"]') || {
+    content: '',
+  };
+  return metaKeywords.content
+      .trim()
+      .split(',')
+      .filter(e => e)
+      .map(e => e.trim());
+}
+
+/**
  * Extracts tags from a given element and document.
- * @param {!Element} element
+ * @param {!Node} root
+ * @param {!Node} element
  * @return {Array<string>}
  */
-export function extractTags(element) {
-  const extractags = extractElementTags(element);
-  const loweredCase = extractags.map(tag => tag.toLowerCase().trim());
-  const noDuplication =
-    loweredCase.filter((item, pos, self) => self.indexOf(item) === pos);
+export function extractTags(root, element) {
+  const extractedTags = extractElementTags(element) || [];
+  const articleMetaTags = extractArticleTags(root);
+  const concatedTags = extractedTags.concat(
+      articleMetaTags.length ? articleMetaTags : extratctTitle(root) || []
+  );
+  const loweredCase = concatedTags.map(tag => tag.toLowerCase().trim());
+  const noDuplication = loweredCase.filter(
+      (item, pos, self) => self.indexOf(item) === pos
+  );
   return noDuplication;
 }
 
