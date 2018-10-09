@@ -140,7 +140,7 @@ function renderOptionalAttrsCheckboxes(doc) {
     }
 
     label.appendChild(input);
-    label.innerHTML += ` ${attr}`;
+    label./*OK*/innerHTML += ` ${attr}`;
 
     fragment.appendChild(label);
   });
@@ -152,8 +152,8 @@ function renderOptionalAttrsCheckboxes(doc) {
 function replaceTagName(node, withTagName) {
   const {tagName} = node;
 
-  node.outerHTML =
-      node.outerHTML
+  node./*OK*/outerHTML =
+      node./*OK*/outerHTML
           .replace(new RegExp(`^\<${tagName}`, 'i'), `<${withTagName}`)
           .replace(new RegExp(`\</${tagName}\>$`, 'i'), `</${withTagName}>`);
 }
@@ -224,7 +224,7 @@ function setOptionalAttrs(req, doc) {
 
 function appendClientScript(doc) {
   const script = doc.createElement('script');
-  script.innerHTML = clientScript;
+  script./*OK*/innerHTML = clientScript;
   doc.body.appendChild(script);
 }
 
