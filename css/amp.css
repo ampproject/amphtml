@@ -492,6 +492,11 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the auto-resize attribute, the loader
+ * should be fully hidden and not take up space.
+ */
 amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
   display: none !important;
 }
