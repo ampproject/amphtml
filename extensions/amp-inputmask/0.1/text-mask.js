@@ -71,7 +71,7 @@ export class TextMask {
    * Cleanup resources
    */
   dispose() {
-    this.controller_.remove();
+    this.controller_.dispose();
   }
 }
 

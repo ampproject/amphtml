@@ -120,8 +120,8 @@ export class Mask {
   }
 
   /** @override */
-  remove() {
-    this.controller_.remove();
+  dispose() {
+    this.controller_.dispose();
     this.controller_ = null;
   }
 }

@@ -48,5 +48,5 @@ export class MaskInterface {
    * Removes the inputmask from the input element UX and cleans up any resources
    * consumed by the controller.
    */
-  remove() {}
+  dispose() {}
 }
