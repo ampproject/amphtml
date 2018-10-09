@@ -58,11 +58,18 @@ AMP within the SXG. If a server is unable to meet those constraints, it should
 respond with non-SXG (unsigned) AMP, as the AMP Cache will need to apply those
 transforms itself, and thus be unable to use the provided signature.
 
+If the server responds with an SXG, it should include an `AMP-Cache-Transform`
+*outer* response header, specifying which of the alternatives it chose to
+satisfy. This allows intermediary caching proxies to cache responses with
+minimal understanding of the underlying format.
+
 ## Header syntax
 
 The header value is a [parameterised list from header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07#section-3.3).
 
 ## Server behavior
+
+### Request header
 
 The list represents an ordered set of constraints. The server should respond
 with an SXG variant matching the first parameterised identifier that it can
@@ -84,8 +91,24 @@ For each identifier:
  4. Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
-If the server content-negotiates on `AMP-Cache-Transform`, it must include
-`Vary: AMP-Cache-Transform` in all responses, whether signed or unsigned.
+The server should ensure its copy of `caches.json` is no more than 60 days
+out-of-date with the canonical linked above.
+
+### Response header
+
+If the server responds with an SXG, it should include an `AMP-Cache-Transform`
+outer response header, with a value equal to the most specific constraint that
+it can satisfy -- that is, a list of size 1. For now, that means:
+
+ 1. If it rewrote subresource URLs for a particular cache, the value should be
+    the id of the cache.
+ 2. Otherwise, the value should be `any`.
+
+### `Vary` header
+
+For a given URL, if the server content-negotiates on `AMP-Cache-Transform`, it
+must include `Vary: AMP-Cache-Transform` in all responses, whether signed or
+unsigned.
 
 ### URL rewrites
 
@@ -94,6 +117,37 @@ The exact set of rewrites is not yet fully specified; a few
 are available, and a [reference implementation](https://github.com/ampproject/amppackager)
 will soon be available. In the interim, the Google AMP Cache will not require
 any rewrites (and, as a result, will not prefetch any subresources).
+
+The list of rewrites is limited to base URLs within `caches.json` in order to
+provide the publisher some assurance that the rewritten subresources are
+faithful representations of the original subresources.
+
+For the sake of security, all script source URLs will need to be on
+`cdn.ampproject.org`, regardless of the target AMP cache. This provides the
+publisher additional assurance that the JS is not an arbitrary payload. It would be
+nice to get rid of this dependency; something like [signature-based
+SRI](https://github.com/mikewest/signature-based-sri) might be feasible.
+
+## Interaction with content negotation
+
+If the URL serves multiple variants, and is thus subject to [HTTP proactive
+negotation](https://tools.ietf.org/html/rfc7231#section-3.4.1), then
+`AMP-Cache-Transform` should only take effect after proactive negotiation has
+selected a resource of content type `application/signed-exchange`. In theory,
+there may be an interaction with content negotation. For instance, assume the
+request is:
+
+```
+Accept-Language: en, de
+AMP-Cache-Transform: google
+```
+
+and the server can only deliver a resource of `de`+`google` or `en`+`cloudflare`.
+In this case, content negotiation may select `en`, and then
+`AMP-Cache-Transform` negotiation would see that the constraint cannot be
+satisfied. In practice, it is expected that this will not happen. Servers should
+avoid such pessimizing interactions with HTTP content negotiation, by being able
+to serve SXGs on all variants of an AMP URL.
 
 ## Caching proxy behavior
 
@@ -106,9 +160,22 @@ two requests are not semantically equivalent. However, this would lead to
 unnecessary duplication in the cache, as the former response obviously can serve
 the latter response.
 
-If the proxy can ensure that a cached response satisfies a new request (either
-because the new request is a superset of the cached request, or through some
-unspecified examination of the response), then it can serve that response.
+If the proxy can ensure that a cached response satisfies a new request, then it
+can serve that response. It can do that by comparing the `AMP-Cache-Transform`
+response header of the cached response to the `AMP-Cache-Transform` request
+header of the new request:
+
+ 1. If the request includes an unparameterised `any` identifier and the response
+    includes a `AMP-Cache-Transform` header, then it satisfies the request.
+ 2. If the response identifier is included in the request list, and
+    unparameterised in both cases, then it satisfies the request.
+
+The above is merely informational; a cache may choose any strategy that doesn't
+serve mismatched responses (i.e. obeys the "Server behavior" specification
+above).
+
+Proper handling of parameters will be defined in a future version of the spec,
+and may require parameter-specific handling for optimal performance.
 
 ## Example
 

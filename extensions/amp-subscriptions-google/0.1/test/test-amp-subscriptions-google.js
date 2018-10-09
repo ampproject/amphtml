@@ -29,6 +29,8 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
+import {SubscriptionsScoreFactor}
+  from '../../../amp-subscriptions/0.1/score-factors.js';
 
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
@@ -336,6 +338,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should link accounts if login action is delegated', () => {
+    const executeStub = platform.runtime_.linkAccount;
+    platform.executeAction('login');
+    expect(executeStub).to.be.calledWith();
+  });
+
   describe('getEntitlements', () => {
     it('should convert granted entitlements to internal shape', () => {
       const entitlementResponse = {
@@ -376,6 +384,99 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
       return platform.getEntitlements().then(entitlement => {
         expect(entitlement).to.be.equal(null);
+      });
+    });
+  });
+
+  describe('isReadyToPay', () => {
+    // #TODO(jpettitt) remove fake entitlements when swj.js
+    // isRadyToPay is available
+    /**
+     * return a fake entitlements object
+     * @param {boolean} isReadyToPay
+     * @return {Object}
+     */
+    function fakeEntitlements(isReadyToPay) {
+      return {
+        isReadyToPay,
+        entitlements: {},
+        getEntitlementForThis: () => {},
+      };
+    }
+
+    it('should treat missing isReadyToPay as false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
+      });
+    });
+
+    it('should handle isReadyToPay true', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: true,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(true));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(1);
+      });
+    });
+
+    it('should handle isReadyToPay false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: false,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(false));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
       });
     });
   });

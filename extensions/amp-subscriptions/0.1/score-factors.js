@@ -19,14 +19,15 @@
  * @const @enum {string}
  */
 export const SubscriptionsScoreFactor = {
+  // User is known to platform and has a form of payment registered
+  IS_READY_TO_PAY: 'isReadyToPay',
   // Platform supports the current viewer environment
   SUPPORTS_VIEWER: 'supportsViewer',
 };
 
 /**
- * Optional per factor default score config values, overridden in
- * on page config if needed.
+ * All other score factors are ignored if not specifed in the publisher
+ * config so adding a default here would be meaningless.
  */
 export const DEFAULT_SCORE_CONFIG = {
-  supportsViewer: 10,
 };

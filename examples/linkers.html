@@ -8,6 +8,7 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 
   <meta name="amp-google-client-id-api" content="googleanalytics">
 </head>
@@ -25,21 +26,21 @@
         }
       },
       "linkers" : {
+        "enabled": true,
+        "proxyOnly": false,
         "ga": {
           "ids": {
             "_ga": "CLIENT_ID(_ga)",
             "gclid": "QUERY_PARAM(gclid)"
           },
-          "destinationDomains": ["www.google.com"],
-          "enabled": true
+          "destinationDomains": ["www.google.com"]
         },
         "linker2": {
           "ids": {
             "_cid": "CLIENT_ID(foo)",
             "t": "${title}"
           },
-          "destinationDomains": ["www.example.com"],
-          "enabled": true
+          "destinationDomains": ["www.example.com"]
         }
       }
     }
@@ -58,21 +59,69 @@
         }
       },
       "linkers" : {
-        "ga": {
-          "ids": {
-            "_ga": "CLIENT_ID(_ga)"
-          },
-          "destinationDomains": ["www.ampproject.com"]
-        }
+        "proxyOnly": false,
+        "enabled": true
       }
     }
     </script>
   </amp-analytics>
   <h1 id="top">AMP Analytics</h1>
-    <div><a href="https://www.example.com">example.com #1</a></div>
-    <div><a href="https://www.example.com">example.com #2</a></div>
-    <div><a href="https://www.google.com">google.com</a></div>
-    <div><a href="https://www.ampproject.com">ampproject.com</a></div>
+  <div><a href="https://www.example.com">example.com #1</a></div>
+  <div><a href="https://www.example.com">example.com #2</a></div>
+  <div><a href="https://www.google.com">google.com</a></div>
+  <div><a href="https://www.ampproject.com">ampproject.com</a></div>
+
+  <form method="post"
+    action-xhr="https://www.example.com"
+    target="_top">
+    post && action-xhr
+    <fieldset>
+      <label>
+        <span>Name:</span>
+        <input type="text"
+          name="name">
+      </label>
+      <br>
+      <br>
+      <input type="submit"
+        value="Subscribe">
+    </fieldset>
+  </form>
+
+  <form method="get"
+    action-xhr="https://www.example.com"
+    target="_top">
+    get && action-xhr
+    <fieldset>
+      <label>
+        <span>Name:</span>
+        <input type="text"
+          name="name">
+      </label>
+      <br>
+      <br>
+      <input type="submit"
+        value="Subscribe">
+    </fieldset>
+  </form>
+
+  <form method="get"
+    action="https://www.google.com"
+    target="_top">
+    get && action
+    <fieldset>
+      <label>
+        <span>Name:</span>
+        <input type="text"
+          name="name">
+      </label>
+      <br>
+      <br>
+      <input type="submit"
+        value="Subscribe">
+    </fieldset>
+  </form>
+
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet
     neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in
