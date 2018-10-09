@@ -75,12 +75,20 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
  * Override a user-supplied `body{overflow: visible; position:relative}`. This
  * style is set in runtime vs css to avoid conflicts with ios-embedded mode
  * and fixed transfer layer.
+ *
+ * Reasoning behind not targeting inabox can be found at:
+ * https://github.com/ampproject/amphtml/issues/18065
  */
 html.i-amphtml-singledoc > body,
 html.i-amphtml-fie > body {
   overflow: visible !important;
+}
+
+html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
+html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
 }
+
 
 /**
  * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView

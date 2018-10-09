@@ -80,8 +80,7 @@ startupChunk(self.document, function initial() {
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   const fullCss = cssText
-      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
-      + 'html.i-amphtml-inabox>body{position:initial!important}';
+      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(ampdoc, fullCss, () => {
     startupChunk(self.document, function services() {
       // Core services.
