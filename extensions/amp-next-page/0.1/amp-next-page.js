@@ -107,13 +107,6 @@ export class AmpNextPage extends AMP.BaseElement {
     const sourceOrigin = getSourceOrigin(url);
 
     const config = assertConfig(element, configJson, url.origin, sourceOrigin);
-
-    if (urlService.isProxyOrigin(url)) {
-      config.pages.forEach(rec => {
-        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
-      });
-    }
-
     service.register(element, config, separator);
     service.setAppendPageHandler(element => this.appendPage_(element));
   }
