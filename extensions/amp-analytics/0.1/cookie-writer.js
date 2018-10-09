@@ -22,15 +22,24 @@ import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
+import {linkerReaderServiceFor} from './linker-reader';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
-
 
 const TAG = 'amp-analytics/cookie-writer';
 
 const EXPAND_WHITELIST = {
   'QUERY_PARAM': true,
-  // TODO: Add linker_param
+  'LINKER_PARAM': true,
+};
+
+const RESERVED_KEYS = {
+  'referrerDomains': true,
+  'enabled': true,
+  'cookiePath': true,
+  'cookieMaxAge': true,
+  'cookieSecure': true,
+  'cookieDomain': true,
 };
 
 export class CookieWriter {
@@ -50,11 +59,15 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
+    this.linkerReader_ = linkerReaderServiceFor(win);
+
     /** @private {?Promise} */
     this.writePromise_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
+
+    this.binding_ = {};
   }
 
   /**
@@ -70,6 +83,17 @@ export class CookieWriter {
 
   /**
    * Parse the config and write to cookie
+   * Config looks like
+   * cookies: {
+   *   enabled: true/false, //Default to true
+   *   cookieNameA: {
+   *     value: cookieValueA (QUERY_PARAM/LINKER_PARAM)
+   *   },
+   *   cookieValueB: {
+   *     value: cookieValueB
+   *   }
+   *   ...
+   * }
    * @return {!Promise}
    */
   init_() {
@@ -83,23 +107,31 @@ export class CookieWriter {
     }
 
 
-    if (!hasOwn(this.config_, 'writeCookies')) {
+    if (!hasOwn(this.config_, 'cookies')) {
       return Promise.resolve();
     }
 
-    if (!isObject(this.config_['writeCookies'])) {
-      user().error(TAG, 'writeCookies config must be an object');
+    if (!isObject(this.config_['cookies'])) {
+      user().error(TAG, 'cookies config must be an object');
       return Promise.resolve();
     }
 
-    const inputConfig = this.config_['writeCookies'];
+    this.registerDynamicBinding_();
+    const inputConfig = this.config_['cookies'];
+
+    if (inputConfig['enabled'] === false) {
+      // Enabled by default
+      // TODO: Allow indiviual cookie object to override the value
+      return Promise.resolve();
+    }
+
     const ids = Object.keys(inputConfig);
     const promises = [];
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
-      const cookieValue = inputConfig[cookieName];
-      if (this.isCookieValueStringValid_(cookieValue)) {
-        promises.push(this.expandAndWrite_(cookieName, cookieValue));
+      const cookieObj = inputConfig[cookieName];
+      if (this.isValidCookieConfig_(cookieName, cookieObj)) {
+        promises.push(this.expandAndWrite_(cookieName, cookieObj['value']));
       }
     }
 
@@ -108,21 +140,37 @@ export class CookieWriter {
 
   /**
    * Check whether the cookie value is supported. Currently only support
-   * QUERY_PARAM(***)
-   * @param {*} str
+   * QUERY_PARAM(***) and LINKER_PARAM(***, ***)
+   *
+   * CookieObj should looks like
+   * cookeName: {
+   *  value: string (cookieValue),
+   * }
+   * @param {string} cookieName
+   * @param {*} cookieConfig
    * @return {boolean}
    */
-  isCookieValueStringValid_(str) {
-    if (typeof str !== 'string') {
-      user().error(TAG, 'cookie value needs to be a string');
+  isValidCookieConfig_(cookieName, cookieConfig) {
+    if (RESERVED_KEYS[cookieName]) {
       return false;
     }
 
+    if (!isObject(cookieConfig)) {
+      user().error(TAG, 'cookieValue must be configured in an object');
+      return false;
+    }
+
+    if (!hasOwn(cookieConfig, 'value')) {
+      user().error(TAG, 'value is required in the cookieValue object');
+      return false;
+    }
+
+    const str = cookieConfig['value'];
     // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
     const {name} = getNameArgs(str);
     if (!EXPAND_WHITELIST[name]) {
       user().error(TAG, `cookie value ${str} not supported. ` +
-        'Only QUERY_PARAM is supported');
+        'Only QUERY_PARAM and LINKER_PARAM is supported');
       return false;
     }
 
@@ -139,10 +187,10 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_.expandStringAsync(cookieValue,
-        /* TODO: Add opt_binding */ undefined, EXPAND_WHITELIST).then(
+        this.binding_, EXPAND_WHITELIST).then(
         value => {
-        // Note: We ignore empty cookieValue, that means currently we don't
-        // provide a way to overwrite or erase existing cookie
+          // Note: We ignore empty cookieValue, that means currently we don't
+          // provide a way to overwrite or erase existing cookie
           if (value) {
             const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
             setCookie(this.win_, cookieName, value, expireDate);
@@ -151,5 +199,16 @@ export class CookieWriter {
       user().error(TAG, 'Error expanding cookie string', e);
     });
   }
+
+  /**
+   * register the dynamic binding.
+   * Supported MACRO is LINKER_PARAM(name, id)
+   */
+  registerDynamicBinding_() {
+    this.binding_['LINKER_PARAM'] = (name, id) => {
+      return this.linkerReader_.get(name, id);
+    };
+  }
 }
+
 

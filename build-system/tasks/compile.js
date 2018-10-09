@@ -130,12 +130,23 @@ function compile(entryModuleFilenames, outputDir,
     define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(entryModuleFilenames, {
+    const compilationOptions = {
       define,
       externs: baseExterns,
       hideWarningsFor,
-    }).then(() => {
+    };
+
+    // Add babel plugin to remove unwanted polyfills in esm build
+    if (options.esmPassCompilation) {
+      compilationOptions['dest'] = './dist/esm/';
+      define.push('ESM_BUILD=true');
+    }
+
+    // TODO(@cramforce): Run the post processing step
+    return singlePassCompile(
+        entryModuleFilenames,
+        compilationOptions
+    ).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
         stream.on('end', resolve);
@@ -387,12 +398,12 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red(
-              'Compiler error for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(err.message));
+          const {message} = err;
+          console./*OK*/error(colors.red(
+              'Compiler issues for ' + outputFilename + ':\n') +
+              formatClosureCompilerError(message));
           process.exit(1);
         });
-
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream

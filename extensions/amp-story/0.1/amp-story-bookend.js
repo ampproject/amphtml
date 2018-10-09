@@ -22,7 +22,7 @@ import {
   ScrollableShareWidget,
 } from './amp-story-share';
 import {EventType, dispatch} from './events';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -360,7 +360,7 @@ export class Bookend {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == Keys.ESCAPE) {
         event.preventDefault();
         this.close_();
       }

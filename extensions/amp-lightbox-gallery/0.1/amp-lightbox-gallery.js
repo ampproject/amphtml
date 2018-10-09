@@ -26,7 +26,7 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -979,7 +979,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
                   opacity: 0,
                 });
                 sourceElement.classList.add('i-amphtml-ghost');
-                this.element.ownerDocument.body.appendChild(transLayer);
+                this.getAmpDoc().getBody().appendChild(transLayer);
               });
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
@@ -988,7 +988,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
-                this.element.ownerDocument.body.removeChild(transLayer);
+                this.getAmpDoc().getBody().removeChild(transLayer);
               }
             });
           });
@@ -1127,7 +1127,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
-            this.element.ownerDocument.body.appendChild(transLayer);
+            this.getAmpDoc().getBody().appendChild(transLayer);
             setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
@@ -1147,7 +1147,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               });
               toggle(dev().assertElement(this.carousel_), false);
               toggle(this.element, false);
-              this.element.ownerDocument.body.removeChild(transLayer);
+              this.getAmpDoc().getBody().removeChild(transLayer);
             });
           });
         });
@@ -1268,19 +1268,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.isActive_) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
-      case KeyCodes.ESCAPE:
+    const {key} = event;
+    switch (key) {
+      case Keys.ESCAPE:
         this.close_();
         break;
-      case KeyCodes.LEFT_ARROW:
+      case Keys.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:
-        // Keycode not registered. Do nothing.
+        // Key not registered. Do nothing.
     }
   }
 

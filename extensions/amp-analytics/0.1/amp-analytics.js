@@ -39,6 +39,7 @@ import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
+import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -100,6 +101,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /** @private {?./linker-manager.LinkerManager} */
+    this.linkerManager_ = null;
   }
 
   /** @override */
@@ -152,6 +156,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+
+    if (this.linkerManager_) {
+      this.linkerManager_.dispose();
+      this.linkerManager_ = null;
+    }
+
     for (let i = 0; i < this.requests_.length; i++) {
       this.requests_[i].dispose();
       delete this.requests_[i];
@@ -181,6 +191,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.transport_.deleteIframeTransport();
       });
     }
+
 
     return super.unlayoutCallback();
   }
@@ -221,10 +232,7 @@ export class AmpAnalytics extends AMP.BaseElement {
                   new Transport(this.win, this.config_['transport'] || {});
             })
             .then(this.registerTriggers_.bind(this))
-            .then(() => {
-              const type = this.element.getAttribute('type');
-              new LinkerManager(this.getAmpDoc(), this.config_, type).init();
-            });
+            .then(this.initializeLinker_.bind(this));
     return this.iniPromise_;
   }
 
@@ -467,6 +475,17 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Create the linker-manager that will append linker params as necessary.
+   * @private
+   */
+  initializeLinker_() {
+    const type = this.element.getAttribute('type');
+    this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
+        this.config_, type);
+    this.linkerManager_.init();
+  }
+
+  /**
    * Callback for events that are registered by the config's triggers. This
    * method generates requests and sends them out.
    *
@@ -612,7 +631,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks result of 'enabled' spec evaluation. Returns false if spec is
    * provided and value resolves to a falsey value (empty string, 0, false,
    * null, NaN or undefined).
-   * @param {string} spec Expression that will be evaluated.
+   * @param {string|boolean} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<boolean>} False only if spec is provided and value is
    * falsey.
@@ -622,6 +641,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Spec absence always resolves to true.
     if (spec === undefined) {
       return Promise.resolve(true);
+    }
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
@@ -677,6 +700,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });

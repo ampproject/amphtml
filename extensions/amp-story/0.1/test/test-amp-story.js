@@ -17,7 +17,7 @@ import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -25,7 +25,8 @@ import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 const IDENTITY_FN = x => x;
-
+// Represents the correct value of KeyboardEvent.which for the Right Arrow
+const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
 describes.realWin('amp-story', {
   amp: {
@@ -285,8 +286,8 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.keyCode = KeyCodes.RIGHT_ARROW;
-    eventObj.which = KeyCodes.RIGHT_ARROW;
+    eventObj.key = Keys.RIGHT_ARROW;
+    eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :

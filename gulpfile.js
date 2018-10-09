@@ -376,6 +376,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
       singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -1689,6 +1690,8 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     extensions: '  Builds only the listed extensions.',
     extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
+    single_pass_dest: '  The directory closure compiler will write out to ' +
+            'with --single_pass mode. The default directory is `dist`',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',

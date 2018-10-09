@@ -17,6 +17,8 @@
 import * as cookie from '../../../../src/cookies';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
+import {installLinkerReaderService} from '../linker-reader';
+
 
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -43,6 +45,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         });
     element = doc.createElement('div');
     doc.body.appendChild(element);
+    installLinkerReaderService(win);
   });
 
   describe('write with condition', () => {
@@ -59,9 +62,9 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Resovle when config is invalid', () => {
       const config = dict({
-        'writeCookies': 'invalid',
+        'cookies': 'invalid',
       });
-      expectAsyncConsoleError(TAG + ' writeCookies config must be an object');
+      expectAsyncConsoleError(TAG + ' cookies config must be an object');
       const cookieWriter = new CookieWriter(win, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
@@ -71,8 +74,10 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Resolve when element is in FIE', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM(test)',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(test)',
+          },
         },
       });
       const parent = doc.createElement('div');
@@ -88,13 +93,16 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Resolve when in viewer', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'testValue',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(test)',
+          },
         },
       });
       const mockWin = {
         location: 'https://www-example-com.cdn.ampproject.org',
       };
+      installLinkerReaderService(mockWin);
       const cookieWriter = new CookieWriter(mockWin, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
@@ -105,8 +113,26 @@ describes.realWin('amp-analytics.cookie-writer', {
     it('Resolve when in inabox ad', () => {
       env.win.AMP_MODE.runtime = 'inabox';
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM(test)',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(test)',
+          },
+        },
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+
+    it('Resolve when disabled', () => {
+      const config = dict({
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(test)',
+          },
+          'enabled': false,
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -118,7 +144,55 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Resolve with nothing to write', () => {
       const config = dict({
-        'writeCookies': {},
+        'cookies': {},
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+
+    it('Resolve with invalid cookieValue (not object)', () => {
+      const config = dict({
+        'cookies': {
+          'testId': 'QUERY_PARAM(test)',
+        },
+      });
+      expectAsyncConsoleError(TAG +
+          ' cookieValue must be configured in an object');
+      const cookieWriter = new CookieWriter(win, element, config);
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+
+
+    it('Resolve when no value in cookieValue object', () => {
+      const config = dict({
+        'cookies': {
+          'testId': {
+            'novalue': 'QUERY_PARAM(test)',
+          },
+        },
+      });
+      expectAsyncConsoleError(TAG +
+          ' value is required in the cookieValue object');
+      const cookieWriter = new CookieWriter(win, element, config);
+      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+      return cookieWriter.write().then(() => {
+        expect(expandAndWriteSpy).to.not.be.called;
+      });
+    });
+
+    it('Ignore reserved keys', () => {
+      const config = dict({
+        'cookies': {
+          'cookiePath': {
+            'value': 'QUERY_PARAM(test)',
+          },
+        },
       });
       const cookieWriter = new CookieWriter(win, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
@@ -129,22 +203,30 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Resolve when cookie value is not supported', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'RANDOM',
-          'testId1': 'static',
-          'testId2': 'QUERY_PARAM(abc)-suf',
-          'testId3': 'pre-QUERY_PARAM(abc)',
+        'cookies': {
+          'testId': {
+            'value': 'RANDOM',
+          },
+          'testId1': {
+            'value': 'static',
+          },
+          'testId2': {
+            'value': 'QUERY_PARAM(abc)-suf',
+          },
+          'testId3': {
+            'value': 'pre-QUERY_PARAM(abc)',
+          },
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
       expectAsyncConsoleError(TAG + ' cookie value RANDOM not supported. ' +
-          'Only QUERY_PARAM is supported');
+          'Only QUERY_PARAM and LINKER_PARAM is supported');
       expectAsyncConsoleError(TAG + ' cookie value static not supported. ' +
-          'Only QUERY_PARAM is supported');
+          'Only QUERY_PARAM and LINKER_PARAM is supported');
       expectAsyncConsoleError(TAG + ' cookie value QUERY_PARAM(abc)-suf not ' +
-          'supported. Only QUERY_PARAM is supported');
+          'supported. Only QUERY_PARAM and LINKER_PARAM is supported');
       expectAsyncConsoleError(TAG + ' cookie value pre-QUERY_PARAM(abc) not ' +
-          'supported. Only QUERY_PARAM is supported');
+          'supported. Only QUERY_PARAM and LINKER_PARAM is supported');
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
         expect(expandAndWriteSpy).to.not.be.called;
@@ -155,8 +237,10 @@ describes.realWin('amp-analytics.cookie-writer', {
   describe('Cookie value', () => {
     it('Write cookie', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM(abc)',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(abc)',
+          },
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -169,11 +253,34 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
     });
 
+    it('Write LINKER_PARAM value to cookie', () => {
+      const config = dict({
+        'cookies': {
+          'testId': {
+            'value': 'LINKER_PARAM(testlinker, testid)',
+          },
+        },
+      });
+      const cookieWriter = new CookieWriter(win, element, config);
+      sandbox.stub(cookieWriter.linkerReader_,
+          'get').callsFake((name, id) => {
+        return `${name}-${id}`;
+      });
+      return cookieWriter.write().then(() => {
+        expect(setCookieSpy).to.be.calledOnce;
+        expect(setCookieSpy).to.be.calledWith('testId', 'testlinker-testid');
+      });
+    });
+
     it('Write multiple cookie', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM(abc)',
-          'testId2': 'QUERY_PARAM(def)',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(abc)',
+          },
+          'testId2': {
+            'value': 'QUERY_PARAM(def)',
+          },
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -187,10 +294,14 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
     });
 
+
+
     it('Do not write when string is empty', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM(noexist)',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM(noexist)',
+          },
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
@@ -205,8 +316,10 @@ describes.realWin('amp-analytics.cookie-writer', {
 
     it('Handle expandString error', () => {
       const config = dict({
-        'writeCookies': {
-          'testId': 'QUERY_PARAM',
+        'cookies': {
+          'testId': {
+            'value': 'QUERY_PARAM',
+          },
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
