@@ -262,8 +262,6 @@ class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
-    this.clickListener_ = this.maybePerformNavigation_.bind(this);
-    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -293,13 +291,15 @@ class ManualAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.element_.addEventListener('click', this.clickListener_, true);
+    this.element_.addEventListener('click',
+        event => this.maybePerformNavigation_(event), true);
   }
 
   /** @override */
   stop() {
     super.stop();
-    this.element_.removeEventListener('click', this.clickListener_, true);
+    this.element_.removeEventListener('click',
+        event => this.maybePerformNavigation_(event), true);
   }
 
   /** @override */
