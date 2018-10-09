@@ -261,6 +261,14 @@ describes.realWin('Expander', {
               .to.eventually.equal(expected);
         });
 
+        it('should handle falsey values', () => {
+          variableSource.setAsync('ZERO', 0);
+          variableSource.setAsync('FALSE', false);
+          const expander = new Expander(variableSource);
+          return expect(expander.expand('a=ZERO&b=FALSE', mockBindings))
+              .to.eventually.equal('a=0&b=false');
+        });
+
         it('throws on bad input with back ticks', () => {
           const url = 'CONCAT(bad`hello`, world)';
           allowConsoleError(() => { expect(() => {
