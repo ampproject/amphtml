@@ -22,7 +22,7 @@ const transformableMethods = [
   {name: 'assertEnumValue', variadic: false, startPos: 2},
   {name: 'assertElement', variadic: false, startPos: 1},
   {name: 'createExpectedError', variadic: true, startPos: 0},
-  {name: 'fine', variadic: true, startPos: 1}, 
+  {name: 'fine', variadic: true, startPos: 1},
   {name: 'info', variadic: true, startPos: 1},
   {name: 'warn', variadic: true, startPos: 1},
   {name: 'error', variadic: true, startPos: 1},
@@ -34,13 +34,12 @@ function areAllArgumentsLiteral(node) {
   if (node.type === 'Literal') {
     return true;
   }
-  
   if (node.type === 'BinaryExpression' && node.operator === '+') {
-    if (areAllArgumentsLiteral(node.left) && areAllArgumentsLiteral(node.right)) {
+    if (areAllArgumentsLiteral(node.left) &&
+        areAllArgumentsLiteral(node.right)) {
       return true;
     }
   }
-  
   return false;
 }
 
@@ -48,7 +47,7 @@ function getMetadata(name) {
   for (let i = 0; i < transformableMethods.length; i++) {
     const curTransformableMethod = transformableMethods[i];
     if (curTransformableMethod.name === name) {
-      return curTransformableMethod; 
+      return curTransformableMethod;
     }
   }
   return null;
@@ -81,7 +80,8 @@ module.exports = function(context) {
       if (!argToEval) {
         context.report({
           node: node,
-       	  message: `No argument passed into expected message parameter number ${metadata.startPos}`,
+       	  message: `No argument passed into expected message parameter ` +
+            `number ${metadata.startPos}`,
         });
         return;
       }
@@ -89,7 +89,9 @@ module.exports = function(context) {
       if (!areAllArgumentsLiteral(argToEval)) {
         context.report({
           node: argToEval,
-       	  message: `Must use a literal string at method invocation on argument position ${metadata.startpos}. No other Node type is allowed besides Raw strings or string concatenation operations`,
+       	  message: `Must use a literal string at method invocation on ` +
+              `argument position ${metadata.startPos}. No other Node type is ` +
+              `allowed besides Raw strings or string concatenation operations.`,
         });
       }
     },
