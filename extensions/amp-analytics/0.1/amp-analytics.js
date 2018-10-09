@@ -159,6 +159,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.linkerManager_) {
       this.linkerManager_.dispose();
+      this.linkerManager_ = null;
     }
 
     for (let i = 0; i < this.requests_.length; i++) {
