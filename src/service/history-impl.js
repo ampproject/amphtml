@@ -602,8 +602,7 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    state = /** @type {!HistoryStateDef} */ (
-      Object.assign({HISTORY_PROP_: newStackIndex}, state));
+    state[HISTORY_PROP_] = newStackIndex;
     this.replaceState_(state, undefined, undefined);
 
     // Update the stack, pop squeezed states.

@@ -128,7 +128,11 @@ function createShadowRootPolyfill(hostElement) {
     /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
   hostElement.__AMP_SHADOW_ROOT = shadowRoot;
-  Object.defineProperty(hostElement, 'shadowRoot', {value: shadowRoot});
+  Object.defineProperty(hostElement, 'shadowRoot', {
+    enumerable: true,
+    configurable: true,
+    value: shadowRoot,
+  });
 
   // API: https://www.w3.org/TR/shadow-dom/#the-shadowroot-interface
 

@@ -382,6 +382,8 @@ describes.realWin('Resource', {amp: true}, env => {
       element.setAttribute('placeholder', '');
       Object.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
+        configurable: true,
+        writable: true,
       });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
@@ -411,7 +413,7 @@ describes.realWin('Resource', {amp: true}, env => {
     });
 
     it('should support abnormal case with no parent', () => {
-      element = Object.assign({}, element, {parentElement: undefined});
+      delete element.parentElement;
 
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();
@@ -421,8 +423,7 @@ describes.realWin('Resource', {amp: true}, env => {
     });
 
     it('should support abnormal case with non-AMP parent', () => {
-      element = Object.assign(
-          {}, element, {parentElement: document.createElement('div')});
+      element.parentElement = document.createElement('div');
 
       elementMock.expects('getBoundingClientRect').returns(rect).once();
       resource.measure();

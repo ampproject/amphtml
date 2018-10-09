@@ -550,6 +550,7 @@ export function getErrorReportData(message, filename, line, col, error,
       data['s'] = error.stack;
     }
 
+    // TODO(jridgewell, #18574); Make sure error is always an object.
     if (error.message) {
       error.message += ' _reported_';
     }
