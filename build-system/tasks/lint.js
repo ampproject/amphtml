@@ -31,6 +31,7 @@ const {gitDiffNameOnlyMaster} = require('../git');
 const isWatching = (argv.watch || argv.w) || false;
 const options = {
   fix: false,
+  quiet: true,
 };
 let collapseLintResults = !!process.env.TRAVIS;
 
