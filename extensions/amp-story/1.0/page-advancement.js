@@ -127,13 +127,11 @@ export class AdvancementConfig {
     return 1;
   }
 
-  /**
-   * @param {string} opt_pageId Page id for which progress will be updated.
-   * @protected */
-  onProgressUpdate(opt_pageId) {
+  /** @protected */
+  onProgressUpdate() {
     const progress = this.getProgress();
     this.progressListeners_.forEach(progressListener => {
-      progressListener(progress, opt_pageId);
+      progressListener(progress);
     });
   }
 
@@ -266,7 +264,7 @@ class ManualAdvancement extends AdvancementConfig {
     super();
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
-    this.element_.addEventListener('click', this.clickListener_, true);
+    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -293,13 +291,16 @@ class ManualAdvancement extends AdvancementConfig {
     };
   }
 
+  /** @override */
+  start() {
+    super.start();
+    this.element_.addEventListener('click', this.clickListener_, true);
+  }
 
-  /**
-   *
-   * @param {string} pageId
-   */
-  updateProgress(pageId) {
-    super.onProgressUpdate(pageId);
+  /** @override */
+  stop() {
+    super.stop();
+    this.element_.removeEventListener('click', this.clickListener_, true);
   }
 
   /** @override */
@@ -346,7 +347,7 @@ class ManualAdvancement extends AdvancementConfig {
    */
   isAmpStoryPageDescendant_(event) {
     return !!closest(dev().assertElement(event.target), el => {
-      return el.localName == 'amp-story-page';
+      return el.tagName.toLowerCase() == 'amp-story-page';
     });
   }
 
