@@ -17,20 +17,18 @@
 import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
   ExpansionOptions,
-  encodeVars,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {
   appendEncodedParamStringToUrl,
-  parseQueryString,
+  serializeQueryString,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {remove} from '../../../src/utils/array';
 
 const TAG = 'amp-analytics/requests';
 
@@ -38,16 +36,19 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!Element} ampAnalyticsElement
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampAnalyticsElement, request, preconnect, transport, isSandbox) {
+  constructor(ampdoc, request, preconnect, transport, isSandbox) {
+
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @const {!Window} */
-    this.win = ampAnalyticsElement.getAmpDoc().win;
+    this.win = this.ampdoc_.win;
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
@@ -62,32 +63,29 @@ export class RequestHandler {
     this.batchIntervalPointer_ = null;
 
     /** @private @const {string} */
-    this.batchPluginId_ = request['batchPlugin'];
+    const batchPluginId = request['batchPlugin'];
 
-    user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
+    user().assert((batchPluginId ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
-    /** @const {?function(string, !Array<!batchSegmentDef>)} */
-    this.batchingPlugin_ = this.batchPluginId_
-      ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
-          `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
-      : null;
+    /** @const {function(string, !Array<!batchSegmentDef>):string} */
+    this.batchingPlugin_ = batchPluginId
+      ? user().assert(BatchingPluginFunctions[batchPluginId],
+          `Invalid request: unsupported batch plugin ${batchPluginId}`)
+      : defaultBatchPlugin;
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ =
-      Services.urlReplacementsForDoc(ampAnalyticsElement);
+      Services.urlReplacementsForDoc(this.ampdoc_);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
-
-    /** @private {!Array<!Promise<string>>}*/
-    this.extraUrlParamsPromise_ = [];
 
     /** @private {!Array<!Promise<!batchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
@@ -131,10 +129,7 @@ export class RequestHandler {
    * @param {!./variables.ExpansionOptions} expansionOption
    */
   send(configParams, trigger, expansionOption) {
-    const isImportant = trigger['important'];
-
-    const isImmediate =
-        (trigger['important'] === true) || (!this.batchInterval_);
+    const isImportant = (trigger['important'] === true);
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
@@ -142,8 +137,6 @@ export class RequestHandler {
 
     this.queueSize_++;
     this.lastTrigger_ = trigger;
-    const triggerParams = trigger['extraUrlParams'];
-
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
         this.win, trigger['resourceTimingSpec'], this.startTime_);
@@ -158,32 +151,19 @@ export class RequestHandler {
       });
     }
 
-    const extraUrlParamsPromise = getExtraUrlParams(
-        this.variableService_, configParams, triggerParams, expansionOption)
-        .then(expandExtraUrlParams => {
-          // Construct the extraUrlParamsString: Remove null param and encode
-          // component
-          const expandedExtraUrlParamsStr =
-              getExtraUrlParamsString(expandExtraUrlParams);
-          return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, bindings, this.whiteList_);
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const timestamp = this.win.Date.now();
+    const batchSegmentPromise = expandExtraUrlParams(
+        this.ampdoc_, params, expansionOption, bindings, this.whiteList_)
+        .then(params => {
+          return dict({
+            'trigger': trigger['on'],
+            'timestamp': timestamp,
+            'extraUrlParams': params,
+          });
         });
-
-    if (this.batchingPlugin_) {
-      const batchSegment = dict({
-        'trigger': trigger['on'],
-        'timestamp': this.win.Date.now(),
-        'extraUrlParams': null,
-      });
-      this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
-        batchSegment['extraUrlParams'] =
-                parseQueryString(str);
-        return batchSegment;
-      }));
-    }
-
-    this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
-    this.trigger_(isImmediate);
+    this.batchSegmentPromises_.push(batchSegmentPromise);
+    this.trigger_(isImportant || !this.batchInterval_);
   }
 
   /**
@@ -218,7 +198,6 @@ export class RequestHandler {
     if (isImmediate) {
       // If not batched, or batchInterval scheduler schedule trigger immediately
       this.fire_();
-      return;
     }
   }
 
@@ -228,60 +207,32 @@ export class RequestHandler {
    */
   fire_() {
     const {
-      extraUrlParamsPromise_: extraUrlParamsPromise,
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
-      batchSegmentPromises_: batchSegmentsPromise,
+      batchSegmentPromises_: segmentPromises,
     } = this;
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
     baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      baseUrlPromise.then(baseUrl => {
-        let requestUrlPromise;
-        if (this.batchingPlugin_) {
-          requestUrlPromise =
-              this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
-        } else {
-          requestUrlPromise =
-              constructExtraUrlParamStrs(baseUrl, extraUrlParamsPromise);
+      Promise.all(
+          [baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
+        const baseUrl = results[0];
+        const batchSegments = results[1];
+        const request = this.batchingPlugin_(baseUrl, batchSegments);
+        if (!request) {
+          user().error(TAG, 'Request not sent. Contents empty.');
+          return;
         }
-        requestUrlPromise.then(request => {
-          if (!request) {
-            user().error(TAG, 'Request not sent. Contents empty.');
-            return;
-          }
-          if (trigger['iframePing']) {
-            user().assert(trigger['on'] == 'visible',
-                'iframePing is only available on page view requests.');
-            this.transport_.sendRequestUsingIframe(request);
-          } else {
-            this.transport_.sendRequest(request);
-          }
-        });
+        if (trigger['iframePing']) {
+          user().assert(trigger['on'] == 'visible',
+              'iframePing is only available on page view requests.');
+          this.transport_.sendRequestUsingIframe(request);
+        } else {
+          this.transport_.sendRequest(request);
+        }
       });
-    });
-  }
-
-  /**
-   * Construct the final requestUrl by calling the batch plugin function
-   * @param {string} baseUrl
-   * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromise
-   */
-  constructBatchSegments_(baseUrl, batchSegmentsPromise) {
-    dev().assert(this.batchingPlugin_ &&
-        typeof this.batchingPlugin_ == 'function', 'Should never call ' +
-        'constructBatchSegments_ with invalid batchingPlugin function');
-
-    return Promise.all(batchSegmentsPromise).then(batchSegments => {
-      try {
-        return this.batchingPlugin_(baseUrl, batchSegments);
-      } catch (e) {
-        dev().error(TAG,
-            `Error: batchPlugin function ${this.batchPluginId_}`, e);
-        return '';
-      }
     });
   }
 
@@ -293,7 +244,6 @@ export class RequestHandler {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
-    this.extraUrlParamsPromise_ = [];
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }
@@ -363,7 +313,7 @@ export class RequestHandler {
 
 /**
  * Expand the postMessage string
- * @param {!AMP.BaseElement} baseInstance
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} msg
  * @param {?JsonObject} configParams
  * @param {!JsonObject} trigger
@@ -371,49 +321,48 @@ export class RequestHandler {
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  baseInstance, msg, configParams, trigger, expansionOption) {
-  const variableService = variableServiceFor(baseInstance.win);
-  const urlReplacementService =
-      Services.urlReplacementsForDoc(baseInstance.element);
+  ampdoc, msg, configParams, trigger, expansionOption) {
+  const variableService = variableServiceFor(ampdoc.win);
+  const urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
 
   const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService.expandTemplate(
       msg, expansionOption).then(base => {
-    return urlReplacementService.expandUrlAsync(base, bindings);
+    return urlReplacementService.expandStringAsync(base, bindings);
   });
   if (msg.indexOf('${extraUrlParams}') < 0) {
     // No need to append extraUrlParams
     return basePromise;
   }
 
-  //return base url with the appended extra url params;
-  const extraUrlParamsStrPromise = getExtraUrlParams(
-      variableService, configParams, trigger['extraUrlParams'], expansionOption)
-      .then(params => {
-        const str = getExtraUrlParamsString(params);
-        return urlReplacementService.expandUrlAsync(str, bindings);
-      });
-
   return basePromise.then(expandedMsg => {
-    return constructExtraUrlParamStrs(expandedMsg, [extraUrlParamsStrPromise]);
+    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    //return base url with the appended extra url params;
+    return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
+        .then(extraUrlParams => {
+          return defaultBatchPlugin(expandedMsg, [{extraUrlParams}]);
+        });
   });
 }
 
 /**
  * Function that handler extraUrlParams from config and trigger.
- * @param {!./variables.VariableService} variableService
- * @param {?JsonObject} configParams
- * @param {?JsonObject} triggerParams
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
- * @return {!Promise<!JsonObject>}
+ * @param {!Object} bindings
+ * @param {!Object=} opt_whitelist
+ * @return {!Promise<!Object>}
  * @private
  */
-function getExtraUrlParams(
-  variableService, configParams, triggerParams, expansionOption) {
+function expandExtraUrlParams(
+  ampdoc, params, expansionOption, bindings, opt_whitelist) {
+  const variableService = variableServiceFor(ampdoc.win);
+  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+
   const requestPromises = [];
-  const params = map();
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
   const option = new ExpansionOptions(
@@ -421,55 +370,36 @@ function getExtraUrlParams(
       expansionOption.iterations,
       true /* noEncode */);
   // Add any given extraUrlParams as query string param
-  if (configParams || triggerParams) {
-    Object.assign(params, configParams, triggerParams);
-    for (const k in params) {
-      if (typeof params[k] == 'string') {
-        requestPromises.push(
-            variableService.expandTemplate(params[k], option)
-                .then(value => { params[k] = value; }));
-      }
-    }
-  }
-  return Promise.all(requestPromises).then(() => {
-    return params;
-  });
-}
-
-/**
- * Handle the params map and form the final extraUrlParams string
- * @param {!Object} params
- * @return {string}
- */
-function getExtraUrlParamsString(params) {
-  const s = [];
   for (const k in params) {
-    const v = params[k];
-    if (v == null) {
-      continue;
-    } else {
-      const sv = encodeVars(v);
-      s.push(`${encodeURIComponent(k)}=${sv}`);
+    if (typeof params[k] == 'string') {
+      const request = variableService.expandTemplate(params[k], option)
+          .then(v =>
+            urlReplacements.expandStringAsync(v, bindings, opt_whitelist))
+          .then(value => params[k] = value);
+      requestPromises.push(request);
     }
   }
-  return s.join('&');
+  return Promise.all(requestPromises).then(() => params);
 }
 
 /**
- * Construct the final requestUrl with baseUrl and extraUrlParams
+ * The default way for merging batch segments
+ *
  * @param {string} baseUrl
- * @param {!Array<!Promise<string>>} extraUrlParamStrsPromise
+ * @param {!Array<!batchSegmentDef>} batchSegments
+ * @return {string}
+ * @private
  */
-function constructExtraUrlParamStrs(baseUrl, extraUrlParamStrsPromise) {
-  return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
-    remove(paramStrs, item => !item);
-    const extraUrlParamsStr = paramStrs.join('&');
-    let requestUrl;
-    if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-      requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-    } else {
-      requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
-    }
-    return requestUrl;
-  });
+function defaultBatchPlugin(baseUrl, batchSegments) {
+  const extraUrlParamsStr = batchSegments
+      .map(item => serializeQueryString(item.extraUrlParams))
+      .filter(queryString => !!queryString)
+      .join('&');
+  let requestUrl;
+  if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+    requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+  } else {
+    requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
+  }
+  return requestUrl;
 }
