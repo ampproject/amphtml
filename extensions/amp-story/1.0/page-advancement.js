@@ -121,7 +121,6 @@ export class AdvancementConfig {
 
   /**
    * @return {number}
-   * @protected
    */
   getProgress() {
     return 1;
