@@ -78,21 +78,57 @@ content.
 
 For each identifier:
 
- 1. If the identifier contains any parameters, then this identifier cannot be
-    satisfied. The server should attempt to match the next one. (This reserves
-    the parameter space for future additional constraints to be defined.)
- 2. If the identifier is `any`, then the SXG is not intended for a particular
+ 1. If the identifier contains a `v` parameter, then its value represents a set
+    of AMP transform versions. The server should respond with an SXG only if it
+    can produce a one of the versions in that set (see [Version negotation](#version-negotiation)).
+ 2. If the identifier contains any other parameters, then this identifier cannot
+    be satisfied. The server should attempt to match the next one. (This
+    reserves the parameter space for future additional constraints to be
+    defined.)
+ 3. If the identifier is `any`, then the SXG is not intended for a particular
     prefetching intermediary, and therefore its subresource URLs needn't be (but
     may be) rewritten.
- 3. Otherwise, if the identifier is an `id` from the list in
+ 4. Otherwise, if the identifier is an `id` from the list in
     [caches.json](../caches.json), then the SXG should have its subresource URLs
     rewritten. That `id`'s corresponding `cacheDomain` indicates the
     fully-qualified domain name that forms the basis for the URL rewrites.
- 4. Otherwise, the identifier is invalid and cannot be satisfied. The server
+ 5. Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
 The server should ensure its copy of `caches.json` is no more than 60 days
 out-of-date with the canonical linked above.
+
+#### Version negotation
+
+This section uses the ABNF rules of
+[RFCF5234](https://tools.ietf.org/html/rfc5234), augmented with the list
+extension defined in [RFC7230 section 7](https://tools.ietf.org/html/rfc7230#section-7),
+the OWS rule from [RFC7230 section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3),
+and the "sh-" rules in [header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07).
+
+The `v` parameter value must be a string. Its value (after parsing as a string)
+must conform to the following ABNF:
+
+```
+v_spec = #v_range
+v_range = sh-integer / sh-integer OWS ".." OWS sh-integer
+```
+
+Each `sh-integer` must be non-negative. If the parameter fails to meet these
+criteria, then the server cannot satisfy the request. Otherwise, the server can
+satisfy the request if, for any `v_range` in the list, any of:
+
+   1. The `v_range` is a single integer, and the server can produce exactly that
+      version.
+   2. The `v_range` is a pair of integers `x-y`, and the server can produce a
+      version in the closed interval _[x, y]_.
+
+If the server can respond with multiple versions in the set, it should respond
+with the newest version it can produce, but may respond with older versions in
+that set if other reasons dictate it (e.g. cache efficiency).
+
+If the server does not know what version of the transforms it provides, then it
+cannot satisfy any `v_spec`.
 
 ### Response header
 
@@ -100,9 +136,11 @@ If the server responds with an SXG, it should include an `AMP-Cache-Transform`
 outer response header, with a value equal to the most specific constraint that
 it can satisfy -- that is, a list of size 1. For now, that means:
 
- 1. If it rewrote subresource URLs for a particular cache, the value should be
-    the id of the cache.
- 2. Otherwise, the value should be `any`.
+ 1. If it rewrote subresource URLs for a particular cache, the identifier should
+    be the id of the cache.
+ 2. Otherwise, the identifier should be `any`.
+ 3. It should have a `v` parameter whose value is the AMP transform version it
+    responded with.
 
 ### `Vary` header
 
@@ -163,12 +201,17 @@ the latter response.
 If the proxy can ensure that a cached response satisfies a new request, then it
 can serve that response. It can do that by comparing the `AMP-Cache-Transform`
 response header of the cached response to the `AMP-Cache-Transform` request
-header of the new request:
+header of the new request. For instance, the following algorithm determines if a
+response satisfies a request:
 
- 1. If the request includes an unparameterised `any` identifier and the response
-    includes a `AMP-Cache-Transform` header, then it satisfies the request.
- 2. If the response identifier is included in the request list, and
-    unparameterised in both cases, then it satisfies the request.
+ 1. If the response matches any parameterised identifier in the request list,
+    per:
+   1. If its identifier is not `any` and the response's identifier is not
+      identical, then the response doesn't match.
+   2. If it includes a `v` parameter and the response's `v` parameter is either
+      missing or not an element of it, then the response doesn't match.
+   3. If it includes any other parameter, then the response doesn't match.
+   4. Otherwise, the response matches.
 
 The above is merely informational; a cache may choose any strategy that doesn't
 serve mismatched responses (i.e. obeys the "Server behavior" specification
