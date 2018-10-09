@@ -16,7 +16,7 @@
 
 import {
   factory as inputmaskDependencyFactory,
-} from '../../../third_party/inputmask/dependencyLibs/inputmask.dependencyLib';
+} from '../../../third_party/inputmask/inputmask.dependencyLib';
 import {
   factory as inputmaskFactory,
 } from '../../../third_party/inputmask/inputmask';
