@@ -74,14 +74,19 @@ function getMetadata(name) {
   return null;
 }
 
+const expressions = transformableMethods.map(x => {
+  return `CallExpression[callee.property.name=${x.name}]`;
+}).join(',');
+
 
 module.exports = function(context) {
   return {
-    'CallExpression[callee.property.name=assert]': function(node) {
+    [expressions]: function(node) {
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
-      if (!(node.callee.object && node.callee.object.type === 'CallExpression')) {
+      if (!(node.callee.object &&
+          node.callee.object.type === 'CallExpression')) {
         return;
       }
 
@@ -114,9 +119,10 @@ module.exports = function(context) {
       if (!areAllArgumentsLiteral(argToEval)) {
         context.report({
           node: argToEval,
-       	  message: `Must use a literal string at method invocation on ` +
-              `argument position ${metadata.startPos}. No other Node type is ` +
-              `allowed besides Raw strings or string concatenation operations.`,
+       	  message: `Must use a literal string at method invocation ` +
+              `"${metadata.name}" on argument position ${metadata.startPos}. ` +
+              `No other Node type is allowed besides Raw strings or string ` +
+              `concatenation operations.`,
         });
       }
     },
