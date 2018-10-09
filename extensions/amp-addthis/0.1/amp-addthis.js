@@ -202,7 +202,7 @@ class AmpAddThis extends AMP.BaseElement {
           'placeholder': '',
         })
     );
-    setStyle(placeholder, 'background-color', '#eee');
+    setStyle(placeholder, 'background-color', '#fff');
 
     const image = createElementWithAttributes(
         this.win.document,
