@@ -37,7 +37,7 @@ export class FormSubmitService {
 
   /**
    * Used to register callbacks.
-   * @param {function(HTMLFormElement)} cb
+   * @param {function(!FormSubmitEventDef)} cb
    * @return {!UnlistenDef}
    */
   beforeSubmit(cb) {
