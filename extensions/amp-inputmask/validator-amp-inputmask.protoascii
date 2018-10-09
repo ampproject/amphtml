@@ -27,10 +27,11 @@ tags: {  # amp-inputmask
   }
   attr_lists: "common-extension-attrs"
 }
+# The input element is also defined by validator/validator-main.protoascii
 tags: {
   html_format: AMP
   tag_name: "INPUT"
-  spec_name: "input[mask]"
+  spec_name: "input [mask]"
   requires_extension: "amp-inputmask"
   attrs: {
     name: "mask"
@@ -45,32 +46,14 @@ tags: {
   }
   attrs: {
     name: "type"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
-        "button|"
-        "checkbox|"
-        "color|"
-        "date|"
-        "datetime-local|"
-        "datetime|"
-        "email|"
-        "file|"
-        "hidden|"
-        "image|"
-        "month|"
-        "number|"
-        "password|"
-        "radio|"
-        "range|"
-        "reset|"
-        "submit|"
-        "time|"
-        "week|"
+    value_regex: "(^|\\s)("  # Values are space separated.
+        "text|"
+        "tel|"
+        "search|"
         ")(\\s|$)"
   }
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
-  # Note that this amp-bind attribute is not available for the AMP4Email format
-  # thus we add this manually for the formats that should.
   attrs: { name: "[type]" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-inputmask"
 }

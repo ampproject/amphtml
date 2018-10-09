@@ -38,7 +38,7 @@ limitations under the License.
 
 ## Behavior
 
-`amp-inputmask` enables the `mask` and `mask-output` attributes on `input` and `textarea` elements. These allow document authors to specify input masks for their form elements.
+`amp-inputmask` enables the `mask` and `mask-output` attributes on `input` elements. These allow document authors to specify input masks for their form elements.
 
 Input masks automatically add formatting characters to user input, and prevent
 users from typing input that doesn't match the mask. For example, an input mask
@@ -51,7 +51,6 @@ them from typing incorrect characters.
 - `input[type=text]`
 - `input[type=tel]`
 - `input[type=search]`
-- `textarea`
 
 ## Attributes
 
