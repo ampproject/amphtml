@@ -289,6 +289,8 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
+        this.maybeCollectVars_(name, val, opt_collectVars, opt_args);
+
         let result;
 
         if (val == null) {
@@ -297,15 +299,10 @@ export class Expander {
           result = NOENCODE_WHITELIST[name] ? val : encodeURIComponent(val);
         }
 
-        if (opt_collectVars) {
-          opt_collectVars[name] = result;
-        }
         return result;
       }).catch(e => {
         rethrowAsync(e);
-        if (opt_collectVars) {
-          opt_collectVars[name] = '';
-        }
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
         return Promise.resolve('');
       });
 
@@ -313,9 +310,7 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      if (opt_collectVars) {
-        opt_collectVars[name] = '';
-      }
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return Promise.resolve('');
     }
   }
@@ -339,32 +334,51 @@ export class Expander {
 
       if (value && value.then) {
         // If binding is passed in as opt_binding we try to resolve it and it
-        // may return a promise.
+        // may return a promise. NOTE: We do not collect this discarded value,
+        // even if opt_collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
       } else if (typeof value === 'string' || typeof value === 'number' ||
           typeof value === 'boolean') {
         // Normal case.
+        this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
         result = NOENCODE_WHITELIST[name] ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
       } else {
         // Most likely a broken binding gets us here.
+        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
         result = '';
       }
 
-      if (opt_collectVars) {
-        opt_collectVars[name] = result;
-      }
 
       return result;
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      if (opt_collectVars) {
-        opt_collectVars[name] = '';
-      }
+      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
       return '';
     }
+  }
+
+  /**
+   * Collect vars if given the optional object. Handles formatting of kv pairs.
+   * @param {string} name Name of the macro.
+   * @param {*} value Raw macro resolution value.
+   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
+   *   variable resolutions.
+   * @param {?Array=} opt_args Arguments to be passed if binding is function.
+   */
+  maybeCollectVars_(name, value, opt_collectVars, opt_args) {
+    if (!opt_collectVars) {
+      return;
+    }
+
+    let args = '';
+    if (opt_args) {
+      const rawArgs = opt_args.filter(arg => arg !== '').join(',');
+      args = `(${rawArgs})`;
+    }
+    opt_collectVars[`${name}${args}`] = value || '';
   }
 }
