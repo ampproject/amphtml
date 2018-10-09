@@ -39,7 +39,7 @@
   is set correctly. And the window location is set correctly
 </p>
 <h4>Expected Cookie value</h4>
-<p>"cookie1=123; cookie2=bob; cookie3=green; cookie4=value1; cookie5=value1"</p>
+<p>"cookie1=123; cookie2=bob; cookie3=green; cookie4=value1; cookie5=value1; _ga=helloworld"</p>
 
 <h4>Click the red box to check if 3 request have been sent out</h4>
 <script>
@@ -105,10 +105,15 @@
   const serializedIds2 = 'key1*dmFsdWUx';
   const checksum2 = getCheckSum(serializedIds2);
 
+  const serializedGAIds = '_ga*aGVsbG93b3JsZA..';
+  const ga_checksum = getCheckSum(serializedGAIds);
+
+  const ga_url = `1*${ga_checksum}*${serializedGAIds}`;
+
   const url1 = `1*${checksum1}*${serializedIds1}`;
   const url2 = `1*${checksum2}*${serializedIds2}`;
   let url = `?test=123&a=1&testlinker=invalid&testlinker=${url1}&testlinker2=${url2}`
-
+  url = `${url}&brand=whatever&version=aaa&_gl=${ga_url}&produce=12345`;
   console.log('copy: ', url);
 </script>
 
@@ -202,4 +207,5 @@
   }
   </script>
 </amp-analytics>
+<amp-analytics type="googleanalytics"></amp-analytics>
 <div id="ele1">click me</div>
