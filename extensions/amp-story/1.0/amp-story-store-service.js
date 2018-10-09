@@ -176,7 +176,10 @@ const actions = (state, action, data) => {
         return state;
       }
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.BOOKEND_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
