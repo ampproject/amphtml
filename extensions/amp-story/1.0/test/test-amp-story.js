@@ -25,7 +25,6 @@ import {
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
@@ -35,7 +34,6 @@ import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
-const NOOP = () => {};
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
@@ -50,21 +48,6 @@ describes.realWin('amp-story', {
   let element;
   let story;
   let replaceStateStub;
-
-  /**
-   * @param {!Element} container
-   * @param {boolean=} opt_active
-   * @return {!Element}
-   */
-  function appendEmptyPage(container, opt_active) {
-    const page = document.createElement('amp-story-page');
-    page.id = '-empty-page';
-    if (opt_active) {
-      page.setAttribute('active', true);
-    }
-    container.appendChild(page);
-    return page;
-  }
 
   /**
    * @param {!Element} container
@@ -209,20 +192,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  // TODO(#11639): Re-enable this test.
-  it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
-    const hideBookendStub = sandbox.stub(
-        element.implementation_, 'hideBookend_', NOOP);
-
-    appendEmptyPage(element);
-
-    element.build();
-
-    element.dispatchEvent(new Event(EventType.CLOSE_BOOKEND));
-
-    expect(hideBookendStub).to.have.been.calledOnce;
-  });
-
   it('should return a valid page index', () => {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
@@ -241,7 +210,6 @@ describes.realWin('amp-story', {
           }
         });
   });
-
 
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
@@ -711,7 +679,6 @@ describes.realWin('amp-story', {
           });
     });
   });
-
 
   describe('desktop attributes', () => {
     it('should add next page attribute', () => {
