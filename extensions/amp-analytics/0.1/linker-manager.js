@@ -60,6 +60,9 @@ export class LinkerManager {
 
     /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
+
+    /** @private {?UnlistenDef} */
+    this.formSubmitUnlistener_ = null;
   }
 
 
@@ -109,12 +112,19 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
-    return Promise.all(this.allLinkerPromises_)
-        .then(() => {
-          if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-            this.enableFormSupport_();
-          }
-        });
+
+    this.maybeEnableFormSupport_();
+
+    return Promise.all(this.allLinkerPromises_);
+  }
+
+  /**
+   * Remove any listeners created to manage form submission.
+   */
+  dispose() {
+    if (this.formSubmitUnlistener_) {
+      this.formSubmitUnlistener_();
+    }
   }
 
   /**
@@ -279,11 +289,29 @@ export class LinkerManager {
   }
 
   /**
+   * Enable form support if experiment is on.
+   * TODO(ccordry): remove this method and use `enableFormSupport_` when fully
+   * launched.
+   * @private
+   */
+  maybeEnableFormSupport_() {
+    if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
+      this.enableFormSupport_();
+    }
+  }
+
+  /**
    * Register callback that will handle form sumbits.
    */
   enableFormSupport_() {
-    this.formSubmitService_.then(formService =>
-      formService.beforeSubmit(this.handleFormSubmit_.bind(this)));
+    if (this.formSubmitUnlistener_) {
+      return;
+    }
+
+    this.formSubmitService_.then(formService => {
+      this.formSubmitUnlistener_ =
+          formService.beforeSubmit(this.handleFormSubmit_.bind(this));
+    });
   }
 
   /**
