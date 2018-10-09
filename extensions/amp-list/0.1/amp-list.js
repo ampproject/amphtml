@@ -473,7 +473,7 @@ export class AmpList extends AMP.BaseElement {
       if (this.element.hasAttribute('auto-resize')) {
         // If the element's size was changed, change to container layout
         // if the auto-resize attribute is set.
-        this.element.signals().whenSignal(CommonSignals.SIZE_CHANGED)
+        this.element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END)
             .then(() => this.changeToLayoutContainer_());
       }
     });
