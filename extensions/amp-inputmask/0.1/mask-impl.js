@@ -15,22 +15,18 @@
  */
 
 import {
+  MASK_SEPARATOR_CHAR,
+  MaskChars,
+  NamedMasks,
+} from './constants';
+import {MaskInterface} from './mask-interface';
+import {
   factory as inputmaskDependencyFactory,
 } from '../../../third_party/inputmask/inputmask.dependencyLib';
 import {
   factory as inputmaskFactory,
 } from '../../../third_party/inputmask/inputmask';
 
-import {
-  MASK_SEPARATOR_CHAR,
-  MaskChars,
-  NamedMasks,
-} from './constants';
-import {MaskInterface} from './mask-interface';
-
-/**
- * @enum {string}
- */
 const NamedMasksToInputmask = {
   [NamedMasks.EMAIL]: 'email',
   [NamedMasks.PHONE]: 'phone',
@@ -57,17 +53,15 @@ let Inputmask;
 
 /**
  * TODO(cvializ): allow masks to be passed as data
- * TODO(cvializ): implement mask-output attribute
+ * @implements {MaskInterface}
  */
-export class Mask extends MaskInterface {
+export class Mask {
   /**
    * Configure and initialize the Inputmask library.
    * @param {!Element} element
    * @param {string} mask
    */
   constructor(element, mask) {
-    super();
-
     const doc = element.ownerDocument;
     const win = element.ownerDocument.defaultView;
 
@@ -109,31 +103,23 @@ export class Mask extends MaskInterface {
     this.controller_ = Inputmask(config);
   }
 
-  /**
-   * Attach the controller to the DOM
-   */
+  /** @override */
   mask() {
     this.controller_.mask(this.element_);
   }
 
-  /**
-   * Get the value of the input element;
-   */
+  /** @override */
   getValue() {
     return this.element_.value;
   }
 
-  /**
-   *
-   */
+  /** @override */
   getUnmaskedValue() {
     const {value} = this.element_;
     return getAlphaNumeric(value);
   }
 
-  /**
-   * Cleanup the controller, which has attached listeners etc.
-   */
+  /** @override */
   remove() {
     this.controller_.remove();
     this.controller_ = null;
@@ -144,7 +130,7 @@ export class Mask extends MaskInterface {
 const NONALPHANUMERIC_REGEXP = /[^A-Za-z0-9]/g;
 
 /**
- *
+ * Removes special characters from the provided string.
  * @param {string} value
  */
 function getAlphaNumeric(value) {

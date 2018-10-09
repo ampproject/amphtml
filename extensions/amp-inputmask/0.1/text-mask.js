@@ -38,11 +38,10 @@ export class TextMask {
     /** @private @const */
     this.controller_ = new Mask(element, mask);
 
-    this.controller_.mask(element);
+    this.controller_.mask();
 
-    /** @private @const {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     Services.formSubmitPromiseForDoc(element).then(formSubmitService => {
-      formSubmitService.beforeSubmit(form => this.handleBeforeSubmit_(form));
+      formSubmitService.beforeSubmit(e => this.handleBeforeSubmit_(e.form));
     });
 
     /** @private {?Element} */
@@ -58,7 +57,7 @@ export class TextMask {
       if (!this.hiddenInput_) {
         const hidden = this.document_.createElement('input');
         hidden.type = 'hidden';
-        const name = this.element_.name || this.element.id;
+        const name = this.element_.name || this.element_.id;
         hidden.name = `${name}-unmasked`; // TODO(cvializ): detect collisions
         form.appendChild(hidden);
         this.hiddenInput_ = hidden;

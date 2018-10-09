@@ -24,8 +24,7 @@ const TAG = `amp-${SERVICE}`;
 
 export class AmpInputmaskService {
   /**
-   *
-   * @param {Ampdoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     this.ampdoc = ampdoc;
@@ -35,7 +34,7 @@ export class AmpInputmaskService {
   }
 
   /**
-   *
+   * Install the inputmask service and controllers.
    */
   install() {
     const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
@@ -49,7 +48,7 @@ export class AmpInputmaskService {
   }
 
   /**
-   *
+   * Remove the inpumask service and controllers.
    */
   uninstall() {
     this.masks_.forEach(m => m.dispose());
@@ -57,7 +56,6 @@ export class AmpInputmaskService {
   }
 }
 
-// Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(SERVICE, function(ampdoc) {
     return new AmpInputmaskService(ampdoc);

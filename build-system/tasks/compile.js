@@ -263,7 +263,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/@ampproject/worker-dom/dist/**/*.js',
       'node_modules/document-register-element/build/' +
           'document-register-element.patched.js',
-      'node_modules/inputmask/dist/inputmask/inputmask.phone.extensions.js',
       // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
