@@ -24,6 +24,7 @@ import {
 import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -59,6 +60,9 @@ export class Transport {
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
+
+    /** @private {boolean} */
+    this.isInabox_ = getMode(win).runtime == 'inabox';
   }
 
   /**
@@ -117,7 +121,8 @@ export class Transport {
     }
 
     const type = element.getAttribute('type');
-    const ampAdResourceId = user().assertString(
+    // In inabox there is no amp-ad element.
+    const ampAdResourceId = this.isInabox_? 1 : user().assertString(
         getAmpAdResourceId(element, getTopWindow(win)),
         'No friendly amp-ad ancestor element was found ' +
         'for amp-analytics tag with iframe transport.');
