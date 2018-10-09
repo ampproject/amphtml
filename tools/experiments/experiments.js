@@ -349,6 +349,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
+  {
+    id: 'linker-form',
+    name: 'Enables form support in linker',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
+  },
 ];
 
 if (getMode().localDev) {

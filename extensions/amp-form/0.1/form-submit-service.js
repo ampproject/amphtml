@@ -16,6 +16,16 @@
 
 import {Observable} from '../../../src/observable';
 
+
+/**
+ * @typedef {{
+ *   form: HTMLFormElement,
+ *   actionXhrMutator: function(string)
+ * }}
+ */
+export let FormSubmitEventDef;
+
+
 export class FormSubmitService {
   /**
    * Global service used to register callbacks we wish to execute when an
@@ -27,7 +37,7 @@ export class FormSubmitService {
 
   /**
    * Used to register callbacks.
-   * @param {function(HTMLFormElement)} cb
+   * @param {function(!FormSubmitEventDef)} cb
    */
   beforeSubmit(cb) {
     this.observable_.add(cb);
@@ -35,9 +45,9 @@ export class FormSubmitService {
 
   /**
    * Fired when form is submitted.
-   * @param {!HTMLFormElement} el
+   * @param {!FormSubmitEventDef} event
    */
-  fire(el) {
-    this.observable_.fire(el);
+  fire(event) {
+    this.observable_.fire(event);
   }
 }
