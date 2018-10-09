@@ -294,11 +294,6 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'pressboard': {
-    prefetch: 'https://adserver.pressboard.ca/js/amp-ad.js',
-    renderStartImplemented: true,
-  },
-
   'atomx': {
     prefetch: 'https://s.ato.mx/p.js',
   },
@@ -731,6 +726,10 @@ export const adConfig = {
   },
 
   'postquare': {},
+
+  'pressboard': {
+    renderStartImplemented: true,
+  },
 
   'pubexchange': {},
 

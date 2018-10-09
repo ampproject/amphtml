@@ -22,8 +22,6 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function pressboard(global, data) {
   validateData(data, ['media']);
-  data.height = data.height || '400';
-  data.amp = '1';
   data.baseUrl = 'https://adserver.pressboard.ca';
   global.pbParams = data;
   loadScript(global, data.baseUrl + '/js/amp-ad.js');

@@ -40,7 +40,6 @@ import {GEMIUS_CONFIG} from './vendors/gemius';
 import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
-import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -61,6 +60,7 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
+import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
@@ -189,7 +189,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'krux': KRUX_CONFIG,
-  'pressboard': PRESSBOARD_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
   'marinsoftware': MARINSOFTWARE_CONFIG,
@@ -210,6 +209,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'parsely': PARSELY_CONFIG,
   'piStats': PISTATS_CONFIG,
   'piano': PIANO_CONFIG,
+  'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'rakam': RAKAM_CONFIG,
   'segment': SEGMENT_CONFIG,

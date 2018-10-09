@@ -105,12 +105,6 @@
     "pageview": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C!extraparams&et=view&hsrc=1",
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C!extraparams&et=action&hsrc=3"
   },
-  "pressboard": {
-    "host": "https://adserver.pressboard.ca",
-    "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset",
-    "conversion_params": "&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_",
-    "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_"
-  },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
     "remarketing_prefix": "<ignore for test>",
@@ -307,6 +301,12 @@
     "basePrefix": "/api/v3",
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid",
     "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=!contentCreated&content_author=!contentAuthor&content_section=!contentSection&timezone_offset=_timezone_&tags=!tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid"
+  },
+  "pressboard": {
+    "host": "https://adserver.pressboard.ca",
+    "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset",
+    "conversion_params": "&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_",
+    "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_"
   },
   "quantcast": {
     "host": "https://pixel.quantserve.com/pixel",
