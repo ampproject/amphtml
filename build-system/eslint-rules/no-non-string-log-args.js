@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @typedef {{
+ *   name: string.
+ *   variadle: boolean,
+ *   startPos: number
+ * }}
+ */
+const LogMethodMetadata = null;
+
+/**
+ * @type {!Array<LogMethodMetadata>}
+ */
 const transformableMethods = [
   {name: 'assert', variadic: false, startPos: 1},
   {name: 'assertString', variadic: false, startPos: 1},
@@ -30,10 +42,15 @@ const transformableMethods = [
   {name: 'createError', variadic: true, startPos: 0},
 ];
 
+/**
+ * @param {!Node} node
+ * @return {boolean}
+ */
 function areAllArgumentsLiteral(node) {
   if (node.type === 'Literal') {
     return true;
   }
+  // Allow for string concatenation operations.
   if (node.type === 'BinaryExpression' && node.operator === '+') {
     if (areAllArgumentsLiteral(node.left) &&
         areAllArgumentsLiteral(node.right)) {
@@ -43,6 +60,10 @@ function areAllArgumentsLiteral(node) {
   return false;
 }
 
+/**
+ * @param {string} name
+ * @return {!LogMethodMetadata}
+ */
 function getMetadata(name) {
   for (let i = 0; i < transformableMethods.length; i++) {
     const curTransformableMethod = transformableMethods[i];
@@ -57,16 +78,20 @@ function getMetadata(name) {
 module.exports = function(context) {
   return {
     'CallExpression[callee.property.name=assert]': function(node) {
+      // Make sure that callee is a CallExpression as well.
+      // dev().assert() // enforce rule
+      // dev.assert() // ignore
       if (!(node.callee.object && node.callee.object.type === 'CallExpression')) {
         return;
       }
 
+      // Make sure that the CallExpression is one of dev() or user().
       if(!['dev', 'user'].includes(node.callee.object.callee.name)) {
         return;
       }
 
-
       const methodInvokedName = node.callee.property.name;
+      // Find the position of the argument we care about.
       const metadata = getMetadata(methodInvokedName);
 
       // If there's no metadata, this is most likely a test file running
