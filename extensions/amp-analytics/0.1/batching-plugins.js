@@ -19,7 +19,7 @@ import {getMode} from '../../../src/mode';
 /** @typedef {{
  *    trigger: string,
  *    timestamp: null,
- *    extraUrlParams: ?JsonObject
+ *    extraUrlParams: !JsonObject
  *  }} */
 export let batchSegmentDef;
 

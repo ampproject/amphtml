@@ -465,7 +465,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.element, request, this.preconnect,
+              this.getAmpDoc(), request, this.preconnect,
               this.transport_,
               this.isSandbox_);
         }
@@ -564,8 +564,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
-    expandPostMessage(
-        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
+    expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
+        trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
