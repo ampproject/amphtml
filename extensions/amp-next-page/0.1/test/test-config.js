@@ -51,7 +51,7 @@ describe('amp-next-page config', () => {
           .to.not.throw();
     });
 
-    it('allows pages with relative URLs', () => {
+    it('rewrites relative URLs to absolute', () => {
       const config = {
         pages: [{
           ampUrl: '/article1',
@@ -59,8 +59,24 @@ describe('amp-next-page config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, document.location))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
           .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example.com/article1');
+    });
+
+    it('rewrites relative URLs when served from the cache', () => {
+      const config = {
+        pages: [{
+          ampUrl: '/article1',
+          image: '/image.png',
+          title: 'Article 1',
+        }],
+      };
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrlCdn))
+          .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example-com.cdn.ampproject.org/c/s/example.com/article1');
     });
 
     it('rewrites canonical URLs when served from the cache', () => {

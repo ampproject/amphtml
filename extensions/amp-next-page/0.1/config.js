@@ -15,7 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {getSourceOrigin} from '../../../src/url';
+import {
+  getSourceOrigin,
+  getSourceUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -94,6 +98,10 @@ function assertSelectors(selectors) {
  */
 function assertReco(context, reco, documentUrl) {
   user().assertString(reco.ampUrl, 'ampUrl must be a string');
+
+  // Rewrite relative URLs to absolute, relative to the source URL.
+  const base = getSourceUrl(documentUrl);
+  reco.ampUrl = resolveRelativeUrl(reco.ampUrl, base);
 
   const urlService = Services.urlForDoc(context);
   const url = urlService.parse(reco.ampUrl);
