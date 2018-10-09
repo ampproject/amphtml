@@ -19,8 +19,8 @@ tags: {  # amp-lightbox-gallery
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-lightbox-gallery"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
@@ -29,14 +29,7 @@ attr_lists: {
   name: "lightboxable-elements"
   attrs: { name: "lightbox" }
   attrs: {
-    name: "lightbox-exclude"
-    value: ""
-  }
-  attrs: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"
-    trigger: {
-      also_requires_attr: "lightbox"
-    }
   }
 }

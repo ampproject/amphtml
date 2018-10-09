@@ -77,14 +77,14 @@ describes.realWin('amp-instagram', {
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=7');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   function testIframeCaptioned(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=7');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=9');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
@@ -153,8 +153,10 @@ describes.realWin('amp-instagram', {
   });
 
   it('requires data-shortcode', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-shortcode attribute is required for/);
+    allowConsoleError(() => {
+      expect(getIns('')).to.be.rejectedWith(
+          /The data-shortcode attribute is required for/);
+    });
   });
 
   it('resizes in response to messages from Instagram iframe', () => {
@@ -172,7 +174,7 @@ describes.realWin('amp-instagram', {
 
       expect(changeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(changeHeight.firstCall.args[0]).to.equal(newHeight - 64);
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
     });
   });
 

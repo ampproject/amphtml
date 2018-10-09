@@ -34,7 +34,7 @@ export function getAdCid(adElement) {
 }
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc|!Node} ampDoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
  * @param {string} clientIdScope
  * @param {string=} opt_clientIdCookieName
  * @param {number=} opt_timeout

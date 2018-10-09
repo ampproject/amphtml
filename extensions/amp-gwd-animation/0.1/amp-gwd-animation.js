@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
@@ -21,9 +21,41 @@ import {
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
+import {getDetail} from '../../../src/event-helper';
 import {getServiceForDoc} from '../../../src/service';
-import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
+
+/**
+ * Returns a value at any level in an object structure addressed by dot-notation
+ * list of fields, such as `field1.field2`. If any field in a chain does not
+ * exist or is not an object or array, returns `undefined`.
+ *
+ * This function is mostly identical to the one in src/json, with the main
+ * difference being that it does not limit the navigable properties to only the
+ * object's own properties. This is required by this component because it
+ * processes CustomEvent objects, which inherit most of its properties.
+ *
+ * TODO(sklobovskaya): If a suitable utility function becomes available again,
+ * use it instead of this one.
+ *
+ * @param {!Object} obj
+ * @param {string} expr
+ * @return {*}
+ */
+function getValueForExpr(obj, expr) {
+  const parts = expr.split('.');
+  let value = obj;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part && value && value[part] !== undefined) {
+      value = value[part];
+      continue;
+    }
+    value = undefined;
+    break;
+  }
+  return value;
+}
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
@@ -46,7 +78,8 @@ const ACTION_IMPL_ARGS = {
   'togglePlay': ['args.id'],
   'gotoAndPlay': ['args.id', 'args.label'],
   'gotoAndPause': ['args.id', 'args.label'],
-  'gotoAndPlayNTimes': ['args.id', 'args.label', 'args.N', 'event.eventName'],
+  'gotoAndPlayNTimes':
+      ['args.id', 'args.label', 'args.N', 'event.detail.eventName'],
   'setCurrentPage': ['args.index'],
 };
 
@@ -147,10 +180,8 @@ export class GwdAnimation extends AMP.BaseElement {
         'Cannot execute action because the GWD service is not registered.');
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
-    const invocationObj = /** @type {!JsonObject} */ (
-      Object.assign({}, invocation));
     const actionArgs =
-        argPaths.map(argPath => getValueForExpr(invocationObj, argPath));
+        argPaths.map(argPath => getValueForExpr(invocation, argPath));
 
     service[invocation.method].apply(service, actionArgs);
   }
@@ -165,8 +196,8 @@ export class GwdAnimation extends AMP.BaseElement {
   onGwdTimelineEvent_(event) {
     Services.actionServiceForDoc(this.getAmpDoc()).trigger(
         this.element,
-        `${this.timelineEventPrefix_}${event.detail.eventName}`,
-        event.detail,
+        `${this.timelineEventPrefix_}${getDetail(event)['eventName']}`,
+        event,
         ActionTrust.HIGH);
   }
 

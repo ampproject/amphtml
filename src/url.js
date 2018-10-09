@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LRUCache} from './utils/lru-cache';
-import {dict} from './utils/object';
+import {LruCache} from './utils/lru-cache';
+import {dict, hasOwn} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
@@ -48,12 +48,18 @@ let a;
  * We cached all parsed URLs. As of now there are no use cases
  * of AMP docs that would ever parse an actual large number of URLs,
  * but we often parse the same one over and over again.
- * @type {Object<string, !Location>}
+ * @type {LruCache}
  */
 let cache;
 
 /** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+/** @private @const Matches amp_gsa parameters in query string. */
+const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
+
+/** @private @const Matches amp_r parameters in query string. */
+const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
 
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
@@ -73,7 +79,7 @@ export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
  * @return {string} origin
  */
 export function getWinOrigin(win) {
-  return win.origin || parseUrl(win.location.href).origin;
+  return win.origin || parseUrlDeprecated(win.location.href).origin;
 }
 
 /**
@@ -85,41 +91,31 @@ export function getWinOrigin(win) {
  * @param {boolean=} opt_nocache
  * @return {!Location}
  */
-export function parseUrl(url, opt_nocache) {
+export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
+    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
   }
 
-  const fromCache = cache.get(url);
-
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  // Freeze during testing to avoid accidental mutation.
-  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-
-  if (opt_nocache) {
-    return frozen;
-  }
-
-  cache.put(url, frozen);
-
-  return frozen;
+  return parseUrlWithA(a, url, opt_nocache ? null : cache);
 }
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
+ * @param {LruCache=} opt_cache
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url) {
+export function parseUrlWithA(a, url, opt_cache) {
+  if (opt_cache && opt_cache.has(url)) {
+    return opt_cache.get(url);
+  }
+
   a.href = url;
 
   // IE11 doesn't provide full URL components when parsing relative URLs.
@@ -163,7 +159,15 @@ export function parseUrlWithA(a, url) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  return info;
+
+  // Freeze during testing to avoid accidental mutation.
+  const frozen = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
+
+  if (opt_cache) {
+    opt_cache.put(url, frozen);
+  }
+
+  return frozen;
 }
 
 /**
@@ -217,6 +221,25 @@ export function addParamsToUrl(url, params) {
 }
 
 /**
+ * Append query string fields and values to a url, only if the key does not
+ * exist in current query string.
+ * @param {string} url
+ * @param {!JsonObject<string, string|!Array<string>>} params
+ */
+export function addMissingParamsToUrl(url, params) {
+  const location = parseUrlDeprecated(url);
+  const existingParams = parseQueryString(location.search);
+  const paramsToAdd = dict({});
+  const keys = Object.keys(params);
+  for (let i = 0; i < keys.length; i++) {
+    if (!hasOwn(existingParams, keys[i])) {
+      paramsToAdd[keys[i]] = params[keys[i]];
+    }
+  }
+  return addParamsToUrl(url, paramsToAdd);
+}
+
+/**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
  * @param {!JsonObject<string, string|!Array<string>>} params
@@ -246,9 +269,9 @@ export function serializeQueryString(params) {
  * @param {string|!Location} url
  * @return {boolean}
  */
-export function isSecureUrl(url) {
+export function isSecureUrlDeprecated(url) {
   if (typeof url == 'string') {
-    url = parseUrl(url);
+    url = parseUrlDeprecated(url);
   }
   return (url.protocol == 'https:' ||
       url.hostname == 'localhost' ||
@@ -272,7 +295,7 @@ export function assertHttpsUrl(
       elementContext, sourceName);
   // (erwinm, #4560): type cast necessary until #4560 is fixed.
   const theUrlString = /** @type {string} */ (urlString);
-  user().assert(isSecureUrl(theUrlString) || /^(\/\/)/.test(theUrlString),
+  user().assert(isSecureUrlDeprecated(theUrlString) || /^(\/\/)/.test(theUrlString),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
@@ -289,7 +312,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
   user().assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
-  return parseUrl(urlString).href;
+  return parseUrlDeprecated(urlString).href;
 }
 
 
@@ -342,9 +365,27 @@ export function getFragment(url) {
  */
 export function isProxyOrigin(url) {
   if (typeof url == 'string') {
-    url = parseUrl(url);
+    url = parseUrlDeprecated(url);
   }
   return urls.cdnProxyRegex.test(url.origin);
+}
+
+/**
+ * For proxy-origin URLs, returns the serving type. Otherwise, returns null.
+ * E.g., 'https://amp-com.cdn.ampproject.org/a/s/amp.com/amp_document.html'
+ * returns 'a'.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {?string}
+ */
+export function getProxyServingType(url) {
+  if (typeof url == 'string') {
+    url = parseUrlDeprecated(url);
+  }
+  if (!isProxyOrigin(url)) {
+    return null;
+  }
+  const path = url.pathname.split('/', 2);
+  return path[1];
 }
 
 /**
@@ -354,7 +395,7 @@ export function isProxyOrigin(url) {
  */
 export function isLocalhostOrigin(url) {
   if (typeof url == 'string') {
-    url = parseUrl(url);
+    url = parseUrlDeprecated(url);
   }
   return urls.localhostRegex.test(url.origin);
 }
@@ -370,23 +411,51 @@ export function isProtocolValid(url) {
     return true;
   }
   if (typeof url == 'string') {
-    url = parseUrl(url);
+    url = parseUrlDeprecated(url);
   }
   return !INVALID_PROTOCOLS.includes(url.protocol);
 }
 
 /**
- * Removes parameters that start with amp js parameter pattern and returns the new
- * search string.
+ * Returns a URL without AMP JS parameters.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeAmpJsParamsFromUrl(url) {
+  const parsed = parseUrlDeprecated(url);
+  const search = removeAmpJsParamsFromSearch(parsed.search);
+  return parsed.origin + parsed.pathname + search + parsed.hash;
+
+}
+
+/**
+ * Returns a URL without a query string.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeSearch(url) {
+  const index = url.indexOf('?');
+  if (index == -1) {
+    return url;
+  }
+  const fragment = getFragment(url);
+  return url.substring(0, index) + fragment;
+}
+
+/**
+ * Removes parameters that start with amp js parameter pattern and returns the
+ * new search string.
  * @param {string} urlSearch
  * @return {string}
  */
-function removeAmpJsParams(urlSearch) {
+function removeAmpJsParamsFromSearch(urlSearch) {
   if (!urlSearch || urlSearch == '?') {
     return '';
   }
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
+      .replace(AMP_GSA_PARAMS_REGEX, '')
+      .replace(AMP_R_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';
@@ -400,7 +469,7 @@ function removeAmpJsParams(urlSearch) {
  */
 export function getSourceUrl(url) {
   if (typeof url == 'string') {
-    url = parseUrl(url);
+    url = parseUrlDeprecated(url);
   }
 
   // Not a proxy URL - return the URL itself.
@@ -423,8 +492,8 @@ export function getSourceUrl(url) {
   // Sanity test that what we found looks like a domain.
   user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
-  return origin + path.join('/') + removeAmpJsParams(url.search) +
-      (url.hash || '');
+  return origin + path.join('/') +
+      removeAmpJsParamsFromSearch(url.search) + (url.hash || '');
 }
 
 /**
@@ -434,7 +503,7 @@ export function getSourceUrl(url) {
  * @return {string} The source origin of the URL.
  */
 export function getSourceOrigin(url) {
-  return parseUrl(getSourceUrl(url)).origin;
+  return parseUrlDeprecated(getSourceUrl(url)).origin;
 }
 
 /**
@@ -445,7 +514,7 @@ export function getSourceOrigin(url) {
  */
 export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
-    baseUrl = parseUrl(baseUrl);
+    baseUrl = parseUrlDeprecated(baseUrl);
   }
   if (typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
@@ -462,10 +531,10 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
-    baseUrl = parseUrl(baseUrl);
+    baseUrl = parseUrlDeprecated(baseUrl);
   }
   relativeUrlString = relativeUrlString.replace(/\\/g, '/');
-  const relativeUrl = parseUrl(relativeUrlString);
+  const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
   // Absolute URL.
   if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
@@ -502,11 +571,11 @@ export function getCorsUrl(win, url) {
 
 
 /**
- * Checks if the url have __amp_source_origin and throws if it does.
+ * Checks if the url has __amp_source_origin and throws if it does.
  * @param {string} url
  */
 export function checkCorsUrl(url) {
-  const parsedUrl = parseUrl(url);
+  const parsedUrl = parseUrlDeprecated(url);
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);

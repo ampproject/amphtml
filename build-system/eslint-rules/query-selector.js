@@ -57,11 +57,14 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, 'querySelector is not scoped to the element, but ' +
-        'globally and filtered to just the elements inside the element. ' +
-        'This leads to obscure bugs if you attempt to match a descendant ' +
-        'of a descendant (ie querySelector("div div")). Instead, use the ' +
-        'scopedQuerySelector in src/dom.js');
+    context.report({
+      node,
+      message: 'querySelector is not scoped to the element, but ' +
+          'globally and filtered to just the elements inside the element. ' +
+          'This leads to obscure bugs if you attempt to match a descendant ' +
+          'of a descendant (ie querySelector("div div")). Instead, use the ' +
+          'scopedQuerySelector in src/dom.js',
+    });
   }
 
   function callScopedQuerySelector(node) {
@@ -85,8 +88,11 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, 'using scopedQuerySelector here is actually ' +
-        "unnecessary, since you don't use child selector semantics.");
+    context.report({
+      node,
+      message: 'using scopedQuerySelector here is actually ' +
+          "unnecessary, since you don't use child selector semantics.",
+    });
   }
 
   function getSelector(node, argIndex) {
@@ -94,7 +100,7 @@ module.exports = function(context) {
     let selector;
 
     if (!arg) {
-      context.report(node, 'no argument to query selector');
+      context.report({node, message: 'no argument to query selector'});
       selector = 'dynamic value';
     } else if (arg.type === 'Literal') {
       selector = arg.value;
@@ -115,30 +121,39 @@ module.exports = function(context) {
 
             if (callee.name === 'escapeCssSelectorIdent') {
               if (inNthChild) {
-                context.report(expression, 'escapeCssSelectorIdent may not ' +
-                    'be used inside an :nth-X psuedo-class. Please use ' +
-                    'escapeCssSelectorNth instead.');
+                context.report({
+                  node: expression,
+                  message: 'escapeCssSelectorIdent may not ' +
+                      'be used inside an :nth-X psuedo-class. Please use ' +
+                      'escapeCssSelectorNth instead.',
+                });
               }
               continue;
             } else if (callee.name === 'escapeCssSelectorNth') {
               if (!inNthChild) {
-                context.report(expression, 'escapeCssSelectorNth may only be ' +
-                    'used inside an :nth-X psuedo-class. Please use ' +
-                    'escapeCssSelectorIdent instead.');
+                context.report({
+                  node: expression,
+                  message: 'escapeCssSelectorNth may only be ' +
+                      'used inside an :nth-X psuedo-class. Please use ' +
+                      'escapeCssSelectorIdent instead.',
+                });
               }
               continue;
             }
           }
         }
 
-        context.report(expression, 'Each selector value must be escaped by ' +
-            'escapeCssSelectorIdent in src/dom.js');
+        context.report({
+          node: expression,
+          message: 'Each selector value must be escaped by ' +
+              'escapeCssSelectorIdent in src/dom.js',
+        });
       }
 
       selector = quasis.join('');
     } else {
       if (arg.type === 'BinaryExpression') {
-        context.report(arg, 'Use a template literal string');
+        context.report({node: arg, message: 'Use a template literal string'});
       }
       selector = 'dynamic value';
     }

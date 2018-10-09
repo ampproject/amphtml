@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 
@@ -30,7 +29,7 @@ describe('LoginDoneDialog', () => {
   let closeButton;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     messageListener = undefined;
@@ -248,9 +247,9 @@ describe('LoginDoneDialog', () => {
           encodeURIComponent(
               encodeURIComponent(encodeURIComponent('https://acme.com/doc1')));
       windowApi.opener = null;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dialog.postbackOrRedirect_();
-      }).to.throw(/URL must start with/);
+      }).to.throw(/URL must start with/); });
       expect(windowApi.location.replace).to.have.not.been.called;
     });
 
@@ -258,9 +257,9 @@ describe('LoginDoneDialog', () => {
       windowApi.location.search = '?url=' +
           encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
       windowApi.opener = null;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dialog.postbackOrRedirect_();
-      }).to.throw(/URL must start with/);
+      }).to.throw(/URL must start with/); });
       expect(windowApi.location.replace).to.have.not.been.called;
     });
 

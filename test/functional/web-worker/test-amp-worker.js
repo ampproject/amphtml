@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../../src/services';
 import {
   ampWorkerForTesting,
@@ -33,7 +32,7 @@ describe('invokeWebWorker', () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
@@ -190,13 +189,13 @@ describe('invokeWebWorker', () => {
       expect(errorStub).to.have.been.calledWith('web-worker');
 
       // Unexpected method at valid `id`.
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         fakeWorker.onmessage({data: {
           method: 'bar',
           returnValue: undefined,
           id: 0,
         }});
-      }).to.throw('mismatched method');
+      }).to.throw('mismatched method'); });
     });
   });
 

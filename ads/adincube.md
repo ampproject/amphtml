@@ -16,12 +16,13 @@ limitations under the License.
 
 # AdinCube
 
-Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to create a publisher account and get access to our amp ads.
+Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to create a publisher account and get access to our AMP ads.
 
 ## Examples
 
-### IN_CONTENT
-Uses fixed size by given ```width``` and ```height```.
+### In content
+
+Uses fixed size by the given `width` and `height`.
 
 ```html
 <amp-ad width="300" height="250"
@@ -31,8 +32,8 @@ Uses fixed size by given ```width``` and ```height```.
 </amp-ad>
 ```
 
-### STICKY_BANNER
-Uses fixed size by given ```width``` and ```height```.
+### Sticky banner
+Uses fixed size by the given `width` and `height`.
 
 ```html
 <amp-sticky-ad layout="nodisplay">
@@ -43,15 +44,20 @@ Uses fixed size by given ```width``` and ```height```.
     </amp-ad>
 </amp-sticky-ad>
 ```
+
 Refer to the [amp-sticky-ad](https://www.ampproject.org/docs/reference/components/amp-sticky-ad) documentation to see how to implement this ad.
 
 
 ## Configuration
-For semantics of configuration, please see ad network documentation.
 
-##### Required parameters
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+
+
+### Required parameters
+
 * `data-ad-type` - type of the ad
 * `data-site-key` - unique key attached to a website
 
-##### Optional parameters
+### Optional parameters
+
 * `data-params` - additional config parameters

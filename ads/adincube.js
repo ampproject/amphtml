@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -41,12 +42,16 @@ export function adincube(global, data) {
   loadScript(global, url);
 }
 
+/**
+ * @param {string} data
+ * @return {string}
+ */
 function parseParams(data) {
   try {
     const params = JSON.parse(data);
     let queryParams = '';
     for (const p in params) {
-      if (params.hasOwnProperty(p)) {
+      if (hasOwn(params, p)) {
         queryParams += '&' + p + '=' + encodeURIComponent(params[p]);
       }
     }

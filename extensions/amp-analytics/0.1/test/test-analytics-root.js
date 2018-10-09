@@ -24,6 +24,7 @@ import {
 import {
   CustomEventTracker,
 } from '../events';
+import {ScrollManager} from '../scroll-manager';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
@@ -137,6 +138,13 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     expect(visibilityManager.parent).to.be.null;
     // Ensure the instance is reused.
     expect(root.getVisibilityManager()).to.equal(visibilityManager);
+  });
+
+  it('should create scroll manager', () => {
+    const scrollManager = root.getScrollManager();
+    expect(scrollManager).to.be.instanceOf(ScrollManager);
+    // Ensure the instance is reused.
+    expect(root.getScrollManager()).to.equal(scrollManager);
   });
 
 
@@ -324,7 +332,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     });
 
     it('should match root', () => {
-      const documentElement = win.document.documentElement;
+      const {documentElement} = win.document;
       expect(matches(body, documentElement, '*')).to.equal(documentElement);
       expect(matches(body, documentElement, ':root'))
           .to.equal(documentElement);
@@ -583,7 +591,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     });
 
     it('should match root', () => {
-      const documentElement = win.document.documentElement;
+      const {documentElement} = win.document;
       expect(matches(body, documentElement, '*')).to.equal(documentElement);
       expect(matches(body, documentElement, ':root'))
           .to.equal(documentElement);

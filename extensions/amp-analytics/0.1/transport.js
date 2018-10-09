@@ -18,57 +18,118 @@ import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
   checkCorsUrl,
-  parseUrl,
+  parseUrlDeprecated,
 } from '../../../src/url';
+import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics.Transport';
 
 /**
- * @param {!Window} win
- * @param {string} request
- * @param {!Object<string, string>} transportOptions
- */
-export function sendRequest(win, request, transportOptions) {
-  assertHttpsUrl(request, 'amp-analytics request');
-  checkCorsUrl(request);
-  if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request)) {
-    return;
-  }
-  if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request)) {
-    return;
-  }
-  if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(request);
-    return;
-  }
-  user().warn(TAG_, 'Failed to send request', request, transportOptions);
-}
-
-/**
- * @visibleForTesting
+ * Transport defines the ways how the analytics pings are going to be sent.
  */
 export class Transport {
 
   /**
+   * @param {!Window} win
+   * @param {!Object<string, string|boolean>} options
+   */
+  constructor(win, options = {}) {
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /** @private {!Object<string, string|boolean>} */
+    this.options_ = options;
+
+    /** @private {string|undefined} */
+    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_['referrerPolicy']);
+
+    // no-referrer is only supported in image transport
+    if (this.referrerPolicy_ === 'no-referrer') {
+      this.options_['beacon'] = false;
+      this.options_['xhrpost'] = false;
+    }
+  }
+
+  /**
    * @param {string} request
    */
-  static sendRequestUsingImage(request) {
-    const image = new Image();
-    image.src = request;
-    image.width = 1;
-    image.height = 1;
+  sendRequest(request) {
+    assertHttpsUrl(request, 'amp-analytics request');
+    checkCorsUrl(request);
+
+    if (this.options_['beacon'] &&
+        Transport.sendRequestUsingBeacon(this.win_, request)) {
+      return;
+    }
+    if (this.options_['xhrpost'] &&
+        Transport.sendRequestUsingXhr(this.win_, request)) {
+      return;
+    }
+    const image = this.options_['image'];
+    if (image) {
+      const suppressWarnings = (typeof image == 'object' &&
+      image['suppressWarnings']);
+      Transport.sendRequestUsingImage(
+          this.win_, request, suppressWarnings,
+          /** @type {string|undefined} */ (this.referrerPolicy_));
+      return;
+    }
+    user().warn(TAG_, 'Failed to send request', request, this.options_);
+  }
+
+  /**
+   * Sends a ping request using an iframe, that is removed 5 seconds after
+   * it is loaded.
+   * This is not available as a standard transport, but rather used for
+   * specific, whitelisted requests.
+   * Note that this is unrelated to the cross-domain iframe use case above in
+   * sendRequestUsingCrossDomainIframe()
+   * @param {string} request The request URL.
+   */
+  sendRequestUsingIframe(request) {
+    assertHttpsUrl(request, 'amp-analytics request');
+    user().assert(
+        parseUrlDeprecated(request).origin !=
+        parseUrlDeprecated(this.win_.location.href).origin,
+        'Origin of iframe request must not be equal to the document origin.' +
+        ' See https://github.com/ampproject/' +
+        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+
+    /** @const {!Element} */
+    const iframe = this.win_.document.createElement('iframe');
+    toggle(iframe, false);
+    iframe.onload = iframe.onerror = () => {
+      Services.timerFor(this.win_).delay(() => {
+        removeElement(iframe);
+      }, 5000);
+    };
+
+    iframe.setAttribute('amp-analytics', '');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.src = request;
+    this.win_.document.body.appendChild(iframe);
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {string} request
+   * @param {boolean} suppressWarnings
+   * @param {string|undefined} referrerPolicy
+   */
+  static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    const image = createPixel(win, request, referrerPolicy);
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Response unparseable or failed to send image ' +
-          'request', request);
+      if (!suppressWarnings) {
+        user().warn(TAG_, 'Response unparseable or failed to send image ' +
+            'request', request);
+      }
     });
   }
 
@@ -117,36 +178,4 @@ export class Transport {
     xhr.send('');
     return true;
   }
-}
-
-/**
- * Sends a ping request using an iframe, that is removed 5 seconds after
- * it is loaded.
- * This is not available as a standard transport, but rather used for
- * specific, whitelisted requests.
- * Note that this is unrelated to the cross-domain iframe use case above in
- * sendRequestUsingCrossDomainIframe()
- * @param {!Window} win
- * @param {string} request The request URL.
- */
-export function sendRequestUsingIframe(win, request) {
-  assertHttpsUrl(request, 'amp-analytics request');
-  /** @const {!Element} */
-  const iframe = win.document.createElement('iframe');
-  setStyle(iframe, 'display', 'none');
-  iframe.onload = iframe.onerror = () => {
-    Services.timerFor(win).delay(() => {
-      removeElement(iframe);
-    }, 5000);
-  };
-  user().assert(
-      parseUrl(request).origin != parseUrl(win.location.href).origin,
-      'Origin of iframe request must not be equal to the document origin.' +
-      ' See https://github.com/ampproject/' +
-      ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
-  iframe.setAttribute('amp-analytics', '');
-  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.src = request;
-  win.document.body.appendChild(iframe);
-  return iframe;
 }

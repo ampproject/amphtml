@@ -31,10 +31,14 @@ const TAG = 'amp-ad-network-base';
  */
 export class AmpAdNetworkBase extends AMP.BaseElement {
 
+  /**
+   * Creates an instance of AmpAdNetworkBase.
+   * @param {!AmpElement} element
+   */
   constructor(element) {
     super(element);
 
-    /** @private {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
+    /** @private {?Promise<!Response>} */
     this.adResponsePromise_ = null;
 
     /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
@@ -152,7 +156,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * Processes the ad response as soon as the XHR request returns.
-   * @param {?../../../src/service/xhr-impl.FetchResponse} response
+   * @param {?Response} response
    * @return {!Promise}
    * @private
    */
@@ -196,7 +200,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     if (error) {
       dev().warn(TAG, error);
     }
-    switch (recoveryMode.type) {
+    switch (recoveryMode) {
       case RecoveryModeType.COLLAPSE:
         this.forceCollapse_();
         break;

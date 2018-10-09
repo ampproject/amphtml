@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -43,14 +43,141 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
 
+## Migrating from 0.1 to 1.0
+
+We've added new capabilities and features to AMP stories that are available in v1.0 of amp-story. You should consider migrating your stories to v1.0 to take advantage of these new features.
+
+### New bookend capabilities
+
+We've added new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the changes include:
+
+* Share providers are sorted according to the JSON configuration.
+* New bookend components:
+  * Call to action links
+  * Text box
+  * Portrait and landscape cards
+
+To use these new capabilities, add an `<amp-story-bookend>` tag as the last child of your `<amp-story>` with the required attributes like so:
+
+```html
+<amp-story standalone>
+  <amp-story-page id="cover">
+    ...
+  </amp-story-page>
+  <!-- `src` and `layout=nodisplay` are required. -->
+  <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+  </amp-story-bookend>
+<amp-story>
+```
+
+Learn more about the new components and how to specify them in the JSON configuration in the [amp-story-bookend](#bookend-amp-story-bookend) section.
+
+### New metadata requirements
+
+We've added new metadata attributes to the `<amp-story>` element. These metadata attributes will be used for displaying a preview of the story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
+
+```html
+<!-- `title`, `publisher`, `publisher-logo-src` and `poster-portrait-src` will soon be required. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
+
+<!-- `poster-square-src` and `poster-landscape-src` are optional, but strongly recommended. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
+```
+
+Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+
+The new attributes:
+
+| ATTRIBUTE | DESCRIPTION |
+| -- | -- |
+| `title` [required] | The title of the story. |
+| `publisher` [required] | The name of the story's publisher. |
+| `publisher-logo-src` [required] | The publisher's logo in square format (1x1 aspect ratio). |
+| `poster-portrait-src` [required] | The story poster in portrait format (3x4 aspect ratio). |
+| `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
+| `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
+
+#### `publisher-logo-src` guidelines
+
+The following guidelines apply to the image for the publisher logo:
+
+- The file should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- Avoid animated images, such as animated gifs.
+- The graphic part of the logo should be legible on the background color.
+
+<table>
+  <tr>
+    <td>
+      <amp-img alt="Logo with blue text on white background"
+          layout="fixed"
+          width="107" height="112" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+        <noscript>
+          <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with white text on blue background"
+          layout="fixed"
+          width="107" height="101" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+        <noscript>
+          <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with blue text on blue background"
+          layout="fixed"
+          width="103" height="102" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+        <noscript>
+          <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
+        </noscript>
+      </amp-img>
+      Avoid this
+    </td>
+  </tr>
+</table>
+
+- The logo shape should be a square, not a rectangle.
+- The background color should not be transparent.
+- Use one logo per brand that is consistent across AMP stories.
+- The logo should be at least 96x96 pixels.
+
+#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
+
+The following guidelines apply to the image for the story poster image(s):
+
+- The poster image should be representative of the entire AMP story.
+- The poster image should be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
+- The poster image should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+- Each poster image should meet the recommended minimium size:
+  - Portrait: 696px x 928px
+  - Landscape: 928px x 696px
+  - Square: 928px x 928px
+
 ## Overview
 
-The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -60,13 +187,13 @@ The `amp-story` extension provides a new format for displaying visual content th
   </amp-anim>
 </figure>
 
-## AMP Story format
+## AMP story format
 
-An [AMP Story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP Story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="AMP Story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
@@ -82,7 +209,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <title>Hello, amp-story</title>
     <link rel="canonical" href="http://example.ampproject.org/my-story.html" />
     <meta name="viewport"
@@ -111,6 +238,8 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
+      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
+      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -120,13 +249,14 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP Story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
 | ---- | --- |
-| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
-| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
+| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-1.0.js" custom-element="amp-story"></script>` tag as the third child of the `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<link rel="canonical" href="$STORY_URL">` tag inside the `<head>`. | The link points to the story itself, identifying the story as the canonical document. |
 
 ## Story: `amp-story`
 
@@ -143,10 +273,19 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example
 
 ```html
-<amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
+<amp-story
+    standalone
+    title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+    background-audio="my.mp3">
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
+  <amp-story-bookend src="./related.json"></amp-story-bookend>
 </amp-story>
 ```
 
@@ -156,21 +295,45 @@ The `amp-story` component represents an entire story.  The component itself  imp
 
 Identifies that the AMP document is a story.
 
-##### bookend-config-src [optional]
+##### title [required]
 
-A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [bookend endpoint](#bookend-json-endpoint) section below for the JSON response format.
+The title of the story.
+
+##### publisher [required]
+
+The name of the story's publisher.
+
+##### publisher-logo-src [required]
+
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
+
+##### poster-portrait-src [required]
+
+A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
 
 ##### background-audio [optional]
 
-A URI to an audio file that plays throughout the story.
+A URL to an audio file that plays throughout the story.
+
+##### poster-square-src [optional]
+
+A URL to the [story poster](#posters) in square format (1x1 aspect ratio).
+
+##### poster-landscape-src [optional]
+
+A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
+
+### Posters
+
+A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
 ### Children (of amp-story)
 
 The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
-### Bookend JSON endpoint
+## Bookend: `amp-story-bookend`
 
-The `bookend-config-src` value is a URL endpoint that returns data for the end screen of the story, containing related links, etc.  The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
+The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
 
 <figure class="centered-fig">
   <amp-anim alt="related article example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/related-articles.gif">
@@ -180,53 +343,255 @@ The `bookend-config-src` value is a URL endpoint that returns data for the end s
   </amp-anim>
 </figure>
 
-#### Related articles
+To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
 
-The end screen displays related articles in sections. The heading for the section is obtained from the provided string key name (e.g., "More to Read"); the array of articles for that key are displayed for that section. The domain and favicon of each linked article are automatically parsed and fetched from the specified URL for each piece of content.
+```html
+<amp-story standalone>
+  <amp-story-page id="cover">
+    ...
+  </amp-story-page>
+  <!-- `src` and `layout=display` are required. -->
+  <amp-story-bookend src="bookendv1.json" layout=nodisplay>
+  </amp-story-bookend>
+<amp-story>
+```
 
-These are configured in the `related-articles` field of the response object.
+Next, you must create a JSON file where you can customize the bookend. The overall structure of the config looks like so:
 
-#### Social sharing
+```text
+{
+  "bookendVersion": "v1.0",
+  "shareProviders": [
+    ...
+  ],
+  "components": [
+    ...
+  ]
+}
 
-The configuration for social sharing is defined in the `share-providers` field of the response object (optional).
+```
 
-This field should contain an object with key-value pairs. Each key represents a share provider's name (e.g. `facebook`). The value should be set to a non-empty configuration object for the provider or `true` (when no parameters are required).
+It is required to specify you are using the v1.0 version by including the first line.
 
-The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+#### Bookend components
 
-Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` preffix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+The bookend is made up of a variety of components. These components can be articles, call to action links, text, and more.
 
-#### Example JSON response
+They are specified in the `components` field of the configured JSON. See the [Example JSON response](#example-json-response) section below for an example.
+
+##### heading
+
+The `heading` component has a `text` field, which can be used to append a title to a group of articles.
+
 
 ```json
 {
-  "share-providers": {
-    "email": true,
-    "twitter": true,
-    "tumblr": true,
-    "facebook": {
-      // Facebook requires an `app_id` param
-      "app_id": "MY_FACEBOOK_APP_ID"
-    }
-  },
-  "related-articles": {
-    "More to Read": [
-      {
-        "title": "My friends, this is India [...]",
-        "url": "http://a-publisher.com/india",
-        "image": "./media/b1.jpg"
-      },
-      {
-        "title": "A wonderful weekend with Tenturi",
-        "url": "http://a-publisher.com/tenturi",
-        "image": "./media/b2.jpg"
-      },
-      ...
-    ]
-  }
+  "type": "heading",
+  "text": "More to Read"
 }
 ```
 
+<amp-img alt="Bookend heading component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
+  <noscript>
+    <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
+  </noscript>
+</amp-img>
+
+
+##### small
+
+The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image`.
+
+```json
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/article.html",
+  "image": "http://placehold.it/256x128"
+}
+```
+
+<amp-img alt="Bookend small component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
+  <noscript>
+    <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
+  </noscript>
+</amp-img>
+
+##### landscape
+
+The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+
+```json
+{
+  "type": "landscape",
+  "title": "TRAPPIST-1 Planets May Still Be Wet Enough for Life",
+  "url": "http://example.com/article.html",
+  "category": "astronomy",
+  "image": "http://placehold.it/256x128"
+}
+```
+
+<amp-img alt="Bookend landscape component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
+  <noscript>
+    <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
+  </noscript>
+</amp-img>
+
+##### portrait
+
+The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+
+```json
+{
+  "type": "portrait",
+  "category": "Science",
+  "title": "New discovery found",
+  "url": "http://example.com/article.html",
+  "image": "http://placehold.it/312x416"
+}
+```
+
+<amp-img alt="Bookend portrait component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
+  <noscript>
+    <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
+  </noscript>
+</amp-img>
+
+##### cta-link
+
+The `cta-link` component lets you specify links for call to actions (e.g., `Read More` or `Subscribe`). This component has a `links` key, which specifies an array of links. Each link is an object with a `text` and `url` values.
+
+```json
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup"
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+}
+```
+
+<amp-img alt="Bookend cta-links component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
+  <noscript>
+    <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
+  </noscript>
+</amp-img>
+
+##### textbox
+
+The `textbox` component lets you specify text inside the bookend (for example, photo credits). This component requires a `text` array, where each element of the array is a line of text.
+
+```json
+{
+  "type": "textbox",
+  "text": [
+    "Food by Enrique McPizza",
+    "Choreography by Gabriel Filly",
+    "Script by Alan Ecma S.",
+    "Direction by Jon Tarantino"
+  ]
+}
+```
+
+<amp-img alt="Bookend textbox component" layout="fixed"
+src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
+  <noscript>
+    <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
+  </noscript>
+</amp-img>
+
+**AMP-to-AMP linking**
+
+For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
+
+```json
+...
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/my-amp-document.html",
+  "image": "http://placehold.it/256x128",
+  "amphtml": true
+},
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup",
+      "amphtml": true
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+},
+...
+```
+
+#### Social sharing
+
+The configuration for social sharing is defined in the `shareProviders` field of the response object, and it's optional.
+
+This field should contain a string, where each string respresents a share provider's name (e.g. `twitter`).
+
+When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
+
+The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+
+Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+
+#### JSON configuration
+The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON configuration of the bookend. It is described as a URL endpoint that accepts GET requests and returns a JSON response with the contents of the bookend.  If omitted, the amp-story component renders a default UI for the end screen. The system is responsible for fetching the data necessary to render related and trending articles.  This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
+
+#### Example JSON response
+
+```text
+{
+  // You must specify version v1.0.
+  "bookendVersion": "v1.0",
+  "shareProviders": [
+    "email",
+    "tumblr",
+    {
+      "provider": "twitter",
+      // You can add custom sharing parameters depending on the social platform.
+      "text": "This is custom share text that I would like for the Twitter platform"
+    },
+    {
+      "provider": "facebook",
+      // Facebook requires an `app_id` param
+      "app_id": "MY_FACEBOOK_APP_ID"
+    }
+  ],
+  "components": [
+    {
+      "type": "heading",
+      "text": "More to read"
+    },
+    {
+      "type": "small",
+      "title": "This is India an the best places you should go",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    ...
+  ]
+}
+
+```
 ## Pages: `amp-story-page`
 
 The `<amp-story-page>` component represents the content to display on a single page of a story.
@@ -350,8 +715,6 @@ The following are available templates to specify for the layout of the grid laye
 To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
 {% endcall %}
 
-
-
 ##### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
@@ -383,7 +746,6 @@ Names Areas: (none)
     <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" />
   </noscript>
 </amp-img>
-
 
 ```html
 <amp-story-grid-layer template="vertical">
@@ -485,7 +847,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;hgroup></code></li>
         <li><code>&lt;nav></code></li>
         <li><code>&lt;section></code></li>
-        <li><code>&lt;amp-cta-layer></code></li>
+        <li><code>&lt;amp-story-cta-layer></code></li>
       </ul>
     </td>
   </tr>
@@ -600,18 +962,21 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
     <div class="content" grid-area="lower-third">Paragraph 3</div>
   </amp-story-grid-layer>
   <amp-story-cta-layer>
-    <a href="http://www.google.com" class="button"> Call to action! </a>
+    <a href="https://www.ampproject.org" class="button">Outlink here!</a>
   </amp-story-cta-layer>
 </amp-story-page>
 ```
 
-[Complete example found at the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+<amp-img alt="CTA Layer" layout="fixed"
+    src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png"
+    width="404" height="678">
+  <noscript>
+    <img width="404" height="678"
+         src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" />
+  </noscript>
+</amp-img>
 
-<div class="flex-images">
-  <amp-img alt="CTA Layer" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" width="404" height="678">
-  <noscript><img width="404" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /></noscript>
-  </amp-img>
-</div>
+[Complete example found in the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
 
 #### Children
 
@@ -659,9 +1024,9 @@ See a [live demo of all the AMP story animations](https://ampbyexample.com/stori
 
 ### Animation attributes
 
-#####  animate-in (required)
+#####  animate-in [required]
 
-Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
+Use this attribute to specify the name of the entrance [animation preset](#animation-effects).
 
 *Example*: A heading flies in from left of the page.
 
@@ -671,7 +1036,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-duration (optional)
+##### animate-in-duration [optional]
 
 Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
 
@@ -683,7 +1048,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-delay (optional)
+##### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
 
@@ -701,7 +1066,7 @@ Fly from left!
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
 {% endcall %}
 
-##### animate-in-after (optional)
+##### animate-in-after [optional]
 
 Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
 

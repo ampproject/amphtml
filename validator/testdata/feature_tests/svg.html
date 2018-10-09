@@ -83,9 +83,28 @@
     </radialgradient>
   </svg>
 
-  <!-- Invalid xml:base present -->
+  <!-- Invalid: xml:base present -->
   <svg xml:base="javascript:alert('hello world')">
     <a href="#"><circle r="10"></a>
+  </svg>
+
+  <!-- Valid: style attribute allowed in svgs. -->
+  <svg>
+    <g style="display: block; position: relative; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
+  </svg>
+
+  <!-- Invalid: these declarations are not allowed in style attributes. -->
+  <svg>
+    <g style="display: block; position: sticky;"/>
+    <g style="DISPLAY:BLOCK;POSITION:STICKY;"/>
+    <g style="foo:bar;"/>
+    <g style="@media only screen and (max-width: 600px)"/>
+  </svg>
+
+  <!-- Invalid: style tag isn't allowed. Note this is really testing the
+        parsing of a self closing style tag in an svg, not validity. -->
+  <svg>
+    <style/>
   </svg>
 </body>
 </html>

@@ -22,6 +22,10 @@
   margin: 16px 8px !important;
 }
 
+.i-amphtml-story-no-sharing .i-amphtml-story-share-widget {
+  display: none !important;
+}
+
 .i-amphtml-story-share-widget-scrollable {
   padding: 16px 0 !important;
   height: 66px !important;
@@ -43,6 +47,8 @@
   padding: 0 8px !important;
   margin: 0 !important;
   display: flex !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
 }
 
 .i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
@@ -54,11 +60,46 @@
   width: 48px !important;
   height: 66px !important;
   padding: 0 16px !important;
+  margin-bottom: 12px !important;
+}
+
+@media (max-width: 410px) {
+  .i-amphtml-story-share-item {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    min-width: 60px !important;
+    width: 25% !important;
+  }
+}
+
+@media (min-width: 410px) and (max-width: 500px) {
+  .i-amphtml-story-share-item {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    width: 20% !important;
+  }
+}
+
+@media (min-width: 500px) and (max-width: 720px) {
+  .i-amphtml-story-share-item {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    width: 16.66% !important;
+  }
+}
+
+.i-amphtml-story-share-widget-scrollable .i-amphtml-story-share-list {
+  flex-wrap: nowrap !important;
 }
 
 .i-amphtml-story-share-widget-scrollable > * > .i-amphtml-story-share-item {
   display: block !important;
   margin: 0 !important;
+  padding: 0 16px !important;
+  min-width: auto !important;
 }
 
 .i-amphtml-story-share-item:empty {

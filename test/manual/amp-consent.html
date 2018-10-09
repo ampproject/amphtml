@@ -137,6 +137,10 @@
       background: #3f51b5;
     }
 
+    #ui1 {
+      height: 100vh;
+    }
+
     hr {
       margin: 0;
     }
@@ -175,21 +179,37 @@
           },
           "ABC": {
             "checkConsentHref": "http://localhost:8000/get-consent-v1",
-            "promptUI": "ui1"
+            "promptUI": "ui2"
           }
         },
         "policy": {
           "Policy_DEF": {
             "waitFor": {
               "DEF": []
+            },
+            "timeout": {
+              "seconds": 5,
+              "fallbackAction": "reject"
             }
           }
-        }
+        },
+        "postPromptUI": "postPromptUI"
       }</script>
       <div id="ui1">
         Please Accept to load image.
         <button on="tap:ABC.accept" role="button">Accept</button>
         <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="ui2">
+        Please Accept to load image.
+        <button on="tap:ABC.accept" role="button">Accept</button>
+        <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt(consent=ABC)" role="button">Manage</button>
       </div>
     </amp-consent>
     <article>
@@ -204,6 +224,19 @@
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
           </p>
         </header>
+
+        <div>
+        Revoke consent ABC and DEF
+        <button class="button" on="tap:ABC.prompt(consent=ABC),ABC.prompt(consent=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.prompt(consent=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.prompt(consent=DEF)" role="button">Manage</button>
+      </div>
 
         <div class="author">
           <div class="byline">

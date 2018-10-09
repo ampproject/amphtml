@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Messenger} from './iframe-api/messenger';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {parseUrl} from '../../../src/url';
 import {toggle} from '../../../src/style';
 
 const AUTHORIZATION_TIMEOUT = 3000;
@@ -68,7 +68,7 @@ export class AccessIframeAdapter {
         '"defaultResponse" must be specified');
 
     /** @private @const {string} */
-    this.targetOrigin_ = parseUrl(this.iframeSrc_).origin;
+    this.targetOrigin_ = parseUrlDeprecated(this.iframeSrc_).origin;
 
     /** @private {?function()} */
     this.connectedResolver_ = null;
@@ -143,9 +143,10 @@ export class AccessIframeAdapter {
    */
   connect() {
     if (!this.connectedPromise_) {
-      this.connectedPromise_ = new Promise(resolve => {
-        this.connectedResolver_ = resolve;
-      });
+      const deferred = new Deferred();
+      this.connectedPromise_ = deferred.promise;
+      this.connectedResolver_ = deferred.resolve;
+
       this.configPromise_ = this.resolveConfig_();
       // Connect.
       this.messenger_.connect(this.handleCommand_.bind(this));
@@ -195,8 +196,7 @@ export class AccessIframeAdapter {
   authorizeRemote_() {
     return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('authorize', {});
-    }).then(response => {
-      const data = response['data'];
+    }).then(data => {
       if (data) {
         // Store the value in a non-blocking microtask.
         Promise.resolve().then(() => this.store_(data));
@@ -210,7 +210,7 @@ export class AccessIframeAdapter {
    * @private
    */
   restore_() {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     const storage = win.sessionStorage || win.localStorage;
     if (!storage) {
       return null;
@@ -244,7 +244,7 @@ export class AccessIframeAdapter {
    * @private
    */
   store_(data) {
-    const win = this.ampdoc.win;
+    const {win} = this.ampdoc;
     const storage = win.sessionStorage || win.localStorage;
     if (!storage) {
       return;

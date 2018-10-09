@@ -22,12 +22,11 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged} from '../layout-rect';
+import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {dict, hasOwn} from '../utils/object';
-import {expandLayoutRect} from '../layout-rect';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
@@ -36,6 +35,7 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -49,7 +49,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -198,7 +197,7 @@ export class Resources {
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
+    this.vsync_ = Services./*OK*/vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -242,7 +241,7 @@ export class Resources {
         this.schedulePass();
       });
 
-      /** @private @const {function(number, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
     }
 
@@ -267,6 +266,11 @@ export class Resources {
 
     this.schedulePass();
 
+    this.rebuildDomWhenReady();
+  }
+
+  /** @visibleForTesting */
+  rebuildDomWhenReady() {
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
@@ -465,7 +469,7 @@ export class Resources {
    */
   ensuredMeasured_(resource) {
     if (resource.hasBeenMeasured()) {
-      return Promise.resolve(resource.getPageLayoutBox());
+      return tryResolve(() => resource.getPageLayoutBox());
     }
     return this.vsync_.measurePromise(() => {
       resource.measure();
@@ -539,7 +543,8 @@ export class Resources {
   }
 
   /**
-   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * Builds the element if ready to be built, otherwise adds it to pending
+   * resources.
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
@@ -1012,17 +1017,38 @@ export class Resources {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
+        // TODO(jridgewell): Audit this system. Did this cause a layer
+        // invalidation (new layer, or removal of old layer)? Right now, we're
+        // only dirtying the measurements.
         mutator();
-
-        // TODO(jridgewell): This API needs to be audited. Common practice is
-        // to pass the amp-element in as the root even though we are only
-        // mutating children. If the amp-element is passed, we invalidate
-        // everything in the parent layer above it, where only invalidating the
-        // amp-element was necessary (only children were mutated, only
-        // amp-element's scroll box is affected).
-        this.layers_.dirty(element);
+        this.dirtyElement(element);
       },
     });
+  }
+
+  /**
+   * Dirties the cached element measurements after a mutation occurs.
+   *
+   * TODO(jridgewell): This API needs to be audited. Common practice is
+   * to pass the amp-element in as the root even though we are only
+   * mutating children. If the amp-element is passed, we invalidate
+   * everything in the parent layer above it, where only invalidating the
+   * amp-element was necessary (only children were mutated, only
+   * amp-element's scroll box is affected).
+   *
+   * @param {!Element} element
+   */
+  dirtyElement(element) {
+    if (this.useLayers_) {
+      this.layers_.dirty(element);
+    } else {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        const r = Resource.forElement(element);
+        this.setRelayoutTop_(r.getLayoutBox().top);
+      }
+      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
+    }
   }
 
 
@@ -1114,6 +1140,9 @@ export class Resources {
     this.schedulePass();
   }
 
+  /**
+   * Runs a pass immediately.
+   */
   doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
@@ -1215,13 +1244,10 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
-    const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
-        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
+    const isScrollingStopped = ((Math.abs(this.lastVelocity_) < 1e-2 &&
+        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_) ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
     // TODO(jridgewell, #12780): Update resize rules to account for layers.
@@ -1238,14 +1264,14 @@ export class Resources {
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
         /** @const {!Resource} */
-        const resource = request.resource;
+        const {resource} = request;
         const box = resource.getLayoutBox();
-        const iniBox = resource.getInitialLayoutBox();
 
         let topMarginDiff = 0;
         let bottomMarginDiff = 0;
-        let topUnchangedBoundary = box.top;
-        let bottomDisplacedBoundary = box.bottom;
+        let leftMarginDiff = 0;
+        let rightMarginDiff = 0;
+        let {top: topUnchangedBoundary, bottom: bottomDisplacedBoundary} = box;
         let newMargins = undefined;
         if (request.marginChange) {
           newMargins = request.marginChange.newMargins;
@@ -1255,6 +1281,12 @@ export class Resources {
           }
           if (newMargins.bottom != undefined) {
             bottomMarginDiff = newMargins.bottom - margins.bottom;
+          }
+          if (newMargins.left != undefined) {
+            leftMarginDiff = newMargins.left - margins.left;
+          }
+          if (newMargins.right != undefined) {
+            rightMarginDiff = newMargins.right - margins.right;
           }
           if (topMarginDiff) {
             topUnchangedBoundary = box.top - margins.top;
@@ -1268,11 +1300,13 @@ export class Resources {
           }
         }
         const heightDiff = request.newHeight - box.height;
+        const widthDiff = request.newWidth - box.width;
 
         // Check resize rules. It will either resize element immediately, or
         // wait until scrolling stops or will call the overflow callback.
         let resize = false;
-        if (heightDiff == 0 && topMarginDiff == 0 && bottomMarginDiff == 0) {
+        if (heightDiff == 0 && topMarginDiff == 0 && bottomMarginDiff == 0 &&
+            widthDiff == 0 && leftMarginDiff == 0 && rightMarginDiff == 0) {
           // 1. Nothing to resize.
         } else if (request.force || !this.visible_) {
           // 2. An immediate execution requested or the document is hidden.
@@ -1313,8 +1347,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (this.elementNearBottom_(resource, box)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
@@ -1391,6 +1424,24 @@ export class Resources {
    */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
+  }
+
+  /**
+   * Returns true if element is within 15% and 1000px of document bottom.
+   * Caller can provide current/initial layout boxes as an optimization.
+   * @param {!./resource.Resource} resource
+   * @param {!../layout-rect.LayoutRectDef=} opt_layoutBox
+   * @param {!../layout-rect.LayoutRectDef=} opt_initialLayoutBox
+   * @return {boolean}
+   * @private
+   */
+  elementNearBottom_(resource, opt_layoutBox, opt_initialLayoutBox) {
+    const contentHeight = this.viewport_.getContentHeight();
+    const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+
+    const box = opt_layoutBox || resource.getLayoutBox();
+    const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
+    return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
   /**
@@ -1485,7 +1536,8 @@ export class Resources {
                 r.getState() == ResourceState.NOT_LAID_OUT ||
                 !r.hasBeenMeasured() ||
                 r.isMeasureRequested() ||
-                relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+                (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop)
+        ) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
@@ -1702,7 +1754,7 @@ export class Resources {
       posPriority *= 2;
     }
     posPriority = Math.abs(posPriority);
-    return task.priority * PRIORITY_BASE_ + posPriority;
+    return (task.priority * PRIORITY_BASE_) + posPriority;
   }
 
   /**
@@ -1723,14 +1775,14 @@ export class Resources {
   calcTaskScoreLayers_(task, cache) {
     const layerScore = this.layers_.iterateAncestry(task.resource.element,
         this.boundCalcLayoutScore_, cache);
-    return task.priority * PRIORITY_BASE_ + layerScore;
+    return (task.priority * PRIORITY_BASE_) + layerScore;
   }
 
   /**
    * Calculates the layout's distance from viewport score, using an iterative
    * (and cacheable) calculation based on tree depth and distance.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @param {!Object<string, *>} cache
@@ -1747,7 +1799,7 @@ export class Resources {
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalDistanceFromParent() +
         layout.getVerticalDistanceFromParent();
-    return cache[id] = score + nonActivePenalty * depthPenalty * distance;
+    return cache[id] = score + (nonActivePenalty * depthPenalty * distance);
   }
 
   /**
@@ -2145,11 +2197,13 @@ export class Resources {
    * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
-    const prerender = VisibilityState.PRERENDER;
-    const visible = VisibilityState.VISIBLE;
-    const hidden = VisibilityState.HIDDEN;
-    const paused = VisibilityState.PAUSED;
-    const inactive = VisibilityState.INACTIVE;
+    const {
+      PRERENDER: prerender,
+      VISIBLE: visible,
+      HIDDEN: hidden,
+      PAUSED: paused,
+      INACTIVE: inactive,
+    } = VisibilityState;
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();

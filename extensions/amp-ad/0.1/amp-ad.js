@@ -29,7 +29,7 @@ import {user} from '../../../src/log';
  * will be handled by the extension loader.
  *
  * @param {string} type
- * @return !string
+ * @return {string}
  * @private
  */
 function networkImplementationTag(type) {
@@ -55,9 +55,8 @@ export class AmpAd extends AMP.BaseElement {
       ? Services.userNotificationManagerForDoc(this.element)
           .then(service => service.get(consentId))
       : Promise.resolve();
-
+    const type = this.element.getAttribute('type');
     return consent.then(() => {
-      const type = this.element.getAttribute('type');
       const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
           || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);

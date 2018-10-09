@@ -70,7 +70,7 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getAncestorOrigin_() {
-    const ancestorOrigins = this.ampdoc_.win.location.ancestorOrigins;
+    const {ancestorOrigins} = this.ampdoc_.win.location;
     if (!ancestorOrigins) {
       return '';
     }

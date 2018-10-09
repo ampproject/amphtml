@@ -1,0 +1,496 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="https://medium.com/p/cb7f223fad86" >
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+      background: white;
+      min-height: 200vh;
+    }
+
+    main {
+      padding-right: 31vw;
+    }
+
+    .brand-logo {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-container p {
+      line-height: 24px;
+    }
+
+    /* In the shadow-doc mode, the parent shell already has header and nav. */
+    .amp-shadow header {
+      display: none;
+    }
+
+    .lightbox {
+      background: #222;
+    }
+
+    .lightbox-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lightbox-content p {
+      color: #fff;
+      padding: 15px;
+    }
+
+    .lightbox amp-img {
+      width: 100%;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      border-bottom: 1px solid #e2e2e2;
+      color: #6d6d6d;
+      margin-left: 20px;
+      margin-right: 20px;
+      font-size: .9em;
+      padding: 15px;
+    }
+
+    figcaption::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    figcaption.image::before {
+      background-image: url('data:image/svg+xml,<svg fill="#a9a9a9" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    }
+
+    figcaption.video::before {
+      background-image: url('data:image/svg+xml,<svg fill="#a9a9a9" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>');
+    }
+
+    .author {
+      display: flex;
+      align-items: center;
+
+      background: #f4f4f4;
+      padding: 0 15px;
+
+      font-size: .8em;
+
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+
+    .header-time, .header-author {
+      color: #a8a3ae;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      font-size: 12px;
+    }
+
+    .header-author {
+      border-right: 1px solid #d5d5d5;
+      padding-right: 10px;
+      margin-right: 10px;
+      display: inline-block;
+    }
+
+    .header-author b {
+      color: #2294dd;
+      font-weight: normal;
+    }
+
+    .author p {
+      margin: 5px;
+    }
+
+    .byline {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      display: inline-block;
+    }
+
+    .byline p {
+      line-height: normal;
+    }
+
+    .byline .brand {
+      color: #6f757a;
+    }
+
+    .mailto {
+      text-decoration: none;
+    }
+
+    #author-avatar {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+
+    aside {
+      position: fixed; top: 20px; right: 20px; width: 30vw; top: 90px
+    }
+
+    hr {
+      margin: 0;
+    }
+
+    amp-sidebar {
+      width: 200px;
+      background: white;
+    }
+
+    nav ul {
+      padding: 0px;
+      list-style: none;
+    }
+
+    nav li {
+      list-style: none;
+      padding: 0px;
+      padding-left: 15px;
+    }
+
+    nav li a {
+      text-decoration: none;
+      color: #666666;
+      display: block;
+      padding: 10px;
+    }
+
+    nav li.active {
+      background: #f7f7f7;
+    }
+
+    nav li.active a {
+      color: black;
+      border-right: 3px solid black;
+    }
+
+    .article-body p {
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+    header {
+      padding: 15px;
+    }
+
+    button.menu {
+      background: transparent;
+      border: none;
+      padding: 10px;
+      padding-right: 20px;
+    }
+
+    #top-bar {
+      background: white;
+      border-bottom: 1px solid #e2e2e2;
+      position: fixed;
+      right: 0;
+      left: 0;
+      z-index: 10000000000;
+    }
+
+    header#article-desc {
+      background: rgb(250, 250, 250);
+      padding: 20px;
+    }
+
+    header#article-desc h1 {
+      margin-top: 0px;
+      padding-top: 0px;
+    }
+
+    .slot-fallback {
+       padding: 16px;
+       background: #1b1b1b;
+       color: white;
+     }
+
+     #lightbox-close-btn {
+       font-family: Helvetica, sans-serif;
+       color: white;
+       position: absolute;
+       top: 0px;
+       right: 0px;
+       padding: 20px;
+     }
+
+     main {
+      margin: 0 auto;
+      padding: 90px calc(30vw + 40px) 20px 20px;
+     }
+
+     .spacer {
+       height: 50vh;
+     }
+
+     amp-video {
+      background: rgba(210, 210, 210, 1);
+     }
+
+     #more-articles {
+       background: #fafafa;
+       padding: 20px 20px 0;
+     }
+     #more-articles ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+     }
+     #more-articles li {
+      border-top: 1px solid #f0f0f0;
+      padding: 10px 20px;
+      margin: 0 -20px;
+     }
+     #more-articles h3 {
+      margin: 0 0 20px;
+     }
+    @media screen and (max-width: 600px) {
+      main {
+        padding-right: 0;
+      }
+      aside {
+        display: none;
+      }
+      #top-bar {
+        position: static;
+      }
+    }
+  </style>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <link rel="manifest" href="medium-manifest.json">
+</head>
+<body>
+  <aside>
+    <amp-layout layout="responsive" width="16" height="9" id="dock-slot">
+    </amp-layout>
+    <div id="more-articles" style="transform: translateY(-16.875vw)">
+      <h3>More videos</h3>
+      <ul>
+        <li>One</li>
+        <li>Two</li>
+        <li>Three</li>
+      </ul>
+    </div>
+  </aside>
+  <amp-animation layout="nodisplay" id="slideDown">
+    <script type="application/json">
+    {
+      "selector": "#more-articles",
+      "duration": "0.5s",
+      "fill": "both",
+      "easing": "ease-out",
+      "keyframes": [{
+          "offset": 0,
+          "transform": "translateY(-16.875vw)"
+        },
+        {
+          "offset": 1,
+          "transform": "translateY(20px)"
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-animation layout="nodisplay" id="slideUp">
+    <script type="application/json">
+    {
+      "selector": "#more-articles",
+      "duration": "0.5s",
+      "fill": "both",
+      "easing": "ease-out",
+      "keyframes": [{
+          "offset": 0,
+          "transform": "translateY(20px)"
+        },
+        {
+          "offset": 1,
+          "transform": "translateY(-16.875vw)"
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-sidebar id="sidebar" layout="nodisplay">
+    <nav>
+      <ul>
+        <li class="active">
+          <a href="#">
+            Home
+          </a>
+        </li>
+        <li><a href="#">Link 1</a></li>
+        <li><a href="#">Link 2</a></li>
+        <li><a href="#">Link 3</a></li>
+        <li><a href="#">Link 4</a></li>
+        <li><a href="#section1">Section 1</a></li>
+        <li><a href="#section2">Section 2</a></li>
+        <li><a href="#section3">Section 3</a></li>
+      </ul>
+    </nav>
+  </amp-sidebar>
+  <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
+    <div class="content">
+      <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="40" height="34"></amp-img>
+      <div class="description">
+        <h5>Medium App</h5>
+        <p>Experience a richer experience on our mobile app!</p>
+      </div>
+      <div class="actions">
+        <button open-button>Open In App</button>
+      </div>
+    </div>
+  </amp-app-banner>
+
+  <header id="top-bar">
+    <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
+      ☰
+    </button>
+    <span class="brand-logo">
+      PublisherLogo
+    </span>
+  </header>
+
+  <main role="main">
+    <article>
+      <header id="article-desc">
+        <h1 itemprop="headline">Lorem Ipsum</h1>
+        <div class="header-author">
+          <amp-img src="img/sample.jpg" id="author-avatar" placeholder
+            height="16" width="16">
+          </amp-img>
+           by <span itemscope itemtype="http://schema.org/Person"
+        itemprop="author"><b>Lorem Ipsum</b></span></div>
+        <time class="header-time" itemprop="datePublished"
+            datetime="2015-09-14 13:00">September 14, 2015</time>
+      </header>
+
+      <div class="content-container">
+        <div class="article-body" itemprop="articleBody">
+
+          <figure>
+            <amp-video
+              autoplay
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
+              artwork="img/bigbuckbunny.jpg"
+              title="Big Buck Bunny"
+              album="Blender"
+              artist="Blender Foundation"
+              width="720"
+              height="405"
+              layout="responsive"
+              controls
+              dock="#dock-slot"
+              on="dock: slideDown.start; undock: slideUp.start">
+            </amp-video>
+            <figcaption class='video'>
+              Fusce pretium tempor justo, vitae consequat dolor maximus eget.
+            </figcaption>
+          </figure>
+
+          <p>
+            Sed pharetra semper fringilla. Nulla fringilla, neque eget
+            varius suscipit, mi turpis congue odio, quis dignissim nisi
+            nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
+            vel velit. Donec congue augue magna, nec eleifend dui porttitor
+            sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
+            Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
+            ex. Phasellus ultrices, purus non egestas ullamcorper, felis
+            lorem ultrices nibh, in tristique mauris justo sed ante.
+            Nunc commodo purus feugiat metus bibendum consequat. Duis
+            finibus urna ut ligula auctor, sed vehicula ex aliquam.
+            Sed sed augue auctor, porta turpis ultrices, cursus diam.
+            In venenatis aliquet porta. Sed volutpat fermentum quam,
+            ac molestie nulla porttitor ac. Donec porta risus ut enim
+            pellentesque, id placerat elit ornare.
+          </p>
+
+          <p id="section1">
+            Curabitur convallis, urna quis pulvinar feugiat, purus diam
+            posuere turpis, sit amet tincidunt purus justo et mi. Donec
+            sapien urna, aliquam ut lacinia quis, varius vitae ex.
+            Maecenas efficitur iaculis lorem, at imperdiet orci viverra
+            in. Nullam eu erat eu metus ultrices viverra a sit amet leo.
+            Pellentesque est felis, pulvinar mollis sollicitudin et,
+            suscipit eget massa. Nunc bibendum non nunc et consequat.
+            Quisque auctor est vel leo faucibus, non faucibus magna ultricies.
+            Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
+            posuere cubilia Curae; Vestibulum tortor lacus, bibendum et
+            enim eu, vehicula placerat erat. Nullam gravida rhoncus accumsan.
+            Integer suscipit iaculis elit nec mollis. Vestibulum eget arcu
+            nec lectus finibus rutrum vel sed orci.
+          </p>
+
+          <p>
+            Cum sociis natoque penatibus et magnis dis parturient montes,
+            nascetur ridiculus mus. Nulla et viverra turpis. Fusce
+            viverra enim eget elit blandit, in finibus enim blandit. Integer
+            fermentum eleifend felis non posuere. In vulputate et metus at
+            aliquam. Praesent a varius est. Quisque et tincidunt nisi.
+            Nam porta urna at turpis lacinia, sit amet mattis eros elementum.
+            Etiam vel mauris mattis, dignissim tortor in, pulvinar arcu.
+            In molestie sem elit, tincidunt venenatis tortor aliquet sodales.
+            Ut elementum velit fermentum felis volutpat sodales in non libero.
+            Aliquam erat volutpat.
+          </p>
+        </div>
+      </div>
+    </article>
+    <div class="spacer"></div>
+  </main>
+
+  <footer>
+    <div class="brand-logo">PublisherLogo</div>
+  </footer>
+</body>
+</html>

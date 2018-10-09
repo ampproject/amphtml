@@ -89,7 +89,7 @@ export class DomFingerprint {
  * @return {string} '.<index>' or ''.
  */
 function indexWithinParent(element) {
-  const nodeName = element.nodeName;
+  const {nodeName} = element;
   // Find my index within my parent's children
   let i = 0;
   let count = 0;

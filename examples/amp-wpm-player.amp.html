@@ -1,0 +1,46 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-wpm-player example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-wpm-player {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-wpm-player" src="https://cdn.ampproject.org/v0/amp-wpm-player-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-iframe"
+  src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+</head>
+<body>
+  <button on="tap:wpmPlayer.init">init</button>
+  <button on="tap:wpmPlayer.play">play</button>
+  <button on="tap:wpmPlayer.pause">pause</button>
+  <button on="tap:wpmPlayer.mute">mute</button>
+  <button on="tap:wpmPlayer.unmute">unmute</button>
+  <button on="tap:wpmPlayer.showControls">showControls</button>
+  <button on="tap:wpmPlayer.hideControls">hideControls</button>
+  <button on="tap:wpmPlayer.fullscreen">fullscreenEnter</button>
+  <button on="tap:wpmPlayer.asdf">asdf</button>
+
+  <amp-wpm-player
+    noloading
+    layout="responsive"
+    width="1920"
+    height="1080"
+    id="wpmPlayer"
+    url="https://wp.tv/?mid=2013067"
+    screenshot="https://via.placeholder.com/800x500"
+    autoplay="true"
+    adv="true"
+    extendedrelated="false"
+    forceliteembed="false"
+  >
+    <div fallback>Cannot play video on this device.</div>
+  </amp-wpm-player>
+</body>
+</html>

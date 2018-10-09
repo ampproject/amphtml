@@ -16,14 +16,17 @@
 
 import {Actions} from './actions';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -36,8 +39,9 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter) {
+  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -49,9 +53,6 @@ export class LocalSubscriptionPlatform {
 
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
-
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -65,14 +66,13 @@ export class LocalSubscriptionPlatform {
         'Authorization Url'
     );
 
-    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
-    this.cid_ = Services.cidForDoc(ampdoc);
-
     /** @private {!UrlBuilder} */
-    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+    this.urlBuilder_ = new UrlBuilder(
+        this.ampdoc_,
+        this.serviceAdapter_.getReaderId('local'));
 
-    /** @private {!SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+    /** @private {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = subscriptionAnalytics;
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
@@ -84,18 +84,9 @@ export class LocalSubscriptionPlatform {
         this.validateActionMap(this.serviceConfig_['actions'])
     );
 
-    /** @private {?Promise<string>} */
-    this.readerIdPromise_ = null;
-
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
-        serviceAdapter.getDialog());
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
+        serviceAdapter.getDialog(), this.serviceAdapter_);
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -113,7 +104,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Validates the action map
    * @param {!JsonObject<string, string>} actionMap
-   * @returns {!JsonObject<string, string>}
+   * @return {!JsonObject<string, string>}
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
@@ -124,23 +115,6 @@ export class LocalSubscriptionPlatform {
   }
 
   /**
-   * @return {!Promise<string>}
-   * @private
-   */
-  getReaderId_() {
-    if (!this.readerIdPromise_) {
-      const consent = Promise.resolve();
-      this.readerIdPromise_ = this.cid_.then(cid => {
-        return cid.get(
-            {scope: 'amp-access', createCookieIfNotPresent: true},
-            consent
-        );
-      });
-    }
-    return this.readerIdPromise_;
-  }
-
-  /**
    * Add event listener for the subscriptions action
    * @private
    */
@@ -148,26 +122,47 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
-      if (element) {
-        const action = element.getAttribute('subscriptions-action');
-        this.executeAction(action);
-      }
+      this.handleClick_(element);
     });
   }
 
   /**
-   * Renders the platform specific UI
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
    */
-  activate(renderState) {
-    this.renderer_.render(renderState);
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      const serviceAttr = element.getAttribute('subscriptions-service');
+      if (serviceAttr == 'local') {
+        this.executeAction(action);
+      } else if ((serviceAttr || 'auto') == 'auto') {
+        if (action == 'login') {
+          // The "login" action is somewhat special b/c viewers can
+          // enhance this action, e.g. to provide save/link feature.
+          const platform = this.serviceAdapter_.selectPlatformForLogin();
+          this.serviceAdapter_.delegateActionToService(
+              action, platform.getServiceId());
+        } else {
+          this.executeAction(action);
+        }
+      } else if (serviceAttr) {
+        this.serviceAdapter_.delegateActionToService(action, serviceAttr);
+      }
+    }
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
+  activate(entitlement) {
+    const renderState = entitlement.json();
+    this.urlBuilder_.setAuthResponse(renderState);
+    this.actions_.build().then(() => {
+      this.renderer_.render(renderState);
+    });
+  }
+
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
@@ -180,16 +175,14 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.xhr_
-        .fetchJson(this.authorizationUrl_, {
-          credentials: 'include',
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          const entitlement = Entitlement.parseFromJson(resJson);
-          this.entitlement_ = entitlement;
-          return entitlement;
-        });
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_,
+        /* useAuthData */ false)
+        .then(fetchUrl =>
+          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+              .then(res => res.json())
+              .then(resJson => {
+                return Entitlement.parseFromJson(resJson);
+              }));
   }
 
   /** @override */
@@ -208,21 +201,30 @@ export class LocalSubscriptionPlatform {
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
+      // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'text/plain',
-        },
-        body: selectedEntitlement.raw,
+        }),
+        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
 }
 
 /**

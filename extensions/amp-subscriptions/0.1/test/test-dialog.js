@@ -21,7 +21,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 
 
-describes.realWin('amp-subscriptions Dialog', {amp: true}, env => {
+describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   let win, doc, ampdoc;
   let dialog;
   let content;
@@ -31,6 +31,7 @@ describes.realWin('amp-subscriptions Dialog', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    doc.body.parentNode.setAttribute('amp-version', '1');
     ampdoc = env.ampdoc;
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
     vsync = Services.vsyncFor(ampdoc.win);
@@ -109,14 +110,14 @@ describes.realWin('amp-subscriptions Dialog', {amp: true}, env => {
   });
 
   it('should show close button', () => {
-    doc.body.parentNode.classList.add('i-amphtml-subs-grant-yes');
+    doc.body.classList.add('i-amphtml-subs-grant-yes');
     return dialog.open(content, true).then(() => {
       expect(getComputedStyle(dialog.closeButton_).display).to.equal('block');
     });
   });
 
   it('should not show close button if content is not granted', () => {
-    doc.body.parentNode.classList.remove('i-amphtml-subs-grant-yes');
+    doc.body.classList.remove('i-amphtml-subs-grant-yes');
     return dialog.open(content, true).then(() => {
       expect(getComputedStyle(dialog.closeButton_).display).to.equal('none');
     });

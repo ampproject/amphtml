@@ -20,17 +20,18 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   RTC_ERROR_ENUM,
-  getCalloutParam_,
-  inflateAndSendRtc_,
-  maybeExecuteRealTimeConfig_,
-  truncUrl_,
-  validateRtcConfig_,
+  RealTimeConfigManager,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  dev,
+  user,
+} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
@@ -38,6 +39,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   let a4aElement;
   let sandbox;
   let fetchJsonStub;
+  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
+  let rtc;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -53,6 +57,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     doc.body.appendChild(element);
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
+
+    rtc = new RealTimeConfigManager(a4aElement);
+    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
+    validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
+    truncUrl_ = rtc.truncUrl_.bind(rtc);
+    inflateAndSendRtc_ = rtc.inflateAndSendRtc_.bind(rtc);
+    sendErrorMessage = rtc.sendErrorMessage.bind(rtc);
   });
 
   afterEach(() => {
@@ -119,7 +131,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       });
       const customMacros = args['customMacros'] || {};
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
-          a4aElement, customMacros);
+          customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
@@ -325,12 +337,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
                 Object.keys(vendors)[0].toLowerCase(), undefined, true));
       }
       const calloutCount = 1;
+      sandbox.stub(user(), 'error').callsFake(() => {});
       return executeTest({
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
-    // TODO(jeffkaufman, #13422): this test was silently failing
-    it.skip('should favor publisher URLs over vendor URLs', () => {
+
+    it('should favor publisher URLs over vendor URLs', () => {
       const urls = generateUrls(3,2);
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1},
@@ -341,7 +354,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com/',
         'https://www.3.com/?slot_id=1',
         'https://www.4.com/?slot_id=1&page_id=2',
-        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {
@@ -356,10 +368,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       }
       expectedRtcArray.push(
           rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
-              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED, true));
       const calloutCount = 5;
       return executeTest({
-        urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+        urls, vendors, customMacros, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should not send more than one RTC callout to the same url', () => {
@@ -447,6 +459,29 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         calloutCount, expectedCalloutUrls: urls, expectedRtcArray,
         failXhr: true});
     });
+    for (const consentState in CONSENT_POLICY_STATE) {
+      it(`should handle consentState ${consentState}`, () => {
+        setRtcConfig({urls: ['https://foo.com']});
+        const rtcResult = maybeExecuteRealTimeConfig_(
+            {}, CONSENT_POLICY_STATE[consentState]);
+        switch (CONSENT_POLICY_STATE[consentState]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+            expect(rtcResult).to.be.ok;
+            return rtcResult.then(() =>
+              expect(fetchJsonStub).to.be.calledOnce);
+          case CONSENT_POLICY_STATE.UNKNOWN:
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+            return rtcResult.then(result => {
+              expect(result).to.deep.equal([]);
+              expect(fetchJsonStub).to.not.be.called;
+            });
+            break;
+          default:
+            throw new Error(`unknown consent state ${consentState}`);
+        }
+      });
+    }
   });
 
   describe('#validateRtcConfig', () => {
@@ -464,9 +499,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 500};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(rtcConfig);
     });
 
     it('should allow timeout of 0', () => {
@@ -478,9 +513,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 0};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(rtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(rtcConfig);
     });
 
     it('should not allow timeout greater than default', () => {
@@ -499,24 +534,26 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'https://broken.zzzzzzz'],
         'timeoutMillis': 1000};
       setRtcConfig(rtcConfig);
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.ok;
-      expect(validatedRtcConfig).to.deep.equal(expectedRtcConfig);
+      validateRtcConfig_(element);
+      expect(rtc.rtcConfig_).to.be.ok;
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
-    it('should return null if rtc-config not specified', () => {
-      validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.null;
+    it('should return false if rtc-config not specified', () => {
+      expect(validateRtcConfig_(element)).to.be.false;
     });
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
-      it('should return null for rtcConfig missing required values', () => {
+      it('should return false for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
-        expect(validatedRtcConfig).to.be.null;
+        allowConsoleError(() => {
+          dev().error('RTCTESTS', 'Error');
+          validatedRtcConfig = validateRtcConfig_(element);
+        });
+        expect(validatedRtcConfig).to.be.false;
       });
     });
 
@@ -524,17 +561,16 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const rtcConfig = '{"urls" : ["https://google.com"]';
       element.setAttribute('rtc-config', rtcConfig);
       validatedRtcConfig = validateRtcConfig_(element);
-      expect(validatedRtcConfig).to.be.null;
+      expect(validatedRtcConfig).to.be.false;
     });
   });
 
   describe('#inflateAndSendRtc_', () => {
     it('should not send RTC if macro expansion exceeds timeout', () => {
       const url = 'https://www.example.biz/?dummy=DUMMY';
-      const seenUrls = {};
-      const promiseArray = [];
-      const rtcStartTime = Date.now();
-      const timeoutMillis = 10;
+      rtc.rtcConfig_ = {
+        timeoutMillis: 10,
+      };
       const macroDelay = 20;
       const macros = {
         DUMMY: () => {
@@ -543,12 +579,220 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           );
         },
       };
-      inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-          rtcStartTime, macros, timeoutMillis);
-      return promiseArray[0].then(errorResponse => {
+      inflateAndSendRtc_(url, macros);
+      return rtc.promiseArray_[0].then(errorResponse => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
+    });
+
+    it('should not send RTC if no longer current', () => {
+      const url = 'https://www.example.biz/';
+      rtc.rtcConfig_ = {
+        timeoutMillis: 1000,
+      };
+      const macros = {};
+      // Simulate an unlayoutCallback call
+      inflateAndSendRtc_(url, macros);
+      a4aElement.promiseId_++;
+      return rtc.promiseArray_[0].then(errorResponse => {
+        expect(errorResponse).to.be.undefined;
+      });
+
+    });
+  });
+
+  describe('modifyRtcConfigForConsentStateSettings', () => {
+
+    beforeEach(() => {
+      rtc.rtcConfig_ = {
+        'vendors': {
+          'vendorA': {'SLOT_ID': '1', 'PAGE_ID': '1'},
+          'vendorB': {'SLOT_ID': '1'},
+          'vendorC': {'PAGE_ID': '1'},
+        },
+        'urls': [
+          'https://www.rtc.com/example1',
+          'https://www.other-rtc.com/example2',
+        ],
+        'timeoutMillis': 500};
+    });
+
+    it('should not modify rtcConfig if consent state is valid', () => {
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      rtc.consentState_ = CONSENT_POLICY_STATE.SUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should clear all callouts if global setting mismatched', () => {
+      rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {};
+      expectedRtcConfig.urls = [];
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should handle empty urls array', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.urls = [];
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle empty vendors object', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.vendors = {};
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle missing urls array', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.urls = undefined;
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should handle missing vendors object', () => {
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.rtcConfig_.vendors = undefined;
+      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+    });
+
+    it('should clear just invalid custom URLs', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['INSUFFICIENT', 'UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+      };
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.urls = [];
+      rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should clear just invalid vendor callouts', () => {
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        {'sendRegardlessOfConsentState': ['INSUFFICIENT', 'UNKNOWN'],
+          'url': 'https://www.other-rtc.com/example2'},
+      ];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {};
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should not clear callouts if per-callout setting valid', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2',
+      ];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+      };
+      expectedRtcConfig.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+      ];
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should handle mix of global and individual consent settings', () => {
+      rtc.rtcConfig_.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorB': {'sendRegardlessOfConsentState': ['UNKNOWN'],
+          'macros': {'SLOT_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      rtc.rtcConfig_.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2',
+      ];
+      rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      expectedRtcConfig.vendors = {
+        'vendorA': {'sendRegardlessOfConsentState': true,
+          'macros': {'SLOT_ID': '1', 'PAGE_ID': '1'}},
+        'vendorC': {'SLOT_ID': '1'},
+      };
+      expectedRtcConfig.urls = [
+        {'sendRegardlessOfConsentState': true,
+          'url': 'https://www.rtc.com/example1'},
+        'https://www.other-rtc.com/example2'];
+      rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should always clear RTC for a new consent state', () => {
+      rtc.consentState_ = 'FAKE_NEW_CONSENT_STATE';
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expectedRtcConfig.urls = [];
+      expectedRtcConfig.vendors = {};
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+    it('should not clear RTC for a null consent state', () => {
+      rtc.consentState_ = null;
+      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      rtc.modifyRtcConfigForConsentStateSettings();
+      expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
+    });
+
+  });
+
+  describe('sendErrorMessage', () => {
+    let imageStub, requestUrl, ampDoc;
+    let errorType, errorReportingUrl;
+    let imageMock;
+
+    beforeEach(() => {
+      // Make sure that we always send the message, as we are using
+      // the check Math.random() < reporting frequency.
+      sandbox.stub(Math, 'random').returns(0);
+      sandbox.stub(Xhr.prototype, 'fetch');
+      imageMock = {};
+      imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
+      ampDoc = a4aElement.getAmpDoc();
+
+      errorType = RTC_ERROR_ENUM.TIMEOUT;
+      errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
+      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const macros = {
+        ERROR_TYPE: errorType,
+        HREF: env.win.location.href,
+      };
+      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+          errorReportingUrl, macros, whitelist);
+    });
+
+    it('should send error message pingback to correct url', () => {
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(imageStub).to.be.calledOnce;
+      expect(imageMock.src).to.equal(requestUrl);
     });
   });
 });

@@ -19,7 +19,7 @@ import {dict} from './../../../src/utils/object';
 import {getData} from './../../../src/event-helper';
 import {parseJson} from './../../../src/json';
 import {
-  parseUrl,
+  parseUrlDeprecated,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
@@ -53,7 +53,7 @@ export function debounce(func, wait, immediate) {
  * Gets an element creator using a given document to create elements.
  * @export getElementCreator
  * @param {Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function getElementCreator(document) {
   return function createElement(name, className, children) {
@@ -64,6 +64,12 @@ export function getElementCreator(document) {
   };
 }
 
+/**
+ * Appends children to element
+ *
+ * @param {!Element} element
+ * @param {!Array<!Element>} children
+ */
 function appendChildren(element, children) {
   children = (!children) ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));
@@ -103,7 +109,7 @@ function handlePlaybuzzItemEvent(event, eventName, handler) {
  * Parses Playbuzz Event Data
  *
  * @param {?JsonObject|string|undefined} data
- * @returns {?JsonObject|undefined} parsedObject
+ * @return {?JsonObject|undefined} parsedObject
  */
 function parsePlaybuzzEventData(data) {
   if (typeof data === 'object') {
@@ -127,7 +133,7 @@ function parsePlaybuzzEventData(data) {
 
 /**
  * @param {Object} options
- * @returns {string} playbuzzEmbedUrl
+ * @return {string} playbuzzEmbedUrl
  */
 export function composeEmbedUrl(options) {
   const embedUrl = options.itemUrl + '?' + serializeQueryString(dict({
@@ -148,17 +154,30 @@ export function composeEmbedUrl(options) {
   return embedUrl;
 }
 
+/**
+ * Satizes URL
+ *
+ * @param {*} localtion
+ * @return {string}
+ */
 function sanitizeUrl(localtion) {
   return removeFragment(localtion.href)
       .replace(localtion.protocol, ''); //remove scheme (cors) & fragment
 }
 
+/**
+ * Conposes src url
+ *
+ * @param {string} src
+ * @param {string} itemId
+ * @return {string}
+ */
 export function composeItemSrcUrl(src, itemId) {
   const DEFAULT_BASE_URL = '//www.playbuzz.com/';
 
   const iframeSrcUrl = itemId ?
     DEFAULT_BASE_URL + 'item/' + itemId :
-    sanitizeUrl(parseUrl(src));
+    sanitizeUrl(parseUrlDeprecated(src));
 
   return iframeSrcUrl;
 }

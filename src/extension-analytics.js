@@ -31,16 +31,17 @@ import {triggerAnalyticsEvent} from './analytics';
  * @param {!Element} parentElement
  * @param {!JsonObject} config
  * @param {boolean=} loadAnalytics
+ * @param {boolean=} disableImmediate
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
-  parentElement, config, loadAnalytics = false) {
+  parentElement, config, loadAnalytics = false, disableImmediate = false) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
       'amp-analytics', dict({
         'sandbox': 'true',
-        'trigger': 'immediate',
+        'trigger': disableImmediate ? '' : 'immediate',
       }));
   const scriptElem = createElementWithAttributes(
       doc,
@@ -69,9 +70,9 @@ export function insertAnalyticsElement(
 
 /**
  * A class that handles customEvent reporting of extension element through
- * amp-analytics.
- * This class is not exposed to extension element directly to restrict the genration of the config
- * Please use CustomEventReporterBuilder to build a CustomEventReporter instance.
+ * amp-analytics. This class is not exposed to extension element directly to
+ * restrict the genration of the config Please use CustomEventReporterBuilder to
+ * build a CustomEventReporter instance.
  */
 class CustomEventReporter {
   /**
@@ -123,9 +124,10 @@ class CustomEventReporter {
 
 
 /**
- * A builder class that enable extension elements to easily build and get a CustomEventReporter instance.
- * Its constructor requires the parent AMP element.
- * It provides two methods #track() and #build() to build the CustomEventReporter instance.
+ * A builder class that enable extension elements to easily build and get a
+ * CustomEventReporter instance. Its constructor requires the parent AMP
+ * element. It provides two methods #track() and #build() to build the
+ * CustomEventReporter instance.
  */
 export class CustomEventReporterBuilder {
   /** @param {!AmpElement} parent */
@@ -142,8 +144,10 @@ export class CustomEventReporterBuilder {
   }
 
   /**
-   * The #track() method takes in a unique custom-event name, and the corresponding request url (or an array of request urls).
-   * One can call #track() multiple times with different eventType name (order doesn't matter) before #build() is called.
+   * The #track() method takes in a unique custom-event name, and the
+   * corresponding request url (or an array of request urls). One can call
+   * #track() multiple times with different eventType name (order doesn't
+   * matter) before #build() is called.
    * @param {string} eventType
    * @param {string|!Array<string>} request
    */
@@ -166,8 +170,8 @@ export class CustomEventReporterBuilder {
 
   /**
    * Call the #build() method to build and get the CustomEventReporter instance.
-   * One CustomEventReporterBuilder instance can only build one reporter,
-   * which means #build() should only be called once after all eventType are added.
+   * One CustomEventReporterBuilder instance can only build one reporter, which
+   * means #build() should only be called once after all eventType are added.
    */
   build() {
     dev().assert(this.config_, 'CustomEventReporter already built');
@@ -180,8 +184,9 @@ export class CustomEventReporterBuilder {
 
 
 /**
- * A helper method that should be used by all extension elements to add their sandbox analytics tracking.
- * This method takes care of insert and remove the analytics tracker at the right time of the element lifecycle.
+ * A helper method that should be used by all extension elements to add their
+ * sandbox analytics tracking. This method takes care of insert and remove the
+ * analytics tracker at the right time of the element lifecycle.
  * @param {!AmpElement} element
  * @param {!Promise<!JsonObject>} promise
  */
