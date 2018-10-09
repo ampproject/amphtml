@@ -76,7 +76,7 @@ export function a9(global, data) {
  * @param {!Object} data
  */
 function getURL(data) {
-  let url = '//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
+  let url = 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
   if (data.regionurl && (data.regionurl !== '')) {
     url = data.regionurl;
   }
