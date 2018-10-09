@@ -123,12 +123,17 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    // Keep CSS Scroll Snap points turned on for the following:
+    // - All iOS devices except for 10.3
+    // - All places where the experiment flag is deliberately set.
+    // Conversely turn CSS Scroll Snap points off for the following:
+    // - iOS devices on version 10.3
+    // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = !isExperimentOn(
-        this.win, 'amp-carousel-scroll-snap') ||
-        startsWith(
-            Services.platformFor(this.win).getIosVersionString(),
-            '10.3');
+    this.shouldDisableCssSnap_ = startsWith(
+        Services.platformFor(this.win).getIosVersionString(),
+        '10.3') ? true : this.isIos_ ? false : !isExperimentOn(
+          this.win, 'amp-carousel-chrome-scroll-snap');
   }
 
   /** @override */
