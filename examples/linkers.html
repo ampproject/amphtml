@@ -74,6 +74,24 @@
   <form method="post"
     action-xhr="https://www.example.com"
     target="_top">
+    post && action-xhr
+    <fieldset>
+      <label>
+        <span>Name:</span>
+        <input type="text"
+          name="name">
+      </label>
+      <br>
+      <br>
+      <input type="submit"
+        value="Subscribe">
+    </fieldset>
+  </form>
+
+  <form method="get"
+    action-xhr="https://www.example.com"
+    target="_top">
+    get && action-xhr
     <fieldset>
       <label>
         <span>Name:</span>
@@ -90,6 +108,7 @@
   <form method="get"
     action="https://www.google.com"
     target="_top">
+    get && action
     <fieldset>
       <label>
         <span>Name:</span>
