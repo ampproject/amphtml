@@ -17,8 +17,6 @@
 const defaultPlugins = [
   require.resolve(
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
-    require.resolve(
-        './babel-plugins/babel-plugin-transform-log-messages'),
 ];
 
 module.exports = {
