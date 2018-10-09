@@ -16,7 +16,7 @@
 
 import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 
@@ -830,10 +830,10 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
-      }).to.throw(/intentional2/);
+      }).to.throw(/intentional2/); });
     });
 
     it('should retry only non-top target', () => {
@@ -1023,8 +1023,10 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-          'element is not AmpElement');
+      allowConsoleError(() => {
+        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement');
+      });
     });
 
     it('should resolve if element has already upgrade', () => {
@@ -1039,10 +1041,8 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-test');
       doc.body.appendChild(element);
       env.win.setTimeout(() => {
-        doc.registerElement('amp-test', {
-          prototype: createAmpElementProtoForTesting(
-              env.win, 'amp-test', TestElement),
-        });
+        env.win.customElements.define('amp-test', createAmpElementForTesting(
+            env.win, 'amp-test', TestElement));
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
         expect(element.whenBuilt).to.exist;

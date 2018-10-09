@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-bodymovin-animation/">amp-bodymovin-animation example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
@@ -63,6 +67,12 @@ Indicates whether the animation should be looping or not.  By default, this attr
 ##### noautoplay (optional)
 
 By default, an animation autoplays. If this attribute is added the video waits for an action to start playing.
+
+##### renderer (optional)
+
+By default, this component uses the SVG renderer, this uses a light version of the Bodymovin animation player. However, if developers feel that they need the full player and want to use an HTML renderer they may do so by specifying the `renderer` attribute to be `html`.
+
+This attribute only accepts the values `html` and `svg`.
 
 ##### common attributes
 

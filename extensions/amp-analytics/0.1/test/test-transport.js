@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
-import {adopt} from '../../../../src/runtime';
+import * as lolex from 'lolex';
+import {Transport} from '../transport';
+import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
-adopt(window);
-
-describe('amp-analytics.transport', () => {
+describes.realWin('amp-analytics.transport', {
+  amp: false,
+  allowExternalResources: true,
+}, env => {
 
   let sandbox;
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
+  let win;
+  let doc;
 
-  afterEach(() => {
-    sandbox.restore();
+  beforeEach(() => {
+    sandbox = env.sandbox;
+    win = env.win;
+    doc = win.document;
   });
 
   function setupStubs(beaconRetval, xhrRetval) {
     sandbox.stub(Transport, 'sendRequestUsingImage');
     sandbox.stub(Transport, 'sendRequestUsingBeacon').returns(beaconRetval);
     sandbox.stub(Transport, 'sendRequestUsingXhr').returns(xhrRetval);
+  }
+
+  function sendRequest(win, request, options) {
+    new Transport(win, options).sendRequest(request);
   }
 
   function assertCallCounts(
@@ -50,7 +56,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers beacon over xhrpost and image', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 0, 0);
@@ -58,7 +64,7 @@ describe('amp-analytics.transport', () => {
 
   it('prefers xhrpost over image', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       beacon: false, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 0);
@@ -66,15 +72,23 @@ describe('amp-analytics.transport', () => {
 
   it('reluctantly uses image if nothing else is enabled', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       image: true,
+    });
+    assertCallCounts(0, 0, 1);
+  });
+
+  it('falls back to image setting suppressWarnings to true', () => {
+    setupStubs(true, true);
+    sendRequest(win, 'https://example.com/test', {
+      beacon: false, xhrpost: false, image: {suppressWarnings: true},
     });
     assertCallCounts(0, 0, 1);
   });
 
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 0);
@@ -82,7 +96,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon not found and xhr disabled', () => {
     setupStubs(false, true);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       beacon: true, xhrpost: false, image: true,
     });
     assertCallCounts(1, 0, 1);
@@ -90,7 +104,7 @@ describe('amp-analytics.transport', () => {
 
   it('falls back to image when beacon and xhr are not available', () => {
     setupStubs(false, false);
-    sendRequest(window, 'https://example.com/test', {
+    sendRequest(win, 'https://example.com/test', {
       beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 1);
@@ -98,52 +112,62 @@ describe('amp-analytics.transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    sendRequest(window, 'https://example.com/test', {});
+    sendRequest(win, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });
 
   it('asserts that urls are https', () => {
-    expect(() => {
-      sendRequest(window, 'http://example.com/test');
-    }).to.throw(/https/);
+    allowConsoleError(() => { expect(() => {
+      sendRequest(win, 'http://example.com/test');
+    }).to.throw(/https/); });
   });
 
   it('should NOT allow __amp_source_origin', () => {
-    expect(() => {
-      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
-    }).to.throw(/Source origin is not allowed in/);
+    allowConsoleError(() => { expect(() => {
+      sendRequest(win, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/); });
   });
 
   describe('sendRequestUsingIframe', () => {
     const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
+
+    function sendRequestUsingIframe(win, url) {
+      new Transport(win).sendRequestUsingIframe(url);
+    }
+
     it('should create and delete an iframe', () => {
-      const clock = sandbox.useFakeTimers();
-      const iframe = sendRequestUsingIframe(window, url);
-      expect(document.body.lastChild).to.equal(iframe);
-      expect(iframe.src).to.equal(url);
+      const clock = lolex.install({target: win});
+      installTimerService(win);
+      sendRequestUsingIframe(win, url);
+      const iframe = doc.querySelector('iframe[src="' + url + '"]');
+      expect(iframe).to.be.ok;
       expect(iframe.getAttribute('sandbox')).to.equal(
           'allow-scripts allow-same-origin');
       return loadPromise(iframe).then(() => {
-        clock.tick(4900);
-        expect(document.body.lastChild).to.equal(iframe);
-        clock.tick(100);
-        expect(document.body.lastChild).to.not.equal(iframe);
+        clock.tick(4999);
+        expect(doc.querySelector('iframe[src="' + url + '"]')).to.be.ok;
+        clock.tick(1);
+        expect(doc.querySelector('iframe[src="' + url + '"]')).to.not.be.ok;
       });
     });
 
     it('iframe asserts that urls are https', () => {
-      expect(() => {
-        sendRequestUsingIframe(window, 'http://example.com/test');
-      }).to.throw(/https/);
+      allowConsoleError(() => { expect(() => {
+        sendRequestUsingIframe(win, 'http://example.com/test');
+      }).to.throw(/https/); });
     });
 
     it('forbids same origin', () => {
-      expect(() => {
-        sendRequestUsingIframe(window, 'http://localhost:9876/');
-      }).to.throw(
-          /Origin of iframe request must not be equal to the document origin./
-      );
+      const fakeWin = {
+        location: {
+          href: 'https://example.com/abc',
+        },
+      };
+      allowConsoleError(() => {
+        expect(() => {
+          sendRequestUsingIframe(fakeWin, 'https://example.com/123');
+        }).to.throw(/Origin of iframe request/);
+      });
     });
   });
 });
-

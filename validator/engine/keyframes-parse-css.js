@@ -65,7 +65,7 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
       }
       return;
     }
-    if (qualifiedRule.declarations.length > 0) return;
+    if (qualifiedRule.declarations.length > 0) {return;}
     if (amp.validator.LIGHT) {
       this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
     } else {

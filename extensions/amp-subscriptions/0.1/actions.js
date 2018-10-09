@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, parseQueryString} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
-import {parseQueryString} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -89,7 +88,7 @@ export class Actions {
     // URL should always be available at this time.
     const url = user().assert(this.builtActionUrlMap_[action],
         'Action URL is not ready: %s', action);
-    return this.execute_(url, 'action-' + action);
+    return this.execute_(url, 'subscriptions-action-' + action);
   }
 
   /**

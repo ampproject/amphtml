@@ -16,8 +16,7 @@
 
 import {UrlBuilder} from '../url-builder';
 
-
-describes.realWin('UrlBuilder', {amp: true}, env => {
+describes.fakeWin('UrlBuilder', {amp: true}, env => {
   let ampdoc;
   let readerIdPromise;
   let urlBuilder;
@@ -29,6 +28,8 @@ describes.realWin('UrlBuilder', {amp: true}, env => {
   });
 
   it('should resolve URL without auth response and no authdata vars', () => {
+    expectAsyncConsoleError(
+        /Access or subsciptions service is not installed/);
     return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
       expect(url).to.equal('?rid=reader1&type=');
@@ -49,6 +50,8 @@ describes.realWin('UrlBuilder', {amp: true}, env => {
   });
 
   it('should resolve URL with auth response and no authdata vars', () => {
+    expectAsyncConsoleError(
+        /Access or subsciptions service is not installed/);
     urlBuilder.setAuthResponse({child: {type: 'premium'}});
     return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {

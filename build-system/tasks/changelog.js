@@ -34,7 +34,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
-const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+const {GITHUB_ACCESS_TOKEN} = process.env;
 const exec = BBPromise.promisify(childProcess.exec);
 const gitExec = BBPromise.promisify(git.exec);
 
@@ -117,8 +117,8 @@ function changelog() {
  * @return {!Promise}
  */
 function getGitMetadata() {
-  if (!argv.version) {
-    throw new Error('no version value passed in. See --version flag option.');
+  if (!argv.tag) {
+    throw new Error('no tag value passed in. See --tag flag option.');
   }
 
   const gitMetadata = {logs: [], tag: undefined, baseTag: undefined};
@@ -134,7 +134,7 @@ function getGitMetadata() {
           return;
         }
         return getCurrentSha().then(
-            submitReleaseNotes.bind(null, argv.version, gitMetadata.changelog)
+            submitReleaseNotes.bind(null, argv.tag, gitMetadata.changelog)
         );
       })
       .catch(errHandler);
@@ -224,7 +224,7 @@ function getCurrentSha() {
  * @return {!GitMetadataDef}
  */
 function buildChangelog(gitMetadata) {
-  let changelog = `## Version: ${argv.version}\n\n`;
+  let changelog = `## Version: ${argv.tag}\n\n`;
 
   if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
     changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
@@ -234,7 +234,7 @@ function buildChangelog(gitMetadata) {
 
   // Append all titles
   changelog += gitMetadata.logs.filter(function(log) {
-    const pr = log.pr;
+    const {pr} = log;
     if (!pr) {
       return true;
     }
@@ -244,7 +244,7 @@ function buildChangelog(gitMetadata) {
     });
   })
       .map(function(log) {
-        const pr = log.pr;
+        const {pr} = log;
         if (!pr) {
           return '  - ' + log.title;
         }
@@ -273,7 +273,7 @@ function buildChangelog(gitMetadata) {
 function buildSections(gitMetadata) {
   const sections = {};
   gitMetadata.logs.forEach(function(log) {
-    const pr = log.pr;
+    const {pr} = log;
     if (!pr) {
       return;
     }
@@ -342,7 +342,7 @@ function getLastGitTag(gitMetadata) {
 
 /**
  * Runs `git log ${branch}...{tag} --pretty=oneline --first-parent`
- * @param {string} tag
+ * @param {!GitMetadataDef} gitMetadata
  * @return {!Promise<GitMetadataDef>}
  */
 function getGitLog(gitMetadata) {
@@ -409,7 +409,7 @@ function getGithubPullRequestsMetadata(gitMetadata) {
  * we will try and also fetch pulls/${id} first before fetching
  * pulls/${id}/files.
  *
- * @param {!GitMetadataDef}
+ * @param {!GitMetadataDef} gitMetadata
  * @return {!Promise<!GitMetadataDef>}
  */
 function getGithubFilesMetadata(gitMetadata) {
@@ -560,7 +560,7 @@ function changelogUpdate() {
 
 function update() {
   const url = 'https://api.github.com/repos/ampproject/amphtml/releases/tags/' +
-      `${argv.version}`;
+      `${argv.tag}`;
   const tagsOptions = {
     url,
     method: 'GET',
@@ -595,7 +595,7 @@ function update() {
     if (!release.body) {
       return;
     }
-    const id = release.id;
+    const {id} = release;
     releasesOptions.url += id;
     if (argv.suffix) {
       releasesOptions.body.body = release.body + argv.message;
@@ -615,7 +615,7 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
-    version: '  The git tag and github release label',
+    tag: '  The git tag and github release label',
   },
 });
 
@@ -624,6 +624,6 @@ const updateMessage = 'Update github release. Ex. prepend ' +
 gulp.task('changelog:update', updateMessage, changelogUpdate, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
-    version: '  The git tag and github release label',
+    tag: '  The git tag and github release label',
   },
 });

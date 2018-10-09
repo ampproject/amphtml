@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
 
@@ -42,7 +41,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -217,9 +216,9 @@ describe('Gestures', () => {
 
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       gestures.signalEmit_(recognizer, {}, null);
-    }).to.throw(/Recognizer is not currently allowed/);
+    }).to.throw(/Recognizer is not currently allowed/); });
     expect(onGesture).to.have.not.been.called;
   });
 
@@ -391,7 +390,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
 
       eventListeners = {};

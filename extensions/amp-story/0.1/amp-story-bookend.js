@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
+import {
+  DEPRECATED_SHARE_PROVIDERS_KEY,
+  SHARE_PROVIDERS_KEY,
+  ScrollableShareWidget,
+} from './amp-story-share';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ScrollableShareWidget} from './amp-story-share';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
@@ -26,24 +32,34 @@ import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
-import {isProtocolValid} from '../../../src/url';
-import {parseUrl} from '../../../src/url';
-import {relatedArticlesFromJson} from './related-articles';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {
+  parseArticlesToClassicApi,
+  relatedArticlesFromJson,
+} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
+/**
+ * Key for omponents in bookend config.
+ * @private @const {string}
+ */
+const BOOKEND_VERSION_KEY = 'bookendVersion';
+const BOOKEND_VERSION_1 = 'v1.0';
+
+/**
+ * Deprecated key for components in bookend config.
+ * @private @const {string}
+ */
+const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
 
 /**
  * @typedef {{
- *   shareProviders: (!JsonObject|undefined),
+ *   shareProviders: (!JsonObject|!Object<string, !JsonObject>),
  *   relatedArticles: !Array<!./related-articles.RelatedArticleSetDef>
  * }}
  */
 export let BookendConfigDef;
-
-
-/** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 
 /**
@@ -94,6 +110,37 @@ const REPLAY_ICON_TEMPLATE = {
 
 /** @type {string} */
 const TAG = 'amp-story';
+
+
+/**
+ * @param {?string} consentId
+ * @return {!./simple-template.ElementDef}
+ */
+const buildPromptConsentTemplate = consentId => {
+  return /** @type {!./simple-template.ElementDef} */ ({
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
+    children: [
+      {
+        tag: 'h3',
+        attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
+      },
+      {
+        tag: 'h2',
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-consent-button',
+          'on': `tap:${consentId}.prompt`,
+          'role': 'button',
+          'aria-label': 'Change data privacy settings',
+        }),
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
+      },
+    ],
+  });
+};
 
 
 /**
@@ -239,11 +286,14 @@ export class Bookend {
      */
     this.bookendEl_ = null;
 
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestServiceV01(this.win_);
+
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -274,6 +324,17 @@ export class Bookend {
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
+
+    const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
+
+    if (consentId) {
+      const promptConsentEl =
+          renderAsElement(
+              this.win_.document,
+              buildPromptConsentTemplate(String(consentId)));
+      innerContainer.appendChild(promptConsentEl);
+    }
+
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
@@ -286,7 +347,7 @@ export class Bookend {
    */
   initializeListeners_() {
     this.getShadowRoot()
-        .addEventListener('click', event => this.maybeClose_(event));
+        .addEventListener('click', event => this.onClick_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
@@ -308,6 +369,10 @@ export class Bookend {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
+
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
@@ -342,12 +407,42 @@ export class Bookend {
   }
 
   /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowSharingUis
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
+  }
+
+  /**
    * Reacts to desktop state updates.
    * @param {boolean} isDesktop
    * @private
    */
   onDesktopStateUpdate_(isDesktop) {
     this.toggleDesktopAttribute_(isDesktop);
+  }
+
+  /**
+   * Reads the bookend version from the bookend JSON config.
+   * @param {!JsonObject} config
+   * @return {?string}
+   * @private
+   */
+  readBookendVersion_(config) {
+    if (config[DEPRECATED_BOOKEND_VERSION_KEY]) {
+      user().warn('AMP-STORY-BOOKEND', '`bookend-version` and ' +
+      '`share-providers` keys in the bookend config are deprecated, please ' +
+      '`bookendVersion` and `shareProviders` keys');
+    }
+
+    return config[DEPRECATED_BOOKEND_VERSION_KEY] ||
+      config[BOOKEND_VERSION_KEY] || null;
   }
 
   /**
@@ -365,17 +460,27 @@ export class Bookend {
       return Promise.resolve(this.config_);
     }
 
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
+    return this.requestService_.loadBookendConfig()
         .then(response => {
           if (!response) {
             return null;
           }
-
-          this.config_ = {
-            shareProviders: response['share-providers'],
-            relatedArticles:
-                relatedArticlesFromJson(response['related-articles']),
-          };
+          if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
+            this.config_ = {
+              shareProviders:
+                this.shareWidget_.parseProvidersToClassicApi(
+                    response[SHARE_PROVIDERS_KEY] ||
+                    response[DEPRECATED_SHARE_PROVIDERS_KEY]),
+              relatedArticles:
+                parseArticlesToClassicApi(response['components']),
+            };
+          } else {
+            this.config_ = {
+              shareProviders: response['share-providers'],
+              relatedArticles:
+                  relatedArticlesFromJson(response['related-articles']),
+            };
+          }
 
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
@@ -392,39 +497,25 @@ export class Bookend {
   }
 
   /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    if (!this.parentEl_.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
-    const rawUrl = this.parentEl_.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
-
-    const ampdoc = getAmpdoc(this.parentEl_);
-
-    return Services.urlReplacementsForDoc(ampdoc)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
-          return response.json();
-        });
-  }
-
-  /**
-   * Closes bookend if tapping outside usable area.
+   * Handles click events on the bookend:
+   *   - Closes bookend if tapping outside usable area
+   *   - Forwards AMP actions
    * @param {!Event} event
    * @private
    */
-  maybeClose_(event) {
-    if (this.elementOutsideUsableArea_(dev().assertElement(event.target))) {
+  onClick_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.elementOutsideUsableArea_(target)) {
       event.stopPropagation();
       this.close_();
+      return;
+    }
+
+    if (target.hasAttribute('on')) {
+      const ampdoc = getAmpdoc(this.parentEl_);
+      const actionService = Services.actionServiceForDoc(ampdoc);
+      actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }
 
@@ -487,7 +578,7 @@ export class Bookend {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    */
   isBuilt() {
     return this.isBuilt_;
@@ -509,11 +600,6 @@ export class Bookend {
 
     this.assertBuilt_();
     this.isConfigRendered_ = true;
-
-    if (bookendConfig.shareProviders) {
-      this.shareWidget_.setProviders(
-          dev().assert(bookendConfig.shareProviders));
-    }
 
     this.setRelatedArticles_(bookendConfig.relatedArticles);
   }
@@ -579,7 +665,7 @@ export class Bookend {
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName: parseUrl(
+      domainName: parseUrlDeprecated(
           Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
     };
 

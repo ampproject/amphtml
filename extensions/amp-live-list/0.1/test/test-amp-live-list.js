@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
@@ -37,7 +36,7 @@ describes.realWin('amp-live-list', {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(win);
     elem = document.createElement('amp-live-list');
     elem.getAmpDoc = () => ampdoc;
@@ -88,7 +87,7 @@ describes.realWin('amp-live-list', {
   }
 
   /**
-   * @param {!Array<number>} childIds
+   * @param {!Array<number>} childAttrs
    * @param {!Element=} opt_pagination
    * @return {!Element<!Element>}
    */
@@ -120,9 +119,9 @@ describes.realWin('amp-live-list', {
 
   it('validates that elem has an id on initial load', () => {
     buildElement(elem, {});
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have an id/);
+    }).to.throw(/must have an id/); });
 
     expect(() => {
       liveList.element.setAttribute('id', 'my-list');
@@ -144,21 +143,21 @@ describes.realWin('amp-live-list', {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.validateLiveListItems_(elem.querySelector('[items]'));
-    }).to.throw(/children must have id and data-sort-time/);
+    }).to.throw(/children must have id and data-sort-time/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       child.setAttribute('id', 'child-id');
       liveList.buildCallback();
-    }).to.throw(/children must have id and data-sort-time/);
+    }).to.throw(/children must have id and data-sort-time/); });
 
     child.removeAttribute('id');
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       child.setAttribute('data-sort-time', Date.now());
       liveList.buildCallback();
-    }).to.throw(/children must have id and data-sort-time/);
+    }).to.throw(/children must have id and data-sort-time/); });
 
     expect(() => {
       child.setAttribute('id', 'child-id');
@@ -190,9 +189,9 @@ describes.realWin('amp-live-list', {
     // Errors out because no data-max-items-per-page is given
     expect(liveList.element.getAttribute('data-max-items-per-page'))
         .to.equal('');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have data-max-items-per-page/);
+    }).to.throw(/must have data-max-items-per-page/); });
 
     // Errors out because data-max-items-per-page does not exist
     attrs = Object.assign({}, dftAttrs);
@@ -200,18 +199,18 @@ describes.realWin('amp-live-list', {
     delete attrs['data-max-items-per-page'];
     expect('data-max-items-per-page' in attrs).to.be.false;
     buildElement(elem, attrs);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have data-max-items-per-page/);
+    }).to.throw(/must have data-max-items-per-page/); });
 
     // Errors out because data-max-items-per-page is not parseable as a number
     attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': 'hello'});
     buildElement(elem, attrs);
     expect(liveList.element.getAttribute('data-max-items-per-page'))
         .to.equal('hello');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have data-max-items-per-page/);
+    }).to.throw(/must have data-max-items-per-page/); });
 
     attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': '10'});
     buildElement(elem, attrs);
@@ -245,17 +244,17 @@ describes.realWin('amp-live-list', {
   it('should enforce update slot', () => {
     buildElement(elem, dftAttrs);
     elem.removeChild(elem.querySelector('[update]'));
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have an "update" slot/);
+    }).to.throw(/must have an "update" slot/); });
   });
 
   it('should enforce items slot', () => {
     buildElement(elem, dftAttrs);
     elem.removeChild(elem.querySelector('[items]'));
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have an "items" slot/);
+    }).to.throw(/must have an "items" slot/); });
   });
 
   it('should have aria-live=polite by default', () => {
@@ -381,9 +380,9 @@ describes.realWin('amp-live-list', {
       updateLiveListItems.appendChild(document.createElement('div'));
       const stub = sandbox.stub(liveList, 'validateLiveListItems_');
       expect(stub).to.have.not.been.called;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         liveList.update(update);
-      }).to.throw();
+      }).to.throw(); });
       expect(stub).to.be.calledOnce;
     });
 

@@ -17,14 +17,24 @@
 import {SubscriptionAnalytics} from '../analytics';
 
 
-describes.realWin('SubscriptionAnalytics', {amp: true}, () => {
+describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   let analytics;
-
+  let ampdoc;
   beforeEach(() => {
-    analytics = new SubscriptionAnalytics();
+    ampdoc = env.ampdoc;
+    analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
   });
 
   it('should not fail', () => {
     analytics.event('event1');
+    analytics.serviceEvent('event1', 'serviceId');
+  });
+
+  it('should trigger a service event', () => {
+    const stub = sandbox.stub(analytics, 'event');
+    analytics.serviceEvent('event1', 'service1');
+    expect(stub).to.be.calledOnce.calledWith('event1', {
+      'serviceId': 'service1',
+    });
   });
 });

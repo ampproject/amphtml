@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
   TapzoomRecognizer} from '../../src/gesture-recognizers';
 import {Gestures} from '../../src/gesture';
@@ -29,7 +28,7 @@ describe('TapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -93,7 +92,6 @@ describe('TapRecognizer', () => {
     expect(res).to.equal(false);
   });
 
-
   it('should signal ready on touchend', () => {
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
     recognizer.onTouchEnd({});
@@ -102,9 +100,12 @@ describe('TapRecognizer', () => {
   it('should emit and end on start', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
+    const target = element;
+    recognizer.target_ = target;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
-          return data.clientX == 101 && data.clientY == 201;
+          return data.clientX == 101 && data.clientY == 201
+            && data.target === target;
         }), null).once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
@@ -121,7 +122,7 @@ describe('DoubletapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -188,7 +189,7 @@ describe('DoubletapRecognizer', () => {
 
   it('should ask pending for first touchend', () => {
     gesturesMock.expects('signalPending_').withExactArgs(
-        recognizer, 300).once();
+        recognizer, 200).once();
     gesturesMock.expects('signalReady_').never();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(1);
@@ -228,7 +229,7 @@ describe('SwipeXYRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -415,7 +416,7 @@ describe('TapzoomRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -596,7 +597,7 @@ describe('PinchRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {

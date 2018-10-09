@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
+
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -26,8 +26,8 @@ import {
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
-import {getStyle} from '../../src/style';
 import {installServiceInEmbedScope} from '../../src/service';
+import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
@@ -40,7 +40,7 @@ describe('friendly-iframe-embed', () => {
   let resourcesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const extensions = Services.extensionsFor(window);
     const resources = Services.resourcesForDoc(window.document);
@@ -59,6 +59,12 @@ describe('friendly-iframe-embed', () => {
     setSrcdocSupportedForTesting(undefined);
     sandbox.restore();
   });
+
+  function stubViewportScrollTop(scrollTop) {
+    sandbox.stub(Services, 'viewportForDoc').returns({
+      getScrollTop: () => scrollTop,
+    });
+  }
 
   it('should follow main install steps', () => {
 
@@ -92,7 +98,7 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.visibility).to.equal('');
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
-      expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(isAnimationNone(embed.win.document.body)).to.be.true;
       expect(embed.win.document.documentElement.classList.contains(
           'i-amphtml-fie')).to.be.true;
 
@@ -329,6 +335,7 @@ describe('friendly-iframe-embed', () => {
     let blacklistedAd;
     let blacklistedAnalytics;
     let blacklistedPixel;
+    let blacklistedAmpAdExit;
 
     const context = document.createElement('div');
     document.body.appendChild(context);
@@ -341,6 +348,7 @@ describe('friendly-iframe-embed', () => {
           blacklistedAd = resource('amp-ad', 0),
           blacklistedAnalytics = resource('amp-analytics', 0),
           blacklistedPixel = resource('amp-pixel', 0),
+          blacklistedAmpAdExit = resource('amp-ad-exit', 0),
         ]))
         .once();
 
@@ -350,6 +358,7 @@ describe('friendly-iframe-embed', () => {
       expect(blacklistedAd.loadedComplete).to.be.false;
       expect(blacklistedAnalytics.loadedComplete).to.be.false;
       expect(blacklistedPixel.loadedComplete).to.be.false;
+      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
     });
   });
 
@@ -678,7 +687,8 @@ describe('friendly-iframe-embed', () => {
       });
     });
 
-    it('should stop polling when loading failed', () => {
+    // TODO(#16916): Make this test work with synchronous throws.
+    it.skip('should stop polling when loading failed', () => {
       iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
@@ -716,38 +726,66 @@ describe('friendly-iframe-embed', () => {
     };
 
     let win;
-    let iframe;
-    let fie;
+
+    function createFie(bodyElementMock, parentType = 'amp-ad') {
+      const iframe = document.createElement('iframe');
+      const parent = document.createElement(parentType);
+
+      parent.appendChild(iframe);
+
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect')
+          .returns(layoutRectLtwh(x, y, w, h));
+
+      const fie = new FriendlyIframeEmbed(iframe, {
+        url: 'https://acme.org/url1',
+        html: '<body></body>',
+      }, Promise.resolve());
+
+      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+
+      fie.win = win;
+
+      return fie;
+    }
+
 
     beforeEach(() => {
       win = {
         innerWidth: winW,
         innerHeight: winH,
       };
-      iframe = document.createElement('iframe');
-
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
-        right: x + w,
-        left: x,
-        top: y,
-        bottom: y + h,
-        width: w,
-        height: h,
-      }));
-
-      fie = new FriendlyIframeEmbed(iframe, {
-        url: 'https://acme.org/url1',
-        html: '<body></body>',
-      }, Promise.resolve());
-
-      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
-      sandbox.stub(fie, 'win').callsFake(win);
     });
 
-    it('should resize body and fixed container when entering', function* () {
+    it('should not throw if inside an amp-ad', () => {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'amp-ad');
 
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const scrollTop = 0;
+      stubViewportScrollTop(scrollTop);
+
+      expect(() => fie.enterFullOverlayMode()).to.not.throw();
+    });
+
+    it('should throw if not inside an amp-ad', () => {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock, 'not-an-amp-ad');
+
+      const scrollTop = 0;
+      stubViewportScrollTop(scrollTop);
+
+      allowConsoleError(() => {
+        expect(() => fie.enterFullOverlayMode())
+            .to.throw(/Only .?amp-ad.? is allowed/);
+      });
+    });
+
+    it('resizes body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
+
+      const scrollTop = 45;
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
 
@@ -755,10 +793,12 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.position).to.equal('absolute');
       expect(bodyElementMock.style.width).to.equal(`${w}px`);
       expect(bodyElementMock.style.height).to.equal(`${h}px`);
-      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y - scrollTop}px`);
       expect(bodyElementMock.style.left).to.equal(`${x}px`);
       expect(bodyElementMock.style.right).to.equal('auto');
       expect(bodyElementMock.style.bottom).to.equal('auto');
+
+      const {iframe} = fie;
 
       expect(iframe.style.position).to.equal('fixed');
       expect(iframe.style.left).to.equal('0px');
@@ -771,8 +811,10 @@ describe('friendly-iframe-embed', () => {
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
+      const fie = createFie(bodyElementMock);
 
-      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
+      const scrollTop = 19;
+      stubViewportScrollTop(scrollTop);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
@@ -784,6 +826,8 @@ describe('friendly-iframe-embed', () => {
       expect(bodyElementMock.style.left).to.be.empty;
       expect(bodyElementMock.style.right).to.be.empty;
       expect(bodyElementMock.style.bottom).to.be.empty;
+
+      const {iframe} = fie;
 
       expect(iframe.style.position).to.be.empty;
       expect(iframe.style.left).to.be.empty;

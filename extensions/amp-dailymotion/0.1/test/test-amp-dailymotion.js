@@ -43,7 +43,7 @@ describes.realWin('amp-dailymotion', {
     }
     doc.body.appendChild(dailymotion);
     return dailymotion.build().then(() => {
-      return dailymotion.layoutCallback();
+      dailymotion.layoutCallback();
     }).then(() => dailymotion);
   }
 
@@ -75,7 +75,9 @@ describes.realWin('amp-dailymotion', {
   });
 
   it('requires data-videoid', () => {
-    return getDailymotion('').should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/);
+    return allowConsoleError(() => {
+      return getDailymotion('').should.eventually.be.rejectedWith(
+          /The data-videoid attribute is required for/);
+    });
   });
 });

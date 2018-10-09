@@ -19,6 +19,7 @@
  */
 
 import '../polyfills';
+import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {
   adopt,
@@ -29,17 +30,20 @@ import {
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
-import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
-import {installCacheServiceWorker} from '../service-worker/install';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
-import {installStylesForDoc, makeBodyVisible} from '../style-installer';
+import {
+  installStylesForDoc,
+  makeBodyVisible,
+  makeBodyVisibleRecovery,
+} from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
+import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -54,7 +58,7 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self); // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
@@ -62,7 +66,7 @@ try {
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(self.document);
+  makeBodyVisibleRecovery(self.document);
   throw e;
 }
 startupChunk(self.document, function initial() {
@@ -91,6 +95,7 @@ startupChunk(self.document, function initial() {
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(self);
+      registerIniLoadListener(ampdoc);
     });
     startupChunk(self.document, function builtins() {
       // Builtins.
@@ -104,11 +109,9 @@ startupChunk(self.document, function initial() {
       stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
-      installAnchorClickInterceptor(ampdoc, self);
-
+      Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForServices */ true);
-      installCacheServiceWorker(self);
+      makeBodyVisible(self.document);
     });
     startupChunk(self.document, function finalTick() {
       perf.tick('e_is');

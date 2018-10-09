@@ -227,8 +227,8 @@ When `items="items"` is specified (which, is the default) the response must be a
 
 #### max-items (optional)
 
-An integer value spcifying the maximum length of the items array to be rendered.
-The `items` array will be trucated to `max-items` entries if the returned value exceeds `max-items`.
+An integer value specifying the maximum length of the items array to be rendered.
+The `items` array will be truncated to `max-items` entries if the returned value exceeds `max-items`.
 
 #### single-item (optional)
 
@@ -238,6 +238,20 @@ Causes `amp-list` to treat the returned result as if it were a single element ar
 #### reset-on-refresh (optional)
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
+
+By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
+
+#### binding (optional)
+
+For pages using `amp-list` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
+
+We recommend using `binding="no"` or `binding="refresh"` for faster performance.
+
+- `binding="no"`: Never block render **(fastest)**.
+- `binding="refresh"`: Don't block render on initial load **(faster)**.
+- `binding="always"`: Always block render **(slow)**.
+
+If `binding` attribute is not provided, default is `always`.
 
 ##### common attributes
 

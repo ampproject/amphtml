@@ -16,12 +16,10 @@
 
  .i-amphtml-image-viewer-image {
   position: absolute;
-  z-index: 1;
 }
 
 .i-amphtml-image-viewer {
   position: absolute;
-  z-index: 1;
   top: 0;
   left: 0;
   right: 0;

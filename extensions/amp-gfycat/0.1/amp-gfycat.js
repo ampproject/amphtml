@@ -18,14 +18,8 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -189,7 +183,10 @@ class AmpGfycat extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleGfycatMessages_(event) {
     const eventData = /** @type {?string|undefined} */ (getData(event));
 
@@ -236,7 +233,6 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
-
   mute() {
     // All Gfycat videos have no sound.
   }
@@ -260,28 +256,20 @@ class AmpGfycat extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenEnter(dev().assertElement(this.iframe_));
+    // Won't implement.
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    if (!this.iframe_) {
-      return;
-    }
-    fullscreenExit(dev().assertElement(this.iframe_));
+    // Won't implement.
   }
 
   /** @override */
   isFullscreen() {
-    if (!this.iframe_) {
-      return false;
-    }
-    return isFullscreenElement(dev().assertElement(this.iframe_));
+    // Won't implement.
+    return false;
   }
 
   /** @override */
@@ -291,6 +279,11 @@ class AmpGfycat extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
     return false;
   }
 

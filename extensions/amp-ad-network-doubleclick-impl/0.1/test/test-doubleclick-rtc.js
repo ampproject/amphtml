@@ -63,8 +63,17 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       rtcResponseArray, expectedParams, expectedJsonTargeting) {
       const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
       expect(rtcUrlParams).to.deep.equal(expectedParams);
-      expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
+      expect(impl.jsonTargeting).to.deep.equal(expectedJsonTargeting);
     }
+
+    it('should handle array with undefined', () => {
+      const rtcResponseArray = [undefined, null];
+      const expectedParams = {'artc': null, 'ati': '', 'ard': ''};
+      const expectedJsonTargeting = {};
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
     it('should properly merge RTC responses into jsonTargeting on impl', () => {
       const rtcResponseArray = [
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
@@ -195,7 +204,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
 
     it('should properly merge mix of success and errors', () => {
-      impl.jsonTargeting_ = {targeting:
+      impl.jsonTargeting = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
       categoryExclusions: ['sports']};
       const rtcResponseArray = [
@@ -296,6 +305,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
+      env.win.document.referrer = 'https://www.google.com/';
       const docInfo = Services.documentInfoForDoc(element);
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
@@ -307,9 +317,14 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
-      return customMacros.ADCID().then(adcid => {
-        expect(adcid).to.not.be.null;
-      });
+      return Promise.all([
+        customMacros.ADCID().then(adcid => {
+          expect(adcid).to.not.be.null;
+        }),
+        customMacros.REFERRER().then(referrer => {
+          expect(referrer).to.equal(env.win.document.referrer);
+        }),
+      ]);
     });
 
     it('should return the same ADCID on multiple calls', () => {
@@ -343,6 +358,20 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       return customMacros.ADCID(0).then(adcid => {
         expect(adcid).to.be.undefined;
       });
+    });
+
+    it('should respect timeout for referrer', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const viewer = Services.viewerForDoc(impl.getAmpDoc());
+      sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      return expect(customMacros.REFERRER(0)).to.eventually.be.undefined;
     });
 
     it('should handle TGT macro when targeting not set', () => {

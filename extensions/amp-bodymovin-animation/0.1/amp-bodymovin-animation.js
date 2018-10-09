@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -46,11 +47,11 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?string} */
     this.loop_ = null;
 
+    /** @private {?string} */
+    this.renderer_ = null;
+
     /** @private {?boolean} */
     this.autoplay_ = null;
-
-    /** @private {?string} */
-    this.src_ = null;
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -72,28 +73,31 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    const scriptToLoad = this.renderer_ === 'svg' ?
+      'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js' :
+      'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
     preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', opt_onLayout);
+    this.preconnect.url(scriptToLoad, opt_onLayout);
   }
 
   /** @override */
   buildCallback() {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('noautoplay');
+    this.renderer_ = this.element.getAttribute('renderer') || 'svg';
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
-    this.src_ = this.element.getAttribute('src');
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
 
     // Register relevant actions
     this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
     this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
     this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
     this.registerAction('seekTo', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       if (args) {
         this.seekTo_(args);
       }
@@ -107,6 +111,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
+        renderer: this.renderer_,
         animationData: data,
       };
       const iframe = getIframe(
@@ -135,13 +140,16 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    this.playerReadyPromise_ = new Promise(resolve => {
-      this.playerReadyResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.playerReadyPromise_ = deferred.promise;
+    this.playerReadyResolver_ = deferred.resolve;
     return true;
   }
 
-  /** @private */
+  /**
+   * @param {!Event} event
+   * @private
+   */
   handleBodymovinMessages_(event) {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
@@ -198,7 +206,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.sendCommand_('stop');
   }
 
-  /** @private */
+  /**
+   * @param {Object} args
+   * @private
+   */
   seekTo_(args) {
     const time = parseFloat(args && args['time']);
     // time based seek

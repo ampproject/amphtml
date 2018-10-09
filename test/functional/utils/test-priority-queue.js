@@ -18,8 +18,10 @@ import PriorityQueue from '../../../src/utils/priority-queue';
 
 describe('PriorityQueue', function() {
   let pq;
+  let sandbox;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox;
     pq = new PriorityQueue();
   });
 
@@ -86,5 +88,18 @@ describe('PriorityQueue', function() {
 
   it('should throw error when priority is NaN', () => {
     expect(() => { pq.enqueue(NaN); }).to.throw(Error);
+  });
+
+  it('should iterate through queue', () => {
+    const spy = sandbox.spy();
+    pq.enqueue('p', 1);
+    pq.enqueue('m', 2);
+    pq.enqueue('a', 3);
+    pq.forEach(letter => {
+      spy(letter);
+    });
+    expect(spy.firstCall).to.be.calledWith('a');
+    expect(spy.secondCall).to.be.calledWith('m');
+    expect(spy.thirdCall).to.be.calledWith('p');
   });
 });

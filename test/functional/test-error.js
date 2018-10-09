@@ -15,12 +15,13 @@
  */
 
 import * as analytics from '../../src/analytics';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
+  blockedByConsentError,
   cancellation,
   detectJsEngineFromStack,
   detectNonAmpJs,
+  errorReportingDataForViewer,
   getErrorReportData,
   installErrorReporting,
   isCancellation,
@@ -90,6 +91,14 @@ describes.fakeWin('installErrorReporting', {}, env => {
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
   });
+
+  it('should ignore blockByConsent', () => {
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+        blockedByConsentError();
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.not.be.ok;
+    expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+  });
 });
 
 describe('maybeReportErrorToViewer', () => {
@@ -103,7 +112,7 @@ describe('maybeReportErrorToViewer', () => {
       new Error('XYZ', false));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
@@ -158,10 +167,11 @@ describe('maybeReportErrorToViewer', () => {
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should send viewer message named `error`', () => {
+  it('should send viewer message named `error` with stripped down error data '
+    + 'set', () => {
     return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.have.been
-            .calledWith('error', data));
+            .calledWith('error', errorReportingDataForViewer(data)));
   });
 });
 
@@ -172,7 +182,7 @@ describe('reportErrorToServer', () => {
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });

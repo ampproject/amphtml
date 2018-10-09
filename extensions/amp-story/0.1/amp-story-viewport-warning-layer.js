@@ -92,6 +92,9 @@ const DESKTOP_SIZE_WARNING_TEMPLATE = {
 
 
 
+/**
+ * Viewport warning layer UI.
+ */
 export class ViewportWarningLayer {
   /**
    * @param {!Window} win
@@ -111,7 +114,7 @@ export class ViewportWarningLayer {
     this.platform_ = Services.platformFor(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;

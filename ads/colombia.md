@@ -14,26 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# colombia
+# Colombia
 
 ## Example
 
 ```html
-<amp-ad width=320 height=140
-      type="colombia"
-      layout=responsive
-      data-clmb_slot="129883"
-      data-clmb_position="1"
-      data-clmb_section="0"
-  </amp-ad>
+<amp-ad width="320" height="140"
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.For support contact care@timesadcenter.com
+For configuration semantics, contact care@timesadcenter.com.
 
 Supported parameters:
 
-- data-clmb_slot : Ad Slot
-- data-clmb_position : Ad Position
-- data-clmb_section : Ad Sections
+- `data-clmb_slot`: Ad slot
+- `data-clmb_position` : Ad position
+- `data-clmb_section` : Ad sections

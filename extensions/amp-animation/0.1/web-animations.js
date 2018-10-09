@@ -31,9 +31,14 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  getVendorJsPropertyName,
+  setStyles,
+} from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
@@ -125,11 +130,9 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        for (const k in request.vars) {
-          request.target.style.setProperty(k, String(request.vars[k]));
-        }
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
-
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
       return player;
@@ -264,7 +267,7 @@ export class WebAnimationRunner {
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
-      const timing = this.requests_[i].timing;
+      const {timing} = this.requests_[i];
 
       user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +
@@ -306,7 +309,8 @@ class Scanner {
       return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|
+    //                   !WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
     } else if (spec.switch) {
@@ -413,6 +417,7 @@ export class Builder {
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
@@ -580,10 +585,12 @@ export class MeasureScanner extends Scanner {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
-      const target = this.target_;
-      const index = this.index_;
-      const vars = this.vars_;
-      const timing = this.timing_;
+      const {
+        target_: target,
+        index_: index,
+        vars_: vars,
+        timing_: timing,
+      } = this;
       const promise = otherSpecPromise.then(otherSpec => {
         if (!otherSpec) {
           return;
@@ -633,7 +640,7 @@ export class MeasureScanner extends Scanner {
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -662,7 +669,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -718,10 +725,12 @@ export class MeasureScanner extends Scanner {
    */
   with_(spec, callback) {
     // Save context.
-    const prevTarget = this.target_;
-    const prevIndex = this.index_;
-    const prevVars = this.vars_;
-    const prevTiming = this.timing_;
+    const {
+      target_: prevTarget,
+      index_: prevIndex,
+      vars_: prevVars,
+      timing_: prevTiming,
+    } = this;
 
     // Push new context and perform calculations.
     const targets =
@@ -930,7 +939,7 @@ export class MeasureScanner extends Scanner {
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
     user().assert(
-        value != null && (value >= 0 || value < 0 && opt_allowNegative),
+        value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
@@ -1062,8 +1071,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const prev = this.currentTarget_;
-    const prevIndex = this.currentIndex_;
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);

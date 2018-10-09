@@ -7,6 +7,33 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+# Element
+
+requirement: {
+  type: BANNED_PROPERTY_WRITE
+  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  value: 'Element.prototype.style'
+  whitelist: 'src/style.js'
+}
+
+# CSSStyleDeclaration
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  value: 'CSSStyleDeclaration.prototype.setProperty'
+  whitelist: 'src/style.js'
+}
+
+# History
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
+  value: 'History.prototype.state'
+  whitelist: 'src/history.js'
+}
+
 # Strings
 
 requirement: {
@@ -23,7 +50,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'string.prototype.startsWith is not allowed'
+  error_message: 'Use string.js#startsWith'
   value: 'string.prototype.startsWith'
 }
 
@@ -37,8 +64,6 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'string.prototype.includes is not allowed'
   value: 'string.prototype.includes'
-  # SW code is modern-browser-only.
-  whitelist: 'src/service-worker/core.js'
 }
 
 requirement: {
@@ -207,6 +232,20 @@ requirement: {
   whitelist: 'ads/yandex.js'
   whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
+  whitelist: 'src/service/history-impl.js' # False-positive
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.detail'
+  value: 'MessageEvent.prototype.detail'
+  whitelist: 'src/event-helper.js' # getDetail is implemented here
+
+  # 3p ads are OK
+  whitelist: 'ads/adhese.js'
+  whitelist: 'ads/loka.js'
+  whitelist: 'ads/xlift.js'
 }
 
 requirement: {

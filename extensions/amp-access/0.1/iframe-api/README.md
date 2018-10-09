@@ -16,7 +16,9 @@ limitations under the License.
 
 # amp-access-iframe-api
 
-The access iframe is an experimental implementation of access protocol. It requires "amp-access-iframe" experiment turned on in the AMP document for it to work.
+The access iframe is an implementation of access protocol.
+
+The npm package is available: https://www.npmjs.com/package/amp-access-iframe-api.
 
 The `AmpAccessIframeApi` is the entry point for access iframe implementation. As its main parameter it requires an instance of `AccessController`, which simply implements all methods of access protocol such as `authorize` and `pingback`.
 
@@ -88,18 +90,7 @@ The `config` argument in the `connect` method will contain the original document
 
 ## Authorize method
 
-The `authorize` method checks whether the user should be able to access this document. It's expected to be in the following format:
-
-```
-{
-  granted: true/false,
-  data: {},
-}
-```
-
-Where:
- - `granted` field is a true/false boolean field. It returns true when the document is accessible.
- - `data` is an open-ended JSON structure that can be used for access expressions.
+The `authorize` method checks whether the user should be able to access this document. It's expected to be an open-ended JSON structure that can be used for access expressions.
 
 Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
 

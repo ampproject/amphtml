@@ -19,8 +19,8 @@ tags: {  # amp-story-auto-ads
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story-auto-ads"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -68,6 +68,7 @@ tags: {
     name: "type"
     mandatory: true
     value: "amp-mustache"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER default" }

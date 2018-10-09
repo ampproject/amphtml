@@ -14,43 +14,59 @@
  * limitations under the License.
  */
 import {loadScript} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function nativo(global, data) {
   let ntvAd;
   (function(ntvAd, global, data) {
     global
         .history
         .replaceState(null,
-            null,
+            '',
             location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
     const loc = global.context.location;
+    /**
+     * @param {number} delay
+     * @return {boolean}
+     */
     function isValidDelayTime(delay) {
       return ((typeof delay != 'undefined'
         && !isNaN(delay)
         && parseInt(delay,10) >= 0));
     }
+    /**
+     * @param {!Object} data
+     * @return {boolean}
+     */
     function isDelayedTimeStart(data) {
       return (isValidDelayTime(data.delayByTime)
         && ('delay' in data)
         && !('delayByView' in data));
     }
+    /**
+     * @param {!Object} data
+     * @return {boolean}
+     */
     function isDelayedViewStart(data) {
       return (isValidDelayTime(data.delayByTime)
         && ('delayByView' in data));
     }
+    /**
+     * Loads ad when done.
+     */
     function loadAdWhenViewed() {
       const g = global;
       global.context.observeIntersection(function(positions) {
         const coordinates = getLastPositionCoordinates(positions);
         if (typeof coordinates.rootBounds != 'undefined'
-            && (coordinates
-                .intersectionRect
-                .top == (coordinates
-                  .rootBounds.top + coordinates
-                    .boundingClientRect
-                    .y))) {
+            && (coordinates.intersectionRect.top == (
+              coordinates.rootBounds.top + coordinates.boundingClientRect.y))) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
@@ -58,6 +74,9 @@ export function nativo(global, data) {
         }
       });
     }
+    /**
+     * Loads ad when timeouts.
+     */
     function loadAdWhenTimedout() {
       const g = global;
       setTimeout(function() {
@@ -65,20 +84,30 @@ export function nativo(global, data) {
         delayedAdLoad = true;
       }, parseInt(data.delayByTime, 10));
     }
+    /**
+     * @param {*} positions
+     */
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
     }
+    /**
+     * @param {number} percentage
+     */
     function setPercentageOfadViewed(percentage) {
       percentageOfadViewed = percentage;
     }
-    // Used to track ad during scrolling event and trigger checkIsAdVisible method on PostRelease instance
+    /**
+     * Used to track ad during scrolling event and trigger checkIsAdVisible
+     * method on PostRelease instance
+     * @param {*} positions
+     */
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(
           (((coordinates.intersectionRect
               .height * 100) / coordinates
-                .boundingClientRect
-                .height) / 100));
+              .boundingClientRect
+              .height) / 100));
       global.PostRelease.checkIsAdVisible();
     }
     // Public
@@ -88,7 +117,8 @@ export function nativo(global, data) {
     ntvAd.getScriptURL = function() {
       return 'https://s.ntv.io/serve/load.js';
     };
-    // Configuration setup is based on the parameters/attributes associated with the amp-ad node
+    // Configuration setup is based on the parameters/attributes associated with
+    // the amp-ad node
     ntvAd.setupAd = function() {
       global._prx = [['cfg.Amp']];
       global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.href]);
@@ -102,7 +132,8 @@ export function nativo(global, data) {
         }
       }
     };
-    // Used to Delay Start and Initalize Tracking. This is a callback AMP will use once script is loaded
+    // Used to Delay Start and Initalize Tracking. This is a callback AMP will
+    // use once script is loaded
     ntvAd.Start = function() {
       if (isDelayedTimeStart(data)) {
         loadAdWhenTimedout();

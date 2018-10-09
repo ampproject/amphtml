@@ -89,13 +89,13 @@ export class ViewportBindingDef {
    */
   showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
-  /*
+  /**
    * Disable the scrolling by setting overflow: hidden.
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {}
 
-  /*
+  /**
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {}
@@ -178,4 +178,11 @@ export class ViewportBindingDef {
    * @return {!Element}
    */
   getScrollingElement() {}
+
+  /**
+   * Whether the root scroller is a native root scroller (behaves like a
+   * viewport), or an overflow scroller (scrolls like an element).
+   * @return {boolean}
+   */
+  getScrollingElementScrollsLikeViewport() {}
 }
