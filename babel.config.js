@@ -40,7 +40,6 @@ module.exports = function(api) {
     ],
     'compact': false,
     'sourceType': 'module',
-    'sourceMapsAbsolute': true,
     'ignore': [
       './third_party/closure-library/sha384-generated.js',
     ],

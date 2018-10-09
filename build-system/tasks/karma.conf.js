@@ -62,7 +62,9 @@ module.exports = {
     watch: true,
     debug: true,
     basedir: __dirname + '/../../',
-    transform: ['babelify'],
+    transform: [
+      ['babelify', {'sourceMapsAbsolute': true}],
+    ],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: process.env.TRAVIS ? 5000 : 1200,
   },
