@@ -113,7 +113,6 @@ PASS
 |          <option>brainy</option>
 |          <option>bringhub</option>
 |          <option>caajainfeed</option>
-|          <option>capirs</option>
 |          <option>caprofitx</option>
 |          <option>chargeads</option>
 |          <option>contentad</option>
@@ -171,6 +170,7 @@ PASS
 |          <option>pubmine</option>
 |          <option>pulsepoint</option>
 |          <option>purch</option>
+|          <option>capirs</option>
 |          <option>relap</option>
 |          <option>revcontent</option>
 |          <option>rubicon</option>
