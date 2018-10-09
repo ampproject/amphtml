@@ -130,6 +130,18 @@ describes.realWin('Expander', {
           .to.eventually.equal(expected);
     });
 
+    it('should respect different whitelists on different calls', () => {
+      const url = 'http://www.google.com/?test=RANDOM&a=ABC';
+      expect(expander.expand(url, mockBindings,
+          /* opt_collectVars */ undefined, /* opt_sync */ true,
+          /* opt_whitelist */ {RANDOM: true}))
+          .to.equal('http://www.google.com/?test=0.1234&a=ABC');
+
+      expect(expander.expand(url, mockBindings,
+          /* opt_collectVars */ undefined, /* opt_sync */ true,
+          /* opt_whitelist */ {RANDOM: true, ABC: true}))
+          .to.equal('http://www.google.com/?test=0.1234&a=three');
+    });
   });
 
   describe('#expand', () => {
