@@ -21,8 +21,6 @@ tags: {  # amp-delight-player
     name: "amp-delight-player"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }

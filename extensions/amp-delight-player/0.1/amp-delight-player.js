@@ -378,18 +378,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   setFullHeight_() {
     this.element.classList.add('i-amphtml-expanded');
-    let viewportMeta = document.querySelector('#dl8-meta-viewport');
-    if (!viewportMeta) {
-      viewportMeta = document.createElement('meta');
-      viewportMeta.setAttribute('id', 'dl8-meta-viewport');
-      viewportMeta.setAttribute('name', 'viewport');
-      viewportMeta.setAttribute(
-          'content',
-          `initial-scale = 1.0, maximum-scale = 1.0, 
-          user-scalable = no, width = device-width`
-      );
-      document.head.appendChild(viewportMeta);
-    }
     document.body.classList.add('x-dl8-fullscreen');
   }
 
@@ -399,10 +387,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   setInlineHeight_() {
     this.element.classList.remove('i-amphtml-expanded');
-    const viewportMeta = document.querySelector('#dl8-meta-viewport');
-    if (viewportMeta) {
-      document.head.removeChild(viewportMeta);
-    }
     document.body.classList.remove('x-dl8-fullscreen');
   }
 
