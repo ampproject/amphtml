@@ -1477,15 +1477,6 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-
-    if (isActive) {
-      this.systemLayer_.hideDeveloperLog();
-      this.activePage_.setState(PageState.PAUSED);
-    }
-
-    if (!isActive) {
-      this.activePage_.setState(PageState.ACTIVE);
-    }
   }
 
 
