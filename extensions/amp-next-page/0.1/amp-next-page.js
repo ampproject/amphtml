@@ -17,7 +17,6 @@
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
 import {NextPageService} from './next-page-service';
-import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
@@ -30,7 +29,6 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -101,12 +99,7 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   register_(service, configJson, separator) {
     const {element} = this;
-    const urlService = Services.urlForDoc(element);
-
-    const url = urlService.parse(this.getAmpDoc().getUrl());
-    const sourceOrigin = getSourceOrigin(url);
-
-    const config = assertConfig(element, configJson, url.origin, sourceOrigin);
+    const config = assertConfig(element, configJson, this.getAmpDoc().getUrl());
     service.register(element, config, separator);
     service.setAppendPageHandler(element => this.appendPage_(element));
   }
