@@ -17,6 +17,7 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
+import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
@@ -269,15 +270,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => true);
       element.layoutCount_ = 10;
       element.isFirstLayoutCompleted_ = true;
-      element.signals().signal('render-start');
-      element.signals().signal('load-end');
+      element.signals().signal(CommonSignals.RENDER_START);
+      element.signals().signal(CommonSignals.LOAD_END);
       container.appendChild(element);
       return buildPromise.then(() => {
         expect(buildStub).to.be.called;
         expect(element.layoutCount_).to.equal(0);
         expect(element.isFirstLayoutCompleted_).to.be.false;
-        expect(element.signals().get('render-start')).to.be.null;
-        expect(element.signals().get('load-end')).to.be.null;
+        expect(element.signals().get(CommonSignals.RENDER_START)).to.be.null;
+        expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
       });
     });
 
@@ -291,14 +292,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => false);
       element.layoutCount_ = 10;
       element.isFirstLayoutCompleted_ = true;
-      element.signals().signal('render-start');
-      expect(element.signals().get('render-start')).to.be.ok;
-      element.signals().signal('load-end');
+      element.signals().signal(CommonSignals.RENDER_START);
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+      element.signals().signal(CommonSignals.LOAD_END);
       container.appendChild(element);
       expect(element.layoutCount_).to.equal(10);
       expect(element.isFirstLayoutCompleted_).to.be.true;
-      expect(element.signals().get('render-start')).to.be.ok;
-      expect(element.signals().get('load-end')).to.be.ok;
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
     });
 
     it('Element - getIntersectionChangeEntry', () => {
@@ -550,7 +551,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
-      expect(element.signals().get('built')).to.not.be.ok;
+      expect(element.signals().get(CommonSignals.BUILT)).to.not.be.ok;
 
       clock.tick(1);
       container.appendChild(element);
@@ -559,7 +560,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
         expect(testElementBuildCallback).to.be.calledOnce;
-        expect(element.signals().get('built')).to.be.ok;
+        expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
         return element.whenBuilt(); // Should eventually resolve.
       });
     });
@@ -863,11 +864,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(testElementLayoutCallback).to.be.calledOnce;
         expect(testElementPreconnectCallback).to.have.callCount(2);
         expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
-        expect(element.signals().get('load-start')).to.be.ok;
-        expect(element.signals().get('load-end')).to.be.null;
+        expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
+        expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
         return p.then(() => {
           expect(element.readyState).to.equal('complete');
-          expect(element.signals().get('load-end')).to.be.ok;
+          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
         });
       });
     });
@@ -1199,6 +1200,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element).to.have.class('i-amphtml-layout-awaiting-size');
       element.changeSize(100, 100);
       expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
+    });
+
+    it('should signal size-changed when size changed', () => {
+      const element = new ElementClass();
+      element.changeSize();
+      expect(element.signals().get(CommonSignals.CHANGE_SIZE_END)).to.be.ok;
+      return element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END);
     });
 
     describe('unlayoutCallback', () => {
@@ -1718,7 +1726,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should ignore loading-on if already rendered', () => {
       stubInA4A(false);
       clock.tick(1);
-      element.signals().signal('render-start');
+      element.signals().signal(CommonSignals.RENDER_START);
       element.toggleLoading(true);
       expect(element.loadingElement_).to.be.null;
     });
@@ -1735,7 +1743,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       clock.tick(1);
       const stub = sandbox.stub(element, 'toggleLoading');
       element.renderStarted();
-      expect(element.signals().get('render-start')).to.be.ok;
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
       expect(stub).to.be.calledOnce;
       expect(stub.args[0][0]).to.be.false;
     });
