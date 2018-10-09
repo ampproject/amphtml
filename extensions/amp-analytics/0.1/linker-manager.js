@@ -289,9 +289,11 @@ export class LinkerManager {
   /**
    * Check to see if any linker configs match this form's url, if so, send
    * along the resolved linker value
-   * @param {HTMLFormElement} form
+   * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
-  handleFormSubmit_(form) {
+  handleFormSubmit_(event) {
+    const {form, actionXhrMutator} = event;
+
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];
       const /** @type {Array} */ domains = config['destinationDomains'];
@@ -301,26 +303,50 @@ export class LinkerManager {
       const {hostname} = this.urlService_.parse(url);
 
       if (this.isDomainMatch_(hostname, domains)) {
-        this.addDataToForm_(form, linkerName);
+        this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
   }
 
 
   /**
-   * Add the linker pairs as <input> elements to form.
+   * Add the linker data to form. If action-xhr is present we can update the
+   * action-xhr, if not we fallback to adding hidden inputs.
    * @param {!Element} form
+   * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
    */
-  addDataToForm_(form, linkerName) {
-    if (!this.resolvedLinkers_[linkerName]) {
+  addDataToForm_(form, actionXhrMutator, linkerName) {
+    const linkerValue = this.resolvedLinkers_[linkerName];
+    if (!linkerValue) {
       return;
     }
 
+    // Runtime controls submits with `action-xhr`, so we can append the linker
+    // param
+    const actionXhrUrl = form.getAttribute('action-xhr');
+    if (actionXhrUrl) {
+      const decoratedUrl = addParamToUrl(actionXhrUrl, linkerName, linkerValue);
+      return actionXhrMutator(decoratedUrl);
+    }
+
+    // If we are not using `action-xhr` it must be a GET request using the
+    // standard action attribute. Browsers will not let you change this in the
+    // middle of a submit, so we add the input hidden attributes.
+    this.addHiddenInputs_(form, linkerName, linkerValue);
+  }
+
+  /**
+   * Add the linker pairs as <input> elements to form.
+   * @param {!Element} form
+   * @param {string} linkerName
+   * @param {string} linkerValue
+   */
+  addHiddenInputs_(form, linkerName, linkerValue) {
     const attrs = dict({
       'type': 'hidden',
       'name': linkerName,
-      'value': this.resolvedLinkers_[linkerName],
+      'value': linkerValue,
     });
 
     const inputEl = createElementWithAttributes(
