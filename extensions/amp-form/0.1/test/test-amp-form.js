@@ -242,7 +242,7 @@ describes.repeated('', {
         expect(fireStub.calledOnce).to.be.true;
         return expect(fireStub).calledWith({
           form,
-          destinationSetter: sinon.match.func,
+          actionXhrMutator: sinon.match.func,
         });
       });
     });

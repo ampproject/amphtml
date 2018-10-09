@@ -490,7 +490,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         const form = createForm();
         form.setAttribute('action', 'https://www.ampproject.com');
         const setterSpy = sandbox.spy();
-        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy.notCalled).to.be.true;
         const el = form.firstChild;
@@ -522,7 +522,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('method', 'get');
 
         const setterSpy = sandbox.spy();
-        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy.calledOnce).to.be.true;
 
@@ -551,7 +551,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('method', 'post');
 
         const setterSpy = sandbox.spy();
-        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy.calledOnce).to.be.true;
 
@@ -579,7 +579,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
         const setterSpy = sandbox.spy();
-        linkerManager.handleFormSubmit_({form, destinationSetter: setterSpy});
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
         expect(setterSpy.notCalled).to.be.true;
         return expect(form.children.length).to.equal(0);
       });
@@ -621,8 +621,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         const form = createForm();
         form.setAttribute('action', 'https://www.source.com');
         const setterSpy = sandbox.spy();
-        manager1.handleFormSubmit_({form, destinationSetter: setterSpy});
-        manager2.handleFormSubmit_({form, destinationSetter: setterSpy});
+        manager1.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+        manager2.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy.notCalled).to.be.true;
         const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
