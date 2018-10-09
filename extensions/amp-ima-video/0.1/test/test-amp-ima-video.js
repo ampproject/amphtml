@@ -677,6 +677,64 @@ describes.realWin('amp-ima-video', {
     //expect(showControlsSpy).to.have.been.called;
   });
 
+  it('mutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = {};
+    videoMock.muted = false;
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(false);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.true;
+  });
+
+  it('unmutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = {};
+    videoMock.muted = false;
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(true);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.false;
+  });
+
+
+
   it('pauses video after webkit end fullscreen', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
