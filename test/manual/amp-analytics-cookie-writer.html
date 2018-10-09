@@ -31,7 +31,7 @@
 </head>
 <h1>Instructions</h1>
 <p>
-  This page is intended to test the amp-analytics writeCookies config.
+  This page is intended to test the amp-analytics cookies config.
 </p>
 <p>
   Copy the value in the console and append to the url.
@@ -102,7 +102,7 @@
 
   const serializedIds1 = 'key1*dmFsdWUx*name*Ym9i*color*Z3JlZW4.*car*dGVzbGE.';
   const checksum1 = getCheckSum(serializedIds1);
-  const serializedIds2 = '~key1*123'
+  const serializedIds2 = 'key1*dmFsdWUx';
   const checksum2 = getCheckSum(serializedIds2);
 
   const url1 = `1*${checksum1}*${serializedIds1}`;
@@ -130,9 +130,13 @@
       "xhrpost": "false",
       "image": "true"
     },
-    "writeCookies": {
-      "cookie1": "QUERY_PARAM(test)",
-      "cookie2": "LINKER_PARAM(testlinker, name)"
+    "cookies": {
+      "cookie1": {
+        "value": "QUERY_PARAM(test)"
+      },
+      "cookie2": {
+        "value": "LINKER_PARAM(testlinker, name)"
+      }
     }
   }
   </script>
@@ -155,8 +159,10 @@
       "xhrpost": "false",
       "image": "true"
     },
-    "writeCookies": {
-      "cookie3": "LINKER_PARAM(testlinker, color)"
+    "cookies": {
+      "cookie3": {
+        "value": "LINKER_PARAM(testlinker, color)"
+      }
     }
   }
   </script>
@@ -179,11 +185,19 @@
       "xhrpost": "false",
       "image": "true"
     },
-    "writeCookies": {
-      "cookie4": "LINKER_PARAM(testlinker, key1)",
-      "cookie5": "LINKER_PARAM(testlinker2, key1)",
-      "cookie6": "LINKER_PARAM(noexist, key1)",
-      "cookie7": "QUERY_PARAM(noexist)"
+    "cookies": {
+      "cookie4": {
+        "value": "LINKER_PARAM(testlinker, key1)"
+      },
+      "cookie5": {
+        "value": "LINKER_PARAM(testlinker2, key1)"
+      },
+      "cookie6": {
+        "value": "LINKER_PARAM(noexist, key1)"
+      },
+      "cookie7": {
+        "value": "QUERY_PARAM(noexist)"
+      }
     }
   }
   </script>
