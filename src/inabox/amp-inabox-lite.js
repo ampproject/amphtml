@@ -86,8 +86,7 @@ installPerformanceService(self); // TODO: to be removed
 
 self.document.documentElement.classList.add('i-amphtml-inabox');
 const fullCss = cssText
-    + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
-    + 'html.i-amphtml-inabox>body{position:initial!important}';
+    + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
 installStylesForDoc(ampdoc, fullCss, () => {
   // Core services.
   installRuntimeServices(self);
