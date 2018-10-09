@@ -121,7 +121,7 @@ export class Mask {
 
   /** @override */
   dispose() {
-    this.controller_.dispose();
+    this.controller_./*OK*/remove();
     this.controller_ = null;
   }
 }
