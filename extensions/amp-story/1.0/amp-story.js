@@ -1314,8 +1314,10 @@ export class AmpStory extends AMP.BaseElement {
 
     const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
     if (pageState == PageState.ACTIVE) {
+      // Attach click listener in amp-story to enable navigation.
       this.advancement_.start();
     } else if (pageState == PageState.PAUSED) {
+      // Detach click listener in amp-story to block navigation.
       this.advancement_.stop();
     }
     this.activePage_.setState(pageState);
