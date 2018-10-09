@@ -68,7 +68,7 @@
 
   <h2>AMP List Basic</h2>
   <p>Test this under slow internet (throttle to slow 3G).</p>
-  <amp-list width="396" height="80" layout="responsive" auto-resize
+  <amp-list width="396" height="80" layout="responsive" auto-resize reset-on-refresh
       src="/test/manual/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -82,6 +82,21 @@
   </amp-list>
 
   <div class="split"></div>
+
+  <h2>AMP List Basic Below fold</h2>
+  <p>Test this under slow internet (throttle to slow 3G).</p>
+  <amp-list width="396" height="80" layout="responsive" auto-resize reset-on-refresh
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
 
   <h2>AMP List Resize with Accordion</h2>
   <amp-list width="396" height="80" layout=responsive reset-on-refresh auto-resize

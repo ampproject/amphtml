@@ -484,12 +484,21 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 /**
  * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
  * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
- * for alighning the loading indicator, while `i-amphtml-loader` and
+ * for aligning the loading indicator, while `i-amphtml-loader` and
  * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
  * default implementation includes the three-dot layout and animation.
  */
 .i-amphtml-loading-container.amp-hidden {
   visibility: hidden;
+}
+
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the auto-resize attribute, the loader
+ * should be fully hidden and not take up space.
+ */
+amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
 }
 
 .i-amphtml-loader-line {
