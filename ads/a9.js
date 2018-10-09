@@ -16,6 +16,7 @@
 
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 const mandatoryParams = [],
     optionalParams = [
@@ -173,8 +174,8 @@ function loadSearTag(global, data) {
       const str = (data.amzn_assoc_fallback_mode).split(',');
       let types = str[0].split(':');
       let typev = str[1].split(':');
-      types = JSON.parse(types[1]);
-      typev = JSON.parse(typev[1]);
+      types = parseJson(types[1]);
+      typev = parseJson(typev[1]);
       global['amzn_assoc_fallback_mode'] = {
         'type': types,
         'value': typev,
