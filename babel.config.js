@@ -23,6 +23,8 @@
  * 3. Preset ordering is reversed (last to first).
  */
 
+'use strict';
+
 module.exports = function(api) {
   api.cache(true);
   return {
@@ -31,15 +33,14 @@ module.exports = function(api) {
         'modules': 'commonjs',
         'loose': true,
         'targets': {
-          'browsers': [
-            'Last 2 versions',
-            'safari >= 9',
-          ],
+          'browsers': process.env.TRAVIS ?
+            ['Last 2 versions', 'safari >= 9'] : ['Last 2 versions'],
         },
       }],
     ],
     'compact': false,
     'sourceType': 'module',
+    'sourceMapsAbsolute': true,
     'ignore': [
       './third_party/closure-library/sha384-generated.js',
     ],
