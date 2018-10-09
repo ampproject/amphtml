@@ -330,7 +330,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-carousel-chrome-scroll-snap',
-    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
