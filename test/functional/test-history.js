@@ -722,7 +722,8 @@ describes.fakeWin('Local Hash Navigation', {
   });
 
   // TODO(alabiaga, #18574): Fails because FakeDom freezes history state.
-  it.skip('should push a new state and replace it for target on Natural', () => {
+  it.skip('should push a new state and replace it for ' +
+      'target on Natural', () => {
     history = new History(new AmpDocSingle(env.win),
         new HistoryBindingNatural_(env.win));
     const startIndex = env.win.history.index;
