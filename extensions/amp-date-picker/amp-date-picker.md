@@ -382,7 +382,7 @@ document that sets a minimum height for the date picker.
 
 ##### allow-blocked-ranges
 
-If present, this attribute prevents the user from selecting a range with a blocked date.
+If present, this attribute allows the user to select a range containing blocked date(s).
 By default, this attribute is not present.
 
 ##### src
