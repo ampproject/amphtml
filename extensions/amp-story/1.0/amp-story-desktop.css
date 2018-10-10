@@ -153,8 +153,16 @@ amp-story[standalone][desktop] {
   border-radius: 16px !important;
 }
 
+[dir=rtl] [desktop] amp-story-page.i-amphtml-element {
+  transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+}
+
 [desktop] amp-story-page[i-amphtml-visited] {
   transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+}
+
+[dir=rtl] [desktop] amp-story-page[i-amphtml-visited] {
+  transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[i-amphtml-desktop-position="-2"],
@@ -181,7 +189,9 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] amp-story-page[active],
-[desktop] amp-story-page[i-amphtml-desktop-position="0"] {
+[dir=rtl] [desktop] amp-story-page[active],
+[desktop] amp-story-page[i-amphtml-desktop-position="0"],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="0"] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
   opacity: 1 !important;
 }
