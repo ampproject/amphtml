@@ -366,7 +366,7 @@ The following example demonstrates a form `submit-success` response with [`amp-b
   </form>
  ``` 
 
- If the form is submitted successfully it will return a JSON response similar to the following: 
+ When the form is submitted successfully it will return a JSON response similar to the following: 
 
 ```json
 {
