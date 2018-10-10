@@ -1086,13 +1086,12 @@ export class AmpStory extends AMP.BaseElement {
       }
     }
 
-    const plusOneId = targetPage.getNextPageId(false /** isAutomaticAdvance */);
+    const plusOneId = targetPage.getNextPageId();
     if (plusOneId) {
       const plusOnePage = this.getPageById(plusOneId);
       list.push({page: plusOnePage, position: 1});
 
-      const plusTwoId =
-          plusOnePage.getNextPageId(false /** isAutomaticAdvance */);
+      const plusTwoId = plusOnePage.getNextPageId();
       if (plusTwoId) {
         list.push({page: this.getPageById(plusTwoId), position: 2});
       }
@@ -1106,8 +1105,8 @@ export class AmpStory extends AMP.BaseElement {
           desktopPositionsToReset =
               scopedQuerySelectorAll(
                   this.element,
-                  escapeCssSelectorIdent(
-                      `amp-story-page[${Attributes.DESKTOP_POSITION}]`));
+                  `amp-story-page[
+                      ${escapeCssSelectorIdent(Attributes.DESKTOP_POSITION)}]`);
         },
         /** mutator */
         () => {
