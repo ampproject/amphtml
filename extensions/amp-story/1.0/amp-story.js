@@ -994,7 +994,9 @@ export class AmpStory extends AMP.BaseElement {
           oldPage.setState(PageState.NOT_ACTIVE);
 
           // Indication that this should be offscreen to left in desktop view.
-          setAttributeInMutate(oldPage, Attributes.VISITED);
+          this.getPageIndex(oldPage) < pageIndex ?
+            setAttributeInMutate(oldPage, Attributes.VISITED) :
+            removeAttributeInMutate(oldPage, Attributes.VISITED);
         }
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
