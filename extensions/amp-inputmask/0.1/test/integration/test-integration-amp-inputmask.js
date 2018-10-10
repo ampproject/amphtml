@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../../../src/services';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 
@@ -29,19 +28,11 @@ describes.integration('amp-inputmask', {
   extensions: ['amp-form', 'amp-inputmask'],
   experiments: ['amp-inputmask'],
 }, env => {
-  let win, doc, ampInputmask;
+  let win, doc;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    return Services.inputmaskServiceForDoc(win.document).then(service => {
-      ampInputmask = service;
-      ampInputmask.install();
-    });
-  });
-
-  afterEach(() => {
-    ampInputmask.uninstall();
   });
 
   describe('mask attribute', () => {
