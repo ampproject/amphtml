@@ -50,6 +50,10 @@ const imports = {
     'scopedQuerySelector',
     'scopedQuerySelectorAll',
   ],
+  'src/log': [
+    'user',
+    'dev',
+  ]
 };
 
 module.exports = function(context) {
