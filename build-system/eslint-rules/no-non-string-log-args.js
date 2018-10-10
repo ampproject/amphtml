@@ -77,18 +77,19 @@ module.exports = function(context) {
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
-      const calleeObject = node.callee.object;
+      const callee = node.callee;
+      const calleeObject = callee.object;
       if (!calleeObject ||
           calleeObject.type !== 'CallExpression') {
         return;
       }
 
       // Make sure that the CallExpression is one of dev() or user().
-      if(!['dev', 'user'].includes(node.callee.object.callee.name)) {
+      if(!['dev', 'user'].includes(calleeObject.callee.name)) {
         return;
       }
 
-      const methodInvokedName = node.callee.property.name;
+      const methodInvokedName = callee.property.name;
       // Find the position of the argument we care about.
       const metadata = getMetadata(methodInvokedName);
 
