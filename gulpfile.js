@@ -741,7 +741,6 @@ function buildExtensionJs(path, name, version, options) {
   }));
 }
 
-
 /**
  * Prints a message that could help speed up local development.
  */

@@ -15,7 +15,6 @@
  */
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-// TODO(choumx): This requires changing line 1 to "module.exports = ...".
 import {MainThread} from '@ampproject/worker-dom/dist/index.safe.patched';
 import {
   calculateExtensionScriptUrl,
@@ -26,8 +25,6 @@ import {getMode} from '../../../src/mode';
 /** @const {string} */
 const TAG = 'amp-script';
 
-// TODO(choumx): Compiled output from worker-dom's TypeScript source is lacking
-// Closure type annotations. worker-dom needs tsickle integration.
 export class AmpScript extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
