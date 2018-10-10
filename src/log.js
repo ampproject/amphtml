@@ -485,22 +485,19 @@ function pushIfNonEmpty(array, val) {
  * @return {!Error};
  */
 export function duplicateErrorIfNecessary(error) {
-  const {message} = error;
-  const test = String(Math.random());
-  error.message = test;
-
-  if (error.message === test) {
-    error.message = message;
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
     return error;
   }
 
-  const e = new Error(error.message);
+  const {message, stack} = error;
+  const e = new Error(message);
   // Copy all the extraneous things we attach.
   for (const prop in error) {
     e[prop] = error[prop];
   }
   // Ensure these are copied.
-  e.stack = error.stack;
+  e.stack = stack;
   return e;
 }
 

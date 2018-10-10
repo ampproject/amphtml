@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
@@ -22,6 +22,7 @@ const colors = require('ansi-colors');
 const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
@@ -265,7 +266,6 @@ exports.getGraph = function(entryModules, config) {
   // The second stage are transforms that closure compiler supports
   // directly and which we don't want to apply during deps finding.
       .transform(babelify, {
-        babelrc: false,
         compact: false,
         plugins: [
           require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
@@ -385,7 +385,9 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
+  if (!process.env.TRAVIS) {
+    log('Writing transforms to', colors.cyan(graph.tmp));
+  }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
     // Don't transform node_module files for now and just copy it.
@@ -394,7 +396,6 @@ function transformPathsToTempDir(graph, config) {
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
-        babelrc: false,
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);

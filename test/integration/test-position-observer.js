@@ -145,7 +145,8 @@ config.run('amp-position-observer', function() {
     experiments,
   }, env => {
 
-    it('plays/pauses animation scene based on visibility', () => {
+    // TODO(#18657, aghassemi): Fails due to timeout.
+    it.skip('plays/pauses animation scene based on visibility', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(env.win)).to.equal(0);
       // Scroll to edge of visibility

@@ -500,10 +500,6 @@ function runTests() {
     c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
-        compact: false,
-        // Transform files in node_modules since deps use ES6 export.
-        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
-        global: true,
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [

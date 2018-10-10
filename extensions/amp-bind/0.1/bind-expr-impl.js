@@ -61,7 +61,7 @@ import {AstNode, AstNodeType} from './bind-expr-defines';
 
         options: {
             ranges: boolean           (optional: true ==> token location info will include a .range[] member)
-            flex: boolean             (optional: true ==> flex-like lexing behavior where the rules are tested exhaustively to find the longest match)
+            flex: boolean             (optional: true ==> flex-like lexing behaviour where the rules are tested exhaustively to find the longest match)
             backtrack_lexer: boolean  (optional: true ==> lexer regexes are tested in order and for each matching regex the action code is invoked; the lexer terminates the scan when a token is returned by the action code)
         },
 
@@ -418,7 +418,7 @@ parse: function parse(input) {
         vstack.length = vstack.length - n;
         lstack.length = lstack.length - n;
     }
-    _token_stack:
+
         var lex = function () {
             var token;
             token = lexer.lex() || EOF;
