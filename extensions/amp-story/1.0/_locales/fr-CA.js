@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Canadian French strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Acceptez',
   },
@@ -95,4 +95,4 @@ export default {
     string: 'Nous sommes désolés, il semble que votre navigateur ne supporte ' +
         'pas cette expérience',
   },
-};
+});
