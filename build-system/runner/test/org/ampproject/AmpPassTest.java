@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
-import com.google.javascript.jscomp.Es6CompilerTestCase;
+import com.google.javascript.jscomp.CompilerTestCase;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
@@ -16,7 +16,7 @@ import com.google.javascript.rhino.Node;
 /**
  * Tests {@link AmpPass}.
  */
-public class AmpPassTest extends Es6CompilerTestCase {
+public class AmpPassTest extends CompilerTestCase {
 
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev",
@@ -305,7 +305,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
   }
 
   public void testOptimizeGetModeFunction() throws Exception {
-    testEs6(
+    test(
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",
@@ -321,7 +321,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
   }
 
   public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
-    testEs6(
+    test(
         LINE_JOINER.join(
             "var a = 'hello';",
             "self.AMP.extension('hello', '0.1', function(AMP) {",
@@ -339,7 +339,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
   }
 
   public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
-    testEs6(
+    test(
         LINE_JOINER.join(
             "var a = 'hello';",
             "AMP.extension('hello', '0.1', function(AMP) {",

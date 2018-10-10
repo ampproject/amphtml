@@ -139,10 +139,13 @@ function getUrl(context, data, ns) {
  *    representation of the url search query.
  */
 function reduceSearch(ns, placementId, click, referrer) {
-  const isRecipeLoaded = hasOwn(ns.args, 'placementId'),
-      isRecipeStale = !isRecipeLoaded ? true :
-        (Date.now() - ns.args[placementId].requestTime) > (60 * cacheTime),
-      needsRequest = !isRecipeLoaded || isRecipeStale;
+  const isRecipeLoaded = hasOwn(ns.args, 'placementId');
+  let isRecipeStale = true;
+  if (isRecipeLoaded) {
+    const info = ns.args[placementId];
+    isRecipeStale = (Date.now() - info['requestTime']) > (60 * cacheTime);
+  }
+  const needsRequest = !isRecipeLoaded || isRecipeStale;
 
   return !needsRequest ? null : dict({
     'click': click,

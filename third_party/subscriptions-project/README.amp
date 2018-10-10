@@ -6,4 +6,5 @@ Description:
 Subscriptions Project and its exports.
 
 Local Modifications:
-Use `gulp export-to-es-all` in the subscriptions-project repos to create exports usable in AMP.
+- Use `gulp export-to-es-all` in the subscriptions-project repos to create exports usable in AMP.
+- Use regex `(!|\?)\.[^>)}]*` to replace missing type paths with `*`.
