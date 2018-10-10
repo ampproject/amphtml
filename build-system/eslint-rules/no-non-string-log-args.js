@@ -21,7 +21,7 @@
  *   startPos: number
  * }}
  */
-let LogMethodMetadataDef
+let LogMethodMetadataDef;
 
 
 /**
@@ -77,8 +77,9 @@ module.exports = function(context) {
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
-      if (!node.callee.object ||
-          node.callee.object.type !== 'CallExpression') {
+      const calleeObject = node.callee.object;
+      if (!calleeObject ||
+          calleeObject.type !== 'CallExpression') {
         return;
       }
 
@@ -100,11 +101,6 @@ module.exports = function(context) {
       const argToEval = node.arguments[metadata.startPos];
 
       if (!argToEval) {
-        context.report({
-          node: node,
-       	  message: `No argument passed into expected message parameter ` +
-            `number ${metadata.startPos}`,
-        });
         return;
       }
 
@@ -114,14 +110,14 @@ module.exports = function(context) {
       ].join(' ');
 
       if (metadata.variadic) {
-        errMsg += 'If you want to pass data to the string, use `%s` ';
+        errMsg += '\n\tIf you want to pass data to the string, use `%s` ';
         errMsg += 'placeholders and pass additional arguments';
       }
 
       if (!isMessageString(argToEval)) {
         context.report({
           node: argToEval,
-       	  message: errMsg,
+          message: errMsg,
         });
       }
     },
