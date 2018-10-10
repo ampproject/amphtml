@@ -244,7 +244,7 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 ## Success/error response rendering
 
-You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success reponses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
+You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success responses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
 
 | Response attribute | Description |
 |-----------|---------------------|
@@ -349,27 +349,24 @@ The following example demonstrates a form `submit-success` response with [`amp-b
 ```html
   <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Subscribe to our newsletter</p>
   <form method="post"
-        class="p2"
         action-xhr="/components/amp-form/submit-form-input-text-xhr"
         target="_top"
         on="submit-success: AMP.setState({'subscribe': event.response.name})">
-    <div class="ampstart-input inline-block relative m0 p0 mb3">
+    <div>
       <input type="text"
-          class="block border-none p0 m0"
           name="name"
           placeholder="Name..."
           required>
       <input type="email"
-        class="block border-none p0 m0"
         name="email"
         placeholder="Email..."
         required>
     </div>
-    <input type="submit" value="Subscribe" class="ampstart-btn caps">
+    <input type="submit" value="Subscribe">
   </form>
  ``` 
 
- On success: 
+ If the form is submitted successfully it will return a JSON response similar to the following: 
 
 ```json
 {
@@ -377,7 +374,7 @@ The following example demonstrates a form `submit-success` response with [`amp-b
   "email": "email@example.com"
 }
 ```
-The `<p>` text will update:
+Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
 
 ```html
 ...
