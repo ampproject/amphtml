@@ -21,10 +21,11 @@
  *   startPos: number
  * }}
  */
-const LogMethodMetadata = null;
+let LogMethodMetadataDef
+
 
 /**
- * @type {!Array<LogMethodMetadata>}
+ * @type {!Array<LogMethodMetadataDef>}
  */
 const transformableMethods = [
   {name: 'assert', variadic: false, startPos: 1},
@@ -46,36 +47,27 @@ const transformableMethods = [
  * @param {!Node} node
  * @return {boolean}
  */
-function areAllArgumentsLiteral(node) {
+function isMessageString(node) {
   if (node.type === 'Literal') {
-    return true;
+    return typeof node.value === 'string';
   }
   // Allow for string concatenation operations.
   if (node.type === 'BinaryExpression' && node.operator === '+') {
-    if (areAllArgumentsLiteral(node.left) &&
-        areAllArgumentsLiteral(node.right)) {
-      return true;
-    }
+    return isMessageString(node.left) && isMessageString(node.right);
   }
   return false;
 }
 
 /**
  * @param {string} name
- * @return {!LogMethodMetadata}
+ * @return {!LogMethodMetadataDef}
  */
 function getMetadata(name) {
-  for (let i = 0; i < transformableMethods.length; i++) {
-    const curTransformableMethod = transformableMethods[i];
-    if (curTransformableMethod.name === name) {
-      return curTransformableMethod;
-    }
-  }
-  return null;
+  return transformableMethods.find(cur => cur.name === name);
 }
 
-const expressions = transformableMethods.map(x => {
-  return `CallExpression[callee.property.name=${x.name}]`;
+const expressions = transformableMethods.map(method => {
+  return `CallExpression[callee.property.name=${method.name}]`;
 }).join(',');
 
 
@@ -85,8 +77,8 @@ module.exports = function(context) {
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
-      if (!(node.callee.object &&
-          node.callee.object.type === 'CallExpression')) {
+      if (!node.callee.object ||
+          node.callee.object.type !== 'CallExpression') {
         return;
       }
 
@@ -116,13 +108,20 @@ module.exports = function(context) {
         return;
       }
 
-      if (!areAllArgumentsLiteral(argToEval)) {
+      let errMsg = [
+        `Must use a literal string for argument[${metadata.startPos}]`,
+        `on ${metadata.name} call.`
+      ].join(' ');
+
+      if (metadata.variadic) {
+        errMsg += 'If you want to pass data to the string, use `%s` ';
+        errMsg += 'placeholders and pass additional arguments';
+      }
+
+      if (!isMessageString(argToEval)) {
         context.report({
           node: argToEval,
-       	  message: `Must use a literal string at method invocation ` +
-              `"${metadata.name}" on argument position ${metadata.startPos}. ` +
-              `No other Node type is allowed besides Raw strings or string ` +
-              `concatenation operations.`,
+       	  message: errMsg,
         });
       }
     },
