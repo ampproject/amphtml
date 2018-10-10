@@ -102,10 +102,9 @@ function patchRegisterElement() {
 }
 
 /**
- * Performs patches/copies of @ampproject/worker-dom for amp-script.
+ * Patch @ampproject/worker-dom/dist/index.safe.js with ES6 export.
  */
 function patchWorkerDom() {
-  // Patch @ampproject/worker-dom/dist/index.safe.js with ES6 export.
   let file;
   const patchedName =
       'node_modules/@ampproject/worker-dom/dist/index.safe.patched.js';
@@ -118,14 +117,6 @@ function patchWorkerDom() {
   file = file.replace('var MainThread=function(R){',
       'export const MainThread=function(R){');
   writeIfUpdated(patchedName, file);
-
-  // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
-  // TODO(choumx): Compile this binary after worker-dom externs are available.
-  fs.mkdirsSync('dist/v0');
-  fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-      'dist/v0/amp-script-worker-0.1.js');
-  fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-      'dist/v0/amp-script-worker-0.1.max.js');
 }
 
 /**
