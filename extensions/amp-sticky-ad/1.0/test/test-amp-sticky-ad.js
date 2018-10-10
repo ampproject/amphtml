@@ -355,7 +355,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       callback();
     };
     Object.defineProperty(
-        impl.element, 'offsetHeight', {value: function() {return 20;}});
+        impl.element, 'offsetHeight', {value: 20});
 
     impl.display_();
     impl.ad_.signals().signal('built');
@@ -395,7 +395,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
       callback();
     };
     Object.defineProperty(
-        impl.element, 'offsetHeight', {value: function() {return 20;}});
+        impl.element, 'offsetHeight', {value: 20});
 
     impl.display_();
     impl.ad_.signals().signal('built');
