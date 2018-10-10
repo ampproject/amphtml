@@ -29,6 +29,15 @@ export let EntitlementChangeEventDef;
 /** @const */
 const TAG = 'amp-subscriptions';
 
+/**
+ * @typedef {{
+ *   platform: !./subscription-platform.SubscriptionPlatform,
+ *   weight: number,
+ * }}
+ */
+let PlatformWeightDef;
+
+
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
@@ -79,7 +88,7 @@ export class PlatformStore {
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
 
-    /** @private @canst {!./entitlement.Entitlement} */
+    /** @private @const {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
@@ -128,7 +137,7 @@ export class PlatformStore {
   }
 
   /**
-   * Returns the local platform;
+   * Returns the local platform
    * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
@@ -225,7 +234,7 @@ export class PlatformStore {
 
     this.grantStatusPromise_ = new Deferred();
 
-    // Check if current entitlements unblocks the reader
+    // Check if current entitlements unblock the reader
     for (const key in this.entitlements_) {
       const entitlement = (this.entitlements_[key]);
       if (entitlement.granted) {
@@ -235,7 +244,7 @@ export class PlatformStore {
     }
 
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if non of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
@@ -258,7 +267,7 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
-    // The entitlement will be stored either if its the first one to grant
+    // The entitlement will be stored if either it is the first one to grant
     // or the new one has full subscription but the last one didn't.
     if ((!this.grantStatusEntitlement_ && entitlement.granted)
         || (this.grantStatusEntitlement_
@@ -313,7 +322,7 @@ export class PlatformStore {
     }
     this.allResolvedPromise_ = new Deferred();
     if (this.areAllPlatformsResolved_()) {
-      // Resolve with null if none of the entitlements unblocks the reader
+      // Resolve with null if none of the entitlements unblock the reader
       this.allResolvedPromise_.resolve(
           this.getAvailablePlatformsEntitlements_());
     } else {
@@ -387,21 +396,18 @@ export class PlatformStore {
    * weight. Every platform starts with weight 0 and evaluated against
    * the following parameters,
    * - base weight
-   * - weight factors the platform supports multiploed by score in the config
+   * - weight factors the platform supports multiplied by score in the config
    *
    * In the end candidate with max weight is selected. However if candidate's
    * weight is equal to local platform, then local platform is selected.
    * @return {!./subscription-platform.SubscriptionPlatform}
-   * @param {string=} optionalFactor if present only use this factor for calculation
    * @private
    */
-  selectApplicablePlatform_(optionalFactor) {
-    const localPlatform = this.getLocalPlatform();
-
+  selectApplicablePlatform_() {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    // Subscriber wins immediatly.
+    // Subscriber wins immediately.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
@@ -412,7 +418,53 @@ export class PlatformStore {
       }
     }
 
-    const platformWeights = this.getAllPlatformWeights_(optionalFactor);
+    return this.rankPlatformsByWeight_(this.getAllPlatformWeights_());
+  }
+
+  /**
+   * Calculate and return weights for all platforms
+   * @return {!Array<!PlatformWeightDef>}
+   * @private
+   */
+  getAllPlatformWeights_() {
+    // Get weights for all of the platforms.
+    return this.getAvailablePlatforms().map(platform => {
+      return {
+        platform,
+        weight: this.calculatePlatformWeight_(platform),
+      };
+    });
+  }
+
+  /**
+   * Calculate platform weight
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   * @return {number}
+   * @private
+   */
+  calculatePlatformWeight_(platform) {
+    const factorWeights = [0]; // reduce always needs something to work with
+
+    // Start with base score
+    const weight = platform.getBaseScore();
+
+    // Iterate score factors checking service support
+    for (const factor in this.scoreConfig_) {
+      if (hasOwn(this.scoreConfig_, factor)) {
+        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
+      }
+    }
+
+    return weight + factorWeights.reduce((a, b) => { return a + b; });
+  }
+
+  /**
+   * @param {!Array<!PlatformWeightDef>} platformWeights
+   * @return {!./subscription-platform.SubscriptionPlatform}
+   * @private
+   */
+  rankPlatformsByWeight_(platformWeights) {
+    const localPlatform = this.getLocalPlatform();
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
       if (platform2.weight == platform1.weight &&
@@ -425,43 +477,23 @@ export class PlatformStore {
   }
 
   /**
-   * Calculate and return weights for all platforms
-   * @return {!Array<{platform:!./subscription-platform.SubscriptionPlatform, weight: number}>}
-   * @param {string=} optionalFactor if present only use this factor for calculation
+   * Returns most qualified platform for the specified factor.
+   *
+   * In the end candidate with max weight is selected. However if candidate's
+   * weight is equal to local platform, then local platform is selected.
+   *
+   * @param {string} factor
+   * @return {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
-  getAllPlatformWeights_(optionalFactor) {
-    // Get weights for all of the platforms
-    return this.getAvailablePlatforms().map(platform => {
-      return {
-        platform,
-        weight: this.calculatePlatformWeight_(platform, optionalFactor),
-      };
+  selectApplicablePlatformForFactor_(factor) {
+    /** @type {!Array<!PlatformWeightDef>} */
+    const platformWeights = this.getAvailablePlatforms().map(platform => {
+      const factorValue = platform.getSupportedScoreFactor(factor);
+      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      return {platform, weight};
     });
-  }
-
-  /**
-   * Calculate platform weight
-   * @param {!./subscription-platform.SubscriptionPlatform} platform
-   * @param {string=} optionalFactor if specified only calculate this factor
-   * @return {number}
-   * @private
-   */
-  calculatePlatformWeight_(platform, optionalFactor) {
-    const factorWeights = [0]; // reduce always needs somthing to work with
-
-    // Start with base score
-    const weight = platform.getBaseScore();
-
-    // Iterate score factors checking service support
-    for (const factor in this.scoreConfig_) {
-      if (hasOwn(this.scoreConfig_, factor) &&
-        (!optionalFactor || optionalFactor === factor)) {
-        factorWeights.push(this.getSupportedFactorWeight_(factor, platform));
-      }
-    }
-
-    return weight + factorWeights.reduce((a, b) => { return a + b; });
+    return this.rankPlatformsByWeight_(platformWeights);
   }
 
   /**
@@ -487,7 +519,7 @@ export class PlatformStore {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    return this.selectApplicablePlatform_(
+    return this.selectApplicablePlatformForFactor_(
         SubscriptionsScoreFactor.SUPPORTS_VIEWER);
   }
 }

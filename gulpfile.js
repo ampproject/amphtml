@@ -375,6 +375,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
       singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -1123,6 +1124,19 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
+  } else if (srcFilename == 'amp-date-picker.js') {
+    // For amp-date-picker, we inject the react-dates bundle after compile
+    // to avoid CC from messing with browserify's module boilerplate.
+    const file = fs.readFileSync(destFilePath, 'utf8');
+    const firstLineBreak = file.indexOf('\n');
+    const wrapperOpen = file.substr(0, firstLineBreak + 1);
+    const reactDates = fs.readFileSync(
+        'third_party/react-dates/bundle.js', 'utf8');
+    // Inject the bundle inside the standard AMP wrapper (after the first line).
+    const newSource = [
+      wrapperOpen, reactDates, file.substr(firstLineBreak + 1),
+    ].join('\n');
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
 }
 
@@ -1190,6 +1204,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babelify, {
         compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
         presets: [
           ['env', {
             targets: {
@@ -1223,8 +1240,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const destFilename = options.toName || srcFilename;
   /**
-   * Rebundle-javascript
-   *
    * @param {boolean} failOnError
    * @return {Promise}
    */
@@ -1688,6 +1703,8 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     extensions: '  Builds only the listed extensions.',
     extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
+    single_pass_dest: '  The directory closure compiler will write out to ' +
+            'with --single_pass mode. The default directory is `dist`',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',

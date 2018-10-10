@@ -17,6 +17,7 @@
 import * as setDOM from 'set-dom/src/index';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
@@ -467,46 +468,32 @@ export class AmpList extends AMP.BaseElement {
       this.container_.dispatchEvent(event);
 
       // Attempt to resize to fit new rendered contents.
-      this.attemptToFit_(this.container_, () => {
-        // If auto-resize is set, then change to container layout instead of
-        // changing height (with one exception).
-        if (this.element.hasAttribute('auto-resize')) {
-          const layout = this.element.getAttribute('layout');
-          if (layout == Layout.FLEX_ITEM) {
-            // TODO(cathyxz, #17824): Flex-item + reset-on-refresh will add
-            // an invisible loader that fills the amp-list and shoves all
-            // list items out of the amp-list.
-            return true;
-          } else if (layout !== Layout.CONTAINER) {
-            this.changeToLayoutContainer_(layout);
-          }
-          return false;
-        }
-        return true;
-      });
+      this.attemptToFit_(this.container_);
+
+      if (this.element.hasAttribute('auto-resize')) {
+        // If the element's size was changed, change to container layout
+        // if the auto-resize attribute is set.
+        this.element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END)
+            .then(() => this.changeToLayoutContainer_());
+      }
     });
   }
 
   /**
    * Attempts to change the height of the amp-list to fit a target child.
    *
-   * If the target's height is greater than the amp-list's height, and
-   * opt_decider returns truthy (or is not provided), then attempt to change the
-   * amp-list's height to fit the target.
+   * If the target's height is greater than the amp-list's height, attempt
+   * to change the amp-list's height to fit the target.
    *
    * @param {!Element} target
-   * @param {function():boolean=} opt_decider
    * @private
    */
-  attemptToFit_(target, opt_decider) {
+  attemptToFit_(target) {
     this.measureElement(() => {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        const shouldResize = !opt_decider || opt_decider();
-        if (shouldResize) {
-          this.attemptChangeHeight(scrollHeight).catch(() => {});
-        }
+        this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
   }
@@ -519,6 +506,16 @@ export class AmpList extends AMP.BaseElement {
     switch (previousLayout) {
       case Layout.RESPONSIVE:
         this.element.classList.remove('i-amphtml-layout-responsive');
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
+        break;
+      case Layout.FLEX_ITEM:
+        setStyles(this.element, {
+          height: '',
+          width: '',
+        });
         break;
       case Layout.FIXED:
         this.element.classList.remove('i-amphtml-layout-fixed');
@@ -545,10 +542,14 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Converts the amp-list to de facto layout container. Must be called in
    * mutation context.
-   * @param {string} previousLayout
    * @private
    */
-  changeToLayoutContainer_(previousLayout) {
+  changeToLayoutContainer_() {
+    const previousLayout = this.element.getAttribute('layout');
+    // If we have already changed to layout container, no need to run again.
+    if (previousLayout == Layout.CONTAINER) {
+      return;
+    }
     this.undoPreviousLayout_(previousLayout);
     this.container_.classList.remove(
         'i-amphtml-fill-content',
@@ -561,7 +562,6 @@ export class AmpList extends AMP.BaseElement {
     if (overflowElement) {
       toggle(overflowElement, false);
     }
-
     this.element.setAttribute('layout', 'container');
   }
 

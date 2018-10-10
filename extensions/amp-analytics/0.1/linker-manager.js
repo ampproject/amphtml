@@ -53,13 +53,16 @@ export class LinkerManager {
     this.allLinkerPromises_ = [];
 
     /** @private {!JsonObject} */
-    this.resolvedLinkers_ = dict();
+    this.resolvedIds_ = dict();
 
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
 
     /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
+
+    /** @private {?UnlistenDef} */
+    this.formSubmitUnlistener_ = null;
   }
 
 
@@ -98,8 +101,7 @@ export class LinkerManager {
             expandedIds[keys[i]] = value;
           }
         });
-        this.resolvedLinkers_[name] =
-            createLinker(/* version */ '1', expandedIds);
+        this.resolvedIds_[name] = expandedIds;
       });
     });
 
@@ -109,12 +111,19 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
-    return Promise.all(this.allLinkerPromises_)
-        .then(() => {
-          if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
-            this.enableFormSupport_();
-          }
-        });
+
+    this.maybeEnableFormSupport_();
+
+    return Promise.all(this.allLinkerPromises_);
+  }
+
+  /**
+   * Remove any listeners created to manage form submission.
+   */
+  dispose() {
+    if (this.formSubmitUnlistener_) {
+      this.formSubmitUnlistener_();
+    }
   }
 
   /**
@@ -222,7 +231,7 @@ export class LinkerManager {
     for (const linkerName in linkerConfigs) {
       // The linker param is created asynchronously. This callback should be
       // synchronous, so we skip if value is not there yet.
-      if (this.resolvedLinkers_[linkerName]) {
+      if (this.resolvedIds_[linkerName]) {
         this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
       }
     }
@@ -243,7 +252,9 @@ export class LinkerManager {
     const /** @type {Array} */ domains = config['destinationDomains'];
 
     if (this.isDomainMatch_(hostname, domains)) {
-      el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+      const linkerValue = createLinker(/* version */ '1',
+          this.resolvedIds_[name]);
+      el.href = addParamToUrl(href, name, linkerValue);
     }
   }
 
@@ -279,19 +290,39 @@ export class LinkerManager {
   }
 
   /**
+   * Enable form support if experiment is on.
+   * TODO(ccordry): remove this method and use `enableFormSupport_` when fully
+   * launched.
+   * @private
+   */
+  maybeEnableFormSupport_() {
+    if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
+      this.enableFormSupport_();
+    }
+  }
+
+  /**
    * Register callback that will handle form sumbits.
    */
   enableFormSupport_() {
-    this.formSubmitService_.then(formService =>
-      formService.beforeSubmit(this.handleFormSubmit_.bind(this)));
+    if (this.formSubmitUnlistener_) {
+      return;
+    }
+
+    this.formSubmitService_.then(formService => {
+      this.formSubmitUnlistener_ =
+          formService.beforeSubmit(this.handleFormSubmit_.bind(this));
+    });
   }
 
   /**
    * Check to see if any linker configs match this form's url, if so, send
    * along the resolved linker value
-   * @param {HTMLFormElement} form
+   * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
    */
-  handleFormSubmit_(form) {
+  handleFormSubmit_(event) {
+    const {form, actionXhrMutator} = event;
+
     for (const linkerName in this.config_) {
       const config = this.config_[linkerName];
       const /** @type {Array} */ domains = config['destinationDomains'];
@@ -301,26 +332,53 @@ export class LinkerManager {
       const {hostname} = this.urlService_.parse(url);
 
       if (this.isDomainMatch_(hostname, domains)) {
-        this.addDataToForm_(form, linkerName);
+        this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
   }
 
 
   /**
-   * Add the linker pairs as <input> elements to form.
+   * Add the linker data to form. If action-xhr is present we can update the
+   * action-xhr, if not we fallback to adding hidden inputs.
    * @param {!Element} form
+   * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
    */
-  addDataToForm_(form, linkerName) {
-    if (!this.resolvedLinkers_[linkerName]) {
+  addDataToForm_(form, actionXhrMutator, linkerName) {
+    const ids = this.resolvedIds_[linkerName];
+    if (!ids) {
+      // Form was clicked before macros resolved.
       return;
     }
 
+    const linkerValue = createLinker(/* version */ '1', ids);
+
+    // Runtime controls submits with `action-xhr`, so we can append the linker
+    // param
+    const actionXhrUrl = form.getAttribute('action-xhr');
+    if (actionXhrUrl) {
+      const decoratedUrl = addParamToUrl(actionXhrUrl, linkerName, linkerValue);
+      return actionXhrMutator(decoratedUrl);
+    }
+
+    // If we are not using `action-xhr` it must be a GET request using the
+    // standard action attribute. Browsers will not let you change this in the
+    // middle of a submit, so we add the input hidden attributes.
+    this.addHiddenInputs_(form, linkerName, linkerValue);
+  }
+
+  /**
+   * Add the linker pairs as <input> elements to form.
+   * @param {!Element} form
+   * @param {string} linkerName
+   * @param {string} linkerValue
+   */
+  addHiddenInputs_(form, linkerName, linkerValue) {
     const attrs = dict({
       'type': 'hidden',
       'name': linkerName,
-      'value': this.resolvedLinkers_[linkerName],
+      'value': linkerValue,
     });
 
     const inputEl = createElementWithAttributes(

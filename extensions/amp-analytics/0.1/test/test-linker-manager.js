@@ -18,6 +18,10 @@ import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
 import {installVariableService} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -176,6 +180,33 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           '?a=1' +
           '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
           '&testLinker2=1*1u4ugj3*foo*YmFy');
+    });
+  });
+
+  it('should generate a param valid for ingestion 5 min later', () => {
+    const clock = sandbox.useFakeTimers(1533329483292);
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker: {
+          ids: {
+            cid: '12345',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      clock.tick(1000 * 60 * 5); // 5 minutes.
+      const linkerUrl = clickAnchor('https://www.source.com/dest?a=1');
+
+      windowInterface.history = {replaceState: () => {}};
+      windowInterface.location = {href: linkerUrl};
+
+      installLinkerReaderService(windowInterface);
+      const linkerReader = linkerReaderServiceFor(windowInterface);
+      return expect(linkerReader.get('testLinker', 'cid')).to.equal('12345');
     });
   });
 
@@ -473,7 +504,37 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should add linker data to form', () => {
+    it('should add hidden elements to form if not action-xhr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action', 'https://www.ampproject.com');
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.notCalled).to.be.true;
+        const el = form.firstChild;
+        expect(el).to.be.ok;
+        expect(el.tagName).to.equal('INPUT');
+        expect(el.getAttribute('name')).to.equal('testLinker');
+        expect(el.getAttribute('value')).to.contain('foo');
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+        return expect(el.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    it('if action-xhr and method=GET it should add linker-xhr attr', () => {
       const linkerManager = new LinkerManager(ampdoc, {
         linkers: {
           testLinker: {
@@ -489,17 +550,48 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
-        linkerManager.handleFormSubmit_(form);
+        form.setAttribute('method', 'get');
 
-        const el = form.firstChild;
-        expect(el).to.be.ok;
-        expect(el.tagName).to.equal('INPUT');
-        expect(el.getAttribute('name')).to.equal('testLinker');
-        expect(el.getAttribute('value')).to.contain('foo');
-        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
-        return expect(el.getAttribute('value')).to.match(prefixRegex);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
       });
     });
+
+    it('if action-xhr and method=POST it should add linker-xhr attr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        form.setAttribute('method', 'post');
+
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
+      });
+    });
+
 
     it('should not add linker if no domain match', () => {
       const linkerManager = new LinkerManager(ampdoc, {
@@ -517,12 +609,14 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
-        linkerManager.handleFormSubmit_(form);
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+        expect(setterSpy.notCalled).to.be.true;
         return expect(form.children.length).to.equal(0);
       });
     });
 
-    it('should add multiple linker data to one form', () => {
+    it('should add multiple linker data to one form if not action-xhr', () => {
       windowInterface.getLocation.returns({
         origin: 'https://www.ampbyexample.com',
       });
@@ -556,10 +650,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return Promise.all([p1, p2]).then(() => {
         const form = createForm();
-        form.setAttribute('action-xhr', 'https://www.source.com');
-        manager1.handleFormSubmit_(form);
-        manager2.handleFormSubmit_(form);
+        form.setAttribute('action', 'https://www.source.com');
+        const setterSpy = sandbox.spy();
+        manager1.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+        manager2.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
+        expect(setterSpy.notCalled).to.be.true;
         const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
 
         const firstChild = form.children[0];

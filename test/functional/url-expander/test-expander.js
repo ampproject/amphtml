@@ -261,6 +261,14 @@ describes.realWin('Expander', {
               .to.eventually.equal(expected);
         });
 
+        it('should handle falsey values', () => {
+          variableSource.setAsync('ZERO', 0);
+          variableSource.setAsync('FALSE', false);
+          const expander = new Expander(variableSource);
+          return expect(expander.expand('a=ZERO&b=FALSE', mockBindings))
+              .to.eventually.equal('a=0&b=false');
+        });
+
         it('throws on bad input with back ticks', () => {
           const url = 'CONCAT(bad`hello`, world)';
           allowConsoleError(() => { expect(() => {
@@ -363,25 +371,36 @@ describes.realWin('Expander', {
           description: 'sibling macros',
           input: 'UPPERCASE(aaaa)LOWERCASE(BBB)',
           output: {
-            UPPERCASE: 'AAAA',
-            LOWERCASE: 'bbb',
+            both: {
+              'UPPERCASE(aaaa)': 'AAAA',
+              'LOWERCASE(BBB)': 'bbb',
+            },
           },
         },
         {
           description: 'nested macros',
           input: 'LOWERCASE(UPPERCASE(TRIM(aAaA    )))',
           output: {
-            TRIM: 'aAaA',
-            UPPERCASE: 'AAAA',
-            LOWERCASE: 'aaaa',
+            sync: {
+              'TRIM(aAaA)': 'aAaA',
+              'UPPERCASE(aAaA)': 'AAAA',
+              'LOWERCASE(AAAA)': 'aaaa',
+            },
+            async: {
+              'TRIM(aAaA)': 'aAaA',
+              'UPPERCASE([object Promise])': 'AAAA',
+              'LOWERCASE([object Promise])': 'aaaa',
+            },
           },
         },
         {
           description: 'macros that resolve undefined should be empty string',
           input: 'UPPERCASE(foo)BROKEN',
           output: {
-            UPPERCASE: 'FOO',
-            BROKEN: '',
+            both: {
+              'UPPERCASE(foo)': 'FOO',
+              BROKEN: '',
+            },
           },
         },
       ];
@@ -393,7 +412,8 @@ describes.realWin('Expander', {
             const vars = {};
             expander.expand(input, mockBindings, /* opt_collectVars */ vars);
             yield macroTask();
-            expect(vars).to.deep.equal(output);
+            const expected = output.both || output.async;
+            expect(vars).to.deep.equal(expected);
           });
         });
 
@@ -403,8 +423,8 @@ describes.realWin('Expander', {
           expander.expand(input, mockBindings, /* opt_collectVars */ vars);
           yield macroTask();
           expect(vars).to.deep.equal({
-            CLIENT_ID: 'amp-GA12345',
-            UPPERCASE: 'FOO',
+            'CLIENT_ID(__ga)': 'amp-GA12345',
+            'UPPERCASE(foo)': 'FOO',
           });
         });
       });
@@ -416,11 +436,12 @@ describes.realWin('Expander', {
             const vars = {};
             expander.expand(input, mockBindings, /* opt_collectVars */ vars,
                 /* opt_sync */ true);
-            expect(vars).to.deep.equal(output);
+            const expected = output.both || output.sync;
+            expect(vars).to.deep.equal(expected);
           });
         });
 
-        it('should return empty string for async functions', () => {
+        it('should discard async functions when called synchronously', () => {
           const vars = {};
           const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
           allowConsoleError(() => {
@@ -428,8 +449,7 @@ describes.realWin('Expander', {
                 /* opt_sync */ true);
           });
           expect(vars).to.deep.equal({
-            CLIENT_ID: '',
-            UPPERCASE: 'FOO',
+            'UPPERCASE(foo)': 'FOO',
           });
         });
       });

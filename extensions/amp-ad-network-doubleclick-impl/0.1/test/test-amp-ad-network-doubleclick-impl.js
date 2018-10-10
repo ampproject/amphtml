@@ -1384,19 +1384,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
         });
 
-        it('should not return renderOutsideViewport boolean not set', () => {
-          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
-          expect(impl.idleRenderOutsideViewport()).to.equal(12);
-        });
-
-        it('should not return renderOutsideViewport boolean ctrl', () => {
-          impl.experimentIds.push('21062567');
-          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
-          expect(impl.idleRenderOutsideViewport()).to.equal(12);
-        });
-
-        it('should return renderOutsideViewport boolean, exp', () => {
-          impl.experimentIds.push('21062568');
+        it('should return renderOutsideViewport boolean', () => {
           sandbox.stub(impl, 'renderOutsideViewport').returns(false);
           expect(impl.idleRenderOutsideViewport()).to.be.false;
         });
