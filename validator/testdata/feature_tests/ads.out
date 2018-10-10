@@ -166,6 +166,7 @@ PASS
 |          <option>plista</option>
 |          <option>polymorphicads</option>
 |          <option>popin</option>
+|          <option>pressboard</option>
 |          <option>pubmine</option>
 |          <option>pulsepoint</option>
 |          <option>purch</option>
@@ -1032,6 +1033,13 @@ PASS
 |        layout=responsive
 |        heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
 |        data-mediaid="popin_amp">
+|    </amp-ad>
+|
+|    <h2>Pressboard</h2>
+|    <amp-ad height="400"
+|        type="pressboard"
+|        layout="fixed-height"
+|        data-media="5">
 |    </amp-ad>
 |
 |    <h2>Pubmine 300x250</h2>

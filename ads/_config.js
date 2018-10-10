@@ -727,6 +727,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
