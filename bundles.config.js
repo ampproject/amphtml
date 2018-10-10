@@ -217,11 +217,6 @@ exports.extensionBundles = [
   {name: 'amp-riddle-quiz', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-script',
-    options: {
-      // jsBinaries: [
-      //   {name: 'amp-script-worker', options: {noWrapper: true}},
-      // ],
-    },
     version: '0.1',
     type: TYPES.MISC,
   },

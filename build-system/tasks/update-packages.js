@@ -120,6 +120,7 @@ function patchWorkerDom() {
   writeIfUpdated(patchedName, file);
 
   // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+  // TODO(choumx): Compile this binary after worker-dom externs are available.
   fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
       'dist/v0/amp-script-worker-0.1.js');
   fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',

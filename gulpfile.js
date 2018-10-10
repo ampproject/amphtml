@@ -164,26 +164,22 @@ function declareExtension(name, version, options) {
  * @param {!ExtensionOption} options extension options object.
  */
 function declareExtensionVersionAlias(name, version, latestVersion, options) {
-  // Adds a new entry to `extensionAliasFilePath` map.
-  const declareFile = (n, ext) => {
-    extensionAliasFilePath[`${n}-${version}.${ext}`] = {
-      'name': n,
-      'file': `${n}-${latestVersion}.${ext}`,
-    };
+  extensionAliasFilePath[name + '-' + version + '.js'] = {
+    'name': name,
+    'file': name + '-' + latestVersion + '.js',
   };
-
-  declareFile(name, 'js');
   if (options.hasCss) {
-    declareFile(name, 'css');
+    extensionAliasFilePath[name + '-' + version + '.css'] = {
+      'name': name,
+      'file': name + '-' + latestVersion + '.css',
+    };
   }
   if (options.cssBinaries) {
     options.cssBinaries.forEach(cssBinaryName => {
-      declareFile(cssBinaryName, 'css');
-    });
-  }
-  if (options.jsBinaries) {
-    options.jsBinaries.forEach(jsBinaryName => {
-      declareFile(jsBinaryName, 'js');
+      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
+        'name': cssBinaryName,
+        'file': cssBinaryName + '-' + latestVersion + '.css',
+      };
     });
   }
 }
@@ -730,40 +726,21 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  // Creates "options" with max/min/latest filenames for a given binary.
-  const defaultOptionsFor = n => {
-    return Object.assign({}, options, {
-      name: n,
-      toName: `${n}-${version}.max.js`,
-      minifiedName: `${n}-${version}.js`,
-      latestName: `${n}-latest.js`,
-      // Wrapper that either registers the extension or schedules it for
-      // execution after the main binary comes back.
-      // The `function` is wrapped in `()` to avoid lazy parsing it,
-      // since it will be immediately executed anyway.
-      // See https://github.com/ampproject/amphtml/issues/3977
-      wrapper: options.noWrapper ? ''
-        : wrappers.extension(n, options.loadPriority),
-    });
-  };
-
-  const mainBinaryFilename = options.filename || name + '.js';
-  const promises = [
-    // The main binary for this extension e.g. amp-foo.js.
-    compileJs(path + '/', mainBinaryFilename, './dist/v0',
-        defaultOptionsFor(name)),
-  ];
-  if (Array.isArray(options.jsBinaries)) {
-    const others = options.jsBinaries.map(jsBinary => {
-      const jsBinaryOptions =
-          Object.assign(defaultOptionsFor(jsBinary.name), jsBinary.options);
-      return compileJs(path + '/', jsBinary.name + '.js', './dist/v0',
-          jsBinaryOptions);
-    });
-    promises.push.apply(promises, others);
-  }
-  return Promise.all(promises);
+  const filename = options.filename || name + '.js';
+  return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: `${name}-latest.js`,
+    // Wrapper that either registers the extension or schedules it for
+    // execution after the main binary comes back.
+    // The `function` is wrapped in `()` to avoid lazy parsing it,
+    // since it will be immediately executed anyway.
+    // See https://github.com/ampproject/amphtml/issues/3977
+    wrapper: options.noWrapper ? ''
+      : wrappers.extension(name, options.loadPriority),
+  }));
 }
+
 
 /**
  * Prints a message that could help speed up local development.
