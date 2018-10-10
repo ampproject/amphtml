@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isLayoutSizeDefined} from '../../../src/layout';
 
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {MainThread} from '@ampproject/worker-dom/dist/index.safe.patched';
 import {
   calculateExtensionScriptUrl,
@@ -28,7 +28,8 @@ const TAG = 'amp-script';
 export class AmpScript extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER ||
+        isLayoutSizeDefined(layout);
   }
 
   /** @override */
