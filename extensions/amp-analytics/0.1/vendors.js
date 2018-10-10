@@ -60,6 +60,7 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
+import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
@@ -208,6 +209,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'parsely': PARSELY_CONFIG,
   'piStats': PISTATS_CONFIG,
   'piano': PIANO_CONFIG,
+  'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'rakam': RAKAM_CONFIG,
   'segment': SEGMENT_CONFIG,
