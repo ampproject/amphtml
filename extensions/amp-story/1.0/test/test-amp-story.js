@@ -196,7 +196,7 @@ describes.realWin('amp-story', {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
         .then(() => {
-        // Getting all the AmpStoryPage objets.
+          // Getting all the AmpStoryPage objets.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
@@ -204,7 +204,7 @@ describes.realWin('amp-story', {
           return Promise.all(pages);
         })
         .then(pages => {
-        // Only the first page should be active.
+          // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             expect(story.getPageIndex(pages[i])).to.equal(i);
           }
@@ -213,21 +213,30 @@ describes.realWin('amp-story', {
 
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
+    sandbox.stub(story, 'maybePreloadBookend_').returns();
+    let pauseOldPageStub;
+    let resumeNewPageStub;
+
     return story.layoutCallback()
         .then(() => {
-        // Getting all the AmpStoryPage objects.
+          // Getting all the AmpStoryPage objects.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
+
           return Promise.all(pages);
-          const oldPage = pageElements[0].implementation_;
-          const newPage = pageElements[1].implementation_;
-          const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-          const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
-          story.switchTo_('page-1').then(() => {
-            expect(pauseOldPageStub).to.have.been.calledOnce;
-            expect(resumeNewPageStub).to.have.been.calledOnce;
-          });
+        })
+        .then(pages => {
+          const oldPage = pages[0];
+          const newPage = pages[1];
+
+          pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+          resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+        })
+        .then(() => story.switchTo_('page-1'))
+        .then(() => {
+          expect(pauseOldPageStub).to.have.been.calledOnce;
+          expect(resumeNewPageStub).to.have.been.calledOnce;
         });
   });
 
@@ -898,6 +907,64 @@ describes.realWin('amp-story', {
               [MediaType.VIDEO]: 8,
             };
             expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          });
+    });
+  });
+
+  describe('amp-story navigation', () => {
+    it('should navigate when performing a navigational click', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+
+            story.activePage_.element.dispatchEvent(clickEvent);
+
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should NOT navigate when clicking on a tappable element', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const tappableEl = win.document.createElement('target');
+            tappableEl.setAttribute('on', 'tap:cover.hide');
+            story.activePage_.element.appendChild(tappableEl);
+
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            tappableEl.dispatchEvent(clickEvent);
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should NOT navigate when clicking on a shadow DOM element', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.shareMenu_.element_.dispatchEvent(clickEvent);
+
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should NOT navigate when clicking on a CTA link', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const ctaLink = win.document.createElement('a');
+            ctaLink.setAttribute('role', 'link');
+            story.activePage_.element.appendChild(ctaLink);
+
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            ctaLink.dispatchEvent(clickEvent);
+            expect(story.activePage_.element.id).to.equal('cover');
           });
     });
   });
