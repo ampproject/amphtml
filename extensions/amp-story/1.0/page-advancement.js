@@ -170,8 +170,7 @@ export class AdvancementConfig {
     const supportedAdvancementModes = [
       ManualAdvancement.fromElement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
-      MediaBasedAdvancement
-          .fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
+      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
 
     if (supportedAdvancementModes.length === 0) {
@@ -262,6 +261,7 @@ class ManualAdvancement extends AdvancementConfig {
   constructor(element) {
     super();
     this.element_ = element;
+    this.clickListener_ = this.maybePerformNavigation_.bind(this);
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -291,15 +291,13 @@ class ManualAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.element_.addEventListener('click',
-        event => this.maybePerformNavigation_(event), true);
+    this.element_.addEventListener('click', this.clickListener_, true);
   }
 
   /** @override */
   stop() {
     super.stop();
-    this.element_.removeEventListener('click',
-        event => this.maybePerformNavigation_(event), true);
+    this.element_.removeEventListener('click', this.clickListener_, true);
   }
 
   /** @override */

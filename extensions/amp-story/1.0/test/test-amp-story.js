@@ -22,9 +22,7 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
@@ -910,21 +908,10 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            expect(story.activePage_.element.id).to.equal('cover');
-
-            const clickEvent = document.createEvent('MouseEvent');
-
             // Click on right side of the screen to trigger page advancement.
-            clickEvent.initMouseEvent(
-            /* typeArg */ 'click',
-                /* canBubbleArg */ true,
-                /* cancelableArg */ true,
-                /* viewArg */ win,
-                /* detailArg */ 1,
-                /* screenXArg */ 70,
-                /* screenYArg */ 50,
-                /* clientXArg */ 100,
-                /* clientYArg */ 100);
+            const clickEvent =
+              new MouseEvent('click', {clientX: 200});
+
             story.activePage_.element.dispatchEvent(clickEvent);
 
             expect(story.activePage_.element.id).to.equal('page-1');
@@ -936,21 +923,12 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            expect(story.activePage_.element.id).to.equal('cover');
-
-            // Create fake action for on="tap".
-            const fakePromise = new Promise(() => {});
-            const abc = sandbox.stub().returns(fakePromise);
-            const fakeAction =
-                new ActionService(new AmpDocSingle(win), document);
-            fakeAction.addGlobalTarget('ABC', abc);
-
-            // Create target for tappable action.
             const tappableEl = win.document.createElement('target');
-            tappableEl.setAttribute('on', 'tap:ABC.abc');
-            story.element.appendChild(tappableEl);
+            tappableEl.setAttribute('on', 'tap:cover.hide');
+            story.activePage_.element.appendChild(tappableEl);
 
-            fakeAction.trigger(tappableEl, 'tap', null);
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            tappableEl.dispatchEvent(clickEvent);
             expect(story.activePage_.element.id).to.equal('cover');
           });
     });
@@ -960,9 +938,8 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            expect(story.activePage_.element.id).to.equal('cover');
-
-            story.shareMenu_.element_.click();
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.shareMenu_.element_.dispatchEvent(clickEvent);
 
             expect(story.activePage_.element.id).to.equal('cover');
           });
@@ -973,15 +950,12 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            expect(story.activePage_.element.id).to.equal('cover');
-
             const ctaLayer = story.getPageById('page-2').element.appendChild(
                 win.document.createElement('amp-story-cta-layer'));
 
             ctaLayer.click();
             expect(story.activePage_.element.id).to.equal('cover');
           });
-
     });
   });
 
