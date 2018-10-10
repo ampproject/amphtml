@@ -5,6 +5,7 @@
 "@ampproject/worker-dom@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.1.1.tgz#c1ba9e924acc3b7d282554ac8e285a02c6cbebf6"
+  integrity sha512-hncTjk3LVnsmaltlAWk5vfuIv7n/aYIVUQyk5UY9zIzGsXgzcqLTJ1JWNqmb90Kf32Pl5LCE28l3j7zbxHDowQ==
   dependencies:
     dompurify "1.0.7"
 
@@ -4681,14 +4682,15 @@ domexception@^1.0.1:
   dependencies:
     webidl-conversions "^4.0.2"
 
+dompurify@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.7.tgz#33e5c4a5fc84df93b58ca162d1d3f28537aa3ec2"
+  integrity sha512-1xK0JEda/jvIm3SgqHXKvRCh3AbEKCyBbUAGpNCMVIljBD145cPvBR66JSj3O4SdscFUx5NXsDkJpz6vDT8KLg==
+
 dompurify@1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.8.tgz#3fa0d91fde3827d6509d83b43444da56a2796795"
   integrity sha512-vetRFbN1SXSPfP3ClIiYnxTrXquSqakBEOoB5JESn0SVcSYzpu6ougjakpKnskGctYdlNpwf+riUHSkG7d4XUw==
-
-dompurify@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.7.tgz#33e5c4a5fc84df93b58ca162d1d3f28537aa3ec2"
 
 domutils@1.5.1:
   version "1.5.1"

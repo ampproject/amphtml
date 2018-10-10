@@ -219,7 +219,7 @@ exports.extensionBundles = [
     name: 'amp-script',
     options: {
       jsBinaries: [
-        'amp-script-worker',
+        {name: 'amp-script-worker', options: {noWrapper: true}},
       ],
     },
     version: '0.1',

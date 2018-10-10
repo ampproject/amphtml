@@ -731,8 +731,9 @@ function buildExtensionCss(path, name, version, options) {
  */
 function buildExtensionJs(path, name, version, options) {
   // Creates "options" with max/min/latest filenames for a given binary.
-  const optionsFor = n => {
-    return Object.assign(options, {
+  const defaultOptionsFor = n => {
+    return Object.assign({}, options, {
+      name: n,
       toName: `${n}-${version}.max.js`,
       minifiedName: `${n}-${version}.js`,
       latestName: `${n}-latest.js`,
@@ -749,13 +750,15 @@ function buildExtensionJs(path, name, version, options) {
   const mainBinaryFilename = options.filename || name + '.js';
   const promises = [
     // The main binary for this extension e.g. amp-foo.js.
-    compileJs(path + '/', mainBinaryFilename, './dist/v0', optionsFor(name)),
+    compileJs(path + '/', mainBinaryFilename, './dist/v0',
+        defaultOptionsFor(name)),
   ];
   if (Array.isArray(options.jsBinaries)) {
-    const others = options.jsBinaries.map(n => {
-      const opts = optionsFor(n);
-      opts.wrapper = ''; // TODO
-      return compileJs(path + '/', n + '.js', './dist/v0', opts);
+    const others = options.jsBinaries.map(jsBinary => {
+      const jsBinaryOptions =
+          Object.assign(defaultOptionsFor(jsBinary.name), jsBinary.options);
+      return compileJs(path + '/', jsBinary.name + '.js', './dist/v0',
+          jsBinaryOptions);
     });
     promises.push.apply(promises, others);
   }
