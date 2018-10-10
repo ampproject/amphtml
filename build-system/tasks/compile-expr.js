@@ -33,7 +33,6 @@ function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
     type: 'lalr',
     debug: false,
     moduleType: 'js',
-    'token-stack': true,
   };
   const generator = new jison.Generator(bnf, settings);
   const jsModule = generator.generate(settings);
@@ -49,7 +48,12 @@ function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
     suppressCheckTypes,
     imports,
     jsModule,
-    jsExports].join('\n\n') + '\n';
+    jsExports]
+      .join('\n\n')
+      // Required in order to support babel 7, since 'token-stack: true' will
+      // adversely affect lexer performance.
+      // See https://github.com/ampproject/amphtml/pull/18574#discussion_r223506153.
+      .replace(/[ \t]*_token_stack:[ \t]*/, '') + '\n';
   fs.writeFileSync(path + jsFilename, out);
 }
 
@@ -76,7 +80,7 @@ function compileCssExpr() {
   const jisonFilename = 'css-expr-impl.jison';
   const imports = 'import * as ast from \'./css-expr-ast\';';
   const parserName = 'cssParser';
-  const jsFilename = 'bind-expr-impl.js';
+  const jsFilename = 'css-expr-impl.js';
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
 }
 

@@ -309,18 +309,15 @@ parse: function parse(input) {
         vstack.length = vstack.length - n;
         lstack.length = lstack.length - n;
     }
-            function lex() {
+
+        var lex = function () {
             var token;
-            token = tstack.pop() || lexer.lex() || EOF;
+            token = lexer.lex() || EOF;
             if (typeof token !== 'number') {
-                if (token instanceof Array) {
-                    tstack = token;
-                    token = tstack.pop();
-                }
                 token = self.symbols_[token] || token;
             }
             return token;
-        }
+        };
     var symbol, preErrorSymbol, state, action, a, r, yyval = {}, p, len, newState, expected;
     while (true) {
         state = stack[stack.length - 1];
@@ -332,27 +329,27 @@ parse: function parse(input) {
             }
             action = table[state] && table[state][symbol];
         }
-        if (typeof action === 'undefined' || !action.length || !action[0]) {
-            var errStr = '';
-            expected = [];
-            for (p in table[state]) {
-                if (this.terminals_[p] && p > TERROR) {
-                    expected.push('\'' + this.terminals_[p] + '\'');
+                    if (typeof action === 'undefined' || !action.length || !action[0]) {
+                var errStr = '';
+                expected = [];
+                for (p in table[state]) {
+                    if (this.terminals_[p] && p > TERROR) {
+                        expected.push('\'' + this.terminals_[p] + '\'');
+                    }
                 }
+                if (lexer.showPosition) {
+                    errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
+                } else {
+                    errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
+                }
+                this.parseError(errStr, {
+                    text: lexer.match,
+                    token: this.terminals_[symbol] || symbol,
+                    line: lexer.yylineno,
+                    loc: yyloc,
+                    expected: expected
+                });
             }
-            if (lexer.showPosition) {
-                errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
-            } else {
-                errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
-            }
-            this.parseError(errStr, {
-                text: lexer.match,
-                token: this.terminals_[symbol] || symbol,
-                line: lexer.yylineno,
-                loc: yyloc,
-                expected: expected
-            });
-        }
         if (action[0] instanceof Array && action.length > 1) {
             throw new Error('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol);
         }
