@@ -198,7 +198,8 @@
       "files": ["babel.config.js"],
       "globals": {
         "module": false,
-        "process": false
+        "process": false,
+        "require": false
       }
     }
   ]
