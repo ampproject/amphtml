@@ -324,38 +324,32 @@ export class AmpSelector extends AMP.BaseElement {
     if (el.hasAttribute('disabled')) {
       return;
     }
-
     this.mutateElement(() => {
-      /** @type {?Array<string>} */
-      let selectedValues;
       if (el.hasAttribute('selected')) {
         if (this.isMultiple_) {
           this.clearSelection_(el);
-          selectedValues = this.setInputs_();
+          this.setInputs_();
         }
       } else {
         this.setSelection_(el);
-        selectedValues = this.setInputs_();
+        this.setInputs_();
       }
+      // Newly picked option should always have focus.
+      this.updateFocus_(el);
 
-      // Don't trigger action or update focus if
-      // selected values haven't changed.
-      if (selectedValues) {
-        // Newly picked option should always have focus.
-        this.updateFocus_(el);
-
-        // Trigger 'select' event with two data params:
-        // 'targetOption' - option value of the selected or deselected element.
-        // 'selectedOptions' - array of option values of selected elements.
-        const name = 'select';
-        const selectEvent =
-            createCustomEvent(this.win, `amp-selector.${name}`, dict({
-              'targetOption': el.getAttribute('option'),
-              'selectedOptions': selectedValues,
-            }));
-        this.action_.trigger(this.element, name, selectEvent,
-            ActionTrust.HIGH);
-      }
+      // Trigger 'select' event with two data params:
+      // 'targetOption' - option value of the selected or deselected element.
+      // 'selectedOptions' - array of option values of selected elements.
+      const name = 'select';
+      const selections =
+          this.selectedOptions_.map(el => el.getAttribute('option'));
+      const selectEvent =
+          createCustomEvent(this.win, `amp-selector.${name}`, dict({
+            'targetOption': el.getAttribute('option'),
+            'selectedOptions': selections,
+          }));
+      this.action_.trigger(this.element, name, selectEvent,
+          ActionTrust.HIGH);
     });
   }
 
