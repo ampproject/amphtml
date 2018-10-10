@@ -909,8 +909,7 @@ describes.realWin('amp-story', {
       return story.layoutCallback()
           .then(() => {
             // Click on right side of the screen to trigger page advancement.
-            const clickEvent =
-              new MouseEvent('click', {clientX: 200});
+            const clickEvent = new MouseEvent('click', {clientX: 200});
 
             story.activePage_.element.dispatchEvent(clickEvent);
 
@@ -950,10 +949,12 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            const ctaLayer = story.getPageById('page-2').element.appendChild(
-                win.document.createElement('amp-story-cta-layer'));
+            const ctaLink = win.document.createElement('a');
+            ctaLink.setAttribute('role', 'link');
+            story.activePage_.element.appendChild(ctaLink);
 
-            ctaLayer.click();
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            ctaLink.dispatchEvent(clickEvent);
             expect(story.activePage_.element.id).to.equal('cover');
           });
     });
