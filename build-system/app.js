@@ -60,11 +60,15 @@ app.get('/serve_mode=:mode', (req, res) => {
   }
 });
 
-app.get('/', renderIndex);
+if (!global.AMP_TESTING) {
+  app.get('/', renderIndex);
 
-// TODO(alanorozco): This doesn't quite work. Listing dirs is fine, but file
-// links will link to a /~ base path, which obviously 404's.
-// app.use('/~', express.static('/'), serveIndex(`${__dirname}/../`));
+  // TODO(alanorozco): This doesn't quite work. Listing dirs is fine, but file
+  // links go to a /~ base path, which obviously 404's.
+  //
+  // app.use('/~', express.static('/'), serveIndex(`${__dirname}/../`));
+}
+
 
 // Deprecate usage of .min.html/.max.html
 app.get([
