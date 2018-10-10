@@ -31,6 +31,7 @@ const {gitDiffNameOnlyMaster} = require('../git');
 const isWatching = (argv.watch || argv.w) || false;
 const options = {
   fix: false,
+  quiet: argv.quiet || false,
 };
 let collapseLintResults = !!process.env.TRAVIS;
 
@@ -218,5 +219,6 @@ gulp.task(
         'fix': '  Fixes simple lint errors (spacing etc)',
         'local-changes':
             '  Lints just the changes commited to the local branch',
+        'quiet': '  Suppress warnings from outputting',
       },
     });
