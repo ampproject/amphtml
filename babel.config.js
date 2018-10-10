@@ -25,8 +25,14 @@
 
 'use strict';
 
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
+
 module.exports = function(api) {
   api.cache(true);
+  if (argv.single_pass) {
+    return {};
+  }
   return {
     'presets': [
       ['@babel/env', {
