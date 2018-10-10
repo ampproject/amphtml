@@ -240,7 +240,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
-    return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename)
+    return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
   parentWindow.defaultBootstrapSubDomain =
@@ -253,7 +253,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 /**
  * Function to return the development boostrap base URL
  * @param {!Window} parentWindow
- * @param {!string} srcFileBasename
+ * @param {string} srcFileBasename
  * @return {string}
  */
 export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {

@@ -19,20 +19,30 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+import ampToolboxCacheUrl from
+  '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
-import {urls} from '../../../src/config';
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {
+  getDevelopmentBootstrapBaseUrl,
+} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
-import {getDevelopmentBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {
+  getService,
+  registerServiceBuilder,
+} from '../../../src/service';
+import {
+  getSourceUrl,
+  isProxyOrigin,
+  parseUrlDeprecated,
+} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrlDeprecated, isProxyOrigin, getSourceOrigin, getSourceUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /**
  * @fileoverview
@@ -164,18 +174,18 @@ export class AmpRecaptchaService {
    * @private
    */
   initialize_(sitekey) {
-    return this.createRecaptchaFrame_(sitekey).then((iframe) => {
+    return this.createRecaptchaFrame_(sitekey).then(iframe => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
         this.listenIframe_(
-          'amp-recaptcha-ready', () => this.recaptchaApiReady_.resolve()
+            'amp-recaptcha-ready', () => this.recaptchaApiReady_.resolve()
         ),
         this.listenIframe_(
-          'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
+            'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
         ),
         this.listenIframe_(
-          'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
+            'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
         ),
       ];
       this.executeMap_ = {};
@@ -243,25 +253,26 @@ export class AmpRecaptchaService {
       if (getMode().localDev || getMode().test) {
         resolve(getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha'));
         return;
-      } 
+      }
 
       // Need to have the subdomain match the original document url.
-      // This is verified by the recaptcha frame to 
+      // This is verified by the recaptcha frame to
       // verify the origin on its messages
       let canonicalDomain = undefined;
 
-      if(isProxyOrigin(this.win_.location.href)) {
+      if (isProxyOrigin(this.win_.location.href)) {
         canonicalDomain = getSourceUrl(this.win_.location.href);
       } else {
-        canonicalDomain = this.win_.location.href
+        canonicalDomain = this.win_.location.href;
       }
 
-      ampToolboxCacheUrl.createCurlsSubdomain(canonicalDomain).then((curlsSubdomain) => {
-        const recaptchaFrameSrc = 'https://' + curlsSubdomain +
+      ampToolboxCacheUrl.createCurlsSubdomain(canonicalDomain)
+          .then(curlsSubdomain => {
+            const recaptchaFrameSrc = 'https://' + curlsSubdomain +
           `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
-          `recaptcha.html`;
-        resolve(recaptchaFrameSrc);
-      }).catch(err => reject(err));
+          'recaptcha.html';
+            resolve(recaptchaFrameSrc);
+          }).catch(err => reject(err));
     });
   }
 

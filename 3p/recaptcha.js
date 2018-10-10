@@ -19,9 +19,9 @@ import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-impor
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev, initLogConstructor, setReportError} from '../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
-import {loadScript, setExperimentToggles, validateData} from './3p';
+import {loadScript} from './3p';
 
 import {tryParseJson} from '../src/json';
 
@@ -54,15 +54,14 @@ let iframeMessagingClient = null;
 
 /**
  * Initialize 3p frame.
- * @param {!Window} win
  */
-function init(win) {
+function init() {
   initLogConstructor();
   setReportError(console.error.bind(console));
 }
 
 // Immediately call init
-init(window);
+init();
 
 /**
  * Main function called by the recaptcha bootstrap frame
