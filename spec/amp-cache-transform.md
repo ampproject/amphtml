@@ -252,3 +252,14 @@ AMP-Cache-Transform: google
 
 The responder must either send an SXG with subresource URLs rewritten for the
 Google AMP Cache, or a non-SXG response.
+
+A requestor wishing to receive transformed AMP of a specific version may send a
+request like:
+
+```
+AMP-Cache-Transform: google;v="1..3,5"
+```
+
+The responder must either send an SXG with subresource URLs rewritten for the
+Google AMP Cache and whose AMP transform version is 1, 2, 3, or 5, or else a
+non-SXG response.
