@@ -183,6 +183,10 @@ function removeAttrs(node) {
 
 
 function replaceExtension(doc, toExtension) {
+  if (!availableExtensions.includes(toExtension)) {
+    throw 'Invalid extension';
+  }
+
   const substitutable = getSubstitutable(doc);
 
   const substitutableTagNameLowerCase = substitutable.tagName.toLowerCase();
