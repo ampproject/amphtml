@@ -19,6 +19,8 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
+import ampToolboxCacheUrl from 'amp-toolbox-cache-url';
+
 import {urls} from '../../../src/config';
 import {Deferred} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
@@ -28,7 +30,7 @@ import {getDevelopmentBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrlDeprecated, isProxyUrl, getSourceOrigin, getSourceUrl} from '../../../src/url';
+import {parseUrlDeprecated, isProxyOrigin, getSourceOrigin, getSourceUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
@@ -92,7 +94,13 @@ export class AmpRecaptchaService {
   register(sitekey) {
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.initialize_(sitekey);
+      return new Promise((resolve, reject) => {
+        this.initialize_(sitekey).then(() => {
+          this.iframeLoadPromise_.then(() => {
+            resolve();
+          }).catch(err => reject(err));
+        }).catch(err => reject(err));
+      });
     }
     return this.iframeLoadPromise_;
   }
@@ -156,25 +164,26 @@ export class AmpRecaptchaService {
    * @private
    */
   initialize_(sitekey) {
+    return this.createRecaptchaFrame_(sitekey).then((iframe) => {
+      this.iframe_ = iframe;
 
-    this.iframe_ = this.createRecaptchaFrame_(sitekey);
-
-    this.unlisteners_ = [
-      this.listenIframe_(
+      this.unlisteners_ = [
+        this.listenIframe_(
           'amp-recaptcha-ready', this.recaptchaApiReady_.resolve
-      ),
-      this.listenIframe_(
+        ),
+        this.listenIframe_(
           'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
-      ),
-      this.listenIframe_(
+        ),
+        this.listenIframe_(
           'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
-      ),
-    ];
-    this.executeMap_ = {};
+        ),
+      ];
+      this.executeMap_ = {};
 
-    this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
-    this.body_.appendChild(this.iframe_);
-    this.iframeLoadPromise_ = loadPromise(this.iframe_);
+      this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
+      this.body_.appendChild(this.iframe_);
+      this.iframeLoadPromise_ = loadPromise(this.iframe_);
+    });
   }
 
   /**
@@ -203,48 +212,57 @@ export class AmpRecaptchaService {
   createRecaptchaFrame_(sitekey) {
 
     const iframe = this.win_.document.createElement('iframe');
-    
-    // Get our iframe src, depends on dev vs. prod
-    let baseUrl = undefined;
-    if (getMode().localDev || getMode().test) {
-      baseUrl = getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha')
-    } else {
+
+    return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+      iframe.src = recaptchaFrameSrc;
+      iframe.ampLocation = parseUrlDeprecated(baseUrl);
+      iframe.setAttribute('scrolling', 'no');
+      iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
+      iframe.setAttribute('name', JSON.stringify({
+        'sitekey': sitekey,
+        'sentinel': 'recaptcha',
+      }));
+      setStyle(iframe, 'border', 'none');
+      /** @this {!Element} */
+      iframe.onload = function() {
+        // Chrome does not reflect the iframe readystate.
+        this.readyState = 'complete';
+      };
+
+      return iframe;
+    });
+  }
+
+  /**
+   * Function to get our recaptcha iframe src
+   * @return {Promise<string>}
+   * @private
+   */
+  getRecaptchaFrameSrc_() {
+    return new Promise((resolve, reject) => {
+      if (getMode().localDev || getMode().test) {
+        resolve(getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha'));
+        return;
+      } 
+
       // Need to have the subdomain match the original document url.
       // This is verified by the recaptcha frame to 
       // verify the origin on its messages
-      let subDomain = undefined;
-      
+      let canonicalDomain = undefined;
+
       if(isProxyUrl(this.win_.location.href)) {
-        subDomain = getSourceUrl(this.win_.location.href);
+        canonicalDomain = getSourceUrl(this.win_.location.href);
       } else {
-        subdomain = parseUrlDeprecated(this.win_.location.href).hostname;
+        canonicalDomain = this.win_.location.href
       }
 
-      subDomain = subDomain.split('-').join('--');
-      subDomain = subDomain.split('.').join('-');
-
-      baseUrl = 'https://' + subDomain +
-        `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
-        `recaptcha.html`;
-    }
-
-
-    iframe.src = baseUrl;
-    iframe.ampLocation = parseUrlDeprecated(baseUrl);
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
-    iframe.setAttribute('name', JSON.stringify({
-      'sitekey': sitekey,
-      'sentinel': 'recaptcha',
-    }));
-    setStyle(iframe, 'border', 'none');
-    /** @this {!Element} */
-    iframe.onload = function() {
-      // Chrome does not reflect the iframe readystate.
-      this.readyState = 'complete';
-    };
-
-    return iframe;
+      ampToolboxCacheUrl.createCurlsSubdomain(canonicalDomain).then((curlsSubdomain) => {
+        const recaptchaFrameSrc = 'https://' + curlsSubdomain +
+          `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+          `recaptcha.html`;
+        resolve(recaptchaFrameSrc);
+      }).catch(err => reject(err));
+    });
   }
 
   /**
