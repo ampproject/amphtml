@@ -38,10 +38,19 @@ Therefore, the requestor of an SXG may require the origin to produce an SXG
 tailored to the AMP Cache that is requesting it, by rewriting its subresource
 URLs appropriately.
 
-AMP Caches may impose additional constraints not yet specified. For instance,
-they may require the origin to apply [AMP
+AMP caches may may require the origin to apply [AMP
 transforms](amp-cache-modifications.md), and may only accept specific versions
-of those transforms.
+of those transforms. This allows the AMP cache to:
+
+  1. Make continuous improvements to the AMP transforms and the transformed AMP
+     validation code.
+  2. Try to satisfy [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
+     especially as deficiencies in the transforms are found, by guaranteeing
+     that its cache of SXGs don't contain those deficiencies.
+  3. Keep its validation code of bounded complexity, by not needing to validate
+     all possible versions of the transforms.
+  4. Guarantee that all responses it fetches from publishers are useful, and
+     don't require a second fetch for unsigned content.
 
 ## Solution
 
