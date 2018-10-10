@@ -21,7 +21,6 @@ import {
 } from './amp-ad-type-defs';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getAmpAdMetadata} from './amp-ad-utils';
-import {hasExtensionId} from '../../../src/service/extensions-impl';
 import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
@@ -123,8 +122,14 @@ export class TemplateValidator extends Validator {
    */
   addExtensionIfApplicable_(creativeMetadata, extensionId, extensionSrc) {
     if (creativeMetadata) {
-      const {customElementExtensions, extensions} = creativeMetadata;
-      if (!hasExtensionId(creativeMetadata, extensionId)) {
+      let ext = [];
+      const {extensions, customElementExtensions} = creativeMetadata;
+      if (extensions && extensions.length) {
+        ext = extensions;
+      } else if (customElementExtensions && customElementExtensions.length) {
+        ext = customElementExtensions;
+      }
+      if (ext.indexOf(extensionId) == -1) {
         if (extensions) {
           extensions.push({
             'custom-element': extensionId,

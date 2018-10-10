@@ -216,12 +216,21 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   return readyPromise.then(() => {
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
     iframe[EMBED_PROP] = embed;
-
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
+    // TODO (alabiaga): remove customElementExtensions once extensions
+    // becomes preferred way.
+    let ext = [];
+    if (spec.customElementExtensions) {
+      ext = spec.customElementExtensions;
+    } else if (spec.extensions) {
+      spec.extensions.forEach(extension => {
+        ext.push(extension['custom-element']);
+      });
+    }
     extensions.installExtensionsInChildWindow(
         childWin,
-        spec.extensions || spec.customElementExtensions || [],
+        ext,
         opt_preinstallCallback);
     // Ready to be shown.
     embed.startRender_();

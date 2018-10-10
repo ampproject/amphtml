@@ -415,12 +415,12 @@ export class Extensions {
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
    * @param {!Window} childWin
-   * @param {!Array<string|!../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef>} extensionData
+   * @param {!Array<string>} extensionIds
    * @param {function(!Window)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInChildWindow(childWin, extensionData,
+  installExtensionsInChildWindow(childWin, extensionIds,
     opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
@@ -446,13 +446,7 @@ export class Extensions {
     stubLegacyElements(childWin);
 
     const promises = [];
-    extensionData.forEach(extension => {
-      let extensionId;
-      if (extension && typeof extension == 'object') {
-        extensionId = extension['custom-element'];
-      } else {
-        extensionId = extension;
-      }
+    extensionIds.forEach(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
@@ -635,30 +629,6 @@ export class Extensions {
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
-}
-
-/**
- * @param {!../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} metadata
- * @param {string} extensionId
- * @return {boolean}
- */
-export function hasExtensionId(metadata, extensionId) {
-  let ext = [];
-  const {extensions, customElementExtensions} = metadata;
-  if (extensions && extensions.length) {
-    ext = extensions;
-  } else if (customElementExtensions && customElementExtensions.length) {
-    ext = customElementExtensions;
-  }
-  for (let i = 0; i < ext.length; i++) {
-    const extensionDefOrId = ext[i];
-    if ((extensionDefOrId && typeof extensionDefOrId == 'object'
-        && extensionId === extensionDefOrId['custom-element'])
-        || (extensionDefOrId === extensionId)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /**

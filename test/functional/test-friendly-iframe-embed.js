@@ -176,7 +176,7 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), [{'custom-element': 'amp-mustache', 'src': '0.2'}],
+        }), ['amp-mustache'],
             /* preinstallCallback */ undefined)
         .once();
 

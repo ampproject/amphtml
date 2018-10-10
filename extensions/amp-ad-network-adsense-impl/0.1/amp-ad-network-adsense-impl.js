@@ -70,7 +70,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
-import {hasExtensionId} from '../../../src/service/extensions-impl';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
@@ -464,12 +463,21 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
-    if (creativeMetaData && !hasExtensionId(creativeMetaData, 'amp-ad-exit')) {
-      // Capture phase click handlers on the ad if amp-ad-exit not present
-      // (assume it will handle capture).
-      dev().assert(this.iframe);
-      Navigation.installAnchorClickInterceptor(
-          this.getAmpDoc(), this.iframe.contentWindow);
+    let ext = [];
+    if (creativeMetaData) {
+      const {extensions, customElementExtensions} = creativeMetaData;
+      if (extensions && extensions.length) {
+        ext = extensions;
+      } else if (customElementExtensions && customElementExtensions.length) {
+        ext = customElementExtensions;
+      }
+      if (ext.indexOf('amp-ad-exit') == -1) {
+        // Capture phase click handlers on the ad if amp-ad-exit not present
+        // (assume it will handle capture).
+        dev().assert(this.iframe);
+        Navigation.installAnchorClickInterceptor(
+            this.getAmpDoc(), this.iframe.contentWindow);
+      }
     }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);

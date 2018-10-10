@@ -25,7 +25,6 @@ import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
   adoptStandardServicesForEmbed,
-  hasExtensionId,
   installExtensionsService,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
@@ -579,31 +578,6 @@ describes.sandboxed('Extensions', {}, () => {
         expect(elementClass).to.equal(ctor);
       });
     });
-
-    describe('hasExtensionId', () => {
-      it('should detect extension as string or with version', () => {
-        // Given a list of extension IDs.
-        let extensionIds = ['amp-list', 'amp-mustache'];
-        expect(hasExtensionId(
-            {customElementExtensions: extensionIds}, 'amp-mustache'))
-            .to.be.true;
-
-        // Given a list of extension IDs, along with versions.
-        extensionIds =
-            [{'custom-element': 'amp-mustache', 'src': '0.2'}];
-        expect(hasExtensionId({extensions: extensionIds}, 'amp-mustache'))
-            .to.be.true;
-
-        // Given the extension is not in the list.
-        extensionIds =
-          [{'custom-element': 'amp-mustache', 'src': '0.2'}];
-        expect(hasExtensionId({extensions: extensionIds}, 'amp-form'))
-            .to.be.false;
-        extensionIds = ['amp-mustache', 'amp-list'];
-        expect(hasExtensionId({extensions: extensionIds}, 'amp-form'))
-            .to.be.false;
-      });
-    });
   });
 
   describes.realWin('preloadExtension', {
@@ -1084,29 +1058,6 @@ describes.sandboxed('Extensions', {}, () => {
           expect(adoptServiceForEmbed.getCall([index]).args[1])
               .to.equal(expectedCallsInOrder[index]);
         });
-      });
-    });
-
-    describe('hasExtensionId', () => {
-      it('should detect extension as string or with version', () => {
-        // Given the extensions provided is just a list of extension IDs.
-        let extensionIds = ['amp-list', 'amp-mustache'];
-        expect(hasExtensionId(
-            {customElementExtensions: extensionIds}, 'amp-mustache'))
-            .to.be.true;
-
-        // Given the extensions is list with a version.
-        extensionIds =
-            ['amp-list', {'custom-element': 'amp-mustache', 'src': '0.2'}];
-        expect(hasExtensionId(
-            {customElementExtensions: extensionIds}, 'amp-mustache'))
-            .to.be.true;
-
-        // Given a non existent extension.
-        extensionIds =
-            [{'custom-element': 'amp-mustache', 'src': '0.2'}];
-        expect(hasExtensionId(
-            {extensions: extensionIds}, 'amp-non-existent')).to.be.false;
       });
     });
   });
