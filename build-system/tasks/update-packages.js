@@ -111,12 +111,12 @@ function patchWorkerDom() {
       'node_modules/@ampproject/worker-dom/dist/index.safe.patched.js';
   file = fs.readFileSync(
       'node_modules/@ampproject/worker-dom/dist/index.safe.js', 'utf8');
-  if (!/var MainThread = \(function \(exports\) {/.test(file)) {
-    throw new Error('Expected "var MainThread = (function (exports) {" ' +
-      'to appear in @ampproject/worker-dom/index.safe.js.');
+  if (!/var MainThread=function\(R\){/.test(file)) {
+    throw new Error('Expected "var MainThread=function(R){" ' +
+      'to appear in @ampproject/worker-dom/dist/index.safe.js.');
   }
-  file = file.replace('var MainThread = (function (exports) {',
-      'export const MainThread = (function (exports) {');
+  file = file.replace('var MainThread=function(R){',
+      'export const MainThread=function(R){');
   writeIfUpdated(patchedName, file);
 
   // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
