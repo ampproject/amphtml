@@ -108,7 +108,7 @@ function renderExtensionDropdown(doc, opt_extension) {
   availableExtensions.forEach(extension => {
     const option = doc.createElement('option');
     option.setAttribute('value', extension);
-    option.innerHTML = extension;
+    option./*OK*/innerHTML = extension;
 
     if (extension == usedExtension) {
       option.setAttribute('selected', '');
