@@ -28,6 +28,7 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
+const renderIndex = require('./app-index/index');
 const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
@@ -58,6 +59,16 @@ app.get('/serve_mode=:mode', (req, res) => {
     res.status(400).send(info);
   }
 });
+
+if (!global.AMP_TESTING) {
+  app.get('/', renderIndex);
+
+  // TODO(alanorozco): This doesn't quite work. Listing dirs is fine, but file
+  // links go to a /~ base path, which obviously 404's.
+  //
+  // app.use('/~', express.static('/'), serveIndex(`${__dirname}/../`));
+}
+
 
 // Deprecate usage of .min.html/.max.html
 app.get([
