@@ -80,11 +80,11 @@ For each identifier:
 
  1. If the identifier contains a `v` parameter, then its value represents a set
     of AMP transform versions. The server should respond with an SXG only if it
-    can produce a one of the versions in that set (see [Version negotation](#version-negotiation)).
- 2. If the identifier contains any other parameters, then this identifier cannot
-    be satisfied. The server should attempt to match the next one. (This
-    reserves the parameter space for future additional constraints to be
-    defined.)
+    can produce one of the versions in that set (see [Version negotation](#version-negotiation)).
+ 2. If the identifier contains any parameters besides those mentioned above,
+    then this identifier cannot be satisfied. The server should attempt to match
+    the next one. (This reserves the parameter space for future additional
+    constraints to be defined.)
  3. If the identifier is `any`, then the SXG is not intended for a particular
     prefetching intermediary, and therefore its subresource URLs needn't be (but
     may be) rewritten.
@@ -116,12 +116,13 @@ v_range = sh-integer / sh-integer OWS ".." OWS sh-integer
 
 Each `sh-integer` must be non-negative. If the parameter fails to meet these
 criteria, then the server cannot satisfy the request. Otherwise, the server can
-satisfy the request if, for any `v_range` in the list, any of:
+satisfy the request if any of the following is true for any `v_range` in the
+list:
 
-   1. The `v_range` is a single integer, and the server can produce exactly that
-      version.
-   2. The `v_range` is a pair of integers `x-y`, and the server can produce a
-      version in the closed interval _[x, y]_.
+ 1. The `v_range` is a single integer, and the server can produce exactly that
+    version.
+ 2. The `v_range` is a pair of integers `x..y`, and the server can produce a
+    version in the closed interval _[x, y]_.
 
 If the server can respond with multiple versions in the set, it should respond
 with the newest version it can produce, but may respond with older versions in
@@ -201,24 +202,24 @@ the latter response.
 If the proxy can ensure that a cached response satisfies a new request, then it
 can serve that response. It can do that by comparing the `AMP-Cache-Transform`
 response header of the cached response to the `AMP-Cache-Transform` request
-header of the new request. For instance, the following algorithm determines if a
-response satisfies a request:
+header of the new request. The response matches the request if there exists a
+parameterised identifier `spec` in the request list for which all of the
+following is true:
 
- 1. If the response matches any parameterised identifier in the request list,
-    per:
-   1. If its identifier is not `any` and the response's identifier is not
-      identical, then the response doesn't match.
-   2. If it includes a `v` parameter and the response's `v` parameter is either
-      missing or not an element of it, then the response doesn't match.
-   3. If it includes any other parameter, then the response doesn't match.
-   4. Otherwise, the response matches.
+ 1. Any of:
+    1. `spec`'s identifier is `any`.
+    2. `spec`'s identifier is identical to the response's identifier.
+ 2. Any of:
+    1. `spec` does not include a `v` parameter.
+    2. `spec`'s `v` parameter is a valid `v_spec`, the response has a `v`
+       parameter (specifying a single version as per
+       [above](#response-header)), and the response's `v` is an element of the
+       request's `v`.
+ 3. `spec` does not include any parameter other than those mentioned above.
 
 The above is merely informational; a cache may choose any strategy that doesn't
 serve mismatched responses (i.e. obeys the "Server behavior" specification
 above).
-
-Proper handling of parameters will be defined in a future version of the spec,
-and may require parameter-specific handling for optimal performance.
 
 ## Example
 
