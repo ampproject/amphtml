@@ -647,6 +647,9 @@ function runTests() {
  * Run tests after applying the prod / canary AMP config to the runtime.
  */
 gulp.task('test', 'Runs tests', preTestTasks, function() {
+  // TODO(alanorozco): Come up with a more elegant check?
+  global.AMP_TESTING = true;
+
   if (!argv.nohelp) {
     printArgvMessages();
   }
