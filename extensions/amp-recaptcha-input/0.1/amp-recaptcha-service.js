@@ -19,7 +19,7 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from 'amp-toolbox-cache-url';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {urls} from '../../../src/config';
 import {Deferred} from '../../../src/utils/promise';
@@ -215,7 +215,7 @@ export class AmpRecaptchaService {
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
       iframe.src = recaptchaFrameSrc;
-      iframe.ampLocation = parseUrlDeprecated(baseUrl);
+      iframe.ampLocation = parseUrlDeprecated(this.win_.location.href);
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
       iframe.setAttribute('name', JSON.stringify({
@@ -250,7 +250,7 @@ export class AmpRecaptchaService {
       // verify the origin on its messages
       let canonicalDomain = undefined;
 
-      if(isProxyUrl(this.win_.location.href)) {
+      if(isProxyOrigin(this.win_.location.href)) {
         canonicalDomain = getSourceUrl(this.win_.location.href);
       } else {
         canonicalDomain = this.win_.location.href
