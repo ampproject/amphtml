@@ -500,10 +500,6 @@ function runTests() {
     c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
-        compact: false,
-        // Transform files in node_modules since deps use ES6 export.
-        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
-        global: true,
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [
@@ -647,6 +643,9 @@ function runTests() {
  * Run tests after applying the prod / canary AMP config to the runtime.
  */
 gulp.task('test', 'Runs tests', preTestTasks, function() {
+  // TODO(alanorozco): Come up with a more elegant check?
+  global.AMP_TESTING = true;
+
   if (!argv.nohelp) {
     printArgvMessages();
   }
