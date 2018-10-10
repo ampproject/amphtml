@@ -206,7 +206,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       installLinkerReaderService(windowInterface);
       const linkerReader = linkerReaderServiceFor(windowInterface);
-      expect(linkerReader.get('testLinker', 'cid')).to.equal('12345');
+      return expect(linkerReader.get('testLinker', 'cid')).to.equal('12345');
     });
   });
 
