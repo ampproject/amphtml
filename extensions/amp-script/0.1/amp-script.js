@@ -16,7 +16,15 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 // TODO(choumx): This requires changing line 1 to "module.exports = ...".
-import {MainThread} from '@ampproject/worker-dom/dist/index.safe';
+import {MainThread} from '@ampproject/worker-dom/dist/index.safe.patched';
+import {
+  calculateExtensionScriptUrl,
+} from '../../../src/service/extension-location';
+import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+
+/** @const {string} */
+const TAG = 'amp-script';
 
 // TODO(choumx): Compiled output from worker-dom's TypeScript source is lacking
 // Closure type annotations. worker-dom needs tsickle integration.
@@ -28,14 +36,22 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    MainThread.upgradeElement(this.element,
-        '/extensions/amp-script/0.1/worker.safe.js');
+    const url = this.workerThreadUrl_();
+    dev().fine(TAG, 'Fetching amp-script-worker from:', url);
+    MainThread.upgradeElement(this.element, url);
+  }
 
-    // TODO(choumx): Compile @ampproject/worker-dom/dist/worker.safe.(m)js
-    // by copying it from node_modules/ to a temporary directory. Requires
-    // proper type annotation output first.
-    // MainThread.upgradeElement(this.element,
-    //     '/dist/v0/amp-script-worker-0.1.js');
+  /**
+   * @return {string}
+   * @private
+   */
+  workerThreadUrl_() {
+    // Use `testLocation` for testing with iframes. @see testing/iframe.js.
+    const location = (getMode().test && this.win.testLocation)
+      ? this.win.testLocation : this.win.location;
+    const useLocal = getMode().localDev || getMode().test;
+    return calculateExtensionScriptUrl(
+        location, 'amp-script-worker', '0.1', useLocal);
   }
 }
 

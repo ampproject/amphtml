@@ -218,9 +218,9 @@ exports.extensionBundles = [
   {
     name: 'amp-script',
     options: {
-      jsBinaries: [
-        {name: 'amp-script-worker', options: {noWrapper: true}},
-      ],
+      // jsBinaries: [
+      //   {name: 'amp-script-worker', options: {noWrapper: true}},
+      // ],
     },
     version: '0.1',
     type: TYPES.MISC,

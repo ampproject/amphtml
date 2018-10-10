@@ -102,6 +102,31 @@ function patchRegisterElement() {
 }
 
 /**
+ * Performs patches/copies of @ampproject/worker-dom for amp-script.
+ */
+function patchWorkerDom() {
+  // Patch @ampproject/worker-dom/dist/index.safe.js with ES6 export.
+  let file;
+  const patchedName =
+      'node_modules/@ampproject/worker-dom/dist/index.safe.patched.js';
+  file = fs.readFileSync(
+      'node_modules/@ampproject/worker-dom/dist/index.safe.js', 'utf8');
+  if (!/var MainThread = \(function \(exports\) {/.test(file)) {
+    throw new Error('Expected "var MainThread = (function (exports) {" ' +
+      'to appear in @ampproject/worker-dom/index.safe.js.');
+  }
+  file = file.replace('var MainThread = (function (exports) {',
+      'export const MainThread = (function (exports) {');
+  writeIfUpdated(patchedName, file);
+
+  // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+  fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+      'dist/v0/amp-script-worker-0.1.js');
+  fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+      'dist/v0/amp-script-worker-0.1.max.js');
+}
+
+/**
  * Installs custom lint rules from build-system/eslint-rules to node_modules.
  */
 function installCustomEslintRules() {
@@ -146,6 +171,7 @@ function updatePackages() {
   }
   patchWebAnimations();
   patchRegisterElement();
+  patchWorkerDom();
 }
 
 gulp.task(

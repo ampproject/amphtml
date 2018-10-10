@@ -57,12 +57,7 @@ export function calculateExtensionScriptUrl(location, extensionId,
   opt_extensionVersion, opt_isLocalDev) {
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
-  if (opt_extensionVersion == null) {
-    opt_extensionVersion = '0.1';
-  }
-  const extensionVersion = opt_extensionVersion
-    ? '-' + opt_extensionVersion
-    : '';
+  const extensionVersion = '-' + (opt_extensionVersion || '0.1');
   return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
 }
 
