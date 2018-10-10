@@ -134,7 +134,7 @@ list:
     version in the closed interval _[x, y]_.
 
 If the server can respond with multiple versions in the set, it should respond
-with the newest version it can produce, but may respond with older versions in
+with the highest version it can produce, but may respond with older versions in
 that set if other reasons dictate it (e.g. cache efficiency).
 
 If the server does not know what version of the transforms it provides, then it
