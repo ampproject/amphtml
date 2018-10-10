@@ -152,7 +152,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   detachedCallback() {
-    this.hasDetached_ = true;
     if (this.analyticsGroup_) {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
@@ -352,7 +351,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   addTriggerNoInline_(config) {
-    if (this.hasDetached_) {
+    if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
       return;
