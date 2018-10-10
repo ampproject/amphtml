@@ -84,20 +84,6 @@ amp-story[standalone][desktop] {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-story-page[distance] {
-  transform: scale(1.0) translateX(50vw) translateY(0%) !important;
-  opacity: .05 !important;
-  transform-origin: left !important;
-  border-radius: 16px !important;
-}
-
-[desktop] amp-story-page[distance="0"],
-[desktop] amp-story-page[distance="1"] {
-  /* TODO(alanorozco): Enable transition for distance = 2.
-   * For some reason, enabling it breaks layout scheduling. */
-  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
 [desktop] .i-amphtml-story-button-container {
   position: absolute !important;
   top: 0 !important;
@@ -155,36 +141,78 @@ amp-story[standalone][desktop] {
   left: 0 !important;
 }
 
-[desktop] amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(-200vw) translateY(0%) !important;
+/**
+ * Page positions and animations.
+ */
+
+[desktop] amp-story-page.i-amphtml-element {
+  /* Pages are stacked to the right side of the screen and then animated in. */
+  transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
+  opacity: 0.05 !important;
+  transform-origin: left !important;
+  border-radius: 16px !important;
 }
 
-[desktop] amp-story-page[i-amphtml-previous-page],
+[dir=rtl] [desktop] amp-story-page.i-amphtml-element {
+  transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-visited] {
+  transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+}
+
+[dir=rtl] [desktop] amp-story-page[i-amphtml-visited] {
+  transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-desktop-position="-2"],
+[desktop] amp-story-page[i-amphtml-desktop-position="-1"],
+[desktop] amp-story-page[i-amphtml-desktop-position="1"],
+[desktop] amp-story-page[i-amphtml-desktop-position="2"] {
+  transition: opacity 350ms ease-out, transform 350ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-desktop-position="0"] {
+  transition: opacity 350ms cubic-bezier(0.0, 0.0, 0.2, 1), transform 350ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-desktop-position="-2"],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="2"] {
+  transform: scale(0.9) translateX(calc(-250% - 128px)) translateY(0%) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-desktop-position="-1"],
 .prev-container > .i-amphtml-story-page-sentinel,
-[dir=rtl] [desktop] amp-story-page[i-amphtml-next-page],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="1"],
 [dir=rtl] .next-container > .i-amphtml-story-page-sentinel {
-  /* -150% + 15% */
   transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
 
-[desktop] amp-story-page[active] {
+[desktop] amp-story-page[active],
+[dir=rtl] [desktop] amp-story-page[active],
+[desktop] amp-story-page[i-amphtml-desktop-position="0"],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="0"] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
   opacity: 1 !important;
 }
 
-[desktop] amp-story-page[i-amphtml-next-page],
+[desktop] amp-story-page[i-amphtml-desktop-position="1"],
 .next-container > .i-amphtml-story-page-sentinel,
-[dir=rtl] [desktop] amp-story-page[i-amphtml-previous-page],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="-1"],
 [dir=rtl] .prev-container > .i-amphtml-story-page-sentinel {
-  /* 50% - 15% */
   transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
+}
+
+[desktop] amp-story-page[i-amphtml-desktop-position="2"],
+[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="-2"] {
+  transform: scale(0.9) translate(calc(150% + 128px), 0%) !important;
 }
 
 /**
  * If the next page is protected behind a paywall, blur its content and display
  * a lock icon on top of it.
  */
-[desktop] amp-story-page[i-amphtml-next-page][amp-access-hide]::before {
+[desktop] amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide]::before {
   content: '' !important;
   position: absolute !important;
   top: 50% !important;
@@ -196,7 +224,7 @@ amp-story[standalone][desktop] {
   z-index: 4 !important; /** Above amp-story-cta-layer and amp-story-grid-layer. */
 }
 
-[desktop] amp-story-page[i-amphtml-next-page][amp-access-hide] > * {
+[desktop] amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide] > * {
   filter: blur(8px) !important;
 }
 
@@ -243,17 +271,17 @@ amp-story[standalone][desktop] {
   justify-content: center!important;
   align-items: center!important;
   opacity: .5!important;
-  transition: 150ms opacity linear, 300ms transform linear!important;
+  transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
   z-index: 100002!important;
   outline: none!important;
 }
 
-.i-amphtml-story-prev-hover > amp-story-page[i-amphtml-previous-page] {
+.i-amphtml-story-prev-hover > amp-story-page[i-amphtml-desktop-position="-1"] {
   opacity: 0.3 !important;
 }
 
-.i-amphtml-story-next-hover > amp-story-page[active] + amp-story-page {
+.i-amphtml-story-next-hover > amp-story-page[i-amphtml-desktop-position="0"] + amp-story-page {
   opacity: 0.3 !important;
 }
 

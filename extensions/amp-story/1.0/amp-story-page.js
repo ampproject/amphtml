@@ -84,7 +84,7 @@ const TAG = 'amp-story-page';
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
-const REWIND_TIMEOUT_MS = 300;
+const REWIND_TIMEOUT_MS = 350;
 
 /**
  * amp-story-page states.
@@ -708,13 +708,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets the ID of the next page in the story (after the current page).
-   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
+   * @param {boolean=} isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
    */
-  getNextPageId(opt_isAutomaticAdvance) {
-    if (opt_isAutomaticAdvance &&
+  getNextPageId(isAutomaticAdvance = false) {
+    if (isAutomaticAdvance &&
         this.element.hasAttribute('auto-advance-to')) {
       return this.element.getAttribute('auto-advance-to');
     }
@@ -750,11 +750,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
+   * @param {boolean=} isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
    */
-  next(opt_isAutomaticAdvance) {
-    const pageId = this.getNextPageId(opt_isAutomaticAdvance);
+  next(isAutomaticAdvance = false) {
+    const pageId = this.getNextPageId(isAutomaticAdvance);
 
     if (!pageId) {
       return;

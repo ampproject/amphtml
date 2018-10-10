@@ -681,29 +681,38 @@ describes.realWin('amp-story', {
   });
 
   describe('desktop attributes', () => {
-    it('should add next page attribute', () => {
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
+    it('should add desktop-position attributes', () => {
+      const desktopAttribute = 'i-amphtml-desktop-position';
+      const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
 
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page1 = pages[1];
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+
+      story.buildCallback();
+
       return story.layoutCallback()
           .then(() => {
-            expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
+            expect(pages[0].getAttribute(desktopAttribute)).to.equal('0');
+            expect(pages[1].getAttribute(desktopAttribute)).to.equal('1');
+            expect(pages[2].getAttribute(desktopAttribute)).to.equal('2');
+            expect(pages[3].hasAttribute(desktopAttribute)).to.be.false;
           });
     });
 
-    it('should add previous page attribute', () => {
-      sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
+    it('should update desktop-position attributes upon navigation', () => {
+      const desktopAttribute = 'i-amphtml-desktop-position';
+      const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
 
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page0 = pages[0];
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+
+      story.buildCallback();
+
       return story.layoutCallback()
-          .then(() => story.switchTo_('page-1'))
+          .then(() => story.switchTo_('2'))
           .then(() => {
-            expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
+            expect(pages[0].getAttribute(desktopAttribute)).to.equal('-2');
+            expect(pages[1].getAttribute(desktopAttribute)).to.equal('-1');
+            expect(pages[2].getAttribute(desktopAttribute)).to.equal('0');
+            expect(pages[3].getAttribute(desktopAttribute)).to.equal('1');
           });
     });
 
