@@ -122,7 +122,7 @@ export class Transport {
 
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
-    const ampAdResourceId = this.isInabox_? 1 : user().assertString(
+    const ampAdResourceId = this.isInabox_ ? 1 : user().assertString(
         getAmpAdResourceId(element, getTopWindow(win)),
         'No friendly amp-ad ancestor element was found ' +
         'for amp-analytics tag with iframe transport.');
