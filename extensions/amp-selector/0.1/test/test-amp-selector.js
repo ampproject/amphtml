@@ -767,7 +767,7 @@ describes.realWin('amp-selector', {
       expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
     });
 
-    it('should trigger `select` action when user selects an option', () => {
+    it('should trigger "select" event when user selects an option', () => {
       const ampSelector = getSelector({
         config: {
           count: 5,
@@ -777,14 +777,46 @@ describes.realWin('amp-selector', {
       ampSelector.build();
       const impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
       impl.clickHandler_({target: impl.options_[3]});
 
-      const eventMatcher =
-          sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
-      expect(triggerSpy).to.have.been.calledWith(
-          ampSelector, 'select', /* CustomEvent */ eventMatcher);
+      expect(triggerSpy).to.be.calledOnce;
+      expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+      const event = triggerSpy.firstCall.args[2];
+      expect(event).to.have.property('detail');
+      expect(event.detail).to.have.property('targetOption', '3');
+      expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+    });
+
+    it('should trigger "select" event for multiple selections', function* () {
+      const ampSelector = getSelector({
+        attributes: {
+          multiple: true,
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.children[1].setAttribute('selected', '');
+
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      impl.clickHandler_({target: impl.options_[2]});
+
+      expect(triggerSpy).to.be.calledOnce;
+      expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+      const event = triggerSpy.firstCall.args[2];
+      expect(event).to.have.property('detail');
+      expect(event.detail).to.have.property('targetOption', '2');
+      expect(event.detail).to.have.deep.property('selectedOptions',
+          ['0', '1', '2']);
     });
 
     it('should trigger `select` action when user uses ' +
