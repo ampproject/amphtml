@@ -53,7 +53,7 @@ export class LinkerManager {
     this.allLinkerPromises_ = [];
 
     /** @private {!JsonObject} */
-    this.resolvedLinkers_ = dict();
+    this.resolvedIds_ = dict();
 
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
@@ -101,8 +101,7 @@ export class LinkerManager {
             expandedIds[keys[i]] = value;
           }
         });
-        this.resolvedLinkers_[name] =
-            createLinker(/* version */ '1', expandedIds);
+        this.resolvedIds_[name] = expandedIds;
       });
     });
 
@@ -232,7 +231,7 @@ export class LinkerManager {
     for (const linkerName in linkerConfigs) {
       // The linker param is created asynchronously. This callback should be
       // synchronous, so we skip if value is not there yet.
-      if (this.resolvedLinkers_[linkerName]) {
+      if (this.resolvedIds_[linkerName]) {
         this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
       }
     }
@@ -253,7 +252,9 @@ export class LinkerManager {
     const /** @type {Array} */ domains = config['destinationDomains'];
 
     if (this.isDomainMatch_(hostname, domains)) {
-      el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+      const linkerValue = createLinker(/* version */ '1',
+          this.resolvedIds_[name]);
+      el.href = addParamToUrl(href, name, linkerValue);
     }
   }
 
@@ -345,10 +346,13 @@ export class LinkerManager {
    * @param {string} linkerName
    */
   addDataToForm_(form, actionXhrMutator, linkerName) {
-    const linkerValue = this.resolvedLinkers_[linkerName];
-    if (!linkerValue) {
+    const ids = this.resolvedIds_[linkerName];
+    if (!ids) {
+      // Form was clicked before macros resolved.
       return;
     }
+
+    const linkerValue = createLinker(/* version */ '1', ids);
 
     // Runtime controls submits with `action-xhr`, so we can append the linker
     // param
