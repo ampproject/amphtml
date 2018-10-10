@@ -205,6 +205,24 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-selector
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>select</code></td>
+    <td>Fired when an option is selected or deselected.</td>
+    <td><pre>// Target element's "option" attribute value.
+event.targetOption
+
+// Array of "option" attribute values of all selected elements.
+event.selectedOptions</pre></td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>
