@@ -169,7 +169,7 @@ export class AmpRecaptchaService {
 
       this.unlisteners_ = [
         this.listenIframe_(
-          'amp-recaptcha-ready', this.recaptchaApiReady_.resolve
+          'amp-recaptcha-ready', () => this.recaptchaApiReady_.resolve()
         ),
         this.listenIframe_(
           'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)

@@ -78,11 +78,11 @@ function recaptcha() {
   const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
+
   loadScript(window, recaptchaApiUrl, function() {
     const {grecaptcha} = window;
 
     grecaptcha.ready(function() {
-      // TODO(@torch2424) Send Ready Event, and listen to actions
       iframeMessagingClient = new IframeMessagingClient(window);
       iframeMessagingClient.setSentinel(dataObject.sentinel);
       iframeMessagingClient.registerCallback(
