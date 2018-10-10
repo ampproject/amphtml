@@ -18,6 +18,10 @@ import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
 import {installVariableService} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -176,6 +180,33 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           '?a=1' +
           '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
           '&testLinker2=1*1u4ugj3*foo*YmFy');
+    });
+  });
+
+  it('should generate a param valid for ingestion 5 min later', () => {
+    const clock = sandbox.useFakeTimers(1533329483292);
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker: {
+          ids: {
+            cid: '12345',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      clock.tick(1000 * 60 * 5); // 5 minutes.
+      const linkerUrl = clickAnchor('https://www.source.com/dest?a=1');
+
+      windowInterface.history = {replaceState: () => {}};
+      windowInterface.location = {href: linkerUrl};
+
+      installLinkerReaderService(windowInterface);
+      const linkerReader = linkerReaderServiceFor(windowInterface);
+      return expect(linkerReader.get('testLinker', 'cid')).to.equal('12345');
     });
   });
 
