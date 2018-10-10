@@ -16,7 +16,6 @@
 
 import {TextMask} from './text-mask';
 import {isExperimentOn} from '../../../src/experiments';
-import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 const SERVICE = 'inputmask';
@@ -38,13 +37,16 @@ export class AmpInputmaskService {
    */
   install() {
     const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
-    iterateCursor(maskElements, element => {
+    if (maskElements.length) {
       user().assert(
           isExperimentOn(this.ampdoc.win, 'amp-inputmask'),
           'Experiment amp-inputmask is disabled');
-      const tm = new TextMask(element);
+    }
+
+    for (let i = 0; i < maskElements.length; i++) {
+      const tm = new TextMask(maskElements[i]);
       this.masks_.push(tm);
-    });
+    }
   }
 
   /**

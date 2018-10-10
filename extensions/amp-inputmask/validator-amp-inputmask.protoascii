@@ -46,11 +46,9 @@ tags: {
   }
   attrs: {
     name: "type"
-    value_regex: "(^|\\s)("  # Values are space separated.
-        "text|"
-        "tel|"
-        "search|"
-        ")(\\s|$)"
+    value: "text"
+    value: "tel"
+    value: "search"
   }
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"

@@ -71,6 +71,7 @@ export class Mask {
         InputmaskDependencyLib, win, doc, undefined);
 
     Inputmask.extendDefaults({
+      // A list of supported input type attribute values
       supportsInputType: [
         'text',
         'tel',
