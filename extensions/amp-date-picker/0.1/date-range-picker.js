@@ -27,9 +27,14 @@ function createDateRangePickerBase() {
   const {
     DAY_SIZE,
     HORIZONTAL_ORIENTATION,
-  } = requireExternal('react-dates/constants');
-  const {DayPickerRangeController} = requireExternal('react-dates');
-
+  } = /** @type {{DAY_SIZE: number, HORIZONTAL_ORIENTATION: string}} */ (
+    requireExternal('react-dates/constants')
+  );
+  const {
+    DayPickerRangeController,
+  } = /** @type {{DayPickerRangerController: Object}} */ (
+    requireExternal('react-dates')
+  );
 
   const defaultProps = map({
     startDate: null, // TODO: use null

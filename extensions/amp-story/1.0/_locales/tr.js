@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Turkish strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Kabul ediyorum',
   },
@@ -94,4 +94,4 @@ export default {
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Üzgünüz, tarayıcınız bu deneyimi desteklemiyor gibi görünüyor.',
   },
-};
+});

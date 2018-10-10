@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../third_party/react-dates/bundle';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';

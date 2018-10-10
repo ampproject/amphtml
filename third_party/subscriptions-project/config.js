@@ -599,9 +599,10 @@ class MetaParser {
     // Is locked?
     const accessibleForFree = getMetaTag(this.doc_.getRootNode(),
         'subscriptions-accessible-for-free');
-    const locked = (accessibleForFree &&
-        accessibleForFree.toLowerCase() == 'false') || false;
-
+    let locked = false;
+    if (accessibleForFree && accessibleForFree.toLowerCase() == 'false') {
+      locked = true;
+    }
     return new PageConfig(productId, locked);
   }
 }

@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
   },
@@ -58,4 +58,4 @@ export default {
     string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
         'this experience',
   },
-};
+});
