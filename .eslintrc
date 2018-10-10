@@ -18,25 +18,9 @@
     "sourceType": "module"
   },
   "globals": {
-    "it": false,
-    "chai": false,
-    "expect": false,
-    "describe": false,
-    "beforeEach": false,
-    "afterEach": false,
-    "before": false,
-    "after": false,
     "AMP": false,
-    "assert": false,
-    "sinon": true,
-    "sandbox": true,
     "context": false,
-    "global": false,
-    "describes": true,
-    "allowConsoleError": false,
-    "expectAsyncConsoleError": false,
-    "restoreAsyncErrorThrows": false,
-    "stubAsyncErrorThrows": false
+    "global": false
   },
   "settings": {
     "jsdoc": {
@@ -190,6 +174,32 @@
         "jsdoc/require-param-name": 0,
         "jsdoc/require-param-type": 0,
         "jsdoc/require-returns-type": 0
+      },
+      "globals": {
+        "it": false,
+        "chai": false,
+        "expect": false,
+        "describe": false,
+        "beforeEach": false,
+        "afterEach": false,
+        "before": false,
+        "after": false,
+        "assert": false,
+        "sinon": true,
+        "sandbox": true,
+        "describes": true,
+        "allowConsoleError": false,
+        "expectAsyncConsoleError": false,
+        "restoreAsyncErrorThrows": false,
+        "stubAsyncErrorThrows": false
+      }
+    },
+    {
+      "files": ["babel.config.js"],
+      "globals": {
+        "module": false,
+        "process": false,
+        "require": false
       }
     }
   ]
