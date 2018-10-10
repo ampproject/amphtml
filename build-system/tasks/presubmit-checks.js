@@ -848,7 +848,7 @@ const forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
-      'build-system/app-video-testbench.js'
+      'build-system/app-video-testbench.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'gulpfile.js',
