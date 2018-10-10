@@ -1571,7 +1571,9 @@ tags: {
       protocol: "mailto"
       protocol: "maps"
       # Whitelisting additional commonly observed third party
-      # protocols which should be safe
+      # protocols which should be safe.
+      # BiP Messenger
+      protocol: "bip"
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
