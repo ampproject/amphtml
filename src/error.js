@@ -320,7 +320,7 @@ function onError(message, filename, line, col, error) {
       hasNonAmpJs);
   if (data) {
     reportingBackoff(() =>
-      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ data));
+      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data)));
   }
 }
 
