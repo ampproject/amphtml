@@ -240,7 +240,7 @@ export function imaVideo(global, data) {
   // Video controls.
   controlsDiv = global.document.createElement('div');
   controlsDiv.id = 'ima-controls';
-  setStyles(controlsDiv, {
+  setStyles(controlsDiv, { 
     'position': 'absolute',
     'bottom': '0px',
     'width': '100%',
@@ -687,6 +687,8 @@ export function onContentEnded() {
   }
   postMessage({event: VideoEvents.PAUSE});
   postMessage({event: VideoEvents.ENDED});
+
+  // TODO: @torch2424 show the replay button in palce of play button
 }
 
 /**
