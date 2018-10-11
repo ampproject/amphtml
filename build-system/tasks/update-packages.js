@@ -39,6 +39,24 @@ function writeIfUpdated(patchedName, file) {
 }
 
 /**
+ * @param {string} filePath
+ * @param {string} newFilePath
+ * @param  {...any} args Search and replace string pairs.
+ */
+function replaceInFile(filePath, newFilePath, ...args) {
+  let file = fs.readFileSync(filePath, 'utf8');
+  for (let i = 0; i < args.length; i += 2) {
+    const searchValue = args[i];
+    const replaceValue = args[i + 1];
+    if (!file.includes(searchValue)) {
+      throw new Error(`Expected "${searchValue}" to appear in ${filePath}.`);
+    }
+    file = file.replace(searchValue, replaceValue);
+  }
+  writeIfUpdated(newFilePath, file);
+}
+
+/**
  * Patches Web Animations API by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
@@ -75,36 +93,32 @@ function patchWebAnimations() {
  * without side effects.
  */
 function patchRegisterElement() {
-  let file;
   // Copies document-register-element into a new file that has an export.
   // This works around a bug in closure compiler, where without the
   // export this module does not generate a goog.provide which fails
-  // compilation.
-  // Details https://github.com/google/closure-compiler/issues/1831
-  const patchedName = 'node_modules/document-register-element' +
-      '/build/document-register-element.patched.js';
-  file = fs.readFileSync(
-      'node_modules/document-register-element/build/' +
-      'document-register-element.node.js').toString();
-
-  // Eliminate the immediate side effect.
-  if (!/installCustomElements\(global\);/.test(file)) {
-    throw new Error('Expected "installCustomElements(global);" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('installCustomElements(global);', '');
-
-  // Closure Compiler does not generate a `default` property even though
-  // to interop CommonJS and ES6 modules. This is the same issue typescript
-  // ran into here https://github.com/Microsoft/TypeScript/issues/2719
-  if (!/module.exports = installCustomElements;/.test(file)) {
-    throw new Error('Expected "module.exports = installCustomElements;" ' +
-        'to appear in document-register-element');
-  }
-  file = file.replace('module.exports = installCustomElements;',
+  // compilation: https://github.com/google/closure-compiler/issues/1831
+  const dir = 'node_modules/document-register-element/build/';
+  replaceInFile(
+      dir + 'document-register-element.node.js',
+      dir + 'document-register-element.patched.js',
+      // Elimate the immediate side effect.
+      'installCustomElements(global);',
+      '',
+      // Replace CJS export with ES6 export.
+      'module.exports = installCustomElements;',
       'export {installCustomElements};');
+}
 
-  writeIfUpdated(patchedName, file);
+/**
+ * Patch @ampproject/worker-dom/dist/index.safe.js with ES6 export.
+ */
+function patchWorkerDom() {
+  replaceInFile(
+      'node_modules/@ampproject/worker-dom/dist/index.safe.js',
+      'node_modules/@ampproject/worker-dom/dist/index.safe.patched.js',
+      // Replace local var with an ES6 export.
+      'var MainThread=function(R){',
+      'export const MainThread=function(R){');
 }
 
 /**
@@ -180,6 +194,7 @@ function updatePackages() {
   }
   patchWebAnimations();
   patchRegisterElement();
+  patchWorkerDom();
   transformEs6Packages();
 }
 
