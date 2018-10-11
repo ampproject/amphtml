@@ -476,17 +476,14 @@ export class AmpDatePicker extends AMP.BaseElement {
           this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
       this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
-
       this.state_ = this.getInitialState_();
-      this.render(this.state_);
-      this.setupListeners_();
     });
   }
 
   /** @override */
   layoutCallback() {
+    const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
-    this.setupSrcAttributes_();
     this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
@@ -495,7 +492,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
     // to adjust expand the height to fit the element for static pickers.
-    return this.render(this.state_).then(() => {
+    return srcAttributesPromise.then(() => {
+      return this.render(this.state_);
+    }).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;

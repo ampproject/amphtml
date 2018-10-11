@@ -123,14 +123,20 @@ export function withDatePickerCommon(WrappedComponent) {
     /** @override */
     render() {
       const props = omit(this.props, Object.keys(defaultProps));
+      const {
+        date,
+        daySize,
+        endDate,
+        initialVisibleMonth,
+        startDate,
+      } = props;
 
-      if (this.props.initialVisibleMonth) {
-        props.initialVisibleMonth =
-            () => moment(this.props.initialVisibleMonth);
-      }
+      const initialDate =
+          initialVisibleMonth || date || startDate || endDate || undefined;
+      props.initialVisibleMonth = () => moment(initialDate);
 
       return React.createElement(WrappedComponent, Object.assign({}, props, {
-        daySize: Number(props.daySize),
+        daySize: Number(daySize),
         isDayBlocked: this.isDayBlocked,
         isDayHighlighted: this.isDayHighlighted,
         isOutsideRange: this.isOutsideRange,

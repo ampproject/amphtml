@@ -95,7 +95,7 @@
     </template>
   </amp-date-picker>
 
-  <h2>external <code>src</code> static</h2>
+  <h2>external <code>src</code> static single</h2>
   <input id="externalSrc-static" type="tel" placeholder="Pick a date">
   <amp-date-picker
     type="single"
@@ -107,6 +107,25 @@
     height="360"
     format="DD/MM/YYYY"
     input-selector="#externalSrc-static"
+  >
+    <template type="amp-mustache" date-template id="spooky">
+      🙀
+    </template>
+  </amp-date-picker>
+  <h2>external <code>src</code> static range</h2>
+  <input id="externalSrc-static-start" type="tel" placeholder="Pick a date">
+  <input id="externalSrc-static-end" type="tel" placeholder="Pick a date">
+  <amp-date-picker
+    type="range"
+    number-of-months="2"
+    mode="static"
+    src="date-picker.json"
+    layout="fixed-height"
+    first-day-of-week="1"
+    height="360"
+    format="DD/MM/YYYY"
+    start-input-selector="#externalSrc-static-start"
+    end-input-selector="#externalSrc-static-end"
   >
     <template type="amp-mustache" date-template id="spooky">
       🙀
