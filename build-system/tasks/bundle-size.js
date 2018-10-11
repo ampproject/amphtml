@@ -98,12 +98,12 @@ function checkBundleSize() {
   const pass = output.match(/PASS .*/);
   const fail = output.match(/FAIL .*/);
   const error = output.match(/ERROR .*/);
-  const bundleSizeMatches = output.match(/: (\d+.?\d*KB)/);
+  const bundleSizeFormatMatches = output.match(/: (\d+.?\d*KB)/);
   if (error && error.length > 0) {
     log(yellow(error[0]));
     process.exitCode = 1;
     return;
-  } else if (!bundleSizeMatches) {
+  } else if (!bundleSizeFormatMatches) {
     log(red('ERROR:'), 'could not infer bundle size from output.');
     log(yellow(output));
     process.exitCode = 1;
@@ -124,7 +124,7 @@ function checkBundleSize() {
   }
 
   if (argv.store) {
-    return storeBundleSize(bundleSizeMatches[1]);
+    return storeBundleSize(bundleSizeFormatMatches[1]);
   }
 }
 
