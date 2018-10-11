@@ -46,7 +46,7 @@ function storeBundleSize(bundleSize) {
     log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle'),
         red('size in the artifacts repository on GitHub!'));
     process.exitCode = 1;
-    return Promise.reject();
+    return;
   }
 
   const commitHash = gitCommitHash();
