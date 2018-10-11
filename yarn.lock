@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@ampproject/worker-dom@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.1.2.tgz#aa365fef9d99f1af21e8d3d144195d2946145562"
+  integrity sha512-POCRe6350Gsc3Vfg5JRCCvio+TcUJSTYg1tJHUANXAKQpdisVeujk2mk6/XhCHVy3lVrQjCnAYomepJIoH7NEw==
+  dependencies:
+    dompurify "1.0.8"
+
 "@ava/babel-plugin-throws-helper@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@ava/babel-plugin-throws-helper/-/babel-plugin-throws-helper-2.0.0.tgz#2fc1fe3c211a71071a4eca7b8f7af5842cd1ae7c"
