@@ -80,7 +80,7 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
-    dev().warn('IMPRESSION', error);
+    dev().warn('IMPRESSION', 'DO NOT SUBMIT', error.message);
   });
 
   const viewer = Services.viewerForDoc(win.document);

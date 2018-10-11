@@ -282,7 +282,7 @@ export class History {
       // TODO(dvoytenko, #8785): cleanup after tracing.
       if (task.trace) {
         task.trace.message += reason;
-        dev().error(TAG_, task.trace);
+        dev().error(TAG_, 'DO NOT SUBMIT: fill this in with a string', task.trace.message);
       }
       task.reject(reason);
     }).then(() => {
