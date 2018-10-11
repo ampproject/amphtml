@@ -93,7 +93,7 @@ function patchRegisterElement() {
   const dir = 'node_modules/document-register-element/build/';
   replaceInFile(
       dir + 'document-register-element.node.js',
-      dir + 'document-register-element.node.patched.js',
+      dir + 'document-register-element.patched.js',
       // Elimate the immediate side effect.
       'installCustomElements(global);',
       '',
