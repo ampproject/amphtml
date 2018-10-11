@@ -119,6 +119,9 @@ module.exports = function(context) {
         context.report({
           node: argToEval,
           message: errMsg,
+          fix: function(fixer) {
+            return fixer.insertTextAfter(node, "blah");
+          }
         });
       }
     },
