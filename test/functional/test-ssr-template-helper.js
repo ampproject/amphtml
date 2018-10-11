@@ -84,12 +84,24 @@ describes.fakeWin('ssr-template-helper', {
       };
       const sendMessage = sandbox.spy(viewer, 'sendMessageAwaitResponse');
       maybeFindTemplateStub.returns(null);
-      ssrTemplateHelper.fetchAndRenderTemplate({}, request);
+      const templates = {
+        successTemplate: {'innerHTML': '<div>much success</div>'},
+        errorTemplate: {'innerHTML': '<div>try again</div>'},
+      };
+      ssrTemplateHelper.fetchAndRenderTemplate(
+          {}, request, templates, {attr: 'test'});
       expect(sendMessage).calledWith('viewerRenderTemplate', {
         'ampComponent': {
-          'errorTemplate': {'payload': null, 'type': 'amp-mustache'},
-          'successTemplate': {'payload': undefined, 'type': 'amp-mustache'},
           'type': 'amp-list',
+          'successTemplate': {
+            'type': 'amp-mustache',
+            'payload': '<div>much success</div>',
+          },
+          'errorTemplate': {
+            'type': 'amp-mustache',
+            'payload': '<div>try again</div>',
+          },
+          'attr': 'test',
         },
         'originalRequest': {
           'init': {
