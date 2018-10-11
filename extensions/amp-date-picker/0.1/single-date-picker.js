@@ -82,12 +82,32 @@ function createSingleDatePickerBase() {
   });
 
   const WrappedDayPickerSingleDateController =
-      withDatePickerCommon(DayPickerSingleDateController);
+      withFocusedTrueHack(withDatePickerCommon(DayPickerSingleDateController));
   WrappedDayPickerSingleDateController.defaultProps = defaultProps;
 
   return WrappedDayPickerSingleDateController;
 }
 
+/**
+ * Fixes bug where overlay single date pickers do not open to
+ * the month containing the selected date.
+ * https://github.com/airbnb/react-dates/issues/931
+ * @param {function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
+ * @return {function(new:React.Component, !Object)} A class with a preset focused prop
+ */
+function withFocusedTrueHack(WrappedComponent) {
+  const React = requireExternal('react');
+
+  class FocusedTrueHack extends React.Component {
+    /** @override */
+    render() {
+      const props = Object.assign({}, this.props, {focused: true});
+      return React.createElement(WrappedComponent, props);
+    }
+  }
+
+  return FocusedTrueHack;
+}
 
 /** @private {?function(new:React.Component, !Object)} */
 let SingleDatePicker_ = null;
