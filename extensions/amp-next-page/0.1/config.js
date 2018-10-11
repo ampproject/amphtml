@@ -15,6 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
+import {
+  getSourceOrigin,
+  getSourceUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -39,19 +44,14 @@ export let AmpNextPageItem;
  * Checks whether the object conforms to the AmpNextPageConfig spec.
  * @param {!Element} context
  * @param {*} config The config to validate.
- * @param {string} origin The origin of the current document
- *     (document.location.origin). All recommendations must be for the same
- *     origin as the current document so the URL can be updated safely.
- * @param {string} sourceOrigin The source origin for the current document.
- *     Will match the value of {@code origin} unless served from the cache.
- *     Any recommendations pointing at {@code sourceOrigin} will be modified
- *     to point to the cache.
+ * @param {string} documentUrl URL of the currently active document, i.e.
+ *     context.getAmpDoc().getUrl()
  * @return {!AmpNextPageConfig}
  */
-export function assertConfig(context, config, origin, sourceOrigin) {
+export function assertConfig(context, config, documentUrl) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
-  assertRecos(context, config.pages, origin, sourceOrigin);
+  assertRecos(context, config.pages, documentUrl);
 
   if ('hideSelectors' in config) {
     user().assert(isArray(config['hideSelectors']),
@@ -65,11 +65,10 @@ export function assertConfig(context, config, origin, sourceOrigin) {
 /**
  * @param {!Element} context
  * @param {!Array<*>} recos
- * @param {string} origin
- * @param {string=} sourceOrigin
+ * @param {string} documentUrl
  */
-function assertRecos(context, recos, origin, sourceOrigin) {
-  recos.forEach(reco => assertReco(context, reco, origin, sourceOrigin));
+function assertRecos(context, recos, documentUrl) {
+  recos.forEach(reco => assertReco(context, reco, documentUrl));
 }
 
 const BANNED_SELECTOR_PATTERNS = [
@@ -95,13 +94,20 @@ function assertSelectors(selectors) {
 /**
  * @param {!Element} context
  * @param {*} reco
- * @param {string} origin
- * @param {string=} sourceOrigin
+ * @param {string} documentUrl
  */
-function assertReco(context, reco, origin, sourceOrigin) {
+function assertReco(context, reco, documentUrl) {
+  user().assertString(reco.ampUrl, 'ampUrl must be a string');
+
+  // Rewrite relative URLs to absolute, relative to the source URL.
+  const base = getSourceUrl(documentUrl);
+  reco.ampUrl = resolveRelativeUrl(reco.ampUrl, base);
+
   const urlService = Services.urlForDoc(context);
   const url = urlService.parse(reco.ampUrl);
-  user().assertString(reco.ampUrl, 'ampUrl must be a string');
+  const {origin} = urlService.parse(documentUrl);
+  const sourceOrigin = getSourceOrigin(documentUrl);
+
   user().assert(url.origin === origin || url.origin === sourceOrigin,
       'pages must be from the same origin as the current document');
   user().assertString(reco.image, 'image must be a string');
