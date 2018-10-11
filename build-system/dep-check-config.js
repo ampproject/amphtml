@@ -302,8 +302,8 @@ exports.rules = [
           'src/service/xhr-impl.js',
       'extensions/amp-a4a/0.1/template-validator.js->' +
           'src/service/extensions-impl.js',
-       // Accessing extension-location.calculateExtensionScriptUrl().
-       'extensions/amp-script/0.1/amp-script.js->' +
+      // Accessing extension-location.calculateExtensionScriptUrl().
+      'extensions/amp-script/0.1/amp-script.js->' +
           'src/service/extension-location.js',
     ],
   },
