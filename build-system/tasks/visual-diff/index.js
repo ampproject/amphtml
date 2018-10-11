@@ -673,7 +673,8 @@ async function createEmptyBuild(page) {
     ],
   });
   await percy.startBuild();
-  await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
+  await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`)
+      .then(() => {}, () => {});
   await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   await percy.finalizeBuild();
 }
