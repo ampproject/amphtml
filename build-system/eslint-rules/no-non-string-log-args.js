@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const generate = require('escodegen').generate;
+
 /**
  * @typedef {{
  *   name: string.
@@ -66,14 +68,14 @@ function getMetadata(name) {
   return transformableMethods.find(cur => cur.name === name);
 }
 
-const expressions = transformableMethods.map(method => {
+const selector = transformableMethods.map(method => {
   return `CallExpression[callee.property.name=${method.name}]`;
 }).join(',');
 
 
 module.exports = function(context) {
   return {
-    [expressions]: function(node) {
+    [selector]: function(node) {
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
@@ -90,7 +92,7 @@ module.exports = function(context) {
       }
 
       const methodInvokedName = callee.property.name;
-      // Find the position of the argument we care about.
+      // Find the position of the argumen we care about.
       const metadata = getMetadata(methodInvokedName);
 
       // If there's no metadata, this is most likely a test file running
@@ -120,7 +122,12 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
-            fixer.replaceText(node, 'blah().wah()');
+            console.log(generate);
+            node.arguments[metadata.startPos] = { type: 'Literal', value: "blah", raw: "blah" };
+            const output = generate(node);
+            console.log(output);
+            //const callConstruct = `${calleeObject.callee.name}().${methodInvokedName}`;
+            //return fixer.replaceText(node, 'blah().wah()');
           }
         });
       }
