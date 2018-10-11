@@ -50,15 +50,21 @@ function patchWebAnimations() {
   let file = fs.readFileSync(
       'node_modules/web-animations-js/' +
       'web-animations.min.js').toString();
+  // Replace |requestAnimationFrame| with |window|.
+  file = file.replace(/requestAnimationFrame/g, function(a, b) {
+    if (file.charAt(b - 1) == '.') {
+      return a;
+    }
+    return 'window.' + a;
+  });
+  // Fix web-animations-js code that violates strict mode.
+  // See https://github.com/ampproject/amphtml/issues/18612 and
+  // https://github.com/web-animations/web-animations-js/issues/46
+  file = file.replace(/b.true=a/g, 'b?b.true=a:true');
   // Wrap the contents inside the install function.
   file = 'export function installWebAnimations(window) {\n' +
       'var document = window.document;\n' +
-      file.replace(/requestAnimationFrame/g, function(a, b) {
-        if (file.charAt(b - 1) == '.') {
-          return a;
-        }
-        return 'window.' + a;
-      }) +
+      file +
       '\n' +
       '}\n';
   writeIfUpdated(patchedName, file);
