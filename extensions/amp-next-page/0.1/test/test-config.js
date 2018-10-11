@@ -17,11 +17,11 @@ import {Services} from '../../../../src/services';
 import {assertConfig} from '../config';
 import {parseUrlDeprecated} from '../../../../src/url';
 
-
 describe('amp-next-page config', () => {
 
   describes.sandboxed('assertConfig', {}, env => {
-    const origin = 'https://example.com';
+    const documentUrl = 'https://example.com/parent';
+    const documentUrlCdn = 'https://example-com.cdn.ampproject.org/c/s/example.com/parent';
 
     beforeEach(() => {
       env.sandbox.stub(Services, 'urlForDoc').returns({
@@ -41,17 +41,17 @@ describe('amp-next-page config', () => {
           'footer',
         ],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
           .to.not.throw();
     });
 
     it('allows a config with no pages', () => {
       const config = {pages: []};
-      expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
           .to.not.throw();
     });
 
-    it('allows pages with relative URLs', () => {
+    it('rewrites relative URLs to absolute', () => {
       const config = {
         pages: [{
           ampUrl: '/article1',
@@ -59,12 +59,27 @@ describe('amp-next-page config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, document.location.origin))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
           .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example.com/article1');
+    });
+
+    it('rewrites relative URLs when served from the cache', () => {
+      const config = {
+        pages: [{
+          ampUrl: '/article1',
+          image: '/image.png',
+          title: 'Article 1',
+        }],
+      };
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrlCdn))
+          .to.not.throw();
+      expect(config.pages[0].ampUrl).to.equal(
+          'https://example-com.cdn.ampproject.org/c/s/example.com/article1');
     });
 
     it('rewrites canonical URLs when served from the cache', () => {
-      const cdnOrigin = 'https://example-com.cdn.ampproject.org';
       const config = {
         pages: [
           {
@@ -79,7 +94,7 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, cdnOrigin, origin))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrlCdn))
           .to.not.throw();
       expect(config.pages[0].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/s/example.com/art1');
@@ -88,8 +103,7 @@ describe('amp-next-page config', () => {
     });
 
     it('rewrites non-HTTPS canonical URLs when served from the cache', () => {
-      const insecureOrigin = 'http://example.com';
-      const cdnOrigin = 'https://example-com.cdn.ampproject.org';
+      const url = documentUrlCdn.replace('/s/', '/');
       const config = {
         pages: [
           {
@@ -100,9 +114,7 @@ describe('amp-next-page config', () => {
         ],
       };
 
-      expect(() =>
-        assertConfig(/*ctx*/ null, config, cdnOrigin, insecureOrigin))
-          .to.not.throw();
+      expect(() => assertConfig(/*ctx*/ null, config, url)).to.not.throw();
 
       expect(config.pages[0].ampUrl).to.equal(
           'https://example-com.cdn.ampproject.org/c/example.com/art2?x=1');
@@ -118,14 +130,14 @@ describe('amp-next-page config', () => {
           },
         ],
       };
-      expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
           .to.not.throw();
       expect(config.pages[0].ampUrl).to.equal('https://example.com/article');
     });
 
     it('throws on null config', () => {
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, null, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, null, documentUrl))
             .to.throw('amp-next-page config must be specified');
       });
     });
@@ -133,7 +145,7 @@ describe('amp-next-page config', () => {
     it('throws on config with no "pages" key', () => {
       const config = {};
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('pages must be an array');
       });
     });
@@ -141,7 +153,7 @@ describe('amp-next-page config', () => {
     it('throws on config with non-array "pages" key', () => {
       const config = {pages: {}};
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('pages must be an array');
       });
     });
@@ -154,7 +166,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('title must be a string');
       });
     });
@@ -168,7 +180,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('title must be a string');
       });
     });
@@ -181,7 +193,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('image must be a string');
       });
     });
@@ -195,7 +207,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('image must be a string');
       });
     });
@@ -211,7 +223,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -228,7 +240,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -245,7 +257,7 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw(
                 'pages must be from the same origin as the current document');
       });
@@ -257,7 +269,7 @@ describe('amp-next-page config', () => {
         hideSelectors: {},
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('amp-next-page hideSelectors should be an array');
       });
     });
@@ -268,7 +280,7 @@ describe('amp-next-page config', () => {
         hideSelectors: ['a', 2],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw('amp-next-page hideSelector value 2 is not a string');
       });
     });
@@ -279,7 +291,7 @@ describe('amp-next-page config', () => {
         hideSelectors: ['   .i-amphtml-something'],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(/*ctx*/ null, config, origin, origin))
+        expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw(/amp-next-page hideSelector .+ not allowed/);
       });
     });
