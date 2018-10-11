@@ -965,6 +965,8 @@ export class UrlReplacements {
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
+      'PAGE_VIEW_ID': true,
+      'NAV_TIMING': true,
     };
     const additionalUrlParameters =
         element.getAttribute('data-amp-addparams') || '';
