@@ -191,6 +191,11 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
+    // Check if story is RTL.
+    if (isRTL(this.win.document)) {
+      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
+    }
+
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
@@ -323,11 +328,6 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
-    }
-
-    // Check if story is RTL.
-    if (isRTL(this.win.document)) {
-      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
 
     const pageEl = this.element.querySelector('amp-story-page');
