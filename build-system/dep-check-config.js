@@ -290,6 +290,9 @@ exports.rules = [
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
           'src/service/xhr-impl.js',
+      // Accessing extension-location.calculateExtensionScriptUrl().
+      'extensions/amp-script/0.1/amp-script.js->' +
+            'src/service/extension-location.js',
     ],
   },
   {

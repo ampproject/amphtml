@@ -738,7 +738,16 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : wrappers.extension(name, options.loadPriority),
-  }));
+  })).then(() => {
+    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    if (name === 'amp-script') {
+      // TODO(choumx): Compile this when worker-dom externs are available.
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.js`);
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.max.js`);
+    }
+  });
 }
 
 /**
