@@ -330,18 +330,15 @@ function onError(message, filename, line, col, error) {
  * @return {Promise<undefined>}
  */
 export function reportErrorToServerOrViewer(win, data) {
-  return new Promise(resolve => {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
-      if (!reportedErrorToViewer) {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', urls.errorReporting, true);
-        xhr.send(JSON.stringify(data));
-      }
-      resolve();
-    });
+  // Report the error to viewer if it has the capability. The data passed
+  // to the viewer is exactly the same as the data passed to the server
+  // below.
+  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+    if (!reportedErrorToViewer) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', urls.errorReporting, true);
+      xhr.send(JSON.stringify(data));
+    }
   });
 }
 

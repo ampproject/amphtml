@@ -107,7 +107,7 @@ describe('reportErrorToServerOrViewer', () => {
   let sandbox;
   let ampdocServiceForStub;
   let sendMessageStub;
-  let xhrRequests = [];
+  let xhrRequests;
 
   const data = getErrorReportData(undefined, undefined, undefined, undefined,
       new Error('XYZ', false));
@@ -128,7 +128,7 @@ describe('reportErrorToServerOrViewer', () => {
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({ getRootNode: () => optedInDoc }),
+      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
     });
 
     viewer = {
@@ -140,12 +140,12 @@ describe('reportErrorToServerOrViewer', () => {
 
     sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
+    xhrRequests = [];
     setupMockXhr();
   });
 
   afterEach(() => {
     sandbox.restore();
-    xhrRequests = [];
   });
 
   it('should report to server if AMP doc is not single', () => {
@@ -190,7 +190,7 @@ describe('reportErrorToServerOrViewer', () => {
         });
   });
 
-  it('should report to viewer with message named `error` which stripped down '
+  it('should report to viewer with message named `error` with stripped down '
     + 'error data set', () => {
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
