@@ -1030,6 +1030,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'zen': {
+    prefetch: 'https://zen.yandex.ru/widget-loader',
+    preconnect: [
+      'https://yastatic.net/',
+    ],
+    renderStartImplemented: true,
+  },
+
   'zergnet': {},
 
   'zucks': {
