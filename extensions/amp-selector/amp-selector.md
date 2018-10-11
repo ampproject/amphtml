@@ -111,6 +111,14 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-selec
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
+##### keyboard-select-mode
+
+The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<amp-selector>`. 
+
+* `none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled. 
+* `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection. 
+* `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys. 
+
 ### Attributes on `<amp-selector>` options
 
 ##### option
