@@ -122,7 +122,7 @@ export class GoogleCidApi {
                 dev().error(TAG, JSON.stringify(res));
               });
             } else {
-              dev().error(TAG, e);
+              dev().error(TAG, 'DO NOT SUBMIT: give this an error message', e.message);
             }
             return null;
           });
