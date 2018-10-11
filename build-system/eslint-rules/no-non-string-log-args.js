@@ -120,7 +120,6 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
-            return fixer.insertTextAfter(node, "blah");
           }
         });
       }
