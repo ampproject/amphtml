@@ -20,49 +20,44 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const octokit = require('@octokit/rest')();
 const path = require('path');
-const tmp = require('tmp');
-const {getStdout, execOrDie} = require('../exec');
+const {getStdout} = require('../exec');
 const {gitCommitHash} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 const maxSize = '82.6KB'; // Only use 0.1 KB of precision (no hundredths digit)
 
-const buildArtifactsStorageRepo =
-    'git@github.com:ampproject/amphtml-build-artifacts.git';
-const bundleSizesJsonFile = 'bundle-sizes.json';
+const buildArtifactsRepoOptions = {
+  owner: 'ampproject',
+  repo: 'amphtml-build-artifacts',
+};
 
 const {green, red, cyan, yellow} = colors;
 
 /**
- * Clone the build artifacts storage repository to a temporary directory and
- * return the directory.
- *
- * This is a shallow clone, with only the head commit, to save time.
- */
-function cloneBuildArtifactsStorageRepo() {
-  const repoDir = tmp.dirSync().name;
-  execOrDie(`git clone --depth 1 ${buildArtifactsStorageRepo} ${repoDir}`);
-  return repoDir;
-}
-
-/**
- * Set the bundle size of a commit hash in the build artifacts storage
+ * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  *
- * @param {string} repoDir full path to the cloned build artifacts storage
- *     repository.
  * @param {string} bundleSize the new bundle size in 99.99KB format.
  */
-function setBundleSizeOfCommitInStorageRepo(repoDir, bundleSize) {
-  const bundleSizesJsonFullFile = path.resolve(repoDir, bundleSizesJsonFile);
-  const bundleSizes = fs.readJsonSync(bundleSizesJsonFullFile);
+function storeBundleSize(bundleSize) {
   const commitHash = gitCommitHash();
-  bundleSizes[commitHash] = bundleSize;
-  fs.writeJsonSync(bundleSizesJsonFullFile, bundleSizes);
-  execOrDie(`git -C ${repoDir} commit --all ` +
-      `--message "bundle-size: ${commitHash} (${bundleSize})`);
-  execOrDie(`git -C ${repoDir} push`);
+  if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
+    log(red('Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle size in'),
+        red('the artifacts repository on GitHub!'));
+    process.exitCode = 1;
+    return Promise.reject();
+  }
+  octokit.authenticate({
+    type: 'token',
+    token: process.env.GITHUB_ARTIFACTS_TOKEN,
+  });
+  return octokit.repos.createFile(Object.assign(buildArtifactsRepoOptions, {
+    path: path.join('bundle-size', commitHash),
+    message: `bundle-size: ${commitHash} (${bundleSize})`,
+    content: Buffer.from(bundleSize).toString('base64'),
+  }));
 }
 
 /**
@@ -70,11 +65,6 @@ function setBundleSizeOfCommitInStorageRepo(repoDir, bundleSize) {
  * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
  */
 function checkBundleSize() {
-  let buildArtifactsStorageRepoDir;
-  if (argv.store) {
-    buildArtifactsStorageRepoDir = cloneBuildArtifactsStorageRepo();
-  }
-
   if (!fs.existsSync(runtimeFile)) {
     log(yellow('Could not find'), cyan(runtimeFile) +
         yellow('. Skipping bundlesize check.'));
@@ -116,8 +106,7 @@ function checkBundleSize() {
   }
 
   if (argv.store) {
-    setBundleSizeOfCommitInStorageRepo(
-        buildArtifactsStorageRepoDir, bundleSizeMatches[1]);
+    return storeBundleSize(bundleSizeMatches[1]);
   }
 }
 
