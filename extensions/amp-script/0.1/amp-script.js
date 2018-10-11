@@ -37,6 +37,7 @@ export class AmpScript extends AMP.BaseElement {
     const url = this.workerThreadUrl_();
     dev().fine(TAG, 'Fetching amp-script-worker from:', url);
     MainThread.upgradeElement(this.element, url);
+    return Promise.resolve();
   }
 
   /**
