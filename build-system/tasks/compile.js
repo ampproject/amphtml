@@ -256,6 +256,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
+      'node_modules/@ampproject/worker-dom/dist/**/*.js',
       'node_modules/document-register-element/build/' +
           'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
