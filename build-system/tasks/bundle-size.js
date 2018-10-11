@@ -42,22 +42,40 @@ const {green, red, cyan, yellow} = colors;
  * @param {string} bundleSize the new bundle size in 99.99KB format.
  */
 function storeBundleSize(bundleSize) {
-  const commitHash = gitCommitHash();
   if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
-    log(red('Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle size in'),
-        red('the artifacts repository on GitHub!'));
+    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle'),
+        red('size in the artifacts repository on GitHub!'));
     process.exitCode = 1;
     return Promise.reject();
   }
+
+  const commitHash = gitCommitHash();
+  const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
+    path: path.join('bundle-size', commitHash),
+  });
+
   octokit.authenticate({
     type: 'token',
     token: process.env.GITHUB_ARTIFACTS_TOKEN,
   });
-  return octokit.repos.createFile(Object.assign(buildArtifactsRepoOptions, {
-    path: path.join('bundle-size', commitHash),
-    message: `bundle-size: ${commitHash} (${bundleSize})`,
-    content: Buffer.from(bundleSize).toString('base64'),
-  }));
+
+  return octokit.repos.getContent(githubApiCallOptions).then(() => {
+    log('The file', cyan(`bundle-size/${commitHash}`), 'already exists in the',
+        'build artifacts repository on GitHub. Skipping...');
+  }).catch(() => {
+    return octokit.repos.createFile(Object.assign(githubApiCallOptions, {
+      message: `bundle-size: ${commitHash} (${bundleSize})`,
+      content: Buffer.from(bundleSize).toString('base64'),
+    })).then(() => {
+      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
+          'repository on GitHub');
+    }).catch(error => {
+      log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
+          red('the build artifacts repository on GitHub!'));
+      log(red('Error message was:'), error.message);
+      process.exitCode = 1;
+    });
+  });
 }
 
 /**
