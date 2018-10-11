@@ -120,6 +120,7 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
+            fixer.replaceText(node, 'blah().wah()');
           }
         });
       }
