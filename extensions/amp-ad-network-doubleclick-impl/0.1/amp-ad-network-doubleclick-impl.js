@@ -913,20 +913,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
-    let ext = [];
-    const {extensions, customElementExtensions} = creativeMetaData;
-    if (extensions && extensions.length) {
-      ext = extensions;
-    } else if (customElementExtensions && customElementExtensions.length) {
-      ext = customElementExtensions;
-    }
-    if (creativeMetaData &&
-        ext.indexOf('amp-ad-exit') == -1) {
-      // Capture phase click handlers on the ad if amp-ad-exit not present
-      // (assume it will handle capture).
-      dev().assert(this.iframe);
-      Navigation.installAnchorClickInterceptor(
-          this.getAmpDoc(), this.iframe.contentWindow);
+    if (creativeMetaData) {
+      let ext = [];
+      const {extensions, customElementExtensions} = creativeMetaData;
+      if (extensions && extensions.length) {
+        ext = extensions;
+      } else if (customElementExtensions && customElementExtensions.length) {
+        ext = customElementExtensions;
+      }
+      if (ext.indexOf('amp-ad-exit') == -1) {
+        // Capture phase click handlers on the ad if amp-ad-exit not present
+        // (assume it will handle capture).
+        dev().assert(this.iframe);
+        Navigation.installAnchorClickInterceptor(
+            this.getAmpDoc(), this.iframe.contentWindow);
+      }
     }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
