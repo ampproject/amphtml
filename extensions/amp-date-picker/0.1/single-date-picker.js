@@ -82,7 +82,7 @@ function createSingleDatePickerBase() {
   });
 
   const WrappedDayPickerSingleDateController =
-      withFocusTrueHack(withDatePickerCommon(DayPickerSingleDateController));
+      withFocusedTrueHack(withDatePickerCommon(DayPickerSingleDateController));
   WrappedDayPickerSingleDateController.defaultProps = defaultProps;
 
   return WrappedDayPickerSingleDateController;
@@ -93,12 +93,12 @@ function createSingleDatePickerBase() {
  * the month containing the selected date.
  * https://github.com/airbnb/react-dates/issues/931
  * @param {function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !Object)} A class with a preset focus prop
+ * @return {function(new:React.Component, !Object)} A class with a preset focused prop
  */
-function withFocusTrueHack(WrappedComponent) {
+function withFocusedTrueHack(WrappedComponent) {
   const React = requireExternal('react');
 
-  class FocusTrueHack extends React.Component {
+  class FocusedTrueHack extends React.Component {
     /** @override */
     render() {
       const props = Object.assign({}, this.props, {focused: true});
@@ -106,7 +106,7 @@ function withFocusTrueHack(WrappedComponent) {
     }
   }
 
-  return FocusTrueHack;
+  return FocusedTrueHack;
 }
 
 /** @private {?function(new:React.Component, !Object)} */

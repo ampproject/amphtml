@@ -482,7 +482,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const srcAttributesP = this.setupSrcAttributes_();
+    const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
     this.setupListeners_();
 
@@ -492,7 +492,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
     // to adjust expand the height to fit the element for static pickers.
-    return srcAttributesP.then(() => this.render(this.state_)).then(() => {
+    return srcAttributesPromise.then(() => {
+      return this.render(this.state_);
+    }).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
