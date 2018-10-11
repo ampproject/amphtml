@@ -63,17 +63,7 @@ function isMessageString(node) {
  * @return {!LogMethodMetadataDef}
  */
 function getMetadata(name) {
-<<<<<<< HEAD
   return transformableMethods.find(cur => cur.name === name);
-=======
-  for (let i = 0; i < transformableMethods.length; i++) {
-    const curTransformableMethod = transformableMethods[i];
-    if (curTransformableMethod.name === name) {
-      return curTransformableMethod;
-    }
-  }
-  return null;
->>>>>>> fix lint issues
 }
 
 const expressions = transformableMethods.map(method => {
