@@ -24,7 +24,7 @@ const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
   'authorization':
-    'http://localhost:8001/api/v2/amp/access?rid=READER_ID',
+    'http://api.poool.fr/api/v2/amp/access?rid=READER_ID',
 };
 
 const AUTHORIZATION_TIMEOUT = 3000;
