@@ -75,7 +75,7 @@ function recaptcha() {
   let dataObject;
   try {
     dataObject = parseJson(window.name);
-  } catch {
+  } catch (e) {
     dev().error(TAG + ' Could not parse the window name.');
     return;
   }
