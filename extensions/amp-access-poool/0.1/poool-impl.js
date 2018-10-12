@@ -38,7 +38,6 @@ const CONFIG = {
   videoClient: 'vast',
   customSegment: null,
   cookiesEnabled: false,
-  popoverEnabled: false,
 };
 
 /**
@@ -52,7 +51,6 @@ const CONFIG = {
  *   videoClient: (string|null)
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
- *   popoverEnabled: (boolean),
  * }}
  */
 let PooolConfigDef;
