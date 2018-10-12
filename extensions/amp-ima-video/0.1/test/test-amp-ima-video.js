@@ -98,7 +98,7 @@ describes.realWin('amp-ima-video', {
     imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
     imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
 
-    imaVideoObj.onClick();
+    imaVideoObj.onBigPlayClick();
 
     expect(imaVideoObj.getPropertiesForTesting().playbackStarted).to.be.true;
     expect(imaVideoObj.getPropertiesForTesting().uiTicker)

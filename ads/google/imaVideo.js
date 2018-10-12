@@ -53,9 +53,7 @@ const icons = {
     `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek':
-  `<circle cx="12" cy="12" r="12" />`,
-  'replay': 
-  `<path d="M0 0h24v24H0z" fill="none"/><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>`
+  `<circle cx="12" cy="12" r="12" />`
 };
 
 const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
@@ -430,9 +428,9 @@ export function imaVideo(global, data) {
     // Create our own tap listener that ignores tap and drag.
     bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
     bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-    bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+    bigPlayDiv.addEventListener('tapwithoutdrag', onBigPlayClick.bind(null, global));
   } else {
-    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    bigPlayDiv.addEventListener(interactEvent, onBigPlayClick.bind(null, global));
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
@@ -587,17 +585,22 @@ function changeIcon(element, name, fill = '#FFFFFF') {
  * @param {!Object} global
  * @visibleForTesting
  */
-export function onClick(global) {
-  playbackStarted = true;
-  uiTicker = setInterval(uiTickerClick, 500);
-  setInterval(playerDataTick, 1000);
-  bigPlayDiv.removeEventListener(interactEvent, onClick);
-  setStyle(bigPlayDiv, 'display', 'none');
-  if (adDisplayContainer) {
-    adDisplayContainer.initialize();
+export function onBigPlayClick(global) {
+  if (playbackStarted) {
+    // Resart the video
+    playVideo();
+  } else {
+    // Play the video for the first time
+    playbackStarted = true;
+    uiTicker = setInterval(uiTickerClick, 500);
+    setInterval(playerDataTick, 1000);
+    setStyle(bigPlayDiv, 'display', 'none');
+    if (adDisplayContainer) {
+      adDisplayContainer.initialize();
+    }
+    videoPlayer.load();
+    playAds(global);
   }
-  videoPlayer.load();
-  playAds(global);
 }
 
 /**
@@ -682,13 +685,14 @@ export function playAds(global) {
  */
 export function onContentEnded() {
   contentComplete = true;
+  console.log('contentComplete', adsLoader);
   if (adsLoader) {
     adsLoader.contentComplete();
+  } else {
+    setStyle(bigPlayDiv, 'display', 'table-cell');
   }
   postMessage({event: VideoEvents.PAUSE});
   postMessage({event: VideoEvents.ENDED});
-
-  // TODO: @torch2424 show the replay button in palce of play button
 }
 
 /**
@@ -782,11 +786,14 @@ export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
   postMessage({event: VideoEvents.AD_END});
+  console.log('onContentResumeRequested', contentComplete);
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
     videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
+  } else {
+    setStyle(bigPlayDiv, 'display', 'table-cell'); 
   }
 }
 
@@ -1165,7 +1172,7 @@ function onMessage(global, event) {
         playVideo();
       } else {
         // Auto-play support
-        onClick(global);
+        onBigPlayClick(global);
       }
       break;
     case 'pauseVideo':
