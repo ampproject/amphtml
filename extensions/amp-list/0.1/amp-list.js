@@ -363,7 +363,7 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
-    dev().assert(current, 'Nothing to render.');
+    dev().assert(current && current.data, 'Nothing to render.');
     dev().info(TAG, 'pass:', current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
@@ -382,10 +382,8 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
-      // a new API on template-impl.js and amp-mustache.js as discussed.
-      const html = /** @type {!JsonObject} */ (current.data);
-      this.templates_.findAndRenderTemplate(this.element, html)
+      const html = /** @type {string} */ (current.data);
+      this.templates_.findAndSetHtmlForTemplate(this.element, html)
           .then(element => this.render_([element]))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
