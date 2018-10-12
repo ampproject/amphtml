@@ -16,7 +16,9 @@
 
 import {AmpAdExit} from '../amp-ad-exit';
 import {FilterType} from '../filters/filter';
-import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
+import {
+  IFRAME_TRANSPORTS,
+} from '../../../amp-analytics/0.1/iframe-transport-vendors';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {setParentWindow} from '../../../../src/service';
@@ -441,6 +443,8 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with vars', () => {
+    // TODO(ccordry): Remove this after url-replacement v1 deletion
+    toggleExperiment(win, 'url-replacement-v2', true);
     const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
@@ -467,6 +471,7 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon)
         .to.have.been.calledWith(
             'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
+    toggleExperiment(win, 'url-replacement-v2', false);
   });
 
   it('border protection', () => {

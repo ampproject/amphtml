@@ -142,8 +142,8 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
 
   it('should toggle the has audio state', () => {
     const listenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.HAS_AUDIO_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_HAS_AUDIO, true);
+    storeService.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -170,6 +170,27 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should pause the story when displaying the bookend', () => {
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should unpause the story when closing the bookend', () => {
+    // First open the bookend.
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+
+    // Close the bookend.
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, false);
+
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(false);
   });
 
   it('should unpause the story when hiding the share menu', () => {

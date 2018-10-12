@@ -65,6 +65,7 @@
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>iplabel</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -84,12 +85,14 @@
       <option>parsely</option>
       <option>piano</option>
       <option>piStats</option>
+      <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>tealiumcollect</option>
       <option>top100</option>
       <option>topmailru</option>
       <option>umenganalytics</option>
@@ -544,6 +547,23 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End INFOnline example -->
 
+<!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
+<amp-analytics type="iplabel" id="iplabel" >
+<script type="application/json">
+{
+  "vars": {
+   "trackerId":"ampTrackerId",
+   "customdim":"",
+   "business":"",
+   "abtesting":"",
+   "infrastructure":"",
+   "customer":"",
+   "clientip":"",
+   "urlgroup":""
+  }
+}
+</script>
+</amp-analytics>
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -917,6 +937,26 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End piStats example -->
 
+<!-- Pressboard tracking. Ensure you replace &media value with a valid media-id, and &ref value with an html-encoded URL of a pressboard sponsored story related to the used media-id -->
+<amp-analytics type="pressboard" id="pressboard" config="https://adserver.pressboard.ca/amp/config?media=5&ref=http%3A%2F%2Fwww.pressboardmedia.com%2Fnative-advertising-advice-from-the-co-founder-of-stackadapt%2F">
+  <script type="application/json">
+  {
+    "vars": {
+      "mediaId": "",
+      "campaignId": "",
+      "storyRequestId": "",
+      "geoNameId": "",
+      "country": "",
+      "region": "",
+      "city": "",
+      "dbInstance": "",
+      "timeZoneOffset": ""
+    }
+  }
+  </script>
+  </amp-analytics>
+<!-- End Pressboard example -->
+
 <!-- Quantcast tracking -->
 <amp-analytics type="quantcast" id="quantcast">
 <script type="application/json">
@@ -1023,6 +1063,53 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Tealium Collect example -->
+<amp-analytics type="tealiumcollect" id="tealiumcollect">
+<script type="application/json">
+{
+  "vars": {
+    "account": "myaccount",
+    "profile": "myprofile",
+    "datasource": "amp123"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "tealium_event": "screen_view"
+      }     
+    },
+    "clickOnTest1Trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "event",
+      "vars": {
+        "tealium_event": "clicked_test1"
+      },
+      "extraUrlParams": {
+        "event_category": "examples",
+        "event_action": "clicked-test1"
+      }
+    },
+    "clickOnTopTrigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "event",
+      "vars": {
+        "tealium_event": "clicked_top"
+      },
+      "extraUrlParams": {
+        "event_category": "examples",
+        "event_action": "clicked-header"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Tealium Collect example -->
 
 <!-- Top100.rambler.ru example -->
 <amp-analytics type="top100" id="top100" config="https://kraken.rambler.ru/amp/config.json">

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {CMP_CONFIG} from './cmps';
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentPolicyManager} from './consent-policy-manager';
+import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -29,18 +31,15 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {
-  childElementsByTag,
-  isJsonScriptTag,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
+import {deepMerge, dict, hasOwn, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {getChildJsonConfig} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+
 import {isEnumValue} from '../../../src/types';
-import {setImportantStyles, toggle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {isExperimentOn} from '../../../src/experiments';
+import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -71,7 +70,7 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, !Element>} */
+    /** @private {!Object<string, !ConsentUI>} */
     this.consentUI_ = map();
 
     /** @private {!JsonObject} */
@@ -83,13 +82,10 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {!Object} */
     this.consentRequired_ = map();
 
-    /** @private {boolean} */
-    this.uiInit_ = false;
-
     /** @private {?string} */
     this.currentDisplayInstance_ = null;
 
-    /** @private {?Element} */
+    /** @private {?ConsentUI} */
     this.postPromptUI_ = null;
 
     /** @private {!Object<string, ?function()>} */
@@ -106,24 +102,15 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isPostPromptUIRequired_ = false;
+
+    /** @private {!Object<string, Promise<?JsonObject>>} */
+    this.remoteConfigPromises_ = map();
   }
 
   /** @override */
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
-  }
-
-  /**
-   * Handles the revoke action.
-   * Display consent UI.
-   * @param {string} consentId
-   */
-  handlePostPrompt_(consentId) {
-    user().assert(this.consentConfig_[consentId],
-        `consent with id ${consentId} not found`);
-    // toggle the UI for this consent
-    this.scheduleDisplay_(consentId);
   }
 
   /** @override */
@@ -133,13 +120,21 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
 
+    const inlineConfig = this.getInlineConfig_();
+
+    const cmpConfig = this.getCMPConfig_();
+
+    const config = deepMerge(cmpConfig || {}, inlineConfig || {}, 1);
+
     // TODO: Decide what to do with incorrect configuration.
-    this.assertAndParseConfig_();
+    this.validateAndParseConfig_(/** @type {!JsonObject} */ (config));
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      toggle(child, false);
       // <amp-consent> will manualy schedule layout for its children.
-      this.setAsOwner(children[i]);
+      this.setAsOwner(child);
     }
 
     const consentPolicyManagerPromise =
@@ -219,7 +214,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
-      const iframes = scopedQuerySelectorAll(this.element, 'amp-iframe iframe');
+      const iframes = this.element.querySelectorAll('iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
@@ -266,22 +261,8 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.vsync_.mutate(() => {
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-      }
-
-      this.element.classList.remove('amp-hidden');
-      this.element.classList.add('amp-active');
-      this.getViewport().addToFixedLayer(this.element);
-      // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      const uiElement = this.consentUI_[this.currentDisplayInstance_];
-      setImportantStyles(uiElement, {display: 'block'});
-      // scheduleLayout is required everytime because some AMP element may
-      // get un laid out after toggle display (#unlayoutOnPause)
-      // for example <amp-iframe>
-      this.scheduleLayout(uiElement);
+      this.consentUI_[this.currentDisplayInstance_].show();
     });
 
     const deferred = new Deferred();
@@ -293,22 +274,18 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    const uiToHide = this.currentDisplayInstance_ &&
-        this.consentUI_[this.currentDisplayInstance_];
+    if (!this.currentDisplayInstance_ ||
+        !this.consentUI_[this.currentDisplayInstance_]) {
+      dev().error(TAG,
+          `${this.currentDisplayInstance_} no consent ui to hide`);
+    }
+
+    const uiToHide = this.consentUI_[this.currentDisplayInstance_];
+
     this.vsync_.mutate(() => {
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      // Need to remove from fixed layer and add it back to update element's top
-      this.getViewport().removeFromFixedLayer(this.element);
-      if (!uiToHide) {
-        dev().error(TAG,
-            `${this.currentDisplayInstance_} no consent ui to hide`);
-      }
-      // Cannot use #toggle() because Safari bug with version older than 10.3
-      // element.style['display] = 'none' cannot overwrite style set with
-      // !important.
-      setImportantStyles(dev().assertElement(uiToHide), {display: 'none'});
+      uiToHide.hide();
     });
+
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
     if (this.dialogResolver_[displayInstance]) {
@@ -365,8 +342,11 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(
           instanceId, this.consentConfig_[instanceId]);
 
+      this.passSharedData_(instanceId);
+
       const isConsentRequiredPromise = this.getConsentRequiredPromise_(
           instanceId, this.consentConfig_[instanceId]);
+
 
       const handlePromptPromise = isConsentRequiredPromise.then(() => {
         return this.initPromptUI_(instanceId);
@@ -397,30 +377,35 @@ export class AmpConsent extends AMP.BaseElement {
         config['promptIfUnknownForGeoGroup'],
     'neither checkConsentHref nor ' +
     'promptIfUnknownForGeoGroup is defined');
-    let remoteConfigPromise = Promise.resolve(null);
-    if (config['checkConsentHref']) {
-      remoteConfigPromise = this.getConsentRemote_(instanceId);
-      this.passSharedData_(instanceId, remoteConfigPromise);
-    }
-    let geoPromise = Promise.resolve();
+    let promptPromise = null;
     if (config['promptIfUnknownForGeoGroup']) {
       const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup);
+      promptPromise = this.isConsentRequiredGeo_(geoGroup);
+    } else {
+      promptPromise =
+          this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
+            if (!remoteConfigResponse ||
+                !hasOwn(remoteConfigResponse, 'promptIfUnknown')) {
+              this.user().error(TAG, 'Expecting promptIfUnknown from ' +
+                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
+                'specified');
+              // Set to false if not defined
+              return false;
+            }
+            return !!remoteConfigResponse['promptIfUnknown'];
+          });
     }
-    return geoPromise.then(promptIfUnknown => {
-      return remoteConfigPromise.then(response => {
-        this.consentRequired_[instanceId] =
-            this.isPromptRequired_(instanceId, response, promptIfUnknown);
-      });
+    return promptPromise.then(prompt => {
+      this.consentRequired_[instanceId] = !!prompt;
     });
   }
 
   /**
    * Blindly pass sharedData
    * @param {string} instanceId
-   * @param {!Promise<!JsonObject>} responsePromise
    */
-  passSharedData_(instanceId, responsePromise) {
+  passSharedData_(instanceId) {
+    const responsePromise = this.getConsentRemote_(instanceId);
     const sharedDataPromise = responsePromise.then(response => {
       if (!response || response['sharedData'] === undefined) {
         return null;
@@ -498,34 +483,43 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Get localStored consent info, and send request to get consent from endpoint
+   * if there is checkConsentHref specified.
    * @param {string} instanceId
-   * @return {!Promise<!JsonObject>}
+   * @return {!Promise<?JsonObject>}
    */
   getConsentRemote_(instanceId) {
-    // Note: Expect the request to look different in following versions.
-    const request = /** @type {!JsonObject} */ ({
-      'consentInstanceId': instanceId,
-    });
-    const init = {
-      credentials: 'include',
-      method: 'POST',
-      body: request,
-      requireAmpResponseSourceOrigin: false,
-    };
-    const href =
-        this.consentConfig_[instanceId]['checkConsentHref'];
-    assertHttpsUrl(href, this.element);
-    const ampdoc = this.getAmpDoc();
-    const sourceBase = getSourceUrl(ampdoc.getUrl());
-    const resolvedHref = resolveRelativeUrl(href, sourceBase);
-    const viewer = Services.viewerForDoc(ampdoc);
-    return viewer.whenFirstVisible().then(() => {
-      return Services.xhrFor(this.win)
-          .fetchJson(resolvedHref, init)
-          .then(res => res.json());
-    });
+    if (this.remoteConfigPromises_[instanceId]) {
+      return this.remoteConfigPromises_[instanceId];
+    }
+    if (!this.consentConfig_[instanceId]['checkConsentHref']) {
+      this.remoteConfigPromises_[instanceId] = Promise.resolve(null);
+    } else {
+      // Note: Expect the request to look different in following versions.
+      const request = /** @type {!JsonObject} */ ({
+        'consentInstanceId': instanceId,
+      });
+      const init = {
+        credentials: 'include',
+        method: 'POST',
+        body: request,
+        requireAmpResponseSourceOrigin: false,
+      };
+      const href =
+          this.consentConfig_[instanceId]['checkConsentHref'];
+      assertHttpsUrl(href, this.element);
+      const ampdoc = this.getAmpDoc();
+      const sourceBase = getSourceUrl(ampdoc.getUrl());
+      const resolvedHref = resolveRelativeUrl(href, sourceBase);
+      const viewer = Services.viewerForDoc(ampdoc);
+      this.remoteConfigPromises_[instanceId] =
+          viewer.whenFirstVisible().then(() => {
+            return Services.xhrFor(this.win)
+                .fetchJson(resolvedHref, init)
+                .then(res => res.json());
+          });
+    }
+    return this.remoteConfigPromises_[instanceId];
   }
-
 
   /**
    * Read and parse consent instance config
@@ -538,21 +532,9 @@ export class AmpConsent extends AMP.BaseElement {
    *   }
    * }
    * TODO: Add support for policy config
+   * @param {!JsonObject} config
    */
-  assertAndParseConfig_() {
-    // All consent config within the amp-consent component. There will be only
-    // one single amp-consent allowed in page.
-    // TODO: Make this a shared helper method.
-    const scripts = childElementsByTag(this.element, 'script');
-    user().assert(scripts.length == 1,
-        `${TAG} should have (only) one <script> child`);
-    const script = scripts[0];
-    user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
-        'tag with type= "application/json"');
-    const config = tryParseJson(script.textContent, () => {
-      user().assert(false, `${TAG}: Error parsing config`);
-    });
+  validateAndParseConfig_(config) {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     user().assert(Object.keys(consents).length != 0,
@@ -576,39 +558,87 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentConfig_ = consents;
     if (config['postPromptUI']) {
-      const postPromptUI = config['postPromptUI'];
-      this.postPromptUI_ = this.getAmpDoc().getElementById(postPromptUI);
-      if (!this.postPromptUI_) {
-        this.user().error(TAG, 'postPromptUI element with ' +
-          `id=${postPromptUI} not found`);
-      }
+      this.postPromptUI_ =
+          new ConsentUI(this, dict({}), config['postPromptUI']);
     }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
 
   /**
-   * Parse response from server endpoint
-   * The response format example:
-   * {
-   *   "promptIfUnknown": true/false
-   * }
-   * TODO: Support vendor lists
-   * @param {string} instanceId
-   * @param {?JsonObject} response
-   * @param {boolean=} opt_initValue
-   * @return {boolean}
+   * Read the inline config from publisher
+   * @return {?JsonObject}
    */
-  isPromptRequired_(instanceId, response, opt_initValue) {
-    let promptIfUnknown = opt_initValue;
-    if (response && response['promptIfUnknown'] == true) {
-      promptIfUnknown = true;
-    } else if (response && response['promptIfUnknown'] == false) {
-      promptIfUnknown = false;
-    } else if (promptIfUnknown == undefined) {
-      // Set to false if not defined
-      promptIfUnknown = false;
+  getInlineConfig_() {
+    // All consent config within the amp-consent component. There will be only
+    // one single amp-consent allowed in page.
+    try {
+      return getChildJsonConfig(this.element);
+    } catch (e) {
+      throw this.user().createError(TAG, e);
     }
-    return promptIfUnknown;
+  }
+
+  /**
+   * Read and format the CMP config
+   * The returned CMP config should looks like
+   * {
+   *   "consents": {
+   *     "foo": {
+   *       "checkConsentHref": "https://fake.com",
+   *       "promptUISrc": "https://fake.com/promptUI.html"
+   *     }
+   *   }
+   * }
+   * @return {?JsonObject}
+   */
+  getCMPConfig_() {
+    if (!isExperimentOn(this.win, 'amp-consent-v2')) {
+      return null;
+    }
+
+    const type = this.element.getAttribute('type');
+    if (!type) {
+      return null;
+    }
+    user().assert(CMP_CONFIG[type], `invalid CMP type ${type}`);
+    const importConfig = CMP_CONFIG[type];
+    this.validateCMPConfig_(importConfig);
+    const constentInstance = importConfig['consentInstanceId'];
+
+    const cmpConfig = dict({
+      'consents': dict({}),
+    });
+
+    const config = Object.assign({}, importConfig);
+    delete config['consentInstanceId'];
+
+    cmpConfig['consents'][constentInstance] = config;
+    return cmpConfig;
+  }
+
+  /**
+   * Handles the revoke action.
+   * Display consent UI.
+   * @param {string} consentId
+   */
+  handlePostPrompt_(consentId) {
+    user().assert(this.consentConfig_[consentId],
+        `consent with id ${consentId} not found`);
+    // toggle the UI for this consent
+    this.scheduleDisplay_(consentId);
+  }
+
+  /**
+   * Check if the CMP config is valid
+   * @param {!JsonObject} config
+   */
+  validateCMPConfig_(config) {
+    const assertValues =
+        ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
+    for (let i = 0; i < assertValues.length; i++) {
+      const attribute = assertValues[i];
+      dev().assert(config[attribute], `CMP config must specify ${attribute}`);
+    }
   }
 
   /**
@@ -617,16 +647,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise}
    */
   initPromptUI_(instanceId) {
-    const promptUI = this.consentConfig_[instanceId]['promptUI'];
-    if (promptUI) {
-      let element = this.getAmpDoc().getElementById(promptUI);
-      if (!element || !this.element.contains(element)) {
-        element = null;
-        this.user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
-      }
-      this.consentUI_[instanceId] = dev().assertElement(element);
-    }
+    const config = this.consentConfig_[instanceId];
+    this.consentUI_[instanceId] =
+        new ConsentUI(this, config);
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceState(instanceId)
@@ -660,45 +683,26 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
-    const {classList} = this.element;
+    if (!this.postPromptUI_) {
+      return;
+    }
+
     this.notificationUiManager_.onQueueEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.uiInit_) {
-          this.uiInit_ = true;
-          toggle(this.element, true);
-        }
-        classList.add('amp-active');
-        classList.remove('amp-hidden');
-        this.getViewport().addToFixedLayer(this.element);
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'block'});
+        this.postPromptUI_.show();
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
       this.vsync_.mutate(() => {
-        if (!this.currentDisplayInstance_) {
-          classList.add('amp-hidden');
-          classList.remove('amp-active');
-        }
-        this.getViewport().removeFromFixedLayer(this.element);
-        // Cannot use #toggle() because Safari bug with version older than 10.3
-        // element.style['display] = 'none' cannot overwrite style set with
-        // !important.
-        setImportantStyles(dev().assertElement(this.postPromptUI_),
-            {display: 'none'});
+        this.postPromptUI_.hide();
       });
     });
   }
 }
+
 
 AMP.extension('amp-consent', '0.1', AMP => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);

@@ -27,15 +27,17 @@ import {Expander, NOENCODE_WHITELIST} from './url-expander/expander';
 import {Services} from '../services';
 import {WindowInterface} from '../window-interface';
 import {
+  addMissingParamsToUrl,
   addParamsToUrl,
   getSourceUrl,
+  isProtocolValid,
   parseQueryString,
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
-  removeSearch,
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
+import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {
@@ -43,7 +45,6 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
-import {isProtocolValid} from '../url';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
@@ -257,6 +258,11 @@ export class GlobalVariableSource extends VariableSource {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback' +
           /*OK*/' Cookie name, is required');
+
+      if (getMode().runtime == 'inabox') {
+        return /** @type {!Promise<ResolverReturnDef>} */(Promise.resolve(null));
+      }
+
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -581,10 +587,10 @@ export class GlobalVariableSource extends VariableSource {
   addReplaceParamsIfMissing_(orig) {
     const {replaceParams} =
     /** @type {!Object} */ (Services.documentInfoForDoc(this.ampdoc));
-    const url = parseUrlDeprecated(removeAmpJsParamsFromUrl(orig));
-    const params = parseQueryString(url.search);
-    return addParamsToUrl(removeSearch(orig),
-        /** @type {!JsonObject} **/ (Object.assign({}, replaceParams, params)));
+    if (!replaceParams) {
+      return orig;
+    }
+    return addMissingParamsToUrl(removeAmpJsParamsFromUrl(orig), replaceParams);
   }
 
   /**
@@ -649,7 +655,7 @@ export class GlobalVariableSource extends VariableSource {
     if (typeof params[key] !== 'undefined') {
       return params[key];
     }
-    if (typeof replaceParams[key] !== 'undefined') {
+    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
       return /** @type {string} */(replaceParams[key]);
     }
     return defaultValue;
@@ -798,10 +804,13 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} source
    * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, boolean>=} opt_whiteList
    * @return {!Promise<string>}
    */
-  expandStringAsync(source, opt_bindings) {
-    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings));
+  expandStringAsync(source, opt_bindings, opt_whiteList) {
+    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings,
+        /* opt_collectVars */ undefined,
+        /* opt_sync */ undefined, opt_whiteList));
   }
 
   /**
@@ -956,6 +965,8 @@ export class UrlReplacements {
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
+      'PAGE_VIEW_ID': true,
+      'NAV_TIMING': true,
     };
     const additionalUrlParameters =
         element.getAttribute('data-amp-addparams') || '';

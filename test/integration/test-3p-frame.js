@@ -18,6 +18,7 @@ import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import {Services} from '../../src/services';
 import {
   addDataAndJsonAttributes_,
+  applySandbox,
   getBootstrapBaseUrl,
   getDefaultBootstrapBaseUrl,
   getIframe,
@@ -284,6 +285,53 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     container.appendChild(div);
     const iframe = getIframe(window, div, 'none');
     expect(iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+  });
+
+  it('should not set sandbox with sandbox-ads off', () => {
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
+  });
+
+  it('should set sandbox with sandbox-ads on', () => {
+    toggleExperiment(window, 'sandbox-ads', true);
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('sandbox')).to.equal(
+        'allow-top-navigation-by-user-activation ' +
+        'allow-popups-to-escape-sandbox allow-forms ' +
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
+  });
+
+  it('should set sandbox (direct call)', () => {
+    const iframe = document.createElement('iframe');
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(
+        'allow-top-navigation-by-user-activation ' +
+        'allow-popups-to-escape-sandbox allow-forms ' +
+        'allow-modals allow-pointer-lock allow-popups allow-same-origin ' +
+        'allow-scripts');
+  });
+
+  it('should not set sandbox without feature detection', () => {
+    const iframe = document.createElement('iframe');
+    iframe.sandbox.supports = null;
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
+  });
+
+  it('should not set sandbox with failing feature detection', () => {
+    const iframe = document.createElement('iframe');
+    iframe.sandbox.supports = function(flag) {
+      return flag != 'allow-top-navigation-by-user-activation';
+    };
+    applySandbox(iframe);
+    expect(iframe.getAttribute('sandbox')).to.equal(null);
   });
 
   it('should pick the right bootstrap url for local-dev mode', () => {

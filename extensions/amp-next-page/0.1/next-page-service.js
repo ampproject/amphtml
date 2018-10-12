@@ -16,7 +16,9 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {fetchDocument} from '../../../src/document-fetcher';
@@ -27,7 +29,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -136,6 +138,7 @@ export class NextPageService {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
+    this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
@@ -265,7 +268,7 @@ export class NextPageService {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit.el, 'display', 'none');
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {

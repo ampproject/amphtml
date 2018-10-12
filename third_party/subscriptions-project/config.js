@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.23 */
+/** Version: 0.1.22.29 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -599,9 +599,10 @@ class MetaParser {
     // Is locked?
     const accessibleForFree = getMetaTag(this.doc_.getRootNode(),
         'subscriptions-accessible-for-free');
-    const locked = (accessibleForFree &&
-        accessibleForFree.toLowerCase() == 'false') || false;
-
+    let locked = false;
+    if (accessibleForFree && accessibleForFree.toLowerCase() == 'false') {
+      locked = true;
+    }
     return new PageConfig(productId, locked);
   }
 }

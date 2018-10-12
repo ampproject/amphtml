@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
 
@@ -167,6 +168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       id,
       ownerDocument: documentApi,
       autoTop: '',
+      tagName: id,
       toString: () => {
         return id;
       },
@@ -267,7 +269,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         return 0;
       },
       hasAttribute: name => {
-        return !!attrs[name];
+        return Object.prototype.hasOwnProperty.call(attrs, name);
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
@@ -309,7 +311,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(html.trim()).to.equal(
             '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
-        this.firstElementChild.style.display = 'none';
+        toggle(this.firstElementChild, false);
       },
     };
     return elem;
@@ -439,20 +441,21 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(fixedLayer.elements_).to.have.length(5);
 
       // Add.
-      fixedLayer.addElement(element3, '*');
+      fixedLayer.addElement(element3);
       expect(updateStub).to.be.calledOnce;
       expect(fixedLayer.elements_).to.have.length(6);
       const fe = fixedLayer.elements_[5];
       expect(fe.id).to.equal('F5');
       expect(fe.element).to.equal(element3);
       expect(fe.selectors).to.deep.equal(['*']);
+      expect(fe.forceTransfer).to.be.undefined;
 
       // Remove.
       fixedLayer.removeElement(element3);
       expect(fixedLayer.elements_).to.have.length(5);
 
-      // Add with forceTransfer.
-      fixedLayer.addElement(element3, '*', true);
+      // Add with forceTransfer=true.
+      fixedLayer.addElement(element3, true);
       expect(updateStub).to.have.callCount(2);
       expect(fixedLayer.elements_).to.have.length(6);
       const fe1 = fixedLayer.elements_[5];
@@ -460,6 +463,20 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(fe1.element).to.equal(element3);
       expect(fe1.selectors).to.deep.equal(['*']);
       expect(fe1.forceTransfer).to.be.true;
+
+      // Remove.
+      fixedLayer.removeElement(element3);
+      expect(fixedLayer.elements_).to.have.length(5);
+
+      // Add with forceTransfer=false.
+      fixedLayer.addElement(element3, false);
+      expect(updateStub).to.have.callCount(3);
+      expect(fixedLayer.elements_).to.have.length(6);
+      const fe2 = fixedLayer.elements_[5];
+      expect(fe2.id).to.equal('F7');
+      expect(fe2.element).to.equal(element3);
+      expect(fe2.selectors).to.deep.equal(['*']);
+      expect(fe2.forceTransfer).to.be.false;
 
       // Remove.
       fixedLayer.removeElement(element3);
@@ -1096,7 +1113,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(state['F4'].top).to.equal('0px');
     });
 
-    it('should collect turn off transferrable with top != 0', () => {
+    it('should collect turn on transferrable with top != 0', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
@@ -1109,7 +1126,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.be.true;
-      expect(state['F0'].transferrable).to.be.false;
+      expect(state['F0'].transferrable).to.be.true;
       expect(state['F0'].top).to.equal('2px');
 
       expect(state['F4'].sticky).to.be.true;
@@ -1162,7 +1179,32 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(state['F0'].transferrable).to.be.true;
     });
 
-    it('should collect turn off transferrable with bottom != 0', () => {
+    it('should disregard element if it has forceTransfer=false', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
+      element5.computedStyle['position'] = 'sticky';
+
+      expect(vsyncTasks).to.have.length(1);
+      let state = {};
+      vsyncTasks[0].measure(state);
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].transferrable).to.be.true;
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].transferrable).to.be.false;
+
+      // Add.
+      state = {};
+      fixedLayer.setupElement_(element1, '*', 'fixed', false);
+      expect(vsyncTasks).to.have.length(1);
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].transferrable).to.be.false;
+    });
+
+    it('should collect turn on transferrable with bottom != 0', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
@@ -1179,7 +1221,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.be.true;
-      expect(state['F0'].transferrable).to.be.false;
+      expect(state['F0'].transferrable).to.be.true;
 
       expect(state['F4'].sticky).to.be.true;
       expect(state['F4'].transferrable).to.be.false;
@@ -1209,7 +1251,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
-      expect(fe.placeholder.style['display']).to.equal('none');
+      expect(fe.placeholder).to.have.attribute('hidden');
 
       expect(fixedLayer.transferLayer_).to.exist;
       const layer = fixedLayer.transferLayer_.layer_;

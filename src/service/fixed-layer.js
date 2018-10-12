@@ -17,10 +17,13 @@
 import {Services} from '../services';
 import {
   computedStyle,
+  getStyle,
   getVendorJsPropertyName,
   setImportantStyles,
+  setInitialDisplay,
   setStyle,
   setStyles,
+  toggle,
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
@@ -189,8 +192,10 @@ export class FixedLayer {
   /**
    * Adds the element directly into the fixed/sticky layer, bypassing discovery.
    * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the transfer layer.
+   * @param {boolean=} opt_forceTransfer If set to true, then the element needs
+   *    to be forcefully transferred to the transfer layer. If false, then it
+   *    will only receive top-padding compensation for the header and never be
+   *    transferred.
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
@@ -303,7 +308,7 @@ export class FixedLayer {
 
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
-          const {element} = fe;
+          const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
           const {offsetWidth, offsetHeight, offsetTop} = element;
@@ -317,12 +322,8 @@ export class FixedLayer {
           const transform = style[getVendorJsPropertyName(style, 'transform')];
           let {top} = style;
 
-          // Element is indeed fixed. Visibility is added to the test to
-          // avoid moving around invisible elements.
-          const isFixed = (
-            position == 'fixed' &&
-              (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
-          // Element is indeed sticky.
+          const isFixed = position === 'fixed' &&
+            (forceTransfer || (offsetWidth > 0 && offsetHeight > 0));
           const isSticky = endsWith(position, 'sticky');
           const isDisplayed = (display !== 'none');
 
@@ -346,20 +347,24 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be fixed and top or bottom to
-          // be styled with `0`. Also, do not transfer transparent
-          // elements - that's a lot of work for no benefit.  Additionally,
-          // transparent elements used for "service" needs and thus
-          // best kept in the original tree. The visibility, however, is not
-          // considered because `visibility` CSS is inherited. Also, the
-          // `height` is constrained to at most 300px. This is to avoid
-          // transfering of more substantial sections for now. Likely to be
-          // relaxed in the future.
-          const isTransferrable = isFixed && (
-            fe.forceTransfer || (
-              opacity > 0 &&
-                  offsetHeight < 300 &&
-                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
+          // Transferability requires element to be opaque (not 100%
+          // transparent) - that's a lot of work for no benefit. Additionally,
+          // transparent elements used for "service" needs and thus best kept
+          // in the original tree. The visibility, however, is not considered
+          // because `visibility` CSS is inherited.
+          let isTransferrable = false;
+          if (isFixed) {
+            if (forceTransfer === true) {
+              isTransferrable = true;
+            } else if (forceTransfer === false) {
+              isTransferrable = false;
+            } else {
+              isTransferrable = (
+                opacity > 0 &&
+                offsetHeight < 300 &&
+                !!(top || bottom));
+            }
+          }
           if (isTransferrable) {
             hasTransferables = true;
           }
@@ -401,15 +406,6 @@ export class FixedLayer {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
-  }
-
-  /**
-   * We currently only allow elements with `top: 0` or `bottom: 0`.
-   * @param {string} s
-   * @return {boolean}
-   */
-  isAllowedCoord_(s) {
-    return (!!s && parseInt(s, 10) == 0);
   }
 
   /**
@@ -470,7 +466,7 @@ export class FixedLayer {
    */
   warnAboutInlineStylesIfNecessary_(element) {
     if (element.hasAttribute('style')
-        && (element.style.top || element.style.bottom)) {
+        && (getStyle(element, 'top') || getStyle(element, 'bottom'))) {
       user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
           'CSS rules are not supported yet for fixed or sticky elements ' +
           '(#14186). Unexpected behavior may occur.', element);
@@ -527,7 +523,7 @@ export class FixedLayer {
       this.elements_.push(fe);
     }
 
-    fe.forceTransfer = isFixed && !!opt_forceTransfer;
+    fe.forceTransfer = isFixed ? opt_forceTransfer : false;
   }
 
   /**
@@ -754,7 +750,6 @@ class TransferLayerBody {
       borderImage: 'none',
       boxSizing: 'border-box',
       boxShadow: 'none',
-      display: 'block',
       float: 'none',
       margin: 0,
       opacity: 1,
@@ -764,6 +759,7 @@ class TransferLayerBody {
       transition: 'none',
       visibility: 'visible',
     });
+    setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
   }
 
@@ -795,7 +791,7 @@ class TransferLayerBody {
       setStyle(element, 'pointer-events', 'initial');
       const placeholder = fe.placeholder = this.doc_.createElement(
           'i-amphtml-fpa');
-      setStyle(placeholder, 'display', 'none');
+      toggle(placeholder, false);
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }
 

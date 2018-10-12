@@ -15,7 +15,7 @@
  */
 
 import {LruCache} from './utils/lru-cache';
-import {dict} from './utils/object';
+import {dict, hasOwn} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
@@ -221,6 +221,25 @@ export function addParamsToUrl(url, params) {
 }
 
 /**
+ * Append query string fields and values to a url, only if the key does not
+ * exist in current query string.
+ * @param {string} url
+ * @param {!JsonObject<string, string|!Array<string>>} params
+ */
+export function addMissingParamsToUrl(url, params) {
+  const location = parseUrlDeprecated(url);
+  const existingParams = parseQueryString(location.search);
+  const paramsToAdd = dict({});
+  const keys = Object.keys(params);
+  for (let i = 0; i < keys.length; i++) {
+    if (!hasOwn(existingParams, keys[i])) {
+      paramsToAdd[keys[i]] = params[keys[i]];
+    }
+  }
+  return addParamsToUrl(url, paramsToAdd);
+}
+
+/**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
  * @param {!JsonObject<string, string|!Array<string>>} params
@@ -406,7 +425,6 @@ export function removeAmpJsParamsFromUrl(url) {
   const parsed = parseUrlDeprecated(url);
   const search = removeAmpJsParamsFromSearch(parsed.search);
   return parsed.origin + parsed.pathname + search + parsed.hash;
-
 }
 
 /**
@@ -439,6 +457,25 @@ function removeAmpJsParamsFromSearch(urlSearch) {
       .replace(AMP_R_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
+  return search ? '?' + search : '';
+}
+
+/**
+ * Removes parameters with param name and returns the new search string.
+ * @param {string} urlSearch
+ * @param {string} paramName
+ * @return {string}
+ */
+export function removeParamsFromSearch(urlSearch, paramName) {
+  // TODO: reuse the function in removeAmpJsParamsFromSearch. Accept paramNames
+  // as an array.
+  if (!urlSearch || urlSearch == '?') {
+    return '';
+  }
+  const paramRegex = new RegExp(`[?&]${paramName}=[^&]*`, 'g');
+  const search = urlSearch
+      .replace(paramRegex, '')
+      .replace(/^[?&]/, '');
   return search ? '?' + search : '';
 }
 

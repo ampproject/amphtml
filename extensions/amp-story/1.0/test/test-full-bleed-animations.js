@@ -24,7 +24,10 @@ import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
 import {PRESETS} from '../animation-presets';
 import {Services} from '../../../../src/services';
-import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
+import {
+  calculateTargetScalingFactor,
+  targetFitsWithinPage,
+} from '../animation-presets-utils';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-full-bleed-animations', {

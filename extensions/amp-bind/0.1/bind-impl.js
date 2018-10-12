@@ -22,20 +22,16 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
 import {debounce} from '../../../src/utils/rate-limit';
-import {deepEquals, parseJson} from '../../../src/json';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
+import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {filterSplice} from '../../../src/utils/array';
+import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {reportError} from '../../../src/error';
 import {rewriteAttributesForElement} from '../../../src/purifier';
 import {startsWith} from '../../../src/string';
@@ -191,10 +187,11 @@ export class Bind {
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
 
-    // AMP.printState() for debugging in the console.
-    if (!self.AMP.printState) {
-      self.AMP.printState = this.printState_.bind(this);
-    }
+    // Install debug tools.
+    const g = self.AMP;
+    g.printState = g.printState || this.debugPrintState_.bind(this);
+    g.setState = g.setState || (state => this.setState(state));
+    g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
   /** @override */
@@ -352,6 +349,8 @@ export class Bind {
    * Returned promise is resolved when all operations complete.
    * If they don't complete within `timeout` ms, the promise is rejected.
    *
+   * Note that elements with bindings must have attribute `i-amphtml-binding`.
+   *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
    * @param {number} timeout Timeout in milliseconds.
@@ -359,55 +358,46 @@ export class Bind {
    */
   scanAndApply(addedElements, removedElements, timeout = 2000) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
-    let promise;
-    if (isExperimentOn(this.win_, 'faster-bind-scan')) {
-      /**
-       * Helper function for cleaning up bindings in removed elements.
-       * @param {number} added
-       * @return {!Promise}
-       */
-      const cleanup = added => {
-        this.removeBindingsForNodes_(removedElements).then(removed => {
-          dev().info(TAG,
-              '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
-        });
-        return Promise.resolve();
-      };
-      // Early-out if max number of bindings has already been exceeded.
-      // This can happen since we purge old bindings in `removedElements`
-      // _after_ adding new ones (rather than before) as an optimization.
-      if (this.numberOfBindings() > this.maxNumberOfBindings_) {
-        this.emitMaxBindingsExceededError_();
-        return cleanup(0);
-      }
-      const bindings = [];
-      addedElements.forEach(ae => {
-        const elements = ae.querySelectorAll('[i-amphtml-binding]');
-        for (let i = 0; i < elements.length; i++) {
-          this.scanElement_(elements[i], Number.POSITIVE_INFINITY, bindings);
-        }
+    /**
+     * Helper function for cleaning up bindings in removed elements.
+     * @param {number} added
+     * @return {!Promise}
+     */
+    const cleanup = added => {
+      this.removeBindingsForNodes_(removedElements).then(removed => {
+        dev().info(TAG,
+            '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
       });
-      const added = bindings.length;
-      if (added === 0) {
-        return cleanup(0);
-      }
-      promise = this.sendBindingsToWorker_(bindings).then(() => {
-        return this.evaluate_()
-            .then(results => this.applyElements_(results, addedElements));
-      }).then(() => {
-        // Remove bindings at the end to reduce evaluation/apply latency.
-        cleanup(added);
-      });
-    } else {
-      promise = this.removeThenAdd_(removedElements, addedElements)
-          .then(deltas => {
-            // Don't reevaluate/apply if there are no bindings.
-            if (deltas.added > 0) {
-              return this.evaluate_().then(results =>
-                this.applyElements_(results, addedElements));
-            }
-          });
+      return Promise.resolve();
+    };
+    // Early-out if max number of bindings has already been exceeded.
+    // This can happen since we purge old bindings in `removedElements`
+    // _after_ adding new ones (rather than before) as an optimization.
+    if (this.numberOfBindings() > this.maxNumberOfBindings_) {
+      this.emitMaxBindingsExceededError_();
+      return cleanup(0);
     }
+    const bindings = [];
+    // Scan `addedElements` and their children for elements with bindings.
+    const elementsToScan = addedElements.slice();
+    addedElements.forEach(el => {
+      const children = el.querySelectorAll('[i-amphtml-binding]');
+      Array.prototype.push.apply(elementsToScan, children);
+    });
+    elementsToScan.forEach(el => {
+      this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
+    });
+    const added = bindings.length;
+    if (added === 0) {
+      return cleanup(0);
+    }
+    const promise = this.sendBindingsToWorker_(bindings).then(() => {
+      return this.evaluate_().then(results =>
+        this.applyElements_(results, addedElements));
+    }).then(() => {
+      // Remove bindings at the end to reduce evaluation/apply latency.
+      cleanup(added);
+    });
     return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
@@ -435,27 +425,21 @@ export class Bind {
    */
   initialize_(root) {
     dev().info(TAG, 'init');
-    let promise = Promise.all([
+    return Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_([root])]
-    ).then(results => {
+      this.addBindingsForNodes_([root]),
+    ]).then(results => {
       dev().info(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
+      // In dev mode, check default values against initial expression results.
+      if (getMode().development) {
+        return this.evaluate_().then(results => this.verify_(results));
+      }
+    }).then(() => {
+      this.viewer_.sendMessage('bindReady', undefined);
+      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
     });
-    if (getMode().development) {
-      // Check default values against initial expression results.
-      promise = promise.then(() =>
-        this.evaluate_().then(results => this.verify_(results))
-      );
-    }
-    if (getMode().test) {
-      // Signal init completion for integration tests.
-      promise.then(() => {
-        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-      });
-    }
-    return promise;
   }
 
   /**
@@ -485,16 +469,16 @@ export class Bind {
   /**
    * Calls setState(s), where s is data.state with the non-overridable keys
    * removed.
-   * @param {*} data
+   * @param {!JsonObject} data
    * @return {!Promise}
    * @private
    */
   premutate_(data) {
     const ignoredKeys = [];
     return this.initializePromise_.then(() => {
-      Object.keys(data.state).forEach(key => {
+      Object.keys(data['state']).forEach(key => {
         if (!this.overridableKeys_.includes(key)) {
-          delete data.state[key];
+          delete data['state'][key];
           ignoredKeys.push(key);
         }
       });
@@ -503,7 +487,7 @@ export class Bind {
               'because they are missing the overridable attribute: ' +
               ignoredKeys.join(', '));
       }
-      return this.setState(data.state);
+      return this.setState(data['state']);
     });
   }
 
@@ -629,13 +613,13 @@ export class Bind {
    */
   removeBindingsForNodes_(nodes) {
     // Eliminate bound elements that are descendants of `nodes`.
-    filterSplice(this.boundElements_, boundElement => {
+    remove(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].contains(boundElement.element)) {
-          return false;
+          return true;
         }
       }
-      return true;
+      return false;
     });
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
@@ -643,13 +627,13 @@ export class Bind {
     const deletedExpressions = /** @type {!Array<string>} */ ([]);
     for (const expression in this.expressionToElements_) {
       const elements = this.expressionToElements_[expression];
-      filterSplice(elements, element => {
+      remove(elements, element => {
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i].contains(element)) {
-            return false;
+            return true;
           }
         }
-        return true;
+        return false;
       });
       if (elements.length == 0) {
         deletedExpressions.push(expression);
@@ -1355,21 +1339,65 @@ export class Bind {
 
   /**
    * Print out the current state in the console.
-   * @param {string=} opt_expression
+   * @param {(!Element|string)=} opt_elementOrExpr
    * @private
    */
-  printState_(opt_expression) {
-    if (opt_expression) {
-      if (typeof opt_expression !== 'string') {
-        user().error(TAG, 'Invalid JSON expression. Example: ' +
-            'AMP.printState("foo.bar") to print current value of "foo.bar".');
-        return;
+  debugPrintState_(opt_elementOrExpr) {
+    if (opt_elementOrExpr) {
+      if (typeof opt_elementOrExpr == 'string') {
+        const value = getValueForExpr(this.state_, opt_elementOrExpr);
+        user().info(TAG, value);
+      } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
+        const element = user().assertElement(opt_elementOrExpr);
+        this.debugPrintElement_(element);
+      } else {
+        user().info(TAG, 'Invalid argument. Pass a JSON expression or an ' +
+            'element instead e.g. AMP.printState("foo.bar") or ' +
+            'AMP.printState($0) after selecting an element.');
       }
-      const value = getValueForExpr(this.state_, opt_expression);
-      user().info(TAG, value);
     } else {
       user().info(TAG, this.state_);
     }
+  }
+
+  /**
+   * Print out the element's bound attributes and respective expression values.
+   * @param {!Element} element
+   * @private
+   */
+  debugPrintElement_(element) {
+    const index = findIndex(this.boundElements_, boundElement => {
+      return boundElement.element == element;
+    });
+    if (index < 0) {
+      user().info(TAG, 'Element has no bindings:', element);
+      return;
+    }
+    // Evaluate expressions in bindings in `element`.
+    const promises = [];
+    const {boundProperties} = this.boundElements_[index];
+    boundProperties.forEach(boundProperty => {
+      const {expressionString} = boundProperty;
+      promises.push(this.evaluateExpression_(expressionString, this.state_));
+    });
+    // Print the map of attribute to expression value for `element`.
+    Promise.all(promises).then(results => {
+      const output = map();
+      boundProperties.forEach((boundProperty, i) => {
+        const {property} = boundProperty;
+        output[property] = results[i];
+      });
+      user().info(TAG, output);
+    });
+  }
+
+  /**
+   * @param {string} expression
+   */
+  debugEvaluate_(expression) {
+    this.evaluateExpression_(expression, this.state_).then(result => {
+      user().info(TAG, result);
+    });
   }
 
   /**

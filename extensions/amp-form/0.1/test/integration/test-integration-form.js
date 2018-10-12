@@ -17,7 +17,10 @@
 import {AmpEvents} from '../../../../../src/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
+import {Services} from '../../../../../src/services';
+import {
+  installGlobalSubmitListenerForDoc,
+} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
@@ -49,6 +52,9 @@ describes.realWin('AmpForm Integration', {
   beforeEach(() => {
     sandbox = env.sandbox;
     doc = env.win.document;
+
+    sandbox.stub(Services, 'formSubmitForDoc')
+        .returns(() => { fire: () => {}; });
 
     const mustache = document.createElement('script');
     mustache.setAttribute('custom-template', 'amp-mustache');

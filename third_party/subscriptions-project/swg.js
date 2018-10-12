@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.23 */
+/** Version: 0.1.22.29 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2142,6 +2142,17 @@ function createElement(doc, tagName, attributes, opt_content) {
 
 
 /**
+ * Removes the element.
+ * @param {!Element} element
+ */
+function removeElement(element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+}
+
+
+/**
  * Removes all children from the parent element.
  * @param {!Element} parent
  */
@@ -2259,10 +2270,10 @@ const TITLE_LANG_MAP = {
 class ButtonApi {
 
   /**
-   * @param {!../model/doc.Doc} doc
+   * @param {*} doc
    */
   constructor(doc) {
-    /** @private @const {!../model/doc.Doc} */
+    /** @private @const {*} */
     this.doc_ = doc;
   }
 
@@ -2326,7 +2337,7 @@ class ButtonApi {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2372,14 +2383,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
+   * @param {function(!Promise<*>)} callback
    */
   setOnEntitlementsResponse(callback) {
     this.setCallback_(CallbackId.ENTITLEMENTS, callback);
   }
 
   /**
-   * @param {!Promise<!../api/entitlements.Entitlements>} promise
+   * @param {!Promise<*>} promise
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
@@ -2395,14 +2406,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!../api/subscriptions.LoginRequest)} callback
+   * @param {function(*)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
-   * @param {!../api/subscriptions.LoginRequest} request
+   * @param {*} request
    * @return {boolean} Whether the callback has been found.
    */
   triggerLoginRequest(request) {
@@ -2472,14 +2483,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
+   * @param {function(!Promise<*>)} callback
    */
   setOnSubscribeResponse(callback) {
     this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
-   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
+   * @param {!Promise<*>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerSubscribeResponse(responsePromise) {
@@ -2623,7 +2634,7 @@ class View {
   getElement() {}
 
   /**
-   * @param {!./dialog.Dialog} unusedDialog
+   * @param {*} unusedDialog
    * @return {!Promise}
    * @abstract
    */
@@ -2648,6 +2659,12 @@ class View {
    * @abstract
    */
   shouldFadeBody() {}
+
+  /**
+   * @return {boolean}
+   * @abstract
+   */
+  hasLoadingIndicator() {}
 }
 
 /**
@@ -2712,13 +2729,15 @@ class ActivityIframeView extends View {
    * @param {string} src
    * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
+   * @param {boolean=} hasLoadingIndicator
    */
   constructor(
       win,
       activityPorts,
       src,
       args,
-      shouldFadeBody = false) {
+      shouldFadeBody = false,
+      hasLoadingIndicator = false) {
     super();
 
     /** @private @const {!Window} */
@@ -2743,6 +2762,9 @@ class ActivityIframeView extends View {
 
     /** @private @const {boolean} */
     this.shouldFadeBody_ = shouldFadeBody;
+
+    /** @private @const {boolean} */
+    this.hasLoadingIndicator_ = hasLoadingIndicator;
 
     /** @private {?web-activities/activity-ports.ActivityIframePort} */
     this.port_ = null;
@@ -2782,8 +2804,16 @@ class ActivityIframeView extends View {
   }
 
   /**
+   * Returns if the view shows loading indicator.
+   * @return {boolean}
+   */
+  hasLoadingIndicator() {
+    return this.hasLoadingIndicator_;
+  }
+
+  /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
-   * @param {!../components/dialog.Dialog} dialog
+   * @param {*} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
@@ -2887,14 +2917,19 @@ class Entitlements {
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
    * @param {function(!Entitlements)} ackHandler
+   * @param {?boolean|undefined} isReadyToPay
    */
-  constructor(service, raw, entitlements, currentProduct, ackHandler) {
+  constructor(service, raw, entitlements, currentProduct, ackHandler,
+    isReadyToPay) {
+
     /** @const {string} */
     this.service = service;
     /** @const {string} */
     this.raw = raw;
     /** @const {!Array<!Entitlement>} */
     this.entitlements = entitlements;
+    /** @const {boolean} */
+    this.isReadyToPay = isReadyToPay || false;
 
     /** @private @const {?string} */
     this.product_ = currentProduct;
@@ -2911,7 +2946,8 @@ class Entitlements {
         this.raw,
         this.entitlements.map(ent => ent.clone()),
         this.product_,
-        this.ackHandler_);
+        this.ackHandler_,
+        this.isReadyToPay);
   }
 
   /**
@@ -2921,6 +2957,7 @@ class Entitlements {
     return {
       'service': this.service,
       'entitlements': this.entitlements.map(item => item.json()),
+      'isReadyToPay': this.isReadyToPay,
     };
   }
 
@@ -3191,15 +3228,18 @@ class SubscribeResponse {
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
+   * @param {?Entitlements} entitlements
    * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData, completeHandler) {
+  constructor(raw, purchaseData, userData, entitlements, completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
     /** @const {?UserData} */
     this.userData = userData;
+    /** @const {?Entitlements} */
+    this.entitlements = entitlements;
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3212,6 +3252,7 @@ class SubscribeResponse {
         this.raw,
         this.purchaseData,
         this.userData,
+        this.entitlements,
         this.completeHandler_);
   }
 
@@ -3222,6 +3263,7 @@ class SubscribeResponse {
     return {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
+      'entitlements': this.entitlements ? this.entitlements.json() : null,
     };
   }
 
@@ -3795,6 +3837,2144 @@ function addQueryParam(url, param, value) {
  * limitations under the License.
  */
 
+/**
+ * Have to put these in the map to avoid compiler optimization. Due to
+ * optimization issues, this map only allows property-style keys. E.g. "hr1",
+ * as opposed to "1hr".
+ * @type {!Object<string, number>}
+ * @package Visible for testing only.
+ */
+const CACHE_KEYS = {
+  'nocache': 1,
+  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
+  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+};
+
+
+/**
+ * @return {string}
+ */
+function feOrigin() {
+  return parseUrl$1('https://news.google.com').origin;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function serviceUrl(url) {
+  return 'https://news.google.com/swg/_/api/v1' + url;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/offersiframe".
+ * @param {string=} prefix
+ * @return {string} The complete URL.
+ */
+function feUrl(url, prefix = '') {
+  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+}
+
+
+/**
+ * @param {string} url FE URL.
+ * @return {string} The complete URL including cache params.
+ */
+function feCached(url) {
+  return addQueryParam(url, '_', cacheParam('hr1'));
+}
+
+
+/**
+ * @param {!Object<string, ?>} args
+ * @return {!Object<string, ?>}
+ */
+function feArgs(args) {
+  return Object.assign(args, {
+    '_client': 'SwG 0.1.22.29',
+  });
+}
+
+
+/**
+ * @param {string} cacheKey
+ * @return {string}
+ * @package Visible for testing only.
+ */
+function cacheParam(cacheKey) {
+  let period = CACHE_KEYS[cacheKey];
+  if (period == null) {
+    period = 1;
+  }
+  if (period === 0) {
+    return '_';
+  }
+  const now = Date.now();
+  return String(period <= 1 ? now : Math.floor(now / period));
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * The flow to initiate payment process.
+ */
+class PayStartFlow {
+  /**
+   * @param {*} deps
+   * @param {string} sku
+   */
+  constructor(deps, sku) {
+    /** @private @const {*} */
+    this.deps_ = deps;
+
+    /** @private @const {*} */
+    this.payClient_ = deps.payClient();
+
+    /** @private @const {*} */
+    this.pageConfig_ = deps.pageConfig();
+
+    /** @private @const {*} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {string} */
+    this.sku_ = sku;
+  }
+
+  /**
+   * Starts the payments flow.
+   * @return {!Promise}
+   */
+  start() {
+    // Start/cancel events.
+    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, {
+      'sku': this.sku_,
+    });
+
+    const opener = this.payClient_.start({
+      'apiVersion': 1,
+      'allowedPaymentMethods': ['CARD'],
+      'environment': 'PRODUCTION',
+      'playEnvironment': 'PROD',
+      'swg': {
+        'publicationId': this.pageConfig_.getPublicationId(),
+        'skuId': this.sku_,
+      },
+      'i': {
+        'startTimeMs': Date.now(),
+      },
+    }, {
+      forceRedirect:
+          this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
+    });
+    this.dialogManager_.popupOpened(opener);
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * The flow for successful payments completion.
+ */
+class PayCompleteFlow {
+
+  /**
+   * @param {*} deps
+   */
+  static configurePending(deps) {
+    deps.payClient().onResponse(payPromise => {
+      deps.dialogManager().popupClosed();
+      deps.entitlementsManager().blockNextNotification();
+      const flow = new PayCompleteFlow(deps);
+      const promise =
+          validatePayResponse(deps, payPromise, flow.complete.bind(flow));
+      deps.callbacks().triggerSubscribeResponse(promise);
+      return promise.then(response => {
+        flow.start(response);
+      }, reason => {
+        if (isCancelError(reason)) {
+          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+        }
+        throw reason;
+      });
+    });
+  }
+
+  /**
+   * @param {*} deps
+   */
+  constructor(deps) {
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {*} */
+    this.deps_ = deps;
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {*} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private {?SubscribeResponse} */
+    this.response_ = null;
+
+    /** @private {?Promise} */
+    this.readyPromise_ = null;
+  }
+
+  /**
+   * Starts the payments completion flow.
+   * @param {!SubscribeResponse} response
+   * @return {!Promise}
+   */
+  start(response) {
+    this.deps_.entitlementsManager().reset(true);
+    this.response_ = response;
+    const args = {
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+    };
+    // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
+    if (response.userData && response.entitlements) {
+      args['idToken'] = response.userData.idToken;
+      this.deps_.entitlementsManager().pushNextEntitlements(
+          response.entitlements.raw);
+    } else {
+      args['loginHint'] = response.userData && response.userData.email;
+    }
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/payconfirmiframe'),
+        feArgs(args),
+        /* shouldFadeBody */ true);
+    this.activityIframeView_.onMessage(data => {
+      if (data['entitlements']) {
+        this.deps_.entitlementsManager().pushNextEntitlements(
+            /** @type {string} */ (data['entitlements']));
+        return;
+      }
+    });
+    this.activityIframeView_.acceptResult().then(() => {
+      // The flow is complete.
+      this.dialogManager_.completeView(this.activityIframeView_);
+    });
+    this.readyPromise_ = this.dialogManager_.openView(this.activityIframeView_);
+    return this.readyPromise_;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  complete() {
+    this.deps_.entitlementsManager().unblockNextNotification();
+    this.readyPromise_.then(() => {
+      this.activityIframeView_.message({'complete': true});
+    });
+    return this.activityIframeView_.acceptResult().catch(() => {
+      // Ignore errors.
+    }).then(() => {
+      this.deps_.entitlementsManager().setToastShown(true);
+    });
+  }
+}
+
+
+/**
+ * @param {*} deps
+ * @param {!Promise<!Object>} payPromise
+ * @param {function():!Promise} completeHandler
+ * @return {!Promise<!SubscribeResponse>}
+ */
+function validatePayResponse(deps, payPromise, completeHandler) {
+  return payPromise.then(data =>
+      parseSubscriptionResponse(deps, data, completeHandler));
+}
+
+
+/**
+ * @param {*} deps
+ * @param {*} data
+ * @param {function():!Promise} completeHandler
+ * @return {!SubscribeResponse}
+ */
+function parseSubscriptionResponse(deps, data, completeHandler) {
+  let swgData = null;
+  let raw = null;
+  if (data) {
+    if (typeof data == 'string') {
+      raw = /** @type {string} */ (data);
+    } else {
+      // Assume it's a json object in the format:
+      // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
+      const json = /** @type {!Object} */ (data);
+      if ('swgCallbackData' in json) {
+        swgData = /** @type {!Object} */ (json['swgCallbackData']);
+      } else if ('integratorClientCallbackData' in json) {
+        raw = json['integratorClientCallbackData'];
+      }
+    }
+  }
+  if (raw && !swgData) {
+    raw = atob(raw);
+    if (raw) {
+      const parsed = parseJson(raw);
+      swgData = parsed['swgCallbackData'];
+    }
+  }
+  if (!swgData) {
+    throw new Error('unexpected payment response');
+  }
+  raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
+  return new SubscribeResponse(
+      raw,
+      parsePurchaseData(swgData),
+      parseUserData(swgData),
+      parseEntitlements(deps, swgData),
+      completeHandler);
+}
+
+
+/**
+ * @param {!Object} swgData
+ * @return {!PurchaseData}
+ */
+function parsePurchaseData(swgData) {
+  const raw = swgData['purchaseData'];
+  const signature = swgData['purchaseDataSignature'];
+  return new PurchaseData(raw, signature);
+}
+
+
+/**
+ * @param {!Object} swgData
+ * @return {?UserData}
+ * @package Visible for testing.
+ */
+function parseUserData(swgData) {
+  const idToken = swgData['idToken'];
+  if (!idToken) {
+    return null;
+  }
+  const jwt = /** @type {!Object} */ (new JwtHelper().decode(idToken));
+  return new UserData(idToken, jwt);
+}
+
+
+/**
+ * @param {*} deps
+ * @param {!Object} swgData
+ * @return {*}
+ * @package Visible for testing.
+ */
+function parseEntitlements(deps, swgData) {
+  if (swgData['signedEntitlements']) {
+    return deps.entitlementsManager().parseEntitlements(swgData);
+  }
+  return null;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * The flow to initiate deferred account process.
+ * See `Subscriptions.completeDeferredAccountCreation` API.
+ */
+class DeferredAccountFlow {
+
+  /**
+   * @param {*} deps
+   * @param {*} options
+   */
+  constructor(deps, options) {
+    /** @private @const {*} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {*} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private {?Promise} */
+    this.openPromise_ = null;
+
+    /** @type {*} */
+    const defaultOptions = {
+      entitlements: null,
+      consent: true,
+    };
+    /** @private @const {*} */
+    this.options_ = Object.assign(defaultOptions, options || {});
+  }
+
+  /**
+   * Starts the deferred account flow.
+   * @return {!Promise<!DeferredAccountCreationResponse>}
+   */
+  start() {
+    const entitlements = this.options_.entitlements;
+
+    // For now, entitlements are required to be present and have the Google
+    // token. This is strictly not required for the implementation. But it's
+    // preferrable API-wise at this time.
+    if (!entitlements || !entitlements.getEntitlementForSource('google')) {
+      throw new Error('No entitlements with "google" source');
+    }
+
+    // Start/cancel events.
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
+
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/recoveriframe'),
+        feArgs({
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'productId': this.deps_.pageConfig().getProductId(),
+          'entitlements': entitlements && entitlements.raw || null,
+          'consent': this.options_.consent,
+        }),
+        /* shouldFadeBody */ true);
+
+    this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
+    return this.activityIframeView_.acceptResult().then(result => {
+      // The consent part is complete.
+      return this.handleConsentResponse_(/** @type {!Object} */ (result.data));
+    }, reason => {
+      if (isCancelError(reason)) {
+        this.deps_.callbacks().triggerFlowCanceled(
+            SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
+      } else {
+        this.dialogManager_.completeView(this.activityIframeView_);
+      }
+      throw reason;
+    });
+  }
+
+  /**
+   * @param {!Object} data
+   * @return {!DeferredAccountCreationResponse}
+   * @private
+   */
+  handleConsentResponse_(data) {
+    this.deps_.entitlementsManager().blockNextNotification();
+
+    // Parse the response.
+    const entitlementsJwt = data['entitlements'];
+    const idToken = data['idToken'];
+    const entitlements = this.deps_.entitlementsManager()
+        .parseEntitlements({'signedEntitlements': entitlementsJwt});
+    const userData = new UserData(
+        idToken,
+        /** @type {!Object} */ (new JwtHelper().decode(idToken)));
+    const purchaseData = new PurchaseData(
+        data['purchaseData']['data'],
+        data['purchaseData']['signature']);
+
+    // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
+    // But this can be eventually implemented by the same iframe.
+    const creatingFlow = new PayCompleteFlow(this.deps_);
+    const completeHandler = creatingFlow.complete.bind(creatingFlow);
+
+    const response = new DeferredAccountCreationResponse(
+        entitlements,
+        userData,
+        purchaseData,
+        completeHandler);
+
+    // Start the "sync" flow.
+    creatingFlow.start(new SubscribeResponse(
+        '',  // raw field doesn't matter in this case
+        purchaseData,
+        userData,
+        entitlements,
+        () => Promise.resolve()  // completeHandler doesn't matter in this case
+    ));
+    return response;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns a promise which is resolved after the given duration of animation
+ * @param {!Element} el - Element to be observed.
+ * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {number} durationMillis - duration of animation.
+ * @param {string} curve - transition function for the animation.
+ * @return {!Promise} Promise which resolves once the animation is done playing.
+ */
+function transition(el, props, durationMillis, curve) {
+  const win = el.ownerDocument.defaultView;
+  const previousTransitionValue = el.style.transition || '';
+  return new Promise(resolve => {
+    win.setTimeout(() => {
+      win.setTimeout(resolve, durationMillis);
+      const tr = `${durationMillis}ms ${curve}`;
+      setImportantStyles(el, Object.assign({
+        'transition': `transform ${tr}, opacity ${tr}`,
+      }, props));
+    });
+  }).then(() => {
+    setImportantStyles(el, {
+      'transition': previousTransitionValue,
+    });
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+class Graypane {
+
+  /**
+   * @param {*} doc
+   * @param {number} zIndex
+   */
+  constructor(doc, zIndex) {
+    /** @private @const {*} */
+    this.doc_ = doc;
+
+    /** @private @const {!Element} */
+    this.fadeBackground_ = this.doc_.getWin().document.createElement(
+        'swg-popup-background');
+    setImportantStyles(this.fadeBackground_, {
+      'z-index': zIndex,
+      'display': 'none',
+      'position': 'fixed',
+      'top': 0,
+      'right': 0,
+      'bottom': 0,
+      'left': 0,
+      'background-color': 'rgba(32, 33, 36, .6)',
+    });
+  }
+
+  /**
+   * @return {!Element}
+   */
+  getElement() {
+    return this.fadeBackground_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isAttached() {
+    return !!this.fadeBackground_.parentNode;
+  }
+
+  /**
+   * Attaches the graypane to the document.
+   */
+  attach() {
+    this.doc_.getBody().appendChild(this.fadeBackground_);
+  }
+
+  /**
+   * Detaches the graypane to the document.
+   */
+  destroy() {
+    this.doc_.getBody().removeChild(this.fadeBackground_);
+  }
+
+  /**
+   * Shows the graypane.
+   * @param {boolean=} animated
+   * @return {!Promise|undefined}
+   */
+  show(animated = true) {
+    setImportantStyles(this.fadeBackground_, {
+      'display': 'block',
+      'opacity': animated ? 0 : 1,
+    });
+    if (animated) {
+      return transition(this.fadeBackground_, {
+        'opacity': 1,
+      }, 300, 'ease-out');
+    }
+  }
+
+  /**
+   * Hides the graypane.
+   * @param {boolean=} animated
+   * @return {!Promise|undefined}
+   */
+  hide(animated = true) {
+    if (animated) {
+      return transition(this.fadeBackground_, {
+        'opacity': 0,
+      }, 300, 'ease-out').then(() => {
+        setImportantStyles(this.fadeBackground_, {'display': 'none'});
+      });
+    }
+    setImportantStyles(this.fadeBackground_, {'display': 'none'});
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Loading indicator class. Builds the loading indicator view to be injected in
+ * parent element <iframe class="swg-dialog"> element. Provides methods to
+ * show/hide loading indicator.
+ */
+class LoadingView {
+
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+
+    /** @private @const {!Element} */
+    this.loadingContainer_ =
+        createElement(this.doc_, 'swg-loading-container', {});
+
+    /** @private @const {!Element} */
+    this.loading_ = createElement(this.doc_, 'swg-loading', {});
+    this.loadingContainer_.appendChild(this.loading_);
+
+    this.loadingContainer_.style.setProperty('display', 'none', 'important');
+
+    // Build the animated loading indicator.
+    this.buildLoadingIndicator_();
+  }
+
+  /**
+   * Gets the populated loading container.
+   * @return {!Element}
+   */
+  getElement() {
+    return this.loadingContainer_;
+  }
+
+  /**
+   * Shows the loading indicator within the container element.
+   */
+  show() {
+    this.loadingContainer_.style.removeProperty('display');
+  }
+
+  /**
+   * Hides the loading indicator within the container element.
+   */
+  hide() {
+    this.loadingContainer_.style.setProperty('display', 'none', 'important');
+  }
+
+  /**
+   * Populates the loading indivicator. The populated element
+   * can be added in any view, when required.
+   * @private
+   */
+  buildLoadingIndicator_() {
+    const loadingContainer = this.loading_;
+
+    const loadingIndicatorTopContainer =
+        createElement(this.doc_, 'swg-loading-animate', {});
+    loadingContainer.appendChild(loadingIndicatorTopContainer);
+
+    const loadingIndicatorChildContainer =
+        createElement(this.doc_, 'swg-loading-image', {});
+    loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string|number>} */
+const friendlyIframeAttributes = {
+  'frameborder': 0,
+  'scrolling': 'no',
+  'src': 'about:blank',
+};
+
+/**
+ * The class for building friendly iframe.
+ */
+class FriendlyIframe {
+
+  /**
+   * @param {!Document} doc
+   * @param {!Object<string, string|number>=} attrs
+   */
+  constructor(doc, attrs = {}) {
+
+    const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (
+            createElement(doc, 'iframe', mergedAttrs));
+
+    // Ensure that the new iframe does not inherit any CSS styles.
+    resetAllStyles(this.iframe_);
+
+    /** @private @const {!Promise} */
+    this.ready_ = new Promise(resolve => {
+      this.iframe_.onload = resolve;
+    });
+  }
+
+  /**
+   * When promise is resolved.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.ready_;
+  }
+
+  /**
+   * Gets the iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * Gets the document object of the iframe element.
+   * @return {!Document}
+   */
+  getDocument() {
+    const doc = this.getElement().contentDocument ||
+        (this.getElement().contentWindow &&
+        this.getElement().contentWindow.document);
+
+    if (!doc) {
+      throw new Error('not loaded');
+    }
+    return doc;
+  }
+
+  /**
+   * Gets the body of the iframe.
+   * @return {!Element}
+   */
+  getBody() {
+    return /** @type {!Element} */ (this.getDocument().body);
+  }
+
+  /**
+   * Whether the iframe is connected.
+   * @return {boolean}
+   */
+  isConnected() {
+    if (!this.getElement().ownerDocument) {
+      return false;
+    }
+    return this.getElement().ownerDocument.contains(this.iframe_);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const Z_INDEX = 2147483647;
+
+/**
+ * Default iframe important styles.
+ * Note: The iframe responsiveness media query style is injected in the
+ * publisher's page since style attribute can not include media query.
+ * @const {!Object<string, string|number>}
+ */
+const rootElementImportantStyles = {
+  'min-height': '50px',
+  'border': 'none',
+  'display': 'block',
+  'position': 'fixed',
+  'z-index': Z_INDEX,
+  'box-sizing': 'border-box',
+};
+
+/**
+ * Reset view styles.
+ * @const {!Object<string, string|number>}
+ */
+const resetViewStyles = {
+  'position': 'absolute',
+  'top': '0',
+  'left': '0',
+  'right': '0',
+  'bottom': '0',
+  'opacity': 0,
+  /* These lines are a work around to this issue in iOS:     */
+  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+  'height': 0,
+  'max-height': '100%',
+  'max-width': '100%',
+  'min-height': '100%',
+  'min-width': '100%',
+  'width': 0,
+};
+
+/**
+ * Position of the dialog.
+ * @const @enum {string}
+ */
+const PositionAt = {
+  BOTTOM: 'BOTTOM',
+  TOP: 'TOP',
+  FLOAT: 'FLOAT',
+  FULL: 'FULL',
+};
+
+
+/**
+ * The class for the top level dialog.
+ * @final
+ */
+class Dialog {
+
+  /**
+   * Create a dialog for the provided doc.
+   * @param {*} doc
+   * @param {!Object<string, string|number>=} importantStyles
+   * @param {!Object<string, string|number>=} styles
+   */
+  constructor(doc, importantStyles = {}, styles = {}) {
+    /** @private @const {*} */
+    this.doc_ = doc;
+
+    /** @private @const {!FriendlyIframe} */
+    this.iframe_ = new FriendlyIframe(
+        doc.getWin().document, {'class': 'swg-dialog'});
+
+    /** @private @const {!Graypane} */
+    this.graypane_ = new Graypane(doc, Z_INDEX - 1);
+
+    const modifiedImportantStyles =
+        Object.assign({}, rootElementImportantStyles, importantStyles);
+    setImportantStyles(
+        this.iframe_.getElement(), modifiedImportantStyles);
+
+    setStyles(this.iframe_.getElement(), styles);
+
+    /** @private {LoadingView} */
+    this.loadingView_ = null;
+
+    /** @private {?Element} */
+    this.container_ = null;  // Depends on constructed document inside iframe.
+
+    /** @private {*} */
+    this.view_ = null;
+
+    /** @private {?Promise} */
+    this.animating_ = null;
+
+    /** @private {boolean} */
+    this.hidden_ = false;
+
+    /** @private {*} */
+    this.previousProgressView_ = null;
+  }
+
+  /**
+   * Opens the dialog and builds the iframe container.
+   * @param {boolean=} hidden
+   * @return {!Promise<!Dialog>}
+   */
+  open(hidden = false) {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('already opened');
+    }
+
+    // Attach.
+    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
+    this.graypane_.attach();
+
+    if (hidden) {
+      setImportantStyles(iframe.getElement(), {
+        'visibility': 'hidden',
+        'opacity': 0,
+      });
+      this.hidden_ = hidden;
+    } else {
+      this.show_();
+    }
+
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
+  }
+
+  /**
+   * Build the iframe with the styling after iframe is loaded.
+   * @private
+   */
+  buildIframe_() {
+    const iframe = this.iframe_;
+    const iframeBody = iframe.getBody();
+    const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
+
+    // Inject Google fonts in <HEAD> section of the iframe.
+    injectStyleSheet(iframeDoc, CSS$1);
+
+    // Add Loading indicator.
+    this.loadingView_ = new LoadingView(iframeDoc);
+    iframeBody.appendChild(this.loadingView_.getElement());
+
+    // Container for all dynamic content, including 3P iframe.
+    this.container_ = createElement(iframeDoc, 'swg-container', {});
+    iframeBody.appendChild(this.container_);
+    this.setPosition_();
+  }
+
+  /**
+   * Closes the dialog.
+   * @param {boolean=} animated
+   * @return {!Promise}
+   */
+  close(animated = true) {
+    let animating;
+    if (animated) {
+      animating = this.animate_(() => {
+        this.graypane_.hide(/* animate */ true);
+        return transition(this.getElement(), {
+          'transform': 'translateY(100%)',
+        }, 300, 'ease-out');
+      });
+    } else {
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.doc_.getBody().removeChild(this.iframe_.getElement());
+      this.removePaddingToHtml_();
+      this.graypane_.destroy();
+    });
+  }
+
+  /**
+   * Gets the container within the dialog.
+   * @return {!Element}
+   */
+  getContainer() {
+    if (!this.container_) {
+      throw new Error('not opened yet');
+    }
+    return this.container_;
+  }
+
+  /**
+   * Gets the attached iframe instance.
+   * @return {!FriendlyIframe}
+   */
+  getIframe() {
+    return this.iframe_;
+  }
+
+  /**
+   * Gets the Iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_.getElement();
+  }
+
+  /**
+   * Transitions to the next view.
+   * @private
+   */
+  entryTransitionToNextView_() {
+    if (this.view_ && this.view_.hasLoadingIndicator()) {
+      // Temporarily cache the old view.
+      this.previousProgressView_ = this.view_;
+    } else {
+      // Since loading indicator will be shown, remove contents of old view.
+      removeChildren(this.getContainer());
+      // When loading indicator was not displayed in the previous view,
+      // loading indicator must be displayed while transitioning to new view.
+      this.loadingView_.show();
+    }
+  }
+
+   /**
+   * Transition out of an old view.
+   * @private
+   */
+  exitTransitionFromOldView_() {
+    // If previous view is still around, remove it.
+    if (this.previousProgressView_) {
+      removeElement(this.previousProgressView_.getElement());
+      this.previousProgressView_ = null;
+    } else {
+      this.loadingView_.hide();
+    }
+  }
+
+  /** @return {*} */
+  getCurrentView() {
+    return this.view_;
+  }
+
+  /**
+   * Opens the given view and removes existing view from the DOM if any.
+   * @param {*} view
+   * @return {!Promise}
+   */
+  openView(view) {
+    setImportantStyles(view.getElement(), resetViewStyles);
+    this.entryTransitionToNextView_();
+
+    this.view_ = view;
+    this.getContainer().appendChild(view.getElement());
+
+    // If the current view should fade the parent document.
+    if (view.shouldFadeBody() && !this.hidden_) {
+      this.graypane_.show(/* animate */ true);
+    }
+
+    return view.init(this).then(() => {
+      setImportantStyles(view.getElement(), {
+        'opacity': 1,
+      });
+      if (this.hidden_) {
+        if (view.shouldFadeBody()) {
+          this.graypane_.show(/* animated */ true);
+        }
+        this.show_();
+      }
+      this.exitTransitionFromOldView_();
+    });
+  }
+
+  /**
+   * Show the iframe.
+   * @private
+   */
+  show_() {
+    this.animate_(() => {
+      setImportantStyles(this.getElement(), {
+        'transform': 'translateY(100%)',
+        'opactiy': 1,
+        'visibility': 'visible',
+      });
+      return transition(this.getElement(), {
+        'transform': 'translateY(0)',
+        'opacity': 1,
+        'visibility': 'visible',
+      }, 300, 'ease-out');
+    });
+    this.hidden_ = false;
+  }
+
+  /**
+   * Resizes the dialog container.
+   * @param {*} view
+   * @param {number} height
+   * @param {boolean=} animated
+   * @return {?Promise}
+   */
+  resizeView(view, height, animated = true) {
+    if (this.view_ != view) {
+      return null;
+    }
+    const newHeight = this.getMaxAllowedHeight_(height);
+
+    let animating;
+    if (animated) {
+      const oldHeight = this.getElement().offsetHeight;
+      if (newHeight >= oldHeight) {
+        // Expand.
+        animating = this.animate_(() => {
+          setImportantStyles(this.getElement(), {
+            'height': `${newHeight}px`,
+            'transform': `translateY(${newHeight - oldHeight}px)`,
+          });
+          return transition(this.getElement(), {
+            'transform': 'translateY(0)',
+          }, 300, 'ease-out');
+        });
+      } else {
+        // Collapse.
+        animating = this.animate_(() => {
+          return transition(this.getElement(), {
+            'transform': `translateY(${oldHeight - newHeight}px)`,
+          }, 300, 'ease-out').then(() => {
+            setImportantStyles(this.getElement(), {
+              'height': `${newHeight}px`,
+              'transform': 'translateY(0)',
+            });
+          });
+        });
+      }
+    } else {
+      setImportantStyles(this.getElement(), {
+        'height': `${newHeight}px`,
+      });
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.updatePaddingToHtml_(height);
+      view.resized();
+    });
+  }
+
+  /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
+  }
+
+  /**
+   * Returns maximum allowed height for current viewport.
+   * @param {number} height
+   * @return {number}
+   * @private
+   */
+  getMaxAllowedHeight_(height) {
+    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
+  }
+
+  /**
+   * Gets the element's height.
+   * @return {number}
+   * @private
+   */
+  getHeight_() {
+    return this.getElement().offsetHeight;
+  }
+
+  /**
+   * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
+   */
+  setPosition_() {
+    setImportantStyles(this.getElement(), this.getPositionStyle_());
+  }
+
+  /**
+   * Add the padding to the containing page so as to not hide the content
+   * behind the popup, if rendered at the bottom.
+   * @param {number} newHeight
+   * @private
+   */
+  updatePaddingToHtml_(newHeight) {
+    if (this.inferPosition_() == PositionAt.BOTTOM) {
+      const bottomPadding = newHeight + 20;  // Add some extra padding.
+      const htmlElement = this.doc_.getRootElement();
+      setImportantStyles(htmlElement, {
+        'padding-bottom': `${bottomPadding}px`,
+      });
+    }
+  }
+
+  /**
+   * Removes previouly added bottom padding from the document.
+   * @private
+   */
+  removePaddingToHtml_() {
+    this.doc_.getRootElement().style.removeProperty('padding-bottom');
+  }
+
+
+  /**
+   * Calculates the position of the dialog. Currently dialog is positioned at
+   * the bottom only. This could change in future to adjust the dialog position
+   * based on the screen size.
+   * @return {string}
+   * @private
+   */
+  inferPosition_() {
+    return PositionAt.BOTTOM;
+  }
+
+  /**
+   * Returns the styles required to postion the dialog.
+   * @return {!Object<string, string|number>}
+   * @private
+   */
+  getPositionStyle_() {
+    const dialogPosition = this.inferPosition_();
+    switch (dialogPosition) {
+      case PositionAt.BOTTOM:
+        return {'bottom': 0};
+      case PositionAt.TOP:
+        return {'top': 0};
+      case PositionAt.FLOAT:
+        return {
+          'position': 'fixed',
+          'top': '50%',
+          'left': '50%',
+          'transform': 'translate(-50%, -50%)',
+        };
+      case PositionAt.FULL:
+        return {
+          'position': 'fixed',
+          'height': '100%',
+          'top': 0,
+          'bottom': 0,
+        };
+      default:
+        return {'bottom': 0};
+    }
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const POPUP_Z_INDEX = 2147483647;
+
+
+/**
+ * The class for the top level dialog.
+ * @final
+ */
+class DialogManager {
+
+  /**
+   * @param {*} doc
+   */
+  constructor(doc) {
+    /** @private @const {*} */
+    this.doc_ = doc;
+
+    /** @private {?Dialog} */
+    this.dialog_ = null;
+
+    /** @private {?Promise<!Dialog>} */
+    this.openPromise_ = null;
+
+    /** @private @const {!Graypane} */
+    this.popupGraypane_ = new Graypane(doc, POPUP_Z_INDEX);
+
+    /** @private {?Window} */
+    this.popupWin_ = null;
+
+    this.popupGraypane_.getElement().addEventListener('click', () => {
+      if (this.popupWin_) {
+        try {
+          this.popupWin_.focus();
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+    });
+  }
+
+  /**
+   * @param {boolean=} hidden
+   * @return {!Promise<!Dialog>}
+   */
+  openDialog(hidden = false) {
+    if (!this.openPromise_) {
+      this.dialog_ = new Dialog(this.doc_);
+      this.openPromise_ = this.dialog_.open(hidden);
+    }
+    return this.openPromise_;
+  }
+
+  /**
+   * @param {*} view
+   * @param {boolean=} hidden
+   * @return {!Promise}
+   */
+  openView(view, hidden = false) {
+    view.whenComplete().catch(reason => {
+      if (isCancelError(reason)) {
+        this.completeView(view);
+      }
+      throw (reason);
+    });
+    return this.openDialog(hidden).then(dialog => {
+      return dialog.openView(view);
+    });
+  }
+
+  /**
+   * @param {*} view
+   */
+  completeView(view) {
+    // Give a small amount of time for another view to take over the dialog.
+    setTimeout(() => {
+      if (this.dialog_ && this.dialog_.getCurrentView() == view) {
+        this.close_();
+      }
+    }, 100);
+  }
+
+  /**
+   */
+  completeAll() {
+    if (this.dialog_) {
+      this.close_();
+    }
+    if (this.popupGraypane_.isAttached()) {
+      this.popupGraypane_.destroy();
+    }
+  }
+
+  /** @private */
+  close_() {
+    this.dialog_.close();
+    this.dialog_ = null;
+    this.openPromise_ = null;
+  }
+
+  /**
+   * @param {?Window|undefined} targetWin
+   */
+  popupOpened(targetWin) {
+    this.popupWin_ = targetWin || null;
+    if (!this.popupGraypane_.isAttached()) {
+      this.popupGraypane_.attach();
+    }
+    this.popupGraypane_.show();
+  }
+
+  /**
+   */
+  popupClosed() {
+    this.popupWin_ = null;
+    try {
+      this.popupGraypane_.hide();
+    } catch (e) {
+      // Ignore.
+    }
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string|number>} */
+const toastImportantStyles = {
+  'height': 0,
+};
+
+/** @const {!Object<string, string>} */
+const iframeAttributes$1 = {
+  'frameborder': '0',
+  'scrolling': 'no',
+  'class': 'swg-toast',
+};
+
+/**
+ * The class Notification toast.
+ */
+class Toast {
+
+  /**
+   * @param {*} deps
+   * @param {string} src
+   * @param {!Object<string, ?>} args
+   */
+  constructor(deps, src, args) {
+
+    /** @private @const {*} */
+    this.doc_ = deps.doc();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {string} */
+    this.src_ = src;
+
+    /** @private @const {!Object<string, ?>} */
+    this.args_ = args;
+
+    /** @private {?Promise} */
+    this.animating_ = null;
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (
+            createElement(
+                this.doc_.getWin().document,
+                'iframe',
+                iframeAttributes$1));
+
+    setImportantStyles(this.iframe_, toastImportantStyles);
+
+    /** @private @const {!Promise} */
+    this.ready_ = new Promise(resolve => {
+      this.iframe_.onload = resolve;
+    });
+  }
+
+  /**
+   * Returns the iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * Opens the notification toast.
+   * @return {!Promise}
+   */
+  open() {
+    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
+    return this.buildToast_();
+  }
+
+  /**
+   * Builds the content of the iframe. On load, animates the toast.
+   */
+  buildToast_() {
+    const toastDurationSeconds = 7;
+    return this.activityPorts_.openIframe(
+        this.iframe_, this.src_, this.args_).then(port => {
+          return port.whenReady();
+        }).then(() => {
+          resetStyles(this.iframe_, ['height']);
+
+          this.animate_(() => {
+            setImportantStyles(this.iframe_, {
+              'transform': 'translateY(100%)',
+              'opactiy': 1,
+              'visibility': 'visible',
+            });
+            return transition(this.iframe_, {
+              'transform': 'translateY(0)',
+              'opacity': 1,
+              'visibility': 'visible',
+            }, 400, 'ease-out');
+          });
+
+          // Close the Toast after the specified duration.
+          this.doc_.getWin().setTimeout(() => {
+            this.close();
+          }, (toastDurationSeconds + 1) * 1000);
+        });
+  }
+
+  /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
+  }
+
+  /**
+   * Closes the toast.
+   * @return {!Promise}
+   */
+  close() {
+    return this.animate_(() => {
+      // Remove the toast from the DOM after animation is complete.
+      this.doc_.getWin().setTimeout(() => {
+        this.doc_.getBody().removeChild(this.iframe_);
+        return Promise.resolve();
+      }, 500);
+
+      return transition(this.iframe_, {
+        'transform': 'translateY(100%)',
+        'opacity': 1,
+        'visibility': 'visible',
+      }, 400, 'ease-out');
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const SERVICE_ID = 'subscribe.google.com';
+const TOAST_STORAGE_KEY = 'toast';
+const ENTS_STORAGE_KEY = 'ents';
+
+
+/**
+ */
+class EntitlementsManager {
+
+  /**
+   * @param {!Window} win
+   * @param {*} config
+   * @param {*} fetcher
+   * @param {*} deps
+   */
+  constructor(win, config, fetcher, deps) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {*} */
+    this.config_ = config;
+
+    /** @private @const {string} */
+    this.publicationId_ = this.config_.getPublicationId();
+
+    /** @private @const {*} */
+    this.fetcher_ = fetcher;
+
+    /** @private @const {*} */
+    this.deps_ = deps;
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper();
+
+    /** @private {?Promise<!Entitlements>} */
+    this.responsePromise_ = null;
+
+    /** @private {number} */
+    this.positiveRetries_ = 0;
+
+    /** @private {boolean} */
+    this.blockNextNotification_ = false;
+
+    /** @private @const {*} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * @param {boolean=} opt_expectPositive
+   */
+  reset(opt_expectPositive) {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = Math.max(
+        this.positiveRetries_, opt_expectPositive ? 3 : 0);
+    if (opt_expectPositive) {
+      this.storage_.remove(ENTS_STORAGE_KEY);
+    }
+  }
+
+  /**
+   * Clears all of the entitlements state and cache.
+   */
+  clear() {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = 0;
+    this.unblockNextNotification();
+    this.storage_.remove(ENTS_STORAGE_KEY);
+    this.storage_.remove(TOAST_STORAGE_KEY);
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlements() {
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.getEntitlementsFlow_();
+    }
+    return this.responsePromise_;
+  }
+
+  /**
+   * @param {string} raw
+   * @param {boolean=} opt_isReadyToPay
+   * @return {boolean}
+   */
+  pushNextEntitlements(raw, opt_isReadyToPay) {
+    const entitlements = this.getValidJwtEntitlements_(
+        raw, /* requireNonExpired */ true, opt_isReadyToPay);
+    if (entitlements && entitlements.enablesThis()) {
+      this.storage_.set(ENTS_STORAGE_KEY, raw);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  getEntitlementsFlow_() {
+    return this.fetchEntitlementsWithCaching_().then(entitlements => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlementsWithCaching_() {
+    return this.storage_.get(ENTS_STORAGE_KEY).then(raw => {
+      // Try cache first.
+      if (raw) {
+        const cached = this.getValidJwtEntitlements_(
+            raw, /* requireNonExpired */ true);
+        if (cached && cached.enablesThis()) {
+          // Already have a positive response.
+          this.positiveRetries_ = 0;
+          return cached;
+        }
+      }
+      // If cache didn't match, perform fetch.
+      return this.fetchEntitlements_().then(ents => {
+        // If entitlements match the product, store them in cache.
+        if (ents && ents.enablesThis() && ents.raw) {
+          this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
+        }
+        return ents;
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlements_() {
+    // TODO(dvoytenko): Replace retries with consistent fetch.
+    let positiveRetries = this.positiveRetries_;
+    this.positiveRetries_ = 0;
+    const attempt = () => {
+      positiveRetries--;
+      return this.fetch_().then(entitlements => {
+        if (entitlements.enablesThis() || positiveRetries <= 0) {
+          return entitlements;
+        }
+        return new Promise(resolve => {
+          this.win_.setTimeout(() => {
+            resolve(attempt());
+          }, 550);
+        });
+      });
+    };
+    return attempt();
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setToastShown(value) {
+    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
+  }
+
+  /**
+   */
+  blockNextNotification() {
+    this.blockNextNotification_ = true;
+  }
+
+  /**
+   */
+  unblockNextNotification() {
+    this.blockNextNotification_ = false;
+  }
+
+  /**
+   * The JSON must either contain a "signedEntitlements" with JWT, or
+   * "entitlements" field with plain JSON object.
+   * @param {!Object} json
+   * @return {!Entitlements}
+   */
+  parseEntitlements(json) {
+    const isReadyToPay = json['isReadyToPay'];
+    const signedData = json['signedEntitlements'];
+    if (signedData) {
+      const entitlements = this.getValidJwtEntitlements_(
+          signedData, /* requireNonExpired */ false, isReadyToPay);
+      if (entitlements) {
+        return entitlements;
+      }
+    } else {
+      const plainEntitlements = json['entitlements'];
+      if (plainEntitlements) {
+        return this.createEntitlements_('', plainEntitlements, isReadyToPay);
+      }
+    }
+    // Empty response.
+    return this.createEntitlements_('', [], isReadyToPay);
+  }
+
+  /**
+   * @param {string} raw
+   * @param {boolean} requireNonExpired
+   * @param {boolean=} opt_isReadyToPay
+   * @return {?Entitlements}
+   * @private
+   */
+  getValidJwtEntitlements_(raw, requireNonExpired, opt_isReadyToPay) {
+    try {
+      const jwt = this.jwtHelper_.decode(raw);
+      if (requireNonExpired) {
+        const now = Date.now();
+        const exp = jwt['exp'];
+        if (parseFloat(exp) * 1000 < now) {
+          return null;
+        }
+      }
+      const entitlementsClaim = jwt['entitlements'];
+      return entitlementsClaim && this.createEntitlements_(
+          raw, entitlementsClaim, opt_isReadyToPay) || null;
+    } catch (e) {
+      // Ignore the error.
+      this.win_.setTimeout(() => {throw e;});
+    }
+    return null;
+  }
+
+  /**
+   * @param {string} raw
+   * @param {!Object|!Array<!Object>} json
+   * @param {boolean=} opt_isReadyToPay
+   * @return {!Entitlements}
+   * @private
+   */
+  createEntitlements_(raw, json, opt_isReadyToPay) {
+    return new Entitlements(
+        SERVICE_ID,
+        raw,
+        Entitlement.parseListFromJson(json),
+        this.config_.getProductId(),
+        this.ack_.bind(this),
+        opt_isReadyToPay);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  onEntitlementsFetched_(entitlements) {
+    // Skip any notifications and toast if other flows are ongoing.
+    // TODO(dvoytenko): what's the right action when pay flow was canceled?
+    const blockNotification = this.blockNextNotification_;
+    this.blockNextNotification_ = false;
+    if (blockNotification) {
+      return;
+    }
+
+    // Notify on the received entitlements.
+    this.deps_.callbacks().triggerEntitlementsResponse(
+        Promise.resolve(entitlements));
+
+    // Show a toast if needed.
+    this.maybeShowToast_(entitlements);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  maybeShowToast_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement) {
+      return Promise.resolve();
+    }
+    // Check if storage bit is set. It's only set by the `Entitlements.ack`
+    // method.
+    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
+      if (value == '1') {
+        // Already shown;
+        return;
+      }
+      if (entitlement) {
+        this.showToast_(entitlement);
+      }
+    });
+  }
+
+  /**
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  showToast_(entitlement) {
+    const source = entitlement.source || 'google';
+    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
+      'publicationId': this.publicationId_,
+      'source': source,
+    })).open();
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  ack_(entitlements) {
+    if (entitlements.getEntitlementForThis()) {
+      this.setToastShown(true);
+    }
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetch_() {
+    const url = serviceUrl(
+        '/publication/' +
+        encodeURIComponent(this.publicationId_) +
+        '/entitlements');
+    return this.fetcher_.fetchCredentialedJson(url)
+        .then(json => this.parseEntitlements(json));
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -4155,2151 +6335,6 @@ class FetchResponseHeaders {
  * limitations under the License.
  */
 
-/**
- * Have to put these in the map to avoid compiler optimization. Due to
- * optimization issues, this map only allows property-style keys. E.g. "hr1",
- * as opposed to "1hr".
- * @type {!Object<string, number>}
- * @package Visible for testing only.
- */
-const CACHE_KEYS = {
-  'nocache': 1,
-  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
-  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
-};
-
-
-/**
- * @return {string}
- */
-function feOrigin() {
-  return parseUrl$1('https://news.google.com').origin;
-}
-
-
-/**
- * @param {string} url Relative URL, e.g. "/service1".
- * @return {string} The complete URL.
- */
-function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
-}
-
-
-/**
- * @param {string} url Relative URL, e.g. "/offersiframe".
- * @param {string=} prefix
- * @return {string} The complete URL.
- */
-function feUrl(url, prefix = '') {
-  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
-}
-
-
-/**
- * @param {string} url FE URL.
- * @return {string} The complete URL including cache params.
- */
-function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
-}
-
-
-/**
- * @param {!Object<string, ?>} args
- * @return {!Object<string, ?>}
- */
-function feArgs(args) {
-  return Object.assign(args, {
-    '_client': 'SwG 0.1.22.23',
-  });
-}
-
-
-/**
- * @param {string} cacheKey
- * @return {string}
- * @package Visible for testing only.
- */
-function cacheParam(cacheKey) {
-  let period = CACHE_KEYS[cacheKey];
-  if (period == null) {
-    period = 1;
-  }
-  if (period === 0) {
-    return '_';
-  }
-  const now = Date.now();
-  return String(period <= 1 ? now : Math.floor(now / period));
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const PAY_REQUEST_ID = 'swg-pay';
-
-/**
- * @const {!Object<string, string>}
- * @package Visible for testing only.
- */
-const PAY_ORIGIN = {
-  'PRODUCTION': 'https://pay.google.com',
-  'SANDBOX': 'https://pay.sandbox.google.com',
-};
-
-
-/** @return {string} */
-function payOrigin() {
-  return PAY_ORIGIN['PRODUCTION'];
-}
-
-/** @return {string} */
-function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
-}
-
-/** @return {string} */
-function payDecryptUrl() {
-  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
-}
-
-
-/**
- * The flow to initiate payment process.
- */
-class PayStartFlow {
-
-  /**
-   * @param {!../utils/preconnect.Preconnect} pre
-   */
-  static preconnect(pre) {
-    pre.prefetch(payUrl());
-    pre.prefetch(
-        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
-    pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
-    pre.preconnect('https://www.gstatic.com/');
-    pre.preconnect('https://fonts.googleapis.com/');
-    pre.preconnect('https://www.google.com/');
-  }
-
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {string} sku
-   */
-  constructor(deps, sku) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.pageConfig_ = deps.pageConfig();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {string} */
-    this.sku_ = sku;
-  }
-
-  /**
-   * Starts the payments flow.
-   * @return {!Promise}
-   */
-  start() {
-    // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, {
-      'sku': this.sku_,
-    });
-
-    // TODO(dvoytenko): switch to gpay async client.
-    const forceRedirect =
-        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
-    const opener = this.activityPorts_.open(
-        PAY_REQUEST_ID,
-        payUrl(),
-        forceRedirect ? '_top' : '_blank',
-        feArgs({
-          'apiVersion': 1,
-          'allowedPaymentMethods': ['CARD'],
-          'environment': 'PRODUCTION',
-          'playEnvironment': 'PROD',
-          'swg': {
-            'publicationId': this.pageConfig_.getPublicationId(),
-            'skuId': this.sku_,
-          },
-        }), {});
-    this.dialogManager_.popupOpened(opener && opener.targetWin);
-    return Promise.resolve();
-  }
-}
-
-
-/**
- * The flow for successful payments completion.
- */
-class PayCompleteFlow {
-
-  /**
-   * @param {!./deps.DepsDef} deps
-   */
-  static configurePending(deps) {
-    deps.activities().onResult(PAY_REQUEST_ID, port => {
-      deps.dialogManager().popupClosed();
-      deps.entitlementsManager().blockNextNotification();
-      const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(
-          deps.win(), port, flow.complete.bind(flow));
-      deps.callbacks().triggerSubscribeResponse(promise);
-      return promise.then(response => {
-        flow.start(response);
-      }, reason => {
-        if (isCancelError(reason)) {
-          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
-        }
-        throw reason;
-      });
-    });
-  }
-
-  /**
-   * @param {!./deps.DepsDef} deps
-   */
-  constructor(deps) {
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private {?ActivityIframeView} */
-    this.activityIframeView_ = null;
-
-    /** @private {?SubscribeResponse} */
-    this.response_ = null;
-
-    /** @private {?Promise} */
-    this.readyPromise_ = null;
-  }
-
-  /**
-   * Starts the payments completion flow.
-   * @param {!SubscribeResponse} response
-   * @return {!Promise}
-   */
-  start(response) {
-    this.deps_.entitlementsManager().reset(true);
-    this.response_ = response;
-    this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/payconfirmiframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'loginHint': response.userData && response.userData.email,
-        }),
-        /* shouldFadeBody */ true);
-    this.activityIframeView_.onMessage(data => {
-      if (data['entitlements']) {
-        this.deps_.entitlementsManager().pushNextEntitlements(
-            /** @type {string} */ (data['entitlements']));
-        return;
-      }
-    });
-    this.activityIframeView_.acceptResult().then(() => {
-      // The flow is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    });
-    this.readyPromise_ = this.dialogManager_.openView(this.activityIframeView_);
-    return this.readyPromise_;
-  }
-
-  /**
-   * @return {!Promise}
-   */
-  complete() {
-    this.deps_.entitlementsManager().unblockNextNotification();
-    this.readyPromise_.then(() => {
-      this.activityIframeView_.message({'complete': true});
-    });
-    return this.activityIframeView_.acceptResult().catch(() => {
-      // Ignore errors.
-    }).then(() => {
-      this.deps_.entitlementsManager().setToastShown(true);
-    });
-  }
-}
-
-
-/**
- * @param {!Window} win
- * @param {!web-activities/activity-ports.ActivityPort} port
- * @param {function():!Promise} completeHandler
- * @return {!Promise<!SubscribeResponse>}
- * @package Visible for testing only.
- */
-function validatePayResponse(win, port, completeHandler) {
-  // Do not require security immediately: it will be checked below.
-  return port.acceptResult().then(result => {
-    if (result.origin != payOrigin()) {
-      throw new Error('channel mismatch');
-    }
-    const data = /** @type {!Object} */ (result.data);
-    if (data['redirectEncryptedCallbackData']) {
-      // Data is supplied as an encrypted blob.
-      const xhr = new Xhr(win);
-      const url = payDecryptUrl();
-      const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-        method: 'post',
-        headers: {'Accept': 'text/plain, application/json'},
-        credentials: 'include',
-        body: data['redirectEncryptedCallbackData'],
-        mode: 'cors',
-      });
-      return xhr.fetch(url, init).then(response => response.json());
-    }
-    // Data is supplied directly: must be a verified and secure channel.
-    if (result.originVerified && result.secureChannel) {
-      return data;
-    }
-    throw new Error('channel mismatch');
-  }).then(data => parseSubscriptionResponse(data, completeHandler));
-}
-
-
-/**
- * @param {*} data
- * @param {function():!Promise} completeHandler
- * @return {!SubscribeResponse}
- */
-function parseSubscriptionResponse(data, completeHandler) {
-  let swgData = null;
-  let raw = null;
-  if (data) {
-    if (typeof data == 'string') {
-      raw = /** @type {string} */ (data);
-    } else {
-      // Assume it's a json object in the format:
-      // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
-      const json = /** @type {!Object} */ (data);
-      if ('swgCallbackData' in json) {
-        swgData = /** @type {!Object} */ (json['swgCallbackData']);
-      } else if ('integratorClientCallbackData' in json) {
-        raw = json['integratorClientCallbackData'];
-      }
-    }
-  }
-  if (raw && !swgData) {
-    raw = atob(raw);
-    if (raw) {
-      const parsed = parseJson(raw);
-      swgData = parsed['swgCallbackData'];
-    }
-  }
-  if (!swgData) {
-    throw new Error('unexpected payment response');
-  }
-  raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
-  return new SubscribeResponse(
-      raw,
-      parsePurchaseData(swgData),
-      parseUserData(swgData),
-      completeHandler);
-}
-
-
-/**
- * @param {!Object} swgData
- * @return {!PurchaseData}
- */
-function parsePurchaseData(swgData) {
-  const raw = swgData['purchaseData'];
-  const signature = swgData['purchaseDataSignature'];
-  return new PurchaseData(raw, signature);
-}
-
-
-/**
- * @param {!Object} swgData
- * @return {?UserData}
- * @package Visible for testing.
- */
-function parseUserData(swgData) {
-  const idToken = swgData['idToken'];
-  if (!idToken) {
-    return null;
-  }
-  const jwt = /** @type {!Object} */ (new JwtHelper().decode(idToken));
-  return new UserData(idToken, jwt);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * The flow to initiate deferred account process.
- * See `Subscriptions.completeDeferredAccountCreation` API.
- */
-class DeferredAccountFlow {
-
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
-   */
-  constructor(deps, options) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private {?ActivityIframeView} */
-    this.activityIframeView_ = null;
-
-    /** @private {?Promise} */
-    this.openPromise_ = null;
-
-    /** @type {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
-    const defaultOptions = {
-      entitlements: null,
-      consent: true,
-    };
-    /** @private @const {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
-    this.options_ = Object.assign(defaultOptions, options || {});
-  }
-
-  /**
-   * Starts the deferred account flow.
-   * @return {!Promise<!DeferredAccountCreationResponse>}
-   */
-  start() {
-    const entitlements = this.options_.entitlements;
-
-    // For now, entitlements are required to be present and have the Google
-    // token. This is strictly not required for the implementation. But it's
-    // preferrable API-wise at this time.
-    if (!entitlements || !entitlements.getEntitlementForSource('google')) {
-      throw new Error('No entitlements with "google" source');
-    }
-
-    // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
-
-    this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/recoveriframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'productId': this.deps_.pageConfig().getProductId(),
-          'entitlements': entitlements && entitlements.raw || null,
-          'consent': this.options_.consent,
-        }),
-        /* shouldFadeBody */ true);
-
-    this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
-    return this.activityIframeView_.acceptResult().then(result => {
-      // The consent part is complete.
-      return this.handleConsentResponse_(/** @type {!Object} */ (result.data));
-    }, reason => {
-      if (isCancelError(reason)) {
-        this.deps_.callbacks().triggerFlowCanceled(
-            SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
-      } else {
-        this.dialogManager_.completeView(this.activityIframeView_);
-      }
-      throw reason;
-    });
-  }
-
-  /**
-   * @param {!Object} data
-   * @return {!DeferredAccountCreationResponse}
-   * @private
-   */
-  handleConsentResponse_(data) {
-    this.deps_.entitlementsManager().blockNextNotification();
-
-    // Parse the response.
-    const entitlementsJwt = data['entitlements'];
-    const idToken = data['idToken'];
-    const entitlements = this.deps_.entitlementsManager()
-        .parseEntitlements({'signedEntitlements': entitlementsJwt});
-    const userData = new UserData(
-        idToken,
-        /** @type {!Object} */ (new JwtHelper().decode(idToken)));
-    const purchaseData = new PurchaseData(
-        data['purchaseData'],
-        data['purchaseDataSignature']);
-
-    // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
-    // But this can be eventually implemented by the same iframe.
-    const creatingFlow = new PayCompleteFlow(this.deps_);
-    const completeHandler = creatingFlow.complete.bind(creatingFlow);
-
-    const response = new DeferredAccountCreationResponse(
-        entitlements,
-        userData,
-        purchaseData,
-        completeHandler);
-
-    // Start the "sync" flow.
-    creatingFlow.start(new SubscribeResponse(
-        '',  // raw field doesn't matter in this case
-        purchaseData,
-        userData,
-        () => Promise.resolve()  // completeHandler doesn't matter in this case
-    ));
-    return response;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Returns a promise which is resolved after the given duration of animation
- * @param {!Element} el - Element to be observed.
- * @param {!Object<string, string|number>} props - properties to be animated.
- * @param {number} durationMillis - duration of animation.
- * @param {string} curve - transition function for the animation.
- * @return {!Promise} Promise which resolves once the animation is done playing.
- */
-function transition(el, props, durationMillis, curve) {
-  const win = el.ownerDocument.defaultView;
-  const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
-    win.setTimeout(() => {
-      win.setTimeout(resolve, durationMillis);
-      const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
-    });
-  }).then(() => {
-    setImportantStyles(el, {
-      'transition': previousTransitionValue,
-    });
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-class Graypane {
-
-  /**
-   * @param {!../model/doc.Doc} doc
-   * @param {number} zIndex
-   */
-  constructor(doc, zIndex) {
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = doc;
-
-    /** @private @const {!Element} */
-    this.fadeBackground_ = this.doc_.getWin().document.createElement(
-        'swg-popup-background');
-    setImportantStyles(this.fadeBackground_, {
-      'z-index': zIndex,
-      'display': 'none',
-      'position': 'fixed',
-      'top': 0,
-      'right': 0,
-      'bottom': 0,
-      'left': 0,
-      'background-color': 'rgba(32, 33, 36, .6)',
-    });
-  }
-
-  /**
-   * @return {!Element}
-   */
-  getElement() {
-    return this.fadeBackground_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isAttached() {
-    return !!this.fadeBackground_.parentNode;
-  }
-
-  /**
-   * Attaches the graypane to the document.
-   */
-  attach() {
-    this.doc_.getBody().appendChild(this.fadeBackground_);
-  }
-
-  /**
-   * Detaches the graypane to the document.
-   */
-  destroy() {
-    this.doc_.getBody().removeChild(this.fadeBackground_);
-  }
-
-  /**
-   * Shows the graypane.
-   * @param {boolean=} animated
-   * @return {!Promise|undefined}
-   */
-  show(animated = true) {
-    setImportantStyles(this.fadeBackground_, {
-      'display': 'block',
-      'opacity': animated ? 0 : 1,
-    });
-    if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 1,
-      }, 300, 'ease-out');
-    }
-  }
-
-  /**
-   * Hides the graypane.
-   * @param {boolean=} animated
-   * @return {!Promise|undefined}
-   */
-  hide(animated = true) {
-    if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 0,
-      }, 300, 'ease-out').then(() => {
-        setImportantStyles(this.fadeBackground_, {'display': 'none'});
-      });
-    }
-    setImportantStyles(this.fadeBackground_, {'display': 'none'});
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * Loading indicator class. Builds the loading indicator view to be injected in
- * parent element <iframe class="swg-dialog"> element. Provides methods to
- * show/hide loading indicator.
- */
-class LoadingView {
-
-  /**
-   * @param {!Document} doc
-   */
-  constructor(doc) {
-
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-
-    /** @private @const {!Element} */
-    this.loadingContainer_ =
-        createElement(this.doc_, 'swg-loading-container', {});
-
-    /** @private @const {!Element} */
-    this.loading_ = createElement(this.doc_, 'swg-loading', {});
-    this.loadingContainer_.appendChild(this.loading_);
-
-    this.loadingContainer_.style.setProperty('display', 'none', 'important');
-
-    // Build the animated loading indicator.
-    this.buildLoadingIndicator_();
-  }
-
-  /**
-   * Gets the populated loading container.
-   * @return {!Element}
-   */
-  getElement() {
-    return this.loadingContainer_;
-  }
-
-  /**
-   * Shows the loading indicator within the container element.
-   */
-  show() {
-    this.loadingContainer_.style.removeProperty('display');
-  }
-
-  /**
-   * Hides the loading indicator within the container element.
-   */
-  hide() {
-    this.loadingContainer_.style.setProperty('display', 'none', 'important');
-  }
-
-  /**
-   * Populates the loading indivicator. The populated element
-   * can be added in any view, when required.
-   * @private
-   */
-  buildLoadingIndicator_() {
-    const loadingContainer = this.loading_;
-
-    const loadingIndicatorTopContainer =
-        createElement(this.doc_, 'swg-loading-animate', {});
-    loadingContainer.appendChild(loadingIndicatorTopContainer);
-
-    const loadingIndicatorChildContainer =
-        createElement(this.doc_, 'swg-loading-image', {});
-    loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string|number>} */
-const friendlyIframeAttributes = {
-  'frameborder': 0,
-  'scrolling': 'no',
-  'src': 'about:blank',
-};
-
-/**
- * The class for building friendly iframe.
- */
-class FriendlyIframe {
-
-  /**
-   * @param {!Document} doc
-   * @param {!Object<string, string|number>=} attrs
-   */
-  constructor(doc, attrs = {}) {
-
-    const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(doc, 'iframe', mergedAttrs));
-
-    // Ensure that the new iframe does not inherit any CSS styles.
-    resetAllStyles(this.iframe_);
-
-    /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
-      this.iframe_.onload = resolve;
-    });
-  }
-
-  /**
-   * When promise is resolved.
-   * @return {!Promise}
-   */
-  whenReady() {
-    return this.ready_;
-  }
-
-  /**
-   * Gets the iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * Gets the document object of the iframe element.
-   * @return {!Document}
-   */
-  getDocument() {
-    const doc = this.getElement().contentDocument ||
-        (this.getElement().contentWindow &&
-        this.getElement().contentWindow.document);
-
-    if (!doc) {
-      throw new Error('not loaded');
-    }
-    return doc;
-  }
-
-  /**
-   * Gets the body of the iframe.
-   * @return {!Element}
-   */
-  getBody() {
-    return /** @type {!Element} */ (this.getDocument().body);
-  }
-
-  /**
-   * Whether the iframe is connected.
-   * @return {boolean}
-   */
-  isConnected() {
-    if (!this.getElement().ownerDocument) {
-      return false;
-    }
-    return this.getElement().ownerDocument.contains(this.iframe_);
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const Z_INDEX = 2147483647;
-
-/**
- * Default iframe important styles.
- * Note: The iframe responsiveness media query style is injected in the
- * publisher's page since style attribute can not include media query.
- * @const {!Object<string, string|number>}
- */
-const rootElementImportantStyles = {
-  'min-height': '50px',
-  'border': 'none',
-  'display': 'block',
-  'position': 'fixed',
-  'z-index': Z_INDEX,
-  'box-sizing': 'border-box',
-};
-
-/**
- * Reset view styles.
- * @const {!Object<string, string|number>}
- */
-const resetViewStyles = {
-  'position': 'absolute',
-  'top': '0',
-  'left': '0',
-  'right': '0',
-  'bottom': '0',
-  'opacity': 0,
-  /* These lines are a work around to this issue in iOS:     */
-  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
-  'height': 0,
-  'max-height': '100%',
-  'max-width': '100%',
-  'min-height': '100%',
-  'min-width': '100%',
-  'width': 0,
-};
-
-/**
- * Position of the dialog.
- * @const @enum {string}
- */
-const PositionAt = {
-  BOTTOM: 'BOTTOM',
-  TOP: 'TOP',
-  FLOAT: 'FLOAT',
-  FULL: 'FULL',
-};
-
-
-/**
- * The class for the top level dialog.
- * @final
- */
-class Dialog {
-
-  /**
-   * Create a dialog for the provided doc.
-   * @param {!../model/doc.Doc} doc
-   * @param {!Object<string, string|number>=} importantStyles
-   * @param {!Object<string, string|number>=} styles
-   */
-  constructor(doc, importantStyles = {}, styles = {}) {
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = doc;
-
-    /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(
-        doc.getWin().document, {'class': 'swg-dialog'});
-
-    /** @private @const {!Graypane} */
-    this.graypane_ = new Graypane(doc, Z_INDEX - 1);
-
-    const modifiedImportantStyles =
-        Object.assign({}, rootElementImportantStyles, importantStyles);
-    setImportantStyles(
-        this.iframe_.getElement(), modifiedImportantStyles);
-
-    setStyles(this.iframe_.getElement(), styles);
-
-    /** @private {LoadingView} */
-    this.loadingView_ = null;
-
-    /** @private {?Element} */
-    this.container_ = null;  // Depends on constructed document inside iframe.
-
-    /** @private {?./view.View} */
-    this.view_ = null;
-
-    /** @private {?Promise} */
-    this.animating_ = null;
-
-    /** @private {boolean} */
-    this.hidden_ = false;
-  }
-
-  /**
-   * Opens the dialog and builds the iframe container.
-   * @param {boolean=} hidden
-   * @return {!Promise<!Dialog>}
-   */
-  open(hidden = false) {
-    const iframe = this.iframe_;
-    if (iframe.isConnected()) {
-      throw new Error('already opened');
-    }
-
-    // Attach.
-    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
-    this.graypane_.attach();
-
-    if (hidden) {
-      setImportantStyles(iframe.getElement(), {
-        'visibility': 'hidden',
-        'opacity': 0,
-      });
-      this.hidden_ = hidden;
-    } else {
-      this.show_();
-    }
-
-    return iframe.whenReady().then(() => {
-      this.buildIframe_();
-      return this;
-    });
-  }
-
-  /**
-   * Build the iframe with the styling after iframe is loaded.
-   * @private
-   */
-  buildIframe_() {
-    const iframe = this.iframe_;
-    const iframeBody = iframe.getBody();
-    const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
-
-    // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(iframeDoc, CSS$1);
-
-    // Add Loading indicator.
-    this.loadingView_ = new LoadingView(iframeDoc);
-    iframeBody.appendChild(this.loadingView_.getElement());
-
-    // Container for all dynamic content, including 3P iframe.
-    this.container_ = createElement(iframeDoc, 'swg-container', {});
-    iframeBody.appendChild(this.container_);
-    this.setPosition_();
-  }
-
-  /**
-   * Closes the dialog.
-   * @param {boolean=} animated
-   * @return {!Promise}
-   */
-  close(animated = true) {
-    let animating;
-    if (animated) {
-      animating = this.animate_(() => {
-        this.graypane_.hide(/* animate */ true);
-        return transition(this.getElement(), {
-          'transform': 'translateY(100%)',
-        }, 300, 'ease-out');
-      });
-    } else {
-      animating = Promise.resolve();
-    }
-    return animating.then(() => {
-      this.doc_.getBody().removeChild(this.iframe_.getElement());
-      this.removePaddingToHtml_();
-      this.graypane_.destroy();
-    });
-  }
-
-  /**
-   * Gets the container within the dialog.
-   * @return {!Element}
-   */
-  getContainer() {
-    if (!this.container_) {
-      throw new Error('not opened yet');
-    }
-    return this.container_;
-  }
-
-  /**
-   * Gets the attached iframe instance.
-   * @return {!FriendlyIframe}
-   */
-  getIframe() {
-    return this.iframe_;
-  }
-
-  /**
-   * Gets the Iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_.getElement();
-  }
-
-  /**
-   * Whether to display loading indicator.
-   * @param {boolean} isLoading
-   */
-  setLoading(isLoading) {
-    if (isLoading) {
-      this.loadingView_.show();
-    } else {
-      this.loadingView_.hide();
-    }
-  }
-
-  /** @return {?./view.View} */
-  getCurrentView() {
-    return this.view_;
-  }
-
-  /**
-   * Opens the given view and removes existing view from the DOM if any.
-   * @param {!./view.View} view
-   * @return {!Promise}
-   */
-  openView(view) {
-    if (this.view_) {
-      // TODO(dparikh): Maybe I need to keep it until the new one is ready.
-      removeChildren(this.getContainer());
-    }
-    this.view_ = view;
-
-    setImportantStyles(view.getElement(), resetViewStyles);
-    this.setLoading(true);
-    this.getContainer().appendChild(view.getElement());
-
-    // If the current view should fade the parent document.
-    if (view.shouldFadeBody() && !this.hidden_) {
-      this.graypane_.show(/* animate */ true);
-    }
-
-    return view.init(this).then(() => {
-      setImportantStyles(view.getElement(), {
-        'opacity': 1,
-      });
-      if (this.hidden_) {
-        if (view.shouldFadeBody()) {
-          this.graypane_.show(/* animated */ true);
-        }
-        this.show_();
-      }
-      this.setLoading(false);
-    });
-  }
-
-  /**
-   * Show the iframe
-   * @private
-   */
-  show_() {
-    this.animate_(() => {
-      setImportantStyles(this.getElement(), {
-        'transform': 'translateY(100%)',
-        'opactiy': 1,
-        'visibility': 'visible',
-      });
-      return transition(this.getElement(), {
-        'transform': 'translateY(0)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 300, 'ease-out');
-    });
-    this.hidden_ = false;
-  }
-
-  /**
-   * Resizes the dialog container.
-   * @param {!./view.View} view
-   * @param {number} height
-   * @param {boolean=} animated
-   * @return {?Promise}
-   */
-  resizeView(view, height, animated = true) {
-    if (this.view_ != view) {
-      return null;
-    }
-    const newHeight = this.getMaxAllowedHeight_(height);
-
-    let animating;
-    if (animated) {
-      const oldHeight = this.getElement().offsetHeight;
-      if (newHeight >= oldHeight) {
-        // Expand.
-        animating = this.animate_(() => {
-          setImportantStyles(this.getElement(), {
-            'height': `${newHeight}px`,
-            'transform': `translateY(${newHeight - oldHeight}px)`,
-          });
-          return transition(this.getElement(), {
-            'transform': 'translateY(0)',
-          }, 300, 'ease-out');
-        });
-      } else {
-        // Collapse.
-        animating = this.animate_(() => {
-          return transition(this.getElement(), {
-            'transform': `translateY(${oldHeight - newHeight}px)`,
-          }, 300, 'ease-out').then(() => {
-            setImportantStyles(this.getElement(), {
-              'height': `${newHeight}px`,
-              'transform': 'translateY(0)',
-            });
-          });
-        });
-      }
-    } else {
-      setImportantStyles(this.getElement(), {
-        'height': `${newHeight}px`,
-      });
-      animating = Promise.resolve();
-    }
-    return animating.then(() => {
-      this.updatePaddingToHtml_(height);
-      view.resized();
-    });
-  }
-
-  /**
-   * @param {function():!Promise} callback
-   * @return {!Promise}
-   * @private
-   */
-  animate_(callback) {
-    const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
-  }
-
-  /**
-   * Returns maximum allowed height for current viewport.
-   * @param {number} height
-   * @return {number}
-   * @private
-   */
-  getMaxAllowedHeight_(height) {
-    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
-  }
-
-  /**
-   * Gets the element's height.
-   * @return {number}
-   * @private
-   */
-  getHeight_() {
-    return this.getElement().offsetHeight;
-  }
-
-  /**
-   * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
-   */
-  setPosition_() {
-    setImportantStyles(this.getElement(), this.getPositionStyle_());
-  }
-
-  /**
-   * Add the padding to the containing page so as to not hide the content
-   * behind the popup, if rendered at the bottom.
-   * @param {number} newHeight
-   * @private
-   */
-  updatePaddingToHtml_(newHeight) {
-    if (this.inferPosition_() == PositionAt.BOTTOM) {
-      const bottomPadding = newHeight + 20;  // Add some extra padding.
-      const htmlElement = this.doc_.getRootElement();
-      setImportantStyles(htmlElement, {
-        'padding-bottom': `${bottomPadding}px`,
-      });
-    }
-  }
-
-  /**
-   * Removes previouly added bottom padding from the document.
-   * @private
-   */
-  removePaddingToHtml_() {
-    this.doc_.getRootElement().style.removeProperty('padding-bottom');
-  }
-
-
-  /**
-   * Calculates the position of the dialog. Currently dialog is positioned at
-   * the bottom only. This could change in future to adjust the dialog position
-   * based on the screen size.
-   * @return {string}
-   * @private
-   */
-  inferPosition_() {
-    return PositionAt.BOTTOM;
-  }
-
-  /**
-   * Returns the styles required to postion the dialog.
-   * @return {!Object<string, string|number>}
-   * @private
-   */
-  getPositionStyle_() {
-    const dialogPosition = this.inferPosition_();
-    switch (dialogPosition) {
-      case PositionAt.BOTTOM:
-        return {'bottom': 0};
-      case PositionAt.TOP:
-        return {'top': 0};
-      case PositionAt.FLOAT:
-        return {
-          'position': 'fixed',
-          'top': '50%',
-          'left': '50%',
-          'transform': 'translate(-50%, -50%)',
-        };
-      case PositionAt.FULL:
-        return {
-          'position': 'fixed',
-          'height': '100%',
-          'top': 0,
-          'bottom': 0,
-        };
-      default:
-        return {'bottom': 0};
-    }
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const POPUP_Z_INDEX = 2147483647;
-
-
-/**
- * The class for the top level dialog.
- * @final
- */
-class DialogManager {
-
-  /**
-   * @param {!../model/doc.Doc} doc
-   */
-  constructor(doc) {
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = doc;
-
-    /** @private {?Dialog} */
-    this.dialog_ = null;
-
-    /** @private {?Promise<!Dialog>} */
-    this.openPromise_ = null;
-
-    /** @private @const {!Graypane} */
-    this.popupGraypane_ = new Graypane(doc, POPUP_Z_INDEX);
-
-    /** @private {?Window} */
-    this.popupWin_ = null;
-
-    this.popupGraypane_.getElement().addEventListener('click', () => {
-      if (this.popupWin_) {
-        try {
-          this.popupWin_.focus();
-        } catch (e) {
-          // Ignore error.
-        }
-      }
-    });
-  }
-
-  /**
-   * @param {boolean=} hidden
-   * @return {!Promise<!Dialog>}
-   */
-  openDialog(hidden = false) {
-    if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.doc_);
-      this.openPromise_ = this.dialog_.open(hidden);
-    }
-    return this.openPromise_;
-  }
-
-  /**
-   * @param {!./view.View} view
-   * @param {boolean=} hidden
-   * @return {!Promise}
-   */
-  openView(view, hidden = false) {
-    view.whenComplete().catch(reason => {
-      if (isCancelError(reason)) {
-        this.completeView(view);
-      }
-      throw (reason);
-    });
-    return this.openDialog(hidden).then(dialog => {
-      return dialog.openView(view);
-    });
-  }
-
-  /**
-   * @param {?./view.View} view
-   */
-  completeView(view) {
-    // Give a small amount of time for another view to take over the dialog.
-    setTimeout(() => {
-      if (this.dialog_ && this.dialog_.getCurrentView() == view) {
-        this.close_();
-      }
-    }, 100);
-  }
-
-  /**
-   */
-  completeAll() {
-    if (this.dialog_) {
-      this.close_();
-    }
-    if (this.popupGraypane_.isAttached()) {
-      this.popupGraypane_.destroy();
-    }
-  }
-
-  /** @private */
-  close_() {
-    this.dialog_.close();
-    this.dialog_ = null;
-    this.openPromise_ = null;
-  }
-
-  /**
-   * @param {?Window|undefined} targetWin
-   */
-  popupOpened(targetWin) {
-    this.popupWin_ = targetWin || null;
-    if (!this.popupGraypane_.isAttached()) {
-      this.popupGraypane_.attach();
-    }
-    this.popupGraypane_.show();
-  }
-
-  /**
-   */
-  popupClosed() {
-    this.popupWin_ = null;
-    try {
-      this.popupGraypane_.hide();
-    } catch (e) {
-      // Ignore.
-    }
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/** @implements {Doc} */
-class GlobalDoc {
-
-  /**
-   * @param {!Window|!Document} winOrDoc
-   */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
-  }
-
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
-  whenReady() {
-    return whenDocumentReady(this.doc_);
-  }
-}
-
-
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
-  }
-  // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
-  }
-  return /** @type {!Doc} */ (input);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string, string|number>} */
-const toastImportantStyles = {
-  'height': 0,
-};
-
-/** @const {!Object<string, string>} */
-const iframeAttributes$1 = {
-  'frameborder': '0',
-  'scrolling': 'no',
-  'class': 'swg-toast',
-};
-
-/**
- * The class Notification toast.
- */
-class Toast {
-
-  /**
-   * @param {!../runtime/deps.DepsDef} deps
-   * @param {string} src
-   * @param {!Object<string, ?>} args
-   */
-  constructor(deps, src, args) {
-
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = deps.doc();
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {string} */
-    this.src_ = src;
-
-    /** @private @const {!Object<string, ?>} */
-    this.args_ = args;
-
-    /** @private {?Promise} */
-    this.animating_ = null;
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(
-                this.doc_.getWin().document,
-                'iframe',
-                iframeAttributes$1));
-
-    setImportantStyles(this.iframe_, toastImportantStyles);
-
-    /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
-      this.iframe_.onload = resolve;
-    });
-  }
-
-  /**
-   * Returns the iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * Opens the notification toast.
-   * @return {!Promise}
-   */
-  open() {
-    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
-    return this.buildToast_();
-  }
-
-  /**
-   * Builds the content of the iframe. On load, animates the toast.
-   */
-  buildToast_() {
-    const toastDurationSeconds = 7;
-    return this.activityPorts_.openIframe(
-        this.iframe_, this.src_, this.args_).then(port => {
-          return port.whenReady();
-        }).then(() => {
-          resetStyles(this.iframe_, ['height']);
-
-          this.animate_(() => {
-            setImportantStyles(this.iframe_, {
-              'transform': 'translateY(100%)',
-              'opactiy': 1,
-              'visibility': 'visible',
-            });
-            return transition(this.iframe_, {
-              'transform': 'translateY(0)',
-              'opacity': 1,
-              'visibility': 'visible',
-            }, 400, 'ease-out');
-          });
-
-          // Close the Toast after the specified duration.
-          this.doc_.getWin().setTimeout(() => {
-            this.close();
-          }, (toastDurationSeconds + 1) * 1000);
-        });
-  }
-
-  /**
-   * @param {function():!Promise} callback
-   * @return {!Promise}
-   * @private
-   */
-  animate_(callback) {
-    const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
-  }
-
-  /**
-   * Closes the toast.
-   * @return {!Promise}
-   */
-  close() {
-    return this.animate_(() => {
-      // Remove the toast from the DOM after animation is complete.
-      this.doc_.getWin().setTimeout(() => {
-        this.doc_.getBody().removeChild(this.iframe_);
-        return Promise.resolve();
-      }, 500);
-
-      return transition(this.iframe_, {
-        'transform': 'translateY(100%)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 400, 'ease-out');
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const SERVICE_ID = 'subscribe.google.com';
-const TOAST_STORAGE_KEY = 'toast';
-const ENTS_STORAGE_KEY = 'ents';
-
-
-/**
- */
-class EntitlementsManager {
-
-  /**
-   * @param {!Window} win
-   * @param {!../model/page-config.PageConfig} config
-   * @param {!./fetcher.Fetcher} fetcher
-   * @param {!./deps.DepsDef} deps
-   */
-  constructor(win, config, fetcher, deps) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
-
-    /** @private @const {string} */
-    this.publicationId_ = this.config_.getPublicationId();
-
-    /** @private @const {!./fetcher.Fetcher} */
-    this.fetcher_ = fetcher;
-
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper();
-
-    /** @private {?Promise<!Entitlements>} */
-    this.responsePromise_ = null;
-
-    /** @private {number} */
-    this.positiveRetries_ = 0;
-
-    /** @private {boolean} */
-    this.blockNextNotification_ = false;
-
-    /** @private @const {!./storage.Storage} */
-    this.storage_ = deps.storage();
-  }
-
-  /**
-   * @param {boolean=} opt_expectPositive
-   */
-  reset(opt_expectPositive) {
-    this.responsePromise_ = null;
-    this.positiveRetries_ = Math.max(
-        this.positiveRetries_, opt_expectPositive ? 3 : 0);
-    if (opt_expectPositive) {
-      this.storage_.remove(ENTS_STORAGE_KEY);
-    }
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlements() {
-    if (!this.responsePromise_) {
-      this.responsePromise_ = this.getEntitlementsFlow_();
-    }
-    return this.responsePromise_;
-  }
-
-  /**
-   * @param {string} raw
-   * @return {boolean}
-   */
-  pushNextEntitlements(raw) {
-    const entitlements = this.getValidJwtEntitlements_(
-        raw, /* requireNonExpired */ true);
-    if (entitlements && entitlements.enablesThis()) {
-      this.storage_.set(ENTS_STORAGE_KEY, raw);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  getEntitlementsFlow_() {
-    return this.fetchEntitlementsWithCaching_().then(entitlements => {
-      this.onEntitlementsFetched_(entitlements);
-      return entitlements;
-    });
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetchEntitlementsWithCaching_() {
-    return this.storage_.get(ENTS_STORAGE_KEY).then(raw => {
-      // Try cache first.
-      if (raw) {
-        const cached = this.getValidJwtEntitlements_(
-            raw, /* requireNonExpired */ true);
-        if (cached && cached.enablesThis()) {
-          // Already have a positive response.
-          this.positiveRetries_ = 0;
-          return cached;
-        }
-      }
-      // If cache didn't match, perform fetch.
-      return this.fetchEntitlements_().then(ents => {
-        // If entitlements match the product, store them in cache.
-        if (ents && ents.enablesThis() && ents.raw) {
-          this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
-        }
-        return ents;
-      });
-    });
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetchEntitlements_() {
-    // TODO(dvoytenko): Replace retries with consistent fetch.
-    let positiveRetries = this.positiveRetries_;
-    this.positiveRetries_ = 0;
-    const attempt = () => {
-      positiveRetries--;
-      return this.fetch_().then(entitlements => {
-        if (entitlements.enablesThis() || positiveRetries <= 0) {
-          return entitlements;
-        }
-        return new Promise(resolve => {
-          this.win_.setTimeout(() => {
-            resolve(attempt());
-          }, 550);
-        });
-      });
-    };
-    return attempt();
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setToastShown(value) {
-    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
-  }
-
-  /**
-   */
-  blockNextNotification() {
-    this.blockNextNotification_ = true;
-  }
-
-  /**
-   */
-  unblockNextNotification() {
-    this.blockNextNotification_ = false;
-  }
-
-  /**
-   * The JSON must either contain a "signedEntitlements" with JWT, or
-   * "entitlements" field with plain JSON object.
-   * @param {!Object} json
-   * @return {!Entitlements}
-   */
-  parseEntitlements(json) {
-    const signedData = json['signedEntitlements'];
-    if (signedData) {
-      const entitlements = this.getValidJwtEntitlements_(
-          signedData, /* requireNonExpired */ false);
-      if (entitlements) {
-        return entitlements;
-      }
-    } else {
-      const plainEntitlements = json['entitlements'];
-      if (plainEntitlements) {
-        return this.createEntitlements_('', plainEntitlements);
-      }
-    }
-    // Empty response.
-    return this.createEntitlements_('', []);
-  }
-
-  /**
-   * @param {string} raw
-   * @param {boolean} requireNonExpired
-   * @return {?Entitlements}
-   * @private
-   */
-  getValidJwtEntitlements_(raw, requireNonExpired) {
-    try {
-      const jwt = this.jwtHelper_.decode(raw);
-      if (requireNonExpired) {
-        const now = Date.now();
-        const exp = jwt['exp'];
-        if (parseFloat(exp) * 1000 < now) {
-          return null;
-        }
-      }
-      const entitlementsClaim = jwt['entitlements'];
-      return entitlementsClaim &&
-          this.createEntitlements_(raw, entitlementsClaim) || null;
-    } catch (e) {
-      // Ignore the error.
-      this.win_.setTimeout(() => {throw e;});
-    }
-    return null;
-  }
-
-  /**
-   * @param {string} raw
-   * @param {!Object|!Array<!Object>} json
-   * @return {!Entitlements}
-   * @private
-   */
-  createEntitlements_(raw, json) {
-    return new Entitlements(
-        SERVICE_ID,
-        raw,
-        Entitlement.parseListFromJson(json),
-        this.config_.getProductId(),
-        this.ack_.bind(this));
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @private
-   */
-  onEntitlementsFetched_(entitlements) {
-    // Skip any notifications and toast if other flows are ongoing.
-    // TODO(dvoytenko): what's the right action when pay flow was canceled?
-    const blockNotification = this.blockNextNotification_;
-    this.blockNextNotification_ = false;
-    if (blockNotification) {
-      return;
-    }
-
-    // Notify on the received entitlements.
-    this.deps_.callbacks().triggerEntitlementsResponse(
-        Promise.resolve(entitlements));
-
-    // Show a toast if needed.
-    this.maybeShowToast_(entitlements);
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @return {!Promise}
-   * @private
-   */
-  maybeShowToast_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
-    if (!entitlement) {
-      return Promise.resolve();
-    }
-    // Check if storage bit is set. It's only set by the `Entitlements.ack`
-    // method.
-    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
-      if (value == '1') {
-        // Already shown;
-        return;
-      }
-      if (entitlement) {
-        this.showToast_(entitlement);
-      }
-    });
-  }
-
-  /**
-   * @param {!Entitlement} entitlement
-   * @private
-   */
-  showToast_(entitlement) {
-    const source = entitlement.source || 'google';
-    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
-      'publicationId': this.publicationId_,
-      'source': source,
-    })).open();
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @private
-   */
-  ack_(entitlements) {
-    if (entitlements.getEntitlementForThis()) {
-      this.setToastShown(true);
-    }
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetch_() {
-    const url = serviceUrl(
-        '/publication/' +
-        encodeURIComponent(this.publicationId_) +
-        '/entitlements');
-    return this.fetcher_.fetchCredentialedJson(url)
-        .then(json => this.parseEntitlements(json));
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 
 /**
  * @interface
@@ -6329,7 +6364,7 @@ class XhrFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+    const init = /** @type {*} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
@@ -6402,19 +6437,19 @@ const LINK_REQUEST_ID = 'swg-link';
 class LinkbackFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    */
   constructor(deps) {
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../model/page-config.PageConfig} */
+    /** @private @const {*} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
   }
 
@@ -6445,7 +6480,7 @@ class LinkbackFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    */
   static configurePending(deps) {
     /**
@@ -6473,7 +6508,7 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    * @param {?Object} response
    */
   constructor(deps, response) {
@@ -6483,13 +6518,13 @@ class LinkCompleteFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!./entitlements-manager.EntitlementsManager} */
+    /** @private @const {*} */
     this.entitlementsManager_ = deps.entitlementsManager();
 
-    /** @private @const {!./callbacks.Callbacks} */
+    /** @private @const {*} */
     this.callbacks_ = deps.callbacks();
 
     const index = response && response['index'] || '0';
@@ -6568,26 +6603,26 @@ class LinkCompleteFlow {
 class LinkSaveFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
+   * @param {*} deps
+   * @param {*} callback
    */
   constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
+    /** @private {*} */
     this.callback_ = callback;
 
-    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
+    /** @private {?Promise<*>} */
     this.requestPromise_ = null;
 
     /** @private {?ActivityIframeView} */
@@ -6595,7 +6630,7 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
+   * @return {?Promise<*>}
    * @package Visible for testing.
    */
   getRequestPromise() {
@@ -6684,10 +6719,10 @@ class LinkSaveFlow {
 
 class LoginPromptApi {
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    */
   constructor(deps) {
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6696,7 +6731,7 @@ class LoginPromptApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6763,10 +6798,10 @@ class LoginPromptApi {
 
 class LoginNotificationApi {
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    */
   constructor(deps) {
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6775,7 +6810,7 @@ class LoginNotificationApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6834,14 +6869,180 @@ class LoginNotificationApi {
  * limitations under the License.
  */
 
+const PAY_REQUEST_ID = 'swg-pay';
+
+/**
+ * @const {!Object<string, string>}
+ * @package Visible for testing only.
+ */
+const PAY_ORIGIN = {
+  'PRODUCTION': 'https://pay.google.com',
+  'SANDBOX': 'https://pay.sandbox.google.com',
+};
+
+/** @return {string} */
+function payOrigin() {
+  return PAY_ORIGIN['PRODUCTION'];
+}
+
+/** @return {string} */
+function payUrl() {
+  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+}
+
+/** @return {string} */
+function payDecryptUrl() {
+  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
+}
+
+
+/**
+ */
+class PayClient {
+  /**
+   * @param {!Window} win
+   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   */
+  constructor(win, activityPorts) {
+    // TODO(dvoytenko, #406): Support GPay API.
+    this.binding_ = new PayClientBindingSwg(win, activityPorts);
+  }
+
+  /**
+   * @param {*} pre
+   */
+  preconnect(pre) {
+    pre.prefetch(payUrl());
+    pre.prefetch(
+        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
+    pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
+    pre.preconnect('https://www.gstatic.com/');
+    pre.preconnect('https://fonts.googleapis.com/');
+    pre.preconnect('https://www.google.com/');
+  }
+
+  /**
+   * @return {string}
+   */
+  getType() {
+    // TODO(dvoytenko, #406): remove once GPay API is launched.
+    return this.binding_.getType();
+  }
+
+  /**
+   * @param {!Object} paymentRequest
+   * @param {!PayOptionsDef=} options
+   * @return {?Window}  popup window, if any.
+   */
+  start(paymentRequest, options = {}) {
+    return this.binding_.start(paymentRequest, options);
+  }
+
+  /**
+   * @param {function(!Promise<!Object>)} callback
+   */
+  onResponse(callback) {
+    this.binding_.onResponse(callback);
+  }
+}
+
+
+/**
+ * @implements {PayClientBindingDef}
+ */
+class PayClientBindingSwg {
+  /**
+   * @param {!Window} win
+   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   */
+  constructor(win, activityPorts) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = activityPorts;
+  }
+
+  /** @override */
+  getType() {
+    return 'SWG';
+  }
+
+  /** @override */
+  start(paymentRequest, options) {
+    const opener = this.activityPorts_.open(
+        PAY_REQUEST_ID,
+        payUrl(),
+        options.forceRedirect ? '_top' : '_blank',
+        feArgs(paymentRequest),
+        {});
+    return opener && opener.targetWin || null;
+  }
+
+  /** @override */
+  onResponse(callback) {
+    this.activityPorts_.onResult(PAY_REQUEST_ID, port => {
+      callback(this.validatePayResponse_(port));
+    });
+  }
+
+  /**
+   * @param {!web-activities/activity-ports.ActivityPort} port
+   * @return {!Promise<!Object>}
+   * @private
+   */
+  validatePayResponse_(port) {
+    // Do not require security immediately: it will be checked below.
+    return port.acceptResult().then(result => {
+      if (result.origin != payOrigin()) {
+        throw new Error('channel mismatch');
+      }
+      const data = /** @type {!Object} */ (result.data);
+      if (data['redirectEncryptedCallbackData']) {
+        // Data is supplied as an encrypted blob.
+        const xhr = new Xhr(this.win_);
+        const url = payDecryptUrl();
+        const init = /** @type {*} */ ({
+          method: 'post',
+          headers: {'Accept': 'text/plain, application/json'},
+          credentials: 'include',
+          body: data['redirectEncryptedCallbackData'],
+          mode: 'cors',
+        });
+        return xhr.fetch(url, init).then(response => response.json());
+      }
+      // Data is supplied directly: must be a verified and secure channel.
+      if (result.originVerified && result.secureChannel) {
+        return data;
+      }
+      throw new Error('channel mismatch');
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 class WaitForSubscriptionLookupApi {
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {*} deps
    * @param {?Promise} accountPromise
    */
   constructor(deps, accountPromise) {
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6850,7 +7051,7 @@ class WaitForSubscriptionLookupApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6868,7 +7069,8 @@ class WaitForSubscriptionLookupApi {
           publicationId: deps.pageConfig().getPublicationId(),
           productId: deps.pageConfig().getProductId(),
         }),
-        /* shouldFadeBody */ true
+        /* shouldFadeBody */ true,
+        /* hasLoadingIndicator */ true
     );
   }
 
@@ -6911,20 +7113,20 @@ class WaitForSubscriptionLookupApi {
 class OffersApi {
 
   /**
-   * @param {!../model/page-config.PageConfig} config
-   * @param {!./fetcher.Fetcher} fetcher
+   * @param {*} config
+   * @param {*} fetcher
    */
   constructor(config, fetcher) {
-    /** @private @const {!../model/page-config.PageConfig} */
+    /** @private @const {*} */
     this.config_ = config;
 
-    /** @private @const {!./fetcher.Fetcher} */
+    /** @private @const {*} */
     this.fetcher_ = fetcher;
   }
 
   /**
    * @param {string=} opt_productId
-   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   * @return {!Promise<!Array<*>>}
    */
   getOffers(opt_productId) {
     const productId = opt_productId || this.config_.getProductId();
@@ -6936,7 +7138,7 @@ class OffersApi {
 
   /**
    * @param {string} productId
-   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   * @return {!Promise<!Array<*>>}
    * @private
    */
   fetch_(productId) {
@@ -6980,11 +7182,11 @@ const OFFERS_VIEW_CLOSABLE = true;
 class OffersFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest|undefined} options
+   * @param {*} deps
+   * @param {*} options
    */
   constructor(deps, options) {
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6993,7 +7195,7 @@ class OffersFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     let isClosable = options && options.isClosable;
@@ -7062,21 +7264,21 @@ class OffersFlow {
 class SubscribeOptionFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest|undefined} options
+   * @param {*} deps
+   * @param {*} options
    */
   constructor(deps, options) {
 
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
-    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
+    /** @private @const {*} */
     this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7142,15 +7344,15 @@ class SubscribeOptionFlow {
 class AbbrvOfferFlow {
 
   /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest=} options
+   * @param {*} deps
+   * @param {*} options
    */
   constructor(deps, options = {}) {
 
-    /** @private @const {!./deps.DepsDef} */
+    /** @private @const {*} */
     this.deps_ = deps;
 
-    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
+    /** @private @const {*} */
     this.options_ = options;
 
     /** @private @const {!Window} */
@@ -7159,7 +7361,7 @@ class AbbrvOfferFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
+    /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7455,7 +7657,7 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {*} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
@@ -7467,10 +7669,10 @@ class ConfiguredRuntime {
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
-    /** @private @const {!../api/subscriptions.Config} */
+    /** @private @const {*} */
     this.config_ = defaultConfig();
 
-    /** @private @const {!../model/page-config.PageConfig} */
+    /** @private @const {*} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {!Promise} */
@@ -7489,6 +7691,9 @@ class ConfiguredRuntime {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = new activityPorts_1(this.win_);
 
+    /** @private @const {!PayClient} */
+    this.payClient_ = new PayClient(this.win_, this.activityPorts_);
+
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
@@ -7506,7 +7711,7 @@ class ConfiguredRuntime {
 
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    PayStartFlow.preconnect(preconnect);
+    this.payClient_.preconnect(preconnect);
 
     injectStyleSheet(this.win_.document, CSS);
   }
@@ -7529,6 +7734,11 @@ class ConfiguredRuntime {
   /** @override */
   activities() {
     return this.activityPorts_;
+  }
+
+  /** @override */
+  payClient() {
+    return this.payClient_;
   }
 
   /** @override */
@@ -7590,6 +7800,12 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  clear() {
+    this.entitlementsManager_.clear();
+    this.dialogManager_.completeAll();
+  }
+
+  /** @override */
   start() {
     // No need to run entitlements without a product or for an unlocked page.
     if (!this.pageConfig_.getProductId() || !this.pageConfig_.isLocked()) {
@@ -7639,7 +7855,7 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showSubscriptionLookupProgress(accountPromise) {
+  waitForSubscriptionLookup(accountPromise) {
     return this.documentParsed_.then(() => {
       const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
       return wait.start();

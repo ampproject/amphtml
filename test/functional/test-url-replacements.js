@@ -24,6 +24,7 @@ import {
   extractClientIdFromGaCookie,
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
+import {getMode} from '../../src/mode';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
@@ -163,7 +164,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getElementById: () => {},
         cookie: '',
       },
-      Math: window.Math,
+      Math: {
+        random: () => 0.1234,
+      },
       services: {
         'viewport': {obj: {}},
         'cid': {
@@ -322,7 +325,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .then(res => {
             expect(res).to.contain(
                 encodeURIComponent(
-                    'https://cdn.ampproject.org/a/o.com/foo/?hello=world&test=case'));
+                    'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=world'));
           });
     });
 
@@ -355,13 +358,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should merge multiple extra params safely in AMPDOC_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
-          'https://cdn.ampproject.org/a/o.com/foo/?test=case&hello=you&amp_r=hello%3Dworld%26goodnight%3Dmoon');
+          'https://cdn.ampproject.org/a/o.com/foo/?test=case&a&hello=you&amp_r=hello%3Dworld%26goodnight%3Dmoon');
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=AMPDOC_URL')
           .then(res => {
             expect(res).to.contain(
                 encodeURIComponent(
-                    'https://cdn.ampproject.org/a/o.com/foo/?hello=you&goodnight=moon&test=case'));
+                    'https://cdn.ampproject.org/a/o.com/foo/?test=case&a&hello=you&goodnight=moon'));
           });
     });
   });
@@ -432,19 +435,19 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should add extra params to SOURCE_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
-          'https://cdn.ampproject.org/a/o.com/foo/?amp_r=hello%3Dworld');
+          'https://cdn.ampproject.org/a/o.com/foo/?a&amp_r=hello%3Dworld');
       sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
         return Promise.resolve();
       });
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
-            expect(res).to.contain(
-                encodeURIComponent('http://o.com/foo/?hello=world'));
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?a&hello=world'));
           });
     });
 
-    it('should merge extra params into SOURCE_URL', () => {
+    it('should ignore extra params that already exists in SOURCE_URL', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated(
           'https://cdn.ampproject.org/a/o.com/foo/?a=1&safe=1&amp_r=hello%3Dworld%26safe=evil');
@@ -454,8 +457,23 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Services.urlReplacementsForDoc(win.ampdoc)
           .expandUrlAsync('?url=SOURCE_URL')
           .then(res => {
-            expect(res).to.contain(
-                encodeURIComponent('http://o.com/foo/?hello=world&safe=1&a=1'));
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?a=1&safe=1&hello=world'));
+          });
+    });
+
+    it('should not change SOURCE_URL if is not ad landing page', () => {
+      const win = getFakeWindow();
+      win.location = parseUrlDeprecated(
+          'https://cdn.ampproject.org/v/o.com/foo/?a&amp_r=hello%3Dworld');
+      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
+        return Promise.resolve();
+      });
+      return Services.urlReplacementsForDoc(win.ampdoc)
+          .expandUrlAsync('?url=SOURCE_URL')
+          .then(res => {
+            expect(res).to.equal(
+                '?url=' + encodeURIComponent('http://o.com/foo/?a'));
           });
     });
   });
@@ -503,6 +521,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace CLIENT_ID with empty string for inabox', () => {
+    setCookie(window, '_ga', 'GA1.2.12345.54321');
+    const origMode = getMode().runtime;
+    getMode().runtime = 'inabox';
+    return expandUrlAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
+      getMode().runtime = origMode;
+      expect(res).to.equal('?a=&b=');
+    });
+  });
+
   it('should parse _ga cookie correctly', () => {
     setCookie(window, '_ga', 'GA1.2.12345.54321');
     return expandUrlAsync(
@@ -511,6 +540,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
     });
   });
+
 
   // TODO(alanorozco, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +
@@ -1618,19 +1648,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'https://example2.com/link?out=QUERY_PARAM(foo)');
     });
 
-    it('should replace CID', () => {
+    it('should replace whitelisted fields', () => {
       a.href = 'https://canonical.com/link?' +
-          'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
+          'out=QUERY_PARAM(foo)' +
+          '&c=PAGE_VIEW_IDCLIENT_ID(abc)NAV_TIMING(navigationStart)';
+      a.setAttribute(
+          'data-amp-replace', 'QUERY_PARAM CLIENT_ID PAGE_VIEW_ID NAV_TIMING');
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal(
-          'https://canonical.com/link?out=bar&c=');
+          'https://canonical.com/link?out=bar&c=1234100');
       // Get a cid, then proceed.
       return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
-            'https://canonical.com/link?out=bar&c=test-cid(abc)');
+            'https://canonical.com/link?out=bar&c=1234test-cid(abc)100');
       });
     });
 

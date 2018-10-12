@@ -106,11 +106,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     const children = this.getRealChildren();
 
     for (let i = 0; i < children.length; i++) {
@@ -122,14 +117,19 @@ export class AmpImageSlider extends AMP.BaseElement {
           this.leftAmpImage_ = child;
         } else if (!this.rightAmpImage_) {
           this.rightAmpImage_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain more than 2 <amp-img>s.');
         }
-      }
-
-      if (child.tagName.toLowerCase() === 'div') {
+      } else if (child.tagName.toLowerCase() === 'div') {
         if (child.hasAttribute('first')) {
           this.leftLabel_ = child;
         } else if (child.hasAttribute('second')) {
           this.rightLabel_ = child;
+        } else {
+          user().error('AMP-IMAGE-SLIDER',
+              'Should not contain <div>s without ' +
+              '"first" or "second" attributes.');
         }
       }
     }
@@ -663,11 +663,6 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // TODO(kqian): remove after launch
-    // From https://github.com/ampproject/amphtml/pull/16688
-    user().assert(isExperimentOn(this.win, 'amp-image-slider'),
-        'Experiment <amp-image-slider> disabled');
-
     // Extensions such as amp-carousel still uses .setAsOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents

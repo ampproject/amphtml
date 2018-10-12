@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {createPointerEvent} from '../../../../../testing/test-helper';
+
 const config = describe.configure().ifNewChrome();
 config.run('amp-image-slider', function() {
   this.timeout(20000);
@@ -32,7 +34,8 @@ config.run('amp-image-slider', function() {
     </amp-image-slider>
     <button id="b1" on="tap:s1.seekTo(percent=0.4)">seekTo 10%</button>
     <amp-image-slider tabindex="0" id="s2"
-        layout="responsive" width="1000" height="500" disable-hint-reappear>
+        layout="responsive" width="1000" height="500" disable-hint-reappear
+        initial-slider-position="0.6" step-size="0.2">
       <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
       <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
@@ -59,14 +62,12 @@ config.run('amp-image-slider', function() {
   }
   `;
 
-  const experiments = ['amp-image-slider'];
   const extensions = ['amp-image-slider'];
 
   describes.integration('amp-image-slider', {
     body: sliderBody,
     css,
     extensions,
-    experiments,
   }, env => {
     let win;
     let doc;
@@ -694,6 +695,31 @@ config.run('amp-image-slider', function() {
       });
     });
 
+    it('should place the slider bar to 60% from left when setting ' +
+      'initial-slider-position="0.6"' , () => {
+      // 0.6 means 60% from left
+      expect(hasCorrectSliderPosition(s2, s2.pos.percent60)).to.be.true;
+    });
+
+    it('should move the slider bar by 20% on arrow key press when setting ' +
+      'step-size="0.2"' , () => {
+      // To test center, we have to focus and move slider bar
+      // to somewhere not the center initially
+      s2.slider.focus();
+      // Moving slider bar from 60% lands on 40%
+      return verifyPositionUpdateAfterEventDispatch(
+          /*eventConfig*/
+          {
+            target: s2.slider,
+            cstr: createKeyDownEvent,
+            key: 'ArrowLeft',
+          },
+          /*observeTarget*/s2.slider,
+          /*sliderInfo*/s2,
+          /*targetPos*/s2.pos.percent40
+      );
+    });
+
     /* #endregion */
 
     /* #region HELPER FUNCTIONS */
@@ -803,25 +829,6 @@ config.run('amp-image-slider', function() {
       // 10 times viewport height + 2 slider height, ensure slider is out
       doc.querySelector('#pad').style.height =
           `${sliderHeights + 10 * viewportHeight}px`;
-    }
-
-    /**
-     * Create a pointer event
-     * Set the event's clientX/Y, pageX/Y, and touches
-     */
-    function createPointerEvent(type, x, y) {
-      const event = new CustomEvent(type);
-      event.clientX = x;
-      event.clientY = y;
-      event.pageX = x;
-      event.pageY = y;
-      event.touches = [{
-        clientX: x,
-        clientY: y,
-        pageX: x,
-        pageY: y,
-      }];
-      return event;
     }
 
     // A collection of convenient event calls

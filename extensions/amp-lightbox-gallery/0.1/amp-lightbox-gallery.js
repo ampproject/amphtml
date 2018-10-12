@@ -26,7 +26,7 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -46,12 +46,13 @@ import {
   translate,
 } from '../../../src/transition';
 import {dev, user} from '../../../src/log';
-import {getData, listen} from '../../../src/event-helper';
-import {isLoaded} from '../../../src/event-helper';
+import {getData, isLoaded, listen} from '../../../src/event-helper';
+import {
+  getElementServiceForDoc,
+} from '../../../src/element-service';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-import {toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -81,11 +82,6 @@ const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
 const EPSILON = 0.01; // precision for approx equals
 
-/**
- * TODO(aghassemi): Make lightbox-manager into a doc-level service.
- * @private  {!./service/lightbox-manager-impl.LightboxManager}
- * */
-let manager_;
 
 /**
  * The structure that represents the metadata of a lightbox element
@@ -187,11 +183,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.manager_ = dev().assert(manager_);
-    this.history_ = Services.historyForDoc(this.getAmpDoc());
-    this.action_ = Services.actionServiceForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(() => {
+    return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
+      this.manager_ = manager;
+      this.history_ = Services.historyForDoc(this.getAmpDoc());
+      this.action_ = Services.actionServiceForDoc(this.getAmpDoc());
+      const viewer = Services.viewerForDoc(this.getAmpDoc());
+      return viewer.whenFirstVisible();
+    }).then(() => {
       this.container_ = this.win.document.createElement('div');
       this.container_.classList.add('i-amphtml-lbg');
       this.element.appendChild(this.container_);
@@ -774,7 +772,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         toggle(this.element, true);
         setStyles(this.element, {
           opacity: 0,
-          display: '',
         });
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
@@ -976,12 +973,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
                 }), MOTION_DURATION_RATIO, ENTER_CURVE_);
               },
               () => {
-                setStyles(dev().assertElement(this.carousel_), {
+                const carousel = dev().assertElement(this.carousel_);
+                toggle(carousel, true);
+                setStyles(carousel, {
                   opacity: 0,
-                  display: '',
                 });
                 sourceElement.classList.add('i-amphtml-ghost');
-                this.element.ownerDocument.body.appendChild(transLayer);
+                this.getAmpDoc().getBody().appendChild(transLayer);
               });
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
@@ -990,7 +988,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
-                this.element.ownerDocument.body.removeChild(transLayer);
+                this.getAmpDoc().getBody().removeChild(transLayer);
               }
             });
           });
@@ -1129,7 +1127,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
-            this.element.ownerDocument.body.appendChild(transLayer);
+            this.getAmpDoc().getBody().appendChild(transLayer);
             setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
@@ -1149,7 +1147,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               });
               toggle(dev().assertElement(this.carousel_), false);
               toggle(this.element, false);
-              this.element.ownerDocument.body.removeChild(transLayer);
+              this.getAmpDoc().getBody().removeChild(transLayer);
             });
           });
         });
@@ -1270,19 +1268,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.isActive_) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
-      case KeyCodes.ESCAPE:
+    const {key} = event;
+    switch (key) {
+      case Keys.ESCAPE:
         this.close_();
         break;
-      case KeyCodes.LEFT_ARROW:
+      case Keys.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:
-        // Keycode not registered. Do nothing.
+        // Key not registered. Do nothing.
     }
   }
 
@@ -1515,29 +1513,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 }
 
 /**
- * @param {!Window} win
- * @private visible for testing.
- */
-export function installLightboxManager(win) {
-  // TODO (#12859): This only works for singleDoc mode. We will move
-  // installation of LightboxManager to core after the experiment, okay for now.
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-  manager_ = new LightboxManager(ampdoc);
-}
-
-/**
  * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
  * default one.
- * @param {!Window} win
- * @return {!Promise}
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<undefined>}
  */
-export function installLightboxGallery(win) {
-  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-  // TODO (#12859): make this work for more than singleDoc mode
+export function installLightboxGallery(ampdoc) {
   return ampdoc.whenBodyAvailable().then(body => {
     const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
     if (!existingGallery) {
-      const gallery = ampdoc.getRootNode().createElement(TAG);
+      const gallery = ampdoc.win.document.createElement(TAG);
       gallery.setAttribute('layout', 'nodisplay');
       gallery.setAttribute('id', DEFAULT_GALLERY_ID);
       body.appendChild(gallery);
@@ -1545,8 +1530,19 @@ export function installLightboxGallery(win) {
   });
 }
 
+/**
+ * Returns a promise for the LightboxManager.
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<?LightboxManager>}
+ */
+function lightboxManagerForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<?LightboxManager>} */ (
+    getElementServiceForDoc(
+        elementOrAmpDoc, 'amp-lightbox-manager', 'amp-lightbox-gallery'));
+}
+
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpLightboxGallery, CSS);
-  installLightboxManager(AMP.win);
-  installLightboxGallery(AMP.win);
+  AMP.registerServiceForDoc('amp-lightbox-manager', LightboxManager);
+  Services.extensionsFor(global).addDocFactory(installLightboxGallery);
 });

@@ -202,7 +202,7 @@ class AmpAddThis extends AMP.BaseElement {
           'placeholder': '',
         })
     );
-    setStyle(placeholder, 'background-color', '#eee');
+    setStyle(placeholder, 'background-color', '#fff');
 
     const image = createElementWithAttributes(
         this.win.document,
@@ -301,7 +301,7 @@ class AmpAddThis extends AMP.BaseElement {
   /**
    * @private
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @return {Object<string, string>}
+   * @return {!Object<string, string>}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {

@@ -63,7 +63,7 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      ['babelify', {compact: false, sourceMapsAbsolute: true}],
+      ['babelify', {'sourceMapsAbsolute': true}],
     ],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: process.env.TRAVIS ? 5000 : 1200,
@@ -234,10 +234,12 @@ module.exports = {
 
   singleRun: true,
   browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
   browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
+
+  // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
+  browserDisconnectTolerance: process.env.TRAVIS ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available

@@ -17,10 +17,17 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
+import {
+  parse as mustacheParse,
+  render as mustacheRender,
+  setUnescapedSanitizer,
+} from '../../../third_party/mustache/mustache';
+import {
+  sanitizeHtml,
+  sanitizeTagsForTripleMustache,
+} from '../../../src/sanitizer';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-mustache';
@@ -41,7 +48,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(sanitizeTagsForTripleMustache);
+    setUnescapedSanitizer(sanitizeTagsForTripleMustache);
 
     user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
         'Please use a more recent version of this extension.');
@@ -73,7 +80,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     container.appendChild(content);
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    mustacheParse(this.template_, /* tags */ undefined);
   }
 
   /** @override */
@@ -84,7 +91,8 @@ export class AmpMustache extends AMP.BaseTemplate {
       if (typeof data === 'object') {
         mustacheData = Object.assign({}, data, this.nestedTemplates_);
       }
-      html = mustacheRender(this.template_, mustacheData);
+      html = mustacheRender(this.template_, mustacheData,
+          /* partials */ undefined);
     }
     return this.serializeHtml_(html);
   }
@@ -97,7 +105,8 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   serializeHtml_(html) {
     const root = this.win.document.createElement('div');
-    const sanitized = sanitizeHtml(html);
+    const diffing = isExperimentOn(self, 'amp-list-diffing');
+    const sanitized = sanitizeHtml(html, diffing);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
