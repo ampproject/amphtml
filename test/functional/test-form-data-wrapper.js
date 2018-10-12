@@ -22,14 +22,12 @@ import {fromIterator} from '../../src/utils/array';
 
 describes.realWin('FormDataWrapper', {}, env => {
   describe('entries', () => {
-    let sandbox;
     let nativeEntries;
     let nativeDelete;
     const scenarios = [{
       description: 'when native `entries` is not available',
 
       beforeEach() {
-        sandbox = env.sandbox;
         nativeEntries = FormData.prototype.entries;
         nativeDelete = FormData.prototype.delete;
         // Remove native entries from the prototype in case the browser running
@@ -50,7 +48,6 @@ describes.realWin('FormDataWrapper', {}, env => {
         description: 'when native `entries` is available',
 
         beforeEach() {
-          sandbox = env.sandbox;
           // Do nothing as `env.win.FormData.prototype` already has `entires`.
         },
 
@@ -327,7 +324,7 @@ describes.realWin('FormDataWrapper', {}, env => {
           // For testing in non-supporting browsers like IE.
           // We can't query the state of FormData, but we can check that
           // the polyfill appended to the real FormData enough.
-          const appendSpy = sandbox.spy(FormData.prototype, 'append');
+          const appendSpy = env.sandbox.spy(FormData.prototype, 'append');
           polyfillFormDataWrapper.getFormData();
           expect(appendSpy).to.have.been.calledTwice;
         }
