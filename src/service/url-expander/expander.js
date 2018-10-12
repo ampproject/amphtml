@@ -55,9 +55,7 @@ export class Expander {
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
-
+    const expr = this.variableSource_.getExpr(opt_bindings, opt_whiteList);
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
@@ -252,7 +250,7 @@ export class Expander {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
-    } else if (hasOwn(bindingInfo, 'async')) {
+    } else if (bindingInfo.async !== null && bindingInfo.async !== undefined) {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async;
     } else {

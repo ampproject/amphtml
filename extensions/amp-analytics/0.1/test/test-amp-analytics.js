@@ -995,7 +995,10 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        sync: 0,
+        async: 0,
+      });
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
@@ -1581,7 +1584,10 @@ describes.realWin('amp-analytics', {
       }, true);
 
       const urlReplacements = Services.urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(0);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        sync: 0,
+        async: 0,
+      });
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005))
           .withArgs('CLIENT_ID').returns(Promise.resolve(0.5));
