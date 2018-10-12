@@ -61,7 +61,6 @@ export class LinkRewriter {
     /** @private {!Document} */
     this.ampPageDocument_ = ampPageDocument;
 
-
     /** @private {function(!Array<!HTMLElement>):!TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
 

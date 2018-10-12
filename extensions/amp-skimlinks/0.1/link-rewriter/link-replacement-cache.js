@@ -24,8 +24,10 @@ export class LinkReplacementCache {
    * Constructor
    */
   constructor() {
+
     /** @private {!Array<!HTMLElement>} */
     this.anchorList_ = [];
+
     /** @private {!Array<?string>} */
     this.replacementList_ = [];
   }
@@ -84,7 +86,7 @@ export class LinkReplacementCache {
 
   /**
    * Get the list of all the anchors present in the cache, associated with their
-   * replacementUrl
+   * replacementUrl.
    * @return {!./link-rewriter.AnchorReplacementList}
    * @public
    */

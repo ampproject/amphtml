@@ -174,8 +174,7 @@ export class Tracking {
     const data = /** @type {!JsonObject} */ (Object.assign(
         dict({
           'slc': numberAffiliateLinks,
-          // Javascript load time, not relevant in AMP context.
-          'jsl': 0,
+          'jsl': 0, // Javascript load time, not relevant in AMP context.
           'pref': referrer,
           'uc': customTrackingId,
           't': 1,
@@ -195,7 +194,7 @@ export class Tracking {
    * register link impression request.
    * @param {!Object} commonData
    * @param {number} numberAffiliateLinks
-   * @param {!Object} urls
+   * @param {!JsonObject} urls
    * @private
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {

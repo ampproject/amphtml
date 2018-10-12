@@ -148,7 +148,6 @@ export class AffiliateLinkResolver {
         willBeResolvedPromise);
   }
 
-
   /**
    * Map an array of anchor to an array of "replacement object" containing
    * the anchor and its associated replacement URL.

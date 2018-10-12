@@ -18,7 +18,6 @@ import {GLOBAL_DOMAIN_BLACKLIST} from './constants';
 import {getNormalizedHostnameFromUrl} from './utils';
 import {user} from '../../../src/log';
 
-
 const errors = {
   INVALID_PUBCODE: '"publisher-code" is required.',
   INVALID_XCUST:

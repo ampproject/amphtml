@@ -66,7 +66,6 @@ export class LinkRewriterManager {
      */
     this.priorityList_ = this.getPriorityList_(ampdoc);
 
-
     /**
      * @private {!Array<./link-rewriter.LinkRewriter>}
      * The list of all the LinkRewriter instances registered
@@ -80,13 +79,12 @@ export class LinkRewriterManager {
         this.maybeRewriteLink.bind(this), Priority.LINK_REWRITER_MANAGER);
   }
 
-
   /**
    * Create and configure a new LinkRewriter on the page.
    * @param {string} linkRewriterId - A unique id used to identify the link rewriter.
    * @param {!function(Array<HTMLElement>): !./two-steps-response.TwoStepsResponse} resolveUnknownLinks
    *   - Function to determine which anchor should be replaced and by what URL.
-   *     Should return an instance of './two-steps-response.TwoStepsResponse'
+   *     Should return an instance of './two-steps-response.TwoStepsResponse'.
    * @param {?{linkSelector: string}=} options
    *   - linkSelector is an optional CSS selector to restrict
    *    which anchors the link rewriter should handle.
@@ -111,7 +109,6 @@ export class LinkRewriterManager {
 
     return linkRewriter;
   }
-
 
   /**
    * Notify the LinkRewriteService that a click has happened on an anchor.
@@ -203,7 +200,6 @@ export class LinkRewriterManager {
     });
   }
 
-
   /**
    * Extract the optional priority list for this specific anchor
    * from its attribute. The 'data-link-rewriters' attribute should
@@ -244,21 +240,21 @@ export class LinkRewriterManager {
       if (indexA === -1 && indexB === -1) {
         return 0; // Nothing to changes
       }
-      // A is not in the priority list, give it the lowest priority
+      // A is not in the priority list, give it the lowest priority.
       if (indexA === -1) {
         return B_HAS_PRIORITY;
       }
-      // B is not in the priority list, give it the lowest priority
+      // B is not in the priority list, give it the lowest priority.
       if (indexB === -1) {
         return A_HAS_PRIORITY;
       }
 
-      // Higher index means lower priority
+      // Higher index means lower priority.
       return indexA > indexB ? B_HAS_PRIORITY : A_HAS_PRIORITY;
     };
 
     linkRewriterList.push(linkRewriter);
-    // Sort in place
+    // Sort in place.
     linkRewriterList.sort(compareFunction);
 
     return linkRewriterList;

@@ -117,7 +117,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.skimlinksLinkRewriter_ = this.initSkimlinksLinkRewriter_();
   }
 
-
   /**
    * Fires impression tracking after beacon API request.
    * @param {!JsonObject} beaconData - Json response from Beacon API.
@@ -127,7 +126,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
     const viewer = Services.viewerForDoc(
-        /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_)
     );
     /*
@@ -146,21 +145,21 @@ export class AmpSkimlinks extends AMP.BaseElement {
    * Called only on the first page scan.
    * Make a fallback call to beacon if no links were founds on the page.
    * Send the impression tracking once we have the beacon API response.
-   * @return {Promise}
+   * @return {!Promise}
    * @private
    */
   onPageScanned_() {
     // .firstRequest may be null if the page doesn't have any non-excluded
     // links.
     const beaconApiPromise = this.affiliateLinkResolver_.firstRequest ||
-        // If it's the case, fallback with manual call
+        // If it's the case, fallback with manual call.
         this.affiliateLinkResolver_.fetchDomainResolverApi([]);
 
     return beaconApiPromise.then(this.sendImpressionTracking_.bind(this));
   }
 
   /**
-   * Initialise Skimlinks LinkRewriter
+   * Initialise Skimlinks LinkRewriter.
    * @return {!./link-rewriter/link-rewriter.LinkRewriter}
    * @private
    */
@@ -192,7 +191,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 
   /**
-   * Initialise tracking module
+   * Initialise tracking module.
    * @return {!./tracking.Tracking}
    * @private
    */
@@ -218,9 +217,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
   onClick_(eventData) {
     const doClickTracking = (
       // Test two scenarios:
-      //  - Link hasn't been replaced at all: eventData.linkRewriterId === null
+      //  - Link hasn't been replaced at all: eventData.linkRewriterId === null.
       //  - Link has been replaced but not by Skimlinks:
-      //    E.g: eventData.linkRewriterId === "awin"
+      //    E.g: eventData.linkRewriterId === "awin".
       eventData.linkRewriterId !== SKIMLINKS_REWRITER_ID &&
       // Also, context menu click should not send tracking
       eventData.clickType !== 'contextmenu'
@@ -236,7 +235,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
     return true;
   }
 }
-
 
 AMP.extension('amp-skimlinks', '0.1', AMP => {
   AMP.registerElement('amp-skimlinks', AmpSkimlinks);
