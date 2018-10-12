@@ -71,7 +71,6 @@ import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
-import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
 import {TREASUREDATA_CONFIG} from './vendors/treasuredata';
 import {WEBTREKK_CONFIG} from './vendors/webtrekk';
@@ -217,7 +216,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,
   'snowplow': SNOWPLOW_CONFIG,
-  'tealiumcollect': TEALIUMCOLLECT_CONFIG,
   'top100': TOP100_CONFIG,
   'topmailru': TOPMAILRU_CONFIG,
   'treasuredata': TREASUREDATA_CONFIG,
