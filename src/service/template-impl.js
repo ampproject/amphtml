@@ -70,11 +70,12 @@ export class BaseTemplate {
   }
 
   /**
-   * To be implemented by subclasses.
+   * Bypasses template rendering and directly sets HTML. Should only be used
+   * for server-side rendering case. To be implemented by subclasses.
    * @param {string} unusedData
    * @return {!Element}
    */
-  insert(unusedData) {
+  setHtml(unusedData) {
     throw new Error('Not implemented');
   }
 
@@ -159,9 +160,9 @@ export class Templates {
    * @param {string} html
    * @return {!Promise<!Element>}
    */
-  insertRenderedTemplate(templateElement, html) {
+  setHtmlForTemplate(templateElement, html) {
     return this.getImplementation_(templateElement).then(impl => {
-      return this.insert_(impl, html);
+      return this.setHtml_(impl, html);
     });
   }
 
@@ -221,8 +222,8 @@ export class Templates {
    * @param {string=} opt_querySelector
    * @return {!Promise<!Element>}
    */
-  findAndInsertRenderedTemplate(parent, html, opt_querySelector) {
-    return this.insertRenderedTemplate(
+  findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
+    return this.setHtmlForTemplate(
         this.findTemplate(parent, opt_querySelector), html);
   }
 
@@ -386,8 +387,8 @@ export class Templates {
    * @return {!Element}
    * @private
    */
-  insert_(impl, html) {
-    return impl.insert(html);
+  setHtml_(impl, html) {
+    return impl.setHtml(html);
   }
 }
 

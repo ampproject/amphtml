@@ -383,7 +383,7 @@ export class AmpList extends AMP.BaseElement {
     };
     if (this.ssrTemplateHelper_.isSupported()) {
       const html = /** @type {string} */ (current.data);
-      this.templates_.findAndInsertRenderedTemplate(this.element, html)
+      this.templates_.findAndSetHtmlForTemplate(this.element, html)
           .then(element => this.render_([element]))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {

@@ -88,7 +88,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
-  insert(html) {
+  setHtml(html) {
     return this.purifyAndSetHtml_(html);
   }
 

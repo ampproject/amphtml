@@ -431,7 +431,7 @@ describe('amp-mustache 0.2', () => {
     it('should not mustache render but still purify html', () => {
       sandbox.spy(purifier, 'purifyHtml');
       sandbox.spy(mustache, 'render');
-      template.insert('<div>test</div>');
+      template.setHtml('<div>test</div>');
       expect(mustache.render).to.have.not.been.called;
       expect(purifier.purifyHtml).to.have.been.called;
     });
@@ -440,7 +440,7 @@ describe('amp-mustache 0.2', () => {
   it('should unwrap output', () => {
     templateElement./*OK*/innerHTML = '<a>abc</a>';
     template.compileCallback();
-    const result = template.insert('<a>abc</a>');
+    const result = template.setHtml('<a>abc</a>');
     expect(result.tagName).to.equal('A');
     expect(result./*OK*/innerHTML).to.equal('abc');
   });

@@ -39,7 +39,7 @@ describes.realWin('amp-list component', {
     sandbox = env.sandbox;
 
     templates = {
-      findAndInsertRenderedTemplate: sandbox.stub(),
+      findAndSetHtmlForTemplate: sandbox.stub(),
       findAndRenderTemplate: sandbox.stub(),
       findAndRenderTemplateArray: sandbox.stub(),
     };
@@ -463,7 +463,7 @@ describes.realWin('amp-list component', {
         expectRender();
 
         const rendered = doc.createElement('p');
-        templates.findAndInsertRenderedTemplate
+        templates.findAndSetHtmlForTemplate
             .withArgs(element, '<p>foo</p>')
             .returns(Promise.resolve(rendered));
 
