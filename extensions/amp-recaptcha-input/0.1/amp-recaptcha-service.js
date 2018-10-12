@@ -22,7 +22,7 @@
 import ampToolboxCacheUrl from
   '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -34,7 +34,6 @@ import {
   registerServiceBuilder,
 } from '../../../src/service';
 import {
-  getSourceUrl,
   isProxyOrigin,
   parseUrlDeprecated,
 } from '../../../src/url';
@@ -216,7 +215,7 @@ export class AmpRecaptchaService {
    * Function to create our bootstrap iframe.
    *
    * @param {string} sitekey
-   * @return {Promise<Element>}
+   * @return {Promise<!Element>}
    * @private
    */
   createRecaptchaFrame_(sitekey) {
@@ -245,36 +244,46 @@ export class AmpRecaptchaService {
 
   /**
    * Function to get our recaptcha iframe src
+   *
+   * This should take the current URL,
+   * either in canonical (www.example.com),
+   * or in cache (www-example-com.cdn.ampproject.org),
+   * and get the curls subdomain (www-example-com)
+   * To then create the iframe src:
+   * https://www-example-com.recaptcha.my.cdn/rtv/recaptcha.html
+   *
    * @return {Promise<string>}
    * @private
    */
   getRecaptchaFrameSrc_() {
-    return new Promise((resolve, reject) => {
-      if (getMode().localDev || getMode().test) {
-        resolve(getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha'));
-        return;
-      }
+    if (getMode().localDev || getMode().test) {
+      return tryResolve(() => {
+        return getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha');
+      });
+    }
 
-      // Need to have the subdomain match the original document url.
-      // This is verified by the recaptcha frame to
-      // verify the origin on its messages
-      let canonicalDomain = undefined;
+    // Need to have the curls subdomain match the original document url.
+    // This is verified by the recaptcha frame to
+    // verify the origin on its messages
+    let curlsSubdomainPromise = undefined;
+    if (isProxyOrigin(this.win_.location.href)) {
+      curlsSubdomainPromise = tryResolve(() => {
+        return this.win_.location.hostname.split('.')[0];
+      });
+    } else {
+      curlsSubdomainPromise =
+        ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href);
+    }
 
-      if (isProxyOrigin(this.win_.location.href)) {
-        canonicalDomain = getSourceUrl(this.win_.location.href);
-      } else {
-        canonicalDomain = this.win_.location.href;
-      }
-
-      ampToolboxCacheUrl.createCurlsSubdomain(canonicalDomain)
-          .then(curlsSubdomain => {
-            const recaptchaFrameSrc = 'https://' + curlsSubdomain +
-          `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
-          'recaptcha.html';
-            resolve(recaptchaFrameSrc);
-          }).catch(err => reject(err));
+    return curlsSubdomainPromise.then(curlsSubdomain => {
+      const recaptchaFrameSrc = 'https://' + curlsSubdomain +
+        `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+        'recaptcha.html';
+      return recaptchaFrameSrc;
     });
   }
+
+
 
   /**
    * Function to create a listener for our iframe

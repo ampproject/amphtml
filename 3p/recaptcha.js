@@ -18,12 +18,10 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
-
-import {tryParseJson} from '../src/json';
+import {parseJson} from '../src/json';
 
 /**
  * @fileoverview
@@ -68,45 +66,69 @@ init();
  */
 function recaptcha() {
 
-  // Get the data from our name attribute
-  const dataObject = dev().assert(
-      typeof window.name === 'string' ? tryParseJson(window.name) : window.name,
-      'Could not parse the window name.');
+  /**
+   *  Get the data from our name attribute
+   * sitekey {string} - reCAPTCHA sitekey used to identify the site
+   * sentinel {string} - string used to psuedo-confirm that we are
+   *    receiving messages from the recaptcha frame
+   */
+  let dataObject;
+  try {
+    dataObject = parseJson(window.name);
+  } catch {
+    dev().error(TAG + ' Could not parse the window name.');
+    return;
+  }
 
   // Get our sitekey from the iframe name attribute
+  dev().assert(
+      dataObject.sitekey,
+      'The sitekey is required for the <amp-recaptcha-input> iframe %s',
+      dataObject
+  );
   const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
-
 
   loadScript(window, recaptchaApiUrl, function() {
     const {grecaptcha} = window;
 
     grecaptcha.ready(function() {
-      iframeMessagingClient = new IframeMessagingClient(window);
-      iframeMessagingClient.setSentinel(dataObject.sentinel);
-      iframeMessagingClient.registerCallback(
-          'amp-recaptcha-action',
-          actionTypeHandler_.bind(this, grecaptcha)
-      );
+      initializeIframeMessagingClient(window, grecaptcha, dataObject);
       iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-ready');
     });
   }, function() {
-    report3pError(
-        TAG + ' Failed to load recaptcha api script'
-    );
     dev().error(TAG + ' Failed to load recaptcha api script');
   });
+}
+
+/**
+ * Function to initialize our IframeMessagingClient
+ * @param {Window} window
+ * @param {*} grecaptcha
+ * @param {Object} dataObject
+ */
+function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
+  iframeMessagingClient = new IframeMessagingClient(window);
+  iframeMessagingClient.setSentinel(dataObject.sentinel);
+  iframeMessagingClient.registerCallback(
+      'amp-recaptcha-action',
+      actionTypeHandler.bind(this, grecaptcha)
+  );
 }
 
 /**
  * Function to handle executing actions using the grecaptcha Object,
  * and sending the token back to the parent amp-recaptcha component
  *
+ * Data Object will have the following fields
+ * sitekey {string} - reCAPTCHA sitekey used to identify the site
+ * action {string} - action to be dispatched with grecaptcha.execute
+ * id {number} - id given to us by a counter in the recaptcha service
+ *
  * @param {*} grecaptcha
  * @param {Object} data
- * @private
  */
-function actionTypeHandler_(grecaptcha, data) {
+function actionTypeHandler(grecaptcha, data) {
 
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
@@ -125,19 +147,6 @@ function actionTypeHandler_(grecaptcha, data) {
       'error': err.message,
     }));
   });
-}
-
-/**
- * Send 3p error to parent iframe
- * @param {!Error} e
- */
-function report3pError(e) {
-  if (!e.message) {
-    return;
-  }
-  iframeMessagingClient.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
-    'message': e.message,
-  }));
 }
 
 
