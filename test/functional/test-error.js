@@ -167,8 +167,8 @@ describe('reportErrorToServerOrViewer', () => {
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
           expect(xhrRequests).to.have.lengthOf(1);
-          expect(sendMessageStub).to.not.have.been.called;}
-        );
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
   it('should report to server if viewer is not capable', () => {
