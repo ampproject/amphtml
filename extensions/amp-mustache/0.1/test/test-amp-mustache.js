@@ -438,7 +438,7 @@ describe('amp-mustache 0.1', () => {
     it('should not mustache render but still sanitize html', () => {
       sandbox.spy(sanitizer, 'sanitizeHtml');
       sandbox.spy(mustache, 'render');
-      template.render();
+      template.setHtml('<div>test</div>');
       expect(mustache.render).to.have.not.been.called;
       expect(sanitizer.sanitizeHtml).to.have.been.called;
     });

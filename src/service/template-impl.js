@@ -70,6 +70,16 @@ export class BaseTemplate {
   }
 
   /**
+   * Bypasses template rendering and directly sets HTML. Should only be used
+   * for server-side rendering case. To be implemented by subclasses.
+   * @param {string} unusedData
+   * @return {!Element}
+   */
+  setHtml(unusedData) {
+    throw new Error('Not implemented');
+  }
+
+  /**
    * To be implemented by subclasses.
    * @param {!JsonObject|string} unusedData
    * @return {!Element}
@@ -145,6 +155,18 @@ export class Templates {
   }
 
   /**
+   * Inserts the specified template element.
+   * @param {!Element} templateElement
+   * @param {string} html
+   * @return {!Promise<!Element>}
+   */
+  setHtmlForTemplate(templateElement, html) {
+    return this.getImplementation_(templateElement).then(impl => {
+      return this.setHtml_(impl, html);
+    });
+  }
+
+  /**
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
    * @param {!JsonObject} data
@@ -188,6 +210,21 @@ export class Templates {
     return this.renderTemplate(
         this.findTemplate(parent, opt_querySelector),
         data);
+  }
+
+  /**
+   * Discovers the already rendered template for the specified parent and
+   * inserts it in the DOM. The template can be specified either via "template"
+   * attribute  or as a child "template" element. When specified via "template"
+   * attribute, the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @param {string} html
+   * @param {string=} opt_querySelector
+   * @return {!Promise<!Element>}
+   */
+  findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
+    return this.setHtmlForTemplate(
+        this.findTemplate(parent, opt_querySelector), html);
   }
 
   /**
@@ -342,6 +379,16 @@ export class Templates {
    */
   render_(impl, data) {
     return impl.render(data);
+  }
+
+  /**
+   * @param {!BaseTemplate} impl
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  setHtml_(impl, html) {
+    return impl.setHtml(html);
   }
 }
 
