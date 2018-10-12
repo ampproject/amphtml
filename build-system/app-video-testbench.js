@@ -116,7 +116,7 @@ function main() {
 
   var dropdown = document.querySelector('select');
   dropdown.onchange = function() {
-    replaceExtension(urlParams, dropdown.value);                                                                                                                                                                                                                                                                   [0/1960]
+    replaceExtension(urlParams, dropdown.value);
     reloadFrom(urlParams);
   };
 
