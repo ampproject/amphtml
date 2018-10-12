@@ -118,15 +118,6 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_NO_RECOVER: '21062235',
 };
 
-/** @const {string} */
-const DOUBLECLICK_IDLE_BOOL_EXP = 'doubleclickIdleExp';
-
-/** @const @enum{string} */
-const DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES = {
-  CONTROL: '21062567',
-  EXP: '21062568',
-};
-
 /**
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
@@ -307,8 +298,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const renderOutsideViewport = this.renderOutsideViewport();
     // False will occur when throttle in effect.
-    if (this.experimentIds.includes(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP) &&
-      typeof renderOutsideViewport === 'boolean') {
+    if (typeof renderOutsideViewport === 'boolean') {
       return renderOutsideViewport;
     }
     this.isIdleRender_ = true;
@@ -371,11 +361,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
-        },
-        [DOUBLECLICK_IDLE_BOOL_EXP]: {
-          isTrafficEligible: () => true,
-          branches: Object.keys(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES).map(
-              key => DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES[key]),
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -570,7 +555,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdUrl(consentState, opt_rtcResponsesPromise) {
     if (this.useSra) {
-      this.sraDeferred = new Deferred();
+      this.sraDeferred = this.sraDeferred || new Deferred();
     }
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
@@ -1207,22 +1192,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
+                // Ensure deferred exists, may not if getAdUrl did not yet
+                // execute.
+                typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
+                  new Deferred();
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
               let sraUrl;
               // Construct and send SRA request.
-              // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given which is then passed to resolver used
-              // for sendXhrRequest.
-              const sraRequestAdUrlResolvers =
-              typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(
-                  (creative, headersObj, done) => {
-                    checkStillCurrent();
-                    sraBlockCallbackHandler(creative, headersObj, done,
-                        sraRequestAdUrlResolvers, sraUrl);
-                  });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
@@ -1236,6 +1214,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
+                    // Chunk handler called with metadata and creative for each
+                    // slot in order of URLs given which is then passed to
+                    // resolver used for sendXhrRequest.
+                    const sraRequestAdUrlResolvers =
+                    typeInstances.map(instance => instance.sraDeferred.resolve);
+                    const slotCallback = metaJsonCreativeGrouper(
+                        (creative, headersObj, done) => {
+                          checkStillCurrent();
+                          sraBlockCallbackHandler(creative, headersObj, done,
+                              sraRequestAdUrlResolvers, sraUrl);
+                        });
                     lineDelimitedStreamer(this.win, response, slotCallback);
                     return Promise.all(typeInstances.map(
                         instance => instance.sraDeferred.promise));

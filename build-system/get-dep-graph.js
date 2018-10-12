@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
@@ -22,6 +22,8 @@ const colors = require('ansi-colors');
 const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const log = require('fancy-log');
+const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
@@ -32,6 +34,14 @@ const {extensionBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+
+const argv = minimist(process.argv.slice(2));
+let singlePassDest = typeof argv.single_pass_dest === 'string' ?
+  argv.single_pass_dest : './dist/';
+
+if (!singlePassDest.endsWith('/')) {
+  singlePassDest = `${singlePassDest}/`;
+}
 
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
@@ -71,13 +81,18 @@ exports.getFlags = function(config) {
     ],
     //new_type_inf: true,
     language_in: 'ES6',
-    language_out: 'ES5',
+    language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
+    module_resolution: 'NODE',
     externs: config.externs,
     define: config.define,
     // Turn off warning for "Unknown @define" since we use define to pass
     // args such as FORTESTING to our runner.
     jscomp_off: ['unknownDefines'],
+    // checkVars: Demote "variable foo is undeclared" errors.
+    // moduleLoad: Demote "module not found" errors to ignore missing files
+    //     in type declarations in the swg.js bundle.
+    jscomp_warning: ['checkVars', 'moduleLoad'],
     jscomp_error: [
       'checkTypes',
       'accessControls',
@@ -251,7 +266,6 @@ exports.getGraph = function(entryModules, config) {
   // The second stage are transforms that closure compiler supports
   // directly and which we don't want to apply during deps finding.
       .transform(babelify, {
-        babelrc: false,
         compact: false,
         plugins: [
           require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
@@ -296,7 +310,7 @@ exports.getGraph = function(entryModules, config) {
     graph.sorted = Array.from(topo.sort().keys()).reverse();
 
     setupBundles(graph);
-    transformPathsToTempDir(graph);
+    transformPathsToTempDir(graph, config);
     resolve(graph);
     fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
   }).on('error', reject).pipe(devnull());
@@ -368,9 +382,12 @@ function setupBundles(graph) {
  * to a temporary directory where we can run babel transformations.
  *
  * @param {!Object} graph
+ * @param {!Object} config
  */
-function transformPathsToTempDir(graph) {
-  console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
+function transformPathsToTempDir(graph, config) {
+  if (!process.env.TRAVIS) {
+    log('Writing transforms to', colors.cyan(graph.tmp));
+  }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
     // Don't transform node_module files for now and just copy it.
@@ -378,8 +395,7 @@ function transformPathsToTempDir(graph) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins,
-        babelrc: false,
+        plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
@@ -431,17 +447,21 @@ function unsupportedExtensions(name) {
 exports.singlePassCompile = function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
-    writeTo: './dist/',
+    writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
-    fs.ensureDirSync('dist/v0');
+    fs.ensureDirSync(`${singlePassDest}/v0`);
     return Promise.all([
-      move('dist/amp-*', 'dist/v0'),
-      move('dist/_base*', 'dist/v0'),
+      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
+      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
+  }, e => {
+    // NOTE: passing the message here to colors.red breaks the output.
+    console./*OK*/error(e.message);
+    process.exit(1);
   });
 };
 

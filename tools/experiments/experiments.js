@@ -242,12 +242,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-navigation-performance',
-    name: 'amp-story page to page navigation performance improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/17017',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
-  },
-  {
     id: 'amp-story-scroll',
     name: 'Scrollable experience for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/16465',
@@ -335,8 +329,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
   },
   {
-    id: 'amp-carousel-scroll-snap',
-    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    id: 'amp-carousel-chrome-scroll-snap',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
@@ -354,6 +348,11 @@ const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'linker-form',
+    name: 'Enables form support in linker',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
 ];
 

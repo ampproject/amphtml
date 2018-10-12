@@ -69,25 +69,27 @@ function appendAnalyticsRow(urlParams) {
   var container = document.querySelector('.analytics-events-container');
   var table = document.getElementById('analytics-events');
   table.appendChild(createTableRow([
-    createTableCell(getHoursMinutesSeconds()),
-    createTableCell(urlParams.get('autoplay')),
-    createTableCell(urlParams.get('type')),
-    createTableCell(urlParams.get('time')),
-    createTableCell(urlParams.get('total')),
-    createTableCell(urlParams.get('duration')),
+    getHoursMinutesSeconds(),
+    urlParams.get('autoplay'),
+    urlParams.get('type'),
+    urlParams.get('time'),
+    urlParams.get('total'),
+    urlParams.get('duration'),
   ]));
   container.scrollTop = container.scrollHeight;
 }
 
 function getHoursMinutesSeconds() {
   var date = new Date();
-  return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+  return date.getHours() + ':' +
+      date.getMinutes() + ':' +
+      date.getSeconds();
 }
 
-function createTableRow(cells) {
+function createTableRow(cellsContent) {
   var row = document.createElement('tr');
-  for (var i = 0; i < cells.length; i++) {
-    row.appendChild(cells[i]);
+  for (var i = 0; i < cellsContent.length; i++) {
+    row.appendChild(createTableCell(cellsContent[i]));
   }
   return row;
 }
@@ -114,7 +116,7 @@ function main() {
 
   var dropdown = document.querySelector('select');
   dropdown.onchange = function() {
-    replaceExtension(urlParams, dropdown.value);
+    replaceExtension(urlParams, dropdown.value);                                                                                                                                                                                                                                                                   [0/1960]
     reloadFrom(urlParams);
   };
 
