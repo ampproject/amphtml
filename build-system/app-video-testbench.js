@@ -102,7 +102,6 @@ function createTableCell(contents) {
 
 function monkeyPatchXhr(xhrPrototype) {
   var defaultOpen = xhrPrototype.open;
-  console.log(xhrPrototype);
   xhrPrototype.open = function(unusedMethod, url) {
     if ((new RegExp('^https://foo\.com/')).test(url)) {
       logAnalyticsEvent(url);
