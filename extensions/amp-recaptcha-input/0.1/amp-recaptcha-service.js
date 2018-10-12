@@ -216,7 +216,7 @@ export class AmpRecaptchaService {
    * Function to create our bootstrap iframe.
    *
    * @param {string} sitekey
-   * @return {Element}
+   * @return {Promise<Element>}
    * @private
    */
   createRecaptchaFrame_(sitekey) {
@@ -228,10 +228,10 @@ export class AmpRecaptchaService {
       iframe.ampLocation = parseUrlDeprecated(this.win_.location.href);
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
-      iframe.setAttribute('name', JSON.stringify({
+      iframe.setAttribute('name', JSON.stringify(dict({
         'sitekey': sitekey,
         'sentinel': 'recaptcha',
-      }));
+      })));
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
       iframe.onload = function() {

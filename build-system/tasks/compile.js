@@ -97,6 +97,7 @@ function formatClosureCompilerError(message) {
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
+    'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
     'third_party/subscriptions-project/',
@@ -240,6 +241,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',
       'builtins/**.js',
+      'third_party/amp-toolbox-cache-url/**/*.esm.js',
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',

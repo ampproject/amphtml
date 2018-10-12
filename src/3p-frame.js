@@ -324,7 +324,7 @@ function getCustomBootstrapBaseUrl(
     return null;
   }
   if (opt_disallowCustom) {
-    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
+    user().error(TAG, '3p iframe url disabled for %s', opt_type || 'unknown');
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
@@ -387,7 +387,7 @@ export function applySandbox(iframe) {
   for (let i = 0; i < requiredFlags.length; i++) {
     const flag = requiredFlags[i];
     if (!iframe.sandbox.supports(flag)) {
-      dev().info(TAG, `Iframe doesn't support ${flag}`);
+      dev().info(TAG, 'Iframe doesn\'t support %s', flag);
       return;
     }
   }

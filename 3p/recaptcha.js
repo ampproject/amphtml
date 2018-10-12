@@ -49,7 +49,7 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
-/** {!IframeMessaginClient|null} **/
+/** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
 /**
@@ -119,7 +119,7 @@ function actionTypeHandler_(grecaptcha, data) {
       'token': token,
     }));
   }, function(err) {
-    user().error(TAG, err);
+    user().error(TAG, '%s', err);
     iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
       'id': data.id,
       'error': err.message,
