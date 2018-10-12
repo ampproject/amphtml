@@ -243,6 +243,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {yieldpro} from '../ads/yieldpro';
 import {zedo} from '../ads/zedo';
+import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
@@ -270,6 +271,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   taboola: true,
+  zen: true,
   zergnet: true,
   runative: true,
 };
@@ -466,6 +468,7 @@ register('yieldone', yieldone);
 register('yieldpro', yieldpro);
 register('yotpo', yotpo);
 register('zedo', zedo);
+register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 

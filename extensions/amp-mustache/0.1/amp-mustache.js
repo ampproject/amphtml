@@ -80,7 +80,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     container.appendChild(content);
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    mustacheParse(this.template_, /* tags */ undefined);
   }
 
   /** @override */
@@ -91,7 +91,8 @@ export class AmpMustache extends AMP.BaseTemplate {
       if (typeof data === 'object') {
         mustacheData = Object.assign({}, data, this.nestedTemplates_);
       }
-      html = mustacheRender(this.template_, mustacheData);
+      html = mustacheRender(this.template_, mustacheData,
+          /* partials */ undefined);
     }
     return this.serializeHtml_(html);
   }

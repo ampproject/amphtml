@@ -101,6 +101,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /** @private {?./linker-manager.LinkerManager} */
+    this.linkerManager_ = null;
   }
 
   /** @override */
@@ -153,6 +156,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+
+    if (this.linkerManager_) {
+      this.linkerManager_.dispose();
+      this.linkerManager_ = null;
+    }
+
     for (let i = 0; i < this.requests_.length; i++) {
       this.requests_[i].dispose();
       delete this.requests_[i];
@@ -182,6 +191,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.transport_.deleteIframeTransport();
       });
     }
+
 
     return super.unlayoutCallback();
   }
@@ -222,10 +232,7 @@ export class AmpAnalytics extends AMP.BaseElement {
                   new Transport(this.win, this.config_['transport'] || {});
             })
             .then(this.registerTriggers_.bind(this))
-            .then(() => {
-              const type = this.element.getAttribute('type');
-              new LinkerManager(this.getAmpDoc(), this.config_, type).init();
-            });
+            .then(this.initializeLinker_.bind(this));
     return this.iniPromise_;
   }
 
@@ -458,13 +465,24 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.element, request, this.preconnect,
+              this.getAmpDoc(), request, this.preconnect,
               this.transport_,
               this.isSandbox_);
         }
       }
       this.requests_ = requests;
     }
+  }
+
+  /**
+   * Create the linker-manager that will append linker params as necessary.
+   * @private
+   */
+  initializeLinker_() {
+    const type = this.element.getAttribute('type');
+    this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
+        this.config_, type);
+    this.linkerManager_.init();
   }
 
   /**
@@ -546,8 +564,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
-    expandPostMessage(
-        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
+    expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
+        trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host

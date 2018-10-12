@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for traditional Chinese strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: '接受',
   },
@@ -93,4 +93,4 @@ export default {
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: '非常抱歉，您的遊覽器不支持此插件',
   },
-};
+});

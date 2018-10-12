@@ -157,7 +157,7 @@ export class AmpForm {
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
 
-    /** @const @private {?string} */
+    /** @private {?string} */
     this.xhrAction_ = this.getXhrUrl_('action-xhr');
 
     /** @const @private {?string} */
@@ -262,6 +262,13 @@ export class AmpForm {
     };
   }
 
+  /**
+   * Setter to change cached action-xhr.
+   * @param {string} url
+   */
+  setXhrAction(url) {
+    this.xhrAction_ = url;
+  }
 
   /**
    * Handle actions that require at least high trust.
@@ -451,7 +458,11 @@ export class AmpForm {
    */
   submit_(trust) {
     try {
-      this.formSubmitService_.fire(this.form_);
+      const event = {
+        form: this.form_,
+        actionXhrMutator: this.setXhrAction.bind(this),
+      };
+      this.formSubmitService_.fire(event);
     } catch (e) {
       dev().error(TAG, `Form submit service failed: ${e}`);
     }
