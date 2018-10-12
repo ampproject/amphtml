@@ -74,6 +74,14 @@ exports.gitDiffColor = function() {
 };
 
 /**
+ * Returns the URL of the origin (upstream) repository.
+ * @return {string}
+ */
+exports.gitOriginUrl = function() {
+  return getStdout('git remote get-url origin').trim();
+};
+
+/**
  * Returns the name of the local branch.
  * @return {string}
  */

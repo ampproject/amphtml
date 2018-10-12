@@ -23,7 +23,7 @@ const log = require('fancy-log');
 const octokit = require('@octokit/rest')();
 const path = require('path');
 const {getStdout} = require('../exec');
-const {gitCommitHash} = require('../git');
+const {gitCommitHash, gitOriginUrl} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 const maxSize = '82.6KB'; // Only use 0.1 KB of precision (no hundredths digit)
@@ -32,6 +32,7 @@ const buildArtifactsRepoOptions = {
   owner: 'ampproject',
   repo: 'amphtml-build-artifacts',
 };
+const expectedGitHubProject = 'ampproject/amphtml';
 
 const {green, red, cyan, yellow} = colors;
 
@@ -42,6 +43,14 @@ const {green, red, cyan, yellow} = colors;
  * @param {string} bundleSize the new bundle size in 99.99KB format.
  */
 function storeBundleSize(bundleSize) {
+  const gitOriginUrlValue = gitOriginUrl();
+  if (!gitOriginUrlValue.includes(expectedGitHubProject)) {
+    log('Git origin URL is', cyan(gitOriginUrlValue));
+    log('Skipping storing the bundle size in the artifacts repository on',
+        'GitHub...');
+    return;
+  }
+
   if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
     log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle'),
         red('size in the artifacts repository on GitHub!'));
