@@ -161,7 +161,8 @@ export class Viewport {
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
     if (this.useLayers_) {
       installLayersServiceForDoc(this.ampdoc,
-          this.binding_.getScrollingElement());
+          this.binding_.getScrollingElement(),
+          this.binding_.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
@@ -554,19 +555,15 @@ export class Viewport {
         offset = 0;
         break;
     }
-    let newScrollTop;
-    let curScrollTopPromise;
 
-    if (this.useLayers_) {
-      newScrollTop = elementRect.top + offset;
-      curScrollTopPromise = Promise.resolve(0);
-    } else {
-      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-      newScrollTop = Math.max(0, calculatedScrollTop);
-      curScrollTopPromise = this.getElementScrollTop_(parent);
-    }
-
-    return curScrollTopPromise.then(curScrollTop => {
+    return this.getElementScrollTop_(parent).then(curScrollTop => {
+      let newScrollTop;
+      if (this.useLayers_) {
+        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
+      } else {
+        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+        newScrollTop = Math.max(0, calculatedScrollTop);
+      }
       if (newScrollTop == curScrollTop) {
         return;
       }

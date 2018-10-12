@@ -40,7 +40,6 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
-const tooManyTestsToFix = 15;
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -458,9 +457,6 @@ function runTests() {
       });
     }
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
-    if (testsToRun.length < tooManyTestsToFix) {
-      c.client.failOnConsoleError = true;
-    }
   } else if (argv.integration) {
     c.files = c.files.concat(
         config.commonIntegrationTestPaths, config.integrationTestPaths);
@@ -476,10 +472,6 @@ function runTests() {
     c.files = c.files.concat(config.a4aTestPaths);
   } else {
     c.files = c.files.concat(config.testPaths);
-  }
-
-  if (argv.travis_like) {
-    c.client.failOnConsoleError = false;
   }
 
   // c.client is available in test browser via window.parent.karma.config
@@ -508,7 +500,6 @@ function runTests() {
     c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
-        compact: false,
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [
@@ -570,8 +561,6 @@ function runTests() {
     }
     if (argv.coverage) {
       if (process.env.TRAVIS) {
-        log(green('INFO: ') + 'Uploading code coverage report to ' +
-            cyan('https://codecov.io/gh/ampproject/amphtml') + '...');
         const codecovCmd =
             './node_modules/.bin/codecov --file=test/coverage/lcov.info';
         let flags = '';
@@ -580,6 +569,9 @@ function runTests() {
         } else if (argv.integration) {
           flags = ' --flags=integration_tests';
         }
+        log(green('INFO: ') + 'Uploading code coverage report to ' +
+            cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+            cyan(codecovCmd + flags) + '...');
         const output = getStdout(codecovCmd + flags);
         const viewReportPrefix = 'View report at: ';
         const viewReport = output.match(viewReportPrefix + '.*');
@@ -651,6 +643,9 @@ function runTests() {
  * Run tests after applying the prod / canary AMP config to the runtime.
  */
 gulp.task('test', 'Runs tests', preTestTasks, function() {
+  // TODO(alanorozco): Come up with a more elegant check?
+  global.AMP_TESTING = true;
+
   if (!argv.nohelp) {
     printArgvMessages();
   }

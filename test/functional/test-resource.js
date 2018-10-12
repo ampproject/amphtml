@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -135,7 +134,7 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').returns(Promise.resolve()).once();
     elementMock.expects('updateLayoutBox')
-        .withExactArgs(box)
+        .withExactArgs(box, true)
         .once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
@@ -383,6 +382,8 @@ describes.realWin('Resource', {amp: true}, env => {
       element.setAttribute('placeholder', '');
       Object.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
+        configurable: true,
+        writable: true,
       });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
@@ -447,7 +448,7 @@ describes.realWin('Resource', {amp: true}, env => {
       return owner;
     });
     resource.completeCollapse();
-    expect(resource.element.style.display).to.equal('none');
+    expect(resource.element).to.have.attribute('hidden');
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
     expect(resource.isFixed()).to.be.false;
@@ -455,27 +456,15 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should show and request measure on expand', () => {
-    resource.element.style.display = 'none';
+    resource.completeCollapse();
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
     resource.isFixed_ = false;
     resource.requestMeasure = sandbox.stub();
 
     resource.completeExpand();
-    expect(resource.element.style.display).to.not.equal('none');
+    expect(resource.element).to.not.have.display('none');
     expect(resource.requestMeasure).to.be.calledOnce;
   });
-
-  it('should show and request measure on expand', () => {
-    resource.element.style.display = 'none';
-    resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
-    resource.isFixed_ = false;
-    resource.requestMeasure = sandbox.stub();
-
-    resource.completeExpand();
-    expect(resource.element.style.display).to.not.equal('none');
-    expect(resource.requestMeasure).to.be.calledOnce;
-  });
-
 
   it('should ignore startLayout if already completed or failed or going',
       () => {
@@ -865,12 +854,29 @@ describes.realWin('Resource', {amp: true}, env => {
         elementMock.expects('pauseCallback').once();
         resource.pauseOnRemove();
       });
+    });
 
-      it('should call disconnectedCallback on remove for built ele', () => {
-        expect(Resource.forElementOptional(resource.element))
-            .to.equal(resource);
-        elementMock.expects('disconnectedCallback').once();
+    describe('manual disconnect', () => {
+      beforeEach(() => {
+        element.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(element);
+        resource = Resource.forElementOptional(element);
+        resources = element.getResources();
+      });
+
+      it('should call disconnect on remove for built ele', () => {
+        sandbox.stub(element, 'isConnected').value(false);
+        const remove = sandbox.spy(resources, 'remove');
         resource.disconnect();
+        expect(remove).to.have.been.called;
+        expect(Resource.forElementOptional(resource.element)).to.not.exist;
+      });
+
+      it('should call disconnected regardless of isConnected', () => {
+        // element is already connected to DOM
+        const spy = sandbox.spy(resources, 'remove');
+        resource.disconnect();
+        expect(spy).to.have.been.called;
         expect(Resource.forElementOptional(resource.element)).to.not.exist;
       });
     });
@@ -900,8 +906,8 @@ describe('Resource idleRenderOutsideViewport', () => {
   let isWithinViewportRatio;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
+    sandbox = sinon.sandbox;
     idleRenderOutsideViewport = sandbox.stub();
     element = {
       idleRenderOutsideViewport,
@@ -958,7 +964,7 @@ describe('Resource renderOutsideViewport', () => {
   let resolveWithinViewportSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       ownerDocument: {defaultView: window},

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
@@ -22,52 +23,151 @@ import {
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const {string} */
-const TAG_ = 'amp-analytics.Transport';
+const TAG_ = 'amp-analytics/transport';
 
 /**
- * @param {!Window} win
- * @param {string} request
- * @param {!Object<string, string|boolean>} transportOptions
- */
-export function sendRequest(win, request, transportOptions) {
-  assertHttpsUrl(request, 'amp-analytics request');
-  checkCorsUrl(request);
-
-  const referrerPolicy = transportOptions['referrerPolicy'];
-
-  if (referrerPolicy === 'no-referrer') {
-    transportOptions['beacon'] = false;
-    transportOptions['xhrpost'] = false;
-  }
-
-  if (transportOptions['beacon'] &&
-      Transport.sendRequestUsingBeacon(win, request)) {
-    return;
-  }
-  if (transportOptions['xhrpost'] &&
-      Transport.sendRequestUsingXhr(win, request)) {
-    return;
-  }
-  const image = transportOptions['image'];
-  if (image) {
-    const suppressWarnings = (typeof image == 'object' &&
-        image['suppressWarnings']);
-    Transport.sendRequestUsingImage(
-        win, request, suppressWarnings, /** @type {string|undefined} */ (referrerPolicy));
-    return;
-  }
-  user().warn(TAG_, 'Failed to send request', request, transportOptions);
-}
-
-/**
- * @visibleForTesting
+ * Transport defines the ways how the analytics pings are going to be sent.
  */
 export class Transport {
+
+  /**
+   * @param {!Window} win
+   * @param {!JsonObject} options
+   */
+  constructor(win, options = /** @type {!JsonObject} */({})) {
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /** @private {!JsonObject} */
+    this.options_ = options;
+
+    /** @private {string|undefined} */
+    this.referrerPolicy_ = /** @type {string|undefined} */ (this.options_['referrerPolicy']);
+
+    // no-referrer is only supported in image transport
+    if (this.referrerPolicy_ === 'no-referrer') {
+      this.options_['beacon'] = false;
+      this.options_['xhrpost'] = false;
+    }
+
+    /** @private {?IframeTransport} */
+    this.iframeTransport_ = null;
+  }
+
+  /**
+   * @param {string} request
+   */
+  sendRequest(request) {
+    if (this.options_['iframe']) {
+      if (!this.iframeTransport_) {
+        dev().error(TAG_, 'iframe transport was inadvertently deleted');
+        return;
+      }
+      this.iframeTransport_.sendRequest(request);
+      return;
+    }
+
+    assertHttpsUrl(request, 'amp-analytics request');
+    checkCorsUrl(request);
+
+    if (this.options_['beacon'] &&
+        Transport.sendRequestUsingBeacon(this.win_, request)) {
+      return;
+    }
+    if (this.options_['xhrpost'] &&
+        Transport.sendRequestUsingXhr(this.win_, request)) {
+      return;
+    }
+    const image = this.options_['image'];
+    if (image) {
+      const suppressWarnings = (typeof image == 'object' &&
+      image['suppressWarnings']);
+      Transport.sendRequestUsingImage(
+          this.win_, request, suppressWarnings,
+          /** @type {string|undefined} */ (this.referrerPolicy_));
+      return;
+    }
+    user().warn(TAG_, 'Failed to send request', request, this.options_);
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed if the
+   * user navigates/swipes away from the page, and is recreated if the user
+   * navigates back to the page.
+   *
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
+   */
+  maybeInitIframeTransport(win, element, opt_preconnect) {
+    if (!this.options_['iframe'] || this.iframeTransport_) {
+      return;
+    }
+    if (opt_preconnect) {
+      opt_preconnect.preload(getIframeTransportScriptUrl(win), 'script');
+    }
+
+    const type = element.getAttribute('type');
+    const ampAdResourceId = user().assertString(
+        getAmpAdResourceId(element, getTopWindow(win)),
+        'No friendly amp-ad ancestor element was found ' +
+        'for amp-analytics tag with iframe transport.');
+
+    this.iframeTransport_ = new IframeTransport(
+        win, type, this.options_, ampAdResourceId);
+  }
+
+  /**
+   * Deletes iframe transport.
+   */
+  deleteIframeTransport() {
+    if (this.iframeTransport_) {
+      this.iframeTransport_.detach();
+      this.iframeTransport_ = null;
+    }
+  }
+
+  /**
+   * Sends a ping request using an iframe, that is removed 5 seconds after
+   * it is loaded.
+   * This is not available as a standard transport, but rather used for
+   * specific, whitelisted requests.
+   * Note that this is unrelated to the cross-domain iframe use case above in
+   * sendRequestUsingCrossDomainIframe()
+   * @param {string} request The request URL.
+   */
+  sendRequestUsingIframe(request) {
+    assertHttpsUrl(request, 'amp-analytics request');
+    user().assert(
+        parseUrlDeprecated(request).origin !=
+        parseUrlDeprecated(this.win_.location.href).origin,
+        'Origin of iframe request must not be equal to the document origin.' +
+        ' See https://github.com/ampproject/' +
+        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+
+    /** @const {!Element} */
+    const iframe = this.win_.document.createElement('iframe');
+    toggle(iframe, false);
+    iframe.onload = iframe.onerror = () => {
+      Services.timerFor(this.win_).delay(() => {
+        removeElement(iframe);
+      }, 5000);
+    };
+
+    iframe.setAttribute('amp-analytics', '');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    iframe.src = request;
+    this.win_.document.body.appendChild(iframe);
+  }
 
   /**
    * @param {!Window} win
@@ -132,37 +232,4 @@ export class Transport {
     xhr.send('');
     return true;
   }
-}
-
-/**
- * Sends a ping request using an iframe, that is removed 5 seconds after
- * it is loaded.
- * This is not available as a standard transport, but rather used for
- * specific, whitelisted requests.
- * Note that this is unrelated to the cross-domain iframe use case above in
- * sendRequestUsingCrossDomainIframe()
- * @param {!Window} win
- * @param {string} request The request URL.
- */
-export function sendRequestUsingIframe(win, request) {
-  assertHttpsUrl(request, 'amp-analytics request');
-  /** @const {!Element} */
-  const iframe = win.document.createElement('iframe');
-  setStyle(iframe, 'display', 'none');
-  iframe.onload = iframe.onerror = () => {
-    Services.timerFor(win).delay(() => {
-      removeElement(iframe);
-    }, 5000);
-  };
-  user().assert(
-      parseUrlDeprecated(request).origin !=
-        parseUrlDeprecated(win.location.href).origin,
-      'Origin of iframe request must not be equal to the document origin.' +
-      ' See https://github.com/ampproject/' +
-      ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
-  iframe.setAttribute('amp-analytics', '');
-  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-  iframe.src = request;
-  win.document.body.appendChild(iframe);
-  return iframe;
 }

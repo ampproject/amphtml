@@ -17,6 +17,7 @@
 import {GestureRecognizer} from './gesture';
 import {calcVelocity} from './motion';
 
+const DOUBLETAP_DELAY = 200;
 
 /**
  * A "tap" gesture.
@@ -25,7 +26,7 @@ import {calcVelocity} from './motion';
  *   clientY: number
  * }}
  */
-let TapDef;
+export let TapDef;
 
 
 /**
@@ -108,12 +109,12 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-let DoubletapDef;
+export let DoubletapDef;
 
 
 /**
  * Recognizes a "doubletap" gesture. This gesture will block a single "tap"
- * for about 300ms while it's expecting the second "tap".
+ * for about 200ms while it's expecting the second "tap".
  * @extends {GestureRecognizer<DoubletapDef>}
  */
 export class DoubletapRecognizer extends GestureRecognizer {
@@ -181,7 +182,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
   onTouchEnd(e) {
     this.tapCount_++;
     if (this.tapCount_ < 2) {
-      this.signalPending(300);
+      this.signalPending(DOUBLETAP_DELAY);
     } else {
       this.event_ = e;
       this.signalReady(0);
@@ -644,7 +645,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let PinchDef;
+export let PinchDef;
 
 /**
  * Threshold in pixels for how much two touches move away from

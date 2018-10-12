@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -30,7 +29,9 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {
+  installDocumentInfoServiceForDoc,
+} from '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
@@ -66,7 +67,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -106,6 +107,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
       Math: window.Math,
+      Promise: window.Promise,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
@@ -26,7 +25,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
       fixture = f;
@@ -35,6 +34,10 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
     });
   });
+
+  function waitForDisplay(element, display) {
+    return () => fixture.win.getComputedStyle(element)['display'] === display;
+  }
 
   afterEach(() => {
     sandbox.restore();
@@ -46,7 +49,7 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('hideBtn');
 
       button.click();
-      yield poll('#spanToHide hidden', () => span.style['display'] === 'none');
+      yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
     });
 
     it('<AMP element>.toggleVisibility', function*() {
@@ -54,10 +57,10 @@ describe.configure().retryOnSaucelabs().run('on="..."', () => {
       const button = fixture.doc.getElementById('toggleBtn');
 
       button.click();
-      yield poll('#imgToToggle hidden', () => img.style['display'] === 'none');
+      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
 
       button.click();
-      yield poll('#imgToToggle displayed', () => img.style['display'] === '');
+      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
     });
 
     describe.configure().skipIfPropertiesObfuscated().run('navigate',

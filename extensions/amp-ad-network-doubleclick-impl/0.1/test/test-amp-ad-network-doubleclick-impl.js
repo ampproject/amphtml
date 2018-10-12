@@ -19,7 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -39,6 +38,7 @@ import {
   resetTokensToInstancesMap,
 } from '../amp-ad-network-doubleclick-impl';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {
@@ -276,6 +276,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
               .calledOnce;
         });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -431,6 +448,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       button.dispatchEvent(ev1);
       expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
       expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should set iframe id and data-google-query-id attribute', () => {
+      impl.buildCallback();
+      impl.ifi_ = 3;
+      impl.qqid_ = 'abc';
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender(null);
+      expect(impl.element.getAttribute('data-google-query-id')).to.equal('abc');
+      expect(impl.iframe.id).to.equal('google_ads_iframe_3');
     });
   });
 
@@ -633,6 +661,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
+    it('has correct sz with fluid as multi-size', () => {
+      element.setAttribute('width', '300');
+      element.setAttribute('height', '250');
+      element.setAttribute('data-multi-size', 'fluid');
+      new AmpAd(element).upgradeCallback();
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        expect(url).to.match(/sz=300x250%7C320x50&/));
+    });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -784,7 +822,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.element.appendChild(placeholder);
       impl.element.appendChild(fallback);
       impl.size_ = {width: 123, height: 456};
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => sandbox.restore());
@@ -1262,6 +1300,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#fireDelayedImpressions', () => {
+        let isSecureStub;
         beforeEach(() => {
           element = createElementWithAttributes(doc, 'amp-ad', {
             'width': '200',
@@ -1269,6 +1308,9 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
             'type': 'doubleclick',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.getAmpDoc = () => {};
+          isSecureStub = sandbox.stub();
+          sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
         });
 
         it('should handle null impressions', () => {
@@ -1278,35 +1320,32 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
 
         it('should not include non-https', () => {
-          impl.fireDelayedImpressions('http://f.com?a=b,https://b.net?c=d');
+          const urls = ['http://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.withArgs(urls[0]).returns(false);
+          isSecureStub.withArgs(urls[1]).returns(true);
+          impl.fireDelayedImpressions(urls.join());
           expect(env.win.document.querySelectorAll('amp-pixel').length)
               .to.equal(1);
           expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
+              `amp-pixel[src="${urls[1]}"][referrerpolicy=""]`))
               .to.be.ok;
         });
 
         it('should append amp-pixel w/o scrubReferer', () => {
-          impl.fireDelayedImpressions('https://f.com?a=b,https://b.net?c=d');
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"][referrerpolicy=""]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"][referrerpolicy=""]'))
-              .to.be.ok;
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join());
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy=""]`)).to.be.ok);
         });
 
-        it('should append amp-pixel wwith scrubReferer', () => {
-          impl.fireDelayedImpressions(
-              'https://f.com?a=b,https://b.net?c=d', true);
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://f.com?a=b"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
-          expect(env.win.document.querySelector(
-              'amp-pixel[src="https://b.net?c=d"]' +
-              '[referrerpolicy="no-referrer"]'))
-              .to.be.ok;
+        it('should append amp-pixel with scrubReferer', () => {
+          const urls = ['https://f.com?a=b', 'https://b.net?c=d'];
+          isSecureStub.returns(true);
+          impl.fireDelayedImpressions(urls.join(), true);
+          urls.forEach(url => expect(env.win.document.querySelector(
+              `amp-pixel[src="${url}"][referrerpolicy="no-referrer"]`))
+              .to.be.ok);
         });
       });
 
@@ -1343,6 +1382,11 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
         it('should return 12 if no experiment header', () => {
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
+
+        it('should return renderOutsideViewport boolean', () => {
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
         });
       });
 
@@ -1416,20 +1460,82 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
       });
 
       describe('#setPageLevelExperiments', () => {
-
+        let randomlySelectUnsetExperimentsStub;
+        let extractUrlExperimentIdStub;
+        beforeEach(() => {
+          randomlySelectUnsetExperimentsStub =
+            sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          extractUrlExperimentIdStub =
+            sandbox.stub(impl, 'extractUrlExperimentId_');
+          sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
+          sandbox.stub(impl, 'getAmpDoc').returns({});
+          sandbox.stub(Services, 'viewerForDoc').returns(
+              {whenFirstVisible: () => new Deferred().promise});
+        });
         afterEach(() => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
         });
 
         it('should set invalid origin fix experiment if on canonical', () => {
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
         });
 
         it('should not set invalid origin fix if exp on', () => {
           toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-          impl.setPageLevelExperiments('');
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
           expect(impl.experimentIds.includes('21060933')).to.be.true;
+        });
+
+        it('should select SRA experiments', () => {
+          randomlySelectUnsetExperimentsStub.returns(
+              {doubleclickSraExp: '117152667'});
+          extractUrlExperimentIdStub.returns(undefined);
+          impl.buildCallback();
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
+          expect(impl.useSra).to.be.true;
+        });
+
+        it('should force-select SRA experiment from URL experiment ID', () => {
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments('8');
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
+        });
+
+        describe('should properly limit SRA traffic', () => {
+          let experimentInfoMap;
+          beforeEach(() => {
+            randomlySelectUnsetExperimentsStub.returns({});
+            impl.setPageLevelExperiments();
+            // args format is call array followed by parameter array so expect
+            // first call, first param.
+            experimentInfoMap = randomlySelectUnsetExperimentsStub
+                .args[0][0]['doubleclickSraExp'];
+            expect(experimentInfoMap).to.be.ok;
+            expect(impl.useSra).to.be.false;
+          });
+
+          it('should allow by default', () =>
+            expect(experimentInfoMap.isTrafficEligible()).to.be.true);
+
+          it('should not allow if refresh meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-enable-refresh'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if sra meta', () => {
+            doc.head.appendChild(createElementWithAttributes(
+                doc, 'meta', {name: 'amp-ad-doubleclick-sra'}));
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
+
+          it('should not allow if block level refresh', () => {
+            impl.element.setAttribute('data-enable-refresh', '');
+            expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+          });
         });
       });
 

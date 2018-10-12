@@ -15,15 +15,14 @@
  */
 import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
-import {addParamsToUrl} from '../../../../src/url';
+import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
 import {getData} from '../../../../src/event-helper';
 import {isObject} from '../../../../src/types';
 import {parseJson} from '../../../../src/json';
 
-import {parseUrlDeprecated} from '../../../../src/url';
-import {setStyles} from '../../../../src/style';
+import {setStyles, toggle} from '../../../../src/style';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
@@ -101,8 +100,8 @@ const iframeDrop = (url, ampDoc, {name, title}) => {
         'src': url,
       })
   );
+  toggle(iframe, false);
   setStyles(iframe, {
-    display: 'none',
     position: 'absolute',
     clip: 'rect(0px 0px 0px 0px)',
   });

@@ -23,13 +23,13 @@ describe('Mustache', () => {
 
   beforeEach(() => {
     savedSanitizer = mustache.sanitizeUnescaped;
-    mustache.setUnescapedSanitizier(function(value) {
+    mustache.setUnescapedSanitizer(function(value) {
       return value.toUpperCase();
     });
   });
 
   afterEach(() => {
-    mustache.setUnescapedSanitizier(savedSanitizer);
+    mustache.setUnescapedSanitizer(savedSanitizer);
   });
 
   it('should escape html', () => {

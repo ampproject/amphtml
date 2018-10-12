@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {FilterType} from './filters/filter';
+import {
+  IFRAME_TRANSPORTS,
+} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {user} from '../../../src/log';
 
 /**
@@ -197,10 +197,7 @@ function assertTarget(name, target, config) {
  * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
-  return user().assertString(
-      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor] &&
-      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport'] &&
-      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'],
+  return user().assertString(IFRAME_TRANSPORTS[vendor],
       `Unknown or invalid vendor ${vendor}, ` +
       'note that vendor must use transport: iframe');
 }

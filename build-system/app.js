@@ -28,8 +28,11 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
+const renderIndex = require('./app-index/index');
 const request = require('request');
 const pc = process;
+const countries = require('../examples/countries.json');
+const runVideoTestBench = require('./app-video-testbench');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -57,6 +60,16 @@ app.get('/serve_mode=:mode', (req, res) => {
     res.status(400).send(info);
   }
 });
+
+if (!global.AMP_TESTING) {
+  app.get('/', renderIndex);
+
+  // TODO(alanorozco): This doesn't quite work. Listing dirs is fine, but file
+  // links go to a /~ base path, which obviously 404's.
+  //
+  // app.use('/~', express.static('/'), serveIndex(`${__dirname}/../`));
+}
+
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -333,7 +346,7 @@ function proxyToAmpProxy(req, res, mode) {
             'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
-    const inabox = req.query['inabox'] == '1';
+    const inabox = req.query['inabox'];
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
@@ -686,7 +699,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
 // Examples:
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/', (req, res) => {
+app.use('/inabox/:version/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
@@ -696,7 +709,7 @@ app.use('/inabox/', (req, res) => {
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
   }
-  adUrl = addQueryParam(adUrl, 'inabox', 1);
+  adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
         .replace(/AD_URL/g, adUrl)
@@ -735,10 +748,15 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
   setTimeout(next, sleep);
 });
 
+/**
+ * Video testbench endpoint
+ */
+app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
+
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
-  const inabox = req.query['inabox'] == '1';
+  const inabox = req.query['inabox'];
   const stream = Number(req.query['stream']);
   fs.readFileAsync(pc.cwd() + filePath, 'utf8').then(file => {
     if (req.query['amp_js_v']) {
@@ -913,7 +931,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
 });
 
 app.use('/subscription/pingback', (req, res) => {
-  assertCors(req, res, ['GET']);
+  assertCors(req, res, ['POST']);
   res.json({
     done: true,
   });
@@ -932,7 +950,8 @@ app.get('/adzerk/*', (req, res) => {
       pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
+    res.setHeader('AMP-Ad-Response-Type', 'template');
     res.end(file);
   }).error(() => {
     res.status(404);
@@ -1095,6 +1114,28 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
+ * Autosuggest endpoint
+ */
+app.get('/search/countries', function(req, res) {
+  let filtered = [];
+  if (req.query.hasOwnProperty('q')) {
+    const query = req.query.q.toLowerCase();
+
+    filtered = countries.items
+        .filter(country => country.name.toLowerCase().startsWith(query));
+  }
+
+  const results = {
+    'items': [
+      {
+        'results': filtered,
+      },
+    ],
+  };
+  res.send(results);
+});
+
+/**
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName
@@ -1123,8 +1164,14 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
+      let filename;
+      if (inabox == '1') {
+        filename = '/dist/amp-inabox.js';
+      } else if (inabox == '2') {
+        filename = '/dist/amp-inabox-lite.js';
+      }
       file = file.replace(/<html [^>]*>/, '<html amp4ads>');
-      file = file.replace(/\/dist\/amp\.js/g, '/dist/amp-inabox.js');
+      file = file.replace(/\/dist\/amp\.js/g, filename);
     }
   } else if (mode == 'compiled') {
     file = file.replace(
@@ -1143,7 +1190,13 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         /\/dist.3p\/current\/(.*)\.max.html/g,
         hostName + '/dist.3p/current-min/$1.html');
     if (inabox) {
-      file = file.replace(/\/dist\/v0\.js/g, '/dist/amp4ads-v0.js');
+      let filename;
+      if (inabox == '1') {
+        filename = '/dist/amp4ads-v0.js';
+      } else if (inabox == '2') {
+        filename = '/dist/amp4ads-lite-v0.js';
+      }
+      file = file.replace(/\/dist\/v0\.js/g, filename);
     }
   }
   return file;

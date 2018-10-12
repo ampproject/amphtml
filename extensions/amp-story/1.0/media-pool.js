@@ -37,6 +37,7 @@ import {ampMediaElementFor} from './utils';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 
 
@@ -124,9 +125,6 @@ export class MediaPool {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services./*OK*/vsyncFor(win);
-
     /**
      * The function used to retrieve the distance between an element and the
      * current position in the document.
@@ -173,6 +171,19 @@ export class MediaPool {
      * @private {boolean}
      */
     this.blessed_ = false;
+
+    /**
+     * The default source to use for pool-created audio sources,
+     * @private @const {!Object<!MediaType, string>}
+     */
+    this.defaultSources_ = {
+      [MediaType.AUDIO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_AUDIO_SRC,
+      [MediaType.VIDEO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_VIDEO_SRC,
+    };
 
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
@@ -230,24 +241,22 @@ export class MediaPool {
       this.allocated[type] = [];
       this.unallocated[type] = [];
 
-      this.vsync_.mutate(() => {
-        // Reverse-looping is generally faster and Closure would usually make
-        // this optimization automatically. However, it skips it due to a
-        // comparison with the itervar below, so we have to roll it by hand.
-        for (let i = count; i > 0; i--) {
-          const mediaEl = /** @type {!HTMLMediaElement} */
-              // Use seed element at end of set to prevent wasting it.
-              (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
-          const sources = this.getDefaultSource_(type);
-          mediaEl.setAttribute('pool-element', elId++);
-          this.enqueueMediaElementTask_(mediaEl,
-              new UpdateSourcesTask(sources));
-          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-          // is returned.  If so, we should adjust the pool size/distribution
-          // between media types.
-          this.unallocated[type].push(mediaEl);
-        }
-      });
+      // Reverse-looping is generally faster and Closure would usually make
+      // this optimization automatically. However, it skips it due to a
+      // comparison with the itervar below, so we have to roll it by hand.
+      for (let i = count; i > 0; i--) {
+        const mediaEl = /** @type {!HTMLMediaElement} */
+            // Use seed element at end of set to prevent wasting it.
+            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        const sources = this.getDefaultSource_(type);
+        mediaEl.setAttribute('pool-element', elId++);
+        this.enqueueMediaElementTask_(mediaEl,
+            new UpdateSourcesTask(sources));
+        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+        // is returned.  If so, we should adjust the pool size/distribution
+        // between media types.
+        this.unallocated[type].push(mediaEl);
+      }
     });
   }
 
@@ -258,15 +267,13 @@ export class MediaPool {
    * @return {!Sources} The default source for the specified type of media.
    */
   getDefaultSource_(mediaType) {
-    switch (mediaType) {
-      case MediaType.AUDIO:
-        return new Sources(BLANK_AUDIO_SRC);
-      case MediaType.VIDEO:
-        return new Sources(BLANK_VIDEO_SRC);
-      default:
-        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-        return new Sources();
+    const sourceStr = this.defaultSources_[mediaType];
+    if (sourceStr === undefined) {
+      dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+      return new Sources();
     }
+
+    return new Sources(sourceStr);
   }
 
 

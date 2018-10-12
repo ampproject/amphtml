@@ -155,7 +155,7 @@ Example with json attribute:
 ```
 
 ### Supported DFP Formats
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
 - Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats

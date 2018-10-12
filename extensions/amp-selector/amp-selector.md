@@ -134,6 +134,9 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 Multi-selectors and single-selectors fire this when selecting or unselecting options.
 Tapping disabled options does not trigger the `select` event.
 
+- `event.targetOption` contains the `option` attribute value of the selected element.
+- `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
+
 ## Validation
 
 See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

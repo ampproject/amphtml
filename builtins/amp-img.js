@@ -17,9 +17,11 @@
 import {BaseElement} from '../src/base-element';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
+import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen} from '../src/event-helper';
 import {registerElement} from '../src/service/custom-element-registry';
+import {setImportantStyles} from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -38,7 +40,7 @@ export class AmpImg extends BaseElement {
     this.allowImgLoadFallback_ = true;
 
     /** @private {boolean} */
-    this.isPrerenderAllowed_ = true;
+    this.prerenderAllowed_ = true;
 
     /** @private {?Element} */
     this.img_ = null;
@@ -84,8 +86,10 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+  firstAttachedCallback() {
+    if (this.element.hasAttribute('noprerender')) {
+      this.prerenderAllowed_ = false;
+    }
   }
 
   /** @override */
@@ -134,7 +138,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.isPrerenderAllowed_;
+    return this.prerenderAllowed_;
   }
 
   /** @override */
@@ -165,6 +169,18 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_ = null;
     }
     return true;
+  }
+
+  /** @override **/
+  firstLayoutCompleted() {
+    const placeholder = this.getPlaceholder();
+    if (placeholder &&
+      placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
+      isExperimentOn(this.win, 'blurry-placeholder')) {
+      setImportantStyles(placeholder, {'opacity': 0});
+    } else {
+      this.togglePlaceholder(false);
+    }
   }
 
   /**
