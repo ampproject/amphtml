@@ -60,7 +60,58 @@ const availableExtensions = [
 const clientScript = `
 var urlParams = new URLSearchParams(window.location.search);
 
+function logAnalyticsEvent(url) {
+  var urlParams = new URLSearchParams(url.split('?', 2)[1]);
+  appendAnalyticsRow(urlParams);
+}
+
+function appendAnalyticsRow(urlParams) {
+  var container = document.querySelector('.analytics-events-container');
+  var table = document.getElementById('analytics-events');
+  table.appendChild(createTableRow([
+    createTableCell(getHoursMinutesSeconds()),
+    createTableCell(urlParams.get('autoplay')),
+    createTableCell(urlParams.get('type')),
+    createTableCell(urlParams.get('time')),
+    createTableCell(urlParams.get('total')),
+    createTableCell(urlParams.get('duration')),
+  ]));
+  container.scrollTop = container.scrollHeight;
+}
+
+function getHoursMinutesSeconds() {
+  var date = new Date();
+  return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+}
+
+function createTableRow(cells) {
+  var row = document.createElement('tr');
+  for (var i = 0; i < cells.length; i++) {
+    row.appendChild(cells[i]);
+  }
+  return row;
+}
+
+function createTableCell(contents) {
+  var cell = document.createElement('td');
+  cell.innerText = contents;
+  return cell;
+}
+
+function monkeyPatchXhr(xhrPrototype) {
+  var defaultOpen = xhrPrototype.open;
+  console.log(xhrPrototype);
+  xhrPrototype.open = function(unusedMethod, url) {
+    if ((new RegExp('^https://foo\.com/')).test(url)) {
+      logAnalyticsEvent(url);
+    }
+    return defaultOpen.apply(this, arguments);
+  };
+}
+
 function main() {
+  monkeyPatchXhr(XMLHttpRequest.prototype);
+
   var dropdown = document.querySelector('select');
   dropdown.onchange = function() {
     replaceExtension(urlParams, dropdown.value);
@@ -101,9 +152,7 @@ function renderExtensionDropdown(doc, opt_extension) {
   const select = doc.createElement('select');
 
   const usedExtension =
-      opt_extension ?
-        opt_extension :
-        getSubstitutable(doc).tagName.toLowerCase();
+      opt_extension || getSubstitutable(doc).tagName.toLowerCase();
 
   availableExtensions.forEach(extension => {
     const option = doc.createElement('option');
