@@ -697,6 +697,13 @@ data.publisher;
 data.dim;
 data.renderer;
 
+// zen.js
+var YandexZen;
+YandexZen.renderWidget;
+data.clid;
+data.successCalback;
+data.failCallback;
+
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
