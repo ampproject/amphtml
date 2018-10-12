@@ -241,7 +241,7 @@ export function imaVideo(global, data) {
   // Video controls.
   controlsDiv = global.document.createElement('div');
   controlsDiv.id = 'ima-controls';
-  setStyles(controlsDiv, { 
+  setStyles(controlsDiv, {
     'position': 'absolute',
     'bottom': '0px',
     'width': '100%',
@@ -432,9 +432,15 @@ export function imaVideo(global, data) {
     // Create our own tap listener that ignores tap and drag.
     bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
     bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-    bigPlayDiv.addEventListener('tapwithoutdrag', onBigPlayClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        'tapwithoutdrag',
+        onBigPlayClick.bind(null, global)
+    );
   } else {
-    bigPlayDiv.addEventListener(interactEvent, onBigPlayClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        interactEvent,
+        onBigPlayClick.bind(null, global)
+    );
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
@@ -604,7 +610,7 @@ export function onBigPlayClick(global) {
     videoPlayer.load();
     playAds(global);
   }
-  
+
   setStyle(bigPlayDiv, 'display', 'none');
 }
 
@@ -692,8 +698,8 @@ export function onContentEnded() {
   contentComplete = true;
   if (adsLoader) {
     adsLoader.contentComplete();
-  }  
-  
+  }
+
   // If all ads are not completed,
   // onContentResume will show the bigPlayDiv
   if (allAdsCompleted) {
@@ -725,10 +731,10 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
       onContentPauseRequested.bind(null, global));
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
-    onContentResumeRequested);
+      onContentResumeRequested);
   adsManager.addEventListener(
-    global.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
-    onAllAdsCompleted);
+      global.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+      onAllAdsCompleted);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
@@ -803,7 +809,7 @@ export function onContentResumeRequested() {
     // resume content in that case.
     playVideo();
   } else {
-    setStyle(bigPlayDiv, 'display', 'table-cell'); 
+    setStyle(bigPlayDiv, 'display', 'table-cell');
   }
 
   videoPlayer.addEventListener('ended', onContentEnded);
@@ -1276,7 +1282,8 @@ function postMessage(data) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return {adContainerDiv, allAdsCompleted, adRequestFailed, adsActive, adsManagerWidthOnLoad,
+  return {adContainerDiv, allAdsCompleted,
+    adRequestFailed, adsActive, adsManagerWidthOnLoad,
     adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
     hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
     playerState, PlayerStates, bigPlayDiv, playPauseDiv, progressLine,
