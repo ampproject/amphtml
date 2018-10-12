@@ -24,20 +24,30 @@ describes.realWin('inabox-host:messaging', {}, env => {
   let host;
   let iframe1;
   let iframe2;
+  let iframe3;
   let iframeUntrusted;
 
   beforeEach(() => {
     win = env.win;
     iframe1 = win.document.createElement('iframe');
     iframe2 = win.document.createElement('iframe');
+    iframe3 = win.document.createElement('iframe');
     iframeUntrusted = win.document.createElement('iframe');
     win.document.body.appendChild(iframe1);
     win.document.body.appendChild(iframe2);
+    win.document.body.appendChild(iframe3);
     win.document.body.appendChild(iframeUntrusted);
     iframe1.contentWindow.postMessage = () => {};
     iframe2.contentWindow.postMessage = () => {};
+    iframe3.contentWindow.postMessage = () => {};
     iframeUntrusted.contentWindow.postMessage = () => {};
-    host = new InaboxMessagingHost(win, [iframe1, iframe2]);
+    iframe1.dataset.ampAllowed =
+        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+    iframe2.dataset.ampAllowed =
+        'send-positions';
+    iframeUntrusted.dataset.ampAllowed =
+        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+    host = new InaboxMessagingHost(win, [iframe1, iframe2, iframe3]);
   });
 
   describe('processMessage', () => {
@@ -49,6 +59,17 @@ describes.realWin('inabox-host:messaging', {}, env => {
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
           type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should process valid message 2', () => {
+      expect(host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
         }),
       })).to.be.true;
     });
@@ -102,6 +123,39 @@ describes.realWin('inabox-host:messaging', {}, env => {
           type: 'send-positions',
         }),
       });
+    });
+
+    it('should process messages with allowed actions', () => {
+      expect(host.processMessage({
+        source: iframe2.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-124',
+          type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should ignore messages with disallowed actions', () => {
+      expect(host.processMessage({
+        source: iframe2.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-124',
+          type: 'full-overlay-frame',
+        }),
+      })).to.be.false;
+    });
+
+    it('should allow messages from frames with no whitelist for now', () => {
+      expect(host.processMessage({
+        source: iframe3.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-125',
+          type: 'full-overlay-frame',
+        }),
+      })).to.be.true;
     });
   });
 

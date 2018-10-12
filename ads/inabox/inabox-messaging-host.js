@@ -129,6 +129,15 @@ export class InaboxMessagingHost {
       return false;
     }
 
+    const allowedTypes =
+        this.iframeMap_[request['sentinel']].iframe.dataset['ampAllowed'];
+    // having no whitelist is legacy behavior so assume all types are allowed
+    if (allowedTypes &&
+        !allowedTypes.split(/ *, */).includes(request['type'])) {
+      dev().info(TAG, 'Ignored non-whitelisted message type:', message);
+      return false;
+    }
+
     if (!this.msgObservable_.fire(request['type'], this,
         [iframe, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
