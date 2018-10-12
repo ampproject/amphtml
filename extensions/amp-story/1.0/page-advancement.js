@@ -23,8 +23,8 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
@@ -270,7 +270,7 @@ class ManualAdvancement extends AdvancementConfig {
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private {?Number} Last touchstart event's timestamp */
+    /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
     /** @private @const {!Window} */
@@ -327,7 +327,7 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * TouchEvent touchstart events handler.
-   * @param {!TouchEvent} event
+   * @param {!Event} event
    * @private
    */
   onTouchstart_(event) {
@@ -345,7 +345,7 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * TouchEvent touchend events handler.
-   * @param {!TouchEvent} event
+   * @param {!Event} event
    * @private
    */
   onTouchend_(event) {
