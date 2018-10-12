@@ -61,6 +61,8 @@ export class Tracking {
 
     /** @private {!Object} */
     this.skimOptions_ = skimOptions;
+
+    /** @private {!Object} */
     this.analytics_ = this.setupAnalytics_(element);
   }
 
@@ -220,6 +222,7 @@ export class Tracking {
    * CommonSignals.LOAD_START has been triggered.
    * (See "initTracking_" in amp-skimlinks.js)
    * @param {!AmpElement} element
+   * @return {!Object}
    * @private
    */
   setupAnalytics_(element) {
