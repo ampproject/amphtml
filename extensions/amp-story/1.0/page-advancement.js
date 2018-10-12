@@ -23,6 +23,7 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 
@@ -272,6 +273,9 @@ class ManualAdvancement extends AdvancementConfig {
     /** @private {?Number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
+    /** @private @const {!Window} */
+    this.win_ = win;
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -309,10 +313,13 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   startListening_() {
-    this.element_
-        .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
-    this.element_
-        .addEventListener('touchend', this.onTouchend_.bind(this), true);
+    if (isExperimentOn(this.win_, 'amp-story-hold-to-pause')) {
+      this.element_
+          .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
+      this.element_
+          .addEventListener('touchend', this.onTouchend_.bind(this), true);
+    }
+
     this.element_
         .addEventListener(
             'click', this.maybePerformNavigation_.bind(this), true);
