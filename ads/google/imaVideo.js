@@ -657,10 +657,8 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      postMessage({event: VideoEvents.PLAYING});
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -668,7 +666,6 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    postMessage({event: VideoEvents.PLAYING});
     playVideo();
   }
 }
