@@ -76,7 +76,7 @@ function appendAnalyticsRow(urlParams) {
     urlParams.get('total'),
     urlParams.get('duration'),
   ]));
-  container.scrollTop = container.scrollHeight;
+  container./*OK*/scrollTop = container./*OK*/scrollHeight;
 }
 
 function getHoursMinutesSeconds() {
@@ -96,7 +96,7 @@ function createTableRow(cellsContent) {
 
 function createTableCell(contents) {
   var cell = document.createElement('td');
-  cell.innerText = contents;
+  cell./*OK*/innerText = contents;
   return cell;
 }
 
