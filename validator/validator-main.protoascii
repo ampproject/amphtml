@@ -4139,6 +4139,13 @@ attr_lists: {
         ")(\\s|$)"
   }
 }
+attr_lists: {
+  name: "input-amp-form-attr"
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
+}
 # 4.10.4 The label element
 tags: {
   html_format: AMP
@@ -4164,6 +4171,7 @@ tags: {
         "password|"
         ")(\\s|$)"
   }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   # Note that this amp-bind attribute is not available for the AMP4Email format
@@ -4181,6 +4189,7 @@ tags: {
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
@@ -4196,6 +4205,7 @@ tags: {
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
@@ -4215,6 +4225,7 @@ tags: {
         "password|"
         ")(\\s|$)"
   }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
@@ -4289,6 +4300,7 @@ tags: {
   attrs: { name: "[multiple]" }
   attrs: { name: "[required]" }
   attrs: { name: "[size]" }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -4372,6 +4384,7 @@ tags: {
   attrs: { name: "[selectionstart]" }
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
+  attr_lists: "input-amp-form-attr"
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
