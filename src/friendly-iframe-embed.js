@@ -654,6 +654,8 @@ export function isInFie(element) {
 /**
  * Preloads extensions. The extensions field is the preferred means as it
  * supports versions.
+ * TODO(alabiaga): clean up once verified that cloudfare is also using the
+ * extensions format.
  * @param {?../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef|!FriendlyIframeSpec} metaData
  * @param {!Window} win
  */
