@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc} from '../../../src/service';
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
@@ -79,3 +79,22 @@ export class AmpStoryRequestService {
         });
   }
 }
+
+/**
+ * Util function to retrieve the request service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @param  {!Element} storyEl
+ * @return {!AmpStoryRequestService}
+ */
+export const getRequestService = (win, storyEl) => {
+  let service = Services.storyRequestService(win);
+
+  if (!service) {
+    service = new AmpStoryRequestService(win, storyEl);
+    registerServiceBuilder(win, 'story-request', () => service);
+  }
+
+  return service;
+};

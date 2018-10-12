@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
@@ -1213,7 +1212,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
@@ -1258,6 +1257,7 @@ describe('Viewport META', () => {
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
         location: {},
+        Promise: window.Promise,
       };
       installTimerService(windowApi);
       installVsyncService(windowApi);
@@ -1399,6 +1399,7 @@ describe('createViewport', () => {
       ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       viewer = Services.viewerForDoc(ampDoc);
+      win.getComputedStyle = () => ({});
     });
 
     it('should bind to "natural" when not iframed', () => {

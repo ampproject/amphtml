@@ -16,19 +16,26 @@
 
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
-import {Action, StateProperty} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+  UIType,
+} from '../amp-story-store-service';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
-import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {AmpStoryConsent} from '../amp-story-consent';
+import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
-const NOOP = () => {};
-
+// Represents the correct value of KeyboardEvent.which for the Right Arrow
+const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
 describes.realWin('amp-story', {
   amp: {
@@ -40,21 +47,7 @@ describes.realWin('amp-story', {
   let win;
   let element;
   let story;
-
-  /**
-   * @param {!Element} container
-   * @param {boolean=} opt_active
-   * @return {!Element}
-   */
-  function appendEmptyPage(container, opt_active) {
-    const page = document.createElement('amp-story-page');
-    page.id = '-empty-page';
-    if (opt_active) {
-      page.setAttribute('active', true);
-    }
-    container.appendChild(page);
-    return page;
-  }
+  let replaceStateStub;
 
   /**
    * @param {!Element} container
@@ -87,6 +80,11 @@ describes.realWin('amp-story', {
   beforeEach(() => {
     win = env.win;
 
+    replaceStateStub = sandbox.stub(win.history, 'replaceState');
+
+    sandbox.stub(Services, 'storyStoreService')
+        .callsFake(() => new AmpStoryStoreService(win));
+
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
@@ -94,11 +92,10 @@ describes.realWin('amp-story', {
     registerServiceBuilder(win, 'localization', () => localizationService);
 
     AmpStory.isBrowserSupported = () => true;
-    story = new AmpStory(element);
-    // TODO(alanorozco): Test active page event triggers once the stubbable
-    // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_,
-    // 'triggerActiveEventForPage_').callsFake(NOOP);
+
+    return element.getImpl().then(impl => {
+      story = impl;
+    });
   });
 
   afterEach(() => {
@@ -185,7 +182,7 @@ describes.realWin('amp-story', {
   it('should not prerender/load the share menu on desktop', () => {
     createPages(story.element, 2);
 
-    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
@@ -195,25 +192,11 @@ describes.realWin('amp-story', {
         });
   });
 
-  // TODO(#11639): Re-enable this test.
-  it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
-    const hideBookendStub = sandbox.stub(
-        element.implementation_, 'hideBookend_', NOOP);
-
-    appendEmptyPage(element);
-
-    element.build();
-
-    element.dispatchEvent(new Event(EventType.CLOSE_BOOKEND));
-
-    expect(hideBookendStub).to.have.been.calledOnce;
-  });
-
   it('should return a valid page index', () => {
     createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
     return story.layoutCallback()
         .then(() => {
-        // Getting all the AmpStoryPage objets.
+          // Getting all the AmpStoryPage objets.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
@@ -221,31 +204,39 @@ describes.realWin('amp-story', {
           return Promise.all(pages);
         })
         .then(pages => {
-        // Only the first page should be active.
+          // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             expect(story.getPageIndex(pages[i])).to.equal(i);
           }
         });
   });
 
-
   it('should pause/resume pages when switching pages', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
+    sandbox.stub(story, 'maybePreloadBookend_').returns();
+    let pauseOldPageStub;
+    let resumeNewPageStub;
+
     return story.layoutCallback()
         .then(() => {
-        // Getting all the AmpStoryPage objects.
+          // Getting all the AmpStoryPage objects.
           const pageElements =
             story.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
+
           return Promise.all(pages);
-          const oldPage = pageElements[0].implementation_;
-          const newPage = pageElements[1].implementation_;
-          const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-          const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
-          story.switchTo_('page-1').then(() => {
-            expect(pauseOldPageStub).to.have.been.calledOnce;
-            expect(resumeNewPageStub).to.have.been.calledOnce;
-          });
+        })
+        .then(pages => {
+          const oldPage = pages[0];
+          const newPage = pages[1];
+
+          pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+          resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+        })
+        .then(() => story.switchTo_('page-1'))
+        .then(() => {
+          expect(pauseOldPageStub).to.have.been.calledOnce;
+          expect(resumeNewPageStub).to.have.been.calledOnce;
         });
   });
 
@@ -266,8 +257,8 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.keyCode = KeyCodes.RIGHT_ARROW;
-    eventObj.which = KeyCodes.RIGHT_ARROW;
+    eventObj.key = Keys.RIGHT_ARROW;
+    eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :
@@ -278,21 +269,34 @@ describes.realWin('amp-story', {
   });
 
   it('lock body when amp-story is initialized', () => {
-    story.lockBody_();
-    expect(win.document.body.style.getPropertyValue('overflow'))
-        .to.be.equal('hidden');
-    expect(win.document.documentElement.style.getPropertyValue('overflow'))
-        .to.be.equal('hidden');
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    return story.layoutCallback()
+        .then(() => {
+          story.lockBody_();
+          expect(win.document.body.style.getPropertyValue('overflow'))
+              .to.be.equal('hidden');
+          expect(
+              win.document.documentElement.style.getPropertyValue('overflow'))
+              .to.be.equal('hidden');
+        });
   });
 
   it('builds and attaches pagination buttons ', () => {
-    const paginationButtonsStub = {
-      attach: sandbox.spy(),
-      onNavigationStateChange: sandbox.spy(),
-    };
-    sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
-    story.buildPaginationButtonsForTesting();
-    expect(paginationButtonsStub.attach).to.have.been.calledWith(story.element);
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    return story.layoutCallback()
+        .then(() => {
+          const paginationButtonsStub = {
+            attach: sandbox.spy(),
+            onNavigationStateChange: sandbox.spy(),
+          };
+          sandbox.stub(PaginationButtons, 'create')
+              .returns(paginationButtonsStub);
+          story.buildPaginationButtonsForTesting();
+          expect(paginationButtonsStub.attach)
+              .to.have.been.calledWith(story.element);
+        });
   });
 
   it.skip('toggles `i-amphtml-story-landscape` based on height and width',
@@ -339,17 +343,13 @@ describes.realWin('amp-story', {
   });
 
   it('should update page id in browser history', () => {
-    // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc).
-    const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'page-zero';
     const pageCount = 2;
     createPages(story.element, pageCount, [firstPageId, 'page-1']);
 
-    story.buildCallback();
     return story.layoutCallback()
         .then(() => {
-          return expect(replaceStub).to.have.been.calledWith(
+          return expect(replaceStateStub).to.have.been.calledWith(
               {ampStoryPageId: firstPageId},
               '',
           );
@@ -357,9 +357,6 @@ describes.realWin('amp-story', {
   });
 
   it('should NOT update page id in browser history if ad', () => {
-    // Have to stub this because tests run in iframe and you can't write
-    // history from another domain (about:srcdoc)
-    const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'i-amphtml-ad-page-1';
     const pageCount = 2;
     const pages = createPages(story.element, pageCount,
@@ -367,19 +364,16 @@ describes.realWin('amp-story', {
     const firstPage = pages[0];
     firstPage.setAttribute('ad', '');
 
-    story.buildCallback();
     return story.layoutCallback()
         .then(() => {
-          return expect(replaceStub).to.not.have.been.called;
+          return expect(replaceStateStub).to.not.have.been.called;
         });
   });
 
   it('should not set first page to active when rendering paused story', () => {
-    sandbox.stub(win.history, 'replaceState');
     createPages(story.element, 2, ['cover', 'page-1']);
 
     story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-    story.buildCallback();
 
     return story.layoutCallback()
         .then(() => {
@@ -390,7 +384,12 @@ describes.realWin('amp-story', {
 
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -403,8 +402,6 @@ describes.realWin('amp-story', {
       // consent prompt.
       const promise = new Promise(() => {});
       sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -425,7 +422,12 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story after the consent is resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -442,8 +444,6 @@ describes.realWin('amp-story', {
       });
 
       sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -468,7 +468,12 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story if the consent was already resolved', () => {
-      sandbox.stub(win.history, 'replaceState');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({clearWhitelist: () => {}, trigger: () => {}});
+
+      // Prevents amp-story-consent element from running code that is irrelevant
+      // to this test.
+      sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
       const consentEl = win.document.createElement('amp-consent');
       const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -480,8 +485,6 @@ describes.realWin('amp-story', {
       // Returns an already resolved promised: the user already accepted or
       // rejected the consent in a previous session.
       sandbox.stub(consent, 'getConsentPolicyState').resolves();
-
-      story.buildCallback();
 
       const coverEl = element.querySelector('amp-story-page');
       let setStateStub;
@@ -507,7 +510,6 @@ describes.realWin('amp-story', {
 
   describe('amp-story pause/resume callbacks', () => {
     it('should pause the story when tab becomes inactive', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       sandbox.stub(story.documentState_, 'isHidden').returns(true);
@@ -529,7 +531,6 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story when tab becomes active', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       sandbox.stub(story.documentState_, 'isHidden').returns(false);
@@ -553,10 +554,7 @@ describes.realWin('amp-story', {
     });
 
     it('should pause the story when viewer becomes inactive', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -567,12 +565,9 @@ describes.realWin('amp-story', {
     });
 
     it('should play the story when viewer becomes active', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -583,12 +578,9 @@ describes.realWin('amp-story', {
     });
 
     it('should keep the story paused on resume when previously paused', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -606,7 +598,6 @@ describes.realWin('amp-story', {
       story = new AmpStory(element);
       const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
       createPages(story.element, 2, ['cover', 'page-4']);
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
             expect(dispatchStub).to.have.been.calledWith(
@@ -616,7 +607,6 @@ describes.realWin('amp-story', {
     });
 
     it('should display the story after clicking "continue" button', () => {
-
       AmpStory.isBrowserSupported = () => false;
       story = new AmpStory(element);
       const dispatchStub = sandbox.stub(
@@ -624,9 +614,6 @@ describes.realWin('amp-story', {
       createPages(story.element, 2, ['cover', 'page-1']);
 
       story.buildCallback();
-      //story.layoutCallback();
-
-      //story.unsupportedBrowserLayer_.continueButton_.click();
 
       return story.layoutCallback()
           .then(() => {
@@ -640,47 +627,111 @@ describes.realWin('amp-story', {
     });
   });
 
+  describe('amp-story custom sidebar', () => {
+    it('should show the sidebar control if a sidebar exists', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
 
-  describe('desktop attributes', () => {
-    it('should add next page attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
 
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page1 = pages[1];
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => {
-            expect(page1.hasAttribute('i-amphtml-next-page')).to.be.true;
+            expect(story.storeService_
+                .get(StateProperty.HAS_SIDEBAR_STATE)).to.be.true;
           });
     });
 
-    it('should add previous page attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
-      sandbox.stub(story, 'maybePreloadBookend_').returns();
-      sandbox.stub(utils, 'setAttributeInMutate').callsFake(
-          (el, attr) => el.element.setAttribute(attr, ''));
+    it('should open the sidebar on button click', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
 
-      const pages = createPages(story.element, 2, ['page-0', 'page-1']);
-      const page0 = pages[0];
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      const executeSpy = sandbox.spy();
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: executeSpy,
+          });
+
       story.buildCallback();
       return story.layoutCallback()
-          .then(() => story.switchTo_('page-1'))
           .then(() => {
-            expect(page0.hasAttribute('i-amphtml-previous-page')).to.be.true;
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+            expect(executeSpy).to.have.been.calledWith(story.sidebar_, 'open',
+                null, null, null, null, ActionTrust.HIGH);
+          });
+    });
+
+    it('should unpause the story when the sidebar is closed', () => {
+      createPages(story.element, 2, ['cover', 'page-1']);
+
+      const sidebar = win.document.createElement('amp-sidebar');
+      story.element.appendChild(sidebar);
+
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .returns({setWhitelist: () => {}, trigger: () => {},
+            addToWhitelist: () => {},
+            clearWhitelist: () => {},
+            execute: () => {sidebar.setAttribute('open', '');}});
+
+      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+          }).then(() => {
+            story.sidebar_.removeAttribute('open');
+          }).then(() => {
+            expect(story.storeService_.get(StateProperty.SIDEBAR_STATE))
+                .to.be.false;
+          });
+    });
+  });
+
+  describe('desktop attributes', () => {
+    it('should add desktop-position attributes', () => {
+      const desktopAttribute = 'i-amphtml-desktop-position';
+      const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
+
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => {
+            expect(pages[0].getAttribute(desktopAttribute)).to.equal('0');
+            expect(pages[1].getAttribute(desktopAttribute)).to.equal('1');
+            expect(pages[2].getAttribute(desktopAttribute)).to.equal('2');
+            expect(pages[3].hasAttribute(desktopAttribute)).to.be.false;
+          });
+    });
+
+    it('should update desktop-position attributes upon navigation', () => {
+      const desktopAttribute = 'i-amphtml-desktop-position';
+      const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
+
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+
+      story.buildCallback();
+
+      return story.layoutCallback()
+          .then(() => story.switchTo_('2'))
+          .then(() => {
+            expect(pages[0].getAttribute(desktopAttribute)).to.equal('-2');
+            expect(pages[1].getAttribute(desktopAttribute)).to.equal('-1');
+            expect(pages[2].getAttribute(desktopAttribute)).to.equal('0');
+            expect(pages[3].getAttribute(desktopAttribute)).to.equal('1');
           });
     });
 
     it('should add previous visited attribute', () => {
-      sandbox.stub(win.history, 'replaceState');
       sandbox.stub(story, 'maybePreloadBookend_').returns();
       sandbox.stub(utils, 'setAttributeInMutate').callsFake(
           (el, attr) => el.element.setAttribute(attr, ''));
 
       const pages = createPages(story.element, 2, ['page-0', 'page-1']);
       const page0 = pages[0];
-      story.buildCallback();
       return story.layoutCallback()
           .then(() => story.switchTo_('page-1'))
           .then(() => {
@@ -691,15 +742,12 @@ describes.realWin('amp-story', {
 
   describe('amp-story audio', () => {
     it('should register and preload the background audio', () => {
-      sandbox.stub(win.history, 'replaceState');
       const src = 'https://example.com/foo.mp3';
       story.element.setAttribute('background-audio', src);
       const registerStub = sandbox.stub(story.mediaPool_, 'register');
       const preloadStub = sandbox.stub(story.mediaPool_, 'preload').resolves();
 
       createPages(story.element, 2, ['cover', 'page-1']);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -715,11 +763,12 @@ describes.realWin('amp-story', {
           sandbox.stub(story.mediaPool_, 'blessAll').resolves();
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-
-      expect(blessAllStub).to.have.been.calledOnce;
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+            expect(blessAllStub).to.have.been.calledOnce;
+          });
     });
 
     it('should pause the background audio on ad state if not muted', () => {
@@ -728,15 +777,16 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
 
-      const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
+            story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+            story.storeService_.dispatch(Action.TOGGLE_AD, true);
 
-      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-      story.storeService_.dispatch(Action.TOGGLE_AD, true);
-
-      expect(pauseStub).to.have.been.calledOnce;
-      expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
+            expect(pauseStub).to.have.been.calledOnce;
+            expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
+          });
     });
 
     it('should play the background audio when hiding ad if not muted', () => {
@@ -745,21 +795,23 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
-      // Displaying an ad and not muted.
-      story.storeService_.dispatch(Action.TOGGLE_AD, true);
-      story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+      return story.layoutCallback()
+          .then(() => {
+            // Displaying an ad and not muted.
+            story.storeService_.dispatch(Action.TOGGLE_AD, true);
+            story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
 
-      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
-      const playStub = sandbox.stub(story.mediaPool_, 'play');
+            const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+            const playStub = sandbox.stub(story.mediaPool_, 'play');
 
-      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+            story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
-      expect(unmuteStub).to.have.been.calledOnce;
-      expect(unmuteStub).to.have.been.calledWith(backgroundAudioEl);
-      expect(playStub).to.have.been.calledOnce;
-      expect(playStub).to.have.been.calledWith(backgroundAudioEl);
+            expect(unmuteStub).to.have.been.calledOnce;
+            expect(unmuteStub).to.have.been.calledWith(backgroundAudioEl);
+            expect(playStub).to.have.been.calledOnce;
+            expect(playStub).to.have.been.calledWith(backgroundAudioEl);
+          });
     });
 
     it('should not play the background audio when hiding ad if muted', () => {
@@ -768,25 +820,25 @@ describes.realWin('amp-story', {
       story.backgroundAudioEl_ = backgroundAudioEl;
 
       createPages(story.element, 2, ['cover', 'page-1']);
-      story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_AD, true);
+      return story.layoutCallback()
+          .then(() => {
+            story.storeService_.dispatch(Action.TOGGLE_AD, true);
 
-      const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
-      const playStub = sandbox.stub(story.mediaPool_, 'play');
+            const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
+            const playStub = sandbox.stub(story.mediaPool_, 'play');
 
-      story.storeService_.dispatch(Action.TOGGLE_AD, false);
+            story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
-      expect(unmuteStub).not.to.have.been.called;
-      expect(playStub).not.to.have.been.called;
+            expect(unmuteStub).not.to.have.been.called;
+            expect(playStub).not.to.have.been.called;
+          });
     });
 
     it('should mute the page and unmute the next page upon navigation', () => {
-      sandbox.stub(win.history, 'replaceState');
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-      story.buildCallback();
 
       let coverMuteStub;
       let firstPageUnmuteStub;
@@ -808,50 +860,118 @@ describes.realWin('amp-story', {
 
   describe('#getMaxMediaElementCounts', () => {
     it('should create 2 audio & video elements when no elements found', () => {
-      sandbox.stub(story.element, 'querySelectorAll').returns([]);
+      createPages(story.element, 2, ['cover', 'page-1']);
 
-      const expected = {
-        [MediaType.AUDIO]: 2,
-        [MediaType.VIDEO]: 2,
-      };
-      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+      return story.layoutCallback()
+          .then(() => {
+            sandbox.stub(story.element, 'querySelectorAll').returns([]);
+
+            const expected = {
+              [MediaType.AUDIO]: 2,
+              [MediaType.VIDEO]: 2,
+            };
+            expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          });
     });
 
     it('should create 2 extra audio & video elements for ads', () => {
-      const qsStub = sandbox.stub(story.element, 'querySelectorAll');
-      qsStub.withArgs('amp-audio, [background-audio]').returns(['el']);
-      qsStub.withArgs('amp-video').returns(['el', 'el']);
+      createPages(story.element, 2, ['cover', 'page-1']);
 
-      const expected = {
-        [MediaType.AUDIO]: 3,
-        [MediaType.VIDEO]: 4,
-      };
-      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+      return story.layoutCallback()
+          .then(() => {
+            const qsStub = sandbox.stub(story.element, 'querySelectorAll');
+            qsStub.withArgs('amp-audio, [background-audio]').returns(['el']);
+            qsStub.withArgs('amp-video').returns(['el', 'el']);
+
+            const expected = {
+              [MediaType.AUDIO]: 3,
+              [MediaType.VIDEO]: 4,
+            };
+            expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          });
     });
 
     it('never have more than the defined maximums', () => {
-      const qsStub = sandbox.stub(story.element, 'querySelectorAll');
-      qsStub.withArgs('amp-audio, [background-audio]')
-          .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el']);
-      qsStub.withArgs('amp-video')
-          .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el', 'el']);
+      createPages(story.element, 2, ['cover', 'page-1']);
 
-      const expected = {
-        [MediaType.AUDIO]: 4,
-        [MediaType.VIDEO]: 8,
-      };
-      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+      return story.layoutCallback()
+          .then(() => {
+            const qsStub = sandbox.stub(story.element, 'querySelectorAll');
+            qsStub.withArgs('amp-audio, [background-audio]')
+                .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el']);
+            qsStub.withArgs('amp-video')
+                .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el', 'el']);
+
+            const expected = {
+              [MediaType.AUDIO]: 4,
+              [MediaType.VIDEO]: 8,
+            };
+            expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          });
     });
   });
 
-  // TODO(gmajoulet): WIP, unskip these tests once the paywall navigation code
-  // is checked in.
-  describe('amp-access navigation', () => {
-    it.skip('should set the access state to true if next page blocked', () => {
-      sandbox.stub(win.history, 'replaceState');
+  describe('amp-story navigation', () => {
+    it('should navigate when performing a navigational click', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-      story.buildCallback();
+      return story.layoutCallback()
+          .then(() => {
+            // Click on right side of the screen to trigger page advancement.
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+
+            story.activePage_.element.dispatchEvent(clickEvent);
+
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should NOT navigate when clicking on a tappable element', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const tappableEl = win.document.createElement('target');
+            tappableEl.setAttribute('on', 'tap:cover.hide');
+            story.activePage_.element.appendChild(tappableEl);
+
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            tappableEl.dispatchEvent(clickEvent);
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should NOT navigate when clicking on a shadow DOM element', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            story.shareMenu_.element_.dispatchEvent(clickEvent);
+
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should NOT navigate when clicking on a CTA link', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      return story.layoutCallback()
+          .then(() => {
+            const ctaLink = win.document.createElement('a');
+            ctaLink.setAttribute('role', 'link');
+            story.activePage_.element.appendChild(ctaLink);
+
+            const clickEvent = new MouseEvent('click', {clientX: 200});
+            ctaLink.dispatchEvent(clickEvent);
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+  });
+
+  describe('amp-access navigation', () => {
+    it('should set the access state to true if next page blocked', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
 
       return story.layoutCallback()
           .then(() => {
@@ -865,11 +985,8 @@ describes.realWin('amp-story', {
           });
     });
 
-    it.skip('should not navigate if next page is blocked by paywall', () => {
-      sandbox.stub(win.history, 'replaceState');
+    it('should not navigate if next page is blocked by paywall', () => {
       createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-
-      story.buildCallback();
 
       return story.layoutCallback()
           .then(() => {
@@ -879,6 +996,166 @@ describes.realWin('amp-story', {
           })
           .then(() => {
             expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should navigate once the doc is reauthorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      let authorizedCallback;
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => true,
+        onApplyAuthorizations: fn => authorizedCallback = fn,
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigates to a paywall protected page, and waits until the document
+      // is successfuly reauthorized to navigate.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            story.getPageById('page-1')
+                .element.removeAttribute('amp-access-hide');
+            authorizedCallback();
+
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should hide the paywall once the doc is reauthorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      let authorizedCallback;
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => true,
+        onApplyAuthorizations: fn => authorizedCallback = fn,
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigates to a paywall protected page, and waits until the document
+      // is successfuly reauthorized to hide the access UI.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+            story.getPageById('page-1')
+                .element.removeAttribute('amp-access-hide');
+            authorizedCallback();
+
+            expect(story.storeService_.get(StateProperty.ACCESS_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should not navigate on doc reauthorized if page still blocked', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      let authorizedCallback;
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => true,
+        onApplyAuthorizations: fn => authorizedCallback = fn,
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigates to a paywall protected page, and does not navigate to that
+      // page if the document has been reauthorized with insuficient rights.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            authorizedCallback();
+
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should show paywall on doc reauthorized if page still blocked', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      let authorizedCallback;
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => true,
+        onApplyAuthorizations: fn => authorizedCallback = fn,
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigates to a paywall protected page, and does not hide the access UI
+      // if the document has been reauthorized with insuficient rights.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access-hide', '');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            authorizedCallback();
+
+            expect(story.storeService_.get(StateProperty.ACCESS_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should block navigation if doc authorizations are pending', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => false,
+        onApplyAuthorizations: () => {},
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigates to a maybe protected page (has amp-access="" rule), but the
+      // document authorizations are still pending. Asserts that it blocks the
+      // navigation.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access', 'random condition');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should navigate only after the doc is first authorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      let authorizedCallback;
+      const fakeAccessService = {
+        areFirstAuthorizationsCompleted: () => false,
+        onApplyAuthorizations: fn => authorizedCallback = fn,
+      };
+      sandbox.stub(Services, 'accessServiceForDocOrNull')
+          .resolves(fakeAccessService);
+
+      // Navigation to a maybe protected page (has amp-access="" rule) is
+      // blocked until the authorizations are completed.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('amp-access', 'random condition');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            authorizedCallback();
+            expect(story.activePage_.element.id).to.equal('page-1');
           });
     });
   });

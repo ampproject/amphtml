@@ -34,9 +34,6 @@ export const EventType = {
   // Triggered when the story should switch to the next page
   NEXT_PAGE: 'ampstory:nextpage',
 
-  // Triggered when the story should navigate after a tap on active page.
-  TAP_NAVIGATION: 'ampstory:tapnavigation',
-
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
@@ -55,6 +52,9 @@ export const EventType = {
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
+
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction',
 };
 
 /**

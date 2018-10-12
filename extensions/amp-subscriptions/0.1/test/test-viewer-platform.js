@@ -186,10 +186,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       viewerPlatform.pingback();
       expect(proxyStub).to.be.called;
     });
-    it('should delegate supportsCurrentViewer', () => {
+    it('should delegate getSupportedScoreFactor', () => {
       const proxyStub =
-        sandbox.stub(viewerPlatform.platform_, 'supportsCurrentViewer');
-      viewerPlatform.supportsCurrentViewer();
+        sandbox.stub(viewerPlatform.platform_, 'getSupportedScoreFactor');
+      viewerPlatform.getSupportedScoreFactor('currentViewer');
       expect(proxyStub).to.be.called;
     });
   });

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import * as log from '../../src/log';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -31,7 +29,9 @@ import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {
+  installDocumentInfoServiceForDoc,
+} from '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
@@ -67,7 +67,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -107,6 +107,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
       Math: window.Math,
+      Promise: window.Promise,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -789,7 +790,6 @@ describes.realWin('cid', {amp: true}, env => {
     sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
-    const rethrowAsyncStub = sandbox.stub(log, 'rethrowAsync');
     cid.get({scope: 'foo'}, hasConsent)
         .then(result => {
           scopedCid = result;
@@ -799,12 +799,8 @@ describes.realWin('cid', {amp: true}, env => {
     clock.tick(9999);
     yield macroTask();
     expect(resolved).to.be.false;
-    clock.tick(1);
-    yield macroTask();
-    expect(resolved).to.be.true;
     expect(scopedCid).to.be.undefined;
     yield macroTask();
-    expect(rethrowAsyncStub).to.be.calledOnce;
   });
 
   describe('pub origin, CID API opt in', () => {

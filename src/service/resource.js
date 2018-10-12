@@ -328,7 +328,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox());
+        this.element.updateLayoutBox(this.getLayoutBox(), true);
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -439,13 +439,13 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    const oldBox = this.getPageLayoutBox();
+    const oldBox = this.layoutBox_;
     if (this.useLayers_) {
       this.measureViaLayers_();
     } else {
       this.measureViaResources_();
     }
-    const box = this.getPageLayoutBox();
+    const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, box);
@@ -516,6 +516,7 @@ export class Resource {
      * for both 2 and 3, we need for force it.
      */
     layers.remeasure(element, /* opt_force */ true);
+    this.layoutBox_ = this.getPageLayoutBox();
   }
 
   /**
@@ -546,7 +547,6 @@ export class Resource {
    */
   completeExpand() {
     toggle(this.element, true);
-    this.element.removeAttribute('hidden');
     this.requestMeasure();
   }
 
@@ -780,12 +780,13 @@ export class Resource {
    * calculation based on tree depth and number of layer scrolls it would take
    * to view the element.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @return {number}
    */
   layersDistanceRatio_(currentScore, layout, depth) {
+    currentScore = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalViewportsFromParent() +
@@ -1020,6 +1021,6 @@ export class Resource {
    */
   disconnect() {
     delete this.element[RESOURCE_PROP_];
-    this.element.disconnectedCallback();
+    this.element.disconnect(/* opt_pretendDisconnected */ true);
   }
 }

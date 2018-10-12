@@ -144,12 +144,25 @@ current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
+#### onUpdateHref
+`onUpdateHref`: Instructs AMP to make a CORS HTTPS POST request with credentials to the specified URL whenever the stored consent state changes.
+
+AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
+
+```html
+{
+  "consentInstanceId": "my-consent",
+  "ampUserId": "xxx",
+  "consentState": true/false,
+}
+```
+
 #### promptIfUnknownForGeoGroup
 `promptIfUnknownForGeoGroup` Provides an alternative way to instruct AMP to display consent prompt or not when consent state is unknown.
 
 To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
 
-In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. `promptIfUnknown`'s value from response will be respected.
+In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. The value from `<amp-geo>` will be respected.
 
 #### promptUI
 
@@ -290,9 +303,8 @@ The post-prompt UI provides one user action type that can be used to allow the u
 
 The `<amp-consent>` element can be used to block any other AMP components on the page from loading (except `<amp-consent>` itself).
 
-To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
-
-AMP may support more advanced customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
+### Basic blocking behaviors
+To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response or `promptIfUnknownForGeoGroup` when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
@@ -305,7 +317,28 @@ Individual components may override this behavior to provide more specialized han
 </amp-analytics>
 ```
 
-### Advanced Consent Blocking Behaviors
+### Advanced predefined consent blocking behaviors
+AMP provides a list of pre-defined [consent policy instances](#policy-instance-optional) for publishers to easily define consent blocking behaviors to individual components.
+
+Set the value to the `data-block-on-consent` attribute to use the pre-defined consent blocking behavior policy.
+
+*Example: Blocking the analytics until user respond to consent*
+
+```html
+<amp-analytics data-block-on-consent="_till_responded"
+  type="googleanalytics">
+</amp-analytics>
+```
+
+AMP may support more advanced pre-defined blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved only for the following supported pre-defined attributes:
+
+* `_till_responded` : Unblock the component until the user has responded to the consent prompt, or the consent prompt has been skipped.
+* `_till_accepted` : [Default basic blocking behavior](#basic-blocking-behaviors), expect that when `_till_accepted` is explicitly added, individual components cannot override the blocking behavior.
+* `_auto_reject` : Always reject the consent automatically if consent is required but unknown. The reject consent decision will not be stored. It is recommended not to specify a consent prompt UI when auto rejecting consent for every components.
+
+When one of the pre-defined attributes is used, AMP assumes that the publisher takes final control on the consent blocking behaviors. Individual components cannot override the blocking behaviors brought by pre-defined consent policy, they can however still customize components' behaviors after having been unblocked.
+
+### Customize Consent Blocking Behaviors
 An optional `policy` object can be added to the `<amp-consent>` element's JSON configuration object to customize consent blocking behaviors.
 
 ```html

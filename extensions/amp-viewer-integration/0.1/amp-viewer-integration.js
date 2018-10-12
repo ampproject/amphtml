@@ -15,7 +15,12 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
-import {HighlightHandler, HighlightInfoDef, getHighlightParam} from './highlight-handler';
+import {
+  HighlightHandler,
+  HighlightInfoDef,
+  getHighlightParam,
+} from './highlight-handler';
+import {KeyboardHandler} from './keyboard-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -29,10 +34,9 @@ import {
   getAmpdoc,
   registerServiceBuilder,
 } from '../../../src/service';
-import {getData} from '../../../src/event-helper';
+import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -192,6 +196,9 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
+    if (viewer.hasCapability('keyboard')) {
+      this.initKeyboardHandler_(messaging);
+    }
     if (this.highlightHandler_ != null) {
       this.highlightHandler_.setupMessaging(messaging);
     }
@@ -213,6 +220,14 @@ export class AmpViewerIntegration {
    */
   initTouchHandler_(messaging) {
     new TouchHandler(this.win, messaging);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initKeyboardHandler_(messaging) {
+    new KeyboardHandler(this.win, messaging);
   }
 }
 

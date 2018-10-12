@@ -16,7 +16,6 @@
 
 import * as dom from '../../src/dom';
 import * as ext from '../../src/service/extensions-impl';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
@@ -27,7 +26,7 @@ import {
   installAmpdocServices,
 } from '../../src/runtime';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {deactivateChunking} from '../../src/chunk';
+import {deactivateChunking, runChunksForTesting} from '../../src/chunk';
 import {
   getServiceForDoc,
   getServicePromise,
@@ -36,7 +35,6 @@ import {
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 

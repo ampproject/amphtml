@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
@@ -121,7 +121,6 @@ export class AdvancementConfig {
 
   /**
    * @return {number}
-   * @protected
    */
   getProgress() {
     return 1;
@@ -161,16 +160,15 @@ export class AdvancementConfig {
 
   /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage} page
-   * @return {!AdvancementConfig}
+   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
+   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
    */
-  static forPage(page) {
-    const rootEl = page.element;
+  static forElement(element) {
+    const rootEl = element.element;
     const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootEl),
+      ManualAdvancement.fromElement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -264,12 +262,11 @@ class ManualAdvancement extends AdvancementConfig {
     super();
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
-    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
       this.storeService_ =
-        Services.storyStoreService(element.ownerDocument.defaultView);
+        getStoreService(element.ownerDocument.defaultView);
     }
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
@@ -295,9 +292,6 @@ class ManualAdvancement extends AdvancementConfig {
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
-    if (!this.hasAutoAdvanceStr_) {
-      super.onProgressUpdate();
-    }
   }
 
   /** @override */
@@ -332,23 +326,36 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    const elementRole = event.target.getAttribute('role');
+    return !!closest(dev().assertElement(event.target), el => {
+      const elementRole = el.getAttribute('role');
 
-    if (elementRole) {
-      return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
-    }
-    return false;
+      if (elementRole) {
+        return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
+      }
+      return false;
+    }, /* opt_stopAt */ this.element_);
   }
 
+
+  /**
+   * Checks if current element is a descendant of amp-story-page. It will not be
+   * when it's in a shadow root, for example.
+   * @param {!Event} event
+   */
+  isAmpStoryPageDescendant_(event) {
+    return !!closest(dev().assertElement(event.target), el => {
+      return el.tagName.toLowerCase() == 'amp-story-page';
+    });
+  }
 
   /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
-   * @private
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
+    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event) ||
+      !this.isAmpStoryPageDescendant_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -387,6 +394,19 @@ class ManualAdvancement extends AdvancementConfig {
     }
 
     return right.direction;
+  }
+
+  /**
+   * Gets an instance of ManualAdvancement based on the HTML tag of the element.
+   * @param {!Element} rootEl
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   *                              an amp-story tag.
+   */
+  static fromElement(rootEl) {
+    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+      return null;
+    }
+    return new ManualAdvancement(rootEl);
   }
 }
 
@@ -429,6 +449,8 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.startTimeMs_ = this.getCurrentTimestampMs_();
 
     this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -510,6 +532,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {?Element} */
     this.mediaElement_ = null;
 
+    /** @private {?UnlistenDef} */
+    this.unlistenEndedFn_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenTimeupdateFn_ = null;
+
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
   }
@@ -579,8 +607,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
   startHtmlMediaElement_() {
     const mediaElement = dev().assertElement(this.mediaElement_,
         'Media element was unspecified.');
-    listenOnce(mediaElement, 'ended', () => this.onAdvance());
-    listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
+    this.unlistenEndedFn_ =
+        listenOnce(mediaElement, 'ended', () => this.onAdvance());
+    this.unlistenTimeupdateFn_ =
+        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
   }
 
   /** @private */
@@ -589,8 +619,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-        {capture: true});
+    this.unlistenEndedFn_ =
+        listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
+            {capture: true});
+
+    this.onProgressUpdate();
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -600,10 +633,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   stop() {
-    // We don't need to explicitly stop the polling or media events listed
-    // above, since they are already bound to either the playback of the media
-    // on the page, or the isRunning state of this AdvancementConfig.
     super.stop();
+
+    if (this.unlistenEndedFn_) {
+      this.unlistenEndedFn_();
+    }
+
+    if (this.unlistenTimeupdateFn_) {
+      this.unlistenTimeupdateFn_();
+    }
   }
 
   /** @override */

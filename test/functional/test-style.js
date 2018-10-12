@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import * as st from '../../src/style';
 
 describe('Style', () => {
@@ -22,7 +21,7 @@ describe('Style', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -31,14 +30,18 @@ describe('Style', () => {
 
   it('toggle', () => {
     const element = document.createElement('div');
-    st.toggle(element);
-    expect(element.style.display).to.equal('none');
-    st.toggle(element);
-    expect(element.style.display).to.equal('');
+
     st.toggle(element, true);
-    expect(element.style.display).to.equal('');
+    expect(element).to.not.have.attribute('hidden');
     st.toggle(element, false);
-    expect(element.style.display).to.equal('none');
+    expect(element).to.have.attribute('hidden');
+    st.toggle(element, true);
+    expect(element).to.not.have.attribute('hidden');
+
+    st.toggle(element);
+    expect(element).to.have.attribute('hidden');
+    st.toggle(element);
+    expect(element).to.not.have.attribute('hidden');
   });
 
   it('setStyle', () => {
@@ -71,6 +74,19 @@ describe('Style', () => {
     expect(element.style.width).to.equal('101px');
     expect(element.style.getPropertyPriority('width'))
         .to.equal('important');
+  });
+
+  it('setImportantStyles with vendor prefix', () => {
+    const spy = sandbox.spy();
+    const element = {style: {
+      WebkitTransitionDurationImportant: '',
+      setProperty: spy,
+    }};
+    st.setImportantStyles(element, {
+      transitionDurationImportant: '1s',
+    });
+    expect(spy).to.have.been.calledWith('WebkitTransitionDurationImportant',
+        '1s', 'important');
   });
 
   it('px', () => {

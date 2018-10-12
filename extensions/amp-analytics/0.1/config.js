@@ -19,13 +19,11 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
+import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {isJsonScriptTag} from '../../../src/dom';
-import {parseJson} from '../../../src/json';
-import {toWin} from '../../../src/types';
+import {isArray, isObject, toWin} from '../../../src/types';
 
-const TAG = 'analytics-config';
+const TAG = 'amp-analytics/config';
 
 export class AnalyticsConfig {
 
@@ -218,21 +216,13 @@ export class AnalyticsConfig {
     try {
       const {children} = this.element_;
       if (children.length == 1) {
-        const child = children[0];
-        if (isJsonScriptTag(child)) {
-          inlineConfig = parseJson(children[0].textContent);
-        } else {
-          user().error(TAG, 'The analytics config should ' +
-              'be put in a <script> tag with type="application/json"');
-        }
+        inlineConfig = getChildJsonConfig(this.element_);
       } else if (children.length > 1) {
         user().error(TAG, 'The tag should contain only one' +
             ' <script> child.');
       }
-    }
-    catch (er) {
-      user().error(TAG, 'Analytics config could not be ' +
-          'parsed. Is it in a valid JSON format?', er);
+    } catch (er) {
+      user().error(TAG, er.message);
     }
     return /** @type {!JsonObject} */ (inlineConfig);
   }

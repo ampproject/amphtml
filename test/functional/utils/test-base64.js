@@ -17,8 +17,10 @@
 import {
   base64DecodeToBytes,
   base64EncodeFromBytes,
+  base64UrlDecodeFromString,
   base64UrlDecodeToBytes,
   base64UrlEncodeFromBytes,
+  base64UrlEncodeFromString,
 } from '../../../src/utils/base64';
 import {
   stringToBytes,
@@ -167,5 +169,39 @@ describe('base64EncodeFromBytes', () => {
         .to.equal('c3Vy');
     expect(base64EncodeFromBytes(new Uint8Array([255, 239])))
         .to.equal('/+8=');
+  });
+});
+
+describe('base64(Encode/Decode)FromString', () => {
+  it('should handle unicode and non-unicode strings encoding', () => {
+    expect(base64UrlEncodeFromString('')).to.equal('');
+    expect(base64UrlEncodeFromString('      ')).to.equal('ICAgICAg');
+    expect(base64UrlEncodeFromString('helloworld')).to
+        .equal('aGVsbG93b3JsZA..');
+    expect(base64UrlEncodeFromString('hello world')).to
+        .equal('aGVsbG8gd29ybGQ.');
+    expect(base64UrlEncodeFromString(' hello world ')).to
+        .equal('IGhlbGxvIHdvcmxkIA..');
+    expect(base64UrlEncodeFromString('✓ à la mode')).to
+        .equal('4pyTIMOgIGxhIG1vZGU.');
+    expect(base64UrlEncodeFromString('\n')).to.equal('Cg..');
+    expect(base64UrlEncodeFromString('$#!@#$%^&*()')).to
+        .equal('JCMhQCMkJV4mKigp');
+  });
+
+  it('should handle unicode and non-unicode strings decoding', () => {
+    expect(base64UrlDecodeFromString('')).to.equal('');
+    expect(base64UrlDecodeFromString('ICAgICAg')).to.equal('      ');
+    expect(base64UrlDecodeFromString('aGVsbG93b3JsZA..')).to
+        .equal('helloworld');
+    expect(base64UrlDecodeFromString('aGVsbG8gd29ybGQ.')).to
+        .equal('hello world');
+    expect(base64UrlDecodeFromString('IGhlbGxvIHdvcmxkIA..')).to
+        .equal(' hello world ');
+    expect(base64UrlDecodeFromString('4pyTIMOgIGxhIG1vZGU.')).to
+        .equal('✓ à la mode');
+    expect(base64UrlDecodeFromString('Cg..')).to.equal('\n');
+    expect(base64UrlDecodeFromString('JCMhQCMkJV4mKigp')).to
+        .equal('$#!@#$%^&*()');
   });
 });

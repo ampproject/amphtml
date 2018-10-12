@@ -42,8 +42,8 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
-const {TOKEN: internalRuntimeToken, VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 const {transpileTs} = require('./build-system/typescript');
+const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -56,6 +56,12 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 // All declared extensions.
 const extensions = {};
 const extensionAliasFilePath = {};
+
+// All extensions to build
+let extensionsToBuild = null;
+
+// All a4a extensions.
+const adVendors = [];
 
 const {green, red, cyan} = colors;
 
@@ -139,6 +145,12 @@ function declareExtension(name, version, options) {
     extensions[`${name}-${v}`] =
         Object.assign({name, version: v}, defaultOptions, options);
   });
+  if (name.startsWith('amp-ad-network-')) {
+    // Get the ad network name. All ad network extensions are named
+    // in the format `amp-ad-network-${name}-impl`
+    name = name.slice(15, -5);
+    adVendors.push(name);
+  }
 }
 
 /**
@@ -206,10 +218,8 @@ function buildExtensions(options) {
     return Promise.resolve();
   }
 
-  let extensionsToBuild = [];
-  if (!!argv.extensions && !options.compileAll) {
-    extensionsToBuild = argv.extensions.split(',');
-  }
+  const extensionsToBuild = options.compileAll ?
+    [] : getExtensionsToBuild();
 
   const results = [];
   for (const key in extensions) {
@@ -223,6 +233,82 @@ function buildExtensions(options) {
     results.push(buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs));
   }
   return Promise.all(results);
+}
+
+/**
+ * Process the command line arguments --extensions and --extensions_from
+ * and return a list of the referenced extensions.
+ * @return {!Array<string>}
+ */
+function getExtensionsToBuild() {
+  if (extensionsToBuild) {
+    return extensionsToBuild;
+  }
+
+  extensionsToBuild = [];
+
+  if (!!argv.extensions) {
+    if (argv.extensions === 'minimal_set') {
+      argv.extensions = MINIMAL_EXTENSION_SET.join(',');
+    }
+    extensionsToBuild = argv.extensions.split(',');
+  }
+
+  if (!!argv.extensions_from) {
+    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
+    extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  }
+
+  return extensionsToBuild;
+}
+
+/**
+ * Process the command line argument --extensions_from of example AMP documents
+ * into a single list of AMP extensions consumed by those documents.
+ * @param {string} examples A comma separated list of AMP documents
+ * @return {!Array<string>}
+ */
+function getExtensionsFromArg(examples) {
+  if (!examples) {
+    return;
+  }
+
+  const extensions = [];
+
+  examples.split(',').forEach(example => {
+    const html = fs.readFileSync(example, 'utf8');
+    const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
+    const extensionNameMatchIndex = 2;
+    let hasAd = false;
+    let match;
+    while ((match = customElementTemplateRe.exec(html))) {
+      if (match[extensionNameMatchIndex] == 'amp-ad') {
+        hasAd = true;
+      }
+      extensions.push(match[extensionNameMatchIndex]);
+    }
+    if (hasAd) {
+      for (let i = 0; i < adVendors.length; i++) {
+        if (html.includes(`type="${adVendors[i]}"`)) {
+          extensions.push('amp-a4a');
+          extensions.push(`amp-ad-network-${adVendors[i]}-impl`);
+        }
+      }
+    }
+  });
+
+  return dedupe(extensions);
+}
+
+/**
+ * Remove duplicates from the given array.
+ * @param {!Array<string>} arr
+ * @return {!Array<string>}
+ */
+function dedupe(arr) {
+  const map = Object.create(null);
+  arr.forEach(item => map[item] = true);
+  return Object.keys(map);
 }
 
 /**
@@ -289,6 +375,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
       singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -375,6 +462,21 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       );
     }
 
+    if (argv.with_inabox_lite) {
+      promises.push(
+          // Entry point for inabox runtime.
+          compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+            toName: 'amp-inabox-lite.js',
+            minifiedName: 'amp4ads-lite-v0.js',
+            includePolyfills: true,
+            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+            checkTypes: opt_checkTypes,
+            watch,
+            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+            minify: shouldMinify,
+          }));
+    }
+
     promises.push(
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
@@ -405,6 +507,24 @@ function css() {
   printNobuildHelp();
   return compileCss();
 }
+
+const cssEntryPoints = [
+  {
+    path: 'amp.css',
+    outJs: 'css.js',
+    outCss: 'v0.css',
+  },
+  {
+    path: 'video-docking.css',
+    outJs: 'video-docking.css.js',
+    outCss: 'video-docking.css',
+  },
+  {
+    path: 'video-autoplay.css',
+    outJs: 'video-autoplay.css.js',
+    outCss: 'video-autoplay.css',
+  },
+];
 
 /**
  * Compile all the css and drop in the build folder
@@ -440,34 +560,37 @@ function compileCss(watch, opt_compileAll) {
         }));
   }
 
+  /**
+   * @param {string} path
+   * @param {string} outJs
+   * @param {string} outCss
+   */
+  function writeCssEntryPoint(path, outJs, outCss) {
+    const startTime = Date.now();
+
+    return jsifyCssAsync(`css/${path}`)
+        .then(css => writeCss(css, path, outJs, outCss))
+        .then(() => {
+          endBuildStep('Recompiled CSS in', path, startTime);
+        });
+  }
+
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
-  const startTime = Date.now();
-  return jsifyCssAsync('css/amp.css')
-      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'amp.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-docking.css'))
-      .then(css => writeCss(css,
-          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
-      })
-      .then(() => jsifyCssAsync('css/video-autoplay.css'))
-      .then(css => writeCss(css,
-          'video-autoplay.css', 'video-autoplay.css.js', 'video-autoplay.css'))
-      .then(() => {
-        endBuildStep('Recompiled CSS in', 'video-autoplay.css', startTime);
-      })
-      .then(() => {
-        return buildExtensions({
-          bundleOnlyIfListedInFiles: false,
-          compileOnlyCss: true,
-          compileAll: opt_compileAll,
-        });
-      });
+
+  let promise = Promise.resolve();
+
+  cssEntryPoints.forEach(entryPoint => {
+    const {path, outJs, outCss} = entryPoint;
+    promise = promise.then(() => writeCssEntryPoint(path, outJs, outCss));
+  });
+
+  return promise.then(() => buildExtensions({
+    bundleOnlyIfListedInFiles: false,
+    compileOnlyCss: true,
+    compileAll: opt_compileAll,
+  }));
 }
 
 /**
@@ -476,12 +599,15 @@ function compileCss(watch, opt_compileAll) {
  */
 function copyCss() {
   const startTime = Date.now();
-  fs.copySync('build/css/v0.css', 'dist/v0.css');
-  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
+
+  cssEntryPoints.forEach(({outCss}) => {
+    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+  });
+
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
-        endBuildStep('Copied', 'build/css/v0.css to dist/v0.css', startTime);
+        endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
       });
 }
 
@@ -545,7 +671,13 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       return promise;
     }
   }
-  return promise.then(() => buildExtensionJs(path, name, version, options));
+  return promise.then(() => {
+    if (argv.single_pass) {
+      return Promise.resolve();
+    } else {
+      return buildExtensionJs(path, name, version, options);
+    }
+  });
 }
 
 /**
@@ -594,10 +726,6 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  if (argv.single_pass) {
-    console.log('Skipping extension JS build in single pass mode', name);
-    return;
-  }
   const filename = options.filename || name + '.js';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
     toName: `${name}-${version}.max.js`,
@@ -610,7 +738,16 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : wrappers.extension(name, options.loadPriority),
-  }));
+  })).then(() => {
+    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    if (name === 'amp-script') {
+      // TODO(choumx): Compile this when worker-dom externs are available.
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.js`);
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.max.js`);
+    }
+  });
 }
 
 /**
@@ -644,9 +781,10 @@ function printConfigHelp(command) {
 }
 
 /**
- * Parse the --extensions or the --noextensions flag and
- * prints a helpful message that lets the developer know how to build
- * a list of extensions or without any extensions.
+ * Parses the --extensions, --extensions_from, and the --noextensions flags,
+ * and prints a helpful message that lets the developer know how to build the
+ * runtime with a list of extensions, all the extensions used by a test file,
+ * or no extensions at all.
  */
 function parseExtensionFlags() {
   if (!process.env.TRAVIS) {
@@ -660,22 +798,24 @@ function parseExtensionFlags() {
         cyan('--extensions=minimal_set ') +
         green('to build just the extensions needed to load ') +
         cyan('article.amp.html') + green('.');
+    const extensionsFromMessage = green('⤷ Use ') +
+        cyan('--extensions_from=examples/foo.amp.html ') +
+        green('to build extensions from example docs.');
     if (argv.extensions) {
       if (typeof (argv.extensions) !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions.');
         log(noExtensionsMessage);
         log(extensionsMessage);
         log(minimalSetMessage);
+        log(extensionsFromMessage);
         process.exit(1);
       }
       argv.extensions = argv.extensions.replace(/\s/g, '');
+    }
 
-      if (argv.extensions === 'minimal_set') {
-        argv.extensions = MINIMAL_EXTENSION_SET.join(',');
-      }
-
+    if (argv.extensions || argv.extensions_from) {
       log(green('Building extension(s):'),
-          cyan(argv.extensions.replace(/,/g, ', ')));
+          cyan(getExtensionsToBuild().join(', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
@@ -689,6 +829,7 @@ function parseExtensionFlags() {
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(minimalSetMessage);
+    log(extensionsFromMessage);
   }
 }
 
@@ -697,10 +838,10 @@ function parseExtensionFlags() {
  * @return {boolean}
  */
 function maybeAddVideoService() {
-  if (!argv.extensions.split(',').find(ext => VIDEO_EXTENSIONS.has(ext))) {
+  if (!extensionsToBuild.find(ext => VIDEO_EXTENSIONS.has(ext))) {
     return false;
   }
-  argv.extensions += ',amp-video-service';
+  extensionsToBuild.push('amp-video-service');
   return true;
 }
 
@@ -770,9 +911,20 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting');
+    let cmd = 'gulp dist --fortesting';
+    if (argv.single_pass) {
+      cmd = cmd + ' --single_pass';
+    }
+    printConfigHelp(cmd);
   }
-  parseExtensionFlags();
+  if (argv.single_pass) {
+    if (!process.env.TRAVIS) {
+      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+          green('mode.'));
+    }
+  } else {
+    parseExtensionFlags();
+  }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(() => {
         return Promise.all([
@@ -800,7 +952,7 @@ function dist() {
           console.log('\n');
         }
       }).then(() => {
-        copyAliasExtensions();
+        return copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
@@ -822,15 +974,14 @@ function dist() {
 
 /**
  * Copy built extension to alias extension
+ * @return {!Promise}
  */
 function copyAliasExtensions() {
   if (argv.noextensions) {
-    return;
+    return Promise.resolve();
   }
-  let extensionsToBuild = [];
-  if (!!argv.extensions) {
-    extensionsToBuild = argv.extensions.split(',');
-  }
+
+  const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
@@ -840,6 +991,8 @@ function copyAliasExtensions() {
     fs.copySync('dist/v0/' + extensionAliasFilePath[key]['file'],
         'dist/v0/' + key);
   }
+
+  return Promise.resolve();
 }
 
 /**
@@ -980,6 +1133,19 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
+  } else if (srcFilename == 'amp-date-picker.js') {
+    // For amp-date-picker, we inject the react-dates bundle after compile
+    // to avoid CC from messing with browserify's module boilerplate.
+    const file = fs.readFileSync(destFilePath, 'utf8');
+    const firstLineBreak = file.indexOf('\n');
+    const wrapperOpen = file.substr(0, firstLineBreak + 1);
+    const reactDates = fs.readFileSync(
+        'third_party/react-dates/bundle.js', 'utf8');
+    // Inject the bundle inside the standard AMP wrapper (after the first line).
+    const newSource = [
+      wrapperOpen, reactDates, file.substr(firstLineBreak + 1),
+    ].join('\n');
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
 }
 
@@ -1045,16 +1211,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babelify, {
-        compact: false,
-        presets: [
-          ['env', {
-            targets: {
-              browsers: ['last 2 versions', 'safari >= 9'],
-            },
-          }],
-        ],
-      })
+      .transform(babelify)
       .once('transform', () => {
         endBuildStep('Transformed', srcFilename, startTime);
       });
@@ -1070,8 +1227,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe($$.replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
+      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
       .pipe($$.wrap, wrapper)
       .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
 
@@ -1081,8 +1237,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const destFilename = options.toName || srcFilename;
   /**
-   * Rebundle-javascript
-   *
    * @param {boolean} failOnError
    * @return {Promise}
    */
@@ -1109,6 +1263,16 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .on('end', function() {
               appendToCompiledFile(srcFilename,
                   path.join(destDir, destFilename));
+
+              if (options.latestName) {
+                // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
+                const latestMaxName =
+                    options.latestName.split('.js')[0] + '.max.js';
+                // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+                fs.copySync(
+                    path.join(destDir, options.toName),
+                    path.join(destDir, latestMaxName));
+              }
             }))
         .then(() => {
           endBuildStep('Compiled', destFilename, startTime);
@@ -1509,6 +1673,7 @@ gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
     extensions: '  Builds only the listed extensions.',
+    extensions_from: '  Builds only the extensions from the listed AMP(s).',
     noextensions: '  Builds with no extensions.',
   },
 });
@@ -1520,6 +1685,8 @@ gulp.task('default', 'Runs "watch" and then "serve"',
     maybeUpdatePackages.concat(['watch']), serve, {
       options: {
         extensions: '  Watches and builds only the listed extensions.',
+        extensions_from: '  Watches and builds only the extensions from the ' +
+            'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
@@ -1529,7 +1696,12 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
             'Great for profiling and debugging production code.',
     fortesting: '  Compiles production binaries for local testing',
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    single_pass: 'Compile AMP\'s primary JS bundles in a single invocatoion',
+    single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
+    extensions: '  Builds only the listed extensions.',
+    extensions_from: '  Builds only the extensions from the listed AMP(s).',
+    noextensions: '  Builds with no extensions.',
+    single_pass_dest: '  The directory closure compiler will write out to ' +
+            'with --single_pass mode. The default directory is `dist`',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
@@ -1538,6 +1710,8 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
         extensions: '  Watches and builds only the listed extensions.',
+        extensions_from: '  Watches and builds only the extensions from the ' +
+            'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
       },
     });

@@ -47,8 +47,9 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
+  {name: 'amp-accordion',version: '0.1',type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
+  {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adsense-impl', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-adzerk-impl', version: '0.1', type: TYPES.AD},
   {name: 'amp-ad-network-doubleclick-impl', version: '0.1', type: TYPES.AD},
@@ -99,7 +100,6 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-compare-slider', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-consent',
     version: '0.1',
@@ -147,6 +147,12 @@ exports.extensionBundles = [
   {
     name: 'amp-image-lightbox',
     version: '0.1', options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-image-slider',
+    version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
@@ -209,6 +215,11 @@ exports.extensionBundles = [
   {name: 'amp-reach-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-reddit', version: '0.1', type: TYPES.MISC},
   {name: 'amp-riddle-quiz', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-script',
+    version: '0.1',
+    type: TYPES.MISC,
+  },
   {name: 'amp-share-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-sidebar',
@@ -294,6 +305,12 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {
+    name: 'amp-recaptcha-input',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -306,7 +323,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-timeago', version: '0.1', type: TYPES.MISC},
-  {name: 'amp-twitter', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-twitter',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {
     name: 'amp-user-notification',
     version: '0.1',
@@ -342,7 +364,7 @@ exports.extensionBundles = [
   {
     name: 'amp-video-iframe',
     version: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-video-service',
@@ -356,9 +378,11 @@ exports.extensionBundles = [
     },
     type: TYPES.MISC,
   },
+  {name: 'amp-viqeo-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-vk', version: '0.1', type: TYPES.MISC},
   {name: 'amp-yotpo', version: '0.1', type: TYPES.MISC},
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
 ];
 
 exports.aliasBundles = [

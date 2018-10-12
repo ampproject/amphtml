@@ -22,13 +22,11 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged} from '../layout-rect';
+import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev} from '../log';
 import {dict, hasOwn} from '../utils/object';
-import {expandLayoutRect} from '../layout-rect';
-import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
@@ -36,6 +34,7 @@ import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
+import {remove} from '../utils/array';
 import {tryResolve} from '../utils/promise';
 
 const TAG_ = 'Resources';
@@ -242,7 +241,7 @@ export class Resources {
         this.schedulePass();
       });
 
-      /** @private @const {function(number, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      /** @private @const {function((number|undefined), !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
     }
 
@@ -662,9 +661,9 @@ export class Resources {
     }
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
-      if (opt_disconnect) {
-        resource.disconnect();
-      }
+    }
+    if (opt_disconnect) {
+      resource.disconnect();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -1783,7 +1782,7 @@ export class Resources {
    * Calculates the layout's distance from viewport score, using an iterative
    * (and cacheable) calculation based on tree depth and distance.
    *
-   * @param {number} currentScore
+   * @param {number|undefined} currentScore
    * @param {!./layers-impl.LayoutElement} layout
    * @param {number} depth
    * @param {!Object<string, *>} cache
@@ -2303,8 +2302,8 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      filterSplice(this.requestsChangeSize_, request => {
-        return request.resource != resource;
+      remove(this.requestsChangeSize_, request => {
+        return request.resource === resource;
       });
     }
 

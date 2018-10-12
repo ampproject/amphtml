@@ -24,18 +24,15 @@ import '../../../amp-ad/0.1/amp-ad';
 // methods in tests.
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
-import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   DEFAULT_SAFEFRAME_VERSION,
   EXPERIMENT_FEATURE_HEADER_NAME,
-  IFRAME_SANDBOXING_FLAGS,
   INVALID_SPSA_RESPONSE,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
-  SANDBOX_HEADER,
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
@@ -55,9 +52,11 @@ import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
-import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
+import {
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../../amp-ad/0.1/concurrent-load';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {is3pThrottled} from '../../../amp-ad/0.1/concurrent-load';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {
   resetScheduledElementForTesting,
@@ -69,6 +68,11 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
+  const IFRAME_SANDBOXING_FLAGS = ['allow-forms', 'allow-modals',
+    'allow-pointer-lock', 'allow-popups', 'allow-popups-to-escape-sandbox',
+    'allow-same-origin', 'allow-scripts',
+    'allow-top-navigation-by-user-activation'];
+
   let sandbox;
   let fetchMock;
   let getSigningServiceNamesMock;
@@ -78,7 +82,7 @@ describe('amp-a4a', () => {
   let getResourceStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     fetchMock = null;
     getSigningServiceNamesMock = sandbox.stub(AmpA4A.prototype,
         'getSigningServiceNames');
@@ -202,10 +206,24 @@ describe('amp-a4a', () => {
   }
 
   /**
+   * Checks that element has expected sandbox attribute.
+   * @param {!Element} element
+   * @param {boolean} shouldSandbox
+   */
+  function verifySandbox(element, shouldSandbox) {
+    const sandboxAttribute = element.getAttribute('sandbox');
+    expect(!!sandboxAttribute).to.equal(shouldSandbox);
+    if (shouldSandbox) {
+      expect(sandboxAttribute.split(' ').sort()).to.jsonEqual(
+          IFRAME_SANDBOXING_FLAGS);
+    }
+  }
+
+  /**
    * Checks that element is an amp-ad that is rendered via SafeFrame.
    * @param {!Element} element
    * @param {string} sfVersion
-   * @param {boolean} shouldSandbox
+   * @param {boolean=} shouldSandbox
    */
   function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
@@ -220,12 +238,7 @@ describe('amp-a4a', () => {
     const re = /^([^;]+);(\d+);([\s\S]*)$/;
     const match = re.exec(name);
     expect(match).to.be.ok;
-    const sandboxAttribute = child.getAttribute('sandbox');
-    if (shouldSandbox) {
-      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
-    } else {
-      expect(sandboxAttribute).to.be.null;
-    }
+    verifySandbox(child, shouldSandbox);
     const contentLength = Number(match[2]);
     const rest = match[3];
     expect(rest.length).to.be.above(contentLength);
@@ -257,18 +270,13 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
-    const sandboxAttribute = child.getAttribute('sandbox');
-    if (shouldSandbox) {
-      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
-    } else {
-      expect(sandboxAttribute).to.be.null;
-    }
+    verifySandbox(child, shouldSandbox);
   }
 
   /**
    * @param {!Element} element
    * @param {string} srcUrl
-   * @param {boolean} shouldSandbox
+   * @param {boolean=} shouldSandbox
    */
   function verifyCachedContentIframeRender(element, srcUrl,
     shouldSandbox = false) {
@@ -282,12 +290,7 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
-    const sandboxAttribute = child.getAttribute('sandbox');
-    if (shouldSandbox) {
-      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
-    } else {
-      expect(sandboxAttribute).to.be.null;
-    }
+    verifySandbox(child, shouldSandbox);
   }
 
   /** @param {string} nameData */
@@ -404,6 +407,18 @@ describe('amp-a4a', () => {
         expect(a4aBody).to.be.ok;
         expect(a4aBody).to.be.visible;
         expect(a4a.friendlyIframeEmbed_).to.exist;
+      });
+    });
+
+    it('detachedCallback should destroy FIE and detach frame', () => {
+      const fieDestroySpy =
+          sandbox./*OK*/spy(FriendlyIframeEmbed.prototype, 'destroy');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        a4a.detachedCallback();
+        expect(fieDestroySpy).to.be.called;
+        expect(a4aElement.querySelector('iframe')).to.not.be.ok;
       });
     });
 
@@ -628,8 +643,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should apply sandbox attribute when header is true', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'true';
+      it('should apply sandbox when sandboxHTMLCreativeFrame is true', () => {
+        a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
@@ -638,8 +653,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should not apply sandbox attribute when header is false', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'false';
+      it('should not apply sandbox when sandboxHTMLCreativeFrame false', () => {
+        a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
@@ -649,7 +664,7 @@ describe('amp-a4a', () => {
       });
 
       it('shouldn\'t set feature policy for sync-xhr with exp off-a4a', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
@@ -658,7 +673,7 @@ describe('amp-a4a', () => {
       });
 
       it('should set feature policy for sync-xhr with exp on-a4a', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.sandboxHTMLCreativeFrame = () => true;
         toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
@@ -729,8 +744,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should apply sandbox attribute when header is true', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'true';
+      it('should apply sandbox when sandboxHTMLCreativeFrame is true', () => {
+        a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyNameFrameRender(a4aElement, true /* shouldSandbox */);
@@ -738,8 +753,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should not apply sandbox attribute when header is false', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'false';
+      it('should not apply sandbox when sandboxHTMLCreativeFrame false', () => {
+        a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
@@ -825,8 +840,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should apply sandbox attribute when header is true', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'true';
+      it('should apply sandbox when sandboxHTMLCreativeFrame is true', () => {
+        a4a.sandboxHTMLCreativeFrame = () => true;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
@@ -835,8 +850,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should not apply sandbox attribute when header is false', () => {
-        adResponse.headers[SANDBOX_HEADER] = 'false';
+      it('should not apply sandbox when sandboxHTMLCreativeFrame false', () => {
+        a4a.sandboxHTMLCreativeFrame = () => false;
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
@@ -1101,7 +1116,7 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(promiseResult => {
           expect(promiseResult).to.be.ok;
           expect(promiseResult.minifiedCreative).to.be.ok;
-          expect(a4a.isVerifiedAmpCreative_).to.be.true;
+          expect(a4a.isVerifiedAmpCreative()).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
           expect(maybeExecuteRealTimeConfigStub.calledWith(
@@ -1289,7 +1304,7 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
-          expect(a4a.isVerifiedAmpCreative_).to.equal(isValidCreative);
+          expect(a4a.isVerifiedAmpCreative()).to.equal(isValidCreative);
           if (isValidCreative) {
             expect(promiseResult).to.be.ok;
             expect(promiseResult.minifiedCreative).to.be.ok;
@@ -2256,7 +2271,7 @@ describe('amp-a4a', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -2342,13 +2357,38 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should fail gracefully if race conditions nullify adPromise', () => {
+      return createIframePromise().then(f => {
+        const fixture = f;
+        setupForAdTesting(fixture);
+        const a4aElement = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(a4aElement);
+        a4a.adPromise_ = null;
+        a4a.getAmpDoc = () => a4a.win.document;
+        a4a.getResource = () => {
+          return {
+            layoutCanceled: () => {},
+          };
+        };
+        a4a.mutateElement = func => func();
+        a4a.togglePlaceholder = sandbox.spy();
+
+        sandbox.stub(AmpA4A.prototype, 'initiateAdRequest').returns(undefined);
+        sandbox.stub(AmpA4A.prototype, 'tearDownSlot').returns(undefined);
+        const callback = sandbox.spy();
+        return a4a.refresh(callback).then(() => {
+          expect(callback).to.not.be.called;
+        });
+      });
+    });
   });
 
   describe('buildCallback', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -2527,5 +2567,17 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
         a4a.postAdResponseExperimentFeatures['pref_neutral_enabled'] = prefVal;
         expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
       }));
+  });
+
+  describe('#sandboxHTMLCreativeFrame', () => {
+    it('should return true if experiment enabled', () => {
+      toggleExperiment(a4a.win, 'sandbox-ads', true);
+      expect(a4a.sandboxHTMLCreativeFrame()).to.be.true;
+    });
+
+    it('should return true if experiment disabled', () => {
+      toggleExperiment(a4a.win, 'sandbox-ads', false);
+      expect(a4a.sandboxHTMLCreativeFrame()).to.be.false;
+    });
   });
 });

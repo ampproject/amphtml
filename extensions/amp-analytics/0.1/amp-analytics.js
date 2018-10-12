@@ -17,31 +17,31 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from './variables';
-import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {LayoutPriority} from '../../../src/layout';
+import {LinkerManager} from './linker-manager';
 import {
   RequestHandler,
+  expandPostMessage,
 } from './requests';
 import {Services} from '../../../src/services';
+import {Transport} from './transport';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service';
-import {isArray} from '../../../src/types';
-import {isEnumValue} from '../../../src/types';
-import {sendRequest, sendRequestUsingIframe} from './transport';
-import {serializeResourceTiming} from './resource-timing';
+import {installLinkerReaderService} from './linker-reader';
+import {isArray, isEnumValue} from '../../../src/types';
+import {isIframed} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -84,7 +84,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
 
-    /** @private {?./instrumentation.AnalyticsGroup} */
+    /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
     /** @private {!./variables.VariableService} */
@@ -96,18 +96,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iniPromise_ = null;
 
-    /** @private {?IframeTransport} */
-    this.iframeTransport_ = null;
+    /** @private {./transport.Transport} */
+    this.transport_ = null;
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
 
-    /**
-     * Maximum time (since epoch) to report resource timing metrics.
-     * We stop reporting after 1 minute.
-     * @private @const {number}
-     */
-    this.maxResourceTimingReportingTime_ = Date.now() + (60 * 1000);
+    /** @private {?./linker-manager.LinkerManager} */
+    this.linkerManager_ = null;
   }
 
   /** @override */
@@ -160,6 +156,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+
+    if (this.linkerManager_) {
+      this.linkerManager_.dispose();
+      this.linkerManager_ = null;
+    }
+
     for (let i = 0; i < this.requests_.length; i++) {
       this.requests_[i].dispose();
       delete this.requests_[i];
@@ -168,8 +170,11 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        this.transport_.maybeInitIframeTransport(
+            this.getAmpDoc().win, this.element);
+      });
     }
   }
 
@@ -180,11 +185,14 @@ export class AmpAnalytics extends AMP.BaseElement {
       return false;
     }
 
-    // Page was unloaded - free up owned resources.
-    if (this.iframeTransport_) {
-      this.iframeTransport_.detach();
-      this.iframeTransport_ = null;
+    if (this.iniPromise_) {
+      this.iniPromise_.then(() => {
+        // Page was unloaded - free up owned resources.
+        this.transport_.deleteIframeTransport();
+      });
     }
+
+
     return super.unlayoutCallback();
   }
 
@@ -197,20 +205,34 @@ export class AmpAnalytics extends AMP.BaseElement {
       return this.iniPromise_;
     }
     toggle(this.element, false);
+
     this.iniPromise_ =
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
             // Rudimentary "idle" signal.
             .then(() => Services.timerFor(this.win).promise(1))
             .then(() => this.consentPromise_)
-            .then(() => instrumentationServicePromiseForDoc(this.getAmpDoc()))
+            .then(() => Services.ampdocServiceFor(this.win))
+            .then(ampDocService => {
+              return ampDocService.getAmpDoc(this.element, {
+                closestAmpDoc: true,
+              });
+            })
+            .then(instrumentationServicePromiseForDoc)
             .then(instrumentation => {
               this.instrumentation_ = instrumentation;
               return new AnalyticsConfig(this.element).loadConfig();
             })
             .then(config => {
               this.config_ = config;
+              return new CookieWriter(this.win,
+                  this.element, this.config_).write();
             })
-            .then(this.registerTriggers_.bind(this));
+            .then(() => {
+              this.transport_ =
+                  new Transport(this.win, this.config_['transport'] || {});
+            })
+            .then(this.registerTriggers_.bind(this))
+            .then(this.initializeLinker_.bind(this));
     return this.iniPromise_;
   }
 
@@ -242,9 +264,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
-    }
+    this.transport_.maybeInitIframeTransport(
+        this.getAmpDoc().win, this.element, this.preconnect);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -258,9 +279,12 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.user().error(TAG, 'Trigger should be an object: ', k);
           continue;
         }
-        if (!trigger['on'] || !trigger['request']) {
-          this.user().error(TAG, '"on" and "request" ' +
-              'attributes are required for data to be collected.');
+        const hasRequestOrPostMessage = trigger['request'] ||
+            (trigger['parentPostMessage'] && this.isInabox_);
+        if (!trigger['on'] || !hasRequestOrPostMessage) {
+          const errorMsgSeg = this.isInabox_ ? '/"parentPostMessage"' : '';
+          this.user().error(TAG, '"on" and "request"' + errorMsgSeg +
+              ' attributes are required for data to be collected.');
           continue;
         }
         // Check for not supported trigger for sandboxed analytics
@@ -308,28 +332,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
-   * This is limited to MRC-accreddited vendors. The frame is removed if the
-   * user navigates/swipes away from the page, and is recreated if the user
-   * navigates back to the page.
-   * @private
-   */
-  initIframeTransport_() {
-    if (this.iframeTransport_) {
-      return;
-    }
-    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
-    const ampAdResourceId = this.assertAmpAdResourceId();
-
-    this.iframeTransport_ = new IframeTransport(
-        // Create  3p transport frame within creative frame if inabox.
-        this.isInabox_ ? this.win : this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport'], ampAdResourceId);
-  }
-
-  /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
@@ -339,19 +341,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   preload(url, opt_preloadAs) {
     this.preconnect.preload(url, opt_preloadAs);
-  }
-
-  /**
-   * Gets the resourceID of the parent amp-ad element.
-   * Throws an exception if no such element.
-   * @return {string}
-   * @visibleForTesting
-   */
-  assertAmpAdResourceId() {
-    return user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
-        'for amp-analytics tag with iframe transport.');
   }
 
   /**
@@ -440,10 +429,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   generateRequests_() {
-    if (!this.config_ || !this.config_['requests']) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'No request strings defined. Analytics ' +
+    if (!this.config_['requests']) {
+      if (!this.isInabox_) {
+        const TAG = this.getName_();
+        this.user().error(TAG, 'No request strings defined. Analytics ' +
           'data will not be sent from this page.');
+      }
       return;
     }
 
@@ -474,13 +465,24 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.element, request, this.preconnect,
-              this.sendRequest_.bind(this),
+              this.getAmpDoc(), request, this.preconnect,
+              this.transport_,
               this.isSandbox_);
         }
       }
       this.requests_ = requests;
     }
+  }
+
+  /**
+   * Create the linker-manager that will append linker params as necessary.
+   * @private
+   */
+  initializeLinker_() {
+    const type = this.element.getAttribute('type');
+    this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
+        this.config_, type);
+    this.linkerManager_.init();
   }
 
   /**
@@ -494,7 +496,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
-
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
       this.handleRequestForEvent_(requestName, trigger, event);
@@ -516,44 +517,23 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const request = this.requests_[requestName];
+    const hasPostMessage = this.isInabox_ && trigger['parentPostMessage'];
 
-    if (!request) {
+    if (requestName != undefined && !request) {
       const TAG = this.getName_();
-      this.user().error(TAG, 'Ignoring event. Request string ' +
+      this.user().error(TAG, 'Ignoring request for event. Request string ' +
           'not found: ', trigger['request']);
-      return;
+      if (!hasPostMessage) {
+        return;
+      }
     }
-
     this.checkTriggerEnabled_(trigger, event).then(enabled => {
       if (!enabled) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
+      this.expandAndPostMessage_(trigger, event);
     });
-  }
-
-  /**
-   * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
-   * @private
-   */
-  getDynamicVariableBindings_(trigger, expansionOptions) {
-    const dynamicBindings = {};
-    const resourceTimingSpec = trigger['resourceTimingSpec'];
-    if (resourceTimingSpec) {
-      // Check if we're done reporting resource timing metrics before binding
-      // before binding the resource timing variable.
-      if (!resourceTimingSpec['done'] &&
-          Date.now() < this.maxResourceTimingReportingTime_) {
-        const binding = 'RESOURCE_TIMING';
-        const analyticsVar = 'resourceTiming';
-        dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec);
-        expansionOptions.vars[analyticsVar] = binding;
-      }
-    }
-    return dynamicBindings;
   }
 
   /**
@@ -563,14 +543,37 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
+    if (!request) {
+      return;
+    }
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    const dynamicBindings =
-        this.getDynamicVariableBindings_(trigger, expansionOptions);
-    request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions,
-        dynamicBindings);
+    request.send(this.config_['extraUrlParams'], trigger, expansionOptions);
   }
+
+  /**
+   * Expand and post message to parent window if applicable.
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @private
+   */
+  expandAndPostMessage_(trigger, event) {
+    const msg = trigger['parentPostMessage'];
+    if (!msg || !this.isInabox_) {
+      // Only send message in inabox runtime with parentPostMessage specified.
+      return;
+    }
+    const expansionOptions = this.expansionOptions_(event, trigger);
+    expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
+        trigger, expansionOptions)
+        .then(message => {
+          if (isIframed(this.win)) {
+            // Only post message with explict `parentPostMessage` to inabox host
+            this.win.parent./*OK*/postMessage(message, '*');
+          }
+        });
+  }
+
 
   /**
    * @param {!JsonObject} trigger The config to use to determine sampling.
@@ -628,7 +631,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks result of 'enabled' spec evaluation. Returns false if spec is
    * provided and value resolves to a falsey value (empty string, 0, false,
    * null, NaN or undefined).
-   * @param {string} spec Expression that will be evaluated.
+   * @param {string|boolean} spec Expression that will be evaluated.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Promise<boolean>} False only if spec is provided and value is
    * falsey.
@@ -638,6 +641,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Spec absence always resolves to true.
     if (spec === undefined) {
       return Promise.resolve(true);
+    }
+
+    if (typeof spec === 'boolean') {
+      return Promise.resolve(spec);
     }
 
     return this.expandTemplateWithUrlParams_(spec, expansionOptions)
@@ -659,31 +666,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
             this.element).expandUrlAsync(key));
-  }
-
-  /**
-   * @param {string} request The full request string to send.
-   * @param {!JsonObject} trigger
-   * @private
-   */
-  sendRequest_(request, trigger) {
-    if (!request) {
-      const TAG = this.getName_();
-      this.user().error(TAG, 'Request not sent. Contents empty.');
-      return;
-    }
-    if (trigger['iframePing']) {
-      user().assert(trigger['on'] == 'visible',
-          'iframePing is only available on page view requests.');
-      sendRequestUsingIframe(this.win, request);
-    } else if (this.config_['transport'] &&
-        this.config_['transport']['iframe']) {
-      user().assert(this.iframeTransport_,
-          'iframe transport was inadvertently deleted');
-      this.iframeTransport_.sendRequest(request);
-    } else {
-      sendRequest(this.win, request, this.config_['transport'] || {});
-    }
   }
 
   /**
@@ -718,6 +700,7 @@ AMP.extension(TAG, '0.1', AMP => {
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
   installVariableService(AMP.win);
+  installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });

@@ -128,6 +128,7 @@ exports.rules = [
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
+      '3p/viqeoplayer.js->src/event-helper.js',
     ],
   },
   {
@@ -150,10 +151,13 @@ exports.rules = [
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
+      'ads/google/a4a/**->src/consent.js',
+      'ads/google/a4a/**->src/consent-state.js',
       'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
@@ -210,6 +214,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-viqeo-player/0.1/amp-viqeo-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
@@ -219,6 +225,8 @@ exports.rules = [
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
+      'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
+          'src/service/url-replacements-impl.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
@@ -247,6 +255,8 @@ exports.rules = [
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cookie-writer.js->' +
+          'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
@@ -272,6 +282,17 @@ exports.rules = [
           'src/service/navigation.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
           'src/service/navigation.js',
+	  'extensions/amp-mowplayer/0.1/amp-mowplayer.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-analytics/0.1/linker-manager.js->' +
+          'src/service/navigation.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+          'src/service/xhr-impl.js',
+      'extensions/amp-form/0.1/amp-form.js->' +
+          'src/service/xhr-impl.js',
+      // Accessing extension-location.calculateExtensionScriptUrl().
+      'extensions/amp-script/0.1/amp-script.js->' +
+            'src/service/extension-location.js',
     ],
   },
   {
@@ -287,10 +308,13 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
+      'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
+      'src/polyfills.js->src/polyfills/custom-elements.js',
+      'src/service/extensions-impl.js->src/polyfills/custom-elements.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
       'src/service/extensions-impl.js->src/polyfills/domtokenlist-toggle.js',
     ],

@@ -31,7 +31,11 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-/*eslint-disable */
+/**
+ * Icons from Google Material Icons
+ * https://material.io/tools/icons
+ */
+/*eslint-disable*/
 const icons = {
   'play':
     `<path d="M8 5v14l11-7z"></path>
@@ -50,7 +54,8 @@ const icons = {
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek':
     `<circle cx="12" cy="12" r="12" />`,
-}
+};
+
 const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
 
@@ -89,6 +94,9 @@ let progressMarkerDiv;
 
 // Div for fullscreen icon.
 let fullscreenDiv;
+
+// Div for mute/unmute icon.
+let muteUnmuteDiv;
 
 // Div for ad container.
 let adContainerDiv;
@@ -312,6 +320,19 @@ export function imaVideo(global, data) {
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
+
+  // Mute/Unmute button
+  muteUnmuteDiv = createIcon(global, 'volume_max');
+  muteUnmuteDiv.id = 'ima-mute-unmute';
+  setStyles(muteUnmuteDiv, {
+    'width': '30px',
+    'height': '30px',
+    'margin-right': '20px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+  });
+  controlsDiv.appendChild(muteUnmuteDiv);
+
   // Fullscreen button
   fullscreenDiv = createIcon(global, 'fullscreen');
   fullscreenDiv.id = 'ima-fullscreen';
@@ -413,6 +434,7 @@ export function imaVideo(global, data) {
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
+  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
   fullscreenDiv.addEventListener(interactEvent,
       toggleFullscreen.bind(null, global));
 
@@ -704,8 +726,8 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
+  videoPlayer.addEventListener(interactEvent, showControls);
   if (playbackStarted) {
-    videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
   }
 }
@@ -848,6 +870,8 @@ function onProgressClick(event) {
   // instead of clicking and dragging.
   clearInterval(hideControlsTimeout);
   onProgressMove(event);
+  event.preventDefault();
+  event.stopPropagation();
   clearInterval(uiTicker);
   document.addEventListener(mouseMoveEvent, onProgressMove);
   document.addEventListener(mouseUpEvent, onProgressClickEnd);
@@ -948,6 +972,51 @@ export function pauseVideo(event = null) {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
     fullscreen = false;
+  }
+}
+
+/**
+ * Handler when the mute/unmute button is clicked
+ */
+export function onMuteUnmuteClick() {
+  if (videoPlayer.muted) {
+    unmuteVideo();
+  } else {
+    muteVideo();
+  }
+}
+
+/**
+ * Function to mute the video
+ */
+export function muteVideo() {
+  if (!videoPlayer.muted) {
+    videoPlayer.volume = 0;
+    videoPlayer.muted = true;
+    if (adsManager) {
+      adsManager.setVolume(0);
+    } else {
+      muteAdsManagerOnLoaded = true;
+    }
+    changeIcon(muteUnmuteDiv, 'mute');
+    postMessage({event: VideoEvents.MUTED});
+  }
+}
+
+/**
+ * Function to unmute the video
+ */
+export function unmuteVideo() {
+  if (videoPlayer.muted) {
+    videoPlayer.volume = 1;
+    videoPlayer.muted = false;
+    if (adsManager) {
+      adsManager.setVolume(1);
+    } else {
+      muteAdsManagerOnLoaded = false;
+    }
+    changeIcon(muteUnmuteDiv, 'volume_max');
+    postMessage({event: VideoEvents.UNMUTED});
   }
 }
 
@@ -1104,33 +1173,31 @@ function onMessage(global, event) {
       }
       break;
     case 'mute':
-      videoPlayer.volume = 0;
-      videoPlayer.muted = true;
-      if (adsManager) {
-        adsManager.setVolume(0);
-      } else {
-        muteAdsManagerOnLoaded = true;
-      }
-      postMessage({event: VideoEvents.MUTED});
+      muteVideo();
       break;
     case 'unMute':
-      videoPlayer.volume = 1;
-      videoPlayer.muted = false;
-      if (adsManager) {
-        adsManager.setVolume(1);
-      } else {
-        muteAdsManagerOnLoaded = false;
+      unmuteVideo();
+      break;
+    case 'hideControls':
+      if (!adsActive) {
+        hideControls();
       }
-      postMessage({event: VideoEvents.UNMUTED});
+      break;
+    case 'showControls':
+      if (!adsActive) {
+        showControls();
+      }
       break;
     case 'resize':
       if (msg.args && msg.args.width && msg.args.height) {
-        const dimsStyles = {
+        setStyles(wrapperDiv, {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
-        };
-        setStyles(wrapperDiv, dimsStyles);
-        setStyles(bigPlayDiv, dimsStyles);
+        });
+        setStyles(bigPlayDiv, {
+          'width': px(msg.args.width),
+          'height': px(msg.args.height),
+        });
         if (adsActive) {
           adsManager.resize(
               msg.args.width, msg.args.height,
@@ -1211,6 +1278,15 @@ export function setAdDisplayContainerForTesting(adc) {
 export function setVideoWidthAndHeightForTesting(width, height) {
   videoWidth = width;
   videoHeight = height;
+}
+
+/**
+ * Sets the video muted state
+ * @param {boolean} shouldMute
+ * @visibleForTesting
+ */
+export function setVideoPlayerMutedForTesting(shouldMute) {
+  videoPlayer.muted = shouldMute;
 }
 
 /**

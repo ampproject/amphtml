@@ -27,6 +27,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
+const config = require('./config');
+const minimatch = require('minimatch');
 const path = require('path');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
@@ -186,8 +188,19 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.js' ||
-          filename == 'visual-tests.js' ||
+          filename == 'visual-tests' ||
           filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
+ * Determines if the given file is a unit test.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isUnitTest(filePath) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -196,7 +209,9 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.includes('test/integration/');
+  return config.integrationTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -223,6 +238,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR_WEBUI',
       'VALIDATOR',
       'RUNTIME',
+      'UNIT_TEST',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -241,6 +257,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
       targetSet.add('FLAG_CONFIG');
+    } else if (isUnitTest(p)) {
+      targetSet.add('UNIT_TEST');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -272,6 +290,7 @@ function stopSauceConnect() {
 const command = {
   testBuildSystem: function() {
     timedExecOrDie('gulp ava');
+    timedExecOrDie('node node_modules/jest/bin/jest.js');
   },
   testDocumentLinks: function() {
     timedExecOrDie('gulp check-links');
@@ -361,7 +380,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --nobuild --headless';
+    let cmd = 'gulp visual-diff --nobuild';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -370,10 +389,7 @@ const command = {
     const {status} = timedExec(cmd);
     if (status != 0) {
       console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found errors while running', colors.cyan(cmd) +
-          '. Here are the last 100 lines from',
-          colors.cyan('chromedriver.log') + ':\n');
-      exec('tail -n 100 chromedriver.log');
+          'Found errors while running', colors.cyan(cmd));
     }
   },
   verifyVisualDiffTests: function() {
@@ -567,18 +583,22 @@ function main() {
       command.testDocumentLinks();
     }
     if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
-      // Run unit tests only if the PR contains runtime changes.
+      // Run unit tests only if the PR contains runtime or build-system changes.
       if (buildTargets.has('RUNTIME') ||
           buildTargets.has('BUILD_SYSTEM')) {
         // Before running all tests, run tests modified by the PR. (Fail early.)
         command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
+      } else if (buildTargets.has('UNIT_TEST')) {
+        // PR contains only test changes. Run just the modified unit tests.
+        command.runUnitTestsOnLocalChanges();
       }
     }
   }
@@ -592,9 +612,11 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.buildRuntimeMinified(/* extensions */ false);
-      command.runBundleSizeCheck();
       command.runVisualDiffTests();
+      if (buildTargets.has('RUNTIME')) {
+        command.buildRuntimeMinified(/* extensions */ false);
+        command.runBundleSizeCheck();
+      }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');

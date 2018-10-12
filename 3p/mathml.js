@@ -56,6 +56,9 @@ export function mathml(global, data) {
         div.textContent = data.formula;
         setStyle(div, 'visibility', 'hidden');
         global.document.body.appendChild(div);
+        mathjax.Hub.Config({
+          showMathMenu: false,
+        });
         mathjax.Hub.Queue(function() {
           const rendered = document.getElementById('MathJax-Element-1-Frame');
           // Remove built in mathjax margins.

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
 import {Toolbar} from '../toolbar';
@@ -100,7 +99,7 @@ describe('amp-sidebar - toolbar', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -135,8 +134,7 @@ describe('amp-sidebar - toolbar', () => {
             toolbar.onLayoutChange();
           });
           expect(toolbarElements.length).to.be.above(0);
-          expect(toolbarElements[0].parentElement.style.display)
-              .to.be.equal('none');
+          expect(toolbarElements[0].parentElement).to.have.display('none');
         });
       });
     });
@@ -154,8 +152,7 @@ describe('amp-sidebar - toolbar', () => {
                 toArray(obj.ampdoc.getRootNode()
                     .getElementsByClassName('i-amphtml-toolbar'));
         expect(toolbarElements.length).to.be.above(0);
-        expect(toolbarElements[0].parentElement.style.display)
-            .to.be.equal('');
+        expect(toolbarElements[0].parentElement).to.not.have.display('none');
       });
     });
   });
@@ -197,8 +194,7 @@ describe('amp-sidebar - toolbar', () => {
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0].style.display)
-            .to.be.equal('');
+        expect(toolbarTargets[0]).to.not.have.display('none');
       });
     });
   });
@@ -219,8 +215,7 @@ describe('amp-sidebar - toolbar', () => {
         });
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargets.length).to.be.equal(1);
-        expect(toolbarTargets[0].style.display)
-            .to.be.equal('none');
+        expect(toolbarTargets[0]).to.have.display('none');
       });
     });
   });

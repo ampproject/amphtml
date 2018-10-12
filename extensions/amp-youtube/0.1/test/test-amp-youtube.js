@@ -15,7 +15,6 @@
  */
 
 import '../amp-youtube';
-import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -105,7 +104,7 @@ describes.realWin('amp-youtube', {
       }).then(yt => {
         const iframe = yt.querySelector('iframe');
         expect(iframe.src).to.contain('myParam=hello%20world');
-        // data-param-autoplay is black listed in favour of just autoplay
+        // data-param-autoplay is black listed in favor of just autoplay
         expect(iframe.src).to.not.contain('autoplay=1');
         // playsinline should default to 1 if not provided.
         expect(iframe.src).to.contain('playsinline=1');
@@ -327,7 +326,7 @@ describes.realWin('amp-youtube', {
       expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('');
     });
   });
 

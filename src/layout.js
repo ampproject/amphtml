@@ -22,7 +22,7 @@
 import {dev, user} from './log';
 import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
-import {setStyle, setStyles} from './style';
+import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
 
 /**
@@ -334,7 +334,10 @@ export function applyStaticLayout(element) {
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
     } else if (layout == Layout.NODISPLAY) {
-      applyNoDisplayLayout(element);
+      toggle(element, false);
+      // TODO(jridgewell): Temporary hack while SSR still adds an inline
+      // `display: none`
+      element['style']['display'] = '';
     }
     return layout;
   }
@@ -432,7 +435,10 @@ export function applyStaticLayout(element) {
   if (layout == Layout.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
-    applyNoDisplayLayout(element);
+    toggle(element, false);
+    // TODO(jridgewell): Temporary hack while SSR still adds an inline
+    // `display: none`
+    element['style']['display'] = '';
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: dev().assertString(width),
@@ -443,7 +449,6 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     setStyles(sizer, {
-      display: 'block',
       paddingTop:
         ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%',
     });
@@ -461,8 +466,7 @@ export function applyStaticLayout(element) {
     intrinsicSizer.setAttribute('src',
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
-    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
-    element.sizerElement = intrinsicSizer;
+    element.sizerElement = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
@@ -486,16 +490,4 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', 0);
   }
   return layout;
-}
-
-
-/**
- * @param {!Element} element
- */
-function applyNoDisplayLayout(element) {
-  // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been deployed
-  // everywhere, switch all relevant elements to this API. In the meantime,
-  // simply unblock display toggling via `style="display: ..."`.
-  setStyle(element, 'display', 'none');
-  element.classList.add('i-amphtml-display');
 }
