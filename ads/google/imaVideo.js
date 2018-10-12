@@ -126,6 +126,9 @@ let seekPercent;
 // Flag tracking whether or not content has played to completion.
 let contentComplete;
 
+// Flag tracking whether or not all ads have been played and been completed.
+let allAdsCompleted;
+
 // Flag tracking if an ad request has failed.
 let adRequestFailed;
 
@@ -406,6 +409,7 @@ export function imaVideo(global, data) {
 
   contentComplete = false;
   adsActive = false;
+  allAdsCompleted = false;
   playbackStarted = false;
   nativeFullscreen = false;
   imaLoadAllowed = true;
@@ -594,13 +598,14 @@ export function onBigPlayClick(global) {
     playbackStarted = true;
     uiTicker = setInterval(uiTickerClick, 500);
     setInterval(playerDataTick, 1000);
-    setStyle(bigPlayDiv, 'display', 'none');
     if (adDisplayContainer) {
       adDisplayContainer.initialize();
     }
     videoPlayer.load();
     playAds(global);
   }
+  
+  setStyle(bigPlayDiv, 'display', 'none');
 }
 
 /**
@@ -685,12 +690,16 @@ export function playAds(global) {
  */
 export function onContentEnded() {
   contentComplete = true;
-  console.log('contentComplete', adsLoader);
   if (adsLoader) {
     adsLoader.contentComplete();
-  } else {
+  }  
+  
+  // If all ads are not completed,
+  // onContentResume will show the bigPlayDiv
+  if (allAdsCompleted) {
     setStyle(bigPlayDiv, 'display', 'table-cell');
   }
+
   postMessage({event: VideoEvents.PAUSE});
   postMessage({event: VideoEvents.ENDED});
 }
@@ -716,7 +725,10 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
       onContentPauseRequested.bind(null, global));
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
-      onContentResumeRequested);
+    onContentResumeRequested);
+  adsManager.addEventListener(
+    global.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+    onAllAdsCompleted);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
@@ -786,15 +798,24 @@ export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
   postMessage({event: VideoEvents.AD_END});
-  console.log('onContentResumeRequested', contentComplete);
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
-    videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
   } else {
     setStyle(bigPlayDiv, 'display', 'table-cell'); 
   }
+
+  videoPlayer.addEventListener('ended', onContentEnded);
+}
+
+/**
+ * Called by the IMA SDK. Signifies all ads have been played for the video.
+ *
+ * @visibleForTesting
+ */
+export function onAllAdsCompleted() {
+  allAdsCompleted = true;
 }
 
 /**
@@ -1255,10 +1276,10 @@ function postMessage(data) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
+  return {adContainerDiv, allAdsCompleted, adRequestFailed, adsActive, adsManagerWidthOnLoad,
     adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
     hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
-    playerState, PlayerStates, playPauseDiv, progressLine,
+    playerState, PlayerStates, bigPlayDiv, playPauseDiv, progressLine,
     progressMarkerDiv, timeNode, uiTicker, videoPlayer};
 }
 
@@ -1298,6 +1319,15 @@ export function setVideoWidthAndHeightForTesting(width, height) {
  */
 export function setVideoPlayerMutedForTesting(shouldMute) {
   videoPlayer.muted = shouldMute;
+}
+
+/**
+ * Sets the allAdsCompleted flag.
+ * @param {boolean} newValue
+ * @visibleForTesting
+ */
+export function setAllAdsCompletedForTesting(newValue) {
+  allAdsCompleted = newValue;
 }
 
 /**
