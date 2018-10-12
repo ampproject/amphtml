@@ -93,7 +93,15 @@ Here is the JSON file that we used:
  ]
 }
 ```
+Here is how we styled the content fetched:
 
+```css
+    amp-list div[role="list"] {
+      display: grid;
+      grid-gap: 0.5em;
+    } 
+```
+    
 ## Behavior
 
 The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from
