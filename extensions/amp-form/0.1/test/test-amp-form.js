@@ -656,8 +656,6 @@ describes.repeated('', {
         return ampForm.verifier_.onCommit().then(() => {
           expect(fromIterator(fetchStub.getCall(0).args[1].body.entries())).to
               .deep.equal([['name', 'Frank'], ['__amp_form_verify', 'true']]);
-          // expect(fromIterator(fetchStub.getCall(0).args[1].body.entries()))
-          //     .to.not.have.deep.members(['noVerify', 'do not send']);
           expect(input.validity.customError).to.be.true;
           expect(input.validationMessage).to.equal('This name is just wrong.');
         });
