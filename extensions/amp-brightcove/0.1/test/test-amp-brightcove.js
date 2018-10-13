@@ -173,7 +173,7 @@ describes.realWin('amp-brightcove', {
     return getBrightcove({
       'data-account': '1290862519001',
       'data-video-id': 'ref:amp-test-video',
-      'data-param-playsinline': 'false'
+      'data-param-playsinline': 'false',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
 
