@@ -147,7 +147,7 @@ describes.realWin('amp-brightcove', {
     });
   });
 
-  it('should allow neither playlist nor video id to be set', () => {
+  it('should allow both playlist and video id to be unset', () => {
     return getBrightcove({
       'data-account': '1290862519001',
     }).then(bc => {
