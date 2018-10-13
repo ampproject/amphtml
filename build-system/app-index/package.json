@@ -1,0 +1,31 @@
+{
+  "name": "app-index",
+  "version": "0.0.1",
+  "description": "Development Dashboard for AMPHTML",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx rollup -c && node build.js",
+    "serve": "npx rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ampproject/amphtml.git"
+  },
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ampproject/amphtml/issues"
+  },
+  "homepage": "https://github.com/ampproject/amphtml#readme",
+  "devDependencies": {
+    "@ampproject/rollup-plugin-closure-compiler": "^0.7.3",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "mustache": "^3.0.0",
+    "rollup": "^0.66.6",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup-plugin-serve": "^0.6.0"
+  }
+}
