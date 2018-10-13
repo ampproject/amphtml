@@ -68,7 +68,7 @@ function renderListing(basepath) {
           .replace('<!-- listing -->',
               files.map(file => renderFileLink(basepath, file)).join(''));
     });
-  });
+  }).catch(() => /* empty catch for fallbacks */ null);
 }
 
 function serveIndex(req, res, next) {
