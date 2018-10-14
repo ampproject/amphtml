@@ -134,6 +134,53 @@ describes.realWin('amp-brightcove', {
     });
   });
 
+  it('should give precedence to playlist id', () => {
+    return getBrightcove({
+      'data-account': '1290862519001',
+      'data-video-id': 'ref:amp-test-video',
+      'data-playlist-id': 'ref:test-playlist',
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+
+      expect(iframe.src).to.contain('playlistId=ref:test-playlist');
+      expect(iframe.src).not.to.contain('videoId');
+    });
+  });
+
+  it('should allow both playlist and video id to be unset', () => {
+    return getBrightcove({
+      'data-account': '1290862519001',
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+
+      expect(iframe.src).not.to.contain('&playlistId');
+      expect(iframe.src).not.to.contain('&videoId');
+    });
+  });
+
+  it('should pass referrer', () => {
+    return getBrightcove({
+      'data-account': '1290862519001',
+      'data-referrer': 'COUNTER',
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+
+      expect(iframe.src).to.contain('referrer=1');
+    });
+  });
+
+  it('should force playsinline', () => {
+    return getBrightcove({
+      'data-account': '1290862519001',
+      'data-video-id': 'ref:amp-test-video',
+      'data-param-playsinline': 'false',
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+
+      expect(iframe.src).to.contain('playsinline=true');
+    });
+  });
+
   it('should forward events', () => {
     return getBrightcove({
       'data-account': '1290862519001',
