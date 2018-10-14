@@ -1,6 +1,22 @@
 language: node_js
-sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
-dist: trusty
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      env: BUILD_SHARD="unit_tests"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env: BUILD_SHARD="integration_tests"
+    - os: osx
+      env: BUILD_SHARD="unit_tests"
+    - os: osx
+      env: BUILD_SHARD="integration_tests"
+    - os: windows
+      env: BUILD_SHARD="unit_tests"
+    - os: windows
+      env: BUILD_SHARD="integration_tests"
 node_js:
   - "lts/*"
 python:
@@ -43,10 +59,6 @@ addons:
     packages:
       - protobuf-compiler
       - python-protobuf
-matrix:
-  include:
-    - env: BUILD_SHARD="unit_tests"
-    - env: BUILD_SHARD="integration_tests"
 cache:
   yarn: true
   directories:
