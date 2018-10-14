@@ -112,8 +112,8 @@ class AmpBrightcove extends AMP.BaseElement {
     // Warn if the player does not have video interface support
     this.readyTimeout_ = Services.timerFor(window).delay(() => {
       user().warn(TAG,
-          `Did not receive ready callback from player ${this.playerId_}.` +
-        ' Ensure it has the videojs-amp-support plugin.');
+          'Did not receive ready callback from player %s.' +
+        ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
     }, 3000);
 
     this.playerReadyResolver_(this.iframe_);
@@ -228,9 +228,11 @@ class AmpBrightcove extends AMP.BaseElement {
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
 
-    dev().info(TAG, `Player ${this.playerId_} ready. ` +
-        `Brightcove Player version: ${data['bcVersion']} ` +
-        `AMP Support version: ${data['ampSupportVersion']}`);
+    dev().info(TAG,
+        'Player %s ready. ' +
+        'Brightcove Player version: %s AMP Support version: %s',
+        this.playerId_, data['bcVersion'], data['ampSupportVersion']
+    );
   }
 
   /**
@@ -244,7 +246,6 @@ class AmpBrightcove extends AMP.BaseElement {
         'The data-account attribute is required for <amp-brightcove> %s',
         el);
     const embed = (el.getAttribute('data-embed') || 'default');
-    const customReferrer = el.getAttribute('data-referrer');
 
     this.playerId_ = (el.getAttribute('data-player') ||
       el.getAttribute('data-player-id') ||
@@ -257,12 +258,20 @@ class AmpBrightcove extends AMP.BaseElement {
         // These are encodeURIComponent'd in encodeId_().
         (el.getAttribute('data-playlist-id') ?
           '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
-        ) +
-        (customReferrer ?
-          `&referrer=${this.urlReplacements_.expandUrlSync(customReferrer)}` :
-          ''
+          (el.getAttribute('data-video-id') ?
+            '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')) :
+            ''
+          )
         );
+
+    const customReferrer = el.getAttribute('data-referrer');
+
+    if (customReferrer) {
+      el.setAttribute(
+          'data-param-referrer',
+          this.urlReplacements_.expandUrlSync(customReferrer)
+      );
+    }
 
     el.setAttribute('data-param-playsinline', 'true');
 
