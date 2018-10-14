@@ -50,7 +50,7 @@
     "ava": "0.25.0",
     "babel-eslint": "10.0.1",
     "babel-plugin-filter-imports": "2.0.3",
-    "babel-plugin-istanbul": "5.0.1",
+    "babel-plugin-istanbul": "5.1.0",
     "babelify": "10.0.0",
     "baconipsum": "0.1.2",
     "bluebird": "3.5.2",
