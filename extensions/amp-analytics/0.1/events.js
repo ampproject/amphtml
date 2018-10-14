@@ -1131,6 +1131,9 @@ export class VisibilityTracker extends EventTracker {
 
     /** @private */
     this.waitForTrackers_ = {};
+
+    /** @private */
+    this.reportWhenTrackers_ = {};
   }
 
   /** @override */
@@ -1142,6 +1145,7 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    const reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
     // special polyfill for eventType: 'hidden'
     let createReadyReportPromiseFunc = null;
@@ -1155,7 +1159,7 @@ export class VisibilityTracker extends EventTracker {
       // a "ready" signal.
       return visibilityManager.listenRoot(
           visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector),
+          this.getReadyPromise(waitForSpec, reportWhenSpec, selector),
           createReadyReportPromiseFunc,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
@@ -1173,7 +1177,7 @@ export class VisibilityTracker extends EventTracker {
       return visibilityManager.listenElement(
           element,
           visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector, element),
+          this.getReadyPromise(waitForSpec, reportWhenSpec, selector, element),
           createReadyReportPromiseFunc,
           this.onEvent_.bind(this, eventType, listener, element));
     });
@@ -1205,21 +1209,20 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * @param {string|undefined} waitForSpec
+   * @param {string|undefined} reportWhenSpec
    * @param {string|undefined} selector
    * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, opt_element) {
-    if (!waitForSpec) {
-      // Default case:
-      if (!selector) {
-        // waitFor selector is not defined, wait for nothing
-        return null;
-      } else {
-        // otherwise wait for ini-load by default
-        waitForSpec = 'ini-load';
-      }
+  getReadyPromise(waitForSpec, reportWhenSpec, selector, opt_element) {
+    if (!waitForSpec && !reportWhenSpec && !selector) {
+      // Wait for nothing, report immediately
+      return null;
+    }
+    if (!waitForSpec && selector) {
+      // Wait for ini-load by default
+      waitForSpec = 'ini-load';
     }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');
@@ -1227,18 +1230,34 @@ export class VisibilityTracker extends EventTracker {
         trackerWhitelist[waitForSpec] !== undefined,
     'waitFor value %s not supported', waitForSpec);
 
-    const waitForTracker = this.waitForTrackers_[waitForSpec] ||
-        this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
+    user().assert(!reportWhenSpec || reportWhenSpec == 'endOfFrame',
+        'reportWhen value %s not supported', reportWhenSpec);
+
+    const waitForTracker = waitForSpec &&
+        (this.waitForTrackers_[waitForSpec] ||
+        this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist));
     if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
-    } else {
+    }
+
+    const reportWhenTracker = reportWhenSpec &&
+        (this.reportWhenTrackers_[reportWhenSpec] ||
+        this.root.getTrackerForWhitelist(reportWhenSpec, trackerWhitelist));
+    if (reportWhenTracker) {
+      this.reportWhenTrackers_[reportWhenSpec] = reportWhenTracker;
+    }
+
+    if (!waitForTracker && !reportWhenTracker) {
       return null;
     }
 
-    // Wait for root signal if there's no element selected.
-    return opt_element ?
-      waitForTracker.getElementSignal(waitForSpec, opt_element)
-      : waitForTracker.getRootSignal(waitForSpec);
+    // TODO: In both branches below, combine waitForTracker and reportWhenTracker, depending on which exist.
+    if (opt_element) {
+      // Wait for root signal if there's no element selected.
+      return waitForTracker.getElementSignal(waitForSpec, opt_element);
+    } else {
+      return waitForTracker.getRootSignal(waitForSpec);
+    }
   }
 
   /**

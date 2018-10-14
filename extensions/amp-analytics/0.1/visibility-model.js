@@ -232,17 +232,26 @@ export class VisibilityModel {
     this.update();
   }
 
-  /**
-   * Sets that the model needs to wait on extra report ready promise
-   * after all visibility conditions have been met to call report handler
-   * @param {function():!Promise} callback
-   */
-  setReportReady(callback) {
-    this.reportReady_ = false;
-    this.createReportReadyPromise_ = callback;
-  }
+    /**
+     * Sets that the model needs to wait on extra report ready promise
+     * after all visibility conditions have been met to call report handler
+     * @param {function():!Promise} callback
+     */
+    setReportReady(callback) {
+        this.reportReady_ = false;
+        this.createReportReadyPromise_ = callback;
+    }
 
-  /**
+    /**
+     * Sets that the model should defer calling report handler until a condition has been met
+     * @param {function():!Promise} callback
+     */
+    setReportWhen(callback) {
+        this.reportReady_ = false;
+        this.createReportReadyPromise_ = callback;
+    }
+
+    /**
    * @return {number}
    * @private
    */
