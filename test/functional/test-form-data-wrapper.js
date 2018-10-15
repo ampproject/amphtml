@@ -20,19 +20,23 @@ import {fromIterator} from '../../src/utils/array';
 describes.realWin('FormDataWrapper', {}, env => {
   describe('entries', () => {
     let nativeEntries;
+    let nativeDelete;
     const scenarios = [{
       description: 'when native `entries` is not available',
 
       beforeEach() {
         nativeEntries = FormData.prototype.entries;
+        nativeDelete = FormData.prototype.delete;
         // Remove native entries from the prototype in case the browser running
         // the tests already have it to force the "no native `entries`"
         // scenario.
         FormData.prototype.entries = undefined;
+        FormData.prototype.delete = undefined;
       },
 
       afterEach() {
         FormData.prototype.entries = nativeEntries;
+        FormData.prototype.delete = nativeDelete;
       },
     }];
     if (FormData.prototype.entries) {
@@ -85,6 +89,27 @@ describes.realWin('FormDataWrapper', {}, env => {
               ['1', 'true'],
               ['-3.4', 'null'],
               ['false', 'undefined'],
+            ]);
+          });
+
+          it('returns appended entries without deleted entries', () => {
+            formData.append('a', '1');
+            formData.append('b', 'true');
+            formData.delete('a');
+
+            expect(fromIterator(formData.entries())).to.have.deep.members([
+              ['b', 'true'],
+            ]);
+          });
+
+          it('does not delete items if a non-present name is deleted', () => {
+            formData.append('a', '1');
+            formData.append('b', 'true');
+            formData.delete('does-not-exist');
+
+            expect(fromIterator(formData.entries())).to.have.deep.members([
+              ['a', '1'],
+              ['b', 'true'],
             ]);
           });
         });
@@ -166,6 +191,27 @@ describes.realWin('FormDataWrapper', {}, env => {
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
+            ]);
+          });
+
+          it('deletes form element values', () => {
+            const input = env.win.document.createElement('input');
+            input.type = 'text';
+            input.name = 'foo';
+            input.value = 'bar';
+            form.appendChild(input);
+
+            const input2 = env.win.document.createElement('input');
+            input2.type = 'text';
+            input2.name = 'baz';
+            input2.value = 'qux';
+            form.appendChild(input2);
+
+            const formData = new FormDataWrapper(form);
+            formData.delete('foo');
+
+            expect(fromIterator(formData.entries())).to.have.deep.members([
+              ['baz', 'qux'],
             ]);
           });
         });
