@@ -1,0 +1,47 @@
+<div class="block proxy-form-container">
+  <form id="proxy-form">
+    <label for="proxy-input">
+      <span>Load URL by Proxy</span>
+      <input type="url" class="text-input" id="proxy-input"
+        placeholder="https://">
+    </label>
+    <div class="form-info">
+      <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
+        What's this?
+      </a>
+    </div>
+  </form>
+</div>
+<script>
+  // TODO(alanorozco): Write this in ES2015 to be transpiled.
+  function getLocation(href) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l;
+  }
+
+  function attachProxyFormListeners() {
+    var form = document.getElementById('proxy-form');
+    var input = document.getElementById('proxy-input');
+
+    form.addEventListener('submit', function (e) {
+      var location = getLocation(input.value);
+      var suffix =
+        location.host +
+        location.pathname +
+        location.search +
+        location.hash;
+      var redirectUrl = '/proxy/s/' + suffix;
+
+      e.preventDefault();
+
+      window.location = redirectUrl;
+    });
+  }
+
+  function attachListeners() {
+    attachProxyFormListeners();
+  }
+
+  attachListeners();
+</script>
