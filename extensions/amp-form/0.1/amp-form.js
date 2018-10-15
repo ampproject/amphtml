@@ -23,7 +23,6 @@ import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
@@ -38,6 +37,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {
@@ -254,7 +254,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = new FormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.form_);
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach(name => {
           body.delete(name);

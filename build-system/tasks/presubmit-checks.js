@@ -589,7 +589,7 @@ const forbiddenTerms = {
     ],
   },
   'new FormData\\(': {
-    message: 'Use new FormDataWrapper() instead and call ' +
+    message: 'Use createFormDataWrapper() instead and call ' +
         'formDataWrapper.getFormData() to get the native FormData object.',
     whitelist: [
       'src/form-data-wrapper.js',

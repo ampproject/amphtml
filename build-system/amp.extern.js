@@ -28,7 +28,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  *
  * @typedef {{
- *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
+ *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
  *   cache: (string|undefined),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
@@ -46,10 +46,16 @@ var FetchInitDef;
 var FetchRequestDef;
 
 /** @constructor **/
-var FormDataWrapper = function() {};
+var FormDataWrapperInterface = function() {};
 
-FormDataWrapper.prototype.entries = function() {};
-FormDataWrapper.prototype.getFormData = function() {};
+FormDataWrapperInterface.prototype.entries = function() {};
+FormDataWrapperInterface.prototype.getFormData = function() {};
+
+FormData.prototype.entries = function () {};
+/**
+ * @param {string} unusedName
+ */
+FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from

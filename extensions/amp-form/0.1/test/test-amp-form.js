@@ -23,11 +23,14 @@ import {
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
 import {Services} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
+import {
+  createFormDataWrapper,
+  isFormDataWrapper,
+} from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/utils/array';
 import {
   setCheckValiditySupportedForTesting,
@@ -857,9 +860,9 @@ describes.repeated('', {
 
           const xhrCall = ampForm.xhr_.fetch.getCall(0);
           const config = xhrCall.args[1];
-          expect(config.body).to.be.an.instanceof(FormDataWrapper);
+          expect(isFormDataWrapper(config.body)).to.be.true;
           const entriesInForm =
-              fromIterator(new FormDataWrapper(getForm()).entries());
+              fromIterator(createFormDataWrapper(getForm()).entries());
           expect(fromIterator(config.body.entries())).to.have.deep.members(
               entriesInForm);
           expect(config.method).to.equal('POST');
