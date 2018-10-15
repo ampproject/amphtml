@@ -27,6 +27,7 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {matches} from '../dom';
 
 const TAG = 'FixedLayer';
 
@@ -220,13 +221,10 @@ export class FixedLayer {
    */
   removeElement(element) {
     const removed = this.removeElement_(element);
-    if (removed.length > 0 && this.transferLayer_) {
+    if (removed && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        for (let i = 0; i < removed.length; i++) {
-          const fe = removed[i];
-          if (fe.position == 'fixed') {
-            this.transferLayer_.returnFrom(fe);
-          }
+        if (removed.position == 'fixed') {
+          this.transferLayer_.returnFrom(removed);
         }
       });
     }
@@ -530,11 +528,10 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
-   * @return {!Array<!ElementDef>}
+   * @return {!ElementDef|undefined}
    * @private
    */
   removeElement_(element) {
-    const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
       if (fe.element == element) {
@@ -542,10 +539,9 @@ export class FixedLayer {
           setStyle(element, 'top', '');
         });
         this.elements_.splice(i, 1);
-        removed.push(fe);
+        return fe;
       }
     }
-    return removed;
   }
 
   /**
@@ -649,18 +645,23 @@ export class FixedLayer {
   discoverSelectors_(rules, foundSelectors, stickySelectors) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
+      if (rule.type == /* CSSMediaRule */ 4 ||
+          rule.type == /* CSSSupportsRule */ 12) {
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        continue;
+      }
+
       if (rule.type == /* CSSStyleRule */ 1) {
-        if (rule.selectorText != '*' && rule.style.position) {
-          if (rule.style.position == 'fixed') {
-            foundSelectors.push(rule.selectorText);
-          } else if (endsWith(rule.style.position, 'sticky')) {
-            stickySelectors.push(rule.selectorText);
-          }
+        const {selectorText} = rule;
+        const {position} = rule.style;
+        if (selectorText === '*' || !position) {
+          continue;
         }
-      } else if (rule.type == /* CSSMediaRule */ 4) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
-      } else if (rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        if (position === 'fixed') {
+          foundSelectors.push(selectorText);
+        } else if (endsWith(position, 'sticky')) {
+          stickySelectors.push(selectorText);
+        }
       }
     }
   }
@@ -847,19 +848,12 @@ class TransferLayerBody {
    */
   matches_(element, selector) {
     try {
-      const matcher = element.matches ||
-          element.webkitMatchesSelector ||
-          element.mozMatchesSelector ||
-          element.msMatchesSelector ||
-          element.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(element, selector);
-      }
+      return matches(element, selector);
     } catch (e) {
       // Fail silently.
       dev().error(TAG, 'Failed to test query match:', e);
+      return false;
     }
-    return false;
   }
 }
 
