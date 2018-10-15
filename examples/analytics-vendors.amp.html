@@ -92,6 +92,7 @@
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>tealiumcollect</option>
       <option>top100</option>
       <option>topmailru</option>
       <option>umenganalytics</option>
@@ -1062,6 +1063,53 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- Tealium Collect example -->
+<amp-analytics type="tealiumcollect" id="tealiumcollect">
+<script type="application/json">
+{
+  "vars": {
+    "account": "myaccount",
+    "profile": "myprofile",
+    "datasource": "amp123"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "tealium_event": "screen_view"
+      }     
+    },
+    "clickOnTest1Trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "event",
+      "vars": {
+        "tealium_event": "clicked_test1"
+      },
+      "extraUrlParams": {
+        "event_category": "examples",
+        "event_action": "clicked-test1"
+      }
+    },
+    "clickOnTopTrigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "event",
+      "vars": {
+        "tealium_event": "clicked_top"
+      },
+      "extraUrlParams": {
+        "event_category": "examples",
+        "event_action": "clicked-header"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Tealium Collect example -->
 
 <!-- Top100.rambler.ru example -->
 <amp-analytics type="top100" id="top100" config="https://kraken.rambler.ru/amp/config.json">
