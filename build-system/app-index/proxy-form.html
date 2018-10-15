@@ -2,7 +2,7 @@
   <form id="proxy-form">
     <label for="proxy-input">
       <span>Load URL by Proxy</span>
-      <input type="url" class="text-input" id="proxy-input" placeholder="https://">
+      <input type="text" class="text-input" id="proxy-input" placeholder="https://">
     </label>
     <div class="form-info">
       <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
@@ -14,12 +14,11 @@
 <script>
   // TODO(alanorozco): Write this in ES2015 to be transpiled.
 
-  function attachProxyFormListeners() {
+  function attachListeners() {
     var form = document.getElementById('proxy-form');
     var input = document.getElementById('proxy-input');
 
-    form.addEventListener('submit', function (e) {
-      var location = getLocation(input.value);
+    form.addEventListener('submit', function(e) {
       var suffix = input.value.replace(/^http(s?):\/\//i, '');
       var redirectUrl = '/proxy/s/' + suffix;
 
@@ -27,10 +26,6 @@
 
       window.location = redirectUrl;
     });
-  }
-
-  function attachListeners() {
-    attachProxyFormListeners();
   }
 
   attachListeners();
