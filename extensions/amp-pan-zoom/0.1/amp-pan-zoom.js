@@ -38,6 +38,7 @@ import {
 } from '../../../src/layout-rect';
 import {numeric} from '../../../src/transition';
 import {px, scale, setStyles, translate} from '../../../src/style';
+import { CommonSignals } from '../../../src/common-signals';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
@@ -192,6 +193,8 @@ export class AmpPanZoom extends AMP.BaseElement {
       const y = args['y'] || 0;
       return this.transform(x, y, scale);
     });
+    this.signals().whenSignal(CommonSignals.BUILT)
+        .then(() => this.maybeSizePlaceholder_());
   }
 
   /**
@@ -338,6 +341,40 @@ export class AmpPanZoom extends AMP.BaseElement {
         sourceAspectRatio / elementBoxRatio
     );
     this.maxScale_ = Math.max(this.maxScale_, maxScale);
+  }
+
+  /**
+   * @private
+   */
+  maybeSizePlaceholder_() {
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      let height;
+      let width;
+      const placeholderChild = placeholder.children[0];
+      const measure = () => {
+        const sourceWidth = placeholderChild./*OK*/scrollWidth;
+        const sourceHeight = placeholderChild./*OK*/scrollHeight;
+        const aspectRatio = sourceWidth / sourceHeight;
+        this.elementBox_ = layoutRectFromDomRect(this.element
+            ./*OK*/getBoundingClientRect());
+
+        // Calculate content height if we set width to amp-pan-zoom's width
+        const heightToFit = this.elementBox_.width / aspectRatio;
+        // Calculate content width if we set height to be amp-pan-zoom's height
+        const widthToFit = this.elementBox_.height * aspectRatio;
+        // The content should fit within amp-pan-zoom, so take the smaller value
+        height = Math.min(heightToFit, this.elementBox_.height);
+        width = Math.min(widthToFit, this.elementBox_.width);
+      };
+      const mutate = () => {
+        setStyles(placeholderChild, {
+          width: px(width),
+          height: px(height),
+        });
+      };
+      this.measureMutateElement(measure, mutate, placeholder);
+    }
   }
 
   /**

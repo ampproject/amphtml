@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
- .i-amphtml-pan-zoom {
-   display: flex;
-   justify-content: center;
-   align-items: center;
- }
+.i-amphtml-pan-zoom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .i-amphtml-pan-zoom-child {
   position: absolute;
@@ -47,4 +47,15 @@
 
 .amp-pan-zoom-out-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13H5v-2h14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+/* Placeholder Prototype */
+.i-amphtml-pan-zoom>[placeholder] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.i-amphtml-pan-zoom>[placeholder]>* {
+  flex-grow: 1;
 }
