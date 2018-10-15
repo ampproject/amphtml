@@ -20,6 +20,7 @@ import {user} from '../../../src/log';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
+export const FORM_VERIFY_OPTOUT = 'no-verify';
 
 /**
  * @typedef {{

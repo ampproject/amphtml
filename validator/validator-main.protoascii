@@ -4156,6 +4156,10 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "INPUT"
   attrs: {
+    name: "no-verify"
+    value: ""
+  }
+  attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
@@ -4175,6 +4179,10 @@ tags: {
   html_format: AMP
   tag_name: "INPUT"
   spec_name: "INPUT [type=file]"
+   attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: {
     name: "type"
     value_casei: "file"
@@ -4281,6 +4289,10 @@ tags: {
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: { name: "required" }
   attrs: { name: "size" }
   # <amp-bind>
@@ -4347,6 +4359,10 @@ tags: {
   attrs: { name: "disabled" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }
