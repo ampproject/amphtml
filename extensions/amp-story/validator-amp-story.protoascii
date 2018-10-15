@@ -100,6 +100,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
+    child_tag_name_oneof: "AMP-INSTALL-SERVICEWORKER"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
