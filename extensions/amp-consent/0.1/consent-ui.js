@@ -202,7 +202,8 @@ export class ConsentUI {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
-      insertAfterOrAtStart(this.parent_, this.placeholder_, null);
+      insertAfterOrAtStart(this.parent_,
+          dev().assertElement(this.placeholder_), null);
     }
     classList.add('loading');
     toggle(dev().assertElement(this.placeholder_), true);
