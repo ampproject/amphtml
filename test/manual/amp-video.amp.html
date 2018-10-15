@@ -36,7 +36,8 @@
     .dropdown-container,
     .dropdown-container option,
     .dropdown-container select,
-    .optional-attrs-container {
+    .optional-attrs-container,
+    #analytics-events td {
       font-family: Inconsolata, Menlo, monospace;
       font-size: 14px;
     }
@@ -47,6 +48,7 @@
 
     .main {
       display: flex;
+      flex-wrap: wrap;
     }
 
     .main, h1 {
@@ -63,14 +65,36 @@
       margin: 40px auto;
       font-size: 32px;
     }
+    h2 {
+      font-weight: bold;
+      margin: 40px 0;
+      font-size: 14px;
+      display: block;
+      flex: 0 0 100%;
+    }
 
     aside {
       margin-left: 20px;
       min-width: 240px;
     }
+
+    .analytics-events-container {
+      padding: 40px 0;
+      background: #fafafa;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    #analytics-events td {
+      padding: 6px 10px 0 0;
+    }
+    #analytics-events thead td {
+      font-weight: bold;
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -85,6 +109,7 @@
           width="358"
           height="204"
           layout="responsive"
+          id="my-video"
           controls>
         <div placeholder>
           This is a placeholder
@@ -98,6 +123,84 @@
       <div class="dropdown-container"></div>
       <div class="optional-attrs-container"></div>
     </aside>
+    <h2>Analytics Events</h2>
   </div>
+
+  <div class="analytics-events-container">
+    <div class="main">
+      <table id="analytics-events">
+        <thead>
+          <tr>
+            <td width="80px">Abs. time</td>
+            <td width="80px">Autoplay</td>
+            <td width="200px">Type</td>
+            <td width="150px">Current time</td>
+            <td width="150px">Played Total</td>
+            <td>Duration</td>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}"
+        },
+        "transport": {
+          "beacon": false,
+          "image": false,
+          "xhrpost": true
+        },
+        "triggers": {
+          "myVideoPlay": {
+            "on": "video-play",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-play"
+            }
+          },
+          "myVideoPause": {
+            "on": "video-pause",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-pause"
+            }
+          },
+          "myVideoSecondsPlayed": {
+            "on": "video-seconds-played",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-seconds-played"
+            },
+            "videoSpec": {
+              "interval": 2
+            }
+          },
+          "myVideoSession": {
+            "on": "video-session",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-session"
+            }
+          },
+          "myVideoEnded": {
+            "on": "video-ended",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-ended"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
 </body>
 </html>
