@@ -61,7 +61,7 @@ export function capirs(global, data) {
         const reportId = 'capirs-' + banner['banner_id'];
         global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: global.context.noContentAvailable,
+      unexist: function() { global.context.noContentAvailable(); },
     },
   };
 
