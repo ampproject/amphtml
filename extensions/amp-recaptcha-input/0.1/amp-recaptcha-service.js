@@ -103,12 +103,8 @@ export class AmpRecaptchaService {
   register(sitekey) {
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      return new Promise((resolve, reject) => {
-        this.initialize_(sitekey).then(() => {
-          this.iframeLoadPromise_.then(() => {
-            resolve();
-          }).catch(err => reject(err));
-        }).catch(err => reject(err));
+      return this.initialize_(sitekey).then(() => {
+        return this.iframeLoadPromise_;
       });
     }
     return this.iframeLoadPromise_;
@@ -215,7 +211,7 @@ export class AmpRecaptchaService {
    * Function to create our bootstrap iframe.
    *
    * @param {string} sitekey
-   * @return {Promise<!Element>}
+   * @return {!Promise<!Element>}
    * @private
    */
   createRecaptchaFrame_(sitekey) {
@@ -226,10 +222,10 @@ export class AmpRecaptchaService {
       iframe.src = recaptchaFrameSrc;
       iframe.ampLocation = parseUrlDeprecated(this.win_.location.href);
       iframe.setAttribute('scrolling', 'no');
-      iframe.setAttribute('data-amp-3p-sentinel', 'recaptcha');
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp');
       iframe.setAttribute('name', JSON.stringify(dict({
         'sitekey': sitekey,
-        'sentinel': 'recaptcha',
+        'sentinel': 'amp',
       })));
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
@@ -252,7 +248,7 @@ export class AmpRecaptchaService {
    * To then create the iframe src:
    * https://www-example-com.recaptcha.my.cdn/rtv/recaptcha.html
    *
-   * @return {Promise<string>}
+   * @return {!Promise<string>}
    * @private
    */
   getRecaptchaFrameSrc_() {

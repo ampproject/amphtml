@@ -64,7 +64,7 @@ init();
 /**
  * Main function called by the recaptcha bootstrap frame
  */
-function recaptcha() {
+window.initRecaptcha = function() {
 
   /**
    *  Get the data from our name attribute
@@ -84,7 +84,7 @@ function recaptcha() {
   dev().assert(
       dataObject.sitekey,
       'The sitekey is required for the <amp-recaptcha-input> iframe %s',
-      dataObject
+      JSON.stringify(dataObject)
   );
   const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
@@ -99,7 +99,7 @@ function recaptcha() {
   }, function() {
     dev().error(TAG + ' Failed to load recaptcha api script');
   });
-}
+};
 
 /**
  * Function to initialize our IframeMessagingClient
@@ -141,16 +141,11 @@ function actionTypeHandler(grecaptcha, data) {
       'token': token,
     }));
   }, function(err) {
-    user().error(TAG, '%s', err);
+    user().error(TAG, '%s', err.message);
     iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
       'id': data.id,
       'error': err.message,
     }));
   });
 }
-
-
-// Finally bind recaptcha to window
-window.recaptcha = recaptcha.bind(this);
-
 
