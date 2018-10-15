@@ -78,9 +78,13 @@
     right: 0;
   }
   .push-right-after-heading {
+    display: flex;
     float: right;
-    margin-top: -80px;
-    line-height: 40px;
+    margin-top: -70px;
+    line-height: 20px;
+  }
+  #examples-mode-form {
+    margin-right: 20px;
   }
   .center {
     margin: 40px 0;
@@ -208,13 +212,50 @@
   </wrap>
   <div class="file-list-container">
     <wrap>
-      <h3 class="code"><!-- basepath --></h3>
+      <h3 class="code" id="basepath"><!-- basepath --></h3>
       <div class="push-right-after-heading">
+        <form hidden id="examples-mode-form">
+          <label for="examples-mode-select">
+            Document mode:
+            <select id="examples-mode-select">
+              <option value="/" selected>standard</option>
+              <option value="/a4a/">a4a</option>
+              <option value="/a4a-3p/">a4a-3p</option>
+              <option value="/inabox/1/">inabox</option>
+            </select>
+          </label>
+        </form>
         <a href="/~" class="underlined">List root directory</a>
       </div>
       <ul class="file-list"><!-- listing --></ul>
     </wrap>
   </div>
+  <script>
+    // TODO(alanorozco): Write this in ES2015 to be transpiled.
+    function maybeEnableExampleModeSelect() {
+      var basepath = document.getElementById('basepath');
+      if (!/^\/examples/.test(basepath.innerText)) {
+        return;
+      }
+      var form = document.querySelector('#examples-mode-form');
+      var select = document.querySelector('#examples-mode-select');
+      var links = document.querySelectorAll('.file-link');
+
+      form.removeAttribute('hidden');
+
+      select.addEventListener('change', function (e) {
+        var prefix = e.target.value;
+        for (var i = 0; i < links.length; i++) {
+          var sufix = links[i].getAttribute('data-default');
+          if (!/\.html$/.test(sufix)) {
+            continue;
+          }
+          links[i].href = prefix + sufix;
+        }
+      });
+    }
+    maybeEnableExampleModeSelect();
+  </script>
   <div class="center">
     Built with 💙  by
     <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
