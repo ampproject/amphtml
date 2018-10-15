@@ -15,8 +15,8 @@
  */
 
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
+import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
 
 describes.sandboxed('fetch', {}, () => {
@@ -98,7 +98,7 @@ describes.sandboxed('fetch', {}, () => {
     });
 
     it('should allow FormData as body', () => {
-      const formData = new FormDataWrapper();
+      const formData = createFormDataWrapper();
       sandbox.stub(JSON, 'stringify');
       formData.append('name', 'John Miller');
       formData.append('age', 56);

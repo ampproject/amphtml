@@ -156,6 +156,27 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
+
+  it('returns multiple selected entries in multi-select', () => {
+    const select = env.win.document.createElement('select');
+    select.name = 'foo';
+    select.multiple = true;
+
+    const selectedOption = env.win.document.createElement('option');
+    selectedOption.value = 'bar';
+    selectedOption.selected = true;
+
+    const unselectedOption = env.win.document.createElement('option');
+    unselectedOption.value = 'bang';
+    unselectedOption.selected = true;
+
+    select.appendChild(selectedOption);
+    select.appendChild(unselectedOption);
+    form.appendChild(select);
+
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar', 'bang']});
+  });
+
   it('returns submit input entries', () => {
     const input = env.win.document.createElement('input');
     input.type = 'submit';
