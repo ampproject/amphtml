@@ -553,7 +553,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 		'${navTiming(domContentLoadedEventEnd)}%7C0&' +
         'fId=${pageViewId}&' +
         'vID=${clientId(rxVisitor)}&' +
-        'referer=${sourceUrl}&' +
+        'url=${sourceUrl}&' +
         'title=${title}&' +
         'sw=${screenWidth}&' +
         'sh=${screenHeight}&' +
