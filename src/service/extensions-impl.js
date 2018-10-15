@@ -415,12 +415,12 @@ export class Extensions {
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
    * @param {!Window} childWin
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<CustomElementExtensionDef>} extensions
    * @param {function(!Window)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInChildWindow(childWin, extensionIds,
+  installExtensionsInChildWindow(childWin, extensions,
     opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
@@ -446,51 +446,59 @@ export class Extensions {
     stubLegacyElements(childWin);
 
     const promises = [];
-    extensionIds.forEach(extensionId => {
+    extensions.forEach(extension => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
+      const extensionId = extension['custom-element'];
+      const src = extension['src'];
+      let version = '0.1';
+      if (src) {
+        const match = /-(\d+.\d+)(.)?\.js$/.exec(src);
+        version = match ? match[1] : '0.1';
+      }
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementIfNotKnown(childWin, extensionId);
       }
       // Install CSS.
-      const promise = this.preloadExtension(extensionId).then(extension => {
-        // Adopt embeddable extension services.
-        extension.services.forEach(service => {
-          adoptServiceForEmbedIfEmbeddable(childWin, service);
-        });
+      const promise = this.preloadExtension(extensionId, version)
+          .then(extension => {
+            // Adopt embeddable extension services.
+            extension.services.forEach(service => {
+              adoptServiceForEmbedIfEmbeddable(childWin, service);
+            });
 
-        // Adopt the custom elements.
-        let elementPromises = null;
-        for (const elementName in extension.elements) {
-          const elementDef = extension.elements[elementName];
-          const elementPromise = new Promise(resolve => {
-            if (elementDef.css) {
-              installStylesLegacy(
-                  childWin.document,
-                  elementDef.css,
-                  /* completeCallback */ resolve,
-                  /* isRuntime */ false,
-                  extensionId);
-            } else {
-              resolve();
+            // Adopt the custom elements.
+            let elementPromises = null;
+            for (const elementName in extension.elements) {
+              const elementDef = extension.elements[elementName];
+              const elementPromise = new Promise(resolve => {
+                if (elementDef.css) {
+                  installStylesLegacy(
+                      childWin.document,
+                      elementDef.css,
+                      /* completeCallback */ resolve,
+                      /* isRuntime */ false,
+                      extensionId);
+                } else {
+                  resolve();
+                }
+              }).then(() => {
+                upgradeOrRegisterElement(
+                    childWin,
+                    elementName,
+                    elementDef.implementationClass);
+              });
+              if (elementPromises) {
+                elementPromises.push(elementPromise);
+              } else {
+                elementPromises = [elementPromise];
+              }
             }
-          }).then(() => {
-            upgradeOrRegisterElement(
-                childWin,
-                elementName,
-                elementDef.implementationClass);
+            if (elementPromises) {
+              return Promise.all(elementPromises).then(() => extension);
+            }
+            return extension;
           });
-          if (elementPromises) {
-            elementPromises.push(elementPromise);
-          } else {
-            elementPromises = [elementPromise];
-          }
-        }
-        if (elementPromises) {
-          return Promise.all(elementPromises).then(() => extension);
-        }
-        return extension;
-      });
       promises.push(promise);
     });
     return Promise.all(promises);
