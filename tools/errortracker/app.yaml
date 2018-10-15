@@ -1,8 +1,0 @@
-application: amp-error-reporting
-version: 11
-runtime: go
-api_version: go1
-
-handlers:
-- url: /r.*
-  script: _go_app

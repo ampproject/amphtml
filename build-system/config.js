@@ -13,28 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var path = require('path');
-
-var karmaConf = path.resolve('karma.conf.js');
-
-var commonTestPaths = [
+const initTestsPath = [
   'test/_init_tests.js',
+];
+
+const fixturesExamplesPaths = [
   'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
-    included: false,
-    nocache: false,
-    watched: true,
-  },
-  {
-    pattern: 'dist/**/*.js',
-    included: false,
-    nocache: false,
-    watched: true,
-  },
-  {
-    pattern: 'dist.tools/**/*.js',
     included: false,
     nocache: false,
     watched: true,
@@ -45,81 +33,87 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
+];
+
+const builtRuntimePaths = [
+  {
+    pattern: 'dist/**/*.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
   {
     pattern: 'dist.3p/**/*',
     included: false,
     nocache: false,
     watched: true,
   },
+  {
+    pattern: 'dist.tools/**/*.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
 ];
 
-var testPaths = commonTestPaths.concat([
+const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+
+const commonIntegrationTestPaths =
+    initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
+
+const testPaths = commonIntegrationTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
 ]);
 
-var integrationTestPaths = commonTestPaths.concat([
-  'test/integration/**/*.js',
-  'extensions/**/test/integration/**/*.js',
+const a4aTestPaths = initTestsPath.concat([
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js',
 ]);
 
-var karmaDefault = {
-  configFile: karmaConf,
-  singleRun: true,
-  client: {
-    mocha: {
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
-    },
-    captureConsole: false,
-  },
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
-};
+const chaiAsPromised = [
+  'test/chai-as-promised/chai-as-promised.js',
+];
 
-var karma = {
-  default: karmaDefault,
-  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
-  safari: extend(karmaDefault, {browsers: ['Safari']}),
-  saucelabs: extend(karmaDefault, {
-    reporters: ['dots', 'saucelabs'],
-    browsers: [
-      'SL_Chrome_android',
-      'SL_Chrome_latest',
-      'SL_Chrome_37',
-      'SL_Firefox_latest',
-      'SL_Safari_8',
-      'SL_Safari_9',
-      'SL_Edge_latest',
-      // TODO(#895) Enable these.
-      //'SL_iOS_9_1',
-      //'SL_IE_11',
-    ],
-  })
-};
+const unitTestPaths = [
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/*.js',
+];
+
+const unitTestOnSaucePaths = [
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+];
+
+const integrationTestPaths = [
+  'test/integration/**/*.js',
+  'test/functional/test-error.js',
+  'extensions/**/test/integration/**/*.js',
+];
+
+const lintGlobs = [
+  '**/*.js',
+  // To ignore a file / directory, add it to .eslintignore.
+];
 
 /** @const  */
 module.exports = {
-  commonTestPaths: commonTestPaths,
-  testPaths: testPaths,
-  integrationTestPaths: integrationTestPaths,
-  karma: karma,
-  lintGlobs: [
-    '**/*.js',
-    '!**/*.extern.js',
+  testPaths,
+  a4aTestPaths,
+  chaiAsPromised,
+  commonUnitTestPaths,
+  commonIntegrationTestPaths,
+  unitTestPaths,
+  unitTestOnSaucePaths,
+  integrationTestPaths,
+  lintGlobs,
+  jsonGlobs: [
+    '**/*.json',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
-    '!{testing,examples}/**/*.*',
-    // TODO: temporary, remove when validator is up to date
-    '!validator/**/*.*',
-    '!eslint-rules/**/*.*',
-    '!gulpfile.js',
-    '!karma.conf.js',
-    '!**/local-amp-chrome-extension/background.js',
-    '!extensions/amp-access/0.1/access-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -127,21 +121,28 @@ module.exports = {
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
-        'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+        'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
+    '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/iframe-transport-client-lib.js',
+    '!out/**/*.*',
+    '!validator/validator.pb.go',
+    '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
+    '!validator/nodejs/node_modules/**/*.*',
+    '!validator/webui/dist/**/*.*',
+    '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
-    '!gulpfile.js',
     '!third_party/**/*.*',
     '!validator/chromeextension/*.*',
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
+    '!examples/*.js',
+    '!examples/visual-tests/**/*',
+    '!test/coverage/**/*.*',
   ],
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
+  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };
-
-function extend(orig, add) {
-  return Object.assign({}, orig, add);
-}

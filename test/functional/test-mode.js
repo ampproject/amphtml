@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-
-import {getFullVersion_, getMode} from '../../src/mode';
-import {parseUrl} from '../../src/url';
+import {
+  getMode,
+  getRtvVersionForTesting,
+  resetRtvVersionForTesting,
+} from '../../src/mode';
+import {parseUrlDeprecated} from '../../src/url';
 
 describe('getMode', () => {
   function getWin(url) {
     const win = {
-      location: parseUrl(url),
+      location: parseUrlDeprecated(url),
     };
     return win;
   }
@@ -51,12 +54,22 @@ describe('getMode', () => {
   });
 });
 
-describe('getFullVersion_', () => {
+describe('getRtvVersion', () => {
+  afterEach(() => {
+    resetRtvVersionForTesting();
+  });
+
+  function getFreshMode(win) {
+    delete win.AMP_MODE;
+    return getMode(win);
+  }
 
   it('should default to version', () => {
     // $internalRuntimeVersion$ doesn't get replaced during test
-    expect(getFullVersion_(window, true)).to.equal('$internalRuntimeVersion$');
-    expect(getFullVersion_(window, false)).to.equal('$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(window, true))
+        .to.equal('$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(window, false))
+        .to.equal('01$internalRuntimeVersion$');
   });
 
   it('should use window.AMP_CONFIG.v if not in dev mode', () => {
@@ -64,10 +77,20 @@ describe('getFullVersion_', () => {
       AMP_CONFIG: {
         v: '12345',
       },
+      location: parseUrlDeprecated('https://acme.org/doc1'),
     };
-    expect(getFullVersion_(win, true)).to.equal('$internalRuntimeVersion$');
-    expect(getFullVersion_(win, false)).to.equal('12345');
+    expect(getRtvVersionForTesting(win, true))
+        .to.equal('$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(win, false)).to.equal('12345');
+    expect(getFreshMode(win).version).to.equal('$internalRuntimeVersion$');
+    resetRtvVersionForTesting();
+    expect(getFreshMode(win).rtvVersion).to.equal('12345');
+
     delete win.AMP_CONFIG;
-    expect(getFullVersion_(win, false)).to.equal('$internalRuntimeVersion$');
+    expect(getRtvVersionForTesting(win, false))
+        .to.equal('01$internalRuntimeVersion$');
+    expect(getFreshMode(win).version).to.equal('$internalRuntimeVersion$');
+    resetRtvVersionForTesting();
+    expect(getFreshMode(win).rtvVersion).to.equal('01$internalRuntimeVersion$');
   });
 });

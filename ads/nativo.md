@@ -19,15 +19,16 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-  type="nativo"
-  height="150"
-  width="350">
+<amp-ad type="nativo" height="350" width="400" layout="responsive"
+data-request-url="https://amp.yoursite.com/amp/nativo">
 </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please [contact Nativo](http://www.nativo.net/#contact-us).
+Before starting any Nativo AMP setup, please reach out to your account manager for the most up to date documentation or contact [tpm@nativo.com](mailto:tpm@nativo.com).
 
-- data-premium: (optional) Will switch to premium
+
+### Optional parameters
+
+- `data-premium`: Switches to premium.

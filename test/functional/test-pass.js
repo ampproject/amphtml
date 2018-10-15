@@ -15,8 +15,7 @@
  */
 
 import {Pass} from '../../src/pass';
-import {timerFor} from '../../src/timer';
-import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 
 describe('Pass', () => {
 
@@ -26,8 +25,8 @@ describe('Pass', () => {
   let handlerCalled;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    timerMock = sandbox.mock(timerFor(window));
+    sandbox = sinon.sandbox;
+    timerMock = sandbox.mock(Services.timerFor(window));
     handlerCalled = 0;
     pass = new Pass(window, () => {
       handlerCalled++;

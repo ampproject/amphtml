@@ -19,10 +19,10 @@
  * has performed on the page.
  */
 
-import {fromClass} from '../../../src/service';
-import {viewerForDoc} from '../../../src/viewer';
-import {viewportForDoc} from '../../../src/viewport';
+import {Services} from '../../../src/services';
+import {hasOwn} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
+import {registerServiceBuilderForDoc} from '../../../src/service';
 
 
 /**
@@ -66,6 +66,9 @@ function findEngagedTimeBetween(activityEvent, time) {
 
 class ActivityHistory {
 
+  /**
+   * Creates an instance of ActivityHistory.
+   */
   constructor() {
     /** @private {number} */
     this.totalEngagedTime_ = 0;
@@ -107,6 +110,7 @@ class ActivityHistory {
     }
     return totalEngagedTime;
   }
+
 }
 
 
@@ -119,6 +123,13 @@ class ActivityHistory {
 const ACTIVE_EVENT_TYPES = [
   'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
 ];
+
+/**
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ */
+export function installActivityServiceForTesting(ampDoc) {
+  registerServiceBuilderForDoc(ampDoc, 'activity', Activity);
+}
 
 export class Activity {
 
@@ -139,11 +150,11 @@ export class Activity {
    *  - At any point after instantiation, `getTotalEngagedTime` can be used
    *    to get the engage time up to the time the function is called. If
    *    `whenFirstVisible` has not yet resolved, engaged time is 0.
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @private @const */
-    this.win_ = win;
+  constructor(ampdoc) {
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    this.ampdoc = ampdoc;
 
     /** @private @const {function()} */
     this.boundStopIgnore_ = this.stopIgnore_.bind(this);
@@ -152,10 +163,17 @@ export class Activity {
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
 
     /** @private @const {function()} */
-    this.boundHandleInactive_ = this.handleInactive_.bind(this);
-
-    /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
+
+    /**
+     * Contains the incrementalEngagedTime timestamps for named triggers.
+     * @private {Object<string, number>}
+     */
+    this.totalEngagedTimeByTrigger_ = {
+      /*
+       * "$triggerName" : ${lastRequestTimestamp}
+      */
+    };
 
     /** @private {Array<!UnlistenDef>} */
     this.unlistenFuncs_ = [];
@@ -170,10 +188,10 @@ export class Activity {
     this.activityHistory_ = new ActivityHistory();
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.win_.document);
+    this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.win_.document);
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     this.viewer_.whenFirstVisible().then(this.start_.bind(this));
   }
@@ -209,8 +227,8 @@ export class Activity {
   /** @private */
   setUpActivityListeners_() {
     for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
-      this.unlistenFuncs_.push(listen(this.win_.document,
-        ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
+      this.unlistenFuncs_.push(listen(this.ampdoc.getRootNode(),
+          ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
     }
 
     this.unlistenFuncs_.push(
@@ -287,7 +305,10 @@ export class Activity {
     this.unlistenFuncs_ = [];
   }
 
-  /** @private */
+  /**
+   * @private
+   * @visibleForTesting
+   */
   cleanup_() {
     this.unlisten_();
   }
@@ -300,13 +321,27 @@ export class Activity {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
   }
-};
 
-
-/**
- * @param  {!Window} win
- * @return {!Activity}
- */
-export function installActivityService(win) {
-  return fromClass(win, 'activity', Activity);
-};
+  /**
+   * Get the incremental engaged time since the last push and reset it if asked.
+   * @param {string} name
+   * @param {boolean=} reset
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name, reset = true) {
+    if (!hasOwn(this.totalEngagedTimeByTrigger_, name)) {
+      if (reset) {
+        this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+      }
+      return this.getTotalEngagedTime();
+    }
+    const currentIncrementalEngagedTime =
+      this.totalEngagedTimeByTrigger_[name];
+    if (reset === false) {
+      return this.getTotalEngagedTime() - currentIncrementalEngagedTime;
+    }
+    this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+    return this.totalEngagedTimeByTrigger_[name] -
+      currentIncrementalEngagedTime;
+  }
+}

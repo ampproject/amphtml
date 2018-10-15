@@ -16,10 +16,7 @@
 
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-
-
-/** @const Time when this JS loaded.  */
-const start = new Date().getTime();
+import {isEnumValue} from './types';
 
 /**
  * Triple zero width space.
@@ -34,10 +31,27 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 
 /**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
+
+
+/**
+ * @param {string} message
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @param {string} message
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbed(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 
@@ -53,14 +67,46 @@ export const LogLevel = {
   FINE: 4,
 };
 
+/**
+ * Sets reportError function. Called from error.js to break cyclic
+ * dependency.
+ * @param {function(*, !Element=)|undefined} fn
+ */
+export function setReportError(fn) {
+  self.reportError = fn;
+}
 
 /**
- * Logging class.
+ * @type {!LogLevel|undefined}
+ * @private
+ */
+let levelOverride_ = undefined;
+
+/**
+ * @param {!LogLevel} level
+ */
+export function overrideLogLevel(level) {
+  levelOverride_ = level;
+}
+
+/**
+ * Logging class. Use of sentinel string instead of a boolean to check user/dev
+ * errors because errors could be rethrown by some native code as a new error,
+ * and only a message would survive. Also, some browser don’t support a 5th
+ * error object argument in window.onerror. List of supporting browser can be
+ * found here:
+ * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
  * @final
  * @private Visible for testing only.
  */
 export class Log {
   /**
+   * opt_suffix will be appended to error message to identify the type of the
+   * error message. We can't rely on the error object to pass along the type
+   * because some browsers do not have this param in its window.onerror API.
+   * See:
+   * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
    * @param {!Window} win
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
@@ -77,7 +123,7 @@ export class Log {
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
-    this.level_ = this.calcLevel_();
+    this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
     this.suffix_ = opt_suffix || '';
@@ -87,7 +133,15 @@ export class Log {
    * @return {!LogLevel}
    * @private
    */
-  calcLevel_() {
+  getLevel_() {
+    return (levelOverride_ !== undefined) ? levelOverride_ : this.level_;
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevel_() {
     // No console - can't enable logging.
     if (!this.win.console || !this.win.console.log) {
       return LogLevel.OFF;
@@ -118,7 +172,7 @@ export class Log {
    * @param {!Array} messages
    */
   msg_(tag, level, messages) {
-    if (this.level_ != LogLevel.OFF) {
+    if (this.getLevel_() != LogLevel.OFF) {
       let fn = this.win.console.log;
       if (level == 'ERROR') {
         fn = this.win.console.error || fn;
@@ -127,7 +181,9 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(Date.now() - start, '[' + tag + ']');
+      if (getMode().localDev) {
+        messages.unshift('[' + tag + ']');
+      }
       fn.apply(this.win.console, messages);
     }
   }
@@ -137,7 +193,7 @@ export class Log {
    * @return {boolean}
    */
   isEnabled() {
-    return this.level_ != LogLevel.OFF;
+    return this.getLevel_() != LogLevel.OFF;
   }
 
   /**
@@ -146,7 +202,7 @@ export class Log {
    * @param {...*} var_args
    */
   fine(tag, var_args) {
-    if (this.level_ >= LogLevel.FINE) {
+    if (this.getLevel_() >= LogLevel.FINE) {
       this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -157,7 +213,7 @@ export class Log {
    * @param {...*} var_args
    */
   info(tag, var_args) {
-    if (this.level_ >= LogLevel.INFO) {
+    if (this.getLevel_() >= LogLevel.INFO) {
       this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -168,7 +224,7 @@ export class Log {
    * @param {...*} var_args
    */
   warn(tag, var_args) {
-    if (this.level_ >= LogLevel.WARN) {
+    if (this.getLevel_() >= LogLevel.WARN) {
       this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
     }
   }
@@ -178,15 +234,46 @@ export class Log {
    * asynchronously.
    * @param {string} tag
    * @param {...*} var_args
+   * @return {!Error|undefined}
+   * @private
    */
-  error(tag, var_args) {
-    if (this.level_ >= LogLevel.ERROR) {
+  error_(tag, var_args) {
+    if (this.getLevel_() >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
       const error = createErrorVargs.apply(null,
           Array.prototype.slice.call(arguments, 1));
       this.prepareError_(error);
-      this.win.setTimeout(() => {throw error;});
+      return error;
+    }
+  }
+
+  /**
+   * Reports an error message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
+  error(tag, var_args) {
+    const error = this.error_.apply(this, arguments);
+    if (error) {
+      error.name = tag || error.name;
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
+    }
+  }
+
+  /**
+   * Reports an error message and marks with an expected property. If the
+   * logging is disabled, the error is rethrown asynchronously.
+   * @param {string} unusedTag
+   * @param {...*} var_args
+   */
+  expectedError(unusedTag, var_args) {
+    const error = this.error_.apply(this, arguments);
+    if (error) {
+      error.expected = true;
+      // reportError is installed globally per window in the entry point.
+      self.reportError(error);
     }
   }
 
@@ -198,6 +285,18 @@ export class Log {
   createError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
+    return error;
+  }
+
+  /**
+   * Creates an error object with its expected property set to true.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createExpectedError(var_args) {
+    const error = createErrorVargs.apply(null, arguments);
+    this.prepareError_(error);
+    error.expected = true;
     return error;
   }
 
@@ -219,8 +318,8 @@ export class Log {
    * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {T} The value of shouldBeTrueish.
    * @template T
+   * eslint "google-camelcase/google-camelcase": 0
    */
-  /*eslint "google-camelcase/google-camelcase": 0*/
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (!shouldBeTrueish) {
@@ -245,6 +344,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
+      // reportError is installed globally per window in the entry point.
+      self.reportError(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -259,8 +360,8 @@ export class Log {
    * @param {string=} opt_message The assertion message
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
@@ -269,16 +370,16 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a string.
+   * Throws an error if the first argument isn't a string. The string can
+   * be empty.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @return {string} The value of shouldBeTrueish.
-   * @template T
+   * @return {string} The string value. Can be an empty string.
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
     this.assert(typeof shouldBeString == 'string',
         (opt_message || 'String expected') + ': %s', shouldBeString);
@@ -286,13 +387,15 @@ export class Log {
   }
 
   /**
-   * Throws an error if the first argument isn't a number.
+   * Throws an error if the first argument isn't a number. The allowed values
+   * include `0` and `NaN`.
    *
-   * Otherwise see `assert` for usage
+   * For more details see `assert`.
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @return {number} The value of shouldBeTrueish.
+   * @return {number} The number value. The allowed values include `0`
+   *   and `NaN`.
    */
   assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
@@ -301,21 +404,34 @@ export class Log {
   }
 
   /**
-   * Asserts and returns the enum value. If the enum doesn't contain such a value,
-   * the error is thrown.
+   * Throws an error if the first argument isn't a boolean.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeBoolean
+   * @param {string=} opt_message The assertion message
+   * @return {boolean} The boolean value.
+   */
+  assertBoolean(shouldBeBoolean, opt_message) {
+    this.assert(!!shouldBeBoolean === shouldBeBoolean,
+        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+    return /** @type {boolean} */ (shouldBeBoolean);
+  }
+
+  /**
+   * Asserts and returns the enum value. If the enum doesn't contain such a
+   * value, the error is thrown.
    *
    * @param {!Object<T>} enumObj
    * @param {string} s
    * @param {string=} opt_enumName
-   * @return T
+   * @return {T}
    * @template T
+   * eslint "google-camelcase/google-camelcase": 2
    */
-  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
-    for (const k in enumObj) {
-      if (enumObj[k] == s) {
-        return enumObj[k];
-      }
+    if (isEnumValue(enumObj, s)) {
+      return s;
     }
     this.assert(false,
         'Unknown %s value: "%s"',
@@ -327,26 +443,29 @@ export class Log {
    * @private
    */
   prepareError_(error) {
+    error = duplicateErrorIfNecessary(error);
     if (this.suffix_) {
       if (!error.message) {
         error.message = this.suffix_;
       } else if (error.message.indexOf(this.suffix_) == -1) {
         error.message += this.suffix_;
       }
+    } else if (isUserErrorMessage(error.message)) {
+      error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
 }
-
 
 /**
  * @param {string|!Element} val
  * @return {string}
  */
 function toString(val) {
-  if (val instanceof Element) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return val;
+  return /** @type {string} */ (val);
 }
 
 
@@ -360,19 +479,40 @@ function pushIfNonEmpty(array, val) {
   }
 }
 
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error};
+ */
+export function duplicateErrorIfNecessary(error) {
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
+    return error;
+  }
+
+  const {message, stack} = error;
+  const e = new Error(message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = stack;
+  return e;
+}
 
 /**
  * @param {...*} var_args
  * @return {!Error}
- * @private
+ * @visibleForTesting
  */
-function createErrorVargs(var_args) {
+export function createErrorVargs(var_args) {
   let error = null;
   let message = '';
   for (let i = 0; i < arguments.length; i++) {
     const arg = arguments[i];
     if (arg instanceof Error && !error) {
-      error = arg;
+      error = duplicateErrorIfNecessary(arg);
     } else {
       if (message) {
         message += ' ';
@@ -380,6 +520,7 @@ function createErrorVargs(var_args) {
       message += arg;
     }
   }
+
   if (!error) {
     error = new Error(message);
   } else if (message) {
@@ -396,18 +537,23 @@ function createErrorVargs(var_args) {
  */
 export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
-  setTimeout(() => {throw error;});
+  setTimeout(() => {
+    // reportError is installed globally per window in the entry point.
+    self.reportError(error);
+    throw error;
+  });
 }
 
 
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {{user: ?Log, dev: ?Log}}
+ * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
 self.log = (self.log || {
   user: null,
   dev: null,
+  userForEmbed: null,
 });
 
 const logs = self.log;
@@ -420,26 +566,29 @@ const logs = self.log;
  */
 let logConstructor = null;
 
-
+/**
+ * Initializes log contructor.
+ */
 export function initLogConstructor() {
   logConstructor = Log;
   // Initialize instances for use. If a binary (an extension for example) that
-  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier
-  // than the binary that does call `initLogConstructor` (amp.js), the extension
-  // will throw an error as that extension will never be able to initialize
-  // the log instances and we also don't want it to call `initLogConstructor`
-  // either (since that will cause the Log implementation to be bundled into that
-  // binary). So we must initialize the instances eagerly so that they are
-  // ready for use (stored globally) after the main binary calls
-  // `initLogConstructor`.
+  // does not call `initLogConstructor` invokes `dev()` or `user()` earlier than
+  // the binary that does call `initLogConstructor` (amp.js), the extension will
+  // throw an error as that extension will never be able to initialize the log
+  // instances and we also don't want it to call `initLogConstructor` either
+  // (since that will cause the Log implementation to be bundled into that
+  // binary). So we must initialize the instances eagerly so that they are ready
+  // for use (stored globally) after the main binary calls `initLogConstructor`.
   dev();
   user();
 }
 
+/**
+ * Resets log contructor for testing.
+ */
 export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
-
 
 /**
  * Publisher level log.
@@ -448,33 +597,52 @@ export function resetLogConstructorForTesting() {
  *  1. Not disabled using `#log=0`.
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
+ *  3. AMP.setLogLevel(D) is called, where D >= 1.
  *
+ * @param {!Element=} opt_element
  * @return {!Log}
  */
-export function user() {
-  if (logs.user) {
-    return logs.user;
+export function user(opt_element) {
+  if (!logs.user) {
+    logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
+  if (!isFromEmbed(logs.user.win, opt_element)) {
+    return logs.user;
+  } else {
+    if (logs.userForEmbed) {
+      return logs.userForEmbed;
+    }
+    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
+  }
+}
+
+/**
+ * Getter for user logger
+ * @param {string=} suffix
+ * @return {!Log}
+ */
+function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
+  return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
-    return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+    return LogLevel.WARN;
+  }, suffix);
 }
 
-
 /**
- * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
- * the PROD binary. However, `devLog().assert` result is preserved in either case.
+ * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped
+ * in the PROD binary. However, `devLog().assert` result is preserved in either
+ * case.
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
  *  2. Logging is explicitly enabled via `#log=D`, where D >= 2.
+ *  3. AMP.setLogLevel(D) is called, where D >= 2.
  *
  * @return {!Log}
  */
@@ -495,4 +663,16 @@ export function dev() {
     }
     return LogLevel.OFF;
   });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element=} opt_element
+ * @return {boolean} isEmbed
+ */
+export function isFromEmbed(win, opt_element) {
+  if (!opt_element) {
+    return false;
+  }
+  return opt_element.ownerDocument.defaultView != win;
 }

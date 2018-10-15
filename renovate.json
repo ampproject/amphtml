@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "statusCheckVerify": true,
+  "ignoreDeps": [
+    "babel-polyfill",
+    "document-register-element",
+    "promise-pjs",
+    "web-activities",
+    "web-animations-js"
+  ],
+  "includePaths": [
+    "package.json"
+  ]
+}

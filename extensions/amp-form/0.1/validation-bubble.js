@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from '../../../src/vsync';
-import {viewportForDoc} from '../../../src/viewport';
-import {setStyles} from '../../../src/style';
+import {Services} from '../../../src/services';
 import {removeChildren} from '../../../src/dom';
+import {setStyles, toggle} from '../../../src/style';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';
@@ -26,20 +25,18 @@ export class ValidationBubble {
 
   /**
    * Creates a bubble component to display messages in.
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} id
    */
-  constructor(win, id) {
+  constructor(ampdoc, id) {
     /** @private @const {string} */
     this.id_ = id;
 
-    // TODO(dvoytenko): Switch away from viewport for this class. Or migrate
-    // to ampdoc.
-    /** @private @const {!Viewport} */
-    this.viewport_ = viewportForDoc(win.document);
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private {?Element} */
     this.currentTargetElement_ = null;
@@ -50,14 +47,17 @@ export class ValidationBubble {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private @const {!HTMLDivElement} */
-    this.bubbleElement_ = win.document.createElement('div');
-    this.bubbleElement_.classList.add('-amp-validation-bubble');
+    /** @private @const {!Element} */
+    this.bubbleElement_ = ampdoc.win.document.createElement('div');
+    toggle(this.bubbleElement_, false);
+
+    this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
-    win.document.body.appendChild(this.bubbleElement_);
+    ampdoc.getBody().appendChild(this.bubbleElement_);
   }
 
   /**
+   * @param {!Element} element
    * @return {boolean}
    */
   isActiveOn(element) {
@@ -76,7 +76,6 @@ export class ValidationBubble {
     this.currentTargetElement_ = null;
     this.currentMessage_ = '';
 
-    // TODO(#3776): Use .mutate method when it supports passing state.
     this.vsync_.run({
       measure: undefined,
       mutate: hideBubble,
@@ -87,7 +86,7 @@ export class ValidationBubble {
 
   /**
    * Shows the bubble targeted to an element with the passed message.
-   * @param {!HTMLElement} targetElement
+   * @param {!Element} targetElement
    * @param {string} message
    */
   show(targetElement, message) {
@@ -122,9 +121,7 @@ function hideBubble(state) {
   state.bubbleElement.removeAttribute('aria-alert');
   state.bubbleElement.removeAttribute('role');
   removeChildren(state.bubbleElement);
-  setStyles(state.bubbleElement, {
-    display: 'none',
-  });
+  toggle(state.bubbleElement, false);
 }
 
 
@@ -152,8 +149,8 @@ function showBubbleElement(state) {
   state.bubbleElement.setAttribute('role', 'alert');
   state.bubbleElement.setAttribute('aria-live', 'assertive');
   state.bubbleElement.appendChild(messageDiv);
+  toggle(state.bubbleElement, true);
   setStyles(state.bubbleElement, {
-    display: 'block',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

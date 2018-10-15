@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 module.exports = function(context) {
   return {
     ForOfStatement: function(node) {
-      context.report(node, 'No for-of statement allowed.');
-    }
+      context.report({node, message: 'No for-of statement allowed.'});
+    },
   };
 };

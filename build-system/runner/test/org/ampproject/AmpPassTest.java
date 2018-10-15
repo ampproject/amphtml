@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
-import com.google.javascript.jscomp.Es6CompilerTestCase;
+import com.google.javascript.jscomp.CompilerTestCase;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
@@ -16,7 +16,7 @@ import com.google.javascript.rhino.Node;
 /**
  * Tests {@link AmpPass}.
  */
-public class AmpPassTest extends Es6CompilerTestCase {
+public class AmpPassTest extends CompilerTestCase {
 
   ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
       "module$src$log.dev",
@@ -24,11 +24,16 @@ public class AmpPassTest extends Es6CompilerTestCase {
       "module$src$log.user", ImmutableSet.of("fine"));
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_MINIFIED",
+      IR.trueNode());
+
+  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements);
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
+        prodAssignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
@@ -121,6 +126,22 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "(function() {",
              "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  var someValue = true;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
+
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(module$src$log.dev().assert(3), module$src$log.dev().assert(3));",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  function add(a, b) { return a + b; }",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = add(3, 3);",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
@@ -284,16 +305,54 @@ public class AmpPassTest extends Es6CompilerTestCase {
   }
 
   public void testOptimizeGetModeFunction() throws Exception {
-    testEs6(
+    test(
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = true;",
+             "const IS_MINIFIED = false;",
              "const IS_SOMETHING = true;",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
              "const IS_DEV = false;",
+             "const IS_MINIFIED = true;",
              "const IS_SOMETHING = true;",
             "})()"));
+  }
+
+  public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
+    test(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "self.AMP.extension('hello', '0.1', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
+  }
+
+  public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
+    test(
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "AMP.extension('hello', '0.1', function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "});",
+            "console.log(a);"),
+        LINE_JOINER.join(
+            "var a = 'hello';",
+            "(function(AMP) {",
+            "  var a = 'world';",
+            "  console.log(a);",
+            "})(self.AMP);",
+            "console.log(a);"));
   }
 }

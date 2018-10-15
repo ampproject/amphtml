@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import * as DocumentFetcher from '../../../../src/document-fetcher';
+import * as lolex from 'lolex';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
-import {removeFragment, serializeQueryString} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
-import * as sinon from 'sinon';
+import {removeFragment, serializeQueryString} from '../../../../src/url';
 
-describe('AccessServerJwtAdapter', () => {
 
-  let sandbox;
+describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
+  let win;
+  let ampdoc;
   let clock;
   let validConfig;
   let context;
@@ -30,8 +32,9 @@ describe('AccessServerJwtAdapter', () => {
   let meta;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    win = env.win;
+    ampdoc = env.ampdoc;
+    clock = lolex.install({target: win});
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -39,10 +42,10 @@ describe('AccessServerJwtAdapter', () => {
       'publicKeyUrl': 'https://acme.com/pk',
     };
 
-    meta = document.createElement('meta');
-    meta.setAttribute('name', 'i-amp-access-state');
+    meta = win.document.createElement('meta');
+    meta.setAttribute('name', 'i-amphtml-access-state');
     meta.setAttribute('content', 'STATE1');
-    document.head.appendChild(meta);
+    win.document.head.appendChild(meta);
 
     context = {
       buildUrl: () => {},
@@ -52,17 +55,14 @@ describe('AccessServerJwtAdapter', () => {
   });
 
   afterEach(() => {
+    clock.uninstall();
     contextMock.verify();
-    sandbox.restore();
-    if (meta.parentNode) {
-      document.head.removeChild(meta);
-    }
   });
 
 
   describe('config', () => {
     it('should load valid config', () => {
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.clientAdapter_.authorizationUrl_).to
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.clientAdapter_.pingbackUrl_).to
@@ -78,36 +78,36 @@ describe('AccessServerJwtAdapter', () => {
 
     it('should fail if config is invalid: authorization', () => {
       delete validConfig['authorization'];
-      expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
-      }).to.throw(/"authorization" URL must be specified/);
+      allowConsoleError(() => { expect(() => {
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
+      }).to.throw(/"authorization" URL must be specified/); });
     });
 
     it('should fail if config is invalid: publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
-      expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
-      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/);
+      allowConsoleError(() => { expect(() => {
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
+      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/); });
     });
 
     it('should fail if config is invalid: http publicKeyUrl', () => {
       validConfig['publicKeyUrl'] = 'http://acme.com/pk';
-      expect(() => {
-        new AccessServerJwtAdapter(window, validConfig, context);
-      }).to.throw(/https/);
+      allowConsoleError(() => { expect(() => {
+        new AccessServerJwtAdapter(ampdoc, validConfig, context);
+      }).to.throw(/https/); });
     });
 
     it('should support either publicKey or publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
       validConfig['publicKey'] = 'key1';
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.key_).to.equal('key1');
       expect(adapter.keyUrl_).to.be.null;
     });
 
-    it('should tolerate when i-amp-access-state is missing', () => {
-      document.head.removeChild(meta);
-      const adapter = new AccessServerJwtAdapter(window, validConfig, context);
+    it('should tolerate when i-amphtml-access-state is missing', () => {
+      win.document.head.removeChild(meta);
+      const adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       expect(adapter.serverState_).to.be.null;
     });
   });
@@ -118,14 +118,16 @@ describe('AccessServerJwtAdapter', () => {
     let clientAdapter;
     let clientAdapterMock;
     let xhrMock;
+    let docFetcherMock;
     let jwtMock;
     let responseDoc;
     let targetElement1, targetElement2;
 
     beforeEach(() => {
-      adapter = new AccessServerJwtAdapter(window, validConfig, context);
+      adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
       jwtMock = sandbox.mock(adapter.jwtHelper_);
+      docFetcherMock = sandbox.mock(DocumentFetcher);
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
@@ -139,21 +141,21 @@ describe('AccessServerJwtAdapter', () => {
 
       adapter.isProxyOrigin_ = true;
 
-      responseDoc = document.createElement('div');
+      responseDoc = win.document.createElement('div');
 
-      const responseAccessData = document.createElement('script');
+      const responseAccessData = win.document.createElement('script');
       responseAccessData.setAttribute('type', 'application/json');
       responseAccessData.setAttribute('id', 'amp-access-data');
       responseAccessData.textContent = JSON.stringify({'access': 'A'});
       responseDoc.appendChild(responseAccessData);
 
-      targetElement1 = document.createElement('div');
-      targetElement1.setAttribute('i-amp-access-id', '1/1');
-      document.body.appendChild(targetElement1);
+      targetElement1 = win.document.createElement('div');
+      targetElement1.setAttribute('i-amphtml-access-id', '1/1');
+      win.document.body.appendChild(targetElement1);
 
-      targetElement2 = document.createElement('div');
-      targetElement2.setAttribute('i-amp-access-id', '1/2');
-      document.body.appendChild(targetElement2);
+      targetElement2 = win.document.createElement('div');
+      targetElement2.setAttribute('i-amphtml-access-id', '1/2');
+      win.document.body.appendChild(targetElement2);
     });
 
     afterEach(() => {
@@ -167,37 +169,41 @@ describe('AccessServerJwtAdapter', () => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnClient_', () => p);
-        xhrMock.expects('fetchDocument').never();
+        const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
+            () => p);
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnClient_', () => p);
-        xhrMock.expects('fetchDocument').never();
+        const stub = sandbox.stub(adapter, 'authorizeOnClient_').callsFake(
+            () => p);
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should execute via server on proxy and w/server state', () => {
         const p = Promise.resolve();
-        const stub = sandbox.stub(adapter, 'authorizeOnServer_', () => p);
-        xhrMock.expects('fetchDocument').never();
+        const stub = sandbox.stub(adapter, 'authorizeOnServer_').callsFake(
+            () => p);
+        docFetcherMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
-        expect(stub.callCount).to.equal(1);
+        expect(stub).to.be.calledOnce;
       });
 
       it('should fetch JWT directly via client', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
-        sandbox.stub(adapter, 'fetchJwt_', () => Promise.resolve({jwt}));
-        xhrMock.expects('fetchDocument').never();
+        sandbox.stub(adapter, 'fetchJwt_').callsFake(
+            () => Promise.resolve({jwt}));
+        docFetcherMock.expects('fetchDocument').never();
         return adapter.authorizeOnClient_().then(result => {
           expect(result).to.equal(authdata);
         });
@@ -208,30 +214,32 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_',
+        sandbox.stub(adapter, 'fetchJwt_').callsFake(
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.resolve(responseDoc))
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         return adapter.authorizeOnServer_().then(response => {
           expect(response).to.equal(authdata);
-          expect(replaceSectionsStub.callCount).to.equal(1);
+          expect(replaceSectionsStub).to.be.calledOnce;
         });
       });
 
@@ -240,32 +248,34 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_',
+        sandbox.stub(adapter, 'fetchJwt_').callsFake(
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
             .returns(Promise.reject('intentional'))
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         return adapter.authorizeOnServer_().then(() => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/intentional/);
-          expect(replaceSectionsStub.callCount).to.equal(0);
+          expect(replaceSectionsStub).to.have.not.been.called;
         });
       });
 
@@ -274,27 +284,29 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox.stub(adapter, 'fetchJwt_',
+        sandbox.stub(adapter, 'fetchJwt_').callsFake(
             () => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
-          'url': removeFragment(window.location.href),
+          'url': removeFragment(win.location.href),
           'state': 'STATE1',
           'jwt': encoded,
         });
-        xhrMock.expects('fetchDocument')
-            .withExactArgs('http://localhost:8000/af', {
+        docFetcherMock.expects('fetchDocument')
+            .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
               method: 'POST',
               body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
+              requireAmpResponseSourceOrigin: false,
             })
-            .returns(new Promise(() => {}))  // Never resolved.
+            .returns(new Promise(() => {})) // Never resolved.
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         const promise = adapter.authorizeOnServer_();
         return Promise.resolve().then(() => {
           clock.tick(3001);
@@ -303,32 +315,33 @@ describe('AccessServerJwtAdapter', () => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/timeout/);
-          expect(replaceSectionsStub.callCount).to.equal(0);
+          expect(replaceSectionsStub).to.have.not.been.called;
         });
       });
 
       it('should replace sections', () => {
-        const responseElement1 = document.createElement('div');
-        responseElement1.setAttribute('i-amp-access-id', '1/1');
+        const responseElement1 = win.document.createElement('div');
+        responseElement1.setAttribute('i-amphtml-access-id', '1/1');
         responseElement1.textContent = 'a1';
         responseDoc.appendChild(responseElement1);
 
-        const responseElement2 = document.createElement('div');
-        responseElement2.setAttribute('i-amp-access-id', '1/2');
+        const responseElement2 = win.document.createElement('div');
+        responseElement2.setAttribute('i-amphtml-access-id', '1/2');
         responseElement2.textContent = 'a2';
         responseDoc.appendChild(responseElement2);
 
-        const unknownResponseElement3 = document.createElement('div');
-        unknownResponseElement3.setAttribute('i-amp-access-id', 'a3');
+        const unknownResponseElement3 = win.document.createElement('div');
+        unknownResponseElement3.setAttribute('i-amphtml-access-id', 'a3');
         unknownResponseElement3.textContent = 'a3';
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(document.querySelector('[i-amp-access-id="1/1"]').textContent)
-              .to.equal('a1');
-          expect(document.querySelector('[i-amp-access-id="1/2"]').textContent)
-              .to.equal('a2');
-          expect(document.querySelector('[i-amp-access-id=a3]')).to.be.null;
+          expect(win.document.querySelector('[i-amphtml-access-id="1/1"]')
+              .textContent).to.equal('a1');
+          expect(win.document.querySelector('[i-amphtml-access-id="1/2"]')
+              .textContent).to.equal('a2');
+          expect(win.document.querySelector('[i-amphtml-access-id=a3]'))
+              .to.be.null;
         });
       });
 
@@ -356,15 +369,18 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
             .returns(jwt)
             .once();
-        sandbox.stub(adapter, 'shouldBeValidated_', () => false);
+        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => false);
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
@@ -381,7 +397,6 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
             .returns(Promise.reject('intentional'))
             .once();
@@ -404,9 +419,8 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
-            .returns(new Promise(() => {}))  // Never resolved.
+            .returns(new Promise(() => {})) // Never resolved.
             .once();
         jwtMock.expects('decode').never();
         const promise = adapter.fetchJwt_();
@@ -435,13 +449,20 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/pk')
-            .returns(pemPromise)
+            .returns(Promise.resolve({
+              text() {
+                return pemPromise;
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
@@ -454,12 +475,12 @@ describe('AccessServerJwtAdapter', () => {
             .withExactArgs(encoded, pemPromise)
             .returns(Promise.resolve(jwt))
             .once();
-        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
         });
       });
 
@@ -478,9 +499,12 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/pk')
@@ -500,12 +524,12 @@ describe('AccessServerJwtAdapter', () => {
             }))
             .returns(Promise.resolve(jwt))
             .once();
-        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
           return pemPromise;
         }).then(pemValue => {
           expect(pemValue).to.equal(pem);
@@ -525,9 +549,12 @@ describe('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchText')
             .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
             })
-            .returns(Promise.resolve(encoded))
+            .returns(Promise.resolve({
+              text() {
+                return Promise.resolve(encoded);
+              },
+            }))
             .once();
         jwtMock.expects('decode')
             .withExactArgs(encoded)
@@ -537,12 +564,12 @@ describe('AccessServerJwtAdapter', () => {
             .returns(false)
             .once();
         jwtMock.expects('decodeAndVerify').never();
-        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
-          expect(validateStub.callCount).to.equal(1);
+          expect(validateStub).to.be.calledOnce;
         });
       });
     });
@@ -564,23 +591,23 @@ describe('AccessServerJwtAdapter', () => {
 
       it('should fail w/o exp', () => {
         delete jwt['exp'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"exp" field must be specified/);
+        }).to.throw(/"exp" field must be specified/); });
       });
 
       it('should fail w/invalid exp', () => {
         jwt['exp'] = 'invalid';
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw();
+        }).to.throw(); });
       });
 
       it('should fail when expired', () => {
         jwt['exp'] = Math.floor((Date.now() - 10000) / 1000);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/token has expired/);
+        }).to.throw(/token has expired/); });
       });
 
       it('should succeed with array aud', () => {
@@ -596,23 +623,23 @@ describe('AccessServerJwtAdapter', () => {
 
       it('should fail w/o aud', () => {
         delete jwt['aud'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" field must be specified/);
+        }).to.throw(/"aud" field must be specified/); });
       });
 
       it('should fail w/non-AMP aud', () => {
         jwt['aud'] = 'other.org';
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/);
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
 
       it('should fail w/non-AMP aud array', () => {
         jwt['aud'] = ['another.org', 'other.org'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/);
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
     });
 

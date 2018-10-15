@@ -15,7 +15,6 @@
  */
 
 import {TaskQueue} from '../../src/service/task-queue';
-import * as sinon from 'sinon';
 
 
 describe('TaskQueue', () => {
@@ -25,7 +24,7 @@ describe('TaskQueue', () => {
   let queue;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     queue = new TaskQueue();
   });
@@ -46,9 +45,9 @@ describe('TaskQueue', () => {
     expect(queue.getLastEnqueueTime()).to.equal(1000);
     expect(queue.getLastDequeueTime()).to.equal(0);
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       queue.enqueue({id: '1'});
-    }).to.throw(/Task already enqueued/);
+    }).to.throw(/Task already enqueued/); });
 
     queue.dequeue({id: '1'});
     expect(queue.getTaskById('1')).to.equal(null);

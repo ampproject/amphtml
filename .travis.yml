@@ -2,43 +2,57 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "stable"
+  - "lts/*"
 python:
   - "2.7"
 notifications:
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
+    on_failure: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  sauce_connect: true
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
 before_install:
-  - |
-      [ -z "$(git diff --name-only $TRAVIS_COMMIT_RANGE)" ] || git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(\.(md|txt)$)|(^(examples|spec))/' || {
-        echo "Only docs were updated, stopping build process."
-        exit
-      }
-  - export CHROME_BIN=chromium-browser
+  - export CHROME_BIN=google-chrome-stable
   - export DISPLAY=:99.0
+  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 before_script:
   - pip install --user protobuf
-script: node build-system/pr-check.js $TRAVIS_COMMIT_RANGE
+script: node build-system/pr-check.js
+after_script:
+  - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
   only:
     - master
     - release
     - canary
     - /^amp-release-.*$/
-env:
-  global:
-    - NPM_CONFIG_PROGRESS="false"
-
+addons:
+  chrome: stable
+  hosts:
+    - ads.localhost
+    - iframe.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
+  apt:
+    packages:
+      - protobuf-compiler
+      - python-protobuf
+matrix:
+  include:
+    - env: BUILD_SHARD="unit_tests"
+    - env: BUILD_SHARD="integration_tests"
 cache:
+  yarn: true
   directories:
-  - node_modules
+    - node_modules
+    - validator/node_modules
+    - validator/nodejs/node_modules
+    - validator/webui/node_modules
+  pip: true
+  bundler: true

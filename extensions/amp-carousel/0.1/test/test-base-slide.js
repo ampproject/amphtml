@@ -31,11 +31,9 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import * as sinon from 'sinon';
 
-describe('BaseSlides', () => {
-
-  let sandbox;
+describes.fakeWin('BaseSlides', {amp: true}, env => {
+  let win, doc;
   let buildSlidesSpy;
   let onViewportCallbackSpy;
   let hasPrevSpy;
@@ -52,7 +50,8 @@ describe('BaseSlides', () => {
 
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
     buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
@@ -70,13 +69,9 @@ describe('BaseSlides', () => {
         sandbox.spy(BaseSlides.prototype, 'onViewportCallback');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
 
   function setElement(options) {
-    const element = document.createElement('div');
+    const element = doc.createElement('div');
     if (options.loop) {
       element.setAttribute('loop', '');
     }
@@ -129,9 +124,9 @@ describe('BaseSlides', () => {
     expect(carouselLoopOnly.shouldLoop).to.be.true;
     expect(carouselLoopOnly.shouldAutoplay_).to.be.false;
     expect(setupAutoplaySpy).to.not.have.been.called;
-    expect(buildButtonsSpy.callCount).to.equal(1);
-    expect(setupGesturesSpy.callCount).to.equal(1);
-    expect(setControlsStateSpy.callCount).to.equal(1);
+    expect(buildButtonsSpy).to.be.calledOnce;
+    expect(setupGesturesSpy).to.be.calledOnce;
+    expect(setControlsStateSpy).to.be.calledOnce;
 
     const carouselAutoplayOnly = new TestCarousel(setElement({
       autoplay: true,
@@ -142,9 +137,9 @@ describe('BaseSlides', () => {
     expect(carouselAutoplayOnly.shouldLoop).to.be.true;
     expect(carouselAutoplayOnly.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.been.called;
-    expect(buildButtonsSpy.callCount).to.equal(2);
-    expect(setupGesturesSpy.callCount).to.equal(2);
-    expect(setControlsStateSpy.callCount).to.equal(2);
+    expect(buildButtonsSpy).to.have.callCount(2);
+    expect(setupGesturesSpy).to.have.callCount(2);
+    expect(setControlsStateSpy).to.have.callCount(2);
 
     const carouselAutoplayWithLoop = new TestCarousel(setElement({
       loop: true,
@@ -155,10 +150,10 @@ describe('BaseSlides', () => {
 
     expect(carouselAutoplayWithLoop.shouldLoop).to.be.true;
     expect(carouselAutoplayWithLoop.shouldAutoplay_).to.be.true;
-    expect(setupAutoplaySpy.callCount).to.equal(2);
-    expect(buildButtonsSpy.callCount).to.equal(3);
-    expect(setupGesturesSpy.callCount).to.equal(3);
-    expect(setControlsStateSpy.callCount).to.equal(3);
+    expect(setupAutoplaySpy).to.have.callCount(2);
+    expect(buildButtonsSpy).to.have.callCount(3);
+    expect(setupGesturesSpy).to.have.callCount(3);
+    expect(setControlsStateSpy).to.have.callCount(3);
   });
 
   it('should handle viewportCallback when in viewport', () => {
@@ -265,4 +260,64 @@ describe('BaseSlides', () => {
     carousel.clearAutoplay();
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
+
+  it('toggle autoPlay status using speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    const args = {'toggleOn': false};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    args['toggleOn'] = true;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
+  it('toggle autoPlay status using speficied value & autoplay=false', () => {
+    const carousel = new TestCarousel(setElement({
+      delay: 300,
+    }));
+    carousel.buildCallback();
+
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    const args = {'toggleOn': true};
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    args['toggleOn'] = false;
+    carousel.executeAction(
+        {method: 'toggleAutoplay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+  });
+
+  it('toggle autoPlay status without speficied value & autoplay=true', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.false;
+
+    carousel.executeAction(
+        {method: 'toggleAutoplay', satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
+  });
+
 });

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 module.exports = function(context) {
   return {
     ArrayPattern: function(node) {
-      context.report(node, 'No Array destructuring allowed.');
-    }
+      context.report({node, message: 'No Array destructuring allowed.'});
+    },
   };
 };

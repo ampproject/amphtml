@@ -15,8 +15,7 @@
  */
 
 import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
-import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
+import {parseUrlDeprecated} from '../../src/url';
 
 describe('alp-handler', () => {
 
@@ -28,12 +27,12 @@ describe('alp-handler', () => {
   let image;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     image = undefined;
     win = {
       location: {},
       open: () => null,
-      Image: function() {
+      Image() {
         image = this;
       },
       postMessage: sandbox.stub(),
@@ -55,7 +54,7 @@ describe('alp-handler', () => {
       postMessage: sandbox.stub(),
       _id: 'p3',
     };
-    open = sandbox.stub(win, 'open', () => {
+    open = sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
@@ -66,6 +65,7 @@ describe('alp-handler', () => {
     };
     win.document = doc;
     anchor = {
+      nodeType: 1,
       tagName: 'A',
       href: 'https://test.com?adurl=' +
         encodeURIComponent(
@@ -73,7 +73,7 @@ describe('alp-handler', () => {
       ownerDocument: doc,
       getAttribute: sandbox.stub(),
       get search() {
-        return parseUrl(this.href).search;
+        return parseUrlDeprecated(this.href).search;
       },
     };
     event = {
@@ -91,7 +91,7 @@ describe('alp-handler', () => {
 
   function simpleSuccess() {
     handleClick(event);
-    expect(open.callCount).to.equal(1);
+    expect(open).to.be.calledOnce;
     expect(open.lastCall.args).to.jsonEqual([
       'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
           'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
@@ -99,26 +99,26 @@ describe('alp-handler', () => {
       '_top',
       undefined,
     ]);
-    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
   }
 
   function a2aSuccess(ampParent) {
     handleClick(event);
-    expect(event.preventDefault.callCount).to.equal(1);
-    expect(ampParent.postMessage.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(ampParent.postMessage).to.be.calledOnce;
     expect(ampParent.postMessage.lastCall.args[0]).to.equal(
         'a2a;{"url":"https://cdn.ampproject.org/c/www.example.com/amp.html' +
         '#click=https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%' +
         '252Fcdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html"}');
     expect(ampParent.postMessage.lastCall.args[1]).to.equal(
         'https://cdn.ampproject.org');
-    expect(open.callCount).to.equal(0);
+    expect(open).to.have.not.been.called;
   }
 
   function noNavigation() {
     handleClick(event);
-    expect(open.callCount).to.equal(0);
-    expect(event.preventDefault.callCount).to.equal(0);
+    expect(open).to.have.not.been.called;
+    expect(event.preventDefault).to.have.not.been.called;
   }
 
   it('should navigate to correct destination', () => {
@@ -256,7 +256,9 @@ describe('alp-handler', () => {
   it('should find the closest a tag', () => {
     const a = anchor;
     event.target = {
+      nodeType: 1,
       parentElement: {
+        nodeType: 1,
         parentElement: a,
       },
     };
@@ -264,7 +266,9 @@ describe('alp-handler', () => {
   });
 
   it('should require an a tag', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     noNavigation();
   });
 
@@ -292,33 +296,39 @@ describe('alp-handler', () => {
 
   it('should warmup statically', () => {
     warmupStatic(win);
-    expect(image).to.be.defined;
+    expect(image).to.exist;
     expect(image.src).to.equal('https://cdn.ampproject.org/preconnect.gif');
-    expect(win.document.head.appendChild.callCount).to.equal(1);
+    expect(win.document.head.appendChild).to.be.calledOnce;
     const link = win.document.head.appendChild.lastCall.args[0];
     expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
-        'https://cdn.ampproject.org/rtv/01$internalRuntimeVersion$/v0.js');
+    expect(link.href).to.equal('https://cdn.ampproject.org/v0.js');
   });
 
   it('should warmup dynamically', () => {
     warmupDynamic(event);
-    expect(win.document.head.appendChild.callCount).to.equal(1);
-    const link = win.document.head.appendChild.lastCall.args[0];
-    expect(link.rel).to.equal('preload');
-    expect(link.href).to.equal(
+    expect(win.document.head.appendChild).to.be.callCount(2);
+    const link0 = win.document.head.appendChild.firstCall.args[0];
+    expect(link0.rel).to.equal('preload');
+    expect(link0.href).to.equal(
+        'https://cdn.ampproject.org/c/www.example.com/amp.html');
+    const link1 = win.document.head.appendChild.secondCall.args[0];
+    expect(link1.rel).to.equal('preload');
+    expect(link1.as).to.equal('fetch');
+    expect(link1.href).to.equal(
         'https://cdn.ampproject.org/c/www.example.com/amp.html');
   });
 
   it('should ignore irrelevant events for warmup (bad target)', () => {
-    event.target = {};
+    event.target = {
+      nodeType: 1,
+    };
     warmupDynamic(event);
-    expect(win.document.head.appendChild.callCount).to.equal(0);
+    expect(win.document.head.appendChild).to.have.not.been.called;
   });
 
   it('should ignore irrelevant events for warmup (bad href)', () => {
     anchor.href = 'https://www.example.com';
     warmupDynamic(event);
-    expect(win.document.head.appendChild.callCount).to.equal(0);
+    expect(win.document.head.appendChild).to.have.not.been.called;
   });
 });

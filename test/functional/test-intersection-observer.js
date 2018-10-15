@@ -19,15 +19,14 @@ import {
   IntersectionObserver,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.useFakeTimers();
   });
 
@@ -40,7 +39,7 @@ describe('getIntersectionChangeEntry', () => {
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -81,7 +80,7 @@ describe('getIntersectionChangeEntry', () => {
     const layoutBox = layoutRectLtwh(50, 200, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -159,7 +158,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -202,7 +201,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -245,7 +244,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
         rootBounds);
 
-    expect(change).to.be.object;
+    expect(change).to.be.an('object');
     expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.deep.equal({
@@ -324,9 +323,9 @@ describe('IntersectionObserver', () => {
     }
   }
 
-  const ElementClass = document.registerElement('amp-int', {
-    prototype: createAmpElementProto(window, 'amp-int', TestElement),
-  });
+  const ElementClass = createAmpElementForTesting(window, 'amp-int',
+      TestElement);
+  customElements.define('amp-int', ElementClass);
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-intersection.html';
@@ -351,7 +350,7 @@ describe('IntersectionObserver', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     testElementCreatedCallback = sandbox.spy();
     testElementPreconnectCallback = sandbox.spy();
@@ -369,25 +368,25 @@ describe('IntersectionObserver', () => {
     element.win = window;
     element.getVsync = function() {
       return {
-        measure: function(fn) {
+        measure(fn) {
           fn();
         },
       };
     };
     element.getViewport = function() {
       return {
-        onScroll: function() {
+        onScroll() {
           onScrollSpy();
           return function() {};
         },
-        onChanged: function() {
+        onChanged() {
           onChangeSpy();
           return function() {};
         },
       };
     };
     element.element = {
-      getIntersectionChangeEntry: function() {
+      getIntersectionChangeEntry() {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
@@ -408,7 +407,7 @@ describe('IntersectionObserver', () => {
     const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
         'postMessage');
     ioInstance.sendElementIntersection_();
-    expect(postMessageSpy.callCount).to.equal(0);
+    expect(postMessageSpy).to.have.not.been.called;
     expect(ioInstance.pendingChanges_).to.have.length(0);
   });
 
@@ -424,7 +423,7 @@ describe('IntersectionObserver', () => {
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
     expect(messages[0].changes).to.have.length(1);
@@ -442,7 +441,7 @@ describe('IntersectionObserver', () => {
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(messages[0].changes).to.have.length(1);
     expect(messages[0].changes[0].time).to.equal(0);
@@ -450,8 +449,8 @@ describe('IntersectionObserver', () => {
     ioInstance.fire();
     clock.tick(1);
     ioInstance.fire();
-    ioInstance.fire();  // Same time
-    ioInstance.fire();  // Same time
+    ioInstance.fire(); // Same time
+    ioInstance.fire(); // Same time
     expect(ioInstance.pendingChanges_).to.have.length(2);
     expect(messages).to.have.length(1);
     clock.tick(1);
@@ -481,9 +480,9 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    expect(fireSpy.callCount).to.equal(1);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(fireSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 
@@ -493,7 +492,7 @@ describe('IntersectionObserver', () => {
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
-    expect(fireSpy.callCount).to.equal(2);
+    expect(fireSpy).to.have.callCount(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });
 
@@ -502,9 +501,9 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 

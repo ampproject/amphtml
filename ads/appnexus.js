@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
+import {setStyles} from '../src/style';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
@@ -39,7 +40,8 @@ export function appnexus(global, data) {
   }
 
   /**
-   * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
+   * Construct the TTJ URL.
+   * Note params should be properly encoded first (use encodeURIComponent);
    * @param  {!Array<string>} args query string params to add to the base URL.
    * @return {string}      Formated TTJ URL.
    */
@@ -57,6 +59,10 @@ export function appnexus(global, data) {
 
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
   let apntag;
@@ -82,7 +88,6 @@ function appnexusAst(global, data) {
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
         apntag.loadTags();
-        apntag.initialRequestMade = true;
       });
     });
   }
@@ -92,26 +97,43 @@ function appnexusAst(global, data) {
   const divContainer = global.document.getElementById('c');
   if (divContainer) {
     divContainer.appendChild(div);
+    setStyles(divContainer, {
+      top: '50%',
+      left: '50%',
+      bottom: '',
+      right: '',
+      transform: 'translate(-50%, -50%)',
+    });
   }
 
   if (!apntag) {
     apntag = context.master.apntag;
-
     //preserve a global reference
+    /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
   }
 
+  // check for ad responses received for a slot but before listeners are
+  // registered, for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
-    if (!apntag.initialRequestMade) {
-      apntag.onEvent('adAvailable', data.target, () => {
-        apntag.showTag(data.target, global.window);
-      });
-    } else {
-      apntag.showTag(data.target, global.window);
+    if (typeof apntag.checkAdAvailable === 'function') {
+      const getAd = apntag.checkAdAvailable(data.target);
+      getAd({resolve: isAdAvailable, reject: context.noContentAvailable});
     }
-
-    apntag.onEvent('adNoBid', data.target, () => {
-      context.noContentAvailable();
-    });
   });
+
+  apntag.anq.push(() => {
+    apntag.onEvent('adAvailable', data.target, isAdAvailable);
+    apntag.onEvent('adNoBid', data.target, context.noContentAvailable);
+  });
+
+  /**
+   * resolve getAd with an available ad object
+   *
+   * @param {{targetId: string}} adObj
+   */
+  function isAdAvailable(adObj) {
+    global.context.renderStart({width: adObj.width, height: adObj.height});
+    global.apntag.showTag(adObj.targetId, global.window);
+  }
 }

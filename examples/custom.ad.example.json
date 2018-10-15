@@ -1,0 +1,25 @@
+{
+  "1": {
+    "templateId": "amp-template-id1",
+    "data": {
+      "src": "https://bachtrack.com/files/46901-banner-728x90px-uk-2016-5sec.gif",
+      "href":"https://bachtrack.com",
+      "info":"Info1"
+    },
+    "src": "https://bachtrack.com/files/46901-banner-728x90px-uk-2016-5sec.gif",
+    "href":"https://bachtrack.com",
+    "info":"Info1"
+  },
+  "2": {
+    "templateId": "amp-template-id2",
+    "data": {
+      "src":"https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n",
+      "href":"http://onestoparts.com",
+      "info":"Info2"
+    },
+    "vars": {
+      "var1": "123",
+      "var2": "456"
+    }
+  }
+}

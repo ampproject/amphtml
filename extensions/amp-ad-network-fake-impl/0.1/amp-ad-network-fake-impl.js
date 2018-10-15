@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {utf8Decode} from '../../../src/utils/bytes';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, user} from '../../../src/log';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
+
+const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
 
@@ -26,40 +27,121 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    user().assert(element.hasAttribute('src'),
-        'Attribute src required for <amp-ad type="fake">: %s', element);
-    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
-        + ' support for TextEncoder() function.');
+  }
+
+  /** @override */
+  buildCallback() {
+    user().assert(this.element.hasAttribute('src'),
+        'Attribute src required for <amp-ad type="fake">: %s', this.element);
+    super.buildCallback();
   }
 
   /** @override */
   isValidElement() {
-    // Note: true is the default, so this method is not strictly needed here.
-    // But a network implementation might choose to implement a real check
-    // in this method.
+    // To send out ad request, ad type='fake' requires the id set to an invalid
+    // value start with `i-amphtml-demo-`. So that fake ad can only be used in
+    // invalid AMP pages.
+    const id = this.element.getAttribute('id');
+    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+      user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
+      return false;
+    }
     return true;
   }
 
   /** @override */
   getAdUrl() {
-    return '/extensions/amp-ad-network-fake-impl/0.1/data/' +
-        this.element.getAttribute('src');
+    return this.element.getAttribute('src');
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, unusedResponseHeaders) {
-    return utf8Decode(responseText).then(deserialized => {
-      const decoded = JSON.parse(deserialized);
-      dev().info('Fake', 'Decoded response text =', decoded['creative']);
-      dev().info('Fake', 'Decoded signature =', decoded['signature']);
-      const encoder = new TextEncoder('utf-8');
-      return {
-        creative: encoder.encode(decoded['creative']).buffer,
-        signature: base64DecodeToBytes(decoded['signature']),
-      };
+  sendXhrRequest(adUrl) {
+    return super.sendXhrRequest(adUrl).then(response => {
+      if (!response) {
+        return null;
+      }
+      const {status, headers} =
+      /** @type {{status: number, headers: !Headers}} */ (response);
+
+      // In the convert creative mode the content is the plain AMP HTML.
+      // This mode is primarily used for A4A Envelop for testing.
+      // See DEVELOPING.md for more info.
+      if (this.element.getAttribute('a4a-conversion') == 'true') {
+        return response.text().then(
+            responseText => new Response(
+                this.transformCreative_(responseText),
+                {status, headers}));
+      }
+
+      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      return response;
     });
+  }
+
+  /**
+   * Converts a general AMP doc to a AMP4ADS doc.
+   * @param {string} source
+   * @return {string}
+   */
+  transformCreative_(source) {
+    const doc = new DOMParser().parseFromString(source, 'text/html');
+    const root = doc.documentElement;
+
+    // <html ⚡> -> <html ⚡4ads>
+    if (root.hasAttribute('⚡')) {
+      root.removeAttribute('⚡');
+    } else if (root.hasAttribute('amp')) {
+      root.removeAttribute('amp');
+    } else if (root.hasAttribute('AMP')) {
+      root.removeAttribute('AMP');
+    }
+    if (!root.hasAttribute('⚡4ads') && !root.hasAttribute('⚡4ADS')) {
+      root.setAttribute('amp4ads', '');
+    }
+
+    // Remove all AMP scripts.
+    const extensions = [];
+    const scripts = doc.head.querySelectorAll('script[src]');
+    for (let i = 0; i < scripts.length; i++) {
+      const script = scripts[i];
+      if (script.hasAttribute('custom-element')) {
+        extensions.push(script.getAttribute('custom-element'));
+      } else if (script.hasAttribute('custom-template')) {
+        extensions.push(script.getAttribute('custom-template'));
+      }
+      doc.head.removeChild(script);
+    }
+
+    // Remove boilerplate styles.
+    const styles = doc.head.querySelectorAll('style[amp-boilerplate]');
+    for (let i = 0; i < styles.length; i++) {
+      const style = styles[i];
+      style.parentNode.removeChild(style);
+    }
+
+    let creative = root./*OK*/outerHTML;
+
+    // Metadata
+    creative += '<script type="application/json" amp-ad-metadata>';
+    creative += '{';
+    creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
+    creative += '"customElementExtensions": [';
+    for (let i = 0; i < extensions.length; i++) {
+      if (i > 0) {
+        creative += ',';
+      }
+      creative += `"${extensions[i]}"`;
+    }
+    creative += ']';
+    creative += '}';
+    creative += '</script>';
+
+    return creative;
   }
 }
 
-AMP.registerElement(
-    'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+
+AMP.extension('amp-ad-network-fake-impl', '0.1', AMP => {
+  AMP.registerElement(
+      'amp-ad-network-fake-impl', AmpAdNetworkFakeImpl);
+});

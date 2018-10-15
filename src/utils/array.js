@@ -14,24 +14,97 @@
  * limitations under the License.
  */
 
+
 /**
- * A bit like Array#filter, but removes elements that filter false from the
- * array. Returns the filtered items.
+ * Compares if two arrays contains exactly same elements of same number
+ * of same order.
+ * Notice that it does NOT handle NaN case as expected
  *
- * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} filter
- * @return {!Array<T>}
+ * @param {!Array<T>} arr1
+ * @param {!Array<T>} arr2
+ * @return {boolean}
  * @template T
  */
-export function filterSplice(array, filter) {
-  const splice = [];
-  for (let i = 0; i < array.length; i++) {
-    const item = array[i];
-    if (!filter(item, i, array)) {
-      splice.push(item);
-      array.splice(i, 1);
-      i--;
+export function areEqualOrdered(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
     }
   }
-  return splice;
+
+  return true;
+}
+
+/**
+ * Removes elements that shouldRemove returns true for from the array.
+ *
+ * @param {!Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} shouldRemove
+ * @template T
+ */
+export function remove(array, shouldRemove) {
+  let index = 0;
+  for (let i = 0; i < array.length; i++) {
+    const item = array[i];
+    if (!shouldRemove(item, i, array)) {
+      if (index < i) {
+        array[index] = item;
+      }
+      index++;
+    }
+  }
+
+  if (index < array.length) {
+    array.length = index;
+  }
+}
+
+/**
+ * Returns the index of the first element matching the predicate.
+ * Like Array#findIndex.
+ *
+ * @param {!Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {number}
+ * @template T
+ */
+export function findIndex(array, predicate) {
+  for (let i = 0; i < array.length; i++) {
+    if (predicate(array[i], i, array)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Converts the given iterator to an array.
+ *
+ * @param {!Iterator<T>} iterator
+ * @return {Array<T>}
+ * @template T
+ */
+export function fromIterator(iterator) {
+  const array = [];
+  for (let e = iterator.next(); !e.done; e = iterator.next()) {
+    array.push(e.value);
+  }
+  return array;
+}
+
+/**
+ * Adds item to array if it is not already present.
+ *
+ * @param {Array<T>} array
+ * @param {T} item
+ * @template T
+ */
+export function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
 }

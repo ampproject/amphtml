@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import * as dom from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {tryParseJson} from '../../../src/json';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {isObject, isFiniteNumber} from '../../../src/types';
+import {CSS} from '../../../build/amp-viz-vega-0.1.css';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
-
-/** @const */
-const EXPERIMENT = 'amp-viz-vega';
+import {dev, user} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber, isObject} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {
 
@@ -34,7 +30,7 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.data_ = null;
 
     /** @private {?string} */
@@ -75,8 +71,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, EXPERIMENT),
-        `Experiment ${EXPERIMENT} disabled`);
+    user().assert(isExperimentOn(this.win, 'amp-viz-vega'),
+        'Experiment amp-viz-vega disabled');
 
     /**
      * Global vg (and implicitly d3) are required and they are created by
@@ -112,7 +108,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    const box = this.element.getLayoutBox();
+    const box = this.getLayoutBox();
     if (this.measuredWidth_ == box.width &&
         this.measuredHeight_ == box.height) {
       return;
@@ -158,8 +154,11 @@ export class AmpVizVega extends AMP.BaseElement {
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      return xhrFor(this.win).fetchJson(dev().assertString(this.src_))
-      .then(data => {
+      return Services.xhrFor(this.win).fetchJson(
+          dev().assertString(this.src_),
+          {
+            requireAmpResponseSourceOrigin: false,
+          }).then(res => res.json()).then(data => {
         this.data_ = data;
       });
     }
@@ -200,7 +199,7 @@ export class AmpVizVega extends AMP.BaseElement {
     });
 
     return parsePromise.then(chartFactory => {
-      return vsyncFor(this.win).mutatePromise(() => {
+      return Services.vsyncFor(this.win).mutatePromise(() => {
         dom.removeChildren(dev().assertElement(this.container_));
         this.chart_ = chartFactory({el: this.container_});
         if (!this.useDataWidth_) {
@@ -220,8 +219,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /**
    * Gets the padding defined in the Vega data for either width or height.
-   * @param {!string} widthOrHeight One of 'width' or 'height' string values.
-   * @return {!number}
+   * @param {string} widthOrHeight One of 'width' or 'height' string values.
+   * @return {number}
    * @private
    */
   getDataPadding_(widthOrHeight) {
@@ -253,4 +252,7 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+
+AMP.extension('amp-viz-vega', '0.1', AMP => {
+  AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+});

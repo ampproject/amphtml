@@ -15,9 +15,9 @@
  */
 
 
-import {exponentialBackoffClock, getJitter,}
-    from '../../../src/exponential-backoff';
-import {timerFor} from '../../../src/timer';
+import {Services} from '../../../src/services';
+import {exponentialBackoffClock, getJitter}
+  from '../../../src/exponential-backoff';
 
 
 /**
@@ -25,6 +25,13 @@ import {timerFor} from '../../../src/timer';
  */
 export class Poller {
 
+  /**
+   * Creates an instance of Poller.
+   * @param {!Window} win
+   * @param {number} wait
+   * @param {!Function} work
+   * @memberof Poller
+   */
   constructor(win, wait, work) {
     /** @const {!Window} */
     this.win = win;
@@ -101,7 +108,7 @@ export class Poller {
    */
   clear_() {
     if (this.lastTimeoutId_) {
-      timerFor(this.win).cancel(this.lastTimeoutId_);
+      Services.timerFor(this.win).cancel(this.lastTimeoutId_);
       this.lastTimeoutId_ = null;
     }
   }
@@ -140,7 +147,8 @@ export class Poller {
     if (opt_immediate) {
       work();
     } else {
-      this.lastTimeoutId_ = timerFor(this.win).delay(work, this.getTimeout_());
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
     }
   }
 }

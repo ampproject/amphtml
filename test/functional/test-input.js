@@ -15,7 +15,7 @@
  */
 
 import {Input} from '../../src/input';
-import * as sinon from 'sinon';
+import {installTimerService} from '../../src/service/timer-impl.js';
 
 
 describe('Input', () => {
@@ -28,7 +28,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -48,7 +48,10 @@ describe('Input', () => {
       document: documentApi,
       navigator: {},
       ontouchstart: '',
+      setTimeout: window.setTimeout,
+      Promise: window.Promise,
     };
+    installTimerService(windowApi);
 
     input = new Input(windowApi);
   });

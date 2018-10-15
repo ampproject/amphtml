@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -39,7 +40,10 @@ class AmpO2Player extends AMP.BaseElement {
     this.src_ = '';
   }
 
-    /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.domain_, onLayout);
   }
@@ -53,12 +57,12 @@ class AmpO2Player extends AMP.BaseElement {
   buildCallback() {
     this.pid_ = user().assert(
         this.element.getAttribute('data-pid'),
-        'Data-pid attribute is required for <amp-o2-player> %s',
+        'data-pid attribute is required for <amp-o2-player> %s',
         this.element);
 
     this.bcid_ = user().assert(
         this.element.getAttribute('data-bcid'),
-        'Data-bcid attribute is required for <amp-o2-player> %s',
+        'data-bcid attribute is required for <amp-o2-player> %s',
         this.element);
 
     const bid = this.element.getAttribute('data-bid');
@@ -91,11 +95,11 @@ class AmpO2Player extends AMP.BaseElement {
   layoutCallback() {
     user().assert(
         this.pid_,
-        'Data-pid attribute is required for <amp-o2-player> %s',
+        'data-pid attribute is required for <amp-o2-player> %s',
         this.element);
     user().assert(
         this.bcid_,
-        'Data-bcid attribute is required for <amp-o2-player> %s',
+        'data-bcid attribute is required for <amp-o2-player> %s',
         this.element);
 
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -111,12 +115,15 @@ class AmpO2Player extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
         'method': 'pause',
         'value': this.domain_,
-      }), '*');
+      })), '*');
     }
   }
 }
 
-AMP.registerElement('amp-o2-player', AmpO2Player);
+
+AMP.extension('amp-o2-player', '0.1', AMP => {
+  AMP.registerElement('amp-o2-player', AmpO2Player);
+});

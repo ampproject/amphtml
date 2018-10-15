@@ -16,49 +16,29 @@
 
 import {dev} from '../log';
 
-
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
- * @return {!Promise<string>}
+ * @return {string}
  */
 export function utf8Decode(bytes) {
-  if (TextDecoder) {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
   }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
+  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  return decodeURIComponent(escape(asciiString));
 }
 
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
- * @return {!Promise<!Uint8Array>}
+ * @return {!Uint8Array}
  */
 export function utf8Encode(string) {
-  if (TextEncoder) {
-    return Promise.resolve(new TextEncoder('utf-8').encode(string));
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
   }
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => {
-      reject(reader.error);
-    };
-    reader.onloadend = () => {
-      // Because we used readAsArrayBuffer, we know the result must be an
-      // ArrayBuffer.
-      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
-    };
-    reader.readAsArrayBuffer(new Blob([string]));
-  });
+  return stringToBytes(unescape(encodeURIComponent(string)));
 }
 
 /**
@@ -76,7 +56,7 @@ export function stringToBytes(str) {
     bytes[i] = charCode;
   }
   return bytes;
-};
+}
 
 /**
  * Converts a 8-bit bytes array into a string
@@ -84,13 +64,38 @@ export function stringToBytes(str) {
  * @return {string}
  */
 export function bytesToString(bytes) {
-  return String.fromCharCode.apply(String, bytes);
-};
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Converts a 4-item byte array to an unsigned integer.
+ * Assumes bytes are big endian.
+ * @param {!Uint8Array} bytes
+ * @return {number}
+ */
+export function bytesToUInt32(bytes) {
+  if (bytes.length != 4) {
+    throw new Error('Received byte array with length != 4');
+  }
+  const val = (bytes[0] & 0xFF) << 24 |
+     (bytes[1] & 0xFF) << 16 |
+     (bytes[2] & 0xFF) << 8 |
+     (bytes[3] & 0xFF);
+  // Convert to unsigned.
+  return val >>> 0;
+}
 
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
- * @param {!number} length
+ * @param {!Window} win
+ * @param {number} length
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {

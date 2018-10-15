@@ -16,14 +16,17 @@
 
 import {JwtHelper} from '../jwt';
 import {pemToBytes} from '../../../../src/utils/pem';
-import * as sinon from 'sinon';
 
 
 describe('JwtHelper', () => {
 
+  // Generated from https://jwt.io/#debugger
+  // Name deliberately changed from "John Doe" to "John ௵Z加䅌ਇ☎Èʘغޝ" to test
+  // correct unicode handling on our part.
   const TOKEN_HEADER = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
   const TOKEN_PAYLOAD =
-      'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9';
+      'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4g4K-1' +
+      'WuWKoOSFjOCoh-KYjsOIypjYut6dIiwiYWRtaW4iOnRydWV9';
   const TOKEN_SIG = 'TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
   const TOKEN = `${TOKEN_HEADER}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`;
 
@@ -31,7 +34,7 @@ describe('JwtHelper', () => {
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
   });
 
@@ -49,7 +52,7 @@ describe('JwtHelper', () => {
       });
       expect(tok.payload).to.deep.equal({
         'sub': '1234567890',
-        'name': 'John Doe',
+        'name': 'John ௵Z加䅌ਇ☎Èʘغޝ',
         'admin': true,
       });
       expect(tok.verifiable).to.equal(
@@ -110,17 +113,20 @@ describe('JwtHelper', () => {
     afterEach(() => {
     });
 
-    it('should decode and verify token correctly', () => {
-      // Skip on non-subtle browser.
-      if (!helper.isVerificationSupported()) {
-        return;
-      }
-      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
-        expect(tok['name']).to.equal('John Do');
-      });
-    });
+    // TODO(aghassemi, 6292): Unskip for Safari after #6292
+    it.configure().skipSafari().run('should decode and verify token correctly',
+        () => {
+          // Skip on non-subtle browser.
+          if (!helper.isVerificationSupported()) {
+            return;
+          }
+          return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM))
+              .then(tok => {
+                expect(tok['name']).to.equal('John Do');
+              });
+        });
 
-    it('should fail invalid signature', () => {
+    it.configure().skipSafari().run('should fail invalid signature', () => {
       // Skip on non-subtle browser.
       if (!helper.isVerificationSupported()) {
         return;
@@ -205,24 +211,24 @@ describe('JwtHelper', () => {
     it('should fetch they key and verify', () => {
       const key = 'KEY';
       subtleMock.expects('importKey')
-        .withExactArgs(
+          .withExactArgs(
           /* format */ 'spki',
-          pemToBytes(PEM),
-          {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
-          /* extractable */ false,
-          /* uses */ ['verify']
-        )
-        .returns(Promise.resolve(key))
-        .once();
+              pemToBytes(PEM),
+              {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
+              /* extractable */ false,
+              /* uses */ ['verify']
+          )
+          .returns(Promise.resolve(key))
+          .once();
       subtleMock.expects('verify')
-        .withExactArgs(
-          {name: 'RSASSA-PKCS1-v1_5'},
-          key,
-          /* sig */ sinon.match(() => true),
-          /* verifiable */ sinon.match(() => true)
-        )
-        .returns(Promise.resolve(true))
-        .once();
+          .withExactArgs(
+              {name: 'RSASSA-PKCS1-v1_5'},
+              key,
+              /* sig */ sinon.match(() => true),
+              /* verifiable */ sinon.match(() => true)
+          )
+          .returns(Promise.resolve(true))
+          .once();
       return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
         expect(tok['name']).to.equal('John Do');
       });

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Requests Frame</title>
+    <script>
+      /**
+       * To receive analytics events in a third-party frame, you must
+       * implement window.onNewContextInstance, with this signature.
+       * @param context  Call onAnalyticsEvent() on this, passing your
+       * function which will receive the analytics events.
+       */
+      window.onNewContextInstance = function(context) {
+        /**
+         * Within the window.onNewContextInstance method, you
+         * must create a function which processes an event, and
+         * pass that function to context.onAnalyticsEvent().
+         * @param {string} event The event message received from AMP Analytics
+         */
+        context.onAnalyticsEvent(function(event) {
+          // Now, do something meaningful with the AMP Analytics event
+          try {
+            console.log('The page at: ' + window.location.href +
+                ' has received an event: ' + event);
+          } catch (e) { }
+
+          // Optionally, you may send a response containing key/value pairs, to
+          // be used by the amp-ad-exit of the creative which generated the
+          // event.
+          context.sendResponseToCreative({'collected-data': 'abc'});
+        });
+      };
+
+      // Load the script specified in the iframe’s name attribute:
+      try {
+        var url = JSON.parse(window.name).scriptSrc;
+        if (url && url.startsWith('https://3p.ampproject.net/')) {
+          script = document.createElement('script');
+          script.src = url;
+          document.head.appendChild(script);
+          // The script will be loaded, and will call onNewContextInstance()
+        } else {
+          try {
+            console.warn('Received invalid URL - risk of XSS! ' + url);
+          } catch (e) { }
+        }
+      } catch (e) {
+        try {
+          console.warn('Caught exception parsing window.name!', e);
+        } catch (e2) { }
+      }
+    </script>
+  </head>
+  <!-- The frame will not be visible, so there is no need for a body tag. -->
+</html>

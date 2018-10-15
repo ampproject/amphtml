@@ -17,6 +17,9 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
+import {findIndex} from './utils/array';
+import {toWin} from './types';
+
 
 const PROP_ = '__AMP_Gestures';
 
@@ -63,13 +66,13 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
-   * @param {boolean=} shouldNotPreventDefault
+   * @param {boolean=} opt_shouldNotPreventDefault
    * @return {!Gestures}
    */
-  static get(element, shouldNotPreventDefault = false) {
+  static get(element, opt_shouldNotPreventDefault = false) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element, shouldNotPreventDefault);
+      res = new Gestures(element, opt_shouldNotPreventDefault);
       element[PROP_] = res;
     }
     return res;
@@ -77,6 +80,7 @@ export class Gestures {
 
   /**
    * @param {!Element} element
+   * @param {boolean} shouldNotPreventDefault
    */
   constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
@@ -108,7 +112,7 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(element.ownerDocument.defaultView,
+    this.pass_ = new Pass(toWin(element.ownerDocument.defaultView),
         this.doPass_.bind(this));
 
     /** @private {!Observable} */
@@ -139,13 +143,14 @@ export class Gestures {
   }
 
   /**
-   * Unsubscribes from all pointer events.
+   * Unsubscribes from all pointer events and removes the shared cache instance.
    */
   cleanup() {
     this.element_.removeEventListener('touchstart', this.boundOnTouchStart_);
     this.element_.removeEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.removeEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.removeEventListener('touchcancel', this.boundOnTouchCancel_);
+    delete this.element_[PROP_];
     this.pass_.cancel();
   }
 
@@ -169,6 +174,35 @@ export class Gestures {
       this.overservers_[type] = overserver;
     }
     return overserver.add(handler);
+  }
+
+  /**
+   * Unsubscribes all handlers from the given gesture recognizer. Returns
+   * true if anything was done. Returns false if there were no handlers
+   * registered on the given gesture recognizer in first place.
+   *
+   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @return {boolean}
+   */
+  removeGesture(recognizerConstr) {
+    const type = new recognizerConstr(this).getType();
+    const overserver = this.overservers_[type];
+    if (overserver) {
+      overserver.removeAll();
+      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      if (index < 0) {
+        return false;
+      }
+      // Remove the recognizer as well as all associated tracking state
+      this.recognizers_.splice(index, 1);
+      this.ready_.splice(index, 1);
+      this.pending_.splice(index, 1);
+      this.tracking_.splice(index, 1);
+      delete this.overservers_[type];
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -291,6 +325,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} offset
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalReady_(recognizer, offset) {
     // Somebody got here first.
@@ -319,6 +355,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} timeLeft
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalPending_(recognizer, timeLeft) {
     // Somebody got here first.
@@ -340,6 +378,8 @@ export class Gestures {
    * emitting gestures.
    * @param {!GestureRecognizer} recognizer
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
@@ -355,6 +395,8 @@ export class Gestures {
    * @param {*} data
    * @param {?Event} event
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
     dev().assert(this.eventing_ == recognizer,
@@ -377,7 +419,7 @@ export class Gestures {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+                (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }

@@ -16,21 +16,16 @@
 
 import {
   addParamToUrl,
+  isLocalhostOrigin,
+  isProxyOrigin,
   parseQueryString,
+  parseUrlDeprecated,
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
+import {dev} from '../../src/log';
+import {dict} from '../../src/utils/object';
+import {startsWith} from '../../src/string';
 import {urls} from '../../src/config';
-
-
-/**
- * Origins that are trusted to serve valid AMP documents.
- * @const {Object}
- */
-const ampOrigins = {
-  [urls.cdn]: true,
-  'http://localhost:8000': true,
-};
-
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -89,7 +84,8 @@ export function handleClick(e, opt_viewerNavigate) {
   const win = link.a.ownerDocument.defaultView;
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
-    destination = destination.replace(`${urls.cdn}/c/`,
+    destination = destination.replace(
+        `${parseUrlDeprecated(link.eventualUrl).host}/c/`,
         'http://localhost:8000/max/');
   }
   e.preventDefault();
@@ -114,7 +110,7 @@ export function handleClick(e, opt_viewerNavigate) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(/** @type {!Element} */ (e.target), element => {
+  const a = closest(dev().assertElement(e.target), element => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {
@@ -138,7 +134,8 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!eventualUrl.indexOf(`${urls.cdn}/c/`) == 0) {
+  if (!isProxyOrigin(eventualUrl) ||
+      !startsWith(parseUrlDeprecated(eventualUrl).pathname, '/c/')) {
     return;
   }
   return eventualUrl;
@@ -155,9 +152,9 @@ function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
   const a2aAncestor = getA2AAncestor(win);
   if (a2aAncestor) {
-    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify({
-      url,
-    }), a2aAncestor.origin);
+    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify(dict({
+      'url': url,
+    })), a2aAncestor.origin);
     return;
   }
   openWindowDialog(win, url, target);
@@ -177,8 +174,7 @@ export function warmupStatic(win) {
   const linkRel = /*OK*/document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
-  linkRel.href =
-      `${urls.cdn}/rtv/01$internalRuntimeVersion$/v0.js`;
+  linkRel.href = `${urls.cdn}/v0.js`;
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 
@@ -193,11 +189,19 @@ export function warmupDynamic(e) {
   if (!link || !link.eventualUrl) {
     return;
   }
-  const linkRel = /*OK*/document.createElement('link');
-  linkRel.rel = 'preload';
-  linkRel.setAttribute('as', 'document');
-  linkRel.href = link.eventualUrl;
-  getHeadOrFallback(e.target.ownerDocument).appendChild(linkRel);
+  // Preloading with empty as and newly specced value `fetch` meaning the same
+  // thing. `document` would be the right value, but this is not yet supported
+  // in browsers.
+  const linkRel0 = /*OK*/document.createElement('link');
+  linkRel0.rel = 'preload';
+  linkRel0.href = link.eventualUrl;
+  const linkRel1 = /*OK*/document.createElement('link');
+  linkRel1.rel = 'preload';
+  linkRel1.as = 'fetch';
+  linkRel1.href = link.eventualUrl;
+  const head = getHeadOrFallback(e.target.ownerDocument);
+  head.appendChild(linkRel0);
+  head.appendChild(linkRel1);
 }
 
 /**
@@ -235,7 +239,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
+  if (!isProxyOrigin(amp) && !isLocalhostOrigin(amp)) {
     return null;
   }
   return {

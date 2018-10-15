@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -50,12 +50,13 @@ export function adgeneration(global, data) {
 
 /**
  * URL encoding of query string
- * @param {!String} str
+ * @param {string} str
+ * @return {string}
  */
 function encodeQueryValue(str) {
   return str.split('&').map(v => {
     const key = v.split('=')[0],
-      val = v.split('=')[1];
+        val = v.split('=')[1];
     return encodeURIComponent(key) + '=' + encodeURIComponent(val);
   }).join('&');
 }

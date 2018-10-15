@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {isExperimentOn} from '../../../src/experiments';
+import {FormEvents} from './form-events';
+import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev} from '../../../src/log';
+import {toWin} from '../../../src/types';
+
+/** @const @private {string} */
+const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
+
+/** @const @private {string} */
+const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
+/** @type {boolean|undefined} */
+let checkValiditySupported;
 
 /** @type {number} */
 let validationBubbleCount = 0;
@@ -30,8 +41,17 @@ let validationBubbleCount = 0;
  * @param {boolean} isSupported
  * @private visible for testing.
  */
-export function setReportValiditySupported(isSupported) {
+export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
+}
+
+
+/**
+ * @param {boolean} isSupported
+ * @private visible for testing.
+ */
+export function setCheckValiditySupportedForTesting(isSupported) {
+  checkValiditySupported = isSupported;
 }
 
 
@@ -39,15 +59,16 @@ export function setReportValiditySupported(isSupported) {
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
+  InteractAndSubmit: 'interact-and-submit',
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
 
 /**
  * Form validator interface.
- * @interface
+ * @abstract
  */
-class FormValidator {
+export class FormValidator {
 
   /**
    * @param {!HTMLFormElement} form
@@ -56,8 +77,20 @@ class FormValidator {
     /** @protected @const {!HTMLFormElement} */
     this.form = form;
 
-    /** @protected @const {!Document} */
-    this.doc = form.ownerDocument;
+    /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = Services.ampdoc(form);
+
+    /** @const @protected {!../../../src/service/resources-impl.Resources} */
+    this.resources = Services.resourcesForDoc(form);
+
+    /** @protected @const {!Document|!ShadowRoot} */
+    this.root = this.ampdoc.getRootNode();
+
+    /**
+     * Tribool indicating last known validity of form.
+     * @private {boolean|null}
+     */
+    this.formValidity_ = null;
   }
 
   /**
@@ -74,6 +107,27 @@ class FormValidator {
    * @param {!Event} unusedEvent
    */
   onInput(unusedEvent) {}
+
+  /** @return {!NodeList} */
+  inputs() {
+    return this.form.querySelectorAll('input,select,textarea');
+  }
+
+  /**
+   * Fires a valid/invalid event from the form if its validity state
+   * has changed since the last invocation of this function.
+   * @visibleForTesting
+   */
+  fireValidityEventIfNecessary() {
+    const previousValidity = this.formValidity_;
+    this.formValidity_ = this.form.checkValidity();
+    if (previousValidity !== this.formValidity_) {
+      const win = toWin(this.form.ownerDocument.defaultView);
+      const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
+      const event = createCustomEvent(win, type, null, {bubbles: true});
+      this.form.dispatchEvent(event);
+    }
+  }
 }
 
 
@@ -83,25 +137,28 @@ export class DefaultValidator extends FormValidator {
   /** @override */
   report() {
     this.form.reportValidity();
+    this.fireValidityEventIfNecessary();
   }
-
 }
 
 
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
 
+  /**
+   * Creates an instance of PolyfillDefaultValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
-    const win = this.doc.defaultView;
-    const bubbleId = `amp-validation-bubble-${validationBubbleCount++}`;
+    const bubbleId = `i-amphtml-validation-bubble-${validationBubbleCount++}`;
     /** @private @const {!./validation-bubble.ValidationBubble} */
-    this.validationBubble_ = new ValidationBubble(win, bubbleId);
+    this.validationBubble_ = new ValidationBubble(this.ampdoc, bubbleId);
   }
 
   /** @override */
   report() {
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         inputs[i]./*REVIEW*/focus();
@@ -109,16 +166,24 @@ export class PolyfillDefaultValidator extends FormValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
-  onBlur(unusedEvent) {
+  onBlur(e) {
+    // NOTE: IE11 focuses the submit button after submitting a form.
+    // Then amp-form focuses the first field with an error, which causes the
+    // submit button to blur. So we need to disregard the submit button blur.
+    if (e.target.type == 'submit') {
+      return;
+    }
     this.validationBubble_.hide();
   }
 
   /** @override */
   onInput(event) {
-    const input = /** @type {!Element} */ (event.target);
+    const input = dev().assertElement(event.target);
     if (!this.validationBubble_.isActiveOn(input)) {
       return;
     }
@@ -140,14 +205,12 @@ export class PolyfillDefaultValidator extends FormValidator {
  */
 export class AbstractCustomValidator extends FormValidator {
 
+  /**
+   * Creates an instance of AbstractCustomValidator.
+   * @param {!HTMLFormElement} form
+   */
   constructor(form) {
     super(form);
-
-    /** @private @const {!Object<string, !Element>} */
-    this.inputValidationsDict_ = {};
-
-    /** @private @const {!Object<string, !Element>} */
-    this.inputVisibleValidationDict_ = {};
   }
 
   /**
@@ -164,27 +227,28 @@ export class AbstractCustomValidator extends FormValidator {
    * Hides all validation messages.
    */
   hideAllValidations() {
-    for (const id in this.inputVisibleValidationDict_) {
-      const input = this.doc.getElementById(id);
-      this.hideValidationFor(input);
+    const inputs = this.inputs();
+    for (let i = 0; i < inputs.length; i++) {
+      this.hideValidationFor(dev().assertElement(inputs[i]));
     }
   }
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string=} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {
     if (!input.id) {
       return null;
     }
-    const selector = `[visible-when-invalid=${invalidType}]` +
-        `[validation-for=${input.id}]`;
-    if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+    const property = VALIDATION_CACHE_PREFIX + invalidType;
+    if (!(property in input)) {
+      const selector = `[visible-when-invalid=${invalidType}]`
+          + `[validation-for=${input.id}]`;
+      input[property] = this.root.querySelector(selector);
     }
-    return this.inputValidationsDict_[selector];
+    return input[property];
   }
 
   /**
@@ -196,14 +260,15 @@ export class AbstractCustomValidator extends FormValidator {
     if (!validation) {
       return;
     }
-
     if (!validation.textContent.trim()) {
       validation.textContent = input.validationMessage;
     }
+    input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    input.setAttribute('aria-invalid', 'true');
-    validation.classList.add('visible');
-    this.inputVisibleValidationDict_[input.id] = validation;
+    this.resources.mutateElement(input,
+        () => input.setAttribute('aria-invalid', 'true'));
+    this.resources.mutateElement(validation,
+        () => validation.classList.add('visible'));
   }
 
   /**
@@ -214,9 +279,12 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-    input.removeAttribute('aria-invalid');
-    visibleValidation.classList.remove('visible');
-    delete this.inputVisibleValidationDict_[input.id];
+    delete input[VISIBLE_VALIDATION_CACHE];
+
+    this.resources.mutateElement(input,
+        () => input.removeAttribute('aria-invalid'));
+    this.resources.mutateElement(visibleValidation,
+        () => visibleValidation.classList.remove('visible'));
   }
 
   /**
@@ -224,15 +292,12 @@ export class AbstractCustomValidator extends FormValidator {
    * @return {?Element}
    */
   getVisibleValidationFor(input) {
-    if (!input.id) {
-      return null;
-    }
-    return this.inputVisibleValidationDict_[input.id];
+    return input[VISIBLE_VALIDATION_CACHE];
   }
 
   /**
    * Whether an input should validate after an interaction.
-   * @param {!Element} input
+   * @param {!Element} unusedInput
    * @return {boolean}
    */
   shouldValidateOnInteraction(unusedInput) {
@@ -243,8 +308,10 @@ export class AbstractCustomValidator extends FormValidator {
    * @param {!Event} event
    */
   onInteraction(event) {
-    const input = /** @type {!Element} */ (event.target);
-    const shouldValidate = this.shouldValidateOnInteraction(input);
+    const input = dev().assertElement(event.target);
+    const shouldValidate =
+        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);
@@ -269,7 +336,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   /** @override */
   report() {
     this.hideAllValidations();
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         this.reportInput(inputs[i]);
@@ -277,13 +344,14 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
         break;
       }
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
   shouldValidateOnInteraction(input) {
     return !!this.getVisibleValidationFor(input);
   }
-
 }
 
 
@@ -294,7 +362,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
   report() {
     this.hideAllValidations();
     let firstInvalidInput = null;
-    const inputs = this.form.querySelectorAll('input,select,textarea');
+    const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         firstInvalidInput = firstInvalidInput || inputs[i];
@@ -305,6 +373,8 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     if (firstInvalidInput) {
       firstInvalidInput./*REVIEW*/focus();
     }
+
+    this.fireValidityEventIfNecessary();
   }
 
   /** @override */
@@ -320,35 +390,48 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   shouldValidateOnInteraction(unusedInput) {
     return true;
   }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
+  }
+}
+
+
+/** @private visible for testing */
+export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
+  /** @override */
+  shouldValidateOnInteraction(unusedInput) {
+    return true;
+  }
+
+  /** @override */
+  onInteraction(event) {
+    super.onInteraction(event);
+    this.fireValidityEventIfNecessary();
+  }
 }
 
 
 /**
  * Returns the form validator instance.
  *
- * TODO(#5000): Consider allowing multiple custom validators to be registered to a form.
- *     This allows for example a form to have as-you-go AND show-all-on-submit
- *     validators instead of having to stick with one.
- *
- * TODO(#5004): Consider setting a form-level class to indicate that the form was blocked
- *    from submission after being invalid (like .amp-form-submit-invalid).
- *
  * @param {!HTMLFormElement} form
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const win = form.ownerDocument.defaultView;
-  if (isExperimentOn(win, 'amp-form-custom-validations')) {
-    const customValidation = form.getAttribute(
-        'custom-validation-reporting');
-    switch (customValidation) {
-      case CustomValidationTypes.AsYouGo:
-        return new AsYouGoValidator(form);
-      case CustomValidationTypes.ShowAllOnSubmit:
-        return new ShowAllOnSubmitValidator(form);
-      case CustomValidationTypes.ShowFirstOnSubmit:
-        return new ShowFirstOnSubmitValidator(form);
-    }
+  const customValidation = form.getAttribute(
+      'custom-validation-reporting');
+  switch (customValidation) {
+    case CustomValidationTypes.AsYouGo:
+      return new AsYouGoValidator(form);
+    case CustomValidationTypes.ShowAllOnSubmit:
+      return new ShowAllOnSubmitValidator(form);
+    case CustomValidationTypes.InteractAndSubmit:
+      return new InteractAndSubmitValidator(form);
+    case CustomValidationTypes.ShowFirstOnSubmit:
+      return new ShowFirstOnSubmitValidator(form);
   }
 
   if (isReportValiditySupported(form.ownerDocument)) {
@@ -361,27 +444,46 @@ export function getFormValidator(form) {
 
 /**
  * Returns whether reportValidity API is supported.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @return {boolean}
  */
 function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
+  if (doc && reportValiditySupported === undefined) {
+    reportValiditySupported = !!document.createElement('form').reportValidity;
   }
-  return reportValiditySupported;
+  return !!reportValiditySupported;
+}
+
+
+/**
+ * Returns whether reportValidity API is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isCheckValiditySupported(doc) {
+  if (checkValiditySupported === undefined) {
+    checkValiditySupported = !!doc.createElement('input').checkValidity;
+  }
+  return checkValiditySupported;
 }
 
 
 /**
  * Returns invalid error type on the input.
- * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} input
+ * @param {!Element} input
  * @return {?string}
  */
 function getInvalidType(input) {
+  // 'badInput' takes precedence over others.
+  const validityTypes = ['badInput'];
   for (const invalidType in input.validity) {
-    if (input.validity[invalidType]) {
-      return invalidType;
+    // add other types after
+    if (!validityTypes.includes(invalidType)) {
+      validityTypes.push(invalidType);
     }
   }
-  return null;
+  // Finding error type with value true
+  const response = validityTypes.filter(type =>
+    input.validity[type] === true);
+  return response.length ? response[0] : null;
 }

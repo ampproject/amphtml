@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
+import * as docready from '../../src/document-ready';
+import * as dom from '../../src/dom';
 import {
   AmpDocService,
-  AmpDocSingle,
   AmpDocShadow,
-  installShadowDoc,
-  shadowDocHasBody,
-  shadowDocReady,
+  AmpDocShell,
+  AmpDocSingle,
 } from '../../src/service/ampdoc-impl';
-import * as dom from '../../src/dom';
-import * as docready from '../../src/document-ready';
-import * as sinon from 'sinon';
+import {
+  ShadowDomVersion,
+  getShadowDomSupportedVersion,
+  isShadowDomSupported,
+  setShadowDomSupportedVersionForTesting,
+} from '../../src/web-components';
+import {createShadowRoot} from '../../src/shadow-embed';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describe('AmpDocService', () => {
@@ -32,7 +37,7 @@ describe('AmpDocService', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -60,6 +65,77 @@ describe('AmpDocService', () => {
       document.body.appendChild(div);
       expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
     });
+
+    it('should yield the single doc when ampdoc-closest is enabled', () => {
+      toggleExperiment(window, 'ampdoc-closest', true);
+      service = new AmpDocService(window, /* isSingleDoc */ true);
+      expect(service.getAmpDoc(null)).to.equal(service.singleDoc_);
+      expect(service.getAmpDoc(document)).to.equal(service.singleDoc_);
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      expect(service.getAmpDoc(div)).to.equal(service.singleDoc_);
+    });
+
+    // For example, <amp-next-page> creates shadow documents in single-doc
+    // mode.
+    describe('shadow documents', () => {
+      let host;
+      let shadowRoot;
+      let content;
+
+      beforeEach(() => {
+        content = document.createElement('span');
+        host = document.createElement('div');
+        if (isShadowDomSupported()) {
+          if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+            shadowRoot = host.attachShadow({mode: 'open'});
+          } else {
+            shadowRoot = host.createShadowRoot();
+          }
+          shadowRoot.appendChild(content);
+        }
+        document.body.appendChild(host);
+      });
+
+      afterEach(() => {
+        if (host.parentNode) {
+          host.parentNode.removeChild(host);
+        }
+        toggleExperiment(window, 'ampdoc-closest', false);
+      });
+
+      it('should yield the single doc', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        service.installShadowDoc('https://a.org/', shadowRoot);
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(service.singleDoc_);
+      });
+
+      it('should yield the shadow doc when explicitly asked', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const ampDoc = service.getAmpDoc(content, {closestAmpDoc: true});
+        expect(ampDoc).to.equal(newAmpDoc);
+      });
+
+      it('should yield the shadow doc when ampdoc-closest is enabled', () => {
+        if (!shadowRoot) {
+          return;
+        }
+
+        toggleExperiment(window, 'ampdoc-closest', true);
+        service = new AmpDocService(window, /* isSingleDoc */ true);
+        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(newAmpDoc);
+      });
+    });
   });
 
   describe('shadow-doc mode', () => {
@@ -71,8 +147,12 @@ describe('AmpDocService', () => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
       content = document.createElement('span');
       host = document.createElement('div');
-      if (host.createShadowRoot) {
-        shadowRoot = host.createShadowRoot();
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot = host.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot = host.createShadowRoot();
+        }
         shadowRoot.appendChild(content);
       }
       document.body.appendChild(host);
@@ -84,7 +164,7 @@ describe('AmpDocService', () => {
       }
     });
 
-    it('should initialize as single-doc', () => {
+    it('should not initialize as single-doc', () => {
       expect(service.isSingleDoc()).to.be.false;
       expect(service.singleDoc_).to.not.exist;
     });
@@ -123,7 +203,7 @@ describe('AmpDocService', () => {
         service.getAmpDoc(content);
       }).to.throw(/No ampdoc found/);
 
-      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
       expect(ampDoc).to.exist;
@@ -146,18 +226,19 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      installShadowDoc(service, 'https://a.org/', shadowRoot);
-      expect(() => {
-        installShadowDoc(service, 'https://a.org/', shadowRoot);
-      }).to.throw(/The shadow root already contains ampdoc/);
+      service.installShadowDoc('https://a.org/', shadowRoot);
+      allowConsoleError(() => { expect(() => {
+        service.installShadowDoc('https://a.org/', shadowRoot);
+      }).to.throw(/The shadow root already contains ampdoc/); });
     });
 
-    it('should navigate via host', () => {
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should navigate via host', () => {
       if (!shadowRoot) {
         return;
       }
 
-      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
+      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
 
@@ -176,6 +257,108 @@ describe('AmpDocService', () => {
       expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
     });
   });
+
+  describe('install AmpDocShell', () => {
+    let sandbox;
+    let ampdocService;
+    let host, content;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+      ampdocService = new AmpDocService(window, /* isSingleDoc */ false);
+      content = document.createElement('span');
+      host = document.createElement('div');
+      document.body.appendChild(host);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should fail when installing AmpDocShell in single-doc mode', () => {
+      const ampdocService = new AmpDocService(window, /* isSingleDoc */ true);
+      allowConsoleError(() => { expect(() => {
+        ampdocService.installShellShadowDoc();
+      }).to.throw(/AmpDocShell cannot be installed in single-doc mode/); });
+    });
+
+    it('should install AmpDocShell in shadow-doc mode', () => {
+      expect(ampdocService.hasAmpDocShell()).to.be.false;
+
+      const ampdocShell = ampdocService.installShellShadowDoc();
+
+      expect(ampdocShell instanceof AmpDocShell).to.be.true;
+      expect(window.document['__AMPDOC']).to.equal(ampdocShell);
+      expect(ampdocService.hasAmpDocShell()).to.be.true;
+    });
+
+    it('should yield AmpDocShell for window document', () => {
+      const ampdocShell = ampdocService.installShellShadowDoc();
+
+      expect(ampdocService.getAmpDoc(window.document)).to.equal(ampdocShell);
+    });
+
+    it('should yield AmpDocShell for custom-element', () => {
+      const ampdocShell = ampdocService.installShellShadowDoc();
+      window.document.body.appendChild(content);
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
+    });
+
+    it('should yield AmpDocShell for custom-element when Shadow Dom is ' +
+        'not supported', () => {
+      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+      const ampdocShell = ampdocService.installShellShadowDoc();
+      window.document.body.appendChild(content);
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
+    });
+
+    it('should yield custom-element shadow-doc', () => {
+      const shadowRoot = createShadowRoot(host);
+      shadowRoot.appendChild(content);
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should yield custom-element shadow-doc when Shadow Dom is ' +
+        'not supported', () => {
+      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+      const shadowRoot = createShadowRoot(host);
+      shadowRoot.appendChild(content);
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('waits for document ready to set body', () => {
+      const mockDoc = {body: {nodeType: 1}};
+
+      let readyCallback;
+      sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
+        return new Promise(resolve => {
+          readyCallback = resolve;
+        });
+      });
+
+      const ampdocShell = ampdocService.installShellShadowDoc();
+
+      expect(ampdocShell.isBodyAvailable()).to.be.false;
+      expect(ampdocShell.isReady()).to.be.false;
+
+      // Set document ready
+      readyCallback(mockDoc);
+
+      return ampdocShell.whenBodyAvailable().then(() => {
+        expect(ampdocShell.isBodyAvailable()).to.be.true;
+        expect(ampdocShell.getBody()).to.equal(mockDoc.body);
+        expect(ampdocShell.isReady()).to.be.true;
+      });
+    });
+  });
 });
 
 
@@ -185,7 +368,7 @@ describe('AmpDocSingle', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(window);
   });
 
@@ -200,6 +383,7 @@ describe('AmpDocSingle', () => {
 
   it('should return document as root', () => {
     expect(ampdoc.getRootNode()).to.equal(window.document);
+    expect(ampdoc.getHeadNode()).to.equal(window.document.head);
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
 
@@ -229,17 +413,17 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise', () => {
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady', () => {
+    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady', () => {
+    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });
@@ -248,7 +432,9 @@ describe('AmpDocSingle', () => {
     const ampdoc = new AmpDocSingle(win);
 
     expect(ampdoc.isBodyAvailable()).to.be.false;
-    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    allowConsoleError(() => {
+      expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    });
     const bodyPromise = ampdoc.whenBodyAvailable();
     const readyPromise = ampdoc.whenReady();
 
@@ -266,6 +452,30 @@ describe('AmpDocSingle', () => {
       expect(ampdoc.isReady()).to.be.true;
     });
   });
+
+  it('should declare extension', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+    ampdoc.declareExtension('ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.false;
+
+    ampdoc.declareExtension('ext2');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaresExtension('ext2')).to.be.true;
+  });
+
+  it('should ignore duplicate extensions', () => {
+    expect(ampdoc.declaresExtension('ext1')).to.be.false;
+    ampdoc.declareExtension('ext1');
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+
+    // Repeat.
+    ampdoc.declareExtension('ext1');
+    expect(ampdoc.declaredExtensions_).to.have.length(1);
+    expect(ampdoc.declaresExtension('ext1')).to.be.true;
+  });
 });
 
 
@@ -278,14 +488,12 @@ describe('AmpDocShadow', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     content = document.createElement('div');
     host = document.createElement('div');
-    if (host.createShadowRoot) {
-      shadowRoot = host.createShadowRoot();
-      shadowRoot.appendChild(content);
-      ampdoc = new AmpDocShadow(window, URL, shadowRoot);
-    }
+    shadowRoot = createShadowRoot(host);
+    shadowRoot.appendChild(content);
+    ampdoc = new AmpDocShadow(window, URL, shadowRoot);
   });
 
   afterEach(() => {
@@ -306,6 +514,7 @@ describe('AmpDocShadow', () => {
       return;
     }
     expect(ampdoc.getRootNode()).to.equal(shadowRoot);
+    expect(ampdoc.getHeadNode()).to.equal(shadowRoot);
   });
 
   it('should find element by id', () => {
@@ -322,13 +531,15 @@ describe('AmpDocShadow', () => {
   it('should update when body is available', () => {
     // Body is still expected.
     expect(ampdoc.isBodyAvailable()).to.be.false;
-    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    allowConsoleError(() => {
+      expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    });
     expect(ampdoc.bodyResolver_).to.be.ok;
 
     // Set body.
     const bodyPromise = ampdoc.whenBodyAvailable();
     const body = {nodeType: 1};
-    shadowDocHasBody(ampdoc, body);
+    ampdoc.setBody(body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(body);
     expect(ampdoc.bodyResolver_).to.be.undefined;
@@ -341,10 +552,10 @@ describe('AmpDocShadow', () => {
 
   it('should only allow one body update', () => {
     const body = {nodeType: 1};
-    shadowDocHasBody(ampdoc, body);
-    expect(() => {
-      shadowDocHasBody(ampdoc, body);
-    }).to.throw(/Duplicate body/);
+    ampdoc.setBody(body);
+    allowConsoleError(() => { expect(() => {
+      ampdoc.setBody(body);
+    }).to.throw(/Duplicate body/); });
   });
 
   it('should update when doc is ready', () => {
@@ -354,7 +565,7 @@ describe('AmpDocShadow', () => {
 
     // Set ready.
     const readyPromise = ampdoc.whenReady();
-    shadowDocReady(ampdoc);
+    ampdoc.setReady();
     expect(ampdoc.isReady()).to.be.true;
     expect(ampdoc.readyResolver_).to.be.undefined;
     expect(ampdoc.readyPromise_).to.be.ok;
@@ -364,9 +575,36 @@ describe('AmpDocShadow', () => {
   });
 
   it('should only allow one ready update', () => {
-    shadowDocReady(ampdoc);
-    expect(() => {
-      shadowDocReady(ampdoc);
-    }).to.throw(/Duplicate ready state/);
+    ampdoc.setReady();
+    allowConsoleError(() => { expect(() => {
+      ampdoc.setReady();
+    }).to.throw(/Duplicate ready state/); });
+  });
+});
+
+describe('AmpDocShell', () => {
+  let sandbox;
+  let ampdocShell;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox;
+    ampdocShell = new AmpDocShell(window);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('extends from AmpDocShadow', () => {
+    expect(ampdocShell instanceof AmpDocShadow).to.be.true;
+  });
+
+  it('should return window.document as root', () => {
+    expect(ampdocShell.getRootNode()).to.equal(window.document);
+    expect(ampdocShell.getHeadNode()).to.equal(window.document.head);
+  });
+
+  it('should return current location as href', () => {
+    expect(ampdocShell.getUrl()).to.equal(window.location.href);
   });
 });

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -59,7 +59,7 @@ function headerBidding(global, data) {
         placement: data.slot,
         elementId: 'c',
       }],
-      done: function(targeting) {
+      done(targeting) {
         doubleclick(global, {
           width: data.width,
           height: data.height,

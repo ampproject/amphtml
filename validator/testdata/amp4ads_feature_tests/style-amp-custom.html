@@ -23,7 +23,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style amp4ads-boilerplate>body{visibility:hidden}</style>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
   </style>
   <style amp-custom>
     /* Valid. */
@@ -32,7 +32,7 @@
       transition: transform 2s;
     }
 
-    /* Invalid: non-animation property (color) invalid in animation selector */
+    /* Valid: non-animation property (color) valid in animation selector */
     .amp-animate .box {
       color: red;
       transform: rotate(180deg);
@@ -88,7 +88,7 @@
       -webkit-transition: transform 2s;
     }
 
-    /* Invalid: non-animation property (color) invalid in animation selector */
+    /* Valid: non-animation property (color) valid in animation selector */
     .amp-animate .box {
       color: red;
       -webkit-transform: rotate(180deg);

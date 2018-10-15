@@ -33,7 +33,13 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fixed, fixed-height, responsive, fill, flex-item</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-google-vrview-image/">amp-google-vrview-image example</a>.</td>
+  </tr>
 </table>
+
+[TOC]
 
 ## Overview
 
@@ -58,20 +64,20 @@ VR view supports mono and stereo 360 images. Note:
 
 ## Attributes
 
-**src**
+##### src
 
 The source URL of a stereo image. Must resolve to https. See notes above on what
 kind of image can be passed here.
 
-**stereo**
+##### stereo
 
 If specified, the image provided by the `src` attribute is considered to be a stereo
 image (see above), otherwise it's a mono image.
 
-**yaw**
+##### yaw
 
 Initial yaw of viewer, in degrees. Defaults to 0.
 
-**yaw-only**
+##### yaw-only
 
 Can be specified to restrict motion to yaw only.

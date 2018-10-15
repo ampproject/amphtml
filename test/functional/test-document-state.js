@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {DocumentState} from '../../src/document-state';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
+import {DocumentState} from '../../src/service/document-state';
 
 
 describe('DocumentState', () => {
@@ -28,7 +27,7 @@ describe('DocumentState', () => {
   let docState;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'complete',
@@ -98,7 +97,7 @@ describe('DocumentState', () => {
 
     expect(docState.isHidden()).to.equal(false);
     expect(docState.getVisibilityState()).to.equal('visible');
-    expect(callback.callCount).to.equal(0);
+    expect(callback).to.have.not.been.called;
 
     testDoc.hidden = true;
     testDoc.visibilityState = 'invisible';
@@ -106,7 +105,7 @@ describe('DocumentState', () => {
 
     expect(docState.isHidden()).to.equal(true);
     expect(docState.getVisibilityState()).to.equal('invisible');
-    expect(callback.callCount).to.equal(1);
+    expect(callback).to.be.calledOnce;
   });
 
   it('should fire body availability change', () => {
@@ -117,15 +116,15 @@ describe('DocumentState', () => {
 
     const first = docState.onBodyAvailable(callback);
     expect(first).to.not.equal(null);
-    expect(callback.callCount).to.equal(0);
+    expect(callback).to.have.not.been.called;
 
     testDoc.body = {};
     docState.onBodyAvailable_();
 
-    expect(callback.callCount).to.equal(1);
+    expect(callback).to.be.calledOnce;
 
     const second = docState.onBodyAvailable(callback);
     expect(second).to.equal(null);
-    expect(callback.callCount).to.equal(2);
+    expect(callback).to.have.callCount(2);
   });
 });

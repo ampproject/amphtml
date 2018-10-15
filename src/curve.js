@@ -237,7 +237,7 @@ class Bezier {
   lerp(a, b, x) {
     return a + x * (b - a);
   }
-};
+}
 
 
 /**
@@ -251,7 +251,7 @@ export const Curves = {
    * @param {number} n
    * @return {number}
    */
-  LINEAR: function(n) {return n;},
+  LINEAR(n) {return n;},
 
   /**
    * ease

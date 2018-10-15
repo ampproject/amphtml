@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
+import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
-import {timerFor} from './timer';
+import {dev} from './log';
+import {dict} from './utils/object';
+import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -34,24 +35,6 @@ import {timerFor} from './timer';
  * }}
  */
 export let DOMRect;
-
-/**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
-}
 
 /**
  * Returns the ratio of the smaller box's area to the larger box's area.
@@ -93,7 +76,6 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   // The element is relative to (0, 0), while the viewport moves. So, we must
   // adjust.
-  // TODO(jridgewell, #5149): Fixed position elements must be recalculated.
   const boundingClientRect = moveLayoutRect(element, -viewport.left,
       -viewport.top);
   intersectionRect = moveLayoutRect(intersectionRect, -viewport.left,
@@ -103,9 +85,9 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
-    rootBounds: DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    rootBounds,
+    boundingClientRect,
+    intersectionRect,
     intersectionRatio: intersectionRatio(intersectionRect, element),
   });
 }
@@ -113,26 +95,24 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 /**
  * The IntersectionObserver class lets any element share its viewport
  * intersection data with an iframe of its choice (most likely contained within
- * the element itself.). When instantiated the class will start listening for
- * a 'send-intersection' postMessage from the iframe, and only then  would start
+ * the element itself.). When instantiated the class will start listening for a
+ * 'send-intersections' postMessage from the iframe, and only then  would start
  * sending intersection data to the iframe. The intersection data would be sent
- * when the element is moved inside or outside the viewport as well as on
- * scroll and resize.
- * The element should create an IntersectionObserver instance once the Iframe
- * element is created.
- * The IntersectionObserver class exposes a `fire` method that would send the
- * intersection data to the iframe.
- * The IntersectionObserver class exposes a `onViewportCallback` method that
- * should be called inside if the viewportCallback of the element. This would
- * let the element sent intersection data automatically when there element comes
- * inside or goes outside the viewport and also manage sending intersection data
- * onscroll and resize.
- * Note: The IntersectionObserver would not send any data over to the iframe if
- * it had not requested the intersection data already via a postMessage.
+ * when the element is moved inside or outside the viewport as well as on scroll
+ * and resize. The element should create an IntersectionObserver instance once
+ * the Iframe element is created. The IntersectionObserver class exposes a
+ * `fire` method that would send the intersection data to the iframe. The
+ * IntersectionObserver class exposes a `onViewportCallback` method that should
+ * be called inside if the viewportCallback of the element. This would let the
+ * element sent intersection data automatically when there element comes inside
+ * or goes outside the viewport and also manage sending intersection data
+ * onscroll and resize. Note: The IntersectionObserver would not send any data
+ * over to the iframe if it had not requested the intersection data already via
+ * a postMessage.
  */
 export class IntersectionObserver {
   /**
-   * @param {!AMP.BaseElement} element.
+   * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
@@ -141,7 +121,7 @@ export class IntersectionObserver {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
-    this.timer_ = timerFor(baseElement.win);
+    this.timer_ = Services.timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
     /** @private {boolean} */
@@ -173,6 +153,9 @@ export class IntersectionObserver {
     this.unlistenViewportChanges_ = null;
   }
 
+  /**
+   * Fires element intersection
+   */
   fire() {
     this.sendElementIntersection_();
   }
@@ -271,7 +254,9 @@ export class IntersectionObserver {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
+    this.postMessageApi_.send('intersection', dict({
+      'changes': this.pendingChanges_,
+    }));
     this.pendingChanges_.length = 0;
   }
 

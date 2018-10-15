@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {getCurve} from './curve';
 import * as st from './style';
+import {assertNotDisplay, setStyle} from './style';
+import {getCurve} from './curve';
 
 
 
@@ -34,6 +35,28 @@ export function all(transitions) {
       const tr = transitions[i];
       tr(time, complete);
     }
+  };
+}
+
+
+/**
+ * Returns a transition that combines the string result of other string-based
+ * transitions such as transform and scale using the given opt_delimiter.
+ * @param {!Array<!TransitionDef<string>>} transitions
+ * @param {string=} opt_delimiter Defaults to a single whitespace.
+ * @return {!TransitionDef<string>}
+ */
+export function concat(transitions, opt_delimiter = ' ') {
+  return (time, complete) => {
+    const results = [];
+    for (let i = 0; i < transitions.length; i++) {
+      const tr = transitions[i];
+      const result = tr(time, complete);
+      if (typeof result == 'string') {
+        results.push(result);
+      }
+    }
+    return results.join(opt_delimiter);
   };
 }
 
@@ -66,7 +89,7 @@ export function withCurve(transition, curve) {
 export function setStyles(element, styles) {
   return (time, complete) => {
     for (const k in styles) {
-      st.setStyle(element, k, styles[k](time, complete));
+      setStyle(element, assertNotDisplay(k), styles[k](time, complete));
     }
   };
 }
@@ -133,6 +156,21 @@ export function translateX(transition) {
       return `translateX(${res})`;
     }
     return `translateX(${res}px)`;
+  };
+}
+
+/**
+ * A transition for "translateY" of CSS "transform" property.
+ * @param {!TransitionDef<number|string>} transition
+ * @return {!TransitionDef<string>}
+ */
+export function translateY(transition) {
+  return time => {
+    const res = transition(time);
+    if (typeof res == 'string') {
+      return `translateY(${res})`;
+    }
+    return `translateY(${res}px)`;
   };
 }
 

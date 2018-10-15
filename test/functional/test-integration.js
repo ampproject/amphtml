@@ -20,15 +20,15 @@
 import {
   draw3p,
   ensureFramed,
-  validateParentOrigin,
+  parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
-  parseFragment,
+  validateParentOrigin,
 } from '../../3p/integration';
-import {registrations, register} from '../../3p/3p';
+import {getRegistrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
-
+  const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
   });
@@ -66,18 +66,21 @@ describe('3p integration.js', () => {
   });
 
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
-    () => {
-      const parent = {
-        origin: 'abc',
-      };
-      expect(() => {
-        validateParentOrigin({
-          location: {
-            ancestorOrigins: ['xyz'],
-          },
-        }, parent);
-      }).to.throw(/Parent origin mismatch/);
-    });
+      () => {
+        const parent = {
+          origin: 'abc',
+        };
+
+        allowConsoleError(() => {
+          expect(() => {
+            validateParentOrigin({
+              location: {
+                ancestorOrigins: ['xyz'],
+              },
+            }, parent);
+          }).to.throw(/Parent origin mismatch/);
+        });
+      });
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +
@@ -88,7 +91,7 @@ describe('3p integration.js', () => {
         'localhost:8000/examples/twitter.amp.html"},' +
         '"mode":{"localDev":true,"development":false,"minified":false}}}';
     const data = parseFragment(unencoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
         'http://localhost:8000/examples/twitter.amp.html');
@@ -104,7 +107,7 @@ describe('3p integration.js', () => {
         'witter.amp.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
         'ment%22:false,%22minified%22:false}}}';
     const data = parseFragment(encoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
         'http://localhost:8000/examples/twitter.amp.html');
@@ -185,9 +188,11 @@ describe('3p integration.js', () => {
         tagName: 'AMP-EMBED',
       },
     };
-    expect(() => {
-      draw3p(win, data);
-    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+    allowConsoleError(() => {
+      expect(() => {
+        draw3p(win, data);
+      }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+    });
   });
 
   it('should allow all types on localhost', () => {
@@ -225,9 +230,11 @@ describe('3p integration.js', () => {
     validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
-    expect(() => {
-      validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
   });
 
   it('should validate types on custom host', () => {
@@ -239,12 +246,16 @@ describe('3p integration.js', () => {
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');
     validateAllowedTypes(defaultHost, 'doubleclick');
-    expect(() => {
-      validateAllowedTypes(defaultHost, 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
-    expect(() => {
-      validateAllowedTypes(defaultHost, 'adtech');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(defaultHost, 'not present');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
+    allowConsoleError(() => {
+      expect(() => {
+        validateAllowedTypes(defaultHost, 'adtech');
+      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });
 

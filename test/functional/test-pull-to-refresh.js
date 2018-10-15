@@ -15,7 +15,6 @@
  */
 
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
-import * as sinon from 'sinon';
 
 
 describe('PullToRefreshBlocker', () => {
@@ -26,7 +25,7 @@ describe('PullToRefreshBlocker', () => {
   let blocker;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     eventListeners = {};
     const documentApi = {
@@ -134,7 +133,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
-    expect(preventDefault.callCount).to.equal(1);
+    expect(preventDefault).to.be.calledOnce;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.equal(undefined);
@@ -150,7 +149,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
-    expect(preventDefault.callCount).to.equal(0);
+    expect(preventDefault).to.have.not.been.called;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.equal(undefined);
@@ -166,7 +165,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(true);
-    expect(preventDefault.callCount).to.equal(0);
+    expect(preventDefault).to.have.not.been.called;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.not.equal(undefined);

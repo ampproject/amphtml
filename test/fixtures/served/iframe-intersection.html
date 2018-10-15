@@ -50,7 +50,10 @@ function sendPostMessage() {
   }, '*');
 }
 sendPostMessage();
-setInterval(sendPostMessage, 10);
+sendPostMessage(); // send twice to test no double registration
+
+// Send foreign message.
+ampWindow./*OK*/postMessage('amp-other', '*');
 
 </script>
 </body>

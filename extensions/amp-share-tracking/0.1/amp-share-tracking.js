@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {xhrFor} from '../../../src/xhr';
-import {viewerForDoc} from '../../../src/viewer';
-import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
-import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
+import {isExperimentOn} from '../../../src/experiments';
+import {registerServiceBuilder} from '../../../src/service';
+import {tryResolve} from '../../../src/utils/promise';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
@@ -41,8 +42,8 @@ export class AmpShareTracking extends AMP.BaseElement {
     /** @private {string} */
     this.vendorHref_ = '';
 
-    /** @private {?Promise<!Object<string, string>>} */
-    this.shareTrackingFragments_ = null;
+    /** @private {string} */
+    this.originalViewerFragment_ = '';
   }
 
   /**
@@ -50,7 +51,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     * @private
     */
   isExperimentOn_() {
-    return isExperimentOn(this.win, TAG);
+    return isExperimentOn(this.win, 'amp-share-tracking');
   }
 
   /** @override */
@@ -61,26 +62,32 @@ export class AmpShareTracking extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     if (!this.isExperimentOn_()) {
-      getService(this.win, 'share-tracking',
-          () => Promise.reject(user().createError(TAG + ' disabled')));
+      registerServiceBuilder(this.win, 'share-tracking', function() {
+        return Promise.reject(user().createError(TAG + ' disabled'));
+      });
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    this.shareTrackingFragments_ = Promise.all([
-      this.getIncomingFragment_(),
-      this.getOutgoingFragment_()]).then(results => {
-        dev().fine(TAG, 'incomingFragment: ', results[0]);
-        dev().fine(TAG, 'outgoingFragment: ', results[1]);
-        return {
-          incomingFragment: results[0],
-          outgoingFragment: results[1],
-        };
-      });
-
-    getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
+    const shareTrackingFragments = Promise.all(
+        [this.getIncomingFragment_(), this.getOutgoingFragment_()]
+    ).then(results => {
+      const incomingFragment = results[0];
+      const outgoingFragment = results[1];
+      dev().fine(TAG, 'incomingFragment: ', incomingFragment);
+      dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
+      if (outgoingFragment && outgoingFragment != '') {
+        const newFragment = this.getNewViewerFragment_(incomingFragment,
+            outgoingFragment);
+        this.getHistory_().updateFragment(newFragment);
+      }
+      return {incomingFragment, outgoingFragment};
+    });
+    registerServiceBuilder(this.win, 'share-tracking', function() {
+      return shareTrackingFragments;
+    });
   }
 
   /**
@@ -89,12 +96,26 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getIncomingFragment_() {
-    dev().fine(TAG, 'getting incoming fragment');
-    return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
-      const match = fragment.match(/\.([^&]*)/);
+    return this.getOriginalViewerFragment_().then(fragment => {
+      // The share tracking fragment should be the first parameter and start
+      // with dot in the url fragment
+      const match = fragment.match(/^\.([^&]*)/);
       return match ? match[1] : '';
     });
   }
+
+  /**
+   * Get the original url fragment from the viewer
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOriginalViewerFragment_() {
+    return this.getHistory_().getFragment().then(fragment => {
+      this.originalViewerFragment_ = fragment;
+      return fragment;
+    });
+  }
+
 
   /**
    * Get an outgoing share-tracking fragment
@@ -102,11 +123,10 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingFragment_() {
-    dev().fine(TAG, 'getting outgoing fragment');
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return Promise.resolve(base64UrlEncodeFromBytes(
+    return tryResolve(() => base64UrlEncodeFromBytes(
         this.getShareTrackingRandomBytes_()));
   }
 
@@ -121,20 +141,24 @@ export class AmpShareTracking extends AMP.BaseElement {
     const postReq = {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
-      body: {},
+      body: dict(),
     };
-    return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
-      if (response.fragment) {
-        return response.fragment;
-      }
-      user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
-          'have a fragment value.');
-      return '';
-    }, err => {
-      user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
-      return '';
-    });
+    return Services.xhrFor(this.win).fetchJson(vendorUrl, postReq)
+        .then(res => res.json())
+        .then(json => {
+          if (json.fragment) {
+            return json.fragment;
+          }
+          this.user().error(
+              TAG, 'The response from [' + vendorUrl + '] does not ' +
+            'have a fragment value.');
+          return '';
+        }, err => {
+          this.user().error(
+              TAG, 'The request to share-tracking endpoint failed:',
+              err);
+          return '';
+        });
   }
 
   /**
@@ -161,10 +185,39 @@ export class AmpShareTracking extends AMP.BaseElement {
     }
     return bytes;
   }
+
+  /**
+   * Generate the new url fragment by replacing incoming share tracking fragment
+   * with outgoing share tracking fragment.
+   * The original fragment is not modified.
+   * @param {string} incomingFragment
+   * @param {string} outgoingFragment
+   * @return {string}
+   * @private
+   */
+  getNewViewerFragment_(incomingFragment, outgoingFragment) {
+    const fragmentResidual = incomingFragment ?
+      this.originalViewerFragment_.substr(incomingFragment.length + 1) :
+      this.originalViewerFragment_;
+    let result = '.' + outgoingFragment;
+    if (fragmentResidual) {
+      if (fragmentResidual[0] != '&') {
+        result += '&';
+      }
+      result += fragmentResidual;
+    }
+    return result;
+  }
+
+  /** @private @return {!../../../src/service/history-impl.History} */
+  getHistory_() {
+    return Services.historyForDoc(this.getAmpDoc());
+  }
+
 }
 
 
 // Install the extension.
-AMP.extension('amp-share-tracking', AMP => {
-  AMP.registerElement('amp-share-tracking', AmpShareTracking);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerElement(TAG, AmpShareTracking);
 });

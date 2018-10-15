@@ -17,11 +17,16 @@
 // Requires polyfills in immediate side effect.
 import '../polyfills';
 
+import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
+import {reportError} from '../error';
 import {user} from '../log';
-import {fromClass} from '../service';
+
+const TAG = 'timer';
 
 /**
  * Helper with all things Timer.
+ *
+* @implements {../service.EmbeddableService}
  */
 export class Timer {
 
@@ -33,7 +38,7 @@ export class Timer {
     this.win = win;
 
     /** @private @const {!Promise}  */
-    this.resolved_ = Promise.resolve();
+    this.resolved_ = this.win.Promise.resolve();
 
     this.taskCount_ = 0;
 
@@ -43,7 +48,7 @@ export class Timer {
     this.startTime_ = Date.now();
   }
 
- /**
+  /**
   * Returns time since start in milliseconds.
   * @return {number}
   */
@@ -57,7 +62,7 @@ export class Timer {
    * be close to 0 and this will NOT yield to the event queue.
    *
    * Returns the timer ID that can be used to cancel the timer (cancel method).
-   * @param {!function()} callback
+   * @param {function()} callback
    * @param {number=} opt_delay
    * @return {number|string}
    */
@@ -72,10 +77,18 @@ export class Timer {
           return;
         }
         callback();
-      });
+      }).catch(reportError);
       return id;
     }
-    return this.win.setTimeout(callback, opt_delay);
+    const wrapped = () => {
+      try {
+        callback();
+      } catch (e) {
+        reportError(e);
+        throw e;
+      }
+    };
+    return this.win.setTimeout(wrapped, opt_delay);
   }
 
   /**
@@ -94,26 +107,15 @@ export class Timer {
    * Returns a promise that will resolve after the delay. Optionally, the
    * resolved value can be provided as opt_result argument.
    * @param {number=} opt_delay
-   * @param {RESULT=} opt_result
-   * @return {!Promise<RESULT>}
-   * @template RESULT
+   * @return {!Promise}
    */
-  promise(opt_delay, opt_result) {
-    let timerKey = null;
-    return new Promise((resolve, reject) => {
-      timerKey = this.delay(() => {
-        timerKey = -1;
-        resolve(opt_result);
-      }, opt_delay);
+  promise(opt_delay) {
+    return new this.win.Promise(resolve => {
+      // Avoid wrapping in closure if no specific result is produced.
+      const timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
+        throw new Error('Failed to schedule timer.');
       }
-    }).catch(error => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      throw error;
     });
   }
 
@@ -129,33 +131,55 @@ export class Timer {
    * @template RESULT
    */
   timeoutPromise(delay, opt_racePromise, opt_message) {
-    let timerKey = null;
-    const delayPromise = new Promise((_resolve, reject) => {
+    let timerKey;
+    const delayPromise = new this.win.Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
-        timerKey = -1;
         reject(user().createError(opt_message || 'timeout'));
       }, delay);
+
       if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
+        throw new Error('Failed to schedule timer.');
       }
-    }).catch(error => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      throw error;
     });
     if (!opt_racePromise) {
       return delayPromise;
     }
-    return Promise.race([delayPromise, opt_racePromise]);
+    const cancel = () => {
+      this.cancel(timerKey);
+    };
+    opt_racePromise.then(cancel, cancel);
+    return this.win.Promise.race([delayPromise, opt_racePromise]);
   }
+
+  /**
+   * Returns a promise that resolves after `predicate` returns true.
+   * Polls with interval `delay`
+   * @param {number} delay
+   * @param {function():boolean} predicate
+   * @return {!Promise}
+   */
+  poll(delay, predicate) {
+    return new this.win.Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
+  /** @override */
+  adoptEmbedWindow(embedWin) {
+    installServiceInEmbedScope(embedWin, TAG,
+        new Timer(embedWin));
+  }
+
 }
 
 /**
  * @param {!Window} window
- * @return {!Timer}
  */
 export function installTimerService(window) {
-  return fromClass(window, 'timer', Timer);
-};
+  registerServiceBuilder(window, TAG, Timer);
+}

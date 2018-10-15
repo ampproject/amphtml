@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {stringToBytes, bytesToString} from './bytes';
+import {
+  bytesToString,
+  stringToBytes,
+  utf8Decode,
+  utf8Encode,
+} from './bytes';
 
 /**
  * Character mapping from base64url to base64.
@@ -29,40 +34,14 @@ const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': '.'};
 
 /**
- * Converts a string which is in base64url encoding into the decoded string.
- * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
- * Note that atob seems to accept input either with or without padding, so this
- * routine will also.
- * Note that the way this is currently implemented, it will also accept regular
- * base64 input. But that is not part of the contract, so do not count on it
- * being true in the future.
- * @param {string} str
- * @return {string}
- */
-export function base64UrlDecode(str) {
-  return atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
-}
-
-/**
  * Converts a string which is in base64url encoding into a Uint8Array
  * containing the decoded value.
  * @param {string} str
  * @return {!Uint8Array}
  */
 export function base64UrlDecodeToBytes(str) {
-  return stringToBytes(base64UrlDecode(str));
-}
-
-/**
- * Converts a string which is in base64 encoding into the decoded string.
- * base64 is defined in RFC 4648.
- * Note that atob seems to accept input either with or without padding, so this
- * routine will also.
- * @param {string} str
- * @return {string}
- */
-export function base64Decode(str) {
-  return atob(str);
+  const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
 }
 
 /**
@@ -72,17 +51,7 @@ export function base64Decode(str) {
  * @return {!Uint8Array}
  */
 export function base64DecodeToBytes(str) {
-  return stringToBytes(base64Decode(str));
-}
-
-/**
- * Converts a string into base64url encoded string.
- * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
- * @param {string} str
- * @return {string}
- */
-export function base64UrlEncode(str) {
-  return btoa(str).replace(/[+/=]/g, ch => base64UrlEncodeSubs[ch]);
+  return stringToBytes(atob(str));
 }
 
 /**
@@ -92,16 +61,29 @@ export function base64UrlEncode(str) {
  * @return {string}
  */
 export function base64UrlEncodeFromBytes(bytes) {
-  return base64UrlEncode(bytesToString(bytes));
+  const str = bytesToString(bytes);
+  return btoa(str).replace(/[+/=]/g, ch => base64UrlEncodeSubs[ch]);
 }
 
 /**
- * Converts a string into base64 encoded string.
+ * Converts a string into base64url encoded string.
+ * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
  * @param {string} str
  * @return {string}
  */
-export function base64Encode(str) {
-  return btoa(str);
+export function base64UrlEncodeFromString(str) {
+  const bytes = utf8Encode(str);
+  return base64UrlEncodeFromBytes(bytes);
+}
+
+/**
+ * Decode a base64url encoded string by `base64UrlEncodeFromString`
+ * @param {string} str
+ * @return {string}
+ */
+export function base64UrlDecodeFromString(str) {
+  const bytes = base64UrlDecodeToBytes(str);
+  return utf8Decode(bytes);
 }
 
 /**
@@ -110,5 +92,5 @@ export function base64Encode(str) {
  * @return {string}
  */
 export function base64EncodeFromBytes(bytes) {
-  return base64Encode(bytesToString(bytes));
+  return btoa(bytesToString(bytes));
 }

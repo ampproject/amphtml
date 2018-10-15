@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var astUtils = require('eslint/lib/ast-utils');
+const astUtils = require('eslint/lib/util/ast-utils');
 
-var GLOBALS = Object.create(null);
+const GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';
 GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 
 module.exports = function(context) {
   return {
     Identifier: function(node) {
-      var name = node.name;
+      const {name} = node;
       if (!(name in GLOBALS)) {
         return;
       }
@@ -36,16 +37,17 @@ module.exports = function(context) {
         return;
       }
 
-      var variable = astUtils.getVariableByName(context.getScope(), node.name);
+      const variable =
+          astUtils.getVariableByName(context.getScope(), node.name);
       if (variable.defs.length > 0) {
         return;
       }
 
-      var message = 'Forbidden global `' + node.name + '`.';
+      let message = 'Forbidden global `' + node.name + '`.';
       if (GLOBALS[name]) {
         message += ' ' + GLOBALS[name];
       }
-      context.report(node, message);
-    }
+      context.report({node, message});
+    },
   };
 };

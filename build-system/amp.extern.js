@@ -14,19 +14,119 @@
  * limitations under the License.
  */
 
+/** @externs */
+
+/**
+ * The "init" argument of the Fetch API. Externed due to being passes across
+ * component/runtime boundary.
+ *
+ * Currently, only "credentials: include" is implemented.
+ *
+ * Note ampCors === false indicates that __amp_source_origin should not be
+ * appended to the URL to allow for potential caching or response across pages.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
+ *   cache: (string|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!JsonObject|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
+ */
+var FetchInitDef;
+
+/**
+ * Externed due to being passed across component/runtime boundary.
+ * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
+ */
+var FetchRequestDef;
+
+/** @constructor **/
+var FormDataWrapper = function() {};
+
+FormDataWrapper.prototype.entries = function() {};
+FormDataWrapper.prototype.getFormData = function() {};
+
+/**
+ * A type for Objects that can be JSON serialized or that come from
+ * JSON serialization. Requires the objects fields to be accessed with
+ * bracket notation object['name'] to make sure the fields do not get
+ * obfuscated.
+ * @constructor
+ * @dict
+ */
+function JsonObject() {}
+
+/**
+ * Force the dataset property to be handled as a JsonObject.
+ * @type {!JsonObject}
+ */
+Element.prototype.dataset;
+
+/**
+ * - n is the name.
+ * - f is the function body of the extension.
+ * - p is the priority. Only supported value is "high".
+ *   high means, that the extension is not subject to chunking.
+ *   This should be used for work, that should always happen
+ *   as early as possible. Currently this is primarily used
+ *   for viewer communication setup.
+ * - v is the release version
+ * @constructor @struct
+ */
+function ExtensionPayload() {}
+
+/** @type {string} */
+ExtensionPayload.prototype.n;
+
+/** @type {function(!Object,!Object)} */
+ExtensionPayload.prototype.f;
+
+/** @type {string|undefined} */
+ExtensionPayload.prototype.p;
+
+/** @type {string} */
+ExtensionPayload.prototype.v;
+
+/** @type {!Array<string>|string|undefined} */
+ExtensionPayload.prototype.i;
+
+
+/**
+ * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
+ */
+var JsonValue;
+
 // Node.js global
 var process = {};
 process.env;
-process.end.NODE_ENV;
+process.env.NODE_ENV;
+process.env.SERVE_MODE;
 
 // Exposed to ads.
 window.context = {};
-window.context.amp3pSentinel;
+window.context.sentinel;
 window.context.clientId;
+window.context.initialLayoutRect;
 window.context.initialIntersection;
+window.context.sourceUrl;
+window.context.experimentToggles;
+window.context.master;
+window.context.isMaster;
 
 // Service Holder
 window.services;
+
+// Safeframe
+// TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
+/* @type {?Object} */
+window.sf_ = {};
+/* @type {?Object} */
+window.sf_.cfg;
 
 // Exposed to custom ad iframes.
 /* @type {!Function} */
@@ -36,18 +136,97 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG = {};
 window.AMP = {};
+window.AMP._ = {};
+window.AMP.push;
+window.AMP.title;
+window.AMP.canonicalUrl;
+window.AMP.extension;
+window.AMP.ampdoc;
+window.AMP.config;
+window.AMP.config.urls;
+window.AMP.BaseElement;
+window.AMP.BaseTemplate;
+window.AMP.registerElement;
+window.AMP.registerTemplate;
+window.AMP.registerServiceForDoc;
+window.AMP.isExperimentOn;
+window.AMP.toggleExperiment;
+window.AMP.setLogLevel;
+window.AMP.setTickFunction;
+window.AMP.viewer;
+window.AMP.viewport = {};
+window.AMP.viewport.getScrollLeft;
+window.AMP.viewport.getScrollWidth;
+window.AMP.viewport.getWidth;
+window.AMP.attachShadowDoc;
+window.AMP.attachShadowDocAsStream
 
-window.AMP_CONFIG.thirdPartyUrl;
-window.AMP_CONFIG.thirdPartyFrameHost;
-window.AMP_CONFIG.thirdPartyFrameRegex;
-window.AMP_CONFIG.cdnUrl;
-window.AMP_CONFIG.errorReportingUrl;
+
+/** @constructor */
+function AmpConfigType() {}
+
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyUrl;
+/* @public {string} */
+AmpConfigType.prototype.thirdParty;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameHost;
+/* @public {string} */
+AmpConfigType.prototype.thirdPartyFrameRegex;
+/* @public {string} */
+AmpConfigType.prototype.errorReporting;
+/* @public {string} */
+AmpConfigType.prototype.cdn;
+/* @public {string} */
+AmpConfigType.prototype.cdnUrl;
+/* @public {string} */
+AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.localDev;
+/* @public {string} */
+AmpConfigType.prototype.v;
+/* @public {boolean} */
+AmpConfigType.prototype.canary;
+/* @public {string} */
+AmpConfigType.prototype.runtime;
+/* @public {boolean} */
+AmpConfigType.prototype.test;
+
+/** @type {!AmpConfigType}  */
+window.AMP_CONFIG;
+
+window.AMP_CONTEXT_DATA;
+
+/** @constructor @struct */
+function AmpViewerMessage() {}
+
+/** @public {string}  */
+AmpViewerMessage.prototype.app;
+/** @public {string}  */
+AmpViewerMessage.prototype.type;
+/** @public {number}  */
+AmpViewerMessage.prototype.requestid;
+/** @public {string}  */
+AmpViewerMessage.prototype.name;
+/** @public {*}  */
+AmpViewerMessage.prototype.data;
+/** @public {boolean|undefined}  */
+AmpViewerMessage.prototype.rsvp;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.error;
+
+// AMP-Analytics Cross-domain iframes
+let IframeTransportEvent;
+
+/** @constructor @struct */
+function IframeTransportContext() {}
+IframeTransportContext.onAnalyticsEvent;
+IframeTransportContext.sendResponseToCreative;
 
 // amp-viz-vega related externs.
 /**
- * @typedef {{spec: function(!JSONType, function())}}
+ * @typedef {{spec: function(!JsonObject, function())}}
  */
 let VegaParser;
 /**
@@ -57,13 +236,62 @@ let VegaObject;
 /* @type {VegaObject} */
 window.vg;
 
+// amp-date-picker externs
+/**
+ * @type {function(*)}
+ */
+let ReactRender = function() {};
+
+/**
+ * @struct
+ */
+let PropTypes = {};
+
+/**
+ * @struct
+ */
+let ReactDates = {};
+
+/** @constructor */
+ReactDates.DayPickerSingleDateController;
+
+/** @struct */
+ReactDates.DayPickerRangeController;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyAfterDay;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyBeforeDay;
+
+/** @type {function(*,*):boolean} */
+ReactDates.isSameDay;
+
+/**
+ * @struct
+ */
+let ReactDatesConstants = {};
+
+/** @const {string} */
+ReactDatesConstants.ANCHOR_LEFT;
+
+/** @const {string} */
+ReactDatesConstants.HORIZONTAL_ORIENTATION;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
 
+// TODO (remove after we update closure compiler externs)
+window.PerformancePaintTiming;
+window.PerformanceObserver;
+Object.prototype.entryTypes
+
 // Externed explicitly because this private property is read across
 // binaries.
-Element.implementation_ = {};
+Element.prototype.implementation_ = {};
+Element.prototype.signals;
+window.whenSignal;
 
 /** @typedef {number}  */
 var time;
@@ -84,13 +312,15 @@ var AmpElement;
 // Temp until we figure out forward declarations
 /** @constructor */
 var AccessService = function() {};
-/** @constructor */
+/** @constructor @struct */
 var UserNotificationManager = function() {};
 UserNotificationManager.prototype.get;
-/** @constructor */
+/** @constructor @struct */
 var Cid = function() {};
-/** @constructor */
+/** @constructor @struct */
 var Activity = function() {};
+/** @constructor */
+var AmpStoryVariableService = function() {};
 
 // data
 var data;
@@ -101,7 +331,44 @@ data.pageHidden;
 data.changes;
 data._context;
 data.inViewport;
-
+data.numposts;
+data.orderBy;
+data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.showFacepile;
+data.showText;
+data.productId;
+data.imageUrl;
+data.yotpoElementId;
+data.backgroudColor;
+data.reviewIds;
+data.showBottomLine;
+data.autoplayEnabled;
+data.autoplaySpeed;
+data.showNavigation;
+data.layoutScroll;
+data.spacing;
+data.hoverColor;
+data.hoverOpacity;
+data.hoverIcon;
+data.ctaText;
+data.ctaColor;
+data.appKey;
+data.widgetType;
+data.layoutRows;
+data.demo;
+data.uploadButton;
+data.reviews;
+data.headerText;
+data.headerBackgroundColor;
+data.bodyBackgroundColor;
+data.data.fontColor;
+data.width;
+data.sitekey;
+data.fortesting;
 
 // 3p code
 var twttr;
@@ -109,9 +376,26 @@ twttr.events;
 twttr.events.bind;
 twttr.widgets;
 twttr.widgets.createTweet;
+twttr.widgets.createMoment;
+twttr.widgets.createTimeline;
 
 var FB;
 FB.init;
+
+var gist;
+gist.gistid;
+
+var bodymovin;
+bodymovin.loadAnimation;
+var animationHandler;
+animationHandler.play;
+animationHandler.pause;
+animationHandler.stop;
+animationHandler.goToAndStop;
+animationHandler.totalFrames;
+
+var grecaptcha;
+grecaptcha.execute;
 
 // Validator
 var amp;
@@ -120,9 +404,8 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
-var Activity;
 Activity.prototype.getTotalEngagedTime = function() {};
-var AccessService;
+Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
@@ -136,7 +419,6 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * }}
  */
 var GetCidDef;
-var Cid;
 /**
  * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
@@ -163,6 +445,10 @@ var Cid;
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
 
+AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.pageIndex;
+AmpStoryVariableService.pageId;
+
 var AMP = {};
 window.AMP;
 // Externed explicitly because we do not export Class shaped names
@@ -171,7 +457,7 @@ window.AMP;
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
+ * @constructor @struct
  * @extends {BaseElement$$module$src$base_element}
  */
 AMP.BaseElement = class {
@@ -183,17 +469,29 @@ AMP.BaseElement = class {
  * This uses the internal name of the type, because there appears to be no
  * other way to reference an ES6 type from an extern that is defined in
  * the app.
- * @constructor
- * @extends {AmpAdApiHandler$$module$extensions$amp_ad$0_1$amp_ad_api_handler}
+ * @constructor @struct
+ * @extends {AmpAdXOriginIframeHandler$$module$extensions$amp_ad$0_1$amp_ad_xorigin_iframe_handler}
  */
-AMP.AmpAdApiHandler = class {
+AMP.AmpAdXOriginIframeHandler = class {
+  /**
+   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
+   */
+  constructor(baseInstance) {}
+};
+
+/**
+ * This uses the internal name of the type, because there appears to be no
+ * other way to reference an ES6 type from an extern that is defined in
+ * the app.
+ * @constructor @struct
+ * @extends {AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui}
+ */
+AMP.AmpAdUIHandler = class {
   /**
    * @param {!AMP.BaseElement} baseInstance
-   * @param {!Element} element
-   * @param {function()=} opt_noContentCallback
    */
-  constructor(baseInstance, element, opt_noContentCallback) {}
-}
+  constructor(baseInstance) {}
+};
 
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
@@ -221,3 +519,217 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
+
+AMP.RealTimeConfigManager;
+
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * @enum {string}
+ */
+const RTC_ERROR_ENUM = {};
+
+/** @typedef {{
+      response: (Object|undefined),
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM|undefined)}} */
+var rtcResponseDef;
+
+/**
+ * This symbol is exposed by browserify bundles transformed by
+ * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
+AMP.require;
+
+/**
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(number, boolean):?|function(number):?}
+ */
+var TransitionDef;
+
+///////////////////
+// amp-bind externs
+///////////////////
+
+/**
+ * @typedef {{method: string, args: !Array, scope: number, id: number}}
+ */
+let ToWorkerMessageDef;
+
+/**
+ * @typedef {{method: string, returnValue: *, id: number}}
+ */
+let FromWorkerMessageDef;
+
+/**
+ * Structured cloneable representation of an <amp-bind-macro> element.
+ * @typedef {{id: string, argumentNames: Array<string>, expressionString: string}}
+ */
+let BindMacroDef;
+
+/**
+ * Structured cloneable representation of a binding e.g. <p [text]="foo>.
+ * @typedef {{tagName: string, property: string, expressionString: string}}
+ */
+let BindBindingDef;
+
+/**
+ * Structured cloneable representation of a JS error.
+ * @typedef {{message: string, stack: string}}
+ */
+let BindEvaluatorErrorDef;
+
+/**
+ * Possible types of an amp-bind expression result.
+ * @typedef {(null|boolean|string|number|Array|Object)}
+ */
+let BindExpressionResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateBindings' API.
+ * @typedef {{results: !Object<string, BindExpressionResultDef>, errors: !Object<string, !BindEvaluatorErrorDef>}}
+ */
+let BindEvaluateBindingsResultDef;
+
+/**
+ * Structured cloneable return value for 'bind.evaluateExpression' API.
+ * @typedef {{result: BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
+ */
+let BindEvaluateExpressionResultDef;
+
+/////////////////////////////
+////// Web Anmomation externs
+/////////////////////////////
+/**
+ * @typedef {
+ *   !WebMultiAnimationDef|
+ *   !WebSwitchAnimationDef|
+ *   !WebCompAnimationDef|
+ *   !WebKeyframeAnimationDef
+ * }
+ */
+var WebAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   animations: !Array<!WebAnimationDef>,
+ * }}
+ */
+var WebMultiAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   switch: !Array<!WebAnimationDef>,
+ * }}
+ */
+var WebSwitchAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   animation: string,
+ * }}
+ */
+var WebCompAnimationDef;
+
+
+/**
+ * @mixes WebAnimationSelectorDef
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @mixes WebAnimationConditionalDef
+ * @typedef {{
+ *   keyframes: (string|!WebKeyframesDef),
+ * }}
+ */
+var WebKeyframeAnimationDef;
+
+
+/**
+ * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
+ */
+var WebKeyframesDef;
+
+
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
+ *
+ * @mixin
+ * @typedef {{
+ *   duration: (time|undefined),
+ *   delay: (time|undefined),
+ *   endDelay: (time|undefined),
+ *   iterations: (number|string|undefined),
+ *   iterationStart: (number|undefined),
+ *   easing: (string|undefined),
+ *   direction: (?|undefined),
+ *   fill: (?|undefined),
+ * }}
+ */
+var WebAnimationTimingDef;
+
+
+/**
+ * Indicates an extension to a type that allows specifying vars. Vars are
+ * specified as properties with the name in the format of `--varName`.
+ *
+ * @mixin
+ * @typedef {Object}
+ */
+var WebAnimationVarsDef;
+
+
+/**
+ * Defines media parameters for an animation.
+ *
+ * @mixin
+ * @typedef {{
+ *   media: (string|undefined),
+ *   supports: (string|undefined),
+ * }}
+ */
+var WebAnimationConditionalDef;
+
+
+/**
+ * @typedef {{
+ *   target: (!Element|undefined),
+ *   selector: (string|undefined),
+ *   subtargets: (!Array<!WebAnimationSubtargetDef>|undefined),
+ * }}
+ */
+var WebAnimationSelectorDef;
+
+
+/**
+ * @mixes WebAnimationTimingDef
+ * @mixes WebAnimationVarsDef
+ * @typedef {{
+ *   matcher: (function(!Element, number):boolean|undefined),
+ *   index: (number|undefined),
+ *   selector: (string|undefined),
+ * }}
+ */
+var WebAnimationSubtargetDef;

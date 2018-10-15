@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,6 +38,8 @@ limitations under the License.
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/viz-vega.amp.html">viz-vega.amp.html</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## What is Vega?
 Vega is a visualization grammar, a declarative format for creating and saving
@@ -124,7 +126,7 @@ to learn more and play with samples.
 
 ## Attributes
 
-**src**
+##### src
 
 This attribute can be used to load a Vega specification data file
 from a specified remote URL. The URL must use https scheme.
@@ -134,8 +136,7 @@ as the only child of `<amp-viz-vega>`.
 
 Only either `src` or `<script>` should be specified. Using both will result in error.
 
-
-**use-data-width** and **use-data-height**
+##### use-data-width and use-data-height
 
 To support responsive visualization, by default `<amp-viz-vega>` overrides `width`
 and `height` values defined in the Vega specification data with the actual width

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {Deferred} from '../../../src/utils/promise';
 import {Layout} from '../../../src/layout';
-import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
-import {getService} from '../../../src/service';
+import {dev, user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
+import {waitForBodyPromise} from '../../../src/dom';
 
-/** @const */
-const EXPERIMENT = 'amp-experiment';
+const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
+
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -35,34 +34,33 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      getService(this.win, 'variant', () => Promise.resolve());
-      return;
+    try {
+      const config = this.getConfig_();
+      const results = Object.create(null);
+      const variants = Object.keys(config).map(experimentName => {
+        return allocateVariant(
+            this.getAmpDoc(), experimentName, config[experimentName])
+            .then(variantName => {
+              results[experimentName] = variantName;
+            });
+      });
+
+      /** @private @const {!Promise<!Object<string, ?string>>} */
+      const experimentVariants = Promise.all(variants)
+          .then(() => results)
+          .then(this.addToBody_.bind(this));
+
+      serviceDeferred.resolve(experimentVariants);
+    } catch (e) {
+      // Ensure downstream consumers don't wait for the promise forever.
+      serviceDeferred.resolve(null);
+      throw e;
     }
-
-    const config = this.getConfig_();
-    const results = Object.create(null);
-    const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(
-          this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
-    });
-
-    /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
-        .then(() => results)
-        .then(this.addToBody_.bind(this));
-
-    getService(this.win, 'variant', () => this.experimentVariants_);
   }
 
+  /** @return {!JsonObject} [description] */
   getConfig_() {
-    const children = this.element.children;
+    const {children} = this.element;
     user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
@@ -70,7 +68,8 @@ export class AmpExperiment extends AMP.BaseElement {
         '<amp-experiment> should contain exactly one ' +
         '<script type="application/json"> child.');
 
-    return JSON.parse(children[0].textContent);
+    return /** @type {!JsonObject} */ (
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -86,7 +85,8 @@ export class AmpExperiment extends AMP.BaseElement {
     return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+          doc.body.setAttribute(ATTR_PREFIX + name,
+              dev().assertString(experiments[name]));
         }
       }
       return experiments;
@@ -94,4 +94,15 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-experiment', AmpExperiment);
+/**
+ * Create the service promise at load time to prevent race between extensions
+ */
+
+/** singleton */
+let serviceDeferred = null;
+
+AMP.extension(TAG, '0.1', AMP => {
+  serviceDeferred = new Deferred();
+  AMP.registerElement(TAG, AmpExperiment);
+  AMP.registerServiceForDoc('variant', () => serviceDeferred.promise);
+});

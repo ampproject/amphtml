@@ -19,7 +19,7 @@ amp-live-list {
 
 amp-live-list > [update] {
   position: relative;
-  z-index: 1000 !important;
+  z-index: 1000;
 }
 
 /* Reset the `display: none` set in amp.css */

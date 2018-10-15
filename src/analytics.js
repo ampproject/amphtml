@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-import {
-  getElementService,
-  getElementServiceIfAvailable,
-} from './element-service';
-
+import {Services} from './services';
 
 /**
- * @param {!Window} window
- * @return {!Promise<!../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
+ * Helper method to trigger analytics event if amp-analytics is available.
+ * TODO: Do not expose this function
+ * @param {!Element} target
+ * @param {string} eventType
+ * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  */
-export function analyticsFor(window) {
-  return (/** @type {!Promise<
-            !../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementService(
-                window, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
-
-/**
- * @param {!Window} window
- * @return {!Promise<?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService>}
- */
-export function analyticsForOrNull(window) {
-  return (/** @type {!Promise<
-            ?../extensions/amp-analytics/0.1/instrumentation.InstrumentationService
-          >} */ (getElementServiceIfAvailable(
-                window, 'amp-analytics-instrumentation', 'amp-analytics')));
-};
+export function triggerAnalyticsEvent(target, eventType, opt_vars) {
+  Services.analyticsForDocOrNull(target).then(analytics => {
+    if (!analytics) {
+      return;
+    }
+    analytics.triggerEventForTarget(target, eventType, opt_vars);
+  });
+}

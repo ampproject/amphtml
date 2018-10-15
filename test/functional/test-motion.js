@@ -15,7 +15,6 @@
  */
 
 import {calcVelocity, continueMotion} from '../../src/motion';
-import * as sinon from 'sinon';
 
 
 describe('Motion calcVelocity', () => {
@@ -62,7 +61,7 @@ describe('Motion continueMotion', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,32 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function aduptech(global, data) {
+  const elementId = 'aduptech';
+
   validateData(data, ['placementkey'], ['query', 'mincpc', 'adtest']);
 
   // add id attriubte to given container (required)
-  global.document.getElementById('c').setAttribute('id', 'aduptech');
+  global.document.getElementById('c').setAttribute('id', elementId);
 
-  // load aduptech js api and embed responsive iframe
+  // load aduptech js api
   loadScript(global, 'https://s.d.adup-tech.com/jsapi', () => {
+
+    // force responsive ads for amp
     data.responsive = true;
-    window.uAd.embed('aduptech', data);
+
+    // ads callback => render start
+    //
+    // NOTE: Not using "data.onAds = global.context.renderStart;"
+    //       because the "onAds()" callback returns our API object
+    //       as first parameter which will cause errors
+    data.onAds = () => {
+      global.context.renderStart();
+    };
+
+    // no ads callback => noContentAvailable
+    data.onNoAds = global.context.noContentAvailable;
+
+    // embed iframe
+    global.uAd.embed(elementId, data);
   });
 }

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {parseUrl, resolveRelativeUrl} from '../src/url';
+import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 
 /**
  * @typedef {{
+ *   hidden: (boolean|undefined),
  *   historyOff: (boolean|undefined),
  *   localStorageOff: (boolean|undefined),
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
+ *   readyState: (boolean|undefined),
+ *   top: (FakeWindowSpec|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -38,11 +41,42 @@ export class FakeWindow {
 
     const spec = opt_spec || {};
 
+    /**
+     * This value is reflected on this.document.readyState.
+     * @type {string}
+     */
+    this.readyState = spec.readyState || 'complete';
+
     // Passthrough.
     /** @const */
     this.Object = window.Object;
     /** @const */
     this.HTMLElement = window.HTMLElement;
+    /** @const */
+    this.HTMLFormElement = window.HTMLFormElement;
+    /** @const */
+    this.Element = window.Element;
+    /** @const */
+    this.Node = window.Node;
+    /** @const */
+    this.EventTarget = window.EventTarget;
+    /** @const */
+    this.DOMTokenList = window.DOMTokenList;
+    /** @const */
+    this.Math = window.Math;
+    /** @const */
+    this.Promise = window.Promise;
+
+    /** @const */
+    this.crypto = window.crypto || window.msCrypto;
+
+    // Parent Window points to itself if spec.parent was not passed.
+    /** @const @type {!Window} */
+    this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
+
+    // Top Window points to parent if spec.top was not passed.
+    /** @const */
+    this.top = spec.top ? new FakeWindow(spec.top) : this.parent;
 
     // Events.
     EventListeners.intercept(this);
@@ -53,9 +87,72 @@ export class FakeWindow {
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
     });
+    Object.defineProperty(this.document, 'readyState', {
+      get: () => this.readyState,
+    });
+    if (!this.document.fonts) {
+      this.document.fonts = {};
+    }
+    Object.defineProperty(this.document.fonts, 'ready', {
+      get: () => Promise.resolve(),
+    });
+    let fontStatus = 'loaded';
+    Object.defineProperty(this.document.fonts, 'status', {
+      get: () => fontStatus,
+      set: val => fontStatus = val,
+    });
+
     EventListeners.intercept(this.document);
     EventListeners.intercept(this.document.documentElement);
     EventListeners.intercept(this.document.body);
+
+    // Document.hidden property.
+    /** @private {boolean} */
+    this.documentHidden_ = spec.hidden !== undefined ? spec.hidden : false;
+    Object.defineProperty(this.document, 'hidden', {
+      get: () => this.documentHidden_,
+      set: value => {
+        this.documentHidden_ = value;
+        this.document.eventListeners.fire({type: 'visibilitychange'});
+      },
+    });
+
+    /** @private {!Array<string>} */
+    this.cookie_ = [];
+    Object.defineProperty(this.document, 'cookie', {
+      get: () => {
+        const cookie = [];
+        for (let i = 0; i < this.cookie_.length; i += 2) {
+          cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
+        }
+        return cookie.join(';');
+      },
+      set: value => {
+        const cookie = value.match(/^([^=]*)=([^;]*)/);
+        const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
+        const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
+        let i = 0;
+        for (; i < this.cookie_.length; i += 2) {
+          if (this.cookie_[i] == cookie[1]) {
+            break;
+          }
+        }
+        if (Date.now() >= expires) {
+          this.cookie_.splice(i, 2);
+        } else {
+          this.cookie_.splice(i, 2, cookie[1], cookie[2]);
+        }
+      },
+    });
+
+    // Create element to enhance test elements.
+    const nativeDocumentCreate = this.document.createElement;
+    /** @this {HTMLDocument} */
+    this.document.createElement = function() {
+      const result = nativeDocumentCreate.apply(this, arguments);
+      EventListeners.intercept(result);
+      return result;
+    };
 
     /** @const {!FakeCustomElements} */
     this.customElements = new FakeCustomElements(this);
@@ -76,46 +173,39 @@ export class FakeWindow {
 
     // Navigator.
     /** @const {!Navigator} */
-    this.navigator = freeze({
-      userAgent: spec.navigator && spec.navigator.userAgent ||
+    this.navigator = {
+      userAgent: (spec.navigator && spec.navigator.userAgent) ||
           window.navigator.userAgent,
-    });
+    };
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
     this.localStorage = spec.localStorageOff ?
-        undefined : new FakeStorage(this);
+      undefined : new FakeStorage(this);
 
     // Timers and animation frames.
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
-    this.setTimeout = window.setTimeout;
+    /** @const */
+    this.Date = window.Date;
 
-    /**
-     * @param {number} id
-     * @const
-     */
-    this.clearTimeout = window.clearTimeout;
+    /** polyfill setTimeout. */
+    this.setTimeout = function() {
+      return window.setTimeout.apply(window, arguments);
+    };
 
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
-    this.setInterval = window.setInterval;
+    /** polyfill clearTimeout. */
+    this.clearTimeout = function() {
+      return window.clearTimeout.apply(window, arguments);
+    };
 
-    /**
-     * @param {number} id
-     * @const
-     */
-    this.clearInterval = window.clearInterval;
+    /** polyfill setInterval. */
+    this.setInterval = function() {
+      return window.setInterval.apply(window, arguments);
+    };
+
+    /** polyfill clearInterval. */
+    this.clearInterval = function() {
+      return window.clearInterval.apply(window, arguments);
+    };
 
     let raf = window.requestAnimationFrame
         || window.webkitRequestAnimationFrame;
@@ -133,18 +223,10 @@ export class FakeWindow {
     this.requestAnimationFrame = raf;
   }
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill addEventListener. */
   addEventListener() {}
 
-  /**
-   * @param {string} type
-   * @param {function(!Event)} handler
-   * @param {(boolean|!Object)=} captureOrOpts
-   */
+  /** polyfill removeEventListener. */
   removeEventListener() {}
 }
 
@@ -171,14 +253,25 @@ class EventListeners {
    */
   static intercept(target) {
     target.eventListeners = new EventListeners();
+    const {
+      addEventListener: originalAdd,
+      removeEventListener: originalRemove,
+    } = target;
     target.addEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
+      if (originalAdd) {
+        originalAdd.apply(target, arguments);
+      }
     };
     target.removeEventListener = function(type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
+      if (originalRemove) {
+        originalRemove.apply(target, arguments);
+      }
     };
   }
 
+  /** Create empty instance. */
   constructor() {
     /** @const {!Array<!EventListener>} */
     this.listeners = [];
@@ -195,7 +288,7 @@ class EventListeners {
       type,
       handler,
       capture: typeof captureOrOpts == 'boolean' ? captureOrOpts :
-          typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
+        typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
           false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
@@ -256,9 +349,17 @@ class EventListeners {
 
 
 /**
+ * @param {!EventTarget} target
+ */
+export function interceptEventListeners(target) {
+  EventListeners.intercept(target);
+}
+
+
+/**
  * @extends {!Location}
  */
-class FakeLocation {
+export class FakeLocation {
 
   /**
    * @param {string} href
@@ -277,7 +378,7 @@ class FakeLocation {
     this.changes = [];
 
     /** @private {!Location} */
-    this.url_ = parseUrl(href, true);
+    this.url_ = parseUrlDeprecated(href, true);
 
     // href
     Object.defineProperty(this, 'href', {
@@ -286,7 +387,7 @@ class FakeLocation {
     });
 
     const properties = ['protocol', 'host', 'hostname', 'port', 'pathname',
-        'search', 'hash', 'origin'];
+      'search', 'hash', 'origin'];
     properties.forEach(property => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
@@ -304,7 +405,7 @@ class FakeLocation {
    */
   set_(href) {
     const oldHash = this.url_.hash;
-    this.url_ = parseUrl(resolveRelativeUrl(href, this.url_));
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
     if (this.url_.hash != oldHash) {
       this.win.eventListeners.fire({type: 'hashchange'});
     }
@@ -314,8 +415,8 @@ class FakeLocation {
    * @param {!Object} args
    */
   change_(args) {
-    const change = parseUrl(this.url_.href);
-    Object.assign(change, args);
+    const change = parseUrlDeprecated(this.url_.href);
+    Object.assign({}, change, args);
     this.changes.push(change);
   }
 
@@ -348,6 +449,15 @@ class FakeLocation {
    */
   reload(forceReload) {
     this.change_({reload: true, forceReload});
+  }
+
+  /**
+   * Resets the URL without firing any events or triggering a history
+   * entry.
+   * @param {string} href
+   */
+  resetHref(href) {
+    this.url_ = parseUrlDeprecated(resolveRelativeUrl(href, this.url_));
   }
 }
 
@@ -402,6 +512,10 @@ export class FakeHistory {
       throw new Error('can\'t go forward');
     }
     this.index = newIndex;
+    // Make sure to restore the location href before firing popstate to match
+    // real browsers behaviors.
+    this.win.location.resetHref(this.stack[this.index].url);
+    this.win.eventListeners.fire({type: 'popstate'});
   }
 
   /**
@@ -414,7 +528,7 @@ export class FakeHistory {
     this.index++;
     if (this.index < this.stack.length) {
       // Remove tail.
-      this.stack.splice(this.index, thius.stack.length - this.index);
+      this.stack.splice(this.index, this.stack.length - this.index);
     }
     this.stack[this.index] = {
       state: state ? freeze(state) : null,
