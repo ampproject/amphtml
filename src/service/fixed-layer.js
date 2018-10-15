@@ -138,7 +138,7 @@ export class FixedLayer {
     this.sortInDomOrder_();
 
     if (this.elements_.length > 0) {
-      this.initMutationObserver_();
+      this.observeHiddenMutations_();
     }
 
     const platform = Services.platformFor(this.ampdoc.win);
@@ -152,6 +152,28 @@ export class FixedLayer {
   }
 
   /**
+   * Begin observing changes to the hidden attribute.
+   */
+  observeHiddenMutations_() {
+    const mo = this.initMutationObserver_();
+    mo.observe(this.ampdoc.getRootNode(), {
+      attributes: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * Stop observing changes to the hidden attribute. Does not destroy the
+   * mutation observer.
+   */
+  unobserveHiddenMutations_() {
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.disconnect();
+    }
+  }
+
+  /**
    * @return {?MutationObserver}
    */
   initMutationObserver_() {
@@ -159,8 +181,7 @@ export class FixedLayer {
       return this.mutationObserver_;
     }
 
-    const {ampdoc} = this;
-    const mo = new ampdoc.win.MutationObserver(mutations => {
+    const mo = new this.ampdoc.win.MutationObserver(mutations => {
       if (this.updatePass_.isPending()) {
         return;
       }
@@ -172,10 +193,6 @@ export class FixedLayer {
           return;
         }
       }
-    });
-    mo.observe(ampdoc.getRootNode(), {
-      attributes: true,
-      subtree: true,
     });
 
     return this.mutationObserver_ = mo;
@@ -252,7 +269,7 @@ export class FixedLayer {
 
     // If this is the first element, we need to start the mutation observer.
     // This'll only be created once.
-    this.initMutationObserver_();
+    this.observeHiddenMutations_();
 
     return this.update();
   }
@@ -272,6 +289,9 @@ export class FixedLayer {
           }
         }
       });
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
     }
   }
 
