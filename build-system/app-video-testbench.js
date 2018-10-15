@@ -60,7 +60,59 @@ const availableExtensions = [
 const clientScript = `
 var urlParams = new URLSearchParams(window.location.search);
 
+function logAnalyticsEvent(url) {
+  var urlParams = new URLSearchParams(url.split('?', 2)[1]);
+  appendAnalyticsRow(urlParams);
+}
+
+function appendAnalyticsRow(urlParams) {
+  var container = document.querySelector('.analytics-events-container');
+  var table = document.getElementById('analytics-events');
+  table.appendChild(createTableRow([
+    getHoursMinutesSeconds(),
+    urlParams.get('autoplay'),
+    urlParams.get('type'),
+    urlParams.get('time'),
+    urlParams.get('total'),
+    urlParams.get('duration'),
+  ]));
+  container./*OK*/scrollTop = container./*OK*/scrollHeight;
+}
+
+function getHoursMinutesSeconds() {
+  var date = new Date();
+  return date.getHours() + ':' +
+      date.getMinutes() + ':' +
+      date.getSeconds();
+}
+
+function createTableRow(cellsContent) {
+  var row = document.createElement('tr');
+  for (var i = 0; i < cellsContent.length; i++) {
+    row.appendChild(createTableCell(cellsContent[i]));
+  }
+  return row;
+}
+
+function createTableCell(contents) {
+  var cell = document.createElement('td');
+  cell./*OK*/innerText = contents;
+  return cell;
+}
+
+function monkeyPatchXhr(xhrPrototype) {
+  var defaultOpen = xhrPrototype.open;
+  xhrPrototype.open = function(unusedMethod, url) {
+    if ((new RegExp('^https://foo\.com/')).test(url)) {
+      logAnalyticsEvent(url);
+    }
+    return defaultOpen.apply(this, arguments);
+  };
+}
+
 function main() {
+  monkeyPatchXhr(XMLHttpRequest.prototype);
+
   var dropdown = document.querySelector('select');
   dropdown.onchange = function() {
     replaceExtension(urlParams, dropdown.value);
@@ -101,9 +153,7 @@ function renderExtensionDropdown(doc, opt_extension) {
   const select = doc.createElement('select');
 
   const usedExtension =
-      opt_extension ?
-        opt_extension :
-        getSubstitutable(doc).tagName.toLowerCase();
+      opt_extension || getSubstitutable(doc).tagName.toLowerCase();
 
   availableExtensions.forEach(extension => {
     const option = doc.createElement('option');
