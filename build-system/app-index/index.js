@@ -21,7 +21,7 @@ const fs = BBPromise.promisifyAll(require('fs'));
 
 
 // TODO(alanorozco): Use JSX once we're ready.
-const templateFile = 'build-system/app-index/template.html';
+const indexFile = 'build-system/app-index/dist/index.html';
 
 
 function renderFileLink(base, location) {
@@ -30,7 +30,7 @@ function renderFileLink(base, location) {
 
 
 function renderIndex(req, res) {
-  Promise.all([fs.readdirAsync('./examples/'), fs.readFileAsync(templateFile)])
+  Promise.all([fs.readdirAsync('./examples/'), fs.readFileAsync(indexFile)])
       .then(result => {
         const files = result[0];
         const template = result[1].toString();
