@@ -17,8 +17,20 @@
 import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
 import {Services} from '../../../src/services';
+import {iterateCursor} from '../../../src/dom';
+import {user} from '../../../src/log';
+
+const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
 
 export class TextMask {
+  /**
+   * Detect if an element has input mask behavior attached.
+   * @param {!Element} element
+   */
+  static isMasked(element) {
+    return element[ELEMENT_MASK_PROPERTY];
+  }
+
   /**
    *
    * @param {!Element} element
@@ -29,6 +41,9 @@ export class TextMask {
 
     /** @private @const */
     this.document_ = element.ownerDocument;
+
+    /** @private {?Element} */
+    this.hiddenInput_ = null;
 
     /** @private @const */
     this.outputMode_ = element.getAttribute('mask-output') || OutputMode.RAW;
@@ -44,8 +59,7 @@ export class TextMask {
       formSubmitService.beforeSubmit(e => this.handleBeforeSubmit_(e.form));
     });
 
-    /** @private {?Element} */
-    this.hiddenInput_ = null;
+    element[ELEMENT_MASK_PROPERTY] = true;
   }
 
   /**
@@ -53,24 +67,40 @@ export class TextMask {
    * @param {!HTMLFormElement} form
    */
   handleBeforeSubmit_(form) {
-    if (this.outputMode_ == OutputMode.ALPHANUMERIC) {
-      if (!this.hiddenInput_) {
-        const hidden = this.document_.createElement('input');
-        hidden.type = 'hidden';
-        const name = this.element_.name || this.element_.id;
-        hidden.name = `${name}-unmasked`; // TODO(cvializ): detect collisions
-        form.appendChild(hidden);
-        this.hiddenInput_ = hidden;
-      }
-      this.hiddenInput_.value = this.outputMode_ == OutputMode.ALPHANUMERIC ?
-        this.controller_.getUnmaskedValue() : this.controller_.getValue();
+    if (this.outputMode_ != OutputMode.ALPHANUMERIC) {
+      return;
     }
+
+    const name = this.element_.name || this.element_.id;
+    if (!name) {
+      return;
+    }
+
+    if (!this.hiddenInput_) {
+      const hiddenName = `${name}-unmasked`;
+      iterateCursor(this.element_.form.elements, element => {
+        const {name} = element;
+        user().assert(name != hiddenName,
+            'Illegal input name, %s found: %s', name, element);
+      });
+
+      const hidden = this.document_.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = hiddenName;
+      form.appendChild(hidden);
+
+      this.hiddenInput_ = hidden;
+    }
+
+    this.hiddenInput_.value = this.outputMode_ == OutputMode.ALPHANUMERIC ?
+      this.controller_.getUnmaskedValue() : this.controller_.getValue();
   }
 
   /**
    * Cleanup resources
    */
   dispose() {
+    delete this.element_[ELEMENT_MASK_PROPERTY];
     this.controller_.dispose();
   }
 }

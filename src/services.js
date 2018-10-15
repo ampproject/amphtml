@@ -265,14 +265,15 @@ export class Services {
     return getService(win, 'input');
   }
 
-  /**
+  /**s
    * Returns a promise for the Inputmask service.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>}
+   * @return {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>}
    */
-  static inputmaskServiceForDoc(elementOrAmpDoc) {
-    return (/** @type {!Promise<!../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>} */ (
-      getElementServiceForDoc(elementOrAmpDoc, 'inputmask', 'amp-inputmask')));
+  static inputmaskServiceForDocOrNull(elementOrAmpDoc) {
+    return (/** @type {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>} */ (
+      getElementServiceIfAvailableForDoc(
+          elementOrAmpDoc, 'inputmask', 'amp-inputmask')));
   }
 
   /**

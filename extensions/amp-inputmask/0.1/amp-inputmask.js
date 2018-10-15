@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {TextMask} from './text-mask';
 import {isExperimentOn} from '../../../src/experiments';
+import {iterateCursor} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 const SERVICE = 'inputmask';
@@ -26,10 +29,18 @@ export class AmpInputmaskService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    user().assert(
+        isExperimentOn(this.ampdoc.win, 'amp-inputmask'),
+        'Experiment amp-inputmask is disabled');
+
     this.ampdoc = ampdoc;
 
     /** @private {!Array<!TextMask>} */
     this.masks_ = [];
+
+    /** @const */
+    this.domUpdateUnlistener_ = listen(
+        this.ampdoc.getRootNode(), AmpEvents.DOM_UPDATE, () => this.install());
   }
 
   /**
@@ -37,22 +48,20 @@ export class AmpInputmaskService {
    */
   install() {
     const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
-    if (maskElements.length) {
-      user().assert(
-          isExperimentOn(this.ampdoc.win, 'amp-inputmask'),
-          'Experiment amp-inputmask is disabled');
-    }
-
-    for (let i = 0; i < maskElements.length; i++) {
-      const tm = new TextMask(maskElements[i]);
+    iterateCursor(maskElements, element => {
+      if (TextMask.isMasked(element)) {
+        return;
+      }
+      const tm = new TextMask(element);
       this.masks_.push(tm);
-    }
+    });
   }
 
   /**
    * Remove the inpumask service and controllers.
    */
   uninstall() {
+    this.domUpdateUnlistener_();
     this.masks_.forEach(m => m.dispose());
     this.masks_ = [];
   }

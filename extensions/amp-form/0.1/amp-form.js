@@ -372,8 +372,10 @@ export class AmpForm {
 
   /** @private */
   installInputMasking_() {
-    Services.inputmaskServiceForDoc(this.form_).then(inputmaskService => {
-      inputmaskService.install();
+    Services.inputmaskServiceForDocOrNull(this.form_).then(inputmaskService => {
+      if (inputmaskService) {
+        inputmaskService.install();
+      }
     });
   }
 
