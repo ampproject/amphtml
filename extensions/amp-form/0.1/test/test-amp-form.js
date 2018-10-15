@@ -116,6 +116,14 @@ describes.repeated('', {
     function getVerificationForm() {
       const form = getForm();
       form.setAttribute('verify-xhr', '');
+
+      const noVerifyInput = createElement('input');
+      noVerifyInput.id = 'noVerify';
+      noVerifyInput.setAttribute('name', 'noVerify');
+      noVerifyInput.setAttribute('type', 'text');
+      noVerifyInput.setAttribute('no-verify', '');
+      form.appendChild(noVerifyInput); // This one is not required
+
       return form;
     }
 
@@ -615,6 +623,41 @@ describes.repeated('', {
         }).then(() => {
           expect(input.validity.customError).to.be.true;
           expect(input.validationMessage).to.equal('Second request error');
+        });
+      });
+    });
+
+    it('should not send verifying elements with a no-verify attribute', () => {
+      const formPromise = getAmpForm(getVerificationForm());
+      const fetchRejectPromise = Promise.reject({
+        response: {
+          status: 400,
+          json() {
+            return Promise.resolve({
+              verifyErrors: [{
+                name: 'name',
+                message: 'This name is just wrong.',
+              }],
+            });
+          },
+        },
+      });
+
+      return formPromise.then(ampForm => {
+        const fetchStub =
+            sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
+
+        const form = ampForm.form_;
+        const input = form.name;
+        form.name.value = 'Frank';
+        const noVerifyInput = form.noVerify;
+        noVerifyInput.value = 'do not send';
+
+        return ampForm.verifier_.onCommit().then(() => {
+          expect(fromIterator(fetchStub.getCall(0).args[1].body.entries())).to
+              .deep.equal([['name', 'Frank'], ['__amp_form_verify', 'true']]);
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('This name is just wrong.');
         });
       });
     });

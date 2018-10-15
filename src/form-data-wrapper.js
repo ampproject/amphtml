@@ -72,6 +72,8 @@ export class FormDataWrapper {
    *
    * For more details on this, see http://mdn.io/FormData/append.
    *
+   * TODO(cvializ): Update file support
+   *
    * @param {string} name The name of the field whose data is contained in
    *     `value`.
    * @param {string} value The field's value.
@@ -84,6 +86,25 @@ export class FormDataWrapper {
     }
 
     return this.formData_.append(name, value);
+  }
+
+  /**
+   * Remove the given value from the FormData.
+   * This function is unsupported in IE.
+
+   * For more details on this, see http://mdn.io/FormData/delete.
+   *
+   * @param {string} name The name of the field to remove from the FormData.
+   */
+  delete(name) {
+    if (this.formData_.delete) {
+      this.formData_.delete(name);
+      return;
+    }
+
+    if (!this.fieldValues_['entries']) {
+      delete this.fieldValues_[name];
+    }
   }
 
   /**
