@@ -2,8 +2,12 @@
   <form id="proxy-form">
     <label for="proxy-input">
       <span>Load URL by Proxy</span>
-      <input type="url" class="text-input" id="proxy-input"
-        placeholder="https://">
+      <!-- Following regex is gnarly, but works. -->
+      <!-- Taken from https://justmarkup.com/log/2012/12/input-url/-->
+      <input type="text" class="text-input" id="proxy-input"
+          required aria-required="true"
+          placeholder="https://"
+          pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$">
     </label>
     <div class="form-info">
       <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
@@ -14,33 +18,19 @@
 </div>
 <script>
   // TODO(alanorozco): Write this in ES2015 to be transpiled.
-  function getLocation(href) {
-    var l = document.createElement("a");
-    l.href = href;
-    return l;
-  }
 
-  function attachProxyFormListeners() {
+  function attachListeners() {
     var form = document.getElementById('proxy-form');
     var input = document.getElementById('proxy-input');
 
-    form.addEventListener('submit', function (e) {
-      var location = getLocation(input.value);
-      var suffix =
-        location.host +
-        location.pathname +
-        location.search +
-        location.hash;
+    form.addEventListener('submit', function(e) {
+      var suffix = input.value.replace(/^http(s?):\/\//i, '');
       var redirectUrl = '/proxy/s/' + suffix;
 
       e.preventDefault();
 
       window.location = redirectUrl;
     });
-  }
-
-  function attachListeners() {
-    attachProxyFormListeners();
   }
 
   attachListeners();
