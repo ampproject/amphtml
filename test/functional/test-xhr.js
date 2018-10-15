@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
 import {assertSuccess} from '../../src/utils/xhr-utils';
+import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
@@ -137,7 +137,7 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should allow FormData as body', () => {
-          const formData = new FormDataWrapper();
+          const formData = createFormDataWrapper();
           sandbox.stub(JSON, 'stringify');
           formData.append('name', 'John Miller');
           formData.append('age', 56);
@@ -796,7 +796,7 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should post correct structurally-cloneable FormData request', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      const formData = new FormDataWrapper();
+      const formData = createFormDataWrapper();
       formData.append('a', 42);
       formData.append('b', '24');
       formData.append('b', true);
