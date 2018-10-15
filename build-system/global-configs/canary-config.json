@@ -23,7 +23,6 @@
   "amp-apester-media": 1,
   "amp-ima-video": 1,
   "amp-playbuzz": 1,
-  "amp-story-navigation-performance": 1,
   "chunked-amp": 1,
   "pump-early-frame": 1,
   "amp-auto-ads": 1,
@@ -44,12 +43,10 @@
   "font-display-swap": 1,
   "amp-date-picker": 1,
   "linker-meta-opt-in": 1,
-  "amp-carousel-scroll-snap": 1,
   "user-error-reporting": 1,
   "no-initial-intersection": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "doubleclickIdleExp": 0.01,
   "inabox-rov": 1,
-  "layers": 0
+  "layers": 1
 }

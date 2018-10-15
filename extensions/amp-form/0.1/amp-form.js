@@ -19,10 +19,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
+  FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
@@ -37,6 +37,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {
@@ -157,7 +158,7 @@ export class AmpForm {
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
 
-    /** @const @private {?string} */
+    /** @private {?string} */
     this.xhrAction_ = this.getXhrUrl_('action-xhr');
 
     /** @const @private {?string} */
@@ -232,21 +233,34 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
+   * @param {!Array<string>=} opt_fieldBlacklist
    * @return {!FetchRequestDef}
    */
-  requestForFormFetch(url, method, opt_extraFields) {
+  requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
+      if (opt_fieldBlacklist) {
+        opt_fieldBlacklist.forEach(name => {
+          delete values[name];
+        });
+      }
+
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
       }
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = new FormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.form_);
+      if (opt_fieldBlacklist) {
+        opt_fieldBlacklist.forEach(name => {
+          body.delete(name);
+        });
+      }
+
       for (const key in opt_extraFields) {
         body.append(key, opt_extraFields[key]);
       }
@@ -262,6 +276,13 @@ export class AmpForm {
     };
   }
 
+  /**
+   * Setter to change cached action-xhr.
+   * @param {string} url
+   */
+  setXhrAction(url) {
+    this.xhrAction_ = url;
+  }
 
   /**
    * Handle actions that require at least high trust.
@@ -451,7 +472,11 @@ export class AmpForm {
    */
   submit_(trust) {
     try {
-      this.formSubmitService_.fire(this.form_);
+      const event = {
+        form: this.form_,
+        actionXhrMutator: this.setXhrAction.bind(this),
+      };
+      this.formSubmitService_.fire(event);
     } catch (e) {
       dev().error(TAG, `Form submit service failed: ${e}`);
     }
@@ -635,8 +660,13 @@ export class AmpForm {
    * @private
    */
   doVerifyXhr_() {
+    const noVerifyFields = toArray(this.form_.querySelectorAll(
+        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`));
+    const blacklist = noVerifyFields.map(field => field.name || field.id);
+
     return this.doXhr_(dev().assertString(this.xhrVerify_), this.method_,
-        {[FORM_VERIFY_PARAM]: true});
+        /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
+        /**opt_fieldBlacklist*/ blacklist);
   }
 
   /**
@@ -644,12 +674,14 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
+   * @param {!Array<string>=} opt_fieldBlacklist
    * @return {!Promise<!Response>}
    * @private
    */
-  doXhr_(url, method, opt_extraFields) {
+  doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const request = this.requestForFormFetch(url, method, opt_extraFields);
+    const request = this.requestForFormFetch(
+        url, method, opt_extraFields, opt_fieldBlacklist);
     return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
   }
 

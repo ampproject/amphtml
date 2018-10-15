@@ -589,7 +589,7 @@ const forbiddenTerms = {
     ],
   },
   'new FormData\\(': {
-    message: 'Use new FormDataWrapper() instead and call ' +
+    message: 'Use createFormDataWrapper() instead and call ' +
         'formDataWrapper.getFormData() to get the native FormData object.',
     whitelist: [
       'src/form-data-wrapper.js',
@@ -819,6 +819,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -848,6 +849,7 @@ const forbiddenTermsSrcInclusive = {
       'tools/errortracker/errortracker.go',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/app-video-testbench.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'gulpfile.js',

@@ -23,11 +23,14 @@ import {
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
 import {Services} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
+import {
+  createFormDataWrapper,
+  isFormDataWrapper,
+} from '../../../../src/form-data-wrapper';
 import {fromIterator} from '../../../../src/utils/array';
 import {
   setCheckValiditySupportedForTesting,
@@ -116,6 +119,14 @@ describes.repeated('', {
     function getVerificationForm() {
       const form = getForm();
       form.setAttribute('verify-xhr', '');
+
+      const noVerifyInput = createElement('input');
+      noVerifyInput.id = 'noVerify';
+      noVerifyInput.setAttribute('name', 'noVerify');
+      noVerifyInput.setAttribute('type', 'text');
+      noVerifyInput.setAttribute('no-verify', '');
+      form.appendChild(noVerifyInput); // This one is not required
+
       return form;
     }
 
@@ -240,7 +251,10 @@ describes.repeated('', {
 
         ampForm.handleSubmitEvent_(event);
         expect(fireStub.calledOnce).to.be.true;
-        return expect(fireStub).calledWith(form);
+        return expect(fireStub).calledWith({
+          form,
+          actionXhrMutator: sinon.match.func,
+        });
       });
     });
 
@@ -616,6 +630,41 @@ describes.repeated('', {
       });
     });
 
+    it('should not send verifying elements with a no-verify attribute', () => {
+      const formPromise = getAmpForm(getVerificationForm());
+      const fetchRejectPromise = Promise.reject({
+        response: {
+          status: 400,
+          json() {
+            return Promise.resolve({
+              verifyErrors: [{
+                name: 'name',
+                message: 'This name is just wrong.',
+              }],
+            });
+          },
+        },
+      });
+
+      return formPromise.then(ampForm => {
+        const fetchStub =
+            sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
+
+        const form = ampForm.form_;
+        const input = form.name;
+        form.name.value = 'Frank';
+        const noVerifyInput = form.noVerify;
+        noVerifyInput.value = 'do not send';
+
+        return ampForm.verifier_.onCommit().then(() => {
+          expect(fromIterator(fetchStub.getCall(0).args[1].body.entries())).to
+              .deep.equal([['name', 'Frank'], ['__amp_form_verify', 'true']]);
+          expect(input.validity.customError).to.be.true;
+          expect(input.validationMessage).to.equal('This name is just wrong.');
+        });
+      });
+    });
+
     it('should allow rendering responses through inlined templates', () => {
       return getAmpForm(getForm(/*button1*/ true)).then(ampForm => {
         const form = ampForm.form_;
@@ -811,9 +860,9 @@ describes.repeated('', {
 
           const xhrCall = ampForm.xhr_.fetch.getCall(0);
           const config = xhrCall.args[1];
-          expect(config.body).to.be.an.instanceof(FormDataWrapper);
+          expect(isFormDataWrapper(config.body)).to.be.true;
           const entriesInForm =
-              fromIterator(new FormDataWrapper(getForm()).entries());
+              fromIterator(createFormDataWrapper(getForm()).entries());
           expect(fromIterator(config.body.entries())).to.have.deep.members(
               entriesInForm);
           expect(config.method).to.equal('POST');

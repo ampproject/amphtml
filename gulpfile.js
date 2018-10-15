@@ -738,7 +738,16 @@ function buildExtensionJs(path, name, version, options) {
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: options.noWrapper ? ''
       : wrappers.extension(name, options.loadPriority),
-  }));
+  })).then(() => {
+    // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
+    if (name === 'amp-script') {
+      // TODO(choumx): Compile this when worker-dom externs are available.
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.js`);
+      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
+          `dist/v0/amp-script-worker-${version}.max.js`);
+    }
+  });
 }
 
 /**
@@ -1124,6 +1133,19 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   if (bundleFiles) {
     const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
     fs.writeFileSync(destFilePath, newSource, 'utf8');
+  } else if (srcFilename == 'amp-date-picker.js') {
+    // For amp-date-picker, we inject the react-dates bundle after compile
+    // to avoid CC from messing with browserify's module boilerplate.
+    const file = fs.readFileSync(destFilePath, 'utf8');
+    const firstLineBreak = file.indexOf('\n');
+    const wrapperOpen = file.substr(0, firstLineBreak + 1);
+    const reactDates = fs.readFileSync(
+        'third_party/react-dates/bundle.js', 'utf8');
+    // Inject the bundle inside the standard AMP wrapper (after the first line).
+    const newSource = [
+      wrapperOpen, reactDates, file.substr(firstLineBreak + 1),
+    ].join('\n');
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
 }
 
@@ -1189,16 +1211,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const startTime = Date.now();
   let bundler = browserify(entryPoint, {debug: true})
-      .transform(babelify, {
-        compact: false,
-        presets: [
-          ['env', {
-            targets: {
-              browsers: ['last 2 versions', 'safari >= 9'],
-            },
-          }],
-        ],
-      })
+      .transform(babelify)
       .once('transform', () => {
         endBuildStep('Transformed', srcFilename, startTime);
       });
@@ -1224,8 +1237,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const destFilename = options.toName || srcFilename;
   /**
-   * Rebundle-javascript
-   *
    * @param {boolean} failOnError
    * @return {Promise}
    */

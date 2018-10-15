@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag} from './dom';
+import {
+  ancestorElementsByTag,
+  iterateCursor,
+} from './dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -58,7 +61,16 @@ export function getFormAsObject(form) {
     if (data[input.name] === undefined) {
       data[input.name] = [];
     }
-    data[input.name].push(input.value);
+
+    if (input.multiple) {
+      iterateCursor(input.options, option => {
+        if (option.selected) {
+          data[input.name].push(option.value);
+        }
+      });
+    } else {
+      data[input.name].push(input.value);
+    }
   }
 
   return data;
