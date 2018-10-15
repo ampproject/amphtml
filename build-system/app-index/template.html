@@ -43,7 +43,7 @@
     display: block;
     flex: 1;
   }
-  .examples-bottom {
+  .file-list-container {
     background: #f8f8f8;
   }
   h3 {
@@ -204,67 +204,20 @@
         <li><a href="https://percy.io/ampproject/amphtml/">Percy</a></li>
       </ul>
     </header>
-    <div class="block proxy-form-contianer">
-      <form id="proxy-form">
-        <label for="proxy-input">
-          <span>Load URL by Proxy</span>
-          <input type="url" class="text-input" id="proxy-input"
-            placeholder="https://">
-        </label>
-        <div class="form-info">
-          <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
-            What's this?
-          </a>
-        </div>
-      </form>
-    </div>
+    <!-- bottom_of_header -->
   </wrap>
-  <div class="examples-bottom">
+  <div class="file-list-container">
     <wrap>
-      <h3 class="code">/examples/</h3>
+      <h3 class="code"><!-- basepath --></h3>
       <div class="push-right-after-heading">
-        <!-- TODO(alanorozco): Enable once we figure out the issue with /~ -->
-        <!--a href="/~" class="underlined">List root directory</a-->
+        <a href="/~" class="underlined">List root directory</a>
       </div>
-      <ul class="file-list"><!-- examples --></ul>
+      <ul class="file-list"><!-- listing --></ul>
     </wrap>
   </div>
   <div class="center">
     Built with 💙  by
     <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
   </div>
-  <script>
-  // TODO(alanorozco): Write this in ES2015 to be transpiled.
-  function getLocation(href) {
-    var l = document.createElement("a");
-    l.href = href;
-    return l;
-  }
-
-  function attachProxyFormListeners() {
-    var form = document.getElementById('proxy-form');
-    var input = document.getElementById('proxy-input');
-
-    form.addEventListener('submit', function(e) {
-      var location = getLocation(input.value);
-      var suffix =
-          location.host +
-          location.pathname +
-          location.search +
-          location.hash;
-      var redirectUrl = '/proxy/s/' + suffix;
-
-      e.preventDefault();
-
-      window.location = redirectUrl;
-    });
-  }
-
-  function attachListeners() {
-    attachProxyFormListeners();
-  }
-
-  attachListeners();
-  </script>
 </body>
 </html>
