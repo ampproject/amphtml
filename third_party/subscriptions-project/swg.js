@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.29 */
+/** Version: 0.1.22.30 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -323,6 +323,18 @@ function serializeRequest(request) {
 
 
 /**
+ * @param {*} error
+ * @return {boolean}
+ */
+function isAbortError(error) {
+  if (!error || typeof error != 'object') {
+    return false;
+  }
+  return (error['name'] === ABORT_ERR_NAME);
+}
+
+
+/**
  * Creates or emulates a DOMException of AbortError type.
  * See https://heycam.github.io/webidl/#aborterror.
  * @param {!Window} win
@@ -396,6 +408,14 @@ function isEdgeBrowser(win) {
 }
 
 
+/**
+ * @param {!Error} e
+ */
+function throwAsync(e) {
+  setTimeout(() => {throw e;});
+}
+
+
 
 const SENTINEL = '__ACTIVITIES__';
 
@@ -409,10 +429,12 @@ class Messenger {
    * @param {!Window} win
    * @param {!Window|function():?Window} targetOrCallback
    * @param {?string} targetOrigin
+   * @param {boolean} requireTarget
    */
-  constructor(win, targetOrCallback, targetOrigin) {
+  constructor(win, targetOrCallback, targetOrigin, requireTarget) {
     /** @private @const {!Window} */
     this.win_ = win;
+
     /** @private @const {!Window|function():?Window} */
     this.targetOrCallback_ = targetOrCallback;
 
@@ -421,6 +443,9 @@ class Messenger {
      * @private {?string}
      */
     this.targetOrigin_ = targetOrigin;
+
+    /** @private @const {boolean} */
+    this.requireTarget_ = requireTarget;
 
     /** @private {?Window} */
     this.target_ = null;
@@ -711,6 +736,13 @@ class Messenger {
    * @private
    */
   handleEvent_(event) {
+    if (this.requireTarget_ && this.getOptionalTarget_() != event.source) {
+      // When target is required, confirm it against the event.source. This
+      // is normally only needed for ports where a single window can include
+      // multiple iframes to match the event to a specific iframe. Otherwise,
+      // the origin checks below are sufficient.
+      return;
+    }
     const data = event.data;
     if (!data || data['sentinel'] != SENTINEL) {
       return;
@@ -859,7 +891,8 @@ class ActivityIframePort {
     this.messenger_ = new Messenger(
         this.win_,
         () => this.iframe_.contentWindow,
-        this.targetOrigin_);
+        this.targetOrigin_,
+        /* requireTarget */ true);
   }
 
   /** @override */
@@ -1270,7 +1303,8 @@ class ActivityWindowPort {
     this.messenger_ = new Messenger(
         this.win_,
         /** @type {!Window} */ (this.targetWin_),
-        /* targetOrigin */ null);
+        /* targetOrigin */ null,
+        /* requireTarget */ true);
     this.messenger_.connect(this.handleCommand_.bind(this));
   }
 
@@ -1466,7 +1500,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.13';
+    this.version = '1.16';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1484,6 +1518,14 @@ class ActivityPorts {
      * @private @const {!Object<string, !ActivityPort>}
      */
     this.resultBuffer_ = {};
+
+    /** @private {?function(!Error)} */
+    this.redirectErrorResolver_ = null;
+
+    /** @private {!Promise<!Error>} */
+    this.redirectErrorPromise_ = new Promise(resolve => {
+      this.redirectErrorResolver_ = resolve;
+    });
   }
 
   /**
@@ -1581,6 +1623,13 @@ class ActivityPorts {
   }
 
   /**
+   * @param {function(!Error)} handler
+   */
+  onRedirectError(handler) {
+    this.redirectErrorPromise_.then(handler);
+  }
+
+  /**
    * @param {string} requestId
    * @return {?ActivityPort}
    * @private
@@ -1588,8 +1637,13 @@ class ActivityPorts {
   discoverResult_(requestId) {
     let port = this.resultBuffer_[requestId];
     if (!port && this.fragment_) {
-      port = discoverRedirectPort(
-          this.win_, this.fragment_, requestId);
+      try {
+        port = discoverRedirectPort(
+            this.win_, this.fragment_, requestId);
+      } catch (e) {
+        throwAsync(e);
+        this.redirectErrorResolver_(e);
+      }
       if (port) {
         this.resultBuffer_[requestId] = port;
       }
@@ -1638,8 +1692,11 @@ var activityPorts = {
   ActivityResult,
   ActivityResultCode,
   ActivityWindowPort,
+  createAbortError,
+  isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
+var activityPorts_11 = activityPorts.isAbortError;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2270,10 +2327,10 @@ const TITLE_LANG_MAP = {
 class ButtonApi {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
   }
 
@@ -2383,14 +2440,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
    */
   setOnEntitlementsResponse(callback) {
     this.setCallback_(CallbackId.ENTITLEMENTS, callback);
   }
 
   /**
-   * @param {!Promise<*>} promise
+   * @param {!Promise<!../api/entitlements.Entitlements>} promise
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
@@ -2406,14 +2463,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(*)} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
-   * @param {*} request
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
   triggerLoginRequest(request) {
@@ -2483,14 +2540,14 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise<*>)} callback
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
     this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
-   * @param {!Promise<*>} responsePromise
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
   triggerSubscribeResponse(responsePromise) {
@@ -2634,7 +2691,7 @@ class View {
   getElement() {}
 
   /**
-   * @param {*} unusedDialog
+   * @param {!./dialog.Dialog} unusedDialog
    * @return {!Promise}
    * @abstract
    */
@@ -2685,14 +2742,13 @@ class View {
 
 
 /**
+ * Whether the specified error is an AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
  * @param {*} error
  * @return {boolean}
  */
 function isCancelError(error) {
-  if (!error || typeof error != 'object') {
-    return false;
-  }
-  return (error['name'] === 'AbortError');
+  return activityPorts_11(error);
 }
 
 /**
@@ -2813,7 +2869,7 @@ class ActivityIframeView extends View {
 
   /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
-   * @param {*} dialog
+   * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
@@ -3665,6 +3721,13 @@ const SubscriptionFlows = {
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
 };
 
+/**
+ * @enum {number}
+ */
+const AnalyticsMode = {
+  DEFAULT: 0,
+  IMPRESSIONS: 1,
+};
 
 /**
  * @enum {string}
@@ -3681,6 +3744,7 @@ const WindowOpenMode = {
 function defaultConfig() {
   return {
     windowOpenMode: WindowOpenMode.AUTO,
+    analyticsMode: AnalyticsMode.DEFAULT,
   };
 }
 
@@ -3798,6 +3862,29 @@ function parseUrlWithA(a, url) {
 
 
 /**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString$1(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+      .split('&')
+      .reduce((params, param) => {
+        const item = param.split('=');
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+        return params;
+      }, {});
+}
+
+
+/**
  * Adds a parameter to a query string.
  * @param {string} url
  * @param {string} param
@@ -3893,7 +3980,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.29',
+    '_client': 'SwG 0.1.22.30',
   });
 }
 
@@ -3937,20 +4024,20 @@ function cacheParam(cacheKey) {
  */
 class PayStartFlow {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
   constructor(deps, sku) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!./pay-client.PayClient} */
     this.payClient_ = deps.payClient();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {string} */
@@ -3967,7 +4054,7 @@ class PayStartFlow {
       'sku': this.sku_,
     });
 
-    const opener = this.payClient_.start({
+    this.payClient_.start({
       'apiVersion': 1,
       'allowedPaymentMethods': ['CARD'],
       'environment': 'PRODUCTION',
@@ -3983,7 +4070,6 @@ class PayStartFlow {
       forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
     });
-    this.dialogManager_.popupOpened(opener);
     return Promise.resolve();
   }
 }
@@ -3995,11 +4081,10 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.payClient().onResponse(payPromise => {
-      deps.dialogManager().popupClosed();
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
       const promise =
@@ -4017,19 +4102,19 @@ class PayCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -4100,7 +4185,7 @@ class PayCompleteFlow {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
@@ -4112,7 +4197,7 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {*} data
  * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
@@ -4181,9 +4266,9 @@ function parseUserData(swgData) {
 
 
 /**
- * @param {*} deps
+ * @param {!./deps.DepsDef} deps
  * @param {!Object} swgData
- * @return {*}
+ * @return {?../api/entitlements.Entitlements}
  * @package Visible for testing.
  */
 function parseEntitlements(deps, swgData) {
@@ -4217,11 +4302,11 @@ function parseEntitlements(deps, swgData) {
 class DeferredAccountFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -4230,7 +4315,7 @@ class DeferredAccountFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?ActivityIframeView} */
@@ -4239,12 +4324,12 @@ class DeferredAccountFlow {
     /** @private {?Promise} */
     this.openPromise_ = null;
 
-    /** @type {*} */
+    /** @type {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     const defaultOptions = {
       entitlements: null,
       consent: true,
     };
-    /** @private @const {*} */
+    /** @private @const {!../api/deferred-account-creation.DeferredAccountCreationRequest} */
     this.options_ = Object.assign(defaultOptions, options || {});
   }
 
@@ -4416,11 +4501,11 @@ function transition(el, props, durationMillis, curve) {
 class Graypane {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
    */
   constructor(doc, zIndex) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
@@ -4761,12 +4846,12 @@ class Dialog {
 
   /**
    * Create a dialog for the provided doc.
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
   constructor(doc, importantStyles = {}, styles = {}) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
@@ -4789,7 +4874,7 @@ class Dialog {
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.view_ = null;
 
     /** @private {?Promise} */
@@ -4798,7 +4883,7 @@ class Dialog {
     /** @private {boolean} */
     this.hidden_ = false;
 
-    /** @private {*} */
+    /** @private {?./view.View} */
     this.previousProgressView_ = null;
   }
 
@@ -4937,14 +5022,14 @@ class Dialog {
     }
   }
 
-  /** @return {*} */
+  /** @return {?./view.View} */
   getCurrentView() {
     return this.view_;
   }
 
   /**
    * Opens the given view and removes existing view from the DOM if any.
-   * @param {*} view
+   * @param {!./view.View} view
    * @return {!Promise}
    */
   openView(view) {
@@ -4995,7 +5080,7 @@ class Dialog {
 
   /**
    * Resizes the dialog container.
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {number} height
    * @param {boolean=} animated
    * @return {?Promise}
@@ -5181,10 +5266,10 @@ const POPUP_Z_INDEX = 2147483647;
 class DialogManager {
 
   /**
-   * @param {*} doc
+   * @param {!../model/doc.Doc} doc
    */
   constructor(doc) {
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private {?Dialog} */
@@ -5223,7 +5308,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {!./view.View} view
    * @param {boolean=} hidden
    * @return {!Promise}
    */
@@ -5240,7 +5325,7 @@ class DialogManager {
   }
 
   /**
-   * @param {*} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -5496,13 +5581,13 @@ const iframeAttributes$1 = {
 class Toast {
 
   /**
-   * @param {*} deps
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
 
-    /** @private @const {*} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
@@ -5633,10 +5718,522 @@ class Toast {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  ACTION_SUBSCRIBE: 1000,
+};
+
+class AnalyticsContext {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmName_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmName() {
+    return this.utmName_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmName(value) {
+    this.utmName_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsContext',  // message type
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmName_,  // field 5 - utm_name
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+    ];
+  }
+}
+
+
+class AnalyticsRequest {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsRequest',  // message type
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+    ];
+  }
+}
+
+/** @license
+Math.uuid.js (v1.4)
+http://www.broofa.com
+mailto:robert@broofa.com
+Copyright (c) 2010 Robert Kieffer
+Dual licensed under the MIT and GPL licenses.
+*/
+
+/*
+ * Generate a random uuid.
+ * EXAMPLES:
+ *   returns RFC4122, version 4 ID
+ *   >>> uuidFast()
+ *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ *
+ * Note: The original code was modified to ES6 and removed other functions,
+ * since we are only using uuidFast().
+ */
+
+const CHARS =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+function uuidFast() {
+  const uuid = new Array(36);
+  let rnd = 0;
+  let r;
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) {
+      uuid[i] = '-';
+    } else if (i === 14) {
+      uuid[i] = '4';
+    } else {
+      if (rnd <= 0x02) {
+        rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+      }
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r];
+    }
+  }
+  return uuid.join('');
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class TransactionId {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./storage.Storage} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * Returns the current transaction id
+   *  @return {!Promise<string>}
+   */
+  get() {
+    return this.storage_.get('transaction_id').then(id => {
+      if (!id) {
+        id = uuidFast();
+        this.storage_.set('transaction_id', id);
+      }
+      return id;
+    });
+  }
+
+  /**
+   * Resets the transaction id
+   * @return {!Promise}
+   */
+  reset() {
+    return this.storage_.remove('transaction_id');
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeStyles = {
+  display: 'none',
+};
+
+
+class AnalyticsService {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = deps.doc();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (createElement(
+            this.doc_.getWin().document, 'iframe', {}));
+
+    setImportantStyles(this.iframe_, iframeStyles);
+
+    /** @private @const {string} */
+    this.src_ = feUrl('/serviceiframe');
+
+    /** @private @const {string} */
+    this.publicationId_ = deps.pageConfig().getPublicationId();
+
+    this.args_ = feArgs({
+      publicationId: this.publicationId_,
+    });
+
+    /**
+     * @private @const {!AnalyticsContext}
+     */
+    this.context_ = new AnalyticsContext();
+
+    /**
+     * @private @const {!TransactionId}
+     */
+    this.xid_ = new TransactionId(deps);
+
+    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
+    this.serviceReady_ = null;
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+  }
+
+  /**
+   * @param {string} sku
+   */
+  setSku(sku) {
+    this.context_.setSku(sku);
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.doc_.getWin().location.search;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getReferrer_() {
+    return this.doc_.getWin().document.referrer;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  setContext_() {
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    const name = utmParams['utm_name'];
+    const medium = utmParams['utm_medium'];
+    const source = utmParams['utm_source'];
+    if (name) {
+      this.context_.setUtmName(name);
+    }
+    if (medium) {
+      this.context_.setUtmMedium(medium);
+    }
+    if (source) {
+      this.context_.setUtmSource(source);
+    }
+    return this.xid_.get().then(id => {
+      this.context_.setTransactionId(id);
+    });
+  }
+
+  /**
+   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @private
+   */
+  start_() {
+    if (!this.serviceReady_) {
+      // TODO(sohanirao): Potentially do this even earlier
+      this.doc_.getBody().appendChild(this.getElement());
+      this.serviceReady_ = this.activityPorts_.openIframe(
+          this.iframe_, this.src_, this.args_).then(port => {
+            this.setContext_();
+            return port.whenReady().then(() => port);
+          });
+    }
+    return this.serviceReady_;
+  }
+
+  /**
+   * @param {boolean} isReadyToPay
+   */
+  setReadyToPay(isReadyToPay) {
+    this.context_.setReadyToPay(isReadyToPay);
+  }
+
+  /**
+   */
+  close() {
+    this.doc_.getBody().removeChild(this.getElement());
+  }
+
+  /**
+   * @param {!../proto/api_messages.AnalyticsEvent} event
+   * @return {!AnalyticsRequest}
+   */
+  createLogRequest_(event) {
+    const /* {!AnalyticsRequest} */ request = new AnalyticsRequest();
+    request.setEvent(event);
+    request.setContext(this.context_);
+    return request;
+  }
+
+  /**
+   * @param {!../proto/api_messages.AnalyticsEvent} event
+   */
+  logEvent(event) {
+    this.lastAction_ = this.start_().then(port => {
+      port.message({'buf': this.createLogRequest_(event).toArray()});
+    });
+  }
+
+  /**
+   * Handles the message received by the port.
+   * @param {function(!Object<string, string|boolean>)} callback
+   */
+  onMessage(callback) {
+    this.lastAction_ = this.start_().then(port => {
+      port.onMessage(callback);
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const SERVICE_ID = 'subscribe.google.com';
 const TOAST_STORAGE_KEY = 'toast';
 const ENTS_STORAGE_KEY = 'ents';
+const IS_READY_TO_PAY_STORAGE_KEY = 'isreadytopay';
 
 
 /**
@@ -5645,24 +6242,24 @@ class EntitlementsManager {
 
   /**
    * @param {!Window} win
-   * @param {*} config
-   * @param {*} fetcher
-   * @param {*} deps
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
    */
-  constructor(win, config, fetcher, deps) {
+  constructor(win, pageConfig, fetcher, deps) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {*} */
-    this.config_ = config;
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.pageConfig_ = pageConfig;
 
     /** @private @const {string} */
-    this.publicationId_ = this.config_.getPublicationId();
+    this.publicationId_ = this.pageConfig_.getPublicationId();
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!JwtHelper} */
@@ -5677,8 +6274,14 @@ class EntitlementsManager {
     /** @private {boolean} */
     this.blockNextNotification_ = false;
 
-    /** @private @const {*} */
+    /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
+
+    /** @private @const {!AnalyticsService} */
+    this.analyticsService_ = new AnalyticsService(deps);
+
+    /** @private @const {!../api/subscriptions.Config} */
+    this.config_ = deps.config();
   }
 
   /**
@@ -5690,6 +6293,7 @@ class EntitlementsManager {
         this.positiveRetries_, opt_expectPositive ? 3 : 0);
     if (opt_expectPositive) {
       this.storage_.remove(ENTS_STORAGE_KEY);
+      this.storage_.remove(IS_READY_TO_PAY_STORAGE_KEY);
     }
   }
 
@@ -5702,6 +6306,15 @@ class EntitlementsManager {
     this.unblockNextNotification();
     this.storage_.remove(ENTS_STORAGE_KEY);
     this.storage_.remove(TOAST_STORAGE_KEY);
+    this.storage_.remove(IS_READY_TO_PAY_STORAGE_KEY);
+  }
+
+  /**
+   * @private
+   */
+  logPaywallImpression_() {
+    // Sends event to logging service asynchronously
+    this.analyticsService_.logEvent(AnalyticsEvent.IMPRESSION_PAYWALL);
   }
 
   /**
@@ -5711,7 +6324,15 @@ class EntitlementsManager {
     if (!this.responsePromise_) {
       this.responsePromise_ = this.getEntitlementsFlow_();
     }
-    return this.responsePromise_;
+    return this.responsePromise_.then(response => {
+      if (response.isReadyToPay != null) {
+        this.analyticsService_.setReadyToPay(response.isReadyToPay);
+      }
+      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS) {
+        this.logPaywallImpression_();
+      }
+      return response;
+    });
   }
 
   /**
@@ -5745,11 +6366,17 @@ class EntitlementsManager {
    * @private
    */
   fetchEntitlementsWithCaching_() {
-    return this.storage_.get(ENTS_STORAGE_KEY).then(raw => {
+    return Promise.all([
+      this.storage_.get(ENTS_STORAGE_KEY),
+      this.storage_.get(IS_READY_TO_PAY_STORAGE_KEY),
+    ]).then(cachedValues => {
+      const raw = cachedValues[0];
+      const irtp = cachedValues[1];
       // Try cache first.
       if (raw) {
         const cached = this.getValidJwtEntitlements_(
-            raw, /* requireNonExpired */ true);
+            raw, /* requireNonExpired */ true,
+            irtpStringToBoolean(irtp));
         if (cached && cached.enablesThis()) {
           // Already have a positive response.
           this.positiveRetries_ = 0;
@@ -5818,6 +6445,11 @@ class EntitlementsManager {
    */
   parseEntitlements(json) {
     const isReadyToPay = json['isReadyToPay'];
+    if (isReadyToPay == null) {
+      this.storage_.remove(IS_READY_TO_PAY_STORAGE_KEY);
+    } else {
+      this.storage_.set(IS_READY_TO_PAY_STORAGE_KEY, String(isReadyToPay));
+    }
     const signedData = json['signedEntitlements'];
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
@@ -5874,7 +6506,7 @@ class EntitlementsManager {
         SERVICE_ID,
         raw,
         Entitlement.parseListFromJson(json),
-        this.config_.getProductId(),
+        this.pageConfig_.getProductId(),
         this.ack_.bind(this),
         opt_isReadyToPay);
   }
@@ -5956,6 +6588,24 @@ class EntitlementsManager {
         '/entitlements');
     return this.fetcher_.fetchCredentialedJson(url)
         .then(json => this.parseEntitlements(json));
+  }
+}
+
+/**
+ * Convert String value of isReadyToPay
+ * (from JSON or Cache) to a boolean value.
+ * @param {string} value
+ * @return {boolean|undefined}
+ * @private
+ */
+function irtpStringToBoolean(value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      return undefined;
   }
 }
 
@@ -6364,7 +7014,7 @@ class XhrFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    const init = /** @type {*} */ ({
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
@@ -6437,19 +7087,19 @@ const LINK_REQUEST_ID = 'swg-link';
 class LinkbackFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
   }
 
@@ -6480,7 +7130,7 @@ class LinkbackFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     /**
@@ -6508,7 +7158,7 @@ class LinkCompleteFlow {
   }
 
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Object} response
    */
   constructor(deps, response) {
@@ -6518,13 +7168,13 @@ class LinkCompleteFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
     this.entitlementsManager_ = deps.entitlementsManager();
 
-    /** @private @const {*} */
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
     const index = response && response['index'] || '0';
@@ -6603,26 +7253,26 @@ class LinkCompleteFlow {
 class LinkSaveFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} callback
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
    */
   constructor(deps, callback) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private {*} */
+    /** @private {!../api/subscriptions.SaveSubscriptionRequestCallback} */
     this.callback_ = callback;
 
-    /** @private {?Promise<*>} */
+    /** @private {?Promise<!../api/subscriptions.SaveSubscriptionRequest>} */
     this.requestPromise_ = null;
 
     /** @private {?ActivityIframeView} */
@@ -6630,7 +7280,7 @@ class LinkSaveFlow {
   }
 
   /**
-   * @return {?Promise<*>}
+   * @return {?Promise<!../api/subscriptions.SaveSubscriptionRequest>}
    * @package Visible for testing.
    */
   getRequestPromise() {
@@ -6719,10 +7369,10 @@ class LinkSaveFlow {
 
 class LoginPromptApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6731,7 +7381,7 @@ class LoginPromptApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6798,10 +7448,10 @@ class LoginPromptApi {
 
 class LoginNotificationApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -6810,7 +7460,7 @@ class LoginNotificationApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -6869,6 +7519,294 @@ class LoginNotificationApi {
  * limitations under the License.
  */
 
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @license
+Math.uuid.js (v1.4)
+http://www.broofa.com
+mailto:robert@broofa.com
+Copyright (c) 2010 Robert Kieffer
+Dual licensed under the MIT and GPL licenses.
+*/
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * A comma-separated set of experiments.
+ * @type {string}
+ */
+let experimentsString = '';
+
+/**
+ * A parsed map of experiments.
+ * @type {?Object<string, boolean>}
+ */
+let experimentMap = null;
+
+
+/**
+ * Ensures that the experiments have been initialized and returns them.
+ * @param {!Window} unusedWin
+ * @return {!Object<string, boolean>}
+ */
+function getExperiments(unusedWin) {
+  // TODO(dvoytenko): implement sticky and fractional experiments.
+  if (!experimentMap) {
+    experimentMap = {};
+    experimentsString.split(',').forEach(s => {
+      if (s) {
+        experimentMap[s] = true;
+      }
+    });
+  }
+  return experimentMap;
+}
+
+
+/**
+ * Toggles the experiment on or off. Returns the actual value of the experiment
+ * after toggling is done.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {boolean} on
+ */
+function setExperiment(win, experimentId, on) {
+  getExperiments(win)[experimentId] = on;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const PAY_REQUEST_ID = 'swg-pay';
 
 /**
@@ -6902,14 +7840,15 @@ class PayClient {
   /**
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
-  constructor(win, activityPorts) {
+  constructor(win, activityPorts, dialogManager) {
     // TODO(dvoytenko, #406): Support GPay API.
-    this.binding_ = new PayClientBindingSwg(win, activityPorts);
+    this.binding_ = new PayClientBindingSwg(win, activityPorts, dialogManager);
   }
 
   /**
-   * @param {*} pre
+   * @param {!../utils/preconnect.Preconnect} pre
    */
   preconnect(pre) {
     pre.prefetch(payUrl());
@@ -6932,10 +7871,9 @@ class PayClient {
   /**
    * @param {!Object} paymentRequest
    * @param {!PayOptionsDef=} options
-   * @return {?Window}  popup window, if any.
    */
   start(paymentRequest, options = {}) {
-    return this.binding_.start(paymentRequest, options);
+    this.binding_.start(paymentRequest, options);
   }
 
   /**
@@ -6954,12 +7892,15 @@ class PayClientBindingSwg {
   /**
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   * @param {!../components/dialog-manager.DialogManager} dialogManager
    */
-  constructor(win, activityPorts) {
+  constructor(win, activityPorts, dialogManager) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = activityPorts;
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = dialogManager;
   }
 
   /** @override */
@@ -6975,12 +7916,13 @@ class PayClientBindingSwg {
         options.forceRedirect ? '_top' : '_blank',
         feArgs(paymentRequest),
         {});
-    return opener && opener.targetWin || null;
+    this.dialogManager_.popupOpened(opener && opener.targetWin || null);
   }
 
   /** @override */
   onResponse(callback) {
     this.activityPorts_.onResult(PAY_REQUEST_ID, port => {
+      this.dialogManager_.popupClosed();
       callback(this.validatePayResponse_(port));
     });
   }
@@ -7001,7 +7943,7 @@ class PayClientBindingSwg {
         // Data is supplied as an encrypted blob.
         const xhr = new Xhr(this.win_);
         const url = payDecryptUrl();
-        const init = /** @type {*} */ ({
+        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
           method: 'post',
           headers: {'Accept': 'text/plain, application/json'},
           credentials: 'include',
@@ -7038,11 +7980,11 @@ class PayClientBindingSwg {
 
 class WaitForSubscriptionLookupApi {
   /**
-   * @param {*} deps
+   * @param {!./deps.DepsDef} deps
    * @param {?Promise} accountPromise
    */
   constructor(deps, accountPromise) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -7051,7 +7993,7 @@ class WaitForSubscriptionLookupApi {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private {?Promise} */
@@ -7113,20 +8055,20 @@ class WaitForSubscriptionLookupApi {
 class OffersApi {
 
   /**
-   * @param {*} config
-   * @param {*} fetcher
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
    */
   constructor(config, fetcher) {
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
-    /** @private @const {*} */
+    /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
   }
 
   /**
    * @param {string=} opt_productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    */
   getOffers(opt_productId) {
     const productId = opt_productId || this.config_.getProductId();
@@ -7138,7 +8080,7 @@ class OffersApi {
 
   /**
    * @param {string} productId
-   * @return {!Promise<!Array<*>>}
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    * @private
    */
   fetch_(productId) {
@@ -7182,11 +8124,11 @@ const OFFERS_VIEW_CLOSABLE = true;
 class OffersFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -7195,7 +8137,7 @@ class OffersFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     let isClosable = options && options.isClosable;
@@ -7264,21 +8206,21 @@ class OffersFlow {
 class SubscribeOptionFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7344,15 +8286,15 @@ class SubscribeOptionFlow {
 class AbbrvOfferFlow {
 
   /**
-   * @param {*} deps
-   * @param {*} options
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest=} options
    */
   constructor(deps, options = {}) {
 
-    /** @private @const {*} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
     this.options_ = options;
 
     /** @private @const {!Window} */
@@ -7361,7 +8303,7 @@ class AbbrvOfferFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {*} */
+    /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!ActivityIframeView} */
@@ -7657,22 +8599,26 @@ class ConfiguredRuntime {
 
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
-   * @param {*} pageConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
+   * @param {!../api/subscriptions.Config=} opt_config
    */
-  constructor(winOrDoc, pageConfig, opt_integr) {
+  constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
     this.win_ = this.doc_.getWin();
 
-    /** @private @const {*} */
+    /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
+    if (opt_config) {
+      this.configure_(opt_config);
+    }
 
-    /** @private @const {*} */
+    /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
     /** @private @const {!Promise} */
@@ -7692,7 +8638,8 @@ class ConfiguredRuntime {
     this.activityPorts_ = new activityPorts_1(this.win_);
 
     /** @private @const {!PayClient} */
-    this.payClient_ = new PayClient(this.win_, this.activityPorts_);
+    this.payClient_ = new PayClient(
+        this.win_, this.activityPorts_, this.dialogManager_);
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -7768,6 +8715,15 @@ class ConfiguredRuntime {
 
   /** @override */
   configure(config) {
+    // Indirected for constructor testing.
+    this.configure_(config);
+  }
+
+  /**
+   * @param {!../api/subscriptions.Config} config
+   * @private
+   */
+  configure_(config) {
     // Validate first.
     let error = null;
     for (const k in config) {
@@ -7777,6 +8733,8 @@ class ConfiguredRuntime {
             v != WindowOpenMode.REDIRECT) {
           error = 'Unknown windowOpenMode: ' + v;
         }
+      } else if (k == 'experiments') {
+        v.forEach(experiment => setExperiment(this.win_, experiment, true));
       } else {
         error = 'Unknown config property: ' + k;
       }
