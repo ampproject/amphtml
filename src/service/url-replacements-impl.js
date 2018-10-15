@@ -781,7 +781,7 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-      this.expander_.expand(source, opt_bindings, opt_collectVars,
+      this.expander_./*OK*/expand(source, opt_bindings, opt_collectVars,
           /* opt_sync */ true, opt_whiteList));
   }
 
@@ -795,7 +795,7 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandStringAsync(source, opt_bindings, opt_whiteList) {
-    return /** @type {!Promise<string>} */ (this.expander_.expand(source,
+    return /** @type {!Promise<string>} */ (this.expander_./*OK*/expand(source,
         opt_bindings,
         /* opt_collectVars */ undefined,
         /* opt_sync */ undefined, opt_whiteList));
@@ -813,7 +813,7 @@ export class UrlReplacements {
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    const replacement = /** @type {string} */ (this.expander_.expand(url,
+    const replacement = /** @type {string} */ (this.expander_./*OK*/expand(url,
         opt_bindings, opt_collectVars, /* opt_sync */ true, opt_whiteList));
     return this.ensureProtocolMatches_(url, replacement);
   }
@@ -830,7 +830,7 @@ export class UrlReplacements {
    */
   expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-      this.expander_.expand(url, opt_bindings, undefined, undefined,
+      this.expander_./*OK*/expand(url, opt_bindings, undefined, undefined,
           opt_whiteList).then(
           replacement => this.ensureProtocolMatches_(url, replacement)));
   }
@@ -873,7 +873,7 @@ export class UrlReplacements {
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
       element[ORIGINAL_VALUE_PROPERTY] = element.value;
     }
-    const result = this.expander_.expand(
+    const result = this.expander_./*OK*/expand(
         element[ORIGINAL_VALUE_PROPERTY] || element.value,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
@@ -1030,7 +1030,7 @@ export class UrlReplacements {
    */
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);
-    return this.expander_.expand(url, opt_bindings, vars).then(() => vars);
+    return this.expander_./*OK*/expand(url, opt_bindings, vars).then(() => vars);
   }
 
   /**
