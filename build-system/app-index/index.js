@@ -29,7 +29,8 @@ const listingHeaderFile = join(__dirname, '/listing-header.html');
 
 function renderFileLink(base, location) {
   return `<li>
-    <a href="${base.replace(/\/$/, '')}/${location}">${location}</a>
+    <a class="file-link" href="${base.replace(/\/$/, '')}/${location}"
+      data-default="${location}">${location}</a>
   </li>`;
 }
 
