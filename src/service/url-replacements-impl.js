@@ -1030,7 +1030,8 @@ export class UrlReplacements {
    */
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);
-    return this.expander_./*OK*/expand(url, opt_bindings, vars).then(() => vars);
+    return this.expander_./*OK*/expand(url, opt_bindings, vars)
+        .then(() => vars);
   }
 
   /**
