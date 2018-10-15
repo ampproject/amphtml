@@ -226,11 +226,10 @@ describes.realWin('HighlightHandler', {
         Services.viewerForDoc(ampdoc), 'sendMessage');
     const setScrollTop = sandbox.stub(
         Services.viewportForDoc(ampdoc), 'setScrollTop');
-    sandbox.stub(Services.viewerForDoc(ampdoc), 'getVisibilityState').
-        returns(VisibilityState.PRERENDER);
+    sandbox.stub(Services.viewerForDoc(ampdoc), 'getVisibilityState')
+        .returns(VisibilityState.PRERENDER);
 
-    const handler = new HighlightHandler(
-        ampdoc,{sentences: ['amp', 'highlight']});
+    new HighlightHandler(ampdoc,{sentences: ['amp', 'highlight']});
 
     expect(setScrollTop).to.be.calledOnce;
     expect(setScrollTop.firstCall.args.length).to.equal(1);
