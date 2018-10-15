@@ -6946,28 +6946,28 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler-linux@^20180910.0.1:
-  version "20180910.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20180910.0.1.tgz#22567f7f5b605946d23c99c86a3e29a2210386da"
-  integrity sha512-hSTqyLLHDLnntR442BVea0sp49q+Uwi05HMOVBPMmbwDoHLtCpDmwZ/FUKs5GLFZ/cQafk3RgHLktPdReEPMIw==
+google-closure-compiler-linux@^20181008.0.0:
+  version "20181008.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20181008.0.0.tgz#d351110b5eaa0d05ec0aadcd29a3b64e812e8e15"
+  integrity sha512-k8njGfH2uzWJiRPPvUxM7MJB28gPrf4kI2bbuiF0gJk/1arXcWCPGjLD6pzCU0UylMy52MUXLgsIpRorqf2brw==
 
-google-closure-compiler-osx@^20180910.0.1:
-  version "20180910.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20180910.0.1.tgz#83e88bf892038655efd281fad61e3f6377a60afb"
-  integrity sha512-HU2waANIOHBFtAJ205rzF8BGXiJaLT0s6qu4memI7D4ThBhAJLA/SwTlEjrby6OvS+ZRL4e0FYMPJW1/fhQKzg==
+google-closure-compiler-osx@^20181008.0.0:
+  version "20181008.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20181008.0.0.tgz#7f7a0a19afdad4fb1f40b1a44d9f08b50762e67f"
+  integrity sha512-xzf/yH/4MXdb6GbP84iHnpcVCOPBbH0gMVOs0JhR/KbrQh+DlJU+Y8Z/DQzTkw9HgD650R2/WZmBknURyg9OTw==
 
-google-closure-compiler@20180910.1.0:
-  version "20180910.1.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20180910.1.0.tgz#e143178bf4fa73d4041338b02ecbba1effd855ec"
-  integrity sha512-4VdtHL5LoNmMxDgOixiRJmJejvcFCzpC/uX5R4oGquuQG08knb7bgzPQuIBieYjbHETyc03DyksPFR+kjW4LgA==
+google-closure-compiler@20181008.0.0:
+  version "20181008.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20181008.0.0.tgz#dcf02ab3a679822a0d1ded519ec8bec99d6887ba"
+  integrity sha512-XmJIasXHyy4kirthlsuDev2LZcXjYXWfOHwHdCLUQnfJH8T2sxWDNjFLQycaCIXwQLOyw2Kem38VgxrYfG0hzg==
   dependencies:
     chalk "^1.0.0"
     minimist "^1.2.0"
     vinyl "^2.0.1"
     vinyl-sourcemaps-apply "^0.2.0"
   optionalDependencies:
-    google-closure-compiler-linux "^20180910.0.1"
-    google-closure-compiler-osx "^20180910.0.1"
+    google-closure-compiler-linux "^20181008.0.0"
+    google-closure-compiler-osx "^20181008.0.0"
 
 google-closure-compiler@^20151015.0.0:
   version "20151015.7.0"
