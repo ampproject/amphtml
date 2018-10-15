@@ -186,11 +186,7 @@ class FormDataWrapperInterface {
    *
    * TODO(cvializ): Update file support
    *
-<<<<<<< HEAD
-   * @param {string} name The name of the field whose data is contained in
-=======
    * @param {string} unusedName The name of the field whose data is contained in
->>>>>>> Refactor FormDataWrapper and fix select[multiple]
    *     `value`.
    * @param {string} unusedValue The field's value.
    */
@@ -204,25 +200,6 @@ class FormDataWrapperInterface {
    * @param {string} unusedName The name of the field to remove from the FormData.
    */
   delete(unusedName) {}
-
-  /**
-   * Remove the given value from the FormData.
-   * This function is unsupported in IE.
-
-   * For more details on this, see http://mdn.io/FormData/delete.
-   *
-   * @param {string} name The name of the field to remove from the FormData.
-   */
-  delete(name) {
-    if (this.formData_.delete) {
-      this.formData_.delete(name);
-      return;
-    }
-
-    if (!this.fieldValues_['entries']) {
-      delete this.fieldValues_[name];
-    }
-  }
 
   /**
    * Returns an iterator of all key/value pairs contained in this object.

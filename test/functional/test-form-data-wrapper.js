@@ -257,7 +257,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             input2.value = 'qux';
             form.appendChild(input2);
 
-            const formData = new FormDataWrapper(form);
+            const formData = createFormDataWrapper(form);
             formData.delete('foo');
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
