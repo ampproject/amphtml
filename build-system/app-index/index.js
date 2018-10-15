@@ -71,38 +71,41 @@ function renderListing(basepath) {
   }).catch(() => /* empty catch for fallbacks */ null);
 }
 
-function serveIndex(req, res, next) {
-  Promise.all([
-    renderListing('/examples'),
-    fs.readFileAsync(proxyFormFile),
-  ]).then(result => {
-    const output = result[0];
-    const proxyForm = result[1].toString();
+
+function serveListingWithReplacements(
+  req, res, next, path, replacements = {}) {
+
+  Promise.all(
+      [renderListing(path)].concat(
+          Object.values(replacements).map(p =>
+            fs.readFileAsync(p)))).then(result => {
+    let output = result[0];
 
     if (!output) {
       next();
       return;
     }
 
-    res.end(output.replace('<!-- bottom_of_header -->', proxyForm));
+    let i = 1;
+    Object.keys(replacements).forEach(key => {
+      output = output.replace(key, result[i++]);
+    });
+
+    res.end(output);
   });
 }
 
+
+function serveIndex(req, res, next) {
+  serveListingWithReplacements(req, res, next, '/examples', {
+    '<!-- bottom_of_header -->': proxyFormFile,
+  });
+}
+
+
 function serveListing(req, res, next) {
-  const basepath = req.url.replace(/^\/~/, '/');
-  Promise.all([
-    renderListing(basepath),
-    fs.readFileAsync(listingHeaderFile),
-  ]).then(result => {
-    const output = result[0];
-    const listingHeader = result[1].toString();
-
-    if (!output) {
-      next();
-      return;
-    }
-
-    res.end(output.replace('<!-- bottom_of_header -->', listingHeader));
+  serveListingWithReplacements(req, res, next, req.url.replace(/^\/~/, '/'), {
+    '<!-- bottom_of_header -->': listingHeaderFile,
   });
 }
 
