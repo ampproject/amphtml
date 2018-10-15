@@ -116,6 +116,46 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(getFormAsObject(form)).to.be.an('object').that.is.empty;
   });
 
+  it('returns first option for select with nothing selected', () => {
+    const select = env.win.document.createElement('select');
+    select.name = 'foo';
+    select.multiple = false;
+
+    const selectedOption = env.win.document.createElement('option');
+    selectedOption.value = 'bar';
+    selectedOption.selected = false;
+
+    const unselectedOption = env.win.document.createElement('option');
+    unselectedOption.value = 'bang';
+    unselectedOption.selected = false;
+
+    select.appendChild(selectedOption);
+    select.appendChild(unselectedOption);
+    form.appendChild(select);
+
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
+  });
+
+  it('returns empty for multi-select with nothing selected', () => {
+    const select = env.win.document.createElement('select');
+    select.name = 'foo';
+    select.multiple = true;
+
+    const selectedOption = env.win.document.createElement('option');
+    selectedOption.value = 'bar';
+    selectedOption.selected = false;
+
+    const unselectedOption = env.win.document.createElement('option');
+    unselectedOption.value = 'bang';
+    unselectedOption.selected = false;
+
+    select.appendChild(selectedOption);
+    select.appendChild(unselectedOption);
+    form.appendChild(select);
+
+    expect(getFormAsObject(form)).to.deep.equal({});
+  });
+
   it('returns selected entry in single-select', () => {
     const select = env.win.document.createElement('select');
     select.name = 'foo';
