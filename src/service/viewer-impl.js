@@ -226,6 +226,8 @@ export class Viewer {
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
+    this.win.setVisibilityState = this.setVisibilityState_.bind(this);
+    this.win.getVisibilityState = this.getVisibilityState.bind(this);
     dev().fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
