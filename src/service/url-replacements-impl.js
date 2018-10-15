@@ -781,8 +781,8 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-      this.expand_(source, opt_bindings, opt_collectVars, /* opt_sync */ true,
-          opt_whiteList));
+      this.expander_.expand(source, opt_bindings, opt_collectVars,
+          /* opt_sync */ true, opt_whiteList));
   }
 
   /**
@@ -795,7 +795,8 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandStringAsync(source, opt_bindings, opt_whiteList) {
-    return /** @type {!Promise<string>} */ (this.expand_(source, opt_bindings,
+    return /** @type {!Promise<string>} */ (this.expander_.expand(source,
+        opt_bindings,
         /* opt_collectVars */ undefined,
         /* opt_sync */ undefined, opt_whiteList));
   }
@@ -812,9 +813,9 @@ export class UrlReplacements {
    * @return {string}
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
-    return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
-        url, opt_bindings, opt_collectVars, /* opt_sync */ true,
-        opt_whiteList)));
+    const replacement = /** @type {string} */ (this.expander_.expand(url,
+        opt_bindings, opt_collectVars, /* opt_sync */ true, opt_whiteList));
+    return this.ensureProtocolMatches_(url, replacement);
   }
 
   /**
@@ -829,7 +830,7 @@ export class UrlReplacements {
    */
   expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-      this.expand_(url, opt_bindings, undefined, undefined,
+      this.expander_.expand(url, opt_bindings, undefined, undefined,
           opt_whiteList).then(
           replacement => this.ensureProtocolMatches_(url, replacement)));
   }
@@ -872,7 +873,7 @@ export class UrlReplacements {
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
       element[ORIGINAL_VALUE_PROPERTY] = element.value;
     }
-    const result = this.expand_(
+    const result = this.expander_.expand(
         element[ORIGINAL_VALUE_PROPERTY] || element.value,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
@@ -1020,21 +1021,6 @@ export class UrlReplacements {
   }
 
   /**
-   * @param {string} url
-   * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, *>=} opt_collectVars
-   * @param {boolean=} opt_sync
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
-   * @return {!Promise<string>|string}
-   * @private
-   */
-  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    return this.expander_./*OK*/expand(url, opt_bindings, opt_collectVars,
-        opt_sync, opt_whiteList);
-  }
-
-  /**
    * Collects all substitutions in the provided URL and expands them to the
    * values for known variables. Optional `opt_bindings` can be used to add
    * new variables or override existing ones.
@@ -1044,7 +1030,7 @@ export class UrlReplacements {
    */
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);
-    return this.expand_(url, opt_bindings, vars).then(() => vars);
+    return this.expander_.expand(url, opt_bindings, vars).then(() => vars);
   }
 
   /**
