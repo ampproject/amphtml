@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from '../pass';
 import {Services} from '../services';
 import {
   computedStyle,
@@ -81,6 +82,12 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @const @private {!Pass} */
+    this.updatePass_ = new Pass(ampdoc.win, () => this.update());
+
+    /** @private {?MutationObserver} */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -106,6 +113,8 @@ export class FixedLayer {
       return;
     }
 
+
+
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
@@ -128,6 +137,10 @@ export class FixedLayer {
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
 
+    if (this.elements_.length > 0) {
+      this.initMutationObserver_();
+    }
+
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
       user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
@@ -136,6 +149,36 @@ export class FixedLayer {
     }
 
     this.update();
+  }
+
+  /**
+   * @return {?MutationObserver}
+   */
+  initMutationObserver_() {
+    if (this.mutationObserver_) {
+      return this.mutationObserver_;
+    }
+
+    const {ampdoc} = this;
+    const mo = new ampdoc.win.MutationObserver(mutations => {
+      if (this.updatePass_.isPending()) {
+        return;
+      }
+
+      for (let i = 0; i < mutations.length; i++) {
+        const mutation = mutations[i];
+        if (mutation.attributeName === 'hidden') {
+          this.updatePass_.schedule(16);
+          return;
+        }
+      }
+    });
+    mo.observe(ampdoc.getRootNode(), {
+      attributes: true,
+      subtree: true,
+    });
+
+    return this.mutationObserver_ = mo;
   }
 
   /**
@@ -200,18 +243,17 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    const {win} = this.ampdoc;
-    if (!element./*OK*/offsetParent &&
-        computedStyle(win, element).display === 'none') {
-      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
-          element.tagName);
-    }
     this.setupElement_(
         element,
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+
+    // If this is the first element, we need to start the mutation observer.
+    // This'll only be created once.
+    this.initMutationObserver_();
+
     return this.update();
   }
 
@@ -266,6 +308,11 @@ export class FixedLayer {
     const toRemove = this.elements_.filter(
         fe => !this.ampdoc.contains(fe.element));
     toRemove.forEach(fe => this.removeElement_(fe.element));
+
+    this.updatePass_.cancel();
+    if (this.mutationObserver_) {
+      this.mutationObserver_.takeRecords();
+    }
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -401,6 +448,10 @@ export class FixedLayer {
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
+        }
+
+        if (this.mutationObserver_) {
+          this.mutationObserver_.takeRecords();
         }
       },
     }, {}).catch(error => {

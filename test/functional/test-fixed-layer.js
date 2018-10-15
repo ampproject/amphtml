@@ -18,6 +18,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
@@ -137,6 +138,10 @@ describes.sandboxed('FixedLayer', {}, () => {
         return (!!elem.parentElement);
       },
       defaultView: {
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
+        Promise: window.Promise,
+        MutationObserver: window.MutationObserver,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
@@ -151,6 +156,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     documentApi.defaultView.document = documentApi;
     ampdoc = new AmpDocSingle(documentApi.defaultView);
     installPlatformService(documentApi.defaultView);
+    installTimerService(documentApi.defaultView);
 
     vsyncTasks = [];
     vsyncApi = {
@@ -1394,6 +1400,7 @@ describes.realWin('FixedLayer', {}, env => {
       doc = win.document;
 
       installPlatformService(win);
+      installTimerService(win);
       ampdoc = new AmpDocSingle(win);
       shadowRoot = win.document.body.attachShadow({mode: 'open'});
       fixedLayer = new FixedLayer(ampdoc, vsyncApi,
