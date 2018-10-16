@@ -238,8 +238,8 @@ export class VisibilityModel {
    * @param {function():!Promise} callback
    */
   setReportReady(callback) {
-      this.reportReady_ = false;
-      this.createReportReadyPromise_ = callback;
+    this.reportReady_ = false;
+    this.createReportReadyPromise_ = callback;
   }
 
   /**
@@ -247,8 +247,8 @@ export class VisibilityModel {
    * @param {function():!Promise} callback
    */
   setReportWhen(callback) {
-      this.reportReady_ = false;
-      this.createReportReadyPromise_ = callback;
+    this.reportReady_ = false;
+    this.createReportReadyPromise_ = callback;
   }
 
   /**

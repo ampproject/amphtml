@@ -1192,7 +1192,7 @@ export class VisibilityTracker extends EventTracker {
    * @param {string|undefined} reportWhenSpec
    * @return {!Promise}
    */
-  createReportReadyPromise_() {
+  createReportReadyPromise_(reportWhenSpec) {
     const viewer = this.root.getViewer();
 
     if (!viewer.isVisible()) {
@@ -1225,6 +1225,7 @@ export class VisibilityTracker extends EventTracker {
         // otherwise wait for ini-load by default
         waitForSpec = 'ini-load';
       }
+    }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');
     user().assert(waitForSpec == 'none' ||
@@ -1241,8 +1242,8 @@ export class VisibilityTracker extends EventTracker {
 
     // Wait for root signal if there's no element selected.
     return opt_element ?
-        waitForTracker.getElementSignal(waitForSpec, opt_element)
-        : waitForTracker.getRootSignal(waitForSpec);
+      waitForTracker.getElementSignal(waitForSpec, opt_element)
+      : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
