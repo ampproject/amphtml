@@ -470,6 +470,10 @@ Here's an example:
             <span>City</span>
             <input type="text" name="city" required>
         </label>
+        <label>
+            <span>Document</span>
+            <input type="file" name="document" no-verify>
+        </label>
         <div class="spinner"></div>
         <input type="submit" value="Submit">
     </fieldset>
@@ -505,6 +509,9 @@ Here is how an error response should look for verification:
   ]
 }
 ```
+
+To remove a field from the `verify-xhr` request, add the `no-verify` attribute
+to the input element.
 
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 

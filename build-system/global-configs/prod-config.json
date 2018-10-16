@@ -49,5 +49,6 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1,
-  "ampdoc-closest": 0.01
+  "ampdoc-closest": 0.01,
+  "linker-form": 1
 }
