@@ -170,6 +170,7 @@ PASS
 |          <option>pulsepoint</option>
 |          <option>purch</option>
 |          <option>capirs</option>
+|          <option>recomad</option>
 |          <option>relap</option>
 |          <option>revcontent</option>
 |          <option>rubicon</option>
@@ -1075,6 +1076,15 @@ PASS
 |        data-begun-block-id="434908944"
 |        data-custom-css="div[id^=begun_block] iframe{margin:0 auto;}"
 |        json='{"params":{"p1":"bvpkq","p2":"y","pct":"a"}}'>
+|    </amp-ad>
+|
+|    <h2>recomAD</h2>
+|    <amp-ad width="320" height="145"
+|        type="recomad"
+|        data-app-id="53811c33"
+|        data-widget-id="275"
+|        data-search-term="sneaker"
+|        data-puid="amp-ad-recomad-test-page">
 |    </amp-ad>
 |
 |    <h2>Relap</h2>
