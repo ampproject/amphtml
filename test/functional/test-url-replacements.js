@@ -43,6 +43,7 @@ import {
 import {parseUrlDeprecated} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 
@@ -62,6 +63,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   function getReplacements(opt_options) {
     return createIframePromise().then(iframe => {
+      // TODO(ccordry): remove this when migration complete.
+      toggleExperiment(iframe.win, 'url-replacement-v2', true);
       ampdoc = iframe.ampdoc;
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
