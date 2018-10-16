@@ -2,12 +2,10 @@
   <form id="proxy-form">
     <label for="proxy-input">
       <span>Load URL by Proxy</span>
-      <!-- Following regex is gnarly, but works. -->
-      <!-- Taken from https://justmarkup.com/log/2012/12/input-url/-->
       <input type="text" class="text-input" id="proxy-input"
           required aria-required="true"
           placeholder="https://"
-          pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$">
+          pattern="^(https?://)?[^\s]+$">
     </label>
     <div class="form-info">
       <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
