@@ -25,7 +25,7 @@
     display: block;
     max-width: 960px;
     padding: 0 40px;
-    margin: 40px auto;
+    margin: 20px auto;
   }
   .block {
     margin: 40px auto;
@@ -134,8 +134,9 @@
   header {
     display: flex;
   }
-  h1 {
+  .right-of-logo {
     flex: 1;
+    margin: 30px 0 0 40px;
   }
   header > ul {
     display: flex;
@@ -145,7 +146,7 @@
   }
   header > ul > li {
     display: flex;
-    margin: 25px 0;
+    margin: 30px 0;
     padding: 0 0 0 20px;
   }
   header li.divider {
@@ -192,6 +193,9 @@
   <wrap>
     <header>
       <h1 class="amp-logo">AMP</h1>
+      <div class="right-of-logo">
+        <!-- right_of_logo -->
+      </div>
       <ul>
         <li>
           <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md">
