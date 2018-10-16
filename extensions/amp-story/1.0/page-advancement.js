@@ -28,6 +28,9 @@ import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
+const HOLD_TOUCH_THRESHOLD_MS = 500;
+
+/** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @private @const {number} */
@@ -358,7 +361,7 @@ class ManualAdvancement extends AdvancementConfig {
     // Cancels the navigation if user paused the story for over 500ms. Calling
     // preventDefault on the touchend event ensures the click/tap event won't
     // fire.
-    if ((Date.now() - this.touchstartTimestamp_) > 500) {
+    if ((Date.now() - this.touchstartTimestamp_) > HOLD_TOUCH_THRESHOLD_MS) {
       event.preventDefault();
     }
 
