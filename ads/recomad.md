@@ -15,6 +15,11 @@ limitations under the License.
 -->
 
 # recomAD widget
+This `<amp-ad>` tag contains a widget called
+recomAD, which can be integrated to add product
+recommendations for your visitors that fit the
+content of your website.
+
 See [https://recomad.de](https://recomad.de) for details.
 
 ## Example
