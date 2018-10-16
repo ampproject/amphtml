@@ -35,7 +35,6 @@ import {
 } from '../../../src/service';
 import {
   isProxyOrigin,
-  parseUrlDeprecated,
 } from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
@@ -103,9 +102,7 @@ export class AmpRecaptchaService {
   register(sitekey) {
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      return this.initialize_(sitekey).then(() => {
-        return this.iframeLoadPromise_;
-      });
+      this.iframeLoadPromise_ = this.initialize_(sitekey);
     }
     return this.iframeLoadPromise_;
   }
@@ -165,6 +162,7 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our recaptcha boostrap iframe.
+   * Should be assigned to this.iframeLoadPromise_
    * @param {string} sitekey
    * @private
    */
@@ -185,9 +183,8 @@ export class AmpRecaptchaService {
       ];
       this.executeMap_ = {};
 
-      this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
       this.body_.appendChild(this.iframe_);
-      this.iframeLoadPromise_ = loadPromise(this.iframe_);
+      return loadPromise(this.iframe_);
     });
   }
 
@@ -220,13 +217,13 @@ export class AmpRecaptchaService {
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
       iframe.src = recaptchaFrameSrc;
-      iframe.ampLocation = parseUrlDeprecated(this.win_.location.href);
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute('name', JSON.stringify(dict({
         'sitekey': sitekey,
         'sentinel': 'amp-recaptcha',
       })));
+      iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
       iframe.onload = function() {
@@ -278,8 +275,6 @@ export class AmpRecaptchaService {
       return recaptchaFrameSrc;
     });
   }
-
-
 
   /**
    * Function to create a listener for our iframe

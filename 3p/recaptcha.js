@@ -83,8 +83,7 @@ window.initRecaptcha = function() {
   // Get our sitekey from the iframe name attribute
   dev().assert(
       dataObject.sitekey,
-      'The sitekey is required for the <amp-recaptcha-input> iframe %s',
-      JSON.stringify(dataObject)
+      'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
