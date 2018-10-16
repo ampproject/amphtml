@@ -354,6 +354,11 @@ const EXPERIMENTS = [
     name: 'Enables form support in linker',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
+  {
+    id: 'fie-metadata-extension',
+    name: 'Use version supporting extension field in amp-ad-metadata.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
 ];
 
 if (getMode().localDev) {
