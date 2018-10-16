@@ -107,17 +107,10 @@ describe('reportErrorToServerOrViewer', () => {
   let sandbox;
   let ampdocServiceForStub;
   let sendMessageStub;
-  let xhrRequests;
+  let createXhr;
 
   const data = getErrorReportData(undefined, undefined, undefined, undefined,
       new Error('XYZ', false));
-
-  function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest();
-    mockXhr.onCreate = function(xhr) {
-      xhrRequests.push(xhr);
-    };
-  }
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
@@ -140,8 +133,7 @@ describe('reportErrorToServerOrViewer', () => {
 
     sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-    xhrRequests = [];
-    setupMockXhr();
+    createXhr = sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   afterEach(() => {
@@ -152,7 +144,7 @@ describe('reportErrorToServerOrViewer', () => {
     ampdocServiceForStub.returns({isSingleDoc: () => false});
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
-          expect(xhrRequests).to.have.lengthOf(1);
+          expect(createXhr).to.be.calledOnce;
           expect(sendMessageStub).to.not.have.been.called;
         });
   });
@@ -166,7 +158,7 @@ describe('reportErrorToServerOrViewer', () => {
     });
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
-          expect(xhrRequests).to.have.lengthOf(1);
+          expect(createXhr).to.be.calledOnce;
           expect(sendMessageStub).to.not.have.been.called;
         });
   });
@@ -176,7 +168,7 @@ describe('reportErrorToServerOrViewer', () => {
         .returns(false);
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
-          expect(xhrRequests).to.have.lengthOf(1);
+          expect(createXhr).to.be.calledOnce;
           expect(sendMessageStub).to.not.have.been.called;
         });
   });
@@ -185,7 +177,7 @@ describe('reportErrorToServerOrViewer', () => {
     sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
-          expect(xhrRequests).to.have.lengthOf(1);
+          expect(createXhr).to.be.calledOnce;
           expect(sendMessageStub).to.not.have.been.called;
         });
   });
@@ -194,7 +186,7 @@ describe('reportErrorToServerOrViewer', () => {
     + 'error data set', () => {
     return reportErrorToServerOrViewer(win, data)
         .then(() => {
-          expect(xhrRequests).to.be.empty;
+          expect(createXhr).to.not.have.been.called;
           expect(sendMessageStub).to.have.been
               .calledWith('error', errorReportingDataForViewer(data));
           expect(data['m']).to.not.be.undefined;
