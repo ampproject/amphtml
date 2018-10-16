@@ -129,7 +129,8 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  * @param {Object} data
  */
 function actionTypeHandler(grecaptcha, data) {
-
+  // TODO: @torch2424: Verify message origin
+  // TODO: @torch2424: Verify sitekey is the same as original
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
   });

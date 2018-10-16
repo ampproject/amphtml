@@ -222,10 +222,10 @@ export class AmpRecaptchaService {
       iframe.src = recaptchaFrameSrc;
       iframe.ampLocation = parseUrlDeprecated(this.win_.location.href);
       iframe.setAttribute('scrolling', 'no');
-      iframe.setAttribute('data-amp-3p-sentinel', 'amp');
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute('name', JSON.stringify(dict({
         'sitekey': sitekey,
-        'sentinel': 'amp',
+        'sentinel': 'amp-recaptcha',
       })));
       setStyle(iframe, 'border', 'none');
       /** @this {!Element} */
