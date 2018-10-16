@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental. Only in Canary.</td>
+    <td>Beta.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
