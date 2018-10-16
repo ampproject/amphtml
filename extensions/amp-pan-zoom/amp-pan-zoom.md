@@ -136,4 +136,3 @@ See [amp-pan-zoom rules](https://github.com/ampproject/amphtml/blob/master/exten
 
 ## Eligibile children tags
 See the [list](https://github.com/ampproject/amphtml/blob/e517ee7e58215ea8baaa04fa5c6b09bba9581549/extensions/amp-pan-zoom/0.1/amp-pan-zoom.js#L47) of eligibles children tags of `amp-pan-zoom`.
-In order to correcly display images, SVGs need the default `meet` value for the `preserveAspectRatio` attribute.
