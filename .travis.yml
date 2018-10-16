@@ -54,5 +54,6 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - sauce_connect
   pip: true
   bundler: true
