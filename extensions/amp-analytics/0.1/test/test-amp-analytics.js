@@ -450,11 +450,16 @@ describes.realWin('amp-analytics', {
   });
 
   it('should tolerate invalid triggers', function() {
-    const analytics = getAnalyticsTag();
-    allowConsoleError(() => { expect(() => {
-      // An incomplete click request.
-      analytics.addTriggerNoInline_({'on': 'click'});
-    }).to.throw(/Failed to process trigger/); });
+    const analytics = getAnalyticsTag({
+      'request': {'foo': 'https://example.com'},
+      'triggers': [],
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      allowConsoleError(() => { expect(() => {
+        // An incomplete click request.
+        analytics.addTriggerNoInline_({'on': 'click'});
+      }).to.throw(/Failed to process trigger/); });
+    });
   });
 
   it('expands recursive requests', function() {
