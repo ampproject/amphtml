@@ -48,7 +48,7 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
   'linkers': {
     'segment': {
       'ids': {
-        'ajs_aid': '${anonymousId}'
+        'ajs_aid': '${anonymousId}',
       },
     },
   },
