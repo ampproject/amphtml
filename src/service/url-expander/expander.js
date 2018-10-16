@@ -245,14 +245,15 @@ export class Expander {
       // If a binding is passed in through opt_bindings it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (opt_sync && hasOwn(bindingInfo, 'sync')) {
+    } else if (opt_sync && bindingInfo.sync !== null
+        && bindingInfo.sync !== undefined) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
     } else if (opt_sync) {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
-    } else if (hasOwn(bindingInfo, 'async')) {
+    } else if (bindingInfo.async !== null && bindingInfo.async !== undefined) {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async;
     } else {
