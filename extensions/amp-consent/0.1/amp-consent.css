@@ -40,3 +40,37 @@ amp-consent.amp-active {
 amp-consent.amp-hidden {
   visibility: hidden;
 }
+
+amp-consent.loading {
+  /* TODO: Finalize the placeholder design */
+  height: 30px;
+}
+
+amp-consent.consent-iframe-active {
+  height: 30vh;
+}
+
+.i-amphtml-consent-placeholder {
+  /* TODO: Finalize the placeholder design */
+}
+
+.i-amphtml-consent-placeholder:after {
+  content: "Loading.....";
+}
+
+.i-amphtml-consent-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes i-amphtml-consent-ui-in {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
+}
+
+.i-amphtml-consent-ui-in {
+  animation: i-amphtml-consent-ui-in 0.5s linear;
+}
