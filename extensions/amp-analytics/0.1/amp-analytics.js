@@ -351,6 +351,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   addTriggerNoInline_(config) {
+    if (!this.analyticsGroup_) {
+      // No need to handle trigger for component that has already been detached
+      // from DOM
+      return;
+    }
     try {
       this.analyticsGroup_.addTrigger(
           config, this.handleEvent_.bind(this, config));
