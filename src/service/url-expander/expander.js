@@ -252,14 +252,10 @@ export class Expander {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
-    } else if (hasOwn(bindingInfo, 'async')) {
-      // Prefer the async over the sync but it may not exist.
-      binding = bindingInfo.async;
     } else {
-      // Use sync in async resolution if async resolver does not exist.
-      binding = bindingInfo.sync;
+      // Prefer the async over the sync but it may not exist.
+      binding = bindingInfo.async || bindingInfo.sync;
     }
-
     return opt_sync ?
       this.evaluateBindingSync_(binding, name, opt_args, opt_collectVars) :
       this.evaluateBindingAsync_(binding, name, opt_args, opt_collectVars);
@@ -338,8 +334,7 @@ export class Expander {
         // even if opt_collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (typeof value === 'string' || typeof value === 'number' ||
-          typeof value === 'boolean') {
+      } else if (typeof value === 'string' || typeof value === 'number') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
         result = NOENCODE_WHITELIST[name] ? value.toString() :

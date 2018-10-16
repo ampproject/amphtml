@@ -443,8 +443,6 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with vars', () => {
-    // TODO(ccordry): Remove this after url-replacement v1 deletion
-    toggleExperiment(win, 'url-replacement-v2', true);
     const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
@@ -471,7 +469,6 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon)
         .to.have.been.calledWith(
             'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
-    toggleExperiment(win, 'url-replacement-v2', false);
   });
 
   it('border protection', () => {
