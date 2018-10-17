@@ -1978,12 +1978,12 @@ class CdataMatcher {
     parse_css.parseMediaQueries(
         stylesheet, seenMediaTypes, seenMediaFeatures, errorBuffer);
 
-    for (let token of seenMediaTypes) {
+    for (const token of seenMediaTypes) {
       /** @type{string} */
       const strippedMediaType =
           parse_css.stripVendorPrefix(token.value.toLowerCase());
       if (!spec.type.includes(strippedMediaType)) {
-        let errorToken = new parse_css.ErrorToken(
+        const errorToken = new parse_css.ErrorToken(
             amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_TYPE,
             ['', token.value]);
         token.copyPosTo(errorToken);
@@ -1991,12 +1991,12 @@ class CdataMatcher {
       }
     }
 
-    for (let token of seenMediaFeatures) {
+    for (const token of seenMediaFeatures) {
       /** @type{string} */
       const strippedMediaFeature = parse_css.stripMinMax(
           parse_css.stripVendorPrefix(token.value.toLowerCase()));
       if (!spec.feature.includes(strippedMediaFeature)) {
-        let errorToken = new parse_css.ErrorToken(
+        const errorToken = new parse_css.ErrorToken(
             amp.validator.ValidationError.Code
                 .CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
             ['', token.value]);
@@ -2040,8 +2040,8 @@ class CdataMatcher {
     for (const atRuleSpec of cssSpec.atRuleSpec) {
       if (atRuleSpec.mediaQuerySpec !== null) {
         goog.asserts.assert(atRuleSpec.name === 'media');
-        const mediaQuerySpec = atRuleSpec.mediaQuerySpec;
-        let errorBuffer =
+        const {mediaQuerySpec} = atRuleSpec;
+        const errorBuffer =
             mediaQuerySpec.issuesAsError ? cssErrors : cssWarnings;
         this.matchMediaQuery_(stylesheet, mediaQuerySpec, errorBuffer);
         // There will be at most @media atRuleSpec
@@ -4688,7 +4688,7 @@ class ParsedValidatorRules {
    */
   isTypeIdentifier(maybeTypeIdentifier) {
     return maybeTypeIdentifier in this.typeIdentifiers_;
-  };
+  }
 
   /**
    * Validates type identifiers within a set of attributes, adding
