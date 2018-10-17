@@ -84,6 +84,9 @@ export class AmpList extends AMP.BaseElement {
      */
     this.renderItems_ = null;
 
+    /** @private {?Array} */
+    this.renderedItems_ = null;
+
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
@@ -117,6 +120,8 @@ export class AmpList extends AMP.BaseElement {
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
+    /** @private {?Element} */
+    this.loadMoreOverflowElement_ = null;
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
@@ -170,7 +175,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!Element}
+   * @return {!Element|null}
    */
   getLoadMoreOverflowElement_() {
     if (!this.loadMoreOverflow_) {
@@ -314,7 +319,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_append, opt_refresh) {
+  fetchList_(opt_append = false, opt_refresh = false) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -323,7 +328,7 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
-      fetch = this.fetch_().then(data => {
+      fetch = this.fetch_(opt_refresh).then(data => {
         let items = getValueForExpr(data, itemsExpr);
         if (this.element.hasAttribute('single-item')) {
           user().assert(typeof items !== 'undefined',
@@ -345,7 +350,7 @@ export class AmpList extends AMP.BaseElement {
         if (maxLen < items.length) {
           items = items.slice(0, maxLen);
         }
-        return this.scheduleRender_(items, opt_append);
+        return this.scheduleRender_(/** @type {!Array} */(items), opt_append);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
       });
@@ -444,10 +449,8 @@ export class AmpList extends AMP.BaseElement {
       current.rejecter();
     };
     if (this.ssrTemplateHelper_.isSupported()) {
-      // TODO(alabiaga): This is a misleading type cast. Instead, we should use
-      // a new API on template-impl.js and amp-mustache.js as discussed.
-      const html = /** @type {!JsonObject} */ (current.data);
-      this.templates_.findAndRenderTemplate(this.element, html)
+      const html = /** @type {string} */ (current.data);
+      this.templates_.findAndSetHtmlForTemplate(this.element, html)
           .then(element => this.render_([element], current.opt_append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
@@ -501,17 +504,14 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {!Array<!Element>} elements
-   * @param {boolean} append
+   * @param {boolean=} opt_append
    * @return {!Promise}
    * @private
    */
-  render_(elements, append) {
+  render_(elements, opt_append = false) {
     dev().info(TAG, 'render:', elements);
     const container = dev().assertElement(this.container_);
 
-    if (!append) {
-      removeChildren(dev().assertElement(this.container_));
-    }
     return this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
@@ -527,7 +527,9 @@ export class AmpList extends AMP.BaseElement {
         diff.KEY = 'i-amphtml-key';
         diff(container, newContainer);
       } else {
-        removeChildren(container);
+        if (!opt_append) {
+          removeChildren(container);
+        }
         this.addElementsToContainer_(elements, container);
       }
 
@@ -749,15 +751,14 @@ export class AmpList extends AMP.BaseElement {
 
 
   /**
-   * @param {boolean} refresh
-   * @param {string?} opt_itemsExpr
-   *
+   * @param {boolean} opt_refresh
+   * @param {string=} opt_itemsExpr
    * @private
    */
-  fetch_(refresh, opt_itemsExpr) {
+  fetch_(opt_refresh = false, opt_itemsExpr) {
     const expr = opt_itemsExpr || '.';
     return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, expr, this.getPolicy_());
+        this.getAmpDoc(), this.element, expr, this.getPolicy_(), opt_refresh);
   }
 
   /**
