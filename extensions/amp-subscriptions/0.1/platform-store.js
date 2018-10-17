@@ -468,8 +468,8 @@ export class PlatformStore {
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
       if (platform2.weight == platform1.weight &&
-        platform2.platform == localPlatform) {
-        return 1;
+        platform1.platform == localPlatform) {
+        return -1;
       }
       return platform2.weight - platform1.weight;
     });
