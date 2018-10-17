@@ -27,14 +27,14 @@ const mandatoryParams = [],
       'design', 'asins', 'debug', 'aax_src_id',
       'header_style', 'link_style', 'link_hover_style',
       'text_style', 'random_permute', 'render_full_page',
-      'fallback_mode', 'url', 'axf_exp_name',
+      'url', 'axf_exp_name',
       'axf_treatment', 'disable_borders', 'attributes',
       'carousel', 'feedback_enable', 'max_ads_in_a_row',
       'list_price', 'prime', 'prime_position', 'widget_padding',
       'strike_text_style', 'brand_text_link', 'brand_position',
       'large_rating', 'rating_position', 'max_title_height',
       'enable_swipe_on_mobile', 'overrides',
-      'ead', 'force_win_bid',
+      'ead', 'force_win_bid', 'fallback_mode',
       'regionurl', 'divid', 'recomtype', 'adinstanceid',
     ];
 const prefix = 'amzn_assoc_';
@@ -51,18 +51,18 @@ export function a9(global, data) {
 
   validateData(data, mandatoryParams, optionalParams);
 
-  if (data[prefix + 'ad_mode']) {
-    if (data[prefix + 'ad_mode'] === 'auto') {
-      if (data['adinstanceid'] &&
-      (data['adinstanceid'] !== '')) {
+  if (data.amzn_assoc_ad_mode) {
+    if (data.amzn_assoc_ad_mode === 'auto') {
+      if (data.adinstanceid &&
+      (data.adinstanceid !== '')) {
         loadRecTag(global, data);
       }
       else {
         loadSearTag(global, data);
       }
     }
-    else if ((data[prefix + 'ad_mode'] === 'search')
-    || (data[prefix + 'ad_mode'] === 'manual')) {
+    else if ((data.amzn_assoc_ad_mode === 'search')
+    || (data.amzn_assoc_ad_mode === 'manual')) {
       loadSearTag(global, data);
     }
   }
@@ -76,7 +76,7 @@ export function a9(global, data) {
  */
 function getURL(data) {
   let url = 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
-  if (data['regionurl'] && (data['regionurl'] !== '')) {
+  if (data.regionurl && (data.regionurl !== '')) {
     url = data['regionurl'];
   }
 
@@ -89,13 +89,13 @@ function getURL(data) {
  */
 function loadRecTag(global, data) {
   let url = getURL(data);
-  url += '&adInstanceId=' + data['adinstanceid'];
-  if (data['recomtype'] === 'sync') {
+  url += '&adInstanceId=' + data.adinstanceid;
+  if (data.recomtype === 'sync') {
     writeScript(global, url);
   }
-  else if (data['recomtype'] === 'async') {
+  else if (data.recomtype === 'async') {
     const d = global.document.createElement('div');
-    d.setAttribute('id', data['divid']);
+    d.setAttribute('id', data.divid);
     global.document.getElementById('c').appendChild(d);
     loadScript(global, url);
   }
@@ -127,23 +127,23 @@ function loadSearTag(global, data) {
     const url = getURL(data);
     let i;
 
-    for (i = 0; i < 46; i++) {
+    for (i = 0; i < 45; i++) {
       setMacro(optionalParams[i]);
     }
 
-    if (data[prefix + 'fallback_mode']) {
-      const str = data[prefix + 'fallback_mode'].split(',');
+    if (data.amzn_assoc_fallback_mode) {
+      const str = (data.amzn_assoc_fallback_mode).split(',');
       let types = str[0].split(':');
       let typev = str[1].split(':');
       types = parseJson(types[1]);
       typev = parseJson(typev[1]);
-      global[prefix + 'fallback_mode'] = {
+      global['amzn_assoc_fallback_mode'] = {
         'type': types,
         'value': typev,
       };
     }
-    if (data[prefix + 'url']) {
-      global[prefix + 'URL'] = data[prefix + 'url'];
+    if (data.amzn_assoc_url) {
+      global['amzn_assoc_URL'] = data['amzn_assoc_url'];
     }
 
     writeScript(global, url);
