@@ -100,9 +100,19 @@ function serveListingWithReplacements(
   });
 }
 
+let shouldCache = true;
+function setCacheStatus(cacheStatus) {
+  shouldCache = cacheStatus;
+}
 
+let serveIndexCache;
 function serveIndex(req, res, next) {
-  
+
+  if (shouldCache && serveIndexCache) {
+    res.end(serveIndexCache);
+    return;
+  }
+
   const serveIndexTask = async () => {
     const bundle = await bundler.bundleComponent(proxyFormComponent);
     let renderedHtml = await renderListing('/examples');
@@ -110,10 +120,12 @@ function serveIndex(req, res, next) {
     renderedHtml = renderedHtml.replace('<!-- bottom_of_header -->', fs.readFileSync(proxyFormFile, 'utf8').toString());
     renderedHtml = renderedHtml.replace('<!-- bundle -->', bundle);
     
+    if (shouldCache) {
+      serveIndexCache = renderedHtml;
+    }
     res.end(renderedHtml);
   };  
   serveIndexTask();
-
 }
 
 
@@ -123,5 +135,8 @@ function serveListing(req, res, next) {
   });
 }
 
-
-module.exports = {serveIndex, serveListing};
+module.exports = {
+  setCacheStatus,
+  serveIndex, 
+  serveListing
+};
