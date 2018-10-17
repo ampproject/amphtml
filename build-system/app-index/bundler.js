@@ -40,12 +40,16 @@ const outputOptions = {
 
 module.exports = {
   bundleComponent: async (componentEntryFile) => {
-    // create a bundle
+    
+    console.log('Generating bundle for: ' + componentEntryFile);
+
     inputOptions.input = componentEntryFile;
     const bundle = await rollup.rollup(inputOptions);
 
     // generate code and a sourcemap
     const { code, map } = await bundle.generate(outputOptions);
+    
+    console.log('Generated bundle for: ' + componentEntryFile);
 
     return code;
   }

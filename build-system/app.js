@@ -63,7 +63,10 @@ app.get('/serve_mode=:mode', (req, res) => {
 
 if (!global.AMP_TESTING) {
   
-  if (process.env.DISABLE_DEV_DASHBOARD_CACHE) {
+  if (
+    process.env.DISABLE_DEV_DASHBOARD_CACHE && 
+    process.env.DISABLE_DEV_DASHBOARD_CACHE !== "false"
+  ) {
     devDashboard.setCacheStatus(false);
   }
 

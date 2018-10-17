@@ -116,7 +116,7 @@ function serveIndex(req, res, next) {
   const serveIndexTask = async () => {
     const bundle = await bundler.bundleComponent(proxyFormComponent);
     let renderedHtml = await renderListing('/examples');
-
+    
     renderedHtml = renderedHtml.replace('<!-- bottom_of_header -->', fs.readFileSync(proxyFormFile, 'utf8').toString());
     renderedHtml = renderedHtml.replace('<!-- bundle -->', bundle);
     
