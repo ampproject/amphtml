@@ -664,6 +664,52 @@ export class FakeCustomElements {
   }
 }
 
+export class FakeMutationObserver {
+  /**
+   * @param {function(!Array<!Object>)} callback
+   */
+  constructor(callback) {
+    this.callback_ = callback;
+
+    /** @type {!Array{!Object}} */
+    this.mutations_ = [];
+
+    /** @type {boolean} */
+    this.scheduled_ = false;
+  }
+
+  observe() {
+    // I'm not implementing this. Wayyyy to complicated.
+  }
+
+  disconnect() {
+    // If observe isn't implemnted, this doesn't need to be.
+  }
+
+  takeRecords() {
+    return this.takeRecords_();
+  }
+
+  takeRecords_() {
+    return this.mutations_.splice(0, Infinity);
+  }
+
+  /**
+   * This is a non-standard method that allows you to queue a mutation.
+   *
+   * @param {!Object} mutation
+   */
+  __mutate(mutation) {
+    this.mutations_.push(mutation);
+    if (!this.scheduled_) {
+      this.scheduled_ = true;
+      Promise.resolve().then(() => {
+        this.callback_(this.takeRecords_());
+      });
+    }
+  }
+}
+
 
 /**
  * @param {!Object} obj

@@ -21,6 +21,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {toggle} from '../../src/style';
 import {user} from '../../src/log';
+import {FakeMutationObserver} from '../../testing/fake-dom'
 
 
 describes.sandboxed('FixedLayer', {}, () => {
@@ -141,7 +142,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
         Promise: window.Promise,
-        MutationObserver: window.MutationObserver,
+        MutationObserver: FakeMutationObserver,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
