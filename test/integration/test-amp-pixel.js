@@ -38,8 +38,26 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   describes.integration('amp-pixel integration test', {
     body: `<amp-pixel src="${depositRequestUrl('has-referrer&title=TITLE')}">`,
   }, env => {
-    it('should resolve the TITLE macro', () => {
+    it('should expand the TITLE macro', () => {
       return withdrawRequest(env.win, 'has-referrer&title=AMP-TEST')
+          .then(request => {
+            expect(request.headers.referer).to.be.ok;
+          });
+    });
+  });
+
+  const requestUrl = depositRequestUrl('has-referrer&b=QUERY_PARAM(body)');
+  describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${requestUrl}">`,
+  }, env => {
+    it('should expand the QUERY_PARAM macro', () => {
+      const doubleEncodedUA = encodeURIComponent(
+          encodeURIComponent(env.win.navigator.userAgent));
+      const bodyStr = '%3Camp-pixel%20src%3D%22%2F%2Flocalhost%3A9876%2F' +
+          'amp4test%2Frequest-bank%2Fdeposit%2Fhas-referrer%26b%3D' +
+          `QUERY_PARAM(body)-${doubleEncodedUA}%22%3E`;
+
+      return withdrawRequest(env.win, `has-referrer&b=${bodyStr}`)
           .then(request => {
             expect(request.headers.referer).to.be.ok;
           });
