@@ -79,7 +79,6 @@ exports.getFlags = function(config) {
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
-    process_common_js_modules: true,
     rewrite_polyfills: false,
     create_source_map: '%outname%.map',
     parse_inline_source_maps: true,
