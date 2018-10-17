@@ -123,7 +123,7 @@ export function getElementServiceIfAvailableForDoc(
   return ampdoc.whenBodyAvailable()
       .then(() => waitForExtensionIfPresent(
           ampdoc.win, extension,
-          ampdoc.getHeadNode()))
+          ampdoc.win.document.head))
       .then(() => {
         // If this service is provided by an element, then we can't depend on
         // the service (they may not use the element).
