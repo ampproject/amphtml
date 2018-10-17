@@ -97,7 +97,6 @@ function formatClosureCompilerError(message) {
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
-    'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
     'third_party/subscriptions-project/',
@@ -107,6 +106,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'third_party/rrule/',
     'third_party/react-dates/',
+    'third_party/amp-toolbox-cache-url/',
     'node_modules/',
     'build/patched-module/',
     // Can't seem to suppress `(0, win.eval)` suspicious code warning
@@ -253,6 +253,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
+      'third_party/amp-toolbox-cache-url/**/*.js',
       'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/set-dom/src/**/*.js',
