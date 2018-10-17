@@ -22,6 +22,7 @@ import {closestBySelector, escapeHtml} from './dom';
 import {dev, rethrowAsync, user} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
+import {isExperimentOn} from './experiments';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -32,6 +33,9 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
+
+/** @type {string} */
+const TAG = 'friendly-iframe-embed';
 
 /** @const {string} */
 const EMBED_PROP = '__AMP_EMBED__';
@@ -221,11 +225,13 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // TODO (alabiaga): remove customElementExtensions once extensions
     // becomes preferred way.
     let ext = [];
-    if (spec.customElementExtensions) {
-      ext = spec.customElementExtensions;
-    } else if (spec.extensions) {
-      spec.extensions.forEach(extension => {
-        ext.push(extension['custom-element']);
+    if (isExperimentOn(win, 'fie-metadata-extension') && spec.extensions) {
+      ext = spec.extensions;
+    } else if (spec.customElementExtensions) {
+      spec.customElementExtensions.forEach(extensionId => {
+        // src is not specified as legacy extensions will default to
+        // their 0.1 version. See extensions.installExtensionsInChildWindow.
+        ext.push({'custom-element': extensionId, 'src': null});
       });
     }
     extensions.installExtensionsInChildWindow(
@@ -660,7 +666,8 @@ export function isInFie(element) {
  * @param {!Window} win
  */
 export function preloadExtensions(metaData, win) {
-  if (metaData.extensions && metaData.extensions.length) {
+  if (isExperimentOn(win, 'fie-metadata-extension')
+      && metaData.extensions && metaData.extensions.length) {
     metaData.extensions.forEach(
         extensionDef => {
           const extensionId = extensionDef['custom-element'];
@@ -670,10 +677,11 @@ export function preloadExtensions(metaData, win) {
         });
   } else if (metaData.customElementExtensions
         && metaData.customElementExtensions.length) {
+    user().warn(TAG, 'Legacy field customElementExtensions on '
+        + 'amp-ad-metadata used.');
     metaData.customElementExtensions.forEach(extensionId => {
       Services.extensionsFor(win)
           ./*OK*/preloadExtension(extensionId);
     });
   }
-
 }

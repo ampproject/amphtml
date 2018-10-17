@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+import * as experiment from '../../src/experiments';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -31,7 +31,6 @@ import {installServiceInEmbedScope} from '../../src/service';
 import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-
 
 describe('friendly-iframe-embed', () => {
 
@@ -150,7 +149,8 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), ['amp-test'], /* preinstallCallback */ undefined)
+        }), [{'custom-element': 'amp-test', 'src': null}],
+            /* preinstallCallback */ undefined)
         .once();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
@@ -164,6 +164,8 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should install extensions with versions', () => {
+    sandbox.stub(experiment, 'isExperimentOn')
+        .withArgs(sinon.match.any, 'fie-metadata-extension').returns(true);
     // Extensions preloading have been requested.
     extensionsMock.expects('preloadExtension')
         .withExactArgs('amp-mustache', '0.2')
@@ -176,7 +178,7 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), ['amp-mustache'],
+        }), [{'custom-element': 'amp-mustache', 'src': '0.2'}],
             /* preinstallCallback */ undefined)
         .once();
 
@@ -212,7 +214,7 @@ describe('friendly-iframe-embed', () => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<amp-test></amp-test>',
-      extensions: ['amp-test'],
+      customElementExtensions: ['amp-test'],
     });
     return embedPromise.then(embed => {
       resourcesMock.expects('removeForChildWindow')
@@ -868,9 +870,11 @@ describe('friendly-iframe-embed', () => {
 
   describe('preloadExtensions', () => {
     it('should preload extensions with versions', () => {
+      sandbox.stub(experiment, 'isExperimentOn')
+          .withArgs(sinon.match.any, 'fie-metadata-extension').returns(true);
       const preloadCallStub = sandbox.stub();
-      sandbox.stub(Services, 'extensionsFor')
-          .withArgs({}).returns({'preloadExtension': preloadCallStub});
+      sandbox.stub(Services, 'extensionsFor').withArgs(sinon.match.any)
+          .returns({'preloadExtension': preloadCallStub});
       const extensions =
           {'extensions': [{'custom-element': 'amp-list', 'src': '0.1'},
             {'custom-element': 'amp-mustache', 'src': '0.2'}]};
@@ -883,8 +887,8 @@ describe('friendly-iframe-embed', () => {
 
     it('should preload extensions without versions', () => {
       const preloadCallStub = sandbox.stub();
-      sandbox.stub(Services, 'extensionsFor')
-          .withArgs({}).returns({'preloadExtension': preloadCallStub});
+      sandbox.stub(Services, 'extensionsFor').withArgs(sinon.match.any)
+          .returns({'preloadExtension': preloadCallStub});
       const extensions =
           {'customElementExtensions': ['amp-list', 'amp-mustache']};
       preloadExtensions(extensions, {});
