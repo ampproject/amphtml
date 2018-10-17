@@ -66,9 +66,11 @@ const adVendors = [];
 const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
+const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
 const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
+const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
@@ -957,7 +959,9 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget);
+              return enableLocalTesting(minifiedRuntimeEsmTarget).then(() => {
+                return enableLocalTesting(minifiedShadowRuntimeTarget);
+              });
             }
           });
         }
@@ -1290,6 +1294,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
+            } else if (destFilename === 'amp-shadow.js') {
+              return enableLocalTesting(unminifiedShadowRuntimeTarget);
             } else {
               return Promise.resolve();
             }
