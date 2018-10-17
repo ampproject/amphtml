@@ -65,12 +65,17 @@ const adVendors = [];
 
 const {green, red, cyan} = colors;
 
+// Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
 const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
+const minifiedAdsTarget = 'dist/amp4ads-v0.js';
 const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
+
+// Unminified targets to which AMP_CONFIG must be written.
 const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
+const unminifiedAdsTarget = 'dist/amp-inabox.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
@@ -959,9 +964,13 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget).then(() => {
-                return enableLocalTesting(minifiedShadowRuntimeTarget);
-              });
+              return enableLocalTesting(minifiedRuntimeEsmTarget)
+                  .then(() => {
+                    return enableLocalTesting(minifiedShadowRuntimeTarget);
+                  })
+                  .then(() => {
+                    return enableLocalTesting(minifiedAdsTarget);
+                  });
             }
           });
         }
@@ -1296,6 +1305,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               return enableLocalTesting(unminified3pTarget);
             } else if (destFilename === 'amp-shadow.js') {
               return enableLocalTesting(unminifiedShadowRuntimeTarget);
+            } else if (destFilename === 'amp-inabox.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else {
               return Promise.resolve();
             }
