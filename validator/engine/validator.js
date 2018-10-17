@@ -3811,6 +3811,7 @@ function validateAttributes(
   // We must have done so for the extension to be valid.
   let seenExtensionSrcAttr = false;
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
+  const isHtmlTag = encounteredTag.upperName() === 'HTML';
   /** @type {!Array<boolean>} */
   const mandatoryAttrsSeen = []; // This is a set of attr ids.
   /** @type {!Array<number>} */
@@ -3833,6 +3834,11 @@ function validateAttributes(
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
     if (!(attr.name in attrsByName)) {
+      // The HTML tag specifies type identifiers which are validated in
+      // validateHtmlTag(), so we skip them here.
+      if (isHtmlTag && context.getRules().isTypeIdentifier(attr.name)) {
+        continue;
+      }
       // While validating a reference point, we skip attributes that
       // we don't have a spec for. They will be validated when the
       // TagSpec itself gets validated.
@@ -3844,7 +3850,7 @@ function validateAttributes(
       {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-templa'te, and 'src' attributes by calling this method.
+      // 'custom-template', and 'src' attributes by calling this method.
       // For 'src', we also keep track whether we validated it this way,
       // (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
@@ -4347,6 +4353,13 @@ class ParsedValidatorRules {
     this.rules_ = amp.validator.createRules();
 
     /**
+     * The HTML format
+     * @type {string}
+     * @private
+     */
+    this.htmlFormat_ = htmlFormat;
+
+    /**
      * ParsedTagSpecs in id order.
      * @type {!Array<!ParsedTagSpec>}
      * @private
@@ -4391,6 +4404,21 @@ class ParsedValidatorRules {
      * @private
      */
     this.exampleUsageByExtension_ = {};
+
+    /**
+     * Sets type identifiers which are used to determine the set of validation
+     * rules to be applied.
+     * @type {!Object<string, number>}
+     * @private
+     */
+    this.typeIdentifiers_ = Object.create(null);
+    this.typeIdentifiers_['⚡'] = 0;
+    this.typeIdentifiers_['amp'] = 0;
+    this.typeIdentifiers_['⚡4ads'] = 0;
+    this.typeIdentifiers_['amp4ads'] = 0;
+    this.typeIdentifiers_['⚡4email'] = 0;
+    this.typeIdentifiers_['amp4email'] = 0;
+    this.typeIdentifiers_['transformed'] = 0;
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
@@ -4580,6 +4608,87 @@ class ParsedValidatorRules {
   /** @return {?string} */
   getScriptSpecUrl() {
     return this.rules_.scriptSpecUrl;
+  }
+
+  /**
+   * @param {string} maybeTypeIdentifier
+   * @return {boolean}
+   */
+  isTypeIdentifier(maybeTypeIdentifier) {
+    return maybeTypeIdentifier in this.typeIdentifiers_;
+  };
+
+  /**
+   * Validates type identifiers within a set of attributes, adding
+   * ValidationErrors as necessary, and sets type identifiers on
+   * ValidationResult.typeIdentifier.
+   * @param {!Array<!Object>} attrs
+   * @param {!Array<string>} formatIdentifiers
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   */
+  validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
+    let hasMandatoryTypeIdentifier = false;
+    for (const attr of attrs) {
+      // Verify this attribute is a type identifier. Other attributes are
+      // validated in validateAttributes.
+      if (this.isTypeIdentifier(attr.name)) {
+        // Verify this type identifier is allowed for this format.
+        if (formatIdentifiers.indexOf(attr.name) !== -1) {
+          // Only add the type identifier once per representation. That is, both
+          // "⚡" and "amp", which represent the same type identifier.
+          const identifier = attr.name.replace('⚡', 'amp');
+          if (validationResult.typeIdentifier.indexOf(identifier) === -1) {
+            validationResult.typeIdentifier.push(identifier);
+          }
+          // The type identifier "transformed" is not considered mandatory
+          // unlike other type identifiers.
+          if (identifier != 'transformed') {
+            hasMandatoryTypeIdentifier = true;
+          }
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+              context.getLineCol(), /*params=*/[attr.name, 'html'],
+              'https://www.ampproject.org/docs/reference/spec#required-markup',
+              validationResult);
+        }
+      }
+    }
+    if (!hasMandatoryTypeIdentifier) {
+      // Missing mandatory type identifier (any AMP variant but "transformed").
+      context.addError(
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
+          'https://www.ampproject.org/docs/reference/spec#required-markup',
+          validationResult);
+    }
+  }
+
+  /**
+   * Validates the HTML tag for type identifiers.
+   * @param {!amp.htmlparser.ParsedHtmlTag} htmlTag
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   */
+  validateHtmlTag(htmlTag, context, validationResult) {
+    switch (this.htmlFormat_) {
+      case 'AMP':
+      case 'EXPERIMENTAL':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡', 'amp', 'transformed'], context,
+            validationResult);
+        break;
+      case 'AMP4ADS':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡4ads', 'amp4ads'], context, validationResult);
+        break;
+      case 'AMP4EMAIL':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡4email', 'amp4email'], context,
+            validationResult);
+        break;
+    }
   }
 
   /**
@@ -5078,6 +5187,10 @@ amp.validator.ValidationHandler =
    * @override
    */
       startTag(encounteredTag) {
+        if (encounteredTag.upperName() === 'HTML') {
+          this.context_.getRules().validateHtmlTag(
+              encounteredTag, this.context_, this.validationResult_);
+        }
         /** @type {?string} */
         const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
         if (maybeDuplicateAttrName !== null) {

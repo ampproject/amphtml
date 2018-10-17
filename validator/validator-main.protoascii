@@ -74,47 +74,13 @@ tags: {
 # 4.1.1 The html element
 tags: {  # AMP
   html_format: AMP
-  tag_name: "HTML"
-  spec_name: "html ⚡ for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡"
-    alternative_names: "amp"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
-}
-tags: {  # AMP4ADS
   html_format: AMP4ADS
-  tag_name: "HTML"
-  spec_name: "html ⚡4ads for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡4ads"
-    alternative_names: "amp4ads"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#a4a-format-rules"
-}
-tags: {  # AMP4EMAIL
   html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "HTML"
-  spec_name: "html ⚡4email for top-level html"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
-  attrs: {
-    name: "⚡4email"
-    alternative_names: "amp4email"
-    mandatory: true
-    value: ""
-  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
