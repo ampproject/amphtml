@@ -55,14 +55,19 @@ export class LinkRewriterManager {
    */
   constructor(ampdoc) {
 
-    /** @private {!Document} */
-    this.ampPageDocument_ = /** @type {!Document} */ (ampdoc.getRootNode());
+    /**
+     * Use getRootNode() to support "shadow AMP" mode where the rootNode is not
+     * necessarily the page document.
+     * See https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa
+     * @private {!Document|!ShadowRoot}
+     */
+    this.rootNode_ = ampdoc.getRootNode();
 
     /**
-     * @private {!Array<string>}
      * List of link rewriter Id in priority order as defined
      * in the PRIORITY_META_TAG_NAME meta tag.
      * First element has the highest priority.
+     * @private {!Array<string>}
      */
     this.priorityList_ = this.getPriorityList_(ampdoc);
 
@@ -73,7 +78,7 @@ export class LinkRewriterManager {
      */
     this.linkRewriters_ = [];
 
-    this.installGlobalEventListener_(this.ampPageDocument_);
+    this.installGlobalEventListener_(this.rootNode_);
     const navigation = Services.navigationForDoc(ampdoc);
     navigation.registerAnchorMutator(
         this.maybeRewriteLink.bind(this), Priority.LINK_REWRITER_MANAGER);
@@ -97,7 +102,7 @@ export class LinkRewriterManager {
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(
-        this.ampPageDocument_,
+        this.rootNode_,
         linkRewriterId,
         resolveUnknownLinks,
         options
@@ -180,11 +185,11 @@ export class LinkRewriterManager {
 
   /**
    * Listen for DOM_UPDATE event.
-   * @param {!Document} ampPageDocument
+   * @param {!Document|!ShadowRoot} rootNode
    * @private
    */
-  installGlobalEventListener_(ampPageDocument) {
-    ampPageDocument.addEventListener(AmpEvents.DOM_UPDATE,
+  installGlobalEventListener_(rootNode) {
+    rootNode.addEventListener(AmpEvents.DOM_UPDATE,
         this.onDomChanged_.bind(this));
   }
 

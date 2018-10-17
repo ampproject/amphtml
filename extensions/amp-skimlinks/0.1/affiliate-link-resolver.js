@@ -143,7 +143,7 @@ export class AffiliateLinkResolver {
           domainsToAsk);
     }
 
-    // Returns an object with a sync reponse and an async response.
+    // Returns an object containing a sync reponse and an async response.
     return new TwoStepsResponse(alreadyResolvedResponse,
         willBeResolvedPromise);
   }

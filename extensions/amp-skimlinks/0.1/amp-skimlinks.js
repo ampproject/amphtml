@@ -17,7 +17,6 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {once} from '../../../src/utils/function';
-import {whenDocumentReady} from '../../../src/document-ready';
 
 import {Tracking} from './tracking';
 
@@ -86,9 +85,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
-    return whenDocumentReady(
-        /** @type {!Document} */(this.ampDoc_.getRootNode())
-    )
+    return this.ampDoc_.whenBodyAvailable()
         .then(() => this.viewer_.getReferrerUrl())
         .then(referrer => {
           this.referrer_ = referrer;

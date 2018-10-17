@@ -46,20 +46,20 @@ export let AnchorReplacementList;
  */
 export class LinkRewriter {
   /**
-   * @param {!Document} ampPageDocument - Document of the iframe when loaded in viewer
+   * @param {!Document|!ShadowRoot} rootNode
    * @param {string} id
    * @param {function(Array<HTMLElement>):!TwoStepsResponse} resolveUnknownLinks
    * @param {?{linkSelector: string}=} options
    */
-  constructor(ampPageDocument, id, resolveUnknownLinks, options) {
+  constructor(rootNode, id, resolveUnknownLinks, options) {
     /** @public {!../../../../src/observable.Observable} */
     this.events = new Observable();
 
     /** @public {string} */
     this.id = id;
 
-    /** @private {!Document} */
-    this.ampPageDocument_ = ampPageDocument;
+    /** @private {!Document|!ShadowRoot} */
+    this.rootNode_ = rootNode;
 
     /** @private {function(!Array<!HTMLElement>):!TwoStepsResponse} */
     this.resolveUnknownLinks_ = resolveUnknownLinks;
@@ -231,7 +231,7 @@ export class LinkRewriter {
    * @private
    */
   getLinksInDOM_() {
-    const q = this.ampPageDocument_.querySelectorAll(this.linkSelector_);
+    const q = this.rootNode_.querySelectorAll(this.linkSelector_);
     return [].slice.call(q);
   }
 }
