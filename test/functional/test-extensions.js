@@ -947,7 +947,7 @@ describes.sandboxed('Extensions', {}, () => {
       const extHolder = extensions.getExtensionHolder_('amp-test');
       extHolder.scriptPresent = true;
       const promise = extensions.installExtensionsInChildWindow(
-          iframeWin, ['amp-test']);
+          iframeWin, [{'custom-element': 'amp-test', 'src': null}]);
       // Must be stubbed already.
       expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
       expect(iframeWin.document.createElement('amp-test').implementation_)
@@ -996,7 +996,8 @@ describes.sandboxed('Extensions', {}, () => {
       const extHolder = extensions.getExtensionHolder_('amp-test');
       extHolder.scriptPresent = true;
       const promise =
-          extensions.installExtensionsInChildWindow(iframeWin, ['amp-test']);
+          extensions.installExtensionsInChildWindow(
+              iframeWin, [{'custom-element': 'amp-test', 'src': null}]);
       // Resolve the promise.
       extensions.registerExtension('amp-test', AMP => {
         AMP.registerServiceForDoc('fake-service-foo', () => fakeServiceFoo);
@@ -1014,7 +1015,7 @@ describes.sandboxed('Extensions', {}, () => {
       extHolder.scriptPresent = true;
       const promise = extensions.installExtensionsInChildWindow(
           iframeWin,
-          ['amp-test'],
+          [{'custom-element': 'amp-test', 'src': null}],
           function() {
             // Built-ins not installed yet.
             expect(
