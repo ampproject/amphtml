@@ -434,7 +434,7 @@ describes.realWin('Platform store', {}, () => {
           .to.equal(anotherPlatform);
     });
 
-    it('should tie-break to local', () => {
+    it.only('should tie-break to local', () => {
       localFactors['supportsViewer'] = 1;
       anotherFactors['supportsViewer'] = 1;
       expect(platformStore.selectPlatformForLogin())
