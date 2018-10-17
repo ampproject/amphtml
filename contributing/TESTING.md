@@ -291,7 +291,7 @@ is done through
 `heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ### Testing with Firebase
-For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory, setting the `public` folder to `firebase` (a `firebase` folder can be generated with the command, `gulp firebase`).
+For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory* (a `firebase` folder can be generated with the command, `gulp firebase`).
 ```
 npm install -g firebase-tools
 firebase login
@@ -299,6 +299,11 @@ firebase init
 gulp firebase
 firebase deploy
 ```
+* When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
+- "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
+- "What do you want to use as your public directory?" enter `firebase`.
+- "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
+
 
 `gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`).  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 
