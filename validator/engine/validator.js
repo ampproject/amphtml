@@ -53,11 +53,14 @@ goog.require('goog.asserts');
 goog.require('goog.string');
 goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
+goog.require('parse_css.ErrorToken');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseInlineStyle');
+goog.require('parse_css.parseMediaQueries');
+goog.require('parse_css.stripMinMax');
 goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
@@ -1961,6 +1964,49 @@ class CdataMatcher {
   }
 
   /**
+   * Matches the provided stylesheet against a CSS media query specification.
+   * @param {!parse_css.Stylesheet} stylesheet
+   * @param {!amp.validator.MediaQuerySpec} spec
+   * @param {!Array<!parse_css.ErrorToken>} errorBuffer
+   * @private
+   */
+  matchMediaQuery_(stylesheet, spec, errorBuffer) {
+    /** @type{!Array<!parse_css.IdentToken>} */
+    const seenMediaTypes = [];
+    /** @type{!Array<!parse_css.IdentToken>} */
+    const seenMediaFeatures = [];
+    parse_css.parseMediaQueries(
+        stylesheet, seenMediaTypes, seenMediaFeatures, errorBuffer);
+
+    for (let token of seenMediaTypes) {
+      /** @type{string} */
+      const strippedMediaType =
+          parse_css.stripVendorPrefix(token.value.toLowerCase());
+      if (!spec.type.includes(strippedMediaType)) {
+        let errorToken = new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_TYPE,
+            ['', token.value]);
+        token.copyPosTo(errorToken);
+        errorBuffer.push(errorToken);
+      }
+    }
+
+    for (let token of seenMediaFeatures) {
+      /** @type{string} */
+      const strippedMediaFeature = parse_css.stripMinMax(
+          parse_css.stripVendorPrefix(token.value.toLowerCase()));
+      if (!spec.feature.includes(strippedMediaFeature)) {
+        let errorToken = new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code
+                .CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
+            ['', token.value]);
+        token.copyPosTo(errorToken);
+        errorBuffer.push(errorToken);
+      }
+    }
+  }
+
+  /**
    * Matches the provided cdata against a CSS specification. Helper
    * routine for match (see above).
    * @param {string} cdata
@@ -1972,6 +2018,8 @@ class CdataMatcher {
   matchCss_(cdata, cssSpec, context, validationResult) {
     /** @type {!Array<!parse_css.ErrorToken>} */
     const cssErrors = [];
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    const cssWarnings = [];
     /** @type {!Array<!parse_css.Token>} */
     const tokenList = parse_css.tokenize(
         cdata, this.getLineCol().getLine(), this.getLineCol().getCol(),
@@ -1979,7 +2027,7 @@ class CdataMatcher {
     /** @type {!CssParsingConfig} */
     const cssParsingConfig = computeCssParsingConfig(cssSpec);
     /** @type {!parse_css.Stylesheet} */
-    const sheet = parse_css.parseAStylesheet(
+    const stylesheet = parse_css.parseAStylesheet(
         tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
         cssErrors);
 
@@ -1987,15 +2035,29 @@ class CdataMatcher {
     // generate errors for url(…) functions with invalid parameters.
     /** @type {!Array<!parse_css.ParsedCssUrl>} */
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+    parse_css.extractUrls(stylesheet, parsedUrls, cssErrors);
+    // Similarly we extract query types and features from @media rules.
+    for (const atRuleSpec of cssSpec.atRuleSpec) {
+      if (atRuleSpec.mediaQuerySpec !== null) {
+        goog.asserts.assert(atRuleSpec.name === 'media');
+        const mediaQuerySpec = atRuleSpec.mediaQuerySpec;
+        let errorBuffer =
+            mediaQuerySpec.issuesAsError ? cssErrors : cssWarnings;
+        this.matchMediaQuery_(stylesheet, mediaQuerySpec, errorBuffer);
+        // There will be at most @media atRuleSpec
+        break;
+      }
+    }
+
     if (cssSpec.validateAmp4Ads) {
-      parse_css.validateAmp4AdsCss(sheet, cssErrors);
+      parse_css.validateAmp4AdsCss(stylesheet, cssErrors);
     }
 
     if (cssSpec.validateKeyframes) {
-      parse_css.validateKeyframesCss(sheet, cssErrors);
+      parse_css.validateKeyframesCss(stylesheet, cssErrors);
     }
 
+    // Add errors then warnings:
     for (const errorToken of cssErrors) {
       // Override the first parameter with the name of this style tag.
       const {params} = errorToken;
@@ -2005,6 +2067,16 @@ class CdataMatcher {
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
     }
+    for (const errorToken of cssWarnings) {
+      // Override the first parameter with the name of this style tag.
+      const {params} = errorToken;
+      // Override the first parameter with the name of this style tag.
+      params[0] = getTagSpecName(this.tagSpec_);
+      context.addError(
+          errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
+          /* url */ '', validationResult);
+    }
+
     const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
     const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
     for (const url of parsedUrls) {
@@ -2016,7 +2088,7 @@ class CdataMatcher {
     }
     const visitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
-    sheet.accept(visitor);
+    stylesheet.accept(visitor);
   }
 
   /** @return {!LineCol} */

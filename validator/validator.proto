@@ -171,6 +171,17 @@ message BlackListedCDataRegex {
   optional string error_message = 2;
 }
 
+// This spec is used when parsing a media query inside a CSS @media rule.
+message MediaQuerySpec {
+  // If issues_as_error is true, then parsing errors and invalid
+  // types / features will be treated as validator errors, otherwise warnings.
+  optional bool issues_as_error = 1 [default = false];
+  // These are the media query types and features allowed within the stylesheet.
+  // http://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Syntax
+  repeated string type = 2;
+  repeated string feature = 3;
+}
+
 // This spec is used by our CSS parser to determine how the contents of a given
 // AT rule should be parsed, if at all. The term 'rule' here refers to the AT
 // Rule in CSS, not a validation rule.
@@ -190,6 +201,11 @@ message AtRuleSpec {
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
+
+  // A MediaQuerySpec may only be set for an AtRuleSpec with the name
+  // "media". If not set, media queries will be left unparsed, so no errors or
+  // warnings about them will be reported.
+  optional MediaQuerySpec media_query_spec = 3;
 }
 
 // NEXT AVAILABLE TAG: 8
