@@ -273,6 +273,12 @@ class ManualAdvancement extends AdvancementConfig {
     /** @private @const {!Element} */
     this.element_ = element;
 
+    /** @private {number|string|null} */
+    this.timeoutId_ = null;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
@@ -322,7 +328,6 @@ class ManualAdvancement extends AdvancementConfig {
       this.element_
           .addEventListener('touchend', this.onTouchend_.bind(this), true);
     }
-
     this.element_
         .addEventListener(
             'click', this.maybePerformNavigation_.bind(this), true);
@@ -344,6 +349,9 @@ class ManualAdvancement extends AdvancementConfig {
 
     this.touchstartTimestamp_ = Date.now();
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.timeoutId_ = this.timer_.delay(() => {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }, HOLD_TOUCH_THRESHOLD_MS);
   }
 
   /**
@@ -367,6 +375,10 @@ class ManualAdvancement extends AdvancementConfig {
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
+    this.timer_.cancel(this.timeoutId_);
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    }
   }
 
   /**

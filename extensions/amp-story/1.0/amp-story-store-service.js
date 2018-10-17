@@ -79,6 +79,7 @@ export const UIType = {
  *    sidebarstate: boolean,
  *    storyaudiostate: boolean,
  *    supportedbrowserstate: boolean,
+ *    systemuiisvisiblestate: boolean,
  *    uistate: !UIType,
  *    consentid: ?string,
  *    currentpageid: string,
@@ -114,6 +115,7 @@ export const StateProperty = {
   SIDEBAR_STATE: 'sidebarstate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
+  SYSTEM_UI_IS_VISIBLE_STATE: 'systemuiisvisiblestate',
   UI_STATE: 'uistate',
 
   // App data.
@@ -141,6 +143,7 @@ export const Action = {
   TOGGLE_HAS_SIDEBAR: 'togglehassidebar',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
+  TOGGLE_SYSTEM_UI_IS_VISIBLE: 'togglesystemuiisvisible',
   TOGGLE_UI: 'toggleui',
 };
 
@@ -229,6 +232,9 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
+    case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -342,6 +348,7 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
@@ -352,7 +359,7 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
-      [StateProperty.HAS_SIDEBAR_STATE]: false,
+      [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
