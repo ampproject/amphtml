@@ -244,11 +244,20 @@ class AmpYoutube extends AMP.BaseElement {
         this.handleYoutubeMessage_.bind(this)
     );
 
-    const loaded = this.loadPromise(this.iframe_).then(() => {
-      // Tell YT that we want to receive messages
-      this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const loaded = this.loadPromise(this.iframe_)
+        // Make sure the YT player is ready for this. For some reason YT player
+        // would send couple of messages but then stop. Waiting for a bit before
+        // sending the 'listening' event seems to fix that and allow YT Player
+        // to send messages continuously.
+        //
+        // This was removed in #6915 but due to #17979 it has been taken back
+        // for a workaround.
+        .then(() => Services.timerFor(this.win).promise(300))
+        .then(() => {
+          // Tell YT that we want to receive messages
+          this.listenToFrame_();
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        });
     this.playerReadyResolver_(loaded);
     return loaded;
   }
