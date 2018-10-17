@@ -1,0 +1,93 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import {dict} from '../../../src/utils/object';
+import {listen} from '../../../src/event-helper';
+
+/**
+ * @fileoverview Forward focus events' related data from the AMP doc to the
+ * viewer.
+ */
+export class FocusHandler {
+
+  /**
+   * @param {!Window} win
+   * @param {!./messaging/messaging.Messaging} messaging
+   */
+  constructor(win, messaging) {
+    /** @const {!Window} */
+    this.win = win;
+    /** @const @private {!./messaging/messaging.Messaging} */
+    this.messaging_ = messaging;
+
+    /**
+     * @const @private {!Array<function()>}
+     */
+    this.unlistenHandlers_ = [];
+
+    this.listenForFocusEvents_();
+  }
+
+  /**
+   * @private
+   */
+  listenForFocusEvents_() {
+    const handleEvent = this.handleEvent_.bind(this);
+    const doc = this.win.document;
+
+    const options = {
+      capture: false,
+    };
+    this.unlistenHandlers_.push(
+        listen(doc, 'focusin', handleEvent, options));
+  }
+
+  /**
+   * @private
+   */
+  unlisten_() {
+    this.unlistenHandlers_.forEach(unlisten => unlisten());
+    this.unlistenHandlers_.length = 0;
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  handleEvent_(e) {
+    switch (e.type) {
+      case 'focusin':
+        this.forwardEventToViewer_(e);
+        break;
+      default:
+        // fall through.
+        return;
+    }
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  forwardEventToViewer_(e) {
+    if (e.defaultPrevented) {
+      return;
+    }
+    this.messaging_.sendRequest(
+        e.type, {'focusTargetRect': e.target.getBoundingClientRect()}, false);
+  }
+}
