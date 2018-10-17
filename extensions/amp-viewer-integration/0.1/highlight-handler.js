@@ -68,6 +68,7 @@ const SCROLL_ANIMATION_HEIGHT = 500;
  * The height of the margin placed before highlighted texts.
  * This margin is necessary to avoid the overlap with the common floating
  * header UI.
+ * TODO(yunabe): Calculate this dynamically using elements in FixedLayer.
  * @type {number}
  */
 const PAGE_TOP_MARGIN = 80;
