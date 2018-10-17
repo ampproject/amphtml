@@ -16,7 +16,6 @@
 
 import * as lolex from 'lolex';
 import * as service from '../../src/service';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {
   hasRenderDelayingServices,
@@ -33,7 +32,7 @@ describe('waitForServices', () => {
   let variantResolve;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const getService = sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
@@ -67,9 +66,7 @@ describe('waitForServices', () => {
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
     clock.tick(3000);
-    allowConsoleError(() => {
-      return expect(promise).to.eventually.be.rejectedWith('variant');
-    });
+    return expect(promise).to.eventually.be.rejectedWith('variant');
   });
 
   it('should resolve when all extensions are ready', () => {

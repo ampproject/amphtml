@@ -20,12 +20,18 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Hindi strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'सक्षम करें',
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'स्वीकार करना',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'प्रयोग सक्षम. कृपया पुनः लोड करें.',
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'अस्वीकार करना',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'मूल डोमेन पर देखें:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'एएमपी परिणामों के बारे में अधिक जानकारी',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Next टैप करें',
@@ -89,4 +95,4 @@ export default {
     string: 'हमें खेद है, ऐसा लगता है कि आपका ब्राउज़र इस अनुभव का समर्थन ' +
         'नहीं करता है',
   },
-};
+});

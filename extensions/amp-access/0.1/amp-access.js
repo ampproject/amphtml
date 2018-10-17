@@ -15,8 +15,10 @@
  */
 
 import {AccessSource, AccessType} from './amp-access-source';
+import {AccessVars} from './access-vars';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
+import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev, user} from '../../../src/log';
@@ -43,6 +45,7 @@ const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
 
 /**
  * AccessService implements the complete lifecycle of the AMP Access system.
+ * @implements {AccessVars}
  */
 export class AccessService {
   /**
@@ -117,6 +120,9 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
+    /** @private @const {!Observable} */
+    this.applyAuthorizationsObservable_ = new Observable();
+
     // This will fire after the first received authorization, even if
     // there are multiple sources.
     this.lastAuthorizationPromises_.then(() => {
@@ -134,13 +140,7 @@ export class AccessService {
         this.onDomUpdate_.bind(this));
   }
 
-  /**
-   * Returns the promise that will yield the access READER_ID.
-   *
-   * This is a restricted API.
-   *
-   * @return {?Promise<string>}
-   */
+  /** @override from AccessVars */
   getAccessReaderId() {
     if (!this.enabled_) {
       return null;
@@ -162,6 +162,21 @@ export class AccessService {
       });
     }
     return this.readerIdPromise_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  areFirstAuthorizationsCompleted() {
+    return this.firstAuthorizationsCompleted_;
+  }
+
+  /**
+   * Registers a callback to be triggered when the document gets (re)authorized.
+   * @param {!Function} callback
+   */
+  onApplyAuthorizations(callback) {
+    this.applyAuthorizationsObservable_.add(callback);
   }
 
   /**
@@ -205,9 +220,9 @@ export class AccessService {
     // Only re-authorize sections if authorization already fired, otherwise
     // just wait and existing callback will cover new sections.
     if (this.firstAuthorizationsCompleted_) {
+      const target = dev().assertElement(event.target);
       // Guard against anything else in flight.
       return this.lastAuthorizationPromises_.then(() => {
-        const target = dev().assertElement(event.target);
         const responses = this.combinedResponses();
         this.applyAuthorizationToRoot_(target, responses);
       });
@@ -265,6 +280,7 @@ export class AccessService {
   /**
    * @return {!AccessService}
    * @private
+   * @restricted
    */
   start_() {
     if (!this.enabled_) {
@@ -378,17 +394,7 @@ export class AccessService {
         });
   }
 
-  /**
-   * Returns the promise that will yield the value of the specified field from
-   * the authorization response. This method will wait for the most recent
-   * authorization request to complete. It will return null values for failed
-   * requests with no fallback, but could be modified to block indefinitely.
-   *
-   * This is a restricted API.
-   *
-   * @param {string} field
-   * @return {?Promise<*|null>}
-   */
+  /** @override from AccessVars */
   getAuthdataField(field) {
     if (!this.enabled_) {
       return null;
@@ -412,7 +418,9 @@ export class AccessService {
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
     }
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => {
+      this.applyAuthorizationsObservable_.fire();
+    });
   }
 
   /**
@@ -667,7 +675,8 @@ export class AccessService {
   }
 
   /**
-   * Runs the login flow using one of the predefined urls in the amp-access config
+   * Runs the login flow using one of the predefined urls in the amp-access
+   * config
    *
    * @private
    * @param {string} type Type of login defined in the config
@@ -716,3 +725,9 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return new AccessService(ampdoc).start_();
   });
 });
+
+
+/** @package Visible for testing only. */
+export function getAccessVarsClassForTesting() {
+  return AccessVars;
+}

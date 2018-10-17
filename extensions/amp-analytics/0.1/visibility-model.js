@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
 
@@ -59,16 +60,16 @@ export class VisibilityModel {
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
 
-    /** @private {?function()} */
-    this.eventResolver_ = null;
-
     /** @private {?Observable} */
     this.onTriggerObservable_ = new Observable();
 
+    const deferred = new Deferred();
+
     /** @private */
-    this.eventPromise_ = new Promise(resolve => {
-      this.eventResolver_ = resolve;
-    });
+    this.eventPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.eventResolver_ = deferred.resolve;
 
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
@@ -149,9 +150,10 @@ export class VisibilityModel {
   reset_() {
     dev().assert(!this.eventResolver_,
         'Attempt to refresh visible event before previous one resolve');
-    this.eventPromise_ = new Promise(resolve => {
-      this.eventResolver_ = resolve;
-    });
+    const deferred = new Deferred();
+    this.eventPromise_ = deferred.promise;
+    this.eventResolver_ = deferred.resolve;
+
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
     });

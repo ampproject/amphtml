@@ -26,6 +26,7 @@ import {writeScript} from './3p';
  *
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
+ * @param {function(*)} cb
  */
 function getMathmlJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
@@ -55,6 +56,9 @@ export function mathml(global, data) {
         div.textContent = data.formula;
         setStyle(div, 'visibility', 'hidden');
         global.document.body.appendChild(div);
+        mathjax.Hub.Config({
+          showMathMenu: false,
+        });
         mathjax.Hub.Queue(function() {
           const rendered = document.getElementById('MathJax-Element-1-Frame');
           // Remove built in mathjax margins.

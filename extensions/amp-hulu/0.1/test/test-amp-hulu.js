@@ -38,7 +38,7 @@ describes.realWin('amp-hulu', {
       hulu.setAttribute('layout', 'responsive');
     }
     doc.body.appendChild(hulu);
-    return hulu.build().then(() => hulu.layoutCallback()).then(() => hulu);
+    return hulu.build().then(() => { hulu.layoutCallback(); return hulu; });
   }
 
   it('renders', () => {
@@ -60,7 +60,7 @@ describes.realWin('amp-hulu', {
   });
 
   it('requires data-eid', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getHulu('').should.eventually.be.rejectedWith(
           /The data-eid attribute is required for/);
     });

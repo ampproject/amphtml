@@ -49,9 +49,7 @@ describes.realWin('amp-wistia-player', {
   });
 
   it('requires data-media-hashed-id', () => {
-    allowConsoleError(() => {
-      return getWistiaEmbed('').should.eventually.be.rejectedWith(
-          /The data-media-hashed-id attribute is required for/);
-    });
+    return getWistiaEmbed('').should.eventually.be.rejectedWith(
+        /The data-media-hashed-id attribute is required for/);
   });
 });

@@ -20,18 +20,24 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for French strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Activer',
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Accepter',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Expérience activée. Veuillez recharger',
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Décliner',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'Voir sur le domaine original:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'En savoir plus sur les résultats AMP',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyez sur Suivant',
+    string: 'Suivant',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyez sur Retour',
+    string: 'Précédent',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: 'Impossible de copier le lien dans le presse-papier :(',
@@ -40,7 +46,7 @@ export default {
     string: 'Lien copié !',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'Courriel',
+    string: 'Email',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -49,7 +55,7 @@ export default {
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'Copier le lien',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -70,23 +76,23 @@ export default {
     string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Partager',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Faire élargir votre fenêtre pour voir cette expérience',
+    string: 'Agrandissez votre fenêtre pour voir cette expérience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'Vous devez activer l\'expérience amp-story pour afficher ce ' +
         'contenu',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page est mieux visualisée en mode portrait',
+    string: 'Cette page est uniquement disponible en mode portrait',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Nous sommes désolés, il semble que votre navigateur ne supporte ' +
         'pas cette expérience',
   },
-};
+});

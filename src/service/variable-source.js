@@ -109,12 +109,6 @@ export class VariableSource {
     /** @protected @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private {!RegExp|undefined} */
-    this.replacementExpr_ = undefined;
-
-    /** @private {!RegExp|undefined} */
-    this.replacementExprV2_ = undefined;
-
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
 
@@ -168,8 +162,6 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -188,8 +180,6 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -208,55 +198,55 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {boolean=} isV2 flag to ignore capture of args
+   * @param {boolean=} isV2 Flag to ignore capture of args.
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *   that can be substituted.
    */
-  getExpr(opt_bindings, isV2) {
+  getExpr(opt_bindings, isV2, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
-
-    const additionalKeys = opt_bindings ? Object.keys(opt_bindings) : null;
-    if (additionalKeys && additionalKeys.length > 0) {
-      const allKeys = Object.keys(this.replacements_);
-      additionalKeys.forEach(key => {
-        if (this.replacements_[key] === undefined) {
-          allKeys.push(key);
-        }
-      });
-      return this.buildExpr_(allKeys, isV2);
-    }
-    if (!this.replacementExpr_ && !isV2) {
-      this.replacementExpr_ = this.buildExpr_(
-          Object.keys(this.replacements_));
-    }
-    // sometimes the v1 expand will be called before the v2
-    // so we need to cache both versions
-    if (!this.replacementExprV2_ && isV2) {
-      this.replacementExprV2_ = this.buildExpr_(
-          Object.keys(this.replacements_), isV2);
-    }
-
-    return isV2 ? this.replacementExprV2_ :
-      this.replacementExpr_;
+    const all = Object.assign({}, this.replacements_, opt_bindings);
+    return this.buildExpr_(Object.keys(all), isV2, opt_whiteList);
   }
 
   /**
    * @param {!Array<string>} keys
    * @param {boolean=} isV2 flag to ignore capture of args
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, isV2) {
+  buildExpr_(keys, isV2, opt_whiteList) {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getUrlMacroWhitelist_()) {
       keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
     }
+    // If a whitelist is passed into the call to GlobalVariableSource.expand_
+    // then we only resolve values contained in the whitelist.
+    if (opt_whiteList) {
+      keys = keys.filter(key => opt_whiteList[key]);
+    }
+    if (keys.length === 0) {
+      const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
+      return regexThatMatchesNothing;
+    }
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);
-    const all = keys.join('|');
+    // Keys that start with a `$` need to be escaped so that they do not
+    // interfere with the regex that is constructed.
+    const escaped = keys.map(key => {
+      if (key[0] === '$') {
+        return '\\' + key;
+      }
+      return key;
+    });
+
+    const all = escaped.join('|');
     // Match the given replacement patterns, as well as optionally
     // arguments to the replacement behind it in parentheses.
     // Example string that match
@@ -282,7 +272,7 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    const head = this.ampdoc.getRootNode().head;
+    const {head} = this.ampdoc.getRootNode();
     if (!head) {
       return null;
     }
@@ -302,17 +292,5 @@ export class VariableSource {
     this.variableWhitelist_ = meta.getAttribute('content').split(',')
         .map(variable => variable.trim());
     return this.variableWhitelist_;
-  }
-
-  /**
-   * Returns `true` if a variable whitelist is *not* present or the present
-   * whitelist contains the given variable name.
-   * @param {string} varName
-   * @return {boolean}
-   * @private
-   */
-  isWhitelisted_(varName) {
-    return !this.getUrlMacroWhitelist_() ||
-      this.getUrlMacroWhitelist_().includes(varName);
   }
 }

@@ -309,7 +309,7 @@ parse: function parse(input) {
         vstack.length = vstack.length - n;
         lstack.length = lstack.length - n;
     }
-    _token_stack:
+
         var lex = function () {
             var token;
             token = lexer.lex() || EOF;
@@ -858,4 +858,4 @@ Parser.prototype = parser;parser.Parser = Parser;
 return new Parser;
 })();
 
-exports.parser = parser;
+export const cssParser = parser;

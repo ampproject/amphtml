@@ -23,7 +23,8 @@ import {loadScript, validateData} from '../3p/3p';
 export function giraff(global, data) {
   validateData(data, ['blockName']);
 
-  const url = '//www.giraff.io/data/widget-' +
+  const serverName = data['serverName'] || 'code.giraff.io';
+  const url = '//' + encodeURIComponent(serverName) + '/data/widget-' +
       encodeURIComponent(data['blockName']) + '.js';
 
   loadScript(global, url, () => {
@@ -33,7 +34,8 @@ export function giraff(global, data) {
   });
 
   const anchorEl = global.document.createElement('div');
-  anchorEl.id = 'grf_' + data['blockName'];
+  const widgetId = data['widgetId'] ? '_' + data['widgetId'] : '';
+  anchorEl.id = 'grf_' + data['blockName'] + widgetId;
   global.document.getElementById('c').appendChild(anchorEl);
 
 }

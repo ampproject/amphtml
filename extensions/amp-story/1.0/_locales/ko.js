@@ -20,12 +20,18 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Korean strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: '허용하기',
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: '수락',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'amp-story experiment를 사용합니다. 페이지를 새로고쳐 주세요.',
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: '거절',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: '오리지널 도메인으로 보기',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'AMP 결과 더 알아보기',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: '다음으로 가기',
@@ -70,7 +76,7 @@ export default {
     string: '트위터',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: '공유하기',
@@ -87,4 +93,4 @@ export default {
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: '죄송합니다. 사용하고 계신 브라우저는 stories를 서포트 하지 않습니다. ',
   },
-};
+});

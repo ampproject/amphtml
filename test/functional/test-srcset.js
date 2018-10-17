@@ -379,11 +379,13 @@ describe('Srcset', () => {
       expect(srcset.select(740, 1)).to.equal('image-1000');
       expect(srcset.select(370, 2)).to.equal('image-1000');
 
-      // Lower than threshold but difference ratio (730/500 = 1.46) too high -> higher value
+      // Lower than threshold but difference ratio (730/500 = 1.46) too high ->
+      // higher value
       expect(srcset.select(730, 1)).to.equal('image-1000');
       expect(srcset.select(365, 2)).to.equal('image-1000');
 
-      // Lower than threshold and difference ratio (600/500 = 1.2) is low enough -> lower value
+      // Lower than threshold and difference ratio (600/500 = 1.2) is low enough
+      // -> lower value
       expect(srcset.select(600, 1)).to.equal('image-500');
       expect(srcset.select(300, 2)).to.equal('image-500');
     });

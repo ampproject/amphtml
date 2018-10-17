@@ -20,18 +20,24 @@
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 
-SC_VERSION="sc-4.4.12-linux"
+SC_VERSION="sc-4.5.1-linux"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
-TAR_FILE="$SC_VERSION.tar.gz"
+DOWNLOAD_DIR="sauce_connect"
+TAR_FILE="$DOWNLOAD_DIR/$SC_VERSION.tar.gz"
 BINARY_FILE="$SC_VERSION/bin/sc"
 PID_FILE="sauce_connect_pid"
 LOG_FILE="sauce_connect_log"
-START_MESSAGE="Sauce Connect is up, you may start your tests."
+READY_FILE="sauce_connect_ready"
+READY_DELAY_SECS=60
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
 
-# Download and unpack sauce connect proxy binary.
-echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
-wget -q "$DOWNLOAD_URL"
+# Download the sauce connect proxy binary (if needed) and unpack it.
+if [[ -f $TAR_FILE ]]; then
+  echo "$LOG_PREFIX Using cached Sauce Connect binary $(CYAN "$TAR_FILE")"
+else
+  echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
+  wget -q "$DOWNLOAD_URL" -P "$DOWNLOAD_DIR"
+fi
 echo "$LOG_PREFIX Unpacking $(CYAN "$TAR_FILE")"
 tar -xzf "$TAR_FILE"
 
@@ -52,13 +58,30 @@ else
   TUNNEL_IDENTIFIER="$TRAVIS_JOB_NUMBER"
 fi
 
-# Launch proxy and wait for completion.
+# Launch proxy and wait for a tunnel to be created.
 echo "$LOG_PREFIX Launching $(CYAN "$BINARY_FILE")"
-"$BINARY_FILE" --tunnel-identifier "$TUNNEL_IDENTIFIER" --pidfile "$PID_FILE" 1>"$LOG_FILE" 2>&1 &
-sleep 2
-( tail -f -n0 "$LOG_FILE" & ) | grep -q "$START_MESSAGE"
-
-# Print confirmation.
-PID="$(cat "$PID_FILE")"
-TUNNEL_ID="$(grep -oP "Tunnel ID: \K.*$" "$LOG_FILE")"
-echo "$LOG_PREFIX Sauce Connect Proxy with tunnel ID $(CYAN "$TUNNEL_ID") and identifier $(CYAN "$TUNNEL_IDENTIFIER") is now running as pid $(CYAN "$PID")"
+"$BINARY_FILE" --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" 1>"$LOG_FILE" 2>&1 &
+count=0
+while [ $count -lt $READY_DELAY_SECS ]
+do
+  if [ -e "$READY_FILE" ]
+  then
+    # Print confirmation.
+    PID="$(cat "$PID_FILE")"
+    TUNNEL_ID="$(grep -oP "Tunnel ID: \K.*$" "$LOG_FILE")"
+    echo "$LOG_PREFIX Sauce Connect Proxy with tunnel ID $(CYAN "$TUNNEL_ID") and identifier $(CYAN "$TUNNEL_IDENTIFIER") is now running as pid $(CYAN "$PID")"
+    break
+  else
+    # Continue waiting.
+    sleep 1
+    (( count++ ))
+    if [ $count -eq $READY_DELAY_SECS ]
+    then
+      # Print the error logs.
+      echo "$LOG_PREFIX Sauce Connect Proxy has not started after $(CYAN "$READY_DELAY_SECS") seconds."
+      echo "$LOG_PREFIX Log file contents:"
+      cat "$LOG_FILE"
+      exit 1
+    fi
+  fi
+done

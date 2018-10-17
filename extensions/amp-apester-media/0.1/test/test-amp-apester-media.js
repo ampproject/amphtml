@@ -43,7 +43,7 @@ describes.realWin(
       function getApester(attributes, opt_responsive) {
         const media = doc.createElement('amp-apester-media');
         const regularResponse = {
-          code: 200,
+          status: 200,
           message: 'ok',
           payload: {
             interactionId: '5aaa70c79aaf0c5443078d31',
@@ -59,7 +59,7 @@ describes.realWin(
           },
         };
         const playlistResponse = {
-          code: 200,
+          status: 200,
           message: 'ok',
           payload: [
             {
@@ -90,6 +90,7 @@ describes.realWin(
         if (attributes) {
           xhrMock.expects('fetchJson').returns(
               Promise.resolve({
+                status: 200,
                 json() {
                   return Promise.resolve(currentResopnse);
                 },
@@ -123,6 +124,10 @@ describes.realWin(
           const iframe = ape.querySelector('iframe');
           expect(iframe).to.not.be.null;
           expect(iframe.src).not.to.be.null;
+          const placeholder = ape.querySelector('div[placeholder]');
+          expect(placeholder).to.not.be.null;
+          expect(placeholder.getAttribute('aria-label'))
+              .to.equal('Loading Apester Media');
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
@@ -134,7 +139,17 @@ describes.realWin(
           expect(changeSizeSpy.args[0][0]).to.equal('404');
         });
       });
-
+      it('propagates aria label to placeholder image', () => {
+        return getApester({
+          'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+          'aria-label': 'scintilating video',
+        }).then(ape => {
+          const placeholder = ape.querySelector('div[placeholder]');
+          expect(placeholder).to.not.be.null;
+          expect(placeholder.getAttribute('aria-label'))
+              .to.equal('Loading - scintilating video');
+        });
+      });
       it('render playlist', () => {
         return getApester({
           'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
@@ -151,6 +166,7 @@ describes.realWin(
           expect(qs.get('type')).to.equal('playlist');
           expect(attemptChangeSizeSpy).to.be.calledOnce;
           expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
+
         });
       });
 

@@ -17,6 +17,8 @@
 import '../amp-ima-video';
 import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+
 
 describes.realWin('amp-ima-video', {
   amp: {
@@ -30,6 +32,7 @@ describes.realWin('amp-ima-video', {
 
   beforeEach(() => {
     win = env.win;
+    win.context = {};
     doc = win.document;
   });
 
@@ -674,6 +677,64 @@ describes.realWin('amp-ima-video', {
     //expect(showControlsSpy).to.have.been.called;
   });
 
+  it('mutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = {};
+    videoMock.muted = false;
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(false);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.true;
+  });
+
+  it('unmutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = {};
+    videoMock.muted = false;
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(true);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.false;
+  });
+
+
+
   it('pauses video after webkit end fullscreen', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -767,5 +828,114 @@ describes.realWin('amp-ima-video', {
 
     expect(imaVideoObj.getPropertiesForTesting().controlsDiv.style.display)
         .to.eql('none');
+  });
+
+  it('suppresses IMA load with unknown consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    // TODO: When I can spy on internals, verify that onImaLoadSuccess() is not
+    // called, and that onImaLoadFail is called.
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+
+  it('handles unknown consent with request ads call', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    imaVideoObj.imaLoadAllowed = true;
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.UNKNOWN);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
+  });
+
+  it('handles insufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.INSUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl&npa=1');
+  });
+
+  it('handles sufficient consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE.SUFFICIENT);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
+  });
+
+  it('handles unknown_not_required consent', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const mockAdsLoader = {requestAds() {}};
+    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
+    imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
+    imaVideoObj.setConsentStateForTesting(
+        CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+    imaVideoObj.requestAds();
+
+    expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl)
+        .to.eql('vast.mxl');
   });
 });

@@ -159,9 +159,10 @@ describe('BindValidator', () => {
     it('should NOT allow unsupported <input> "type" values', () => {
       expect(val.isResultValid('INPUT', 'type', 'checkbox')).to.be.true;
       expect(val.isResultValid('INPUT', 'type', 'email')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.true;
+      expect(val.isResultValid('INPUT', 'type', 'password')).to.be.true;
 
       expect(val.isResultValid('INPUT', 'type', 'BUTTON')).to.be.false;
-      expect(val.isResultValid('INPUT', 'type', 'file')).to.be.false;
       expect(val.isResultValid('INPUT', 'type', 'image')).to.be.false;
     });
   });
@@ -182,13 +183,11 @@ describe('BindValidator', () => {
     it('should support <amp-img>', () => {
       expect(val.canBind('AMP-IMG', 'src')).to.be.true;
 
-      // src
       expect(val.isResultValid(
           'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
       expect(val.isResultValid('AMP-IMG', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
 
-      // srcset
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
@@ -197,6 +196,10 @@ describe('BindValidator', () => {
           'AMP-IMG',
           'srcset',
           /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
+    });
+
+    it('should support <amp-carousel>', () => {
+      expect(val.canBind('AMP-LIGHTBOX', 'open')).to.be.true;
     });
 
     it('should support <amp-list>', () => {
@@ -212,7 +215,6 @@ describe('BindValidator', () => {
     it('should support <amp-state>', () => {
       expect(val.canBind('AMP-STATE', 'src')).to.be.true;
 
-      // src
       expect(val.isResultValid(
           'AMP-STATE', 'src', 'https://foo.com/bar.json')).to.be.true;
       expect(val.isResultValid(
@@ -226,12 +228,17 @@ describe('BindValidator', () => {
       expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
       expect(val.canBind('AMP-VIDEO', 'src')).to.be.true;
 
-      // src
       expect(val.isResultValid(
           'AMP-VIDEO', 'src', 'https://foo.com/bar.mp4')).to.be.true;
       expect(val.isResultValid(
           'AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to.be.false;
       expect(val.isResultValid('AMP-VIDEO', 'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+    });
+
+    it('should support (svg) image', () => {
+      expect(val.canBind('IMAGE', 'xlink:href')).to.be.true;
+      expect(val.isResultValid('IMAGE', 'xlink:href',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
   });

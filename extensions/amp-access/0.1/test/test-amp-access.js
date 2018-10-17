@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
@@ -61,9 +60,9 @@ describes.fakeWin('AccessService', {
   });
 
   it('should fail if config is malformed', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       new AccessService(ampdoc);
-    }).to.throw(Error); });
+    }).to.throw(Error);
   });
 
   it('should default to "client" and fail if authorization is missing', () => {
@@ -136,14 +135,12 @@ describes.fakeWin('AccessService', {
     });
     const service = new AccessService(ampdoc);
     service.sources_[0].buildLoginUrls_ = sandbox.spy();
-    service.sources_[0].signIn_.start = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
 
     service.startInternal_();
     expect(service.sources_[0].buildLoginUrls_).to.be.calledOnce;
-    expect(service.sources_[0].signIn_.start).to.be.calledOnce;
     expect(service.runAuthorization_).to.be.calledOnce;
     expect(service.scheduleView_).to.be.calledOnce;
     expect(service.scheduleView_.firstCall.args[0]).to.equal(2000);
@@ -468,37 +465,18 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  it('should use fallback on authorization failure when available', () => {
+  it('should execute the onApplyAuthorizations registered callbacks', () => {
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()
-        .returns(Promise.reject('intentional'))
+        .returns(Promise.resolve({access: true}))
         .once();
-    service.sources_[0].authorizationFallbackResponse_ = {'error': true};
-    const promise = service.runAuthorization_();
-    expect(document.documentElement).to.have.class('amp-access-loading');
-    expect(document.documentElement).not.to.have.class('amp-access-error');
-    return promise.then(() => {
-      expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(document.documentElement).not.to.have.class('amp-access-error');
-      expect(elementOn).to.have.attribute('amp-access-hide');
-      expect(elementOff).not.to.have.attribute('amp-access-hide');
-      expect(elementError).not.to.have.attribute('amp-access-hide');
-    });
-  });
 
-  it('should NOT fallback on authorization failure when disabled', () => {
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(Promise.reject('intentional'))
-        .once();
-    service.authorizationFallbackResponse_ = {'error': true};
-    const promise = service.runAuthorization_(/* disableFallback */ true);
-    expect(document.documentElement).to.have.class('amp-access-loading');
-    expect(document.documentElement).not.to.have.class('amp-access-error');
-    return promise.then(() => {
-      expect(document.documentElement).to.have.class('amp-access-error');
+    const applyAuthorizationsStub = sandbox.stub();
+    service.onApplyAuthorizations(applyAuthorizationsStub);
+
+    return service.runAuthorization_().then(() => {
+      expect(applyAuthorizationsStub).to.have.been.calledOnce;
     });
   });
 
@@ -1075,7 +1053,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return service.sources_[0].buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1');
       expect(service.sources_[0].loginUrlMap_['']).to.equal(url);
     });
@@ -1129,7 +1107,7 @@ describes.fakeWin('AccessService login', {
         .returns(Promise.resolve('reader1'))
         .once();
     return source.buildLoginUrls_().then(urls => {
-      const url = urls[0].url;
+      const {url} = urls[0];
       expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
       expect(source.loginUrlMap_['']).to.equal(url);
     });
@@ -1323,23 +1301,8 @@ describes.fakeWin('AccessService login', {
     });
   });
 
-  it('should request sign-in when configured', () => {
-    const source = service.sources_[0];
-    source.signIn_.requestSignIn = sandbox.stub();
-    source.signIn_.requestSignIn.returns(Promise.resolve('#signin'));
-    source.openLoginDialog_ = sandbox.stub();
-    source.openLoginDialog_.returns(Promise.resolve('#login'));
-    service.loginWithType_('');
-    expect(source.signIn_.requestSignIn).to.be.calledOnce;
-    expect(source.signIn_.requestSignIn.firstCall.args[0])
-        .to.equal('https://acme.com/l?rid=R');
-    expect(source.openLoginDialog_).to.have.not.been.called;
-  });
-
   it('should wait for token exchange post-login with success=true', () => {
     const source = service.sources_[0];
-    source.signIn_.postLoginResult = sandbox.stub();
-    source.signIn_.postLoginResult.returns(Promise.resolve());
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
           () => Promise.resolve());
@@ -1351,10 +1314,6 @@ describes.fakeWin('AccessService login', {
         .once();
     return service.loginWithType_('').then(() => {
       expect(source.loginPromise_).to.not.exist;
-      expect(source.signIn_.postLoginResult).to.be.calledOnce;
-      expect(source.signIn_.postLoginResult.firstCall.args[0]).to.deep.equal({
-        'success': 'true',
-      });
       expect(authorizationStub).to.be.calledOnce;
       expect(viewStub).to.be.calledOnce;
       expect(broadcastStub).to.be.calledOnce;

@@ -20,7 +20,37 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Sound off',
+    description: 'Text that informs users that the sound is off after they ' +
+          'click the mute button',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sound on',
+    description: 'Text that informs users that the sound is on after they ' +
+          'click the unmute button on a page with sound',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'This page has no sound',
+    description: 'Text that informs users that the sound is on after they ' +
+          'click the unmute button on a page without sound',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'More to read',
+    description: 'Label to be placed as a title on top of related articles ' +
+        'at the end of a story.',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacy settings',
+    description: 'Title for a section that allows the user to configure ' +
+        'their privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Change data privacy settings',
+    description: 'Label for a button that allows the user to change their ' +
+        'choice to consent to providing their cookie access.',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accept',
     description: 'Label for a button that allows the user to consent to ' +
@@ -31,19 +61,20 @@ export default {
     description: 'Label for a button that allows the user to disconsent to ' +
         'providing their cookie access.',
   },
-  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
-    string: 'Ok',
-    description: 'Label for a button that allows the user to dismiss the ' +
-        'cookie consent dialog.',
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Continue Anyway',
+    description: 'Button label to allow the user to continue even if they ' +
+        'are not using a supportive browser.',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Enable',
-    description: 'Label for a button that enables the amp-story experiment.',
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'View on original domain:',
+    description: 'Label for a heading of a dialog that shows the user the ' +
+        'domain from which the story is served.',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Experiment enabled.  Please reload.',
-    description: 'Text that is shown once the amp-story experiment has ' +
-        'been successfully enabled.',
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'More about AMP results',
+    description: 'Label for a link to documentation on how AMP links are ' +
+        'handled.',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
@@ -116,9 +147,9 @@ export default {
         'Twitter.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
     description: 'Button label for the share target that shares a link via ' +
-        'Whatsapp.',
+        'WhatsApp.',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
@@ -146,4 +177,4 @@ export default {
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-};
+});

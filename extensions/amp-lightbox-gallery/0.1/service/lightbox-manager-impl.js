@@ -29,16 +29,12 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
-import {isExperimentOn} from '../../../../src/experiments';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'AMP-AD': true,
   'AMP-IMG': true,
-  'AMP-VIDEO': true,
-  'AMP-YOUTUBE': true,
 };
 
 export const ELIGIBLE_TAP_TAGS = {
@@ -78,9 +74,6 @@ export class LightboxManager {
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
-    // Extra safety check, we don't install this service if experiment is off
-    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-gallery'));
 
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -187,7 +180,11 @@ export class LightboxManager {
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
         if (!shouldExcludeSlide) {
+          if (this.seen_.includes(slide)) {
+            return;
+          }
           slide.setAttribute('lightbox', lightboxGroupId);
+          this.seen_.push(slide);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
       });
@@ -253,8 +250,7 @@ export class LightboxManager {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
 
-    this.lightboxGroups_[lightboxGroupId]
-        .push(dev().assertElement(element));
+    this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
     if (this.meetsHeuristicsForTap_(element)) {
       const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
       element.setAttribute('on', `tap:${gallery.id}.activate`);
@@ -299,36 +295,18 @@ export class LightboxManager {
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaDescribedBy);
+      const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
         return descriptionElement./*OK*/innerText;
       }
     }
-    const alt = element.getAttribute('alt');
-    if (alt) {
-      return alt;
-    }
-    const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) {
-      return ariaLabel;
-    }
-    const ariaLabelledBy = element.getAttribute('aria-labelledby');
-    if (ariaLabelledBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaLabelledBy);
-      if (descriptionElement) {
-        return descriptionElement./*OK*/innerText;
-      }
-    }
-
     return null;
   }
 
   /**
    * Gets the duration of a supported video element
    * @param {!Element} element
-   * @returns {!Promise<number>}
+   * @return {!Promise<number>}
    * @private
    */
   getVideoTimestamp_(element) {
@@ -382,7 +360,7 @@ export class LightboxManager {
   getThumbnailSrcset_(element) {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
-      const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
+      const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
       if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
         return srcsetFromElement(thumbnailImage);
       }

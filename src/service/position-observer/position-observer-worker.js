@@ -79,7 +79,7 @@ export class PositionObserverWorker {
    * @private
    */
   trigger_(position) {
-    const prevPos = this.prevPosition_ ;
+    const prevPos = this.prevPosition_;
     if (prevPos
         && layoutRectEquals(prevPos.positionRect, position.positionRect)
         && layoutRectEquals(prevPos.viewportRect, position.viewportRect)) {
@@ -90,7 +90,7 @@ export class PositionObserverWorker {
     dev().assert(position.positionRect,
         'PositionObserver should always trigger entry with clientRect');
     const positionRect =
-        /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+    /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
     position.relativePos = layoutRectsRelativePos(positionRect,
         position.viewportRect);

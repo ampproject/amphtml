@@ -15,7 +15,7 @@
  */
 
 import '../amp-selector';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 
 describes.realWin('amp-selector', {
   win: { /* window spec */
@@ -35,11 +35,9 @@ describes.realWin('amp-selector', {
       const attributes = options.attributes || {};
       const ampSelector = win.document.createElement('amp-selector');
       ampSelector.setAttribute('layout', 'container');
-      if (attributes) {
-        Object.keys(attributes).forEach(key => {
-          ampSelector.setAttribute(key, attributes[key]);
-        });
-      }
+      Object.keys(attributes).forEach(key => {
+        ampSelector.setAttribute(key, attributes[key]);
+      });
 
       const config = options.config || {};
       let noOfSelectables = 3;
@@ -75,6 +73,12 @@ describes.realWin('amp-selector', {
             disabledCount--;
           }
         }
+
+        const optionAttributes = options.optionAttributes || {};
+        Object.keys(optionAttributes).forEach(key => {
+          img.setAttribute(key, optionAttributes[key]);
+        });
+
         ampSelector.appendChild(img);
       }
       win.document.body.appendChild(ampSelector);
@@ -84,7 +88,7 @@ describes.realWin('amp-selector', {
     function keyPress(ampSelector, key, opt_target) {
       const impl = ampSelector.implementation_;
       const event = {
-        keyCode: key,
+        key,
         preventDefault: () => {},
         target: opt_target,
       };
@@ -130,6 +134,25 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.be.calledOnce;
+    });
+
+    it('should retain existing roles', function* () {
+      const ampSelector = getSelector({
+        attributes: {
+          role: 'tablist',
+        },
+        optionAttributes: {
+          role: 'tab',
+        },
+        config: {
+          count: 4,
+          selectedCount: 2,
+        },
+      });
+      const impl = ampSelector.implementation_;
+      yield ampSelector.build();
+      expect(impl.element.getAttribute('role')).to.equal('tablist');
+      expect(impl.options_[0].getAttribute('role')).to.equal('tab');
     });
 
     it('should init properly for single select', function* () {
@@ -534,14 +557,14 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
       expect(impl.options_[3].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
       expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[3]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -562,19 +585,19 @@ describes.realWin('amp-selector', {
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
       expect(impl.options_[4].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.not.have.been.called;
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
       expect(impl.options_[4].hasAttribute('selected')).to.be.false;
       expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, KeyCodes.ENTER, impl.options_[2]);
+      keyPress(ampSelector, Keys.ENTER, impl.options_[2]);
       expect(impl.options_[2].hasAttribute('selected')).to.be.true;
       expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
       expect(setSelectionSpy).to.have.been.calledTwice;
@@ -597,7 +620,7 @@ describes.realWin('amp-selector', {
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
-      keyPress(ampSelector, KeyCodes.SPACE, impl.element.children[0]);
+      keyPress(ampSelector, Keys.SPACE, impl.element.children[0]);
       expect(setSelectionSpy).to.not.have.been.called;
       expect(clearSelectionSpy).to.not.have.been.called;
     });
@@ -629,6 +652,41 @@ describes.realWin('amp-selector', {
       expect(impl.options_[3].hasAttribute('selected')).to.be.false;
 
       expect(setInputsSpy).to.have.callCount(4);
+    });
+
+    it('should support `disabled` attribute mutation', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+      ampSelector.build();
+
+      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+
+      impl.clickHandler_({target: impl.options_[3]});
+
+      // When not disabled, clicking an option should select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+
+      expect(ampSelector.hasAttribute('aria-disabled')).to.be.false;
+
+      ampSelector.setAttribute('disabled', '');
+      impl.mutatedAttributesCallback({disabled: true});
+
+      expect(ampSelector.getAttribute('aria-disabled')).to.equal('true');
+
+      impl.clickHandler_({target: impl.options_[0]});
+
+      // When disabled, clicking an option should not select it.
+      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
+      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
     });
 
     it('should trigger `toggle` action even when no `value` argument is' +
@@ -709,7 +767,7 @@ describes.realWin('amp-selector', {
       expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
     });
 
-    it('should trigger `select` action when user selects an option', () => {
+    it('should trigger "select" event when user selects an option', () => {
       const ampSelector = getSelector({
         config: {
           count: 5,
@@ -719,14 +777,46 @@ describes.realWin('amp-selector', {
       ampSelector.build();
       const impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
-      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
 
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
       impl.clickHandler_({target: impl.options_[3]});
 
-      const eventMatcher =
-          sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
-      expect(triggerSpy).to.have.been.calledWith(
-          ampSelector, 'select', /* CustomEvent */ eventMatcher);
+      expect(triggerSpy).to.be.calledOnce;
+      expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+      const event = triggerSpy.firstCall.args[2];
+      expect(event).to.have.property('detail');
+      expect(event.detail).to.have.property('targetOption', '3');
+      expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+    });
+
+    it('should trigger "select" event for multiple selections', function* () {
+      const ampSelector = getSelector({
+        attributes: {
+          multiple: true,
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.children[1].setAttribute('selected', '');
+
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+      impl.mutateElement = fn => fn();
+
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      impl.clickHandler_({target: impl.options_[2]});
+
+      expect(triggerSpy).to.be.calledOnce;
+      expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
+
+      const event = triggerSpy.firstCall.args[2];
+      expect(event).to.have.property('detail');
+      expect(event.detail).to.have.property('targetOption', '2');
+      expect(event.detail).to.have.deep.property('selectedOptions',
+          ['0', '1', '2']);
     });
 
     it('should trigger `select` action when user uses ' +
@@ -885,7 +975,7 @@ describes.realWin('amp-selector', {
             ampSelector.implementation_,
             'navigationKeyDownHandler_');
         ampSelector.build();
-        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        keyPress(ampSelector, Keys.RIGHT_ARROW);
         expect(spy).to.not.have.been.called;
       });
 
@@ -903,11 +993,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
-        keyPress(ampSelector, KeyCodes.LEFT_ARROW);
+        keyPress(ampSelector, Keys.LEFT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(-1);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(0);
-        keyPress(ampSelector, KeyCodes.RIGHT_ARROW);
+        keyPress(ampSelector, Keys.RIGHT_ARROW);
         expect(ampSelector.children[0].tabIndex).to.equal(0);
         expect(ampSelector.children[1].tabIndex).to.equal(-1);
         expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -942,7 +1032,7 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
         });
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           return expect(ampSelector.build()).to.eventually.be.rejectedWith(
               /not supported for multiple selection amp-selector​​​/);
         });
@@ -963,11 +1053,11 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        keyPress(ampSelector, KeyCodes.DOWN_ARROW);
+        keyPress(ampSelector, Keys.DOWN_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-        keyPress(ampSelector, KeyCodes.UP_ARROW);
+        keyPress(ampSelector, Keys.UP_ARROW);
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;

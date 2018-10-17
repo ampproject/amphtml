@@ -24,7 +24,7 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
  * @param {string} type
- * @param {Object|string|undefined} detail
+ * @param {!JsonObject|string|undefined|null} detail
  * @param {EventInit=} opt_eventInit
  * @return {!Event}
  */
@@ -64,6 +64,15 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  */
 export function getData(event) {
   return /** @type {?JsonObject|string|undefined} */ (event.data);
+}
+
+/**
+ * Returns the detail property of an event with the correct type.
+ * @param {!Event|{detail: !JsonObject}} event
+ * @return {?JsonObject|string|undefined}
+ */
+export function getDetail(event) {
+  return /** @type {?JsonObject|string|undefined} */ (event.detail);
 }
 
 /**
@@ -145,7 +154,7 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const tagName = eleOrWindow.tagName;
+    const {tagName} = eleOrWindow;
     if (tagName === 'AUDIO' || tagName === 'VIDEO') {
       unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
     } else {

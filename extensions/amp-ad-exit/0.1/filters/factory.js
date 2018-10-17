@@ -19,14 +19,23 @@ import {ClickLocationFilter} from './click-location';
 import {FilterType} from './filter';
 import {InactiveElementFilter} from './inactive-element';
 
-export function createFilter(name, spec, adExitElement) {
+/**
+ * @param {string} name
+ * @param {!../config.FilterConfig} spec
+ * @param {!../amp-ad-exit.AmpAdExit} adExitInstance
+ */
+export function createFilter(name, spec, adExitInstance) {
   switch (spec.type) {
     case FilterType.CLICK_DELAY:
-      return new ClickDelayFilter(name, spec);
+      return new ClickDelayFilter(
+          name,
+          /** @type {!../config.ClickDelayConfig} **/(spec),
+          adExitInstance.win);
     case FilterType.CLICK_LOCATION:
-      return new ClickLocationFilter(name, spec, adExitElement);
+      return new ClickLocationFilter(name, spec, adExitInstance);
     case FilterType.INACTIVE_ELEMENT:
-      return new InactiveElementFilter(name, spec);
+      return new InactiveElementFilter(
+          name, /** @type {!../config.InactiveElementConfig} */(spec));
     default:
       return undefined;
   }

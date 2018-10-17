@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ActionInvocation,
   ActionService,
   DeferredEvent,
-  OBJECT_STRING_ARGS_KEY,
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
-import {ActionTrust} from '../../src/action-trust';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {KeyCodes} from '../../src/utils/key-codes';
+import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
@@ -53,10 +51,10 @@ function createExecElement(id, enqueAction) {
 }
 
 
-function assertInvocation(inv, target, method, source, caller, opt_event,
+function assertInvocation(inv, node, method, source, caller, opt_event,
   child, opt_args) {
 
-  expect(inv.target).to.equal(target);
+  expect(inv.node).to.equal(node);
   expect(inv.method).to.equal(method);
   expect(inv.caller).to.equal(caller);
 
@@ -306,7 +304,7 @@ describe('ActionService parseAction', () => {
 
   it('should parse with object literal args', () => {
     const a = parseAction('e:t.m({"foo": {"bar": "qux"}})');
-    expect(a.args[OBJECT_STRING_ARGS_KEY])
+    expect(a.args[RAW_OBJECT_ARGS_KEY])
         .to.equal('{"foo": {"bar": "qux"}}');
   });
 
@@ -512,7 +510,7 @@ describe('Action findAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -604,7 +602,7 @@ describe('Action hasAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -647,7 +645,7 @@ describe('Action method', () => {
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
@@ -674,7 +672,7 @@ describe('Action method', () => {
         'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
     expect(inv.caller).to.equal('caller1');
@@ -687,7 +685,7 @@ describe('Action method', () => {
         'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
     expect(inv.caller).to.equal('caller1');
@@ -715,7 +713,7 @@ describe('Action method', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal(child);
     expect(inv.caller).to.equal(targetElement);
@@ -725,7 +723,7 @@ describe('Action method', () => {
     action.execute(execElement, 'method1', {'key1': 11}, child, null);
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
-    expect(inv.target).to.equal(execElement);
+    expect(inv.node).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
@@ -737,7 +735,7 @@ describe('installActionHandler', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -753,12 +751,13 @@ describe('installActionHandler', () => {
         'button', 'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
-    expect(callArgs.target).to.be.equal(target);
+    expect(callArgs.node).to.be.equal(target);
     expect(callArgs.method).to.be.equal('submit');
     expect(callArgs.args).to.be.equal(null);
     expect(callArgs.source).to.be.equal('button');
     expect(callArgs.caller).to.be.equal('button');
     expect(callArgs.event).to.be.equal('tap');
+    expect(callArgs.trust).to.be.equal(ActionTrust.HIGH);
   });
 
   it('should check trust level before invoking action', () => {
@@ -766,15 +765,15 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    allowConsoleError(() => {
-      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-          'button', 'button', 'tap', ActionTrust.LOW));
-      expect(handlerSpy).to.not.be.called;
-    });
-
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tapEvent', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tapEvent', ActionTrust.LOW));
+      expect(handlerSpy).to.be.calledOnce;
+    });
   });
 });
 
@@ -785,7 +784,7 @@ describe('Multiple handlers action method', () => {
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
@@ -871,7 +870,7 @@ describe('Action interceptor', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
@@ -906,14 +905,14 @@ describe('Action interceptor', () => {
     expect(queue).to.have.length(2);
 
     const inv0 = queue[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
     expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = queue[1];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
     expect(inv1.caller).to.equal('caller2');
@@ -939,14 +938,14 @@ describe('Action interceptor', () => {
     expect(handler).to.have.callCount(2);
 
     const inv0 = handler.getCall(0).args[0];
-    expect(inv0.target).to.equal(target);
+    expect(inv0.node).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
     expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = handler.getCall(1).args[0];
-    expect(inv1.target).to.equal(target);
+    expect(inv1.node).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
     expect(inv1.caller).to.equal('caller2');
@@ -956,7 +955,7 @@ describe('Action interceptor', () => {
         'source3', 'caller3', 'event3', ActionTrust.HIGH));
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
-    expect(inv2.target).to.equal(target);
+    expect(inv2.node).to.equal(target);
     expect(inv2.method).to.equal('method3');
     expect(inv2.source).to.equal('source3');
     expect(inv2.caller).to.equal('caller3');
@@ -971,7 +970,7 @@ describe('Action common handler', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
@@ -1006,15 +1005,15 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    allowConsoleError(() => {
-      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-          'source1', 'caller1', 'event1', ActionTrust.LOW));
-      expect(handler).to.not.be.called;
-    });
-
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
         'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(handler).to.be.calledOnce;
+
+    return allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.be.calledOnce;
+    });
   });
 });
 
@@ -1076,7 +1075,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     document = window.document;
     sandbox = env.sandbox;
     sandbox.stub(window.document, 'addEventListener');
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
@@ -1110,7 +1109,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1126,7 +1125,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'option');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1139,7 +1138,17 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: Keys.ENTER};
+    handler(event);
+    expect(action.trigger).to.not.have.been.called;
+  });
+
+  it('should NOT trigger tap event on key press if focused element DOES NOT ' +
+     'have any role', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('input');
+    const event = {target: element, key: Keys.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1224,7 +1233,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'qux';
         }));
   });
@@ -1240,7 +1249,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object => {
-          const detail = object.detail;
+          const {detail} = object;
           return detail.value == 'foo';
         }));
   });
@@ -1261,7 +1270,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
           element,
           'input-debounced',
           sinon.match(event => {
-            const value = event.target.value;
+            const {value} = event.target;
             return value == 'foo bar baz';
           }));
     });
@@ -1283,7 +1292,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
           element,
           'input-throttled',
           sinon.match(event => {
-            const value = event.target.value;
+            const {value} = event.target;
             return value == 'foo bar baz';
           }));
     });
@@ -1301,16 +1310,16 @@ describes.fakeWin('Core events', {amp: true}, env => {
       }
     });
 
-    it('should replace functions with throws', () => {
+    it('should replace functions with throws', function*() {
       const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
       const deferredEvent = new DeferredEvent(event);
       const errorText = 'cannot access native event functions';
 
       // Specifically test these commonly used functions
-      allowConsoleError(() => {
+      yield allowConsoleError(() => {
         expect(() => deferredEvent.preventDefault()).to.throw(errorText);
       });
-      allowConsoleError(() => {
+      yield allowConsoleError(() => {
         expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
       });
 
@@ -1318,7 +1327,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          allowConsoleError(() => {
+          yield allowConsoleError(() => {
             expect(() => value()).to.throw(errorText);
           });
         }
@@ -1327,40 +1336,94 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 });
 
-describes.realWin('whitelist', {
+describes.realWin('Action whitelisting', {
   amp: {
     ampdoc: 'single',
   },
 }, env => {
   let action;
   let target;
+  let spy;
 
   beforeEach(() => {
-    const meta = createElementWithAttributes(env.win.document, 'meta', {
-      name: 'amp-action-whitelist',
-      content: 'AMP.pushState, AMP.setState',
+    spy = env.sandbox.spy();
+    target = createExecElement('foo', spy);
+  });
+
+  describe('with non-empty whitelist', () => {
+    beforeEach(() => {
+      const meta = createElementWithAttributes(env.win.document, 'meta', {
+        name: 'amp-action-whitelist',
+        content: 'AMP.pushState, AMP.setState, *.show',
+      });
+      env.win.document.head.appendChild(meta);
+
+      action = new ActionService(env.ampdoc, env.win.document);
     });
-    env.win.document.head.appendChild(meta);
 
-    action = new ActionService(env.ampdoc, env.win.document);
-    target = createExecElement('foo', sandbox.spy());
-  });
+    it('should allow whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
 
-  it('should allow whitelisted actions', () => {
-    const i = new ActionInvocation(target, 'setState', /* args */ null,
-        'source', 'caller', 'event', 0, 'AMP');
-    action.invoke_(i);
-    expect(target.enqueAction).to.be.calledWithExactly(i);
-  });
+    it('should allow whitelisted actions with wildcard target', () => {
+      const i = new ActionInvocation(target, 'show', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'DIV');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
 
-  it('should not allow non-whitelisted actions', () => {
-    const i = new ActionInvocation(target, 'print', /* args */ null,
-        'source', 'caller', 'event', 0, 'AMP');
-    sandbox.stub(action, 'error_');
-    allowConsoleError(() => {
+    it('should not allow non-whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      sandbox.stub(action, 'error_');
       expect(action.invoke_(i)).to.be.null;
       expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
-          '(AMP.pushState,AMP.setState).');
+          '[{"tagOrTarget":"AMP","method":"pushState"},' +
+          '{"tagOrTarget":"AMP","method":"setState"},' +
+          '{"tagOrTarget":"*","method":"show"}].');
     });
+
+    it('should allow adding actions to the whitelist', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.addToWhitelist('AMP', 'print');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+  });
+
+  it('should not allow any action with empty string whitelist', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: '',
+    });
+    env.win.document.head.appendChild(meta);
+    action = new ActionService(env.ampdoc, env.win.document);
+
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+    sandbox.stub(action, 'error_');
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith(
+        '"AMP.print" is not whitelisted [].');
+  });
+
+  it('should ignore unparseable whitelist entries', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
+    });
+    env.win.document.head.appendChild(meta);
+    allowConsoleError(() => {
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
+        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+    action.invoke_(i);
+    expect(spy).to.be.calledWithExactly(i);
   });
 });

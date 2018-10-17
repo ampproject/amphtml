@@ -40,7 +40,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
-    const ampdoc = env.ampdoc;
+    const {ampdoc} = env;
     cidService = cidServiceForDocForTesting(ampdoc);
     adElement = {
       getAmpDoc: () => ampdoc,
@@ -112,8 +112,6 @@ describes.realWin('ad-cid', {amp: true}, env => {
     sandbox.stub(cidService, 'get').callsFake(() => {
       return Promise.reject(new Error('nope'));
     });
-    allowConsoleError(() => {
-      return expect(getAdCid(adElement)).to.eventually.be.undefined;
-    });
+    return expect(getAdCid(adElement)).to.eventually.be.undefined;
   });
 });

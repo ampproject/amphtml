@@ -17,13 +17,16 @@ import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
+import {LocalizationService} from '../localization';
 import {PaginationButtons} from '../pagination-buttons';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
 const IDENTITY_FN = x => x;
-
+// Represents the correct value of KeyboardEvent.which for the Right Arrow
+const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
 describes.realWin('amp-story', {
   amp: {
@@ -36,6 +39,11 @@ describes.realWin('amp-story', {
   let element;
   let story;
 
+  /**
+   * @param {!Element} container
+   * @param {boolean=} opt_active
+   * @return {!Element}
+   */
   function appendEmptyPage(container, opt_active) {
     const page = document.createElement('amp-story-page');
     page.id = '-empty-page';
@@ -46,6 +54,12 @@ describes.realWin('amp-story', {
     return page;
   }
 
+  /**
+   * @param {!Element} container
+   * @param {number} count
+   * @param {Array<string>=} opt_ids
+   * @return {!Array<!Element>}
+   */
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
@@ -56,6 +70,10 @@ describes.realWin('amp-story', {
     });
   }
 
+  /**
+   * @param {string} eventType
+   * @return {!Event}
+   */
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
       document.createEventObject() : document.createEvent('Events');
@@ -70,11 +88,15 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization-v01', () => localizationService);
+
     AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
+    // sandbox.stub(element.implementation_,
+    // 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -264,8 +286,8 @@ describes.realWin('amp-story', {
         });
 
     const eventObj = createEvent('keydown');
-    eventObj.keyCode = KeyCodes.RIGHT_ARROW;
-    eventObj.which = KeyCodes.RIGHT_ARROW;
+    eventObj.key = Keys.RIGHT_ARROW;
+    eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
       docEl.dispatchEvent(eventObj) :
@@ -329,8 +351,10 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback()
         .then(() => {
-          expect(dispatchStub)
-              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+          expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+            id: firstPageId,
+            index: 0,
+          });
         });
   });
 

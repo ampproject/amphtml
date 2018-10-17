@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -66,6 +66,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
+  'xlink:href': true,
 };
 
 /**
@@ -78,7 +79,7 @@ export class BindValidator {
   /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
+   * NOTE: `tag` and `property` are case-sensitive.
    * @param {string} tag
    * @param {string} property
    * @return {boolean}
@@ -137,7 +138,7 @@ export class BindValidator {
     }
 
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -157,14 +158,14 @@ export class BindValidator {
    */
   isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
+    const {allowedProtocols} = rules;
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
       if (match !== null) {
         const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
+        if (!hasOwn(allowedProtocols, protocol)) {
           return false;
         }
       }
@@ -177,6 +178,8 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
@@ -219,6 +222,10 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
+    },
     'AMP-IFRAME': {
       'src': null,
     },
@@ -235,6 +242,9 @@ function createElementRules_() {
       'srcset': {
         'alternativeName': 'src',
       },
+    },
+    'AMP-LIGHTBOX': {
+      'open': null,
     },
     'AMP-LIST': {
       'src': {
@@ -254,6 +264,10 @@ function createElementRules_() {
           'https': true,
         },
       },
+    },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+      'title': null,
     },
     'AMP-VIDEO': {
       'alt': null,
@@ -300,6 +314,14 @@ function createElementRules_() {
     'FIELDSET': {
       'disabled': null,
     },
+    'IMAGE': {
+      'xlink:href': {
+        'allowedProtocols': {
+          'http': true,
+          'https': true,
+        },
+      },
+    },
     'INPUT': {
       'accept': null,
       'accesskey': null,
@@ -322,7 +344,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,

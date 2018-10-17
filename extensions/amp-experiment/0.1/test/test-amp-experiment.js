@@ -17,6 +17,7 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
+import {hasOwn} from '../../../../src/utils/object';
 
 
 describes.realWin('amp-experiment', {
@@ -67,7 +68,7 @@ describes.realWin('amp-experiment', {
 
   function expectBodyHasAttributes(attributes) {
     for (const attributeName in attributes) {
-      if (attributes.hasOwnProperty(attributeName)) {
+      if (hasOwn(attributes, attributeName)) {
         expect(doc.body.getAttribute(attributeName))
             .to.equal(attributes[attributeName]);
       }
@@ -110,10 +111,13 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if the child script element has non-JSON content', () => {
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
       experiment.buildCallback();
-    }).to.throw(); });
+    }).to.throw();
+    return Services.variantForOrNull(win).then(variants => {
+      expect(variants).to.be.null;
+    });
   });
 
   it('should add attributes to body element for the allocated variants', () => {

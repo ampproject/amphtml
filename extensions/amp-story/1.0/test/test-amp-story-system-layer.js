@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
@@ -24,6 +25,7 @@ const NOOP = () => {};
 
 describes.fakeWin('amp-story system layer', {amp: true}, env => {
   let win;
+  let storeService;
   let systemLayer;
   let progressBarStub;
   let progressBarRoot;
@@ -31,16 +33,14 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store', () => ({
-      get: NOOP,
-      subscribe: NOOP,
-    }));
+    storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
+
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
       build: sandbox.stub().returns(progressBarRoot),
       getRoot: sandbox.stub().returns(progressBarRoot),
-      setActiveSegmentId: sandbox.spy(),
       updateProgress: sandbox.spy(),
     };
 
@@ -76,10 +76,42 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
 
-  it('should set the active page index', () => {
-    [0, 1, 2, 3, 4].forEach(index => {
-      systemLayer.setActivePageId(index);
-      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
-    });
+  it('should set an attribute to toggle the UI when an ad is shown', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_AD, true);
+
+    expect(systemLayer.getShadowRoot()).to.have.attribute('ad-showing');
+  });
+
+  it('should show that sound off on a page when muted', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+    storeService.dispatch(Action.TOGGLE_MUTED, true);
+    expect(systemLayer.getShadowRoot()).to.have.attribute('muted');
+  });
+
+  it('should show that this page has no sound when unmuted', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, false);
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute(
+        'i-amphtml-story-audio-state');
+  });
+
+  it('should show that the sound is on when unmuted', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
+    expect(systemLayer.getShadowRoot()).to.have.attribute(
+        'i-amphtml-story-audio-state');
+  });
+
+  it('should show the sidebar control only if a sidebar exists', () => {
+    storeService.dispatch(Action.TOGGLE_HAS_SIDEBAR, true);
+    systemLayer.build();
+    expect(systemLayer.getShadowRoot()).to.have.attribute(
+        'i-amphtml-story-has-sidebar');
   });
 });

@@ -51,7 +51,7 @@ describes.realWin('amp-google-vrview-image', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('src')).to.equal(
-          'https://storage.googleapis.com/vrview/index.html' +
+          'https://storage.googleapis.com/vrview/2.0/index.html' +
           '?image=' + encodeURIComponent('https://example.com/image1'));
     });
   });
@@ -65,7 +65,7 @@ describes.realWin('amp-google-vrview-image', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('src')).to.equal(
-          'https://storage.googleapis.com/vrview/index.html' +
+          'https://storage.googleapis.com/vrview/2.0/index.html' +
           '?image=' + encodeURIComponent('https://example.com/image1') +
           '&is_stereo=true');
     });
@@ -80,14 +80,14 @@ describes.realWin('amp-google-vrview-image', {
   });
 
   it('requires src', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getVrImage({}).should.eventually.be.rejectedWith(
           /must be available/);
     });
   });
 
   it('requires https src', () => {
-    allowConsoleError(() => {
+    return allowConsoleError(() => {
       return getVrImage({'src': 'http://example.com/image1'})
           .should.eventually.be.rejectedWith(/https/);
     });

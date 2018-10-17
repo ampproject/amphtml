@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement} from '../entitlement';
+import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
@@ -22,6 +22,7 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
+import {Services} from '../../../../src/services';
 import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
@@ -54,6 +55,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         serviceId: 'google.subscription',
       },
     ],
+    fallbackEntitlement: {
+      source: 'local',
+      grantReason: GrantReason.SUBSCRIBER,
+      granted: true,
+    },
   };
 
   beforeEach(() => {
@@ -93,18 +99,119 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
-  it('should setup store and page on start', () => {
-    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
-    const renderLoadingStub =
-        sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
+  describe('start', () => {
+    it('should setup store and page on start', () => {
+      sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+      const renderLoadingStub =
+          sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
-    subscriptionService.start();
-    return subscriptionService.initialize_().then(() => {
-      // Should show loading on the page
-      expect(renderLoadingStub).to.be.calledWith(true);
-      // Should setup platform store
-      expect(subscriptionService.platformStore_).to.be
-          .instanceOf(PlatformStore);
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        // Should show loading on the page
+        expect(renderLoadingStub).to.be.calledWith(true);
+        // Should setup platform store
+        expect(subscriptionService.platformStore_).to.be
+            .instanceOf(PlatformStore);
+      });
+    });
+
+    it('should start auth flow for short circuiting', () => {
+      const authFlowStub = sandbox.stub(subscriptionService,
+          'startAuthorizationFlow_');
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateAuthToViewer_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = serviceConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        subscriptionService.doesViewerProvideAuth_ = true;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+        expect(delegateStub).to.be.calledOnce;
+      });
+    });
+
+    it('should skip everything and unlock document for alwaysGrant', () => {
+      const processStateStub = sandbox.stub(subscriptionService,
+          'processGrantState_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: true,
+        };
+        subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(processStateStub).to.be.calledWith(true);
+      });
+    });
+
+    it('should not skip everything and unlock document for alwaysGrant '
+        + 'if viewer provides authorization', () => {
+      const processStateStub = sandbox.stub(subscriptionService,
+          'processGrantState_');
+      const authFlowStub = sandbox.stub(subscriptionService,
+          'startAuthorizationFlow_');
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateAuthToViewer_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: true,
+        };
+        subscriptionService.pageConfig_ = pageConfig;
+        subscriptionService.doesViewerProvideAuth_ = true;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+        expect(delegateStub).to.be.calledOnce;
+        expect(processStateStub).to.not.be.called;
+      });
+    });
+  });
+
+  describe('getReaderId', () => {
+    let cidGet;
+
+    beforeEach(() => {
+      return Services.cidForDoc(ampdoc).then(cid => {
+        cidGet = sandbox.stub(cid, 'get').callsFake(
+            () => Promise.resolve('cid1'));
+      });
+    });
+
+    it('should delegate to cid.get for local', () => {
+      return subscriptionService.getReaderId('local').then(value => {
+        expect(value).to.equal('cid1');
+        expect(cidGet).to.be.calledOnce.calledWith({
+          // Local service is default to "amp-access" scope.
+          scope: 'amp-access',
+          createCookieIfNotPresent: true,
+        });
+      });
+    });
+
+    it('should delegate to cid.get for non-local', () => {
+      return subscriptionService.getReaderId('service1').then(() => {
+        expect(cidGet).to.be.calledOnce.calledWith({
+          scope: 'amp-access-service1',
+          createCookieIfNotPresent: true,
+        });
+      });
+    });
+
+    it('should resolve reader ID only once', () => {
+      const local1 = subscriptionService.getReaderId('local');
+      const local2 = subscriptionService.getReaderId('local');
+      const service1 = subscriptionService.getReaderId('service');
+      const service2 = subscriptionService.getReaderId('service');
+      expect(local1).to.equal(local2);
+      expect(service1).to.equal(service2);
+      expect(local1).to.not.equal(service1);
     });
   });
 
@@ -120,27 +227,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
-  it('should start auth flow for short circuiting', () => {
-    const authFlowStub = sandbox.stub(subscriptionService,
-        'startAuthorizationFlow_');
-    const delegateStub = sandbox.stub(subscriptionService,
-        'delegateAuthToViewer_');
-    sandbox.stub(subscriptionService, 'initialize_')
-        .callsFake(() => Promise.resolve());
-    subscriptionService.pageConfig_ = pageConfig;
-    subscriptionService.doesViewerProvideAuth_ = true;
-    subscriptionService.start();
-    return subscriptionService.initialize_().then(() => {
-      expect(authFlowStub.withArgs(false)).to.be.calledOnce;
-      expect(delegateStub).to.be.calledOnce;
-    });
-  });
-
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
     const platform = new SubscriptionPlatform();
-    const entitlementData = {source: 'local',
-      service: 'local', products, subscriptionToken: 'token'};
+    const entitlementData = {source: 'local', granted: true,
+      grantReason: GrantReason.SUBSCRIBER};
     const entitlement = Entitlement.parseFromJson(entitlementData);
     const factoryStub = sandbox.stub().callsFake(() => platform);
 
@@ -161,6 +252,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.serviceAdapter_);
       expect(analyticsEventStub).to.be.calledWith(
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          {
+            serviceId: 'local',
+          }
+      );
+      expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
           {
             serviceId: 'local',
           }
@@ -186,7 +283,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.serviceAdapter_ =
         new ServiceAdapter(subscriptionService);
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.platformStore_ = new PlatformStore('local');
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
       expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
           .to.be.not.null;
@@ -201,7 +298,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService);
+        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
         const selectPlatformStub =
@@ -217,15 +314,24 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
                 'serviceId': 'local',
               }
           );
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+              {
+                'serviceId': 'local',
+              }
+          );
+          expect(analyticsEventStub).to.not.be.calledWith(
+              SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED);
         });
       });
     });
+
     it('should call selectPlatform with preferViewerSupport config', () => {
       sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService);
+        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
@@ -234,10 +340,44 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         });
       });
     });
-    function resolveRequiredPromises(subscriptionService) {
-      const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        service: 'local', products, subscriptionToken: 'token'});
-      entitlement.setCurrentProduct('product1');
+
+    it('should send paywall activation event', () => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      return subscriptionService.initialize_().then(() => {
+        resolveRequiredPromises(subscriptionService, /* subscriber */ false);
+        const localPlatform =
+            subscriptionService.platformStore_.getLocalPlatform();
+        sandbox.stub(localPlatform, 'activate');
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+              {
+                'serviceId': 'local',
+              }
+          );
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+              {
+                'serviceId': 'local',
+              });
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.ACCESS_DENIED,
+              {
+                'serviceId': 'local',
+              });
+        });
+      });
+    });
+
+    function resolveRequiredPromises(subscriptionService, subscriber) {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: subscriber,
+        grantReason: subscriber ? GrantReason.SUBSCRIBER : null,
+      });
       const localPlatform =
         subscriptionService.platformStore_.getLocalPlatform();
       sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
@@ -326,7 +466,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should resolve entitlement if platform resolves', () => {
       const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        service: 'local', products, subscriptionToken: 'token'});
+        granted: true, grantReason: GrantReason.SUBSCRIBER});
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.resolve(entitlement));
       const resolveStub = sandbox.stub(subscriptionService.platformStore_,
@@ -340,6 +480,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
               'serviceId': 'local',
             }
         );
+      });
+    });
+
+    it('should reset entitlement on re-authorization', () => {
+      const entitlement = new Entitlement({source: 'local', raw: 'raw',
+        granted: true, grantReason: GrantReason.SUBSCRIBER});
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => Promise.resolve(entitlement));
+      const resetStub = sandbox.stub(subscriptionService.platformStore_,
+          'resetEntitlementFor');
+      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+      return subscriptionService.reAuthorizePlatform(platform).then(() => {
+        expect(resetStub).to.be.calledOnce.calledWith('local');
       });
     });
   });
@@ -400,8 +553,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('performPingback_', () => {
     it('should wait for viewer tracker', () => {
-      const entitlementData = {source: 'local',
-        service: 'local', products, subscriptionToken: 'token'};
+      const entitlementData = {source: 'local', granted: true,
+        grantReason: GrantReason.SUBSCRIBER};
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -416,7 +569,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should send pingback with resolved entitlement', () => {
       const entitlementData = {source: 'local',
-        service: 'local', products, subscriptionToken: 'token'};
+        granted: true, grantReason: GrantReason.SUBSCRIBER};
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -445,6 +598,121 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.performPingback_().then(() => {
         expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
       });
+    });
+  });
+
+  describe('initializePlatformStore_', () => {
+    it('should initialize platform store with the given ids', () => {
+      subscriptionService.platformConfig_ = serviceConfig;
+      const entitlement = Entitlement.parseFromJson(
+          serviceConfig.fallbackEntitlement);
+      subscriptionService.initializePlatformStore_(['local']);
+      expect(subscriptionService.platformStore_.serviceIds_)
+          .to.be.deep.equal(['local']);
+      expect(subscriptionService.platformStore_.fallbackEntitlement_.json())
+          .to.be.deep.equal(entitlement.json());
+    });
+  });
+
+  describe('action delegation', () => {
+    it('should call delegateActionToService with serviceId local', () => {
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateActionToService');
+      const action = 'action';
+      subscriptionService.delegateActionToLocal(action);
+      expect(delegateStub).to.be.calledWith(action, 'local');
+    });
+
+    it('should delegate action to the specified platform', () => {
+      subscriptionService.platformStore_ =
+        new PlatformStore(['local'], null, null);
+      const platform = new SubscriptionPlatform();
+      const executeActionStub = sandbox.stub(platform, 'executeAction');
+      const getPlatformStub = sandbox.stub(
+          subscriptionService.platformStore_, 'onPlatformResolves')
+          .callsFake((serviceId, callback) => callback(platform));
+      const action = action;
+      return subscriptionService.delegateActionToService(action,
+          'local').then(() => {
+        expect(getPlatformStub).to.be.calledWith('local');
+        expect(executeActionStub).to.be.calledWith(action);
+      });
+    });
+  });
+
+  describe('decorateServiceAction', () => {
+    it('should delegate element to platform of given serviceId', () => {
+      const element = document.createElement('div');
+      element.setAttribute('subscriptions-service', 'swg-google');
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'swg-google';
+      subscriptionService.platformStore_ = new PlatformStore(
+          ['local', 'swg-google']);
+      const whenResolveStub = sandbox.stub(subscriptionService.platformStore_,
+          'onPlatformResolves').callsFake(
+          (serviceId, callback) => callback(platform));
+      const decorateUIStub = sandbox.stub(platform,
+          'decorateUI');
+      subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
+      expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+      expect(decorateUIStub).to.be.calledWith(element);
+    });
+  });
+
+  describe('selectPlatformForLogin', () => {
+    it('should return the platform which ever supports viewer', () => {
+      subscriptionService.platformStore_ = new PlatformStore(
+          ['local', 'swg-google']);
+      const loginStub = sandbox.stub(
+          subscriptionService.platformStore_, 'selectPlatformForLogin');
+      subscriptionService.selectPlatformForLogin();
+      expect(loginStub).to.be.called;
+    });
+  });
+
+  describe('AccessVars', () => {
+    let platformStore;
+    let entitlement;
+
+    beforeEach(() => {
+      platformStore = new PlatformStore(['local']);
+      subscriptionService.platformStore_ = platformStore;
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {
+          test: 'a1',
+        },
+      });
+    });
+
+    it('should return local reader ID', () => {
+      const stub = sandbox.stub(subscriptionService, 'getReaderId').callsFake(
+          () => Promise.resolve('reader1'));
+      return subscriptionService.getAccessReaderId().then(readerId => {
+        expect(readerId).to.equal('reader1');
+        expect(stub).to.be.calledOnce.calledWith('local');
+      });
+    });
+
+    it('should resolve authdata from local service', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('data.test'))
+          .to.eventually.equal('a1');
+    });
+
+    it('should resolve authdata for a standard field', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('grantReason'))
+          .to.eventually.equal('SUBSCRIBER');
+    });
+
+    it('should resolve authdata for an unknown value', () => {
+      platformStore.resolveEntitlement('local', entitlement);
+      return expect(subscriptionService.getAuthdataField('data.other'))
+          .to.eventually.be.undefined;
     });
   });
 });

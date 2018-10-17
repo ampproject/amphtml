@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 import {dev} from './log';
 import {getCurve} from './curve';
@@ -38,8 +39,8 @@ export class Animation {
    * @param {!Node} contextNode The context node.
    * @param {!TransitionDef<?>} transition Transition to animate.
    * @param {./time.timeDef} duration Duration in milliseconds.
-   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for animation.
-   *   Default is the linear animation.
+   * @param {(!./curve.CurveDef|string)=} opt_curve Optional curve to use for
+   *   animation. Default is the linear animation.
    * @return {!AnimationPlayer}
    */
   static animate(contextNode, transition, duration, opt_curve) {
@@ -84,9 +85,9 @@ export class Animation {
   }
 
   /**
-   * Adds a segment to the animation. Each segment starts at offset (delay)
-   * and runs for a portion of the overall animation (duration). Note that
-   * both delay and duration and normtimeDef types which accept values from 0 to 1.
+   * Adds a segment to the animation. Each segment starts at offset (delay) and
+   * runs for a portion of the overall animation (duration). Note that both
+   * delay and duration and normtimeDef types which accept values from 0 to 1.
    * Optionally, the time is pushed through a curve. If curve is not specified,
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.
@@ -117,7 +118,6 @@ export class Animation {
   start(duration) {
     const player = new AnimationPlayer(this.vsync_, this.contextNode_,
         this.segments_, this.curve_, duration);
-    player.start_();
     return player;
   }
 }
@@ -167,36 +167,42 @@ class AnimationPlayer {
     this.duration_ = duration;
 
     /** @private {./time.timeDef} */
-    this.startTime_ = 0;
+    this.startTime_ = Date.now();
 
     /** @private {./time.normtimeDef} */
-    this.normLinearTime_ = 0;
+    // this.normLinearTime_ = 0;
 
     /** @private {./time.normtimeDef} */
-    this.normTime_ = 0;
+    // this.normTime_ = 0;
 
     /** @private {boolean} */
-    this.running_ = false;
+    this.running_ = true;
 
     /** @private {!Object<string, *>} */
     this.state_ = {};
 
-    /** @const {function()} */
-    this.resolve_;
+    const deferred = new Deferred();
 
-    /** @const {function()} */
-    this.reject_;
+    /** @const @private */
+    this.promise_ = deferred.promise;
 
-    /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    /** @const @private */
+    this.resolve_ = deferred.resolve;
+
+    /** @const @private */
+    this.reject_ = deferred.reject;
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
       mutate: this.stepMutate_.bind(this),
     });
+
+    if (this.vsync_.canAnimate(this.contextNode_)) {
+      this.task_(this.state_);
+    } else {
+      dev().warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
   }
 
   /**
@@ -235,20 +241,6 @@ class AnimationPlayer {
    */
   halt(opt_dir) {
     this.complete_(/* success */ false, /* dir */ opt_dir || 0);
-  }
-
-  /**
-   * @private
-   */
-  start_() {
-    this.startTime_ = Date.now();
-    this.running_ = true;
-    if (this.vsync_.canAnimate(this.contextNode_)) {
-      this.task_(this.state_);
-    } else {
-      dev().warn(TAG_, 'cannot animate');
-      this.complete_(/* success */ false, /* dir */ 0);
-    }
   }
 
   /**

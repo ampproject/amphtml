@@ -20,12 +20,18 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Portuguese strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Habilitar',
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Aceitar',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Experimento habilitado. Por favor recarregue.',
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Recusar',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'Ver no domínio original:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'Mais sobre os resultados AMP',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Toque em Avançar',
@@ -70,7 +76,7 @@ export default {
     string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Compartilhar',
@@ -89,4 +95,4 @@ export default {
     string: 'Lamentamos, mas parece que seu navegador não suporta essa ' +
         'experiência',
   },
-};
+});

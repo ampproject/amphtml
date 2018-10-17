@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 
 
 /** @type {string} */
@@ -29,14 +30,18 @@ const TAG = 'amp-story';
  *    canshowbookend: boolean,
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
+ *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    infodialogstate: boolean,
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
+ *    consentid: ?string,
  *    currentpageid: string,
  * }}
  */
@@ -50,30 +55,40 @@ export const StateProperty = {
   CAN_SHOW_BOOKEND: 'canshowbookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
+  CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
+  AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
+
+  // App data.
+  CONSENT_ID: 'consentid',
   CURRENT_PAGE_ID: 'currentpageid',
+  CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
 
 /** @private @const @enum {string} */
 export const Action = {
+  CHANGE_PAGE: 'changepage',
+  SET_CONSENT_ID: 'setconsentid',
+  TOGGLE_AD: 'togglead',
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_INFO_DIALOG: 'toggleinfodialog',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
-  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -86,6 +101,10 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Triggers the ad UI.
+    case Action.TOGGLE_AD:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.AD_STATE]: !!data}));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
@@ -97,6 +116,10 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_DESKTOP:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+    // Shows or hides the info dialog.
+    case Action.TOGGLE_INFO_DIALOG:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.INFO_DIALOG_STATE]: !!data}));
     // Shows or hides the audio controls.
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
@@ -128,9 +151,15 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
+    case Action.SET_CONSENT_ID:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CONSENT_ID]: data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
+          {}, state, {
+            [StateProperty.CURRENT_PAGE_ID]: data.id,
+            [StateProperty.CURRENT_PAGE_INDEX]: data.index,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -138,6 +167,9 @@ const actions = (state, action, data) => {
 };
 
 
+/**
+ * Store service.
+ */
 export class AmpStoryStoreService {
   /**
    * @param {!Window} win
@@ -160,7 +192,7 @@ export class AmpStoryStoreService {
    * @return {*}
    */
   get(key) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
@@ -175,7 +207,7 @@ export class AmpStoryStoreService {
    *                                     triggered with current value.
    */
   subscribe(key, listener, callToInitialize = false) {
-    if (!this.state_.hasOwnProperty(key)) {
+    if (!hasOwn(this.state_, key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
@@ -219,21 +251,26 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
+      [StateProperty.CURRENT_PAGE_INDEX]: 0,
     });
   }
 
+  // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
    * Retrieves the embed mode config, that will override the default state.
-   * @todo(gmajoulet): These should get their own file if they start growing.
    * @return {!Object<StateProperty, *>} Partial state
    * @private
    */
@@ -248,6 +285,10 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
+        };
+      case EmbedMode.NO_SHARING:
+        return {
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
       default:
         return {};

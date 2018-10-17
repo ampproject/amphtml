@@ -20,7 +20,7 @@ import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
 
@@ -190,7 +190,7 @@ describes.realWin('amp-image-lightbox component', {
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
       impl.activate({caller: ampImage});
-      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
+      impl.closeOnEscape_({key: Keys.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly
@@ -238,6 +238,19 @@ describes.realWin('amp-image-lightbox image viewer', {
   let imageViewer;
   let loadPromiseStub;
 
+  const sourceElement = {
+    offsetWidth: 101,
+    offsetHeight: 201,
+    getAttribute: name => {
+      if (name == 'src') {
+        return 'image1';
+      }
+      return undefined;
+    },
+    hasAttribute: () => undefined,
+    getImpl: () => Promise.resolve(sourceElement.implementation_),
+  };
+
   beforeEach(() => {
     win = env.win;
     doc = win.document;
@@ -275,64 +288,27 @@ describes.realWin('amp-image-lightbox image viewer', {
 
 
   it('should init to the source element without image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
-
     imageViewer.init(sourceElement, null);
-
     expect(imageViewer.sourceWidth_).to.equal(101);
     expect(imageViewer.sourceHeight_).to.equal(201);
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with unloaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
     const sourceImage = {
       complete: false,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().src).to.equal('');
   });
 
   it('should init to the source element with loaded image', () => {
-    const sourceElement = {
-      offsetWidth: 101,
-      offsetHeight: 201,
-      getAttribute: name => {
-        if (name == 'src') {
-          return 'image1';
-        }
-        return undefined;
-      },
-      hasAttribute: () => undefined,
-    };
     const sourceImage = {
       complete: true,
       src: 'image1-smaller',
     };
-
     imageViewer.init(sourceElement, sourceImage);
 
     expect(imageViewer.getImage().getAttribute('src')).to

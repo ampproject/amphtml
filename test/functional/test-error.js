@@ -15,12 +15,13 @@
  */
 
 import * as analytics from '../../src/analytics';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
+  blockedByConsentError,
   cancellation,
   detectJsEngineFromStack,
   detectNonAmpJs,
+  errorReportingDataForViewer,
   getErrorReportData,
   installErrorReporting,
   isCancellation,
@@ -90,6 +91,14 @@ describes.fakeWin('installErrorReporting', {}, env => {
     expect(rejectedPromiseError.reported).to.be.not.be.ok;
     expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
   });
+
+  it('should ignore blockByConsent', () => {
+    rejectedPromiseEvent.reason = rejectedPromiseError =
+        blockedByConsentError();
+    win.eventListeners.fire(rejectedPromiseEvent);
+    expect(rejectedPromiseError.reported).to.be.not.be.ok;
+    expect(rejectedPromiseEventCancelledSpy).to.be.calledOnce;
+  });
 });
 
 describe('maybeReportErrorToViewer', () => {
@@ -103,7 +112,7 @@ describe('maybeReportErrorToViewer', () => {
       new Error('XYZ', false));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
@@ -158,10 +167,19 @@ describe('maybeReportErrorToViewer', () => {
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should send viewer message named `error`', () => {
+  it('should send viewer message named `error` with stripped down error data '
+    + 'set', () => {
     return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.have.been
-            .calledWith('error', data));
+        .then(() => {
+          expect(sendMessageStub).to.have.been
+              .calledWith('error', errorReportingDataForViewer(data));
+          expect(data['m']).to.not.be.undefined;
+          expect(data['a']).to.not.be.undefined;
+          expect(data['s']).to.not.be.undefined;
+          expect(data['el']).to.not.be.undefined;
+          expect(data['v']).to.not.be.undefined;
+          expect(data['jse']).to.not.be.undefined;
+        });
   });
 });
 
@@ -172,7 +190,7 @@ describe('reportErrorToServer', () => {
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });
@@ -543,9 +561,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 
   it('should accept number and report incorrect use', () => {
@@ -555,9 +573,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 
   it('should accept null and report incorrect use', () => {
@@ -567,9 +585,9 @@ describes.sandboxed('reportError', {}, () => {
     expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
-    allowConsoleError(() => { expect(() => {
+    expect(() => {
       clock.tick();
-    }).to.throw(/_reported_ Error reported incorrectly/); });
+    }).to.throw(/_reported_ Error reported incorrectly/);
   });
 });
 

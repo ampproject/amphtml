@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
+import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-selector-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {areEqualOrdered} from '../../../src/utils/array';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
+import {toArray} from '../../../src/types';
 const TAG = 'amp-selector';
 
 /**
@@ -54,9 +58,6 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.inputs_ = [];
 
-    /** @private {boolean} */
-    this.isDisabled_ = false;
-
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -81,15 +82,16 @@ export class AmpSelector extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
-    this.isDisabled_ = this.element.hasAttribute('disabled');
 
-    this.element.setAttribute('role', 'listbox');
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'listbox');
+    }
 
     if (this.isMultiple_) {
       this.element.setAttribute('aria-multiselectable', 'true');
     }
 
-    if (this.isDisabled_) {
+    if (this.element.hasAttribute('disabled')) {
       this.element.setAttribute('aria-disabled', 'true');
     }
 
@@ -109,25 +111,24 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction('clear', this.clearAllSelections_.bind(this));
 
     this.init_();
-    if (!this.isDisabled_) {
-      this.element.addEventListener('click', this.clickHandler_.bind(this));
-      this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
-    }
+
+    this.element.addEventListener('click', this.clickHandler_.bind(this));
+    this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
     this.registerAction('selectUp', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
       this.select_(delta);
     }, ActionTrust.LOW);
 
     this.registerAction('selectDown', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
       this.select_(delta);
     }, ActionTrust.LOW);
 
     this.registerAction('toggle', invocation => {
-      const args = invocation.args;
+      const {args} = invocation;
       user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
       user().assert(args['index'] < this.options_.length, '\'index\' must be ' +
         'less than the length of options in the <amp-selector>');
@@ -135,6 +136,10 @@ export class AmpSelector extends AMP.BaseElement {
         this.toggle_(args['index'], args['value']);
       }
     }, ActionTrust.LOW);
+
+    // Triggers on DOM children updates
+    this.element.addEventListener(AmpEvents.DOM_UPDATE,
+        this.maybeRefreshOnUpdate_.bind(this));
   }
 
   /** @override */
@@ -142,6 +147,14 @@ export class AmpSelector extends AMP.BaseElement {
     const selected = mutations['selected'];
     if (selected !== undefined) {
       this.selectedAttributeMutated_(selected);
+    }
+    const disabled = mutations['disabled'];
+    if (disabled !== undefined) {
+      if (disabled) {
+        this.element.setAttribute('aria-disabled', 'true');
+      } else {
+        this.element.removeAttribute('aria-disabled');
+      }
     }
   }
 
@@ -220,12 +233,34 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
+   * Calls init_ again if options element has changed
+   * @param {Event} unusedEvent
    * @private
    */
-  init_() {
-    const options = [].slice.call(this.element.querySelectorAll('[option]'));
+  maybeRefreshOnUpdate_(unusedEvent) {
+    const newOptions = toArray(this.element.querySelectorAll('[option]'));
+    if (areEqualOrdered(this.options_, newOptions)) { // no updates
+      return;
+    }
+    // Clear prev states
+    this.options_ = [];
+    this.selectedOptions_ = [];
+    this.inputs_ = [];
+    this.init_(newOptions);
+  }
+
+  /**
+   * @param {Array<Element>=} opt_options
+   * @private
+   */
+  init_(opt_options) {
+    const options = opt_options ?
+      opt_options :
+      toArray(this.element.querySelectorAll('[option]'));
     options.forEach(option => {
-      option.setAttribute('role', 'option');
+      if (!option.hasAttribute('role')) {
+        option.setAttribute('role', 'option');
+      }
       if (option.hasAttribute('disabled')) {
         option.setAttribute('aria-disabled', 'true');
       }
@@ -244,14 +279,14 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Creates inputs for the currently selected elements and returns a string
    * array of their option values.
-   * @note Ignores elements that have `disabled` attribute set.
+   * Note: Ignores elements that have `disabled` attribute set.
    * @return {!Array<string>}
    * @private
    */
   setInputs_() {
     const selectedValues = [];
     const elementName = this.element.getAttribute('name');
-    if (!elementName || this.isDisabled_) {
+    if (!elementName || this.element.hasAttribute('disabled')) {
       return selectedValues;
     }
     const formId = this.element.getAttribute('form');
@@ -289,38 +324,32 @@ export class AmpSelector extends AMP.BaseElement {
     if (el.hasAttribute('disabled')) {
       return;
     }
-
     this.mutateElement(() => {
-      /** @type {?Array<string>} */
-      let selectedValues;
       if (el.hasAttribute('selected')) {
         if (this.isMultiple_) {
           this.clearSelection_(el);
-          selectedValues = this.setInputs_();
+          this.setInputs_();
         }
       } else {
         this.setSelection_(el);
-        selectedValues = this.setInputs_();
+        this.setInputs_();
       }
+      // Newly picked option should always have focus.
+      this.updateFocus_(el);
 
-      // Don't trigger action or update focus if
-      // selected values haven't changed.
-      if (selectedValues) {
-        // Newly picked option should always have focus.
-        this.updateFocus_(el);
-
-        // Trigger 'select' event with two data params:
-        // 'targetOption' - option value of the selected or deselected element.
-        // 'selectedOptions' - array of option values of selected elements.
-        const name = 'select';
-        const selectEvent =
-            createCustomEvent(this.win, `amp-selector.${name}`, {
-              targetOption: el.getAttribute('option'),
-              selectedOptions: selectedValues,
-            });
-        this.action_.trigger(this.element, name, selectEvent,
-            ActionTrust.HIGH);
-      }
+      // Trigger 'select' event with two data params:
+      // 'targetOption' - option value of the selected or deselected element.
+      // 'selectedOptions' - array of option values of selected elements.
+      const name = 'select';
+      const selections =
+          this.selectedOptions_.map(el => el.getAttribute('option'));
+      const selectEvent =
+          createCustomEvent(this.win, `amp-selector.${name}`, dict({
+            'targetOption': el.getAttribute('option'),
+            'selectedOptions': selections,
+          }));
+      this.action_.trigger(this.element, name, selectEvent,
+          ActionTrust.HIGH);
     });
   }
 
@@ -329,6 +358,9 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   clickHandler_(event) {
+    if (this.element.hasAttribute('disabled')) {
+      return;
+    }
     let el = dev().assertElement(event.target);
     if (!el) {
       return;
@@ -390,18 +422,21 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   keyDownHandler_(event) {
-    const keyCode = event.keyCode;
-    switch (keyCode) {
-      case KeyCodes.LEFT_ARROW: /* fallthrough */
-      case KeyCodes.UP_ARROW: /* fallthrough */
-      case KeyCodes.RIGHT_ARROW: /* fallthrough */
-      case KeyCodes.DOWN_ARROW:
+    if (this.element.hasAttribute('disabled')) {
+      return;
+    }
+    const {key} = event;
+    switch (key) {
+      case Keys.LEFT_ARROW: /* fallthrough */
+      case Keys.UP_ARROW: /* fallthrough */
+      case Keys.RIGHT_ARROW: /* fallthrough */
+      case Keys.DOWN_ARROW:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           this.navigationKeyDownHandler_(event);
         }
         return;
-      case KeyCodes.ENTER: /* fallthrough */
-      case KeyCodes.SPACE:
+      case Keys.ENTER: /* fallthrough */
+      case Keys.SPACE:
         this.selectionKeyDownHandler_(event);
         return;
     }
@@ -415,20 +450,20 @@ export class AmpSelector extends AMP.BaseElement {
   navigationKeyDownHandler_(event) {
     const doc = this.win.document;
     let dir = 0;
-    switch (event.keyCode) {
-      case KeyCodes.LEFT_ARROW:
+    switch (event.key) {
+      case Keys.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
         break;
-      case KeyCodes.UP_ARROW:
+      case Keys.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isRTL(doc) ? -1 : 1;
         break;
-      case KeyCodes.DOWN_ARROW:
+      case Keys.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
@@ -465,8 +500,8 @@ export class AmpSelector extends AMP.BaseElement {
    * @param {!Event} event
    */
   selectionKeyDownHandler_(event) {
-    const keyCode = event.keyCode;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       if (this.options_.includes(event.target)) {
         event.preventDefault();
         const el = dev().assertElement(event.target);
@@ -477,7 +512,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Clears a given element from the list of selected options.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @private
    */
   clearSelection_(element) {
@@ -504,7 +539,7 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Marks a given element as selected and clears the others if required.
-   * @param {!Element} element.
+   * @param {!Element} element
    * @private
    */
   setSelection_(element) {

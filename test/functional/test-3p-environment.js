@@ -225,11 +225,9 @@ describe('3p environment', () => {
     expect(win.prompt()).to.equal('');
     expect(win.confirm()).to.be.false;
     // We only allow 3 calls to these functions.
-    allowConsoleError(() => {
-      expect(() => win.alert()).to.throw(/security error/);
-      expect(() => win.prompt()).to.throw(/security error/);
-      expect(() => win.confirm()).to.throw(/security error/);
-    });
+    expect(() => win.alert()).to.throw(/security error/);
+    expect(() => win.prompt()).to.throw(/security error/);
+    expect(() => win.confirm()).to.throw(/security error/);
   }
 
   function waitForMutationObserver(iframe) {

@@ -27,8 +27,9 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./dialog.Dialog} dialog
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, dialog) {
+  constructor(ampdoc, dialog, serviceAdapter) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
@@ -40,11 +41,14 @@ export class LocalSubscriptionPlatformRenderer {
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
+
+    /** @private @const {!./service-adapter.ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
   }
 
   /**
    *
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   render(renderState) {
     return Promise.all([
@@ -54,7 +58,7 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    */
   renderActions_(renderState) {
     this.renderActionsInNode_(renderState, this.rootNode_);
@@ -85,7 +89,7 @@ export class LocalSubscriptionPlatformRenderer {
         return this.templates_.renderTemplate(candidate, authResponse)
             .then(element => {
               const renderState =
-                  /** @type {!./amp-subscriptions.RenderState} */(authResponse);
+                /** @type {!JsonObject} */(authResponse);
               return this.renderActionsInNode_(
                   renderState,
                   element);
@@ -105,14 +109,15 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    * Renders actions inside a given node according to an authResponse
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!JsonObject} renderState
    * @param {!Node} rootNode
    * @return {!Promise<Node>}
    * @private
    */
   renderActionsInNode_(renderState, rootNode) {
     return this.ampdoc_.whenReady().then(() => {
-      // Find the matching actions and sections and make them visible if evalutes to true.
+      // Find the matching actions and sections and make them visible if
+      // evalutes to true.
       const querySelectors =
           '[subscriptions-action], [subscriptions-section="actions"],'
               + ' [subscriptions-actions]';
@@ -123,6 +128,16 @@ export class LocalSubscriptionPlatformRenderer {
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
           candidate.classList.add('i-amphtml-subs-display');
+          if (candidate.getAttribute('subscriptions-service')
+            && candidate.getAttribute('subscriptions-action')
+            && candidate.getAttribute('subscriptions-decorate') !== 'false') {
+            this.serviceAdapter_.decorateServiceAction(
+                candidate,
+                candidate.getAttribute('subscriptions-service'),
+                candidate.getAttribute('subscriptions-action'),
+                null
+            );
+          }
         } else {
           candidate.classList.remove('i-amphtml-subs-display');
         }

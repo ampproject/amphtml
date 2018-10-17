@@ -28,7 +28,7 @@ export class InactiveElementFilter extends Filter {
    * @param {!../config.InactiveElementConfig} spec
    */
   constructor(name, spec) {
-    super(name);
+    super(name, spec.type);
     user().assert(isValidInactiveElementSpec(spec),
         'Invalid InactiveElementspec');
 

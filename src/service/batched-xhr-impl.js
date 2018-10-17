@@ -34,7 +34,7 @@ export class BatchedXhr extends Xhr {
   constructor(win) {
     super(win);
 
-    /** @const {!Object<!Promise<!./xhr-impl.FetchResponse>>} */
+    /** @const {!Object<!Promise<!Response>>} */
     this.fetchPromises_ = map();
   }
 
@@ -42,8 +42,8 @@ export class BatchedXhr extends Xhr {
    * Fetch and batch the requests if possible.
    *
    * @param {string} input URL
-   * @param {?./xhr-impl.FetchInitDef=} opt_init Fetch options object.
-   * @return {!Promise<!./xhr-impl.FetchResponse>}
+   * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @return {!Promise<!Response>}
    * @override
    */
   fetch(input, opt_init) {

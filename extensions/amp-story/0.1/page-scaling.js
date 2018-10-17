@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {
+  assertDoesNotContainDisplay,
+  px,
+  setImportantStyles,
+  setStyle,
+} from '../../../src/style';
 import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
+import {tryResolve} from '../../../src/utils/promise';
 import {unscaledClientRect} from './utils';
 
 
@@ -80,8 +86,8 @@ function targetDimensionsFor(sizer) {
 function scaleTransform(factor, width, height, matrix) {
   // TODO(alanorozco, #12934): Translate values are not correctly calculated if
   // `scale`, `skew` or `rotate` have been user-defined.
-  const translateX = width * factor / 2 - width / 2;
-  const translateY = height * factor / 2 - height / 2;
+  const translateX = ((width * factor) / 2) - (width / 2);
+  const translateY = ((height * factor) / 2) - (height / 2);
   return [
     matrix[0] * factor,
     matrix[1],
@@ -172,18 +178,15 @@ let pageScalingService = null;
 /**
  * Service for scaling pages dynamically so their layers will be sized within a
  * certain pixel range independent of visual dimensions.
+ * TODO(alanorozco): Make this part of the runtime layout system to prevent
+ *   FOUC-like jump and allow for SSR.
  */
-// TODO(alanorozco): Make this part of the runtime layout system to prevent
-// FOUC-like jump and allow for SSR.
 export class PageScalingService {
   /**
    * @param {!Window} win
    * @param {!Element} rootEl
    */
   constructor(win, rootEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     /** @private @const {!Element} */
     this.rootEl_ = rootEl;
 
@@ -237,7 +240,7 @@ export class PageScalingService {
    * @return {!Promise}
    */
   scale(page) {
-    return Promise.resolve(this.scale_(page));
+    return tryResolve(() => this.scale_(page));
   }
 
   /**
@@ -265,8 +268,8 @@ export class PageScalingService {
         scalableElements(page).forEach((el, i) => {
           // `border-box` required since layer now has a width/height set.
           setImportantStyles(el, {'box-sizing': 'border-box'});
-          setImportantStyles(el,
-              this.scalingStyles(targetDimensions, scalableElsDimensions[i]));
+          setImportantStyles(el, assertDoesNotContainDisplay(this.scalingStyles(
+              targetDimensions, scalableElsDimensions[i])));
         });
         markScalingApplied(page);
       },

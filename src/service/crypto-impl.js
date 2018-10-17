@@ -26,6 +26,10 @@ const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
 export class Crypto {
 
+  /**
+   * Creates an instance of Crypto.
+   * @param {!Window} win
+   */
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;

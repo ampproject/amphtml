@@ -16,6 +16,12 @@
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
 import {
+  HighlightHandler,
+  HighlightInfoDef,
+  getHighlightParam,
+} from './highlight-handler';
+import {KeyboardHandler} from './keyboard-handler';
+import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
@@ -28,10 +34,9 @@ import {
   getAmpdoc,
   registerServiceBuilder,
 } from '../../../src/service';
-import {getData} from '../../../src/event-helper';
+import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -63,6 +68,11 @@ export class AmpViewerIntegration {
     /** @private {boolean} */
     this.isHandShakePoll_ = false;
 
+    /**
+     * @private {?HighlightHandler}
+     */
+    this.highlightHandler_ = null;
+
     /** @const @private {!AmpViewerIntegrationVariableService} */
     this.variableService_ = new AmpViewerIntegrationVariableService(
         getAmpdoc(this.win.document));
@@ -78,7 +88,8 @@ export class AmpViewerIntegration {
    */
   init() {
     dev().fine(TAG, 'handshake init()');
-    const viewer = Services.viewerForDoc(this.win.document);
+    const ampdoc = getAmpdoc(this.win.document);
+    const viewer = Services.viewerForDoc(ampdoc);
     this.isWebView_ = viewer.getParam('webview') == '1';
     this.isHandShakePoll_ = viewer.hasCapability('handshakepoll');
     const origin = viewer.getParam('origin') || '';
@@ -87,8 +98,6 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    const ampdoc = getAmpdoc(this.win.document);
-
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;
       return this.webviewPreHandshakePromise_(source, origin)
@@ -96,6 +105,11 @@ export class AmpViewerIntegration {
             return this.openChannelAndStart_(viewer, ampdoc, origin,
                 new Messaging(this.win, receivedPort, this.isWebView_));
           });
+    }
+    /** @type {?HighlightInfoDef} */
+    const highlightInfo = getHighlightParam(ampdoc);
+    if (highlightInfo) {
+      this.highlightHandler_ = new HighlightHandler(ampdoc, highlightInfo);
     }
 
     const port = new WindowPortEmulator(
@@ -182,6 +196,12 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
+    if (viewer.hasCapability('keyboard')) {
+      this.initKeyboardHandler_(messaging);
+    }
+    if (this.highlightHandler_ != null) {
+      this.highlightHandler_.setupMessaging(messaging);
+    }
   }
 
   /**
@@ -200,6 +220,14 @@ export class AmpViewerIntegration {
    */
   initTouchHandler_(messaging) {
     new TouchHandler(this.win, messaging);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initKeyboardHandler_(messaging) {
+    new KeyboardHandler(this.win, messaging);
   }
 }
 

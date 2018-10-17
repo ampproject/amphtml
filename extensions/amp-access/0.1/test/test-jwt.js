@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {JwtHelper} from '../jwt';
 import {pemToBytes} from '../../../../src/utils/pem';
 
@@ -35,7 +34,7 @@ describe('JwtHelper', () => {
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
   });
 
@@ -63,23 +62,23 @@ describe('JwtHelper', () => {
     });
 
     it('should fail on invalid format', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         helper.decodeInternal_('ABC');
-      }).to.throw(/Invalid token/); });
+      }).to.throw(/Invalid token/);
     });
 
     it('should fail on invalid JSON in header', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         helper.decodeInternal_(
             `${TOKEN_HEADER.substring(1)}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`);
-      }).to.throw(/Invalid token/); });
+      }).to.throw(/Invalid token/);
     });
 
     it('should fail on invalid JSON in payload', () => {
-      allowConsoleError(() => { expect(() => {
+      expect(() => {
         helper.decodeInternal_(
             `${TOKEN_HEADER}.${TOKEN_PAYLOAD.substring(1)}.${TOKEN_SIG}`);
-      }).to.throw(/Invalid token/); });
+      }).to.throw(/Invalid token/);
     });
 
     it('should decode web safe and non-web-safe base64', () => {

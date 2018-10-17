@@ -1,0 +1,53 @@
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+    <title>amp-recaptcha example</title>
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <style amp-custom>
+        h1, h2 {
+          font-family: Verdana,Geneva,sans-serif
+        }
+
+        html, body {
+          min-height: 2500px;
+        }
+
+        #recaptcha-lightbox {
+          color: #fff;
+          background-color: rgba(0,0,0,0.5);
+        }
+
+        .push-down {
+          margin-top: 4000px;
+        }
+      </style>
+      <script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js"></script>
+      <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>Amp Recaptcha Examples</h1>
+    <p>This page is long to show off layout and unlayout callbacks</p>
+    
+    <div>
+    <h2>amp-recaptcha-input inside amp-lightbox</h2>
+      <button on="tap:recaptcha-lightbox">Open Lightbox</button>
+      <amp-lightbox id="recaptcha-lightbox" layout="nodisplay">
+        <blockquote>Open Devtools to check for amp-recaptcha-input</blockquote>
+        <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+        </amp-recaptcha-input>
+        <button on="tap:recaptcha-lightbox.close">Close lightbox</button>
+      </amp-lightbox>
+    <div>
+
+    <div class="push-down">
+      <h2>amp-recaptcha-input</h2>
+      <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+      </amp-recaptcha-input>
+    </div>
+
+  </body>
+</html>

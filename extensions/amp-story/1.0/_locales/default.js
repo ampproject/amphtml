@@ -20,12 +20,39 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
-    string: 'Enable',
+export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Sound off',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
-    string: 'Experiment enabled.  Please reload.',
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sound on',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'This page has no sound',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'More to read',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Change data privacy settings',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Accept',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Decline',
+  },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Continue Anyway',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
+    string: 'View on original domain:',
+  },
+  [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
+    string: 'More about AMP results',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',
@@ -46,4 +73,4 @@ export default {
     string: 'We\'re sorry, it looks like your browser doesn\'t support ' +
         'this experience',
   },
-};
+});

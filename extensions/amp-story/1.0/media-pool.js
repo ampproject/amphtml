@@ -30,10 +30,14 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
+import {
+  VideoServiceSignals,
+} from '../../../src/service/video-service-interface';
 import {ampMediaElementFor} from './utils';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 
 
@@ -100,6 +104,10 @@ let nextInstanceId = 0;
 let elId = 0;
 
 
+/**
+ * 🍹 MediaPool
+ * Keeps a pool of N media elements to be shared across components.
+ */
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
@@ -116,9 +124,6 @@ export class MediaPool {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
@@ -166,6 +171,22 @@ export class MediaPool {
      * @private {boolean}
      */
     this.blessed_ = false;
+
+    /**
+     * The default source to use for pool-created audio sources,
+     * @private @const {!Object<!MediaType, string>}
+     */
+    this.defaultSources_ = {
+      [MediaType.AUDIO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_AUDIO_SRC,
+      [MediaType.VIDEO]:
+          isExperimentOn(win, 'disable-amp-story-default-media') ? '' :
+            BLANK_VIDEO_SRC,
+    };
+
+    /** @private {?Array<!AmpElement>} */
+    this.ampElementsToBless_ = null;
 
     /** @const {!Object<string, (function(): !HTMLMediaElement)>} */
     this.mediaFactory_ = {
@@ -220,24 +241,22 @@ export class MediaPool {
       this.allocated[type] = [];
       this.unallocated[type] = [];
 
-      this.vsync_.mutate(() => {
-        // Reverse-looping is generally faster and Closure would usually make
-        // this optimization automatically. However, it skips it due to a
-        // comparison with the itervar below, so we have to roll it by hand.
-        for (let i = count; i > 0; i--) {
-          const mediaEl = /** @type {!HTMLMediaElement} */
-              // Use seed element at end of set to prevent wasting it.
-              (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
-          const sources = this.getDefaultSource_(type);
-          mediaEl.setAttribute('pool-element', elId++);
-          this.enqueueMediaElementTask_(mediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
-          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-          // is returned.  If so, we should adjust the pool size/distribution
-          // between media types.
-          this.unallocated[type].push(mediaEl);
-        }
-      });
+      // Reverse-looping is generally faster and Closure would usually make
+      // this optimization automatically. However, it skips it due to a
+      // comparison with the itervar below, so we have to roll it by hand.
+      for (let i = count; i > 0; i--) {
+        const mediaEl = /** @type {!HTMLMediaElement} */
+            // Use seed element at end of set to prevent wasting it.
+            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        const sources = this.getDefaultSource_(type);
+        mediaEl.setAttribute('pool-element', elId++);
+        this.enqueueMediaElementTask_(mediaEl,
+            new UpdateSourcesTask(sources));
+        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+        // is returned.  If so, we should adjust the pool size/distribution
+        // between media types.
+        this.unallocated[type].push(mediaEl);
+      }
     });
   }
 
@@ -248,15 +267,13 @@ export class MediaPool {
    * @return {!Sources} The default source for the specified type of media.
    */
   getDefaultSource_(mediaType) {
-    switch (mediaType) {
-      case MediaType.AUDIO:
-        return new Sources(BLANK_AUDIO_SRC);
-      case MediaType.VIDEO:
-        return new Sources(BLANK_VIDEO_SRC);
-      default:
-        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-        return new Sources();
+    const sourceStr = this.defaultSources_[mediaType];
+    if (sourceStr === undefined) {
+      dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+      return new Sources();
     }
+
+    return new Sources(sourceStr);
   }
 
 
@@ -462,12 +479,12 @@ export class MediaPool {
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl, this.vsync_))
+        new SwapIntoDomTask(domMediaEl))
         .then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
           this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
+              new UpdateSourcesTask(sources));
           this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
         }, () => {
           this.forceDeallocateMediaElement_(poolMediaEl);
@@ -489,7 +506,11 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+    componentEl.getImpl().then(impl => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
 
@@ -504,7 +525,7 @@ export class MediaPool {
     const defaultSources = this.getDefaultSource_(mediaType);
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new UpdateSourcesTask(defaultSources, this.vsync_));
+        new UpdateSourcesTask(defaultSources));
   }
 
 
@@ -524,7 +545,7 @@ export class MediaPool {
         'No media element to put back into DOM after eviction.'));
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
+        new SwapOutOfDomTask(oldDomMediaEl))
         .then(() => {
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
         });
@@ -632,6 +653,12 @@ export class MediaPool {
    */
   register(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
+
+    const parent = domMediaEl.parentNode;
+    if (parent.signals) {
+      this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
+    }
+
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
@@ -654,6 +681,15 @@ export class MediaPool {
     domMediaEl.pause();
 
     return Promise.resolve();
+  }
+
+  /**
+   * @param {!AmpElement} element
+   * @private
+   */
+  trackAmpElementToBless_(element) {
+    this.ampElementsToBless_ = this.ampElementsToBless_ || [];
+    this.ampElementsToBless_.push(element);
   }
 
 
@@ -789,6 +825,13 @@ export class MediaPool {
     }
 
     const blessPromises = [];
+
+    (this.ampElementsToBless_ || []).forEach(ampEl => {
+      ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
+    });
+
+    this.ampElementsToBless_ = null; // GC
+
     this.forEachMediaElement_(mediaEl => {
       blessPromises.push(this.bless_(mediaEl));
     });

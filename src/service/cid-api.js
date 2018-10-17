@@ -19,7 +19,7 @@ import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
-import {isProxyOrigin, parseUrl} from '../url';
+import {isProxyOrigin, parseUrlDeprecated} from '../url';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
@@ -60,10 +60,12 @@ export class GoogleCidApi {
      */
     this.cidPromise_ = {};
 
-    const canonicalUrl = Services.documentInfoForDoc(ampdoc).canonicalUrl;
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
 
     /** @private {?string} */
-    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
+    this.canonicalOrigin_ = canonicalUrl
+      ? parseUrlDeprecated(canonicalUrl).origin
+      : null;
   }
 
   /**
@@ -104,8 +106,9 @@ export class GoogleCidApi {
           .then(response => {
             const cid = this.handleResponse_(response);
             if (!cid && response['alternateUrl']) {
-              // If an alternate url is provided, try again with the alternate url
-              // The client is still responsible for appending API keys to the URL.
+              // If an alternate url is provided, try again with the alternate
+              // url The client is still responsible for appending API keys to
+              // the URL.
               const altUrl = `${response['alternateUrl']}?key=${apiKey}`;
               return this.fetchCid_(dev().assertString(altUrl), scope, token)
                   .then(this.handleResponse_.bind(this));
@@ -191,11 +194,18 @@ export class GoogleCidApi {
     return this.win_.Date.now() + time;
   }
 
+  /**
+   * @return {boolean}
+   */
   isReferrerProxyOrigin_() {
     return isProxyOrigin(WindowInterface.getDocumentReferrer(this.win_));
   }
 
+  /**
+   * @param {?string} token
+   * @return {boolean}
+   */
   isStatusToken_(token) {
-    return token && token[0] === '$';
+    return /** @type boolean */ (token && token[0] === '$');
   }
 }

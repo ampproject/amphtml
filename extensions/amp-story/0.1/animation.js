@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {
   KeyframesDef,
   KeyframesOrFilterFnDef,
@@ -26,10 +27,14 @@ import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  escapeCssSelectorIdent,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {map, omit} from '../../../src/utils/object';
-import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -47,8 +52,8 @@ const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /**
  * @param {!Element} element
  * @return {boolean}
+ * TODO(alanorozco): maybe memoize?
  */
-// TODO(alanorozco): maybe memoize?
 export function hasAnimations(element) {
   return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
@@ -196,7 +201,7 @@ class AnimationRunner {
 
     return this.firstFrameProps_.then(firstFrameProps =>
       this.vsync_.mutatePromise(() => {
-        setStyles(this.target_, firstFrameProps);
+        setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
       }));
   }
 
@@ -217,7 +222,8 @@ class AnimationRunner {
     let promise = Promise.resolve();
 
     if (this.animationDef_.startAfterId) {
-      const startAfterId = this.animationDef_.startAfterId;
+      const startAfterId = /** @type {string} */(
+        this.animationDef_.startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
     }
 
@@ -239,8 +245,8 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        !!this.runner_ && dev().assert(this.runner_)
-            .getPlayState() == WebAnimationPlayState.RUNNING;
+        (!!this.runner_ && dev().assert(this.runner_)
+            .getPlayState() == WebAnimationPlayState.RUNNING);
   }
 
   /** Force-finishes all animations. */
@@ -379,9 +385,6 @@ export class AnimationManager {
 
     /** @private @const */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
-
-    /** @private @const */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
 
     /** @private @const */
     this.timer_ = Services.timerFor(this.ampdoc_.win);
@@ -541,6 +544,9 @@ export class AnimationManager {
 
 /** Bus for animation sequencing. */
 class AnimationSequence {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Object<string, !Promise>} */
     this.subscriptionPromises_ = map();
@@ -573,9 +579,9 @@ class AnimationSequence {
    */
   waitFor(id) {
     if (!(id in this.subscriptionPromises_)) {
-      this.subscriptionPromises_[id] = new Promise(resolve => {
-        this.subscriptionResolvers_[id] = resolve;
-      });
+      const deferred = new Deferred();
+      this.subscriptionPromises_[id] = deferred.promise;
+      this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
   }

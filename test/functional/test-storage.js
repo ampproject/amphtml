@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   LocalStorageBinding,
@@ -37,7 +36,7 @@ describe('Storage', () => {
   let viewerBroadcastHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     viewerBroadcastHandler = undefined;
     viewer = {
@@ -325,7 +324,7 @@ describe('Store', () => {
   let store;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     store = new Store({}, 2);
   });
@@ -432,7 +431,7 @@ describe('LocalStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowApi = {
       localStorage: {
         getItem: () => {},
@@ -572,7 +571,7 @@ describe('ViewerStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     viewer = {
       sendMessageAwaitResponse: () => {},
     };

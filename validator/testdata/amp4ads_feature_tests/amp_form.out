@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,23 +46,27 @@ FAIL
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
 |    </form>
-|    <!-- Invalid: input can not be type="button|file|image". -->
+|    <!-- Invalid: input can not be type="button|image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
 amp4ads_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-|      <input type="file" name="file">
->>     ^~~~~~~~~
-amp4ads_feature_tests/amp_form.html:51:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-amp4ads_feature_tests/amp_form.html:52:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4ads_feature_tests/amp_form.html:51:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
-|    <!-- Invalid: input can not be type="password" -->
+|    <!-- Invalid: input can not be type="file|password". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-amp4ads_feature_tests/amp_form.html:56:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4ads_feature_tests/amp_form.html:55:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|      <input type="file" name="file">
+>>     ^~~~~~~~~
+amp4ads_feature_tests/amp_form.html:56:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|      <input [type]="state.value" name="name">
+|      <div submitting>
+|        Submitting form...
+|      </div>
 |    </form>
 |  </body>
 |  </html>
