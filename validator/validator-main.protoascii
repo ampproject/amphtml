@@ -4126,10 +4126,6 @@ tags: {
     value: ""
   }
   attrs: {
-    name: "no-verify"
-    value: ""
-  }
-  attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "button|"
