@@ -80,6 +80,7 @@ export const UIType = {
  *    storyaudiostate: boolean,
  *    supportedbrowserstate: boolean,
  *    uistate: !UIType,
+ *    uivisibilitystate: boolean,
  *    consentid: ?string,
  *    currentpageid: string,
  *    currentpageindex: number,
@@ -115,6 +116,7 @@ export const StateProperty = {
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
   UI_STATE: 'uistate',
+  UI_VISIBILITY_STATE: 'uivisibilitystate',
 
   // App data.
   CONSENT_ID: 'consentid',
@@ -142,6 +144,7 @@ export const Action = {
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
   TOGGLE_UI: 'toggleui',
+  TOGGLE_UI_VISIBILITY: 'toggleuivisibility',
 };
 
 
@@ -236,6 +239,9 @@ const actions = (state, action, data) => {
             [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
             [StateProperty.UI_STATE]: data,
           }));
+    case Action.TOGGLE_UI_VISIBILITY:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.UI_VISIBILITY_STATE]: !!data}));
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CONSENT_ID]: data}));
@@ -354,6 +360,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.UI_VISIBILITY_STATE]: true,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,

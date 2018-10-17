@@ -114,4 +114,10 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     expect(systemLayer.getShadowRoot()).to.have.attribute(
         'i-amphtml-story-has-sidebar');
   });
+
+  it('should hide the system layer depending on UI_VISIBILITY_STATE', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_UI_VISIBILITY, false);
+    expect(systemLayer.getShadowRoot()).to.have.class('i-amphtml-story-hidden');
+  });
 });
