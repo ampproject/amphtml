@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
+
+/** @private @const {number} */
+const HOLD_TOUCH_THRESHOLD_MS = 500;
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
@@ -168,7 +176,7 @@ export class AdvancementConfig {
     const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
     const supportedAdvancementModes = [
-      ManualAdvancement.fromElement(rootEl),
+      ManualAdvancement.fromElement(win, rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -255,13 +263,23 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
+   * @param {!Window} win The Window object.
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(element) {
+  constructor(win, element) {
     super();
+
+    /** @private @const {!Element} */
     this.element_ = element;
-    this.clickListener_ = this.maybePerformNavigation_.bind(this);
+
+    /** @private {?number} Last touchstart event's timestamp */
+    this.touchstartTimestamp_ = null;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    this.startListening_();
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -289,32 +307,78 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  start() {
-    super.start();
-    this.element_.addEventListener('click', this.clickListener_, true);
-  }
-
-  /** @override */
-  stop() {
-    super.stop();
-    this.element_.removeEventListener('click', this.clickListener_, true);
-  }
-
-  /** @override */
   getProgress() {
     return 1.0;
+  }
+
+  /**
+   * Binds the event listeners.
+   * @private
+   */
+  startListening_() {
+    if (isExperimentOn(this.win_, 'amp-story-hold-to-pause')) {
+      this.element_
+          .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
+      this.element_
+          .addEventListener('touchend', this.onTouchend_.bind(this), true);
+    }
+
+    this.element_
+        .addEventListener(
+            'click', this.maybePerformNavigation_.bind(this), true);
+  }
+
+  /**
+   * TouchEvent touchstart events handler.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchstart_(event) {
+    // Don't start the paused state if the target is not a descendant of an
+    // amp-story-page. Also ignores any subsequent touchstart that would happen
+    // before touchend was fired, since it'd reset the touchstartTimestamp (ie:
+    // user touches the screen with a second finger).
+    if (this.touchstartTimestamp_ || !this.isAmpStoryPageDescendant_(event)) {
+      return;
+    }
+
+    this.touchstartTimestamp_ = Date.now();
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+  }
+
+  /**
+   * TouchEvent touchend events handler.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchend_(event) {
+    // Ignores the event if there's still a user's finger holding the screen.
+    const touchesCount = (event.touches || []).length;
+    if (!this.touchstartTimestamp_ || touchesCount > 0) {
+      return;
+    }
+
+    // Cancels the navigation if user paused the story for over 500ms. Calling
+    // preventDefault on the touchend event ensures the click/tap event won't
+    // fire.
+    if ((Date.now() - this.touchstartTimestamp_) > HOLD_TOUCH_THRESHOLD_MS) {
+      event.preventDefault();
+    }
+
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.touchstartTimestamp_ = null;
   }
 
   /**
    * Determines whether a click should be used for navigation.  Navigate should
    * occur unless the click is on the system layer, or on an element that
    * defines on="tap:..."
-   * @param {!Event} e 'click' event.
+   * @param {!Event} event 'click' event.
    * @return {boolean} true, if the click should be used for navigation.
    * @private
    */
-  isNavigationalClick_(e) {
-    return !closest(dev().assertElement(e.target), el => {
+  isNavigationalClick_(event) {
+    return !closest(dev().assertElement(event.target), el => {
       return hasTapAction(el);
     }, /* opt_stopAt */ this.element_);
   }
@@ -354,7 +418,9 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Event} event 'click' event
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event) ||
+    if (!this.isRunning() ||
+      !this.isNavigationalClick_(event) ||
+      this.isProtectedTarget_(event) ||
       !this.isAmpStoryPageDescendant_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
@@ -398,15 +464,16 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * Gets an instance of ManualAdvancement based on the HTML tag of the element.
+   * @param {!Window} win
    * @param {!Element} rootEl
    * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
    *                              an amp-story tag.
    */
-  static fromElement(rootEl) {
+  static fromElement(win, rootEl) {
     if (rootEl.tagName.toLowerCase() !== 'amp-story') {
       return null;
     }
-    return new ManualAdvancement(rootEl);
+    return new ManualAdvancement(win, rootEl);
   }
 }
 
