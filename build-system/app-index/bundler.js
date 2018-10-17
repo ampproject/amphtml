@@ -15,43 +15,42 @@
  */
 'use strict';
 
-const rollup = require('rollup');
-const resolve = require('rollup-plugin-node-resolve');
-const commonjs = require( 'rollup-plugin-commonjs');
 const babel = require('rollup-plugin-babel');
+const commonjs = require('rollup-plugin-commonjs');
+const resolve = require('rollup-plugin-node-resolve');
+const rollup = require('rollup');
 
 const plugins = [
   resolve(),
   babel({
     exclude: '**/node_modules/**',
-    plugins: [["transform-react-jsx", { "pragma": "h" }]],
-    presets: [['@babel/preset-env', { modules: false }]],
+    plugins: [['transform-react-jsx', {'pragma': 'h'}]],
+    presets: [['@babel/preset-env', {modules: false}]],
   }),
   commonjs(),
 ];
 
 const inputOptions = {
-  plugins: plugins
+  plugins,
 };
 
 const outputOptions = {
-  format: 'iife'
-}
+  format: 'iife',
+};
 
 module.exports = {
-  bundleComponent: async (componentEntryFile) => {
-    
-    console.log('Generating bundle for: ' + componentEntryFile);
+  bundleComponent: async componentEntryFile => {
+
+    console/*OK*/.log('Generating bundle for: ' + componentEntryFile);
 
     inputOptions.input = componentEntryFile;
-    const bundle = await rollup.rollup(inputOptions);
 
-    // generate code and a sourcemap
-    const { code, map } = await bundle.generate(outputOptions);
-    
-    console.log('Generated bundle for: ' + componentEntryFile);
+    const bundle = await rollup.rollup(inputOptions);
+    const {code} = await bundle.generate(outputOptions);
+
+    console/*OK*/.log('Generated bundle for: ' + componentEntryFile);
 
     return code;
-  }
-}
+  },
+};
 

@@ -17,9 +17,9 @@
 
 
 const BBPromise = require('bluebird');
+const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {join, normalize, sep} = require('path');
-const bundler = require('./bundler');
 
 // TODO(alanorozco): Use JSX once we're ready.
 // HTML Templates
@@ -106,25 +106,31 @@ function setCacheStatus(cacheStatus) {
 }
 
 let serveIndexCache;
-function serveIndex(req, res, next) {
+function serveIndex(req, res) {
 
   if (shouldCache && serveIndexCache) {
     res.end(serveIndexCache);
     return;
   }
 
-  const serveIndexTask = async () => {
+  const serveIndexTask = async() => {
     const bundle = await bundler.bundleComponent(proxyFormComponent);
     let renderedHtml = await renderListing('/examples');
-    
-    renderedHtml = renderedHtml.replace('<!-- bottom_of_header -->', fs.readFileSync(proxyFormFile, 'utf8').toString());
-    renderedHtml = renderedHtml.replace('<!-- bundle -->', bundle);
-    
+
+    renderedHtml = renderedHtml.replace(
+        '<!-- bottom_of_header -->',
+        fs.readFileSync(proxyFormFile, 'utf8').toString()
+    );
+    renderedHtml = renderedHtml.replace(
+        '<!-- bundle -->',
+        bundle
+    );
+
     if (shouldCache) {
       serveIndexCache = renderedHtml;
     }
     res.end(renderedHtml);
-  };  
+  };
   serveIndexTask();
 }
 
@@ -137,6 +143,6 @@ function serveListing(req, res, next) {
 
 module.exports = {
   setCacheStatus,
-  serveIndex, 
-  serveListing
+  serveIndex,
+  serveListing,
 };

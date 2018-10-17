@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import { h, render, Component } from 'preact';
+/* eslint-disable no-unused-vars */
+
+import {Component, h, render} from 'preact';
 
 class ProxyForm extends Component {
 
   constructor() {
     super();
     this.setState({
-      proxyInput: ''
+      proxyInput: '',
     });
   }
 
   handleProxyInputChange(event) {
     this.setState({
       ...this.state,
-      proxyInput: event.target.value
+      proxyInput: event.target.value,
     });
   }
-  
+
   handleSubmit(event) {
     event.preventDefault();
 
@@ -44,27 +46,27 @@ class ProxyForm extends Component {
   render() {
     return (
       <div class="block proxy-form-container">
-        <form id="proxy-form" onSubmit={(event) => this.handleSubmit(event)}>
+        <form id="proxy-form" onSubmit={event => this.handleSubmit(event)}>
           <label for="proxy-input">
             <span>Load URL by Proxy</span>
-            {/* 
-                Following regex is gnarly, but works. 
+            {/*
+                Following regex is gnarly, but works.
                 Taken from https://justmarkup.com/log/2012/12/input-url/
             */}
             <input type="text" class="text-input" id="proxy-input"
               required aria-required="true"
               placeholder="https://"
-              value={this.state.proxyInput} 
-              onChange={(event) => this.handleProxyInputChange(event)}
+              value={this.state.proxyInput}
+              onChange={event => this.handleProxyInputChange(event)}
               pattern="^(https?://)?[^\s]+$" />
-            </label>
-            <div class="form-info">
-              <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
+          </label>
+          <div class="form-info">
+            <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
                 What's this?
-              </a>
-            </div>
-          </form>
-        </div>
+            </a>
+          </div>
+        </form>
+      </div>
     );
   }
 }
