@@ -479,12 +479,12 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
     });
 
     it('should NOT require fixed layer transferring', () => {
-      expect(binding.requiresFixedLayerTransfer()).to.be.false;
+      expect(binding.requiresFixedLayerTransfer()).to.be.true;
     });
 
     it('should require fixed layer transferring with experiment', () => {
-      toggleExperiment(win, 'ios-embed-sd-transfer', true);
-      expect(binding.requiresFixedLayerTransfer()).to.be.true;
+      toggleExperiment(win, 'ios-embed-sd-notransfer', true);
+      expect(binding.requiresFixedLayerTransfer()).to.be.false;
     });
 
     it('should start w/o overscroll and set it on doc ready', () => {

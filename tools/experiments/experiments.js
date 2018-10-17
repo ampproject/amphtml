@@ -156,8 +156,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
-    id: 'ios-embed-sd-transfer',
-    name: 'A transfer mode for the new iOS embedded viewport model',
+    id: 'ios-embed-sd-notransfer',
+    name: 'Disables transfer mode for the new iOS embedded viewport model',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
       '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
