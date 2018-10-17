@@ -106,7 +106,7 @@ function serveIndex(req, res, next) {
 
 function serveListing(req, res, next) {
   serveListingWithReplacements(req, res, next, req.url.replace(/^\/~/, '/'), {
-    '<!-- bottom_of_header -->': listingHeaderFile,
+    '<!-- right_of_logo -->': listingHeaderFile,
   });
 }
 
