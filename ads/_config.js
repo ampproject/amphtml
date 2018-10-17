@@ -728,8 +728,7 @@ export const adConfig = {
   'postquare': {},
 
   'pressboard': {
-    // prefetch: 'https://adserver.pressboard.ca/js/amp-ad.js',
-    // prefetch: 'https://localhost:3000/js/amp-ad.js',
+    renderStartImplemented: true,
   },
 
   'pubexchange': {},
