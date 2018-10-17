@@ -89,6 +89,7 @@ export const adConfig = {
 
   'a9': {
     prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
+    renderStartImplemented: true,
   },
 
   'accesstrade': {
