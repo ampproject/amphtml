@@ -35,6 +35,7 @@ goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
 goog.provide('parse_css.parseInlineStyle');
 goog.provide('parse_css.parseMediaQueries');
+goog.provide('parse_css.stripMinMax');
 goog.provide('parse_css.stripVendorPrefix');
 goog.require('amp.validator.ValidationError.Code');
 goog.require('goog.asserts');
@@ -142,6 +143,22 @@ parse_css.stripVendorPrefix = function(prefixedString) {
     {return prefixedString.substr('-ms-'.length);}
     if (goog.string./*OK*/ startsWith(prefixedString, '-webkit-'))
     {return prefixedString.substr('-webkit-'.length);}
+  }
+  return prefixedString;
+};
+
+/**
+ * Strips 'min-' or 'max-' from the start of a media feature identifier, if
+ * present. E.g., "min-width" -> "width".
+ * @param {string} prefixedString
+ * @return {string}
+ */
+parse_css.stripMinMax = function(prefixedString) {
+  if (goog.string./*OK*/ startsWith(prefixedString, 'min-')) {
+    return prefixedString.substr('min-'.length);
+  }
+  if (goog.string./*OK*/ startsWith(prefixedString, 'max-')) {
+    return prefixedString.substr('max-'.length);
   }
   return prefixedString;
 };

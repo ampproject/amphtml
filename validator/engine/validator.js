@@ -53,11 +53,14 @@ goog.require('goog.asserts');
 goog.require('goog.string');
 goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
+goog.require('parse_css.ErrorToken');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseInlineStyle');
+goog.require('parse_css.parseMediaQueries');
+goog.require('parse_css.stripMinMax');
 goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
@@ -1961,6 +1964,49 @@ class CdataMatcher {
   }
 
   /**
+   * Matches the provided stylesheet against a CSS media query specification.
+   * @param {!parse_css.Stylesheet} stylesheet
+   * @param {!amp.validator.MediaQuerySpec} spec
+   * @param {!Array<!parse_css.ErrorToken>} errorBuffer
+   * @private
+   */
+  matchMediaQuery_(stylesheet, spec, errorBuffer) {
+    /** @type{!Array<!parse_css.IdentToken>} */
+    const seenMediaTypes = [];
+    /** @type{!Array<!parse_css.IdentToken>} */
+    const seenMediaFeatures = [];
+    parse_css.parseMediaQueries(
+        stylesheet, seenMediaTypes, seenMediaFeatures, errorBuffer);
+
+    for (const token of seenMediaTypes) {
+      /** @type{string} */
+      const strippedMediaType =
+          parse_css.stripVendorPrefix(token.value.toLowerCase());
+      if (!spec.type.includes(strippedMediaType)) {
+        const errorToken = new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_TYPE,
+            ['', token.value]);
+        token.copyPosTo(errorToken);
+        errorBuffer.push(errorToken);
+      }
+    }
+
+    for (const token of seenMediaFeatures) {
+      /** @type{string} */
+      const strippedMediaFeature = parse_css.stripMinMax(
+          parse_css.stripVendorPrefix(token.value.toLowerCase()));
+      if (!spec.feature.includes(strippedMediaFeature)) {
+        const errorToken = new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code
+                .CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
+            ['', token.value]);
+        token.copyPosTo(errorToken);
+        errorBuffer.push(errorToken);
+      }
+    }
+  }
+
+  /**
    * Matches the provided cdata against a CSS specification. Helper
    * routine for match (see above).
    * @param {string} cdata
@@ -1972,6 +2018,8 @@ class CdataMatcher {
   matchCss_(cdata, cssSpec, context, validationResult) {
     /** @type {!Array<!parse_css.ErrorToken>} */
     const cssErrors = [];
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    const cssWarnings = [];
     /** @type {!Array<!parse_css.Token>} */
     const tokenList = parse_css.tokenize(
         cdata, this.getLineCol().getLine(), this.getLineCol().getCol(),
@@ -1979,7 +2027,7 @@ class CdataMatcher {
     /** @type {!CssParsingConfig} */
     const cssParsingConfig = computeCssParsingConfig(cssSpec);
     /** @type {!parse_css.Stylesheet} */
-    const sheet = parse_css.parseAStylesheet(
+    const stylesheet = parse_css.parseAStylesheet(
         tokenList, cssParsingConfig.atRuleSpec, cssParsingConfig.defaultSpec,
         cssErrors);
 
@@ -1987,15 +2035,29 @@ class CdataMatcher {
     // generate errors for url(…) functions with invalid parameters.
     /** @type {!Array<!parse_css.ParsedCssUrl>} */
     const parsedUrls = [];
-    parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+    parse_css.extractUrls(stylesheet, parsedUrls, cssErrors);
+    // Similarly we extract query types and features from @media rules.
+    for (const atRuleSpec of cssSpec.atRuleSpec) {
+      if (atRuleSpec.mediaQuerySpec !== null) {
+        goog.asserts.assert(atRuleSpec.name === 'media');
+        const {mediaQuerySpec} = atRuleSpec;
+        const errorBuffer =
+            mediaQuerySpec.issuesAsError ? cssErrors : cssWarnings;
+        this.matchMediaQuery_(stylesheet, mediaQuerySpec, errorBuffer);
+        // There will be at most @media atRuleSpec
+        break;
+      }
+    }
+
     if (cssSpec.validateAmp4Ads) {
-      parse_css.validateAmp4AdsCss(sheet, cssErrors);
+      parse_css.validateAmp4AdsCss(stylesheet, cssErrors);
     }
 
     if (cssSpec.validateKeyframes) {
-      parse_css.validateKeyframesCss(sheet, cssErrors);
+      parse_css.validateKeyframesCss(stylesheet, cssErrors);
     }
 
+    // Add errors then warnings:
     for (const errorToken of cssErrors) {
       // Override the first parameter with the name of this style tag.
       const {params} = errorToken;
@@ -2005,6 +2067,16 @@ class CdataMatcher {
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
     }
+    for (const errorToken of cssWarnings) {
+      // Override the first parameter with the name of this style tag.
+      const {params} = errorToken;
+      // Override the first parameter with the name of this style tag.
+      params[0] = getTagSpecName(this.tagSpec_);
+      context.addError(
+          errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
+          /* url */ '', validationResult);
+    }
+
     const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
     const parsedImageUrlSpec = new ParsedUrlSpec(cssSpec.imageUrlSpec);
     for (const url of parsedUrls) {
@@ -2016,7 +2088,7 @@ class CdataMatcher {
     }
     const visitor = new InvalidRuleVisitor(
         this.tagSpec_, cssSpec, context, validationResult);
-    sheet.accept(visitor);
+    stylesheet.accept(visitor);
   }
 
   /** @return {!LineCol} */
@@ -3811,6 +3883,7 @@ function validateAttributes(
   // We must have done so for the extension to be valid.
   let seenExtensionSrcAttr = false;
   const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
+  const isHtmlTag = encounteredTag.upperName() === 'HTML';
   /** @type {!Array<boolean>} */
   const mandatoryAttrsSeen = []; // This is a set of attr ids.
   /** @type {!Array<number>} */
@@ -3833,6 +3906,11 @@ function validateAttributes(
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
     if (!(attr.name in attrsByName)) {
+      // The HTML tag specifies type identifiers which are validated in
+      // validateHtmlTag(), so we skip them here.
+      if (isHtmlTag && context.getRules().isTypeIdentifier(attr.name)) {
+        continue;
+      }
       // While validating a reference point, we skip attributes that
       // we don't have a spec for. They will be validated when the
       // TagSpec itself gets validated.
@@ -3844,7 +3922,7 @@ function validateAttributes(
       {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-templa'te, and 'src' attributes by calling this method.
+      // 'custom-template', and 'src' attributes by calling this method.
       // For 'src', we also keep track whether we validated it this way,
       // (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
@@ -4347,6 +4425,13 @@ class ParsedValidatorRules {
     this.rules_ = amp.validator.createRules();
 
     /**
+     * The HTML format
+     * @type {string}
+     * @private
+     */
+    this.htmlFormat_ = htmlFormat;
+
+    /**
      * ParsedTagSpecs in id order.
      * @type {!Array<!ParsedTagSpec>}
      * @private
@@ -4391,6 +4476,21 @@ class ParsedValidatorRules {
      * @private
      */
     this.exampleUsageByExtension_ = {};
+
+    /**
+     * Sets type identifiers which are used to determine the set of validation
+     * rules to be applied.
+     * @type {!Object<string, number>}
+     * @private
+     */
+    this.typeIdentifiers_ = Object.create(null);
+    this.typeIdentifiers_['⚡'] = 0;
+    this.typeIdentifiers_['amp'] = 0;
+    this.typeIdentifiers_['⚡4ads'] = 0;
+    this.typeIdentifiers_['amp4ads'] = 0;
+    this.typeIdentifiers_['⚡4email'] = 0;
+    this.typeIdentifiers_['amp4email'] = 0;
+    this.typeIdentifiers_['transformed'] = 0;
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
@@ -4580,6 +4680,87 @@ class ParsedValidatorRules {
   /** @return {?string} */
   getScriptSpecUrl() {
     return this.rules_.scriptSpecUrl;
+  }
+
+  /**
+   * @param {string} maybeTypeIdentifier
+   * @return {boolean}
+   */
+  isTypeIdentifier(maybeTypeIdentifier) {
+    return maybeTypeIdentifier in this.typeIdentifiers_;
+  }
+
+  /**
+   * Validates type identifiers within a set of attributes, adding
+   * ValidationErrors as necessary, and sets type identifiers on
+   * ValidationResult.typeIdentifier.
+   * @param {!Array<!Object>} attrs
+   * @param {!Array<string>} formatIdentifiers
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   */
+  validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
+    let hasMandatoryTypeIdentifier = false;
+    for (const attr of attrs) {
+      // Verify this attribute is a type identifier. Other attributes are
+      // validated in validateAttributes.
+      if (this.isTypeIdentifier(attr.name)) {
+        // Verify this type identifier is allowed for this format.
+        if (formatIdentifiers.indexOf(attr.name) !== -1) {
+          // Only add the type identifier once per representation. That is, both
+          // "⚡" and "amp", which represent the same type identifier.
+          const identifier = attr.name.replace('⚡', 'amp');
+          if (validationResult.typeIdentifier.indexOf(identifier) === -1) {
+            validationResult.typeIdentifier.push(identifier);
+          }
+          // The type identifier "transformed" is not considered mandatory
+          // unlike other type identifiers.
+          if (identifier != 'transformed') {
+            hasMandatoryTypeIdentifier = true;
+          }
+        } else {
+          context.addError(
+              amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+              context.getLineCol(), /*params=*/[attr.name, 'html'],
+              'https://www.ampproject.org/docs/reference/spec#required-markup',
+              validationResult);
+        }
+      }
+    }
+    if (!hasMandatoryTypeIdentifier) {
+      // Missing mandatory type identifier (any AMP variant but "transformed").
+      context.addError(
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
+          'https://www.ampproject.org/docs/reference/spec#required-markup',
+          validationResult);
+    }
+  }
+
+  /**
+   * Validates the HTML tag for type identifiers.
+   * @param {!amp.htmlparser.ParsedHtmlTag} htmlTag
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} validationResult
+   */
+  validateHtmlTag(htmlTag, context, validationResult) {
+    switch (this.htmlFormat_) {
+      case 'AMP':
+      case 'EXPERIMENTAL':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡', 'amp', 'transformed'], context,
+            validationResult);
+        break;
+      case 'AMP4ADS':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡4ads', 'amp4ads'], context, validationResult);
+        break;
+      case 'AMP4EMAIL':
+        this.validateTypeIdentifiers(
+            htmlTag.attrs(), ['⚡4email', 'amp4email'], context,
+            validationResult);
+        break;
+    }
   }
 
   /**
@@ -5078,6 +5259,10 @@ amp.validator.ValidationHandler =
    * @override
    */
       startTag(encounteredTag) {
+        if (encounteredTag.upperName() === 'HTML') {
+          this.context_.getRules().validateHtmlTag(
+              encounteredTag, this.context_, this.validationResult_);
+        }
         /** @type {?string} */
         const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
         if (maybeDuplicateAttrName !== null) {

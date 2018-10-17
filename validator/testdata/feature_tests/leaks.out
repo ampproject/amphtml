@@ -30,7 +30,7 @@ feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html
 |
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
-feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 |
 |
 |  <!-- AMP boilerplate which should not produce errors -->

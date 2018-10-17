@@ -171,6 +171,17 @@ message BlackListedCDataRegex {
   optional string error_message = 2;
 }
 
+// This spec is used when parsing a media query inside a CSS @media rule.
+message MediaQuerySpec {
+  // If issues_as_error is true, then parsing errors and invalid
+  // types / features will be treated as validator errors, otherwise warnings.
+  optional bool issues_as_error = 1 [default = false];
+  // These are the media query types and features allowed within the stylesheet.
+  // http://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Syntax
+  repeated string type = 2;
+  repeated string feature = 3;
+}
+
 // This spec is used by our CSS parser to determine how the contents of a given
 // AT rule should be parsed, if at all. The term 'rule' here refers to the AT
 // Rule in CSS, not a validation rule.
@@ -190,6 +201,11 @@ message AtRuleSpec {
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
+
+  // A MediaQuerySpec may only be set for an AtRuleSpec with the name
+  // "media". If not set, media queries will be left unparsed, so no errors or
+  // warnings about them will be reported.
+  optional MediaQuerySpec media_query_spec = 3;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -382,7 +398,9 @@ message ExtensionSpec {
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
-// prescribes a particular set of validation rules.
+// prescribes a particular set of validation rules. This should be kept in sync
+// with Request.HtmlFormat in
+// github.com/ampproject/amppackager/transformer/request/request.proto.
 message HtmlFormat {
   enum Code {
     UNKNOWN_CODE = 0;  // Never used
@@ -790,6 +808,10 @@ message ValidationResult {
   repeated ValidationError errors = 1;
   optional int32 validator_revision = 3 [ default = -1];
   optional int32 spec_file_revision = 4 [ default = -1];
+  // The type idenfitier of the parsed document, e.g. AMP, AMP4ADS or some other
+  // type that has yet to be defined. These are declared on the HTML tag and
+  // parsed by the Validator Engine.
+  repeated string type_identifier = 5;
 }
 
 // Information about the validator returned by ValidatorFactory
