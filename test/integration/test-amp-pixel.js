@@ -36,6 +36,17 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${depositRequestUrl('has-referrer&title=TITLE')}">`,
+  }, env => {
+    it('should resolve the TITLE macro', () => {
+      return withdrawRequest(env.win, 'has-referrer&title=AMP-TEST')
+          .then(request => {
+            expect(request.headers.referer).to.be.ok;
+          });
+    });
+  });
+
+  describes.integration('amp-pixel integration test', {
     body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
              referrerpolicy="no-referrer">`,
   }, env => {
