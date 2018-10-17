@@ -217,14 +217,28 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar', 'bang']});
   });
 
-  it('returns submit input entries', () => {
+  it('returns focused submit input entries', () => {
     const input = env.win.document.createElement('input');
     input.type = 'submit';
     input.name = 'foo';
     input.value = 'bar';
 
     form.appendChild(input);
+    expect(getFormAsObject(form)).to.deep.equal({});
 
+    input.focus();
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
+  });
+
+  it('returns focused button input entries', () => {
+    const input = env.win.document.createElement('button');
+    input.name = 'foo';
+    input.value = 'bar';
+
+    form.appendChild(input);
+    expect(getFormAsObject(form)).to.deep.equal({});
+
+    input.focus();
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
