@@ -56,7 +56,7 @@ class ProxyForm extends Component {
               placeholder="https://"
               value={this.state.proxyInput} 
               onChange={(event) => this.handleProxyInputChange(event)}
-              pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$" />
+              pattern="^(https?://)?[^\s]+$" />
             </label>
             <div class="form-info">
               <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy">
