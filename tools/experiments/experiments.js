@@ -248,6 +248,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
   },
   {
+    id: 'amp-story-hold-to-pause',
+    name: 'Hold to pause an amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/18714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
+  },
+  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
