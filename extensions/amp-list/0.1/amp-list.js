@@ -106,8 +106,7 @@ export class AmpList extends AMP.BaseElement {
     this.bind_ = null;
 
     /** @private @const {boolean} */
-    this.loadMoreEnabled_ =
-        isExperimentOn(this.getAmpDoc().win, 'amp-list-load-more') &&
+    this.loadMoreEnabled_ = isExperimentOn(this.win, 'amp-list-load-more') &&
         element.hasAttribute('load-more');
 
     /** @private {?string} */

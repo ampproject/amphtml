@@ -97,13 +97,14 @@ describes.realWin('amp-selector amp-list interaction', {
 
     AmpList.prototype.mutateElement = function(cb) { cb(); };
     list = new AmpList(listElement);
+
     list.fetch_ = () => {
       return new Promise(resolve => {
         setTimeout(() => {
-          resolve([
+          resolve({items: [
             {value: 0, text: 'ZERO'},
             {value: 1, text: 'ONE'},
-          ]);
+          ]});
         }, 100);
       });
     };
