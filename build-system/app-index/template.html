@@ -51,6 +51,27 @@
     line-height: 40px;
     font-size: 18px;
     margin: 0;
+    display: flex;
+  }
+  .find-icon {
+    mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+    -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+    mask-position: center center;
+    -webkit-mask-position: center center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    background-color: #999;
+    display: block;
+    width: 24px;
+    height: 24px;
+    text-indent: -999em;
+  }
+  h3 > .find-icon {
+    height: 40px;
+    margin: 0 20px;
+  }
+  a.find-icon:hover {
+    background-color: #1c79c0;
   }
   .code,
   .file-list > li > a {
@@ -212,7 +233,14 @@
   </wrap>
   <div class="file-list-container">
     <wrap>
-      <h3 class="code" id="basepath"><!-- basepath --></h3>
+      <h3 class="code" id="basepath">
+        <!-- basepath -->
+        <a href="https://github.com/ampproject/amphtml/find/master"
+            target="_blank"
+            class="find-icon">
+          Find file
+        </a>
+      </h3>
       <div class="push-right-after-heading">
         <form hidden id="examples-mode-form">
           <label for="examples-mode-select">
@@ -232,29 +260,34 @@
   </div>
   <script>
     // TODO(alanorozco): Write this in ES2015 to be transpiled.
-    function maybeEnableExampleModeSelect() {
-      var basepath = document.getElementById('basepath');
-      if (!/^\/examples/.test(basepath.innerText)) {
-        return;
-      }
-      var form = document.querySelector('#examples-mode-form');
-      var select = document.querySelector('#examples-mode-select');
-      var links = document.querySelectorAll('.file-link');
+    (function() {
+      'use strict';
 
-      form.removeAttribute('hidden');
-
-      select.addEventListener('change', function (e) {
-        var prefix = e.target.value;
-        for (var i = 0; i < links.length; i++) {
-          var sufix = links[i].getAttribute('data-default');
-          if (!/\.html$/.test(sufix)) {
-            continue;
-          }
-          links[i].href = prefix + sufix;
+      function maybeEnableExampleModeSelect() {
+        var basepath = document.getElementById('basepath');
+        if (!/^\/examples/.test(basepath.innerText)) {
+          return;
         }
-      });
-    }
-    maybeEnableExampleModeSelect();
+        var form = document.querySelector('#examples-mode-form');
+        var select = document.querySelector('#examples-mode-select');
+        var links = document.querySelectorAll('.file-link');
+
+        form.removeAttribute('hidden');
+
+        select.addEventListener('change', function (e) {
+          var prefix = e.target.value;
+          for (var i = 0; i < links.length; i++) {
+            var sufix = links[i].getAttribute('data-default');
+            if (!/\.html$/.test(sufix)) {
+              continue;
+            }
+            links[i].href = prefix + sufix;
+          }
+        });
+      }
+
+      maybeEnableExampleModeSelect();
+    })();
   </script>
   <div class="center">
     Built with 💙  by
