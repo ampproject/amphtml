@@ -96,6 +96,7 @@ export class Storage {
   /**
    * Saves the value of the specified property. Returns the promise that's
    * resolved when the operation completes.
+   * Note: More restrict privacy review is required to store non boolean value.
    * @param {string} name
    * @param {*} value
    * @return {!Promise}
