@@ -15,7 +15,7 @@
  */
 
 
-import {BatchingPluginFunctions} from '../batching-plugins';
+import {TransportPluginFunctions} from '../transport-plugins';
 import {dict} from '../../../../src/utils/object';
 import {isArray} from '../../../../src/types';
 
@@ -30,37 +30,40 @@ import {isArray} from '../../../../src/types';
  *   'out': Array<string>
  * }
  */
-const pingTestData = {
+const defaultTestData = {
   'in': [{
     'baseUrl': 'base.com?',
     'batchSegments': [{
       'trigger': 'click',
       'timestamp': 0,
-      'extraUrlParams': 123,
+      'extraUrlParams': {
+        a: 1,
+        b: 'xyz',
+      },
     }],
   }],
-  'out': ['testFinalUrl'],
+  'out': ['base.com?a=1&b=xyz'],
 };
 
 /**
  * Please register your custom test data to the test in alphabetic order.
  */
 const BatchingPluginTests = {
-  '_ping_': pingTestData,
+  'default': defaultTestData,
 };
 
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Batching Plugins', () => {
-  it('BatchPluginFunctions sort in alphabetic order', () => {
-    const keys = Object.keys(BatchingPluginFunctions);
-    const sorted = Object.keys(BatchingPluginFunctions).sort();
+describe('Transport Plugins', () => {
+  it('TransportPluginFunctions sort in alphabetic order', () => {
+    const keys = Object.keys(TransportPluginFunctions);
+    const sorted = Object.keys(TransportPluginFunctions).sort();
     expect(keys).to.deep.equal(sorted);
   });
 
-  for (const name in BatchingPluginFunctions) {
-    const plugin = BatchingPluginFunctions[name];
+  for (const name in TransportPluginFunctions) {
+    const plugin = TransportPluginFunctions[name];
     describe('Default tests for every plugin', () => {
       it('should handle empty batchSegment array', () => {
         try {

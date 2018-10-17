@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {TransportPluginFunctions, batchSegmentDef} from './transport-plugins';
+
 import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {
@@ -59,6 +61,41 @@ export class Transport {
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
+  }
+
+  /**
+   * @param {string} url
+   * @param {!batchSegmentDef} segment
+   * @param {string} batchPluginId
+   * @param {boolean|undefined} opt_useLegacyIframe
+   */
+  sendSingle(url, segment, batchPluginId, opt_useLegacyIframe = false) {
+    const plugin = this.getPlugin_(batchPluginId);
+    const request = plugin(url, [segment]);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+    if (opt_useLegacyIframe) {
+      this.sendRequestUsingIframe(request);
+    } else {
+      this.sendRequest(request);
+    }
+  }
+
+  /**
+   * @param {string} url
+   * @param {!Array<!batchSegmentDef>} segments
+   * @param {string} batchPluginId
+   */
+  sendBatch(url, segments, batchPluginId) {
+    const plugin = this.getPlugin_(batchPluginId);
+    const request = plugin(url, segments);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+    this.sendRequest(request);
   }
 
   /**
@@ -167,6 +204,15 @@ export class Transport {
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.src = request;
     this.win_.document.body.appendChild(iframe);
+  }
+
+  /**
+   * @param {string} pluginId
+   * @return {function(string, !Array<!batchSegmentDef>):string}
+   */
+  getPlugin_(pluginId) {
+    return user().assert(
+        TransportPluginFunctions[pluginId], 'Unsupported plugin %s', pluginId);
   }
 
   /**
