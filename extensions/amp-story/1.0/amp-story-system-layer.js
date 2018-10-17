@@ -375,9 +375,9 @@ export class SystemLayer {
           this.onHasSidebarStateUpdate_(hasSidebar);
         }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.UI_VISIBILITY_STATE,
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
         isVisible => {
-          this.onUiVisibilityStateUpdate_(isVisible);
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
         });
   }
 
@@ -527,11 +527,11 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to UI visibility state updates.
+   * Reacts to system UI visibility state updates.
    * @param {boolean} isVisible
    * @private
    */
-  onUiVisibilityStateUpdate_(isVisible) {
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
     this.vsync_.mutate(() => {
       this.getShadowRoot()
           .classList.toggle('i-amphtml-story-hidden', !isVisible);

@@ -350,7 +350,7 @@ class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = Date.now();
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
-      this.storeService_.dispatch(Action.TOGGLE_UI_VISIBILITY, false);
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     }, HOLD_TOUCH_THRESHOLD_MS);
   }
 
@@ -376,8 +376,8 @@ class ManualAdvancement extends AdvancementConfig {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
-    if (!this.storeService_.get(StateProperty.UI_VISIBILITY_STATE)) {
-      this.storeService_.dispatch(Action.TOGGLE_UI_VISIBILITY, true);
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
 

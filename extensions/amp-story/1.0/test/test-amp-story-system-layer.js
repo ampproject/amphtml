@@ -115,9 +115,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
         'i-amphtml-story-has-sidebar');
   });
 
-  it('should hide the system layer depending on UI_VISIBILITY_STATE', () => {
+  it('should hide system layer on SYSTEM_UI_IS_VISIBLE_STATE change', () => {
     systemLayer.build();
-    storeService.dispatch(Action.TOGGLE_UI_VISIBILITY, false);
+    storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     expect(systemLayer.getShadowRoot()).to.have.class('i-amphtml-story-hidden');
   });
 });
