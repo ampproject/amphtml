@@ -16,6 +16,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoAnalyticsEvents,
   VideoEvents,
 } from '../../../src/video-interface';
 import {
@@ -26,7 +27,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
@@ -40,6 +41,7 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
@@ -247,7 +249,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      dev().assert(false, `Unknown method '${methodReceived}`);
+      dev().assert(false, `Unknown method`);
       return;
     }
 
@@ -263,6 +265,17 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (eventReceived == 'error' && !this.canPlay_) {
       dev().assert(this.readyRejecter_).call();
+      return;
+    }
+
+    if (eventReceived == 'analytics') {
+      const {eventType} = data['data'];
+
+      user().assertString(eventType, '`eventType` missing in analytics event');
+
+      this.element.dispatchCustomEvent(
+          VideoAnalyticsEvents.CUSTOM, {eventType});
+
       return;
     }
 

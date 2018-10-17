@@ -304,6 +304,17 @@ export class AmpVideoIntegration {
   }
 
   /**
+   * Posts a custom analytics event.
+   * @param {string} eventType
+   */
+  postAnalyticsEvent(eventType) {
+    this.postToParent_(dict({
+      'event': 'analytics',
+      'eventType': eventType,
+    }));
+  }
+
+  /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
    * @private

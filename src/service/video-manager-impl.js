@@ -444,6 +444,11 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
+    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      this.logCustomAnalytics_(
+          dev().assertString(e.data.eventType, '`eventType` missing'));
+    });
+
     video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
@@ -461,6 +466,13 @@ class VideoEntry {
     });
 
     this.listenForAutoplayDelegation_();
+  }
+
+  /**
+   * @param {string} eventType
+   */
+  logCustomAnalytics_(eventType) {
+    analyticsEvent(this, eventType);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
