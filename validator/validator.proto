@@ -382,7 +382,9 @@ message ExtensionSpec {
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
-// prescribes a particular set of validation rules.
+// prescribes a particular set of validation rules. This should be kept in sync
+// with Request.HtmlFormat in
+// github.com/ampproject/amppackager/transformer/request/request.proto.
 message HtmlFormat {
   enum Code {
     UNKNOWN_CODE = 0;  // Never used
