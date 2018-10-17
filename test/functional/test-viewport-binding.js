@@ -28,6 +28,7 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
+import {toggleExperiment} from '../../src/experiments';
 import {whenDocumentReady} from '../../src/document-ready';
 
 describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
@@ -478,6 +479,11 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
     });
 
     it('should NOT require fixed layer transferring', () => {
+      expect(binding.requiresFixedLayerTransfer()).to.be.false;
+    });
+
+    it('should require fixed layer transferring with experiment', () => {
+      toggleExperiment(win, 'ios-embed-sd-transfer', true);
       expect(binding.requiresFixedLayerTransfer()).to.be.true;
     });
 
