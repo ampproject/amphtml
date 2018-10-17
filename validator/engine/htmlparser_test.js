@@ -100,7 +100,7 @@ describe('HtmlParser', () => {
 
     expect(handler.log).toEqual([
       'startDoc()',
-      'startTag(HTML,[⚡,])',
+      'startTag(HTML,[])',
       'startTag(HEAD,[])',
       'endTag(HEAD)',
       'markManufacturedBody()',
