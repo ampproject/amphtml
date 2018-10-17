@@ -297,7 +297,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    return !isExperimentOn(this.win, 'ios-embed-sd-notransfer');
   }
 
   /** @override */
