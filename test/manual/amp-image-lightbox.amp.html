@@ -70,9 +70,10 @@
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
   </p>
-
+  <amp-image-lightbox id="image-lightbox1" layout="nodisplay" data-close-button-aria-label="Close">
   <figure>
-    <amp-img id="img0"
+
+  <amp-img id="img0"
         srcset="
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h1114-no/PANO_20150726_171347%257E2.jpg 2004w,
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h557-no/PANO_20150726_171347%257E2.jpg 1002w"
@@ -80,13 +81,14 @@
         alt='This is a sample description' aria-label='Expand an image' aria-labelledby='aria-labelledby'
         on="tap:image-lightbox1"
         role="button" tabindex="0"></amp-img>
+  </figure>
     <figcaption>
       Lorem <i>ipsum</i> dolor sit amet, has nisl nihil convenire et, vim at aeque
       inermis reprehendunt.
     </figcaption>
-  </figure>
 
-  <amp-image-lightbox id="image-lightbox1" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>
+
+  </amp-image-lightbox>
 
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
@@ -120,12 +122,6 @@
       <amp-img id="wide_image"
       src="https://picsum.photos/4000/300"
       width=4000 height=300 layout="responsive"
-      aria-describedby="img1-desc" role="button" tabindex="0"
-      on="tap:image-lightbox1"></amp-img>
-
-      <amp-img id="long_image"
-      src="https://picsum.photos/300/4000"
-      width=300 height=4000 layout="responsive"
       aria-describedby="img1-desc" role="button" tabindex="0"
       on="tap:image-lightbox1"></amp-img>
   </div>

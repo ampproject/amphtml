@@ -26,6 +26,7 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
+import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
@@ -346,6 +347,7 @@ export class ImageViewer {
   }
 
   /** @private */
+  // TODO: HEIDI
   setupGestures_() {
     const gestures = Gestures.get(this.image_);
 
