@@ -125,7 +125,7 @@ export class FixedLayer {
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
     // Sort in document order.
-    this.sortInDomOrder_();
+    this.sortInDomOrder_(this.elements_);
 
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
@@ -210,7 +210,7 @@ export class FixedLayer {
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
-    this.sortInDomOrder_();
+    this.sortInDomOrder_(this.elements_);
     return this.update();
   }
 
@@ -548,16 +548,26 @@ export class FixedLayer {
     return removed;
   }
 
-  /** @private */
-  sortInDomOrder_() {
-    this.elements_.sort(function(fe1, fe2) {
-      // 8 | 2 = 0x0A
-      // 2 - preceeding
-      // 8 - contains
-      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
-        return 1;
+  /**
+   * @param {!Array<ElementDef>} elements
+   * @private */
+  sortInDomOrder_(elements) {
+    elements.sort(function(fe1, fe2) {
+      if (fe1.element && (fe1.element == fe2.element)) {
+        return 0;
       }
-      return -1;
+
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
+      const pos = fe1.element.compareDocumentPosition(fe2.element);
+
+      // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
+      if (pos & Node.DOCUMENT_POSITION_PRECEDING ||
+          pos & Node.DOCUMENT_POSITION_CONTAINS) {
+        return 1;
+      } else {
+        // if fe2 is following or contained by fe1, then fe1 is before fe2
+        return -1;
+      }
     });
   }
 
