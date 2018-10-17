@@ -84,7 +84,9 @@ export class FixedLayer {
     this.elements_ = [];
 
     /** @const @private {!Pass} */
-    this.updatePass_ = new Pass(ampdoc.win, () => this.update());
+    this.updatePass_ = new Pass(ampdoc.win, () => {
+      this.update();
+    });
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
@@ -167,9 +169,21 @@ export class FixedLayer {
    * mutation observer.
    */
   unobserveHiddenMutations_() {
+    this.clearMutationObserver_();
     const mo = this.mutationObserver_;
     if (mo) {
       mo.disconnect();
+    }
+  }
+
+  /**
+   * Clears the mutation observer and it's pass queue.
+   */
+  clearMutationObserver_() {
+    this.updatePass_.cancel();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.takeRecords();
     }
   }
 
@@ -329,14 +343,12 @@ export class FixedLayer {
         fe => !this.ampdoc.contains(fe.element));
     toRemove.forEach(fe => this.removeElement_(fe.element));
 
-    this.updatePass_.cancel();
-    if (this.mutationObserver_) {
-      this.mutationObserver_.takeRecords();
-    }
-
     if (this.elements_.length == 0) {
       return Promise.resolve();
     }
+
+    // Clear out the mutation observer's queue since we're doing the work now.
+    this.clearMutationObserver_();
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
@@ -468,10 +480,6 @@ export class FixedLayer {
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        }
-
-        if (this.mutationObserver_) {
-          this.mutationObserver_.takeRecords();
         }
       },
     }, {}).catch(error => {

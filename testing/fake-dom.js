@@ -674,8 +674,8 @@ export class FakeMutationObserver {
     /** @type {!Array{!Object}} */
     this.mutations_ = [];
 
-    /** @type {boolean} */
-    this.scheduled_ = false;
+    /** @type {Promise} */
+    this.scheduled_ = null;
   }
 
   observe() {
@@ -698,15 +698,17 @@ export class FakeMutationObserver {
    * This is a non-standard method that allows you to queue a mutation.
    *
    * @param {!Object} mutation
+   * @return {!Promise}
    */
   __mutate(mutation) {
     this.mutations_.push(mutation);
-    if (!this.scheduled_) {
-      this.scheduled_ = true;
-      Promise.resolve().then(() => {
-        this.callback_(this.takeRecords_());
-      });
+    if (this.scheduled_) {
+      return this.scheduled_;
     }
+    return this.scheduled_ = Promise.resolve().then(() => {
+      this.scheduled_ = null;
+      this.callback_(this.takeRecords_());
+    });
   }
 }
 
