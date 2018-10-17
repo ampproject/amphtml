@@ -25,7 +25,6 @@ export function pressboard(global, data) {
   data.baseUrl = 'https://adserver.pressboard.ca';
   global.pbParams = data;
   loadScript(global, data.baseUrl + '/js/amp-ad.js', () => {
-    // render start
     global.context.renderStart();
   }, () => {
     global.context.noContentAvailable();
