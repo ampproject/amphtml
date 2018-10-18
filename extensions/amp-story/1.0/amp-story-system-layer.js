@@ -71,7 +71,7 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {number} */
-const hideTimeout = 1500;
+const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -374,6 +374,11 @@ export class SystemLayer {
         hasSidebar => {
           this.onHasSidebarStateUpdate_(hasSidebar);
         }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
   }
 
   /**
@@ -478,21 +483,24 @@ export class SystemLayer {
   }
 
   /**
-   * Hides element after elapsed time.
+   * Hides audio message after elapsed time.
    * @private
    */
-  hideAfterTimeout_() {
+  hideAudioMessageAfterTimeout_() {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
-    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    this.timeoutId_ =
+        this.timer_.delay(
+            () => this.hideAudioMessageInternal_(),
+            HIDE_AUDIO_MESSAGE_TIMEOUT_MS);
   }
 
   /**
-   * Hides message.
+   * Hides audio message.
    * @private
    */
-  hideInteral_() {
+  hideAudioMessageInternal_() {
     if (!this.isBuilt_) {
       return;
     }
@@ -515,6 +523,18 @@ export class SystemLayer {
       uiState === UIType.DESKTOP ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-hidden', !isVisible);
     });
   }
 
@@ -550,7 +570,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAfterTimeout_();
+      this.hideAudioMessageAfterTimeout_();
     });
   }
 
