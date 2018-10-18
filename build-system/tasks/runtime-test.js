@@ -29,7 +29,6 @@ const minimatch = require('minimatch');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {exec, getStdout} = require('../exec');
@@ -39,7 +38,6 @@ const {green, yellow, cyan, red, bold} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
-const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -198,41 +196,6 @@ function printArgvMessages() {
         log(yellow('--' + arg + ':'), green(message));
       }
     });
-  }
-}
-
-/**
- * Applies the prod or canary AMP config to the AMP runtime.
- * @return {Promise}
- */
-function applyAmpConfig() {
-  if (argv.unit || argv.a4a) {
-    return Promise.resolve();
-  }
-  if (!process.env.TRAVIS) {
-    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
-  }
-  return writeConfig('dist/amp.js').then(() => {
-    return writeConfig('dist/v0.js');
-  });
-}
-
-/**
- * Writes the prod or canary AMP config to file.
- * @param {string} targetFile File to which the config is to be written.
- * @return {Promise}
- */
-function writeConfig(targetFile) {
-  const configFile =
-      'build-system/global-configs/' + ampConfig + '-config.json';
-  if (fs.existsSync(targetFile)) {
-    return removeConfig(targetFile).then(() => {
-      return applyConfig(
-          ampConfig, targetFile, configFile,
-          /* opt_localDev */ true, /* opt_localBranch */ true);
-    });
-  } else {
-    return Promise.resolve();
   }
 }
 
@@ -649,10 +612,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
   if (!argv.nohelp) {
     printArgvMessages();
   }
-
-  return applyAmpConfig().then(() => {
-    return runTests();
-  });
+  return runTests();
 }, {
   options: {
     'verbose': '  With logging enabled',
@@ -673,7 +633,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'files': '  Runs tests for specific files',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
-    'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
     'local-changes': '  Run unit tests directly affected by the files ' +
