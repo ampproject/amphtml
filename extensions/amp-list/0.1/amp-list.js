@@ -217,14 +217,16 @@ export class AmpList extends AMP.BaseElement {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
         this.resetIfNecessary_(/* isFetch */ false);
-        promise = this.scheduleRender_(isArray(src) ? src : [src]);
+        const data = isArray(src) ? src : [src];
+        promise = this.scheduleRender_(data, /*append*/ false);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
       this.resetIfNecessary_(/* isFetch */ false);
-      promise = this.scheduleRender_(isArray(state) ? state : [state]);
+      const data = isArray(state) ? state : [state];
+      promise = this.scheduleRender_(data, /*append*/ false);
     }
     // Only return the promise for easier testing.
     if (getMode().test) {
@@ -349,7 +351,7 @@ export class AmpList extends AMP.BaseElement {
         if (maxLen < items.length) {
           items = items.slice(0, maxLen);
         }
-        return this.scheduleRender_(/** @type {!Array} */(items), opt_append);
+        return this.scheduleRender_(/** @type {!Array} */(items), !!opt_append);
       }, error => {
         throw user().createError('Error fetching amp-list', error);
       });
@@ -392,17 +394,17 @@ export class AmpList extends AMP.BaseElement {
       return response['html'];
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(html => this.scheduleRender_(html));
+    }).then(html => this.scheduleRender_(html, /*append*/ false));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|?JsonObject|string|undefined} data
-   * @param {boolean=} opt_append
+   * @param {boolean} append
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(data, opt_append = false) {
+  scheduleRender_(data, append) {
     dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
@@ -412,9 +414,9 @@ export class AmpList extends AMP.BaseElement {
       this.renderPass_.schedule();
     }
 
-    this.renderItems_ = {data, opt_append, resolver, rejecter};
+    this.renderItems_ = {data, append, resolver, rejecter};
 
-    if (this.renderedItems_ && opt_append) {
+    if (this.renderedItems_ && append) {
       this.renderItems_.data = this.renderedItems_.concat(data);
     }
 
@@ -450,13 +452,13 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       const html = /** @type {string} */ (current.data);
       this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(element => this.render_([element], current.opt_append))
+          .then(element => this.render_([element], current.append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
       this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(results => this.updateBindings_(results))
-          .then(elements => this.render_(elements, current.opt_append))
+          .then(elements => this.render_(elements, current.append))
           .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
@@ -751,13 +753,11 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {boolean} opt_refresh
-   * @param {string=} opt_itemsExpr
    * @private
    */
-  fetch_(opt_refresh = false, opt_itemsExpr) {
-    const expr = opt_itemsExpr || '.';
+  fetch_(opt_refresh = false) {
     return batchFetchJsonFor(
-        this.getAmpDoc(), this.element, expr, this.getPolicy_(), opt_refresh);
+        this.getAmpDoc(), this.element, '.', this.getPolicy_(), opt_refresh);
   }
 
   /**
