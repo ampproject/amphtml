@@ -836,6 +836,12 @@ const forbiddenTermsSrcInclusive = {
       'src/service/url-replacements-impl.js',
     ],
   },
+  '\\.setNonBoolean\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/storage-impl.js',
+    ],
+  },
   '(cdn|3p)\\.ampproject\\.': {
     message: 'The CDN domain should typically not be hardcoded in source ' +
         'code. Use a property of urls from src/config.js instead.',
