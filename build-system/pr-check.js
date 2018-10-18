@@ -204,6 +204,18 @@ function isUnitTest(filePath) {
 }
 
 /**
+ * Determines if the given file is,
+ * a file concerning the dev dashboard
+ * Concerning the dev dashboard
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isDevDashboardFile(filePath) {
+  return (filePath === 'build-system/app.js' ||
+  filePath.startsWith('build-system/app-index/'));
+}
+
+/**
  * Determines if the given file is an integration test.
  * @param {string} filePath
  * @return {boolean}
@@ -239,6 +251,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR',
       'RUNTIME',
       'UNIT_TEST',
+      'DEV_DASHBOARD',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -259,6 +272,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isUnitTest(p)) {
       targetSet.add('UNIT_TEST');
+    } else if (isDevDashboardFile(p)) {
+      targetSet.add('DEV_DASHBOARD');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -610,6 +625,10 @@ function main() {
         // PR contains only test changes. Run just the modified unit tests.
         command.runUnitTestsOnLocalChanges();
       }
+    }
+
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      command.runDevDashboardTests();
     }
   }
 
