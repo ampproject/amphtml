@@ -317,8 +317,12 @@ const command = {
     }
     timedExecOrDie(cmd);
   },
-  runBundleSizeCheck: function() {
-    timedExecOrDie('gulp bundle-size');
+  runBundleSizeCheck: function(storeBundleSize = false) {
+    let cmd = 'gulp bundle-size';
+    if (storeBundleSize) {
+      cmd += ' --store';
+    }
+    timedExecOrDie(cmd);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -441,7 +445,7 @@ function runAllCommands() {
     command.buildRuntimeMinified(/* extensions */ true);
     // Disable bundle-size check on release branch builds.
     if (process.env['TRAVIS_BRANCH'] === 'master') {
-      command.runBundleSizeCheck();
+      command.runBundleSizeCheck(/* storeBundleSize */ true);
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
@@ -558,7 +562,9 @@ function main() {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files');
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
