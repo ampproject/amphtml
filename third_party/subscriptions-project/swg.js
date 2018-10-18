@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.30 */
+/** Version: 01.22.33 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1696,6 +1696,7 @@ var activityPorts = {
   isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
+var activityPorts_10 = activityPorts.createAbortError;
 var activityPorts_11 = activityPorts.isAbortError;
 
 /**
@@ -2321,7 +2322,7 @@ const TITLE_LANG_MAP = {
 
 /**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
- * It's produced by the `assets:swg-button` gulp task and deployed to
+ * It's produced by the `gulp assets` task and deployed to
  * `https://news.google.com/swg/js/v1/swg-button.css`.
  */
 class ButtonApi {
@@ -2749,6 +2750,18 @@ class View {
  */
 function isCancelError(error) {
   return activityPorts_11(error);
+}
+
+
+/**
+ * Creates or emulates a DOMException of AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {!Window} win
+ * @param {string=} opt_message
+ * @return {!DOMException}
+ */
+function createCancelError(win, opt_message) {
+  return activityPorts_10(win, opt_message);
 }
 
 /**
@@ -3980,7 +3993,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.30',
+    '_client': 'SwG 01.22.33',
   });
 }
 
@@ -4017,7 +4030,244 @@ function cacheParam(cacheKey) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  ACTION_SUBSCRIBE: 1000,
+};
 
+class AnalyticsContext {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmName_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmName() {
+    return this.utmName_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmName(value) {
+    this.utmName_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsContext',  // message type
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmName_,  // field 5 - utm_name
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+    ];
+  }
+}
+
+
+class AnalyticsRequest {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsRequest',  // message type
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+    ];
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * The flow to initiate payment process.
@@ -4042,6 +4292,9 @@ class PayStartFlow {
 
     /** @private @const {string} */
     this.sku_ = sku;
+
+    /** @private @const {*} */
+    this.analyticsService_ = deps.analytics();
   }
 
   /**
@@ -4053,7 +4306,8 @@ class PayStartFlow {
     this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, {
       'sku': this.sku_,
     });
-
+    this.analyticsService_.setSku(this.sku_);
+    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_SUBSCRIBE);
     this.payClient_.start({
       'apiVersion': 1,
       'allowedPaymentMethods': ['CARD'],
@@ -4437,7 +4691,7 @@ class DeferredAccountFlow {
  * limitations under the License.
  */
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -5718,517 +5972,6 @@ class Toast {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** @enum {number} */
-const AnalyticsEvent = {
-  UNKNOWN: 0,
-  IMPRESSION_PAYWALL: 1,
-  ACTION_SUBSCRIBE: 1000,
-};
-
-class AnalyticsContext {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
-
-    /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
-
-    /** @private {?string} */
-    this.utmName_ = (data[5] == null) ? null : data[5];
-
-    /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
-
-    /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
-  }
-
-  /**
-   * @return {?string}
-   */
-  getEmbedderOrigin() {
-    return this.embedderOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setEmbedderOrigin(value) {
-    this.embedderOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTransactionId() {
-    return this.transactionId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setTransactionId(value) {
-    this.transactionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getReferringOrigin() {
-    return this.referringOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setReferringOrigin(value) {
-    this.referringOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmSource() {
-    return this.utmSource_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmSource(value) {
-    this.utmSource_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmName() {
-    return this.utmName_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmName(value) {
-    this.utmName_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmMedium() {
-    return this.utmMedium_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmMedium(value) {
-    this.utmMedium_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.sku_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSku(value) {
-    this.sku_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getReadyToPay() {
-    return this.readyToPay_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setReadyToPay(value) {
-    this.readyToPay_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsContext',  // message type
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmName_,  // field 5 - utm_name
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-    ];
-  }
-}
-
-
-class AnalyticsRequest {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
-
-    /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
-  }
-
-  /**
-   * @return {?AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!AnalyticsContext} value
-   */
-  setContext(value) {
-    this.context_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEvent}
-   */
-  getEvent() {
-    return this.event_;
-  }
-
-  /**
-   * @param {!AnalyticsEvent} value
-   */
-  setEvent(value) {
-    this.event_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsRequest',  // message type
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-    ];
-  }
-}
-
-/** @license
-Math.uuid.js (v1.4)
-http://www.broofa.com
-mailto:robert@broofa.com
-Copyright (c) 2010 Robert Kieffer
-Dual licensed under the MIT and GPL licenses.
-*/
-
-/*
- * Generate a random uuid.
- * EXAMPLES:
- *   returns RFC4122, version 4 ID
- *   >>> uuidFast()
- *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
- *
- * Note: The original code was modified to ES6 and removed other functions,
- * since we are only using uuidFast().
- */
-
-const CHARS =
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-
-function uuidFast() {
-  const uuid = new Array(36);
-  let rnd = 0;
-  let r;
-  for (let i = 0; i < 36; i++) {
-    if (i === 8 || i === 13 || i === 18 || i === 23) {
-      uuid[i] = '-';
-    } else if (i === 14) {
-      uuid[i] = '4';
-    } else {
-      if (rnd <= 0x02) {
-        rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
-      }
-      r = rnd & 0xf;
-      rnd = rnd >> 4;
-      uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r];
-    }
-  }
-  return uuid.join('');
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class TransactionId {
-  /**
-   * @param {*} deps
-   */
-  constructor(deps) {
-    /** @private @const {*} */
-    this.storage_ = deps.storage();
-  }
-
-  /**
-   * Returns the current transaction id
-   *  @return {!Promise<string>}
-   */
-  get() {
-    return this.storage_.get('transaction_id').then(id => {
-      if (!id) {
-        id = uuidFast();
-        this.storage_.set('transaction_id', id);
-      }
-      return id;
-    });
-  }
-
-  /**
-   * Resets the transaction id
-   * @return {!Promise}
-   */
-  reset() {
-    return this.storage_.remove('transaction_id');
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string, string>} */
-const iframeStyles = {
-  display: 'none',
-};
-
-
-class AnalyticsService {
-  /**
-   * @param {*} deps
-   */
-  constructor(deps) {
-
-    /** @private @const {*} */
-    this.doc_ = deps.doc();
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (createElement(
-            this.doc_.getWin().document, 'iframe', {}));
-
-    setImportantStyles(this.iframe_, iframeStyles);
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/serviceiframe');
-
-    /** @private @const {string} */
-    this.publicationId_ = deps.pageConfig().getPublicationId();
-
-    this.args_ = feArgs({
-      publicationId: this.publicationId_,
-    });
-
-    /**
-     * @private @const {!AnalyticsContext}
-     */
-    this.context_ = new AnalyticsContext();
-
-    /**
-     * @private @const {!TransactionId}
-     */
-    this.xid_ = new TransactionId(deps);
-
-    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
-    this.serviceReady_ = null;
-
-    /** @private {?Promise} */
-    this.lastAction_ = null;
-  }
-
-  /**
-   * @param {string} sku
-   */
-  setSku(sku) {
-    this.context_.setSku(sku);
-  }
-
-  /**
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.doc_.getWin().location.search;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getReferrer_() {
-    return this.doc_.getWin().document.referrer;
-  }
-
-  /**
-   * @return {!Promise}
-   */
-  setContext_() {
-    const utmParams = parseQueryString$1(this.getQueryString_());
-    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    const name = utmParams['utm_name'];
-    const medium = utmParams['utm_medium'];
-    const source = utmParams['utm_source'];
-    if (name) {
-      this.context_.setUtmName(name);
-    }
-    if (medium) {
-      this.context_.setUtmMedium(medium);
-    }
-    if (source) {
-      this.context_.setUtmSource(source);
-    }
-    return this.xid_.get().then(id => {
-      this.context_.setTransactionId(id);
-    });
-  }
-
-  /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
-   * @private
-   */
-  start_() {
-    if (!this.serviceReady_) {
-      // TODO(sohanirao): Potentially do this even earlier
-      this.doc_.getBody().appendChild(this.getElement());
-      this.serviceReady_ = this.activityPorts_.openIframe(
-          this.iframe_, this.src_, this.args_).then(port => {
-            this.setContext_();
-            return port.whenReady().then(() => port);
-          });
-    }
-    return this.serviceReady_;
-  }
-
-  /**
-   * @param {boolean} isReadyToPay
-   */
-  setReadyToPay(isReadyToPay) {
-    this.context_.setReadyToPay(isReadyToPay);
-  }
-
-  /**
-   */
-  close() {
-    this.doc_.getBody().removeChild(this.getElement());
-  }
-
-  /**
-   * @param {*} event
-   * @return {!AnalyticsRequest}
-   */
-  createLogRequest_(event) {
-    const /* {!AnalyticsRequest} */ request = new AnalyticsRequest();
-    request.setEvent(event);
-    request.setContext(this.context_);
-    return request;
-  }
-
-  /**
-   * @param {*} event
-   */
-  logEvent(event) {
-    this.lastAction_ = this.start_().then(port => {
-      port.message({'buf': this.createLogRequest_(event).toArray()});
-    });
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessage(callback) {
-    this.lastAction_ = this.start_().then(port => {
-      port.onMessage(callback);
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 const SERVICE_ID = 'subscribe.google.com';
 const TOAST_STORAGE_KEY = 'toast';
@@ -6277,8 +6020,8 @@ class EntitlementsManager {
     /** @private @const {*} */
     this.storage_ = deps.storage();
 
-    /** @private @const {!AnalyticsService} */
-    this.analyticsService_ = new AnalyticsService(deps);
+    /** @private @const {*} */
+    this.analyticsService_ = deps.analytics();
 
     /** @private @const {*} */
     this.config_ = deps.config();
@@ -7519,6 +7262,24 @@ class LoginNotificationApi {
  * limitations under the License.
  */
 
+
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables GPay API in SwG.
+   * Cleanup issue: #406.
+   */
+  GPAY_API: 'gpay-api',
+
+  /**
+   * Enables GPay native support.
+   * Cleanup issue: #441.
+   */
+  GPAY_NATIVE: 'gpay-native',
+};
+
 /**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -7535,6 +7296,327 @@ class LoginNotificationApi {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const MAX_Z_INDEX = 2147483647;
+
+const Constants = {};
+
+/**
+ * Supported environments.
+ *
+ * @enum {string}
+ */
+Constants.Environment = {
+  LOCAL: 'LOCAL',
+  PREPROD: 'PREPROD',
+  PRODUCTION: 'PRODUCTION',
+  SANDBOX: 'SANDBOX',
+  TEST: 'TEST',
+  TIN: 'TIN',
+};
+
+/**
+ * Supported payment methods.
+ *
+ * @enum {string}
+ */
+Constants.PaymentMethod = {
+  CARD: 'CARD',
+  TOKENIZED_CARD: 'TOKENIZED_CARD',
+  UPI: 'UPI',
+};
+
+/**
+ * Auth methods.
+ *
+ * @enum {string}
+ */
+Constants.AuthMethod = {
+  CRYPTOGRAM_3DS: 'CRYPTOGRAM_3DS',
+  PAN_ONLY: 'PAN_ONLY',
+};
+
+/**
+ * Returned result status.
+ *
+ * @enum {string}
+ */
+Constants.ResponseStatus = {
+  CANCELED: 'CANCELED',
+  DEVELOPER_ERROR: 'DEVELOPER_ERROR',
+};
+
+/**
+ * Supported total price status.
+ *
+ * @enum {string}
+ */
+Constants.TotalPriceStatus = {
+  ESTIMATED: 'ESTIMATED',
+  FINAL: 'FINAL',
+  NOT_CURRENTLY_KNOWN: 'NOT_CURRENTLY_KNOWN',
+};
+
+/**
+ * Supported Google Pay payment button type.
+ *
+ * @enum {string}
+ */
+Constants.ButtonType = {
+  SHORT: 'short',
+  LONG: 'long',
+};
+
+/**
+ * Supported button colors.
+ *
+ * @enum {string}
+ */
+Constants.ButtonColor = {
+  DEFAULT: 'default',  // Currently defaults to black.
+  BLACK: 'black',
+  WHITE: 'white',
+};
+
+/**
+ * Id attributes.
+ *
+ * @enum {string}
+ */
+Constants.Id = {
+  POPUP_WINDOW_CONTAINER: 'popup-window-container',
+};
+
+/** @const {string} */
+Constants.STORAGE_KEY_PREFIX = 'google.payments.api.storage';
+
+/** @const {string} */
+Constants.IS_READY_TO_PAY_RESULT_KEY =
+    Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
+
+/** @const {string} */
+Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY =
+    Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
+
+
+Constants.CLASS_PREFIX = 'google-payments-';
+Constants.IFRAME_ACTIVE_CONTAINER_CLASS =
+    `${Constants.CLASS_PREFIX}activeContainer`;
+Constants.IFRAME_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}dialogContainer`;
+Constants.IFRAME_STYLE_CENTER_CLASS = `${Constants.CLASS_PREFIX}dialogCenter`;
+Constants.IFRAME_STYLE_CLASS = `${Constants.CLASS_PREFIX}dialog`;
+
+Constants.IFRAME_STYLE = `
+.${Constants.IFRAME_STYLE_CLASS} {
+    animation: none 0s ease 0s 1 normal none running;
+    background: none 0 0 / auto repeat scroll padding-box border-box #fff;
+    background-blend-mode: normal;
+    border: 0 none #333;
+    border-radius: 8px 8px 0 0;
+    border-collapse: separate;
+    bottom: 0;
+    box-shadow: #808080 0 3px 0 0, #808080 0 0 22px;
+    box-sizing: border-box;
+    letter-spacing: normal;
+    max-height: 100%;
+    overflow: visible;
+    position: fixed;
+    width: 100%;
+    z-index: ${MAX_Z_INDEX};
+    -webkit-appearance: none;
+    left: 0;
+}
+@media (min-width: 480px) {
+  .${Constants.IFRAME_STYLE_CLASS}{
+    width: 480px !important;
+    left: -240px !important;
+    margin-left: calc(100vw - 100vw / 2) !important;
+  }
+}
+.${Constants.IFRAME_CONTAINER_CLASS} {
+  background-color: rgba(0,0,0,0.26);
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+.iframeContainer {
+  -webkit-overflow-scrolling: touch;
+}
+`;
+
+Constants.IFRAME_STYLE_CENTER = `
+.${Constants.IFRAME_STYLE_CENTER_CLASS} {
+  animation: none 0s ease 0s 1 normal none running;
+  background-blend-mode: normal;
+  background: none 0 0 / auto repeat scroll padding-box border-box #fff;
+  border-collapse: separate;
+  border-radius: 8px;
+  border: 0px none #333;
+  bottom: auto;
+  box-shadow: #808080 0 0 22px;
+  box-sizing: border-box;
+  left: -240px;
+  letter-spacing: normal;
+  margin-left: calc(100vw - 100vw / 2) !important;
+  max-height: 600px;
+  overflow: visible;
+  position: absolute;
+  top: 100%;
+  transform: scale(0.8);
+  width: 480px;
+  z-index: ${MAX_Z_INDEX};
+  -webkit-appearance: none;
+}
+.${Constants.IFRAME_ACTIVE_CONTAINER_CLASS} {
+  top: 50%;
+  transform: scale(1.0) translateY(-50%);
+}
+`;
+
+Constants.GPAY_BUTTON_WITH_CARD_INFO_IMAGE =
+    'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
+
+Constants.BUTTON_LOCALE_TO_MIN_WIDTH = {
+  'en': 152,
+  'bg': 163,
+  'cs': 192,
+  'de': 183,
+  'es': 183,
+  'fr': 183,
+  'hr': 157,
+  'id': 186,
+  'ja': 148,
+  'ko': 137,
+  'ms': 186,
+  'nl': 167,
+  'pl': 182,
+  'pt': 193,
+  'ru': 206,
+  'sk': 157,
+  'sl': 211,
+  'sr': 146,
+  'tr': 161,
+  'uk': 207,
+  'zh': 156,
+};
+
+/**
+ * Name of the graypane.
+ *
+ * @const {string}
+ */
+Constants.GPAY_GRAYPANE = 'gpay-graypane';
+
+/**
+ * Class used for the gpay button.
+ *
+ * @const {string}
+ */
+Constants.GPAY_BUTTON_CLASS = 'gpay-button';
+
+Constants.BUTTON_STYLE = `
+.${Constants.GPAY_BUTTON_CLASS} {
+  background-origin: content-box;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: 0px;
+  border-radius: 4px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 1px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  cursor: pointer;
+  height: 40px;
+  min-height: 40px;
+  padding: 11px 24px;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.black {
+  background-color: #000;
+  box-shadow: none;
+  padding: 12px 24px 10px;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.white {
+  background-color: #fff;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.short {
+  min-width: 90px;
+  width: 160px;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.black.short {
+  background-image: url(https://www.gstatic.com/instantbuy/svg/dark_gpay.svg);
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.white.short {
+  background-image: url(https://www.gstatic.com/instantbuy/svg/light_gpay.svg);
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.black.active {
+  background-color: #5f6368;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.black.hover {
+  background-color: #3c4043;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.white.active {
+  background-color: #fff;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.white.focus {
+  box-shadow: #e8e8e8 0 1px 1px 0, #e8e8e8 0 1px 3px;
+}
+
+.${Constants.GPAY_BUTTON_CLASS}.white.hover {
+  background-color: #f8f8f8;
+}
+`;
+
+/**
+ * Class used for the new gpay button with card info (last 4 digits, card net).
+ *
+ * @const {string}
+ */
+Constants.GPAY_BUTTON_CARD_INFO_CLASS = 'gpay-card-info-btn';
+
+Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
+  .${Constants.GPAY_BUTTON_CARD_INFO_CLASS} {
+    background-origin: content-box;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border: 0px;
+    border-radius: 4px;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 1px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+    cursor: pointer;
+    height: 40px;
+    min-height: 40px;
+    padding: 11px 24px;
+    background-color: #000;
+    box-shadow: none;
+    padding: 9px 24px 10px;
+    min-width: 190px;
+    width: 240px;
+  }
+
+  .${Constants.GPAY_BUTTON_CARD_INFO_CLASS}.active {
+    background-color: #5f6368;
+  }
+
+  .${Constants.GPAY_BUTTON_CARD_INFO_CLASS}.hover {
+    background-color: #3c4043;
+  }
+  `;
+
+/**
+ * Trusted domain for secure context validation
+ *
+ * @const {string}
+ */
+Constants.TRUSTED_DOMAIN = '.google.com';
 
 /**
  * @license
@@ -7571,6 +7653,165 @@ class LoginNotificationApi {
  */
 
 /**
+ * An implementation of PaymentsClientDelegateInterface that leverages payment
+ * request.
+ * @implements {PaymentsClientDelegateInterface}
+ */
+class PaymentsRequestDelegate {
+  /**
+   * @param {string} environment
+   */
+  constructor(environment) {
+    this.environment_ = environment;
+
+    /** @private {?function(!Promise<!PaymentData>)} */
+    this.callback_ = null;
+  }
+
+  /** @override */
+  onResult(callback) {
+    this.callback_ = callback;
+  }
+
+  /** @override */
+  isReadyToPay(isReadyToPayRequest) {
+    /** @type{!PaymentRequest} */
+    const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
+    return new Promise((resolve, reject) => {
+      paymentRequest.canMakePayment()
+          .then(result => {
+            window.sessionStorage.setItem(
+                Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
+            const response = {'result': result};
+            if (isReadyToPayRequest.apiVersion >= 2 &&
+                isReadyToPayRequest.existingPaymentMethodRequired) {
+              // For apiVersion 2, we always use native to only check for
+              // tokenized cards.
+              // For tokenized cards native always does a presence check so
+              // we can say that if canMakePayment is true for native for
+              // tokenizedCards then the user has a payment method which is
+              // present.
+              response['paymentMethodPresent'] = result;
+            }
+            resolve(response);
+          })
+          .catch(function(err) {
+            if (window.sessionStorage.getItem(
+                    Constants.IS_READY_TO_PAY_RESULT_KEY)) {
+              resolve({
+                'result': window.sessionStorage.getItem(
+                              Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
+              });
+            } else {
+              resolve({'result': false});
+            }
+          });
+    });
+  }
+
+  /** @override */
+  prefetchPaymentData(paymentDataRequest) {
+    // Creating PaymentRequest instance will call
+    // Gcore isReadyToPay internally which will prefetch tempaltes.
+    this.createPaymentRequest_(
+        paymentDataRequest, this.environment_,
+        paymentDataRequest.transactionInfo.currencyCode,
+        paymentDataRequest.transactionInfo.totalPrice);
+  }
+
+  /** @override */
+  loadPaymentData(paymentDataRequest) {
+    this.loadPaymentDataThroughPaymentRequest_(paymentDataRequest);
+  }
+
+  /**
+   * Create PaymentRequest instance.
+   *
+   * @param {!IsReadyToPayRequest|!PaymentDataRequest} request The necessary information to check if user is
+   *     ready to pay or to support a payment from merchants.
+   * @param {?string=} environment (optional)
+   * @param {?string=} currencyCode (optional)
+   * @param {?string=} totalPrice (optional)
+   * @return {!PaymentRequest} PaymentRequest instance.
+   * @private
+   */
+  createPaymentRequest_(request, environment, currencyCode, totalPrice) {
+    let data = {};
+    if (request) {
+      data = JSON.parse(JSON.stringify(request));
+    }
+
+    // Only set the apiVersion if the merchant doesn't set it.
+    if (!data['apiVersion']) {
+      data['apiVersion'] = 1;
+    }
+
+    // Add allowedPaymentMethods for swg to get through gms core validation.
+    if (data['swg']) {
+      data['allowedPaymentMethods'] = [Constants.PaymentMethod.CARD];
+    }
+
+    if (environment && environment == Constants.Environment.TEST) {
+      data['environment'] = environment;
+    }
+
+    const supportedInstruments = [{
+      'supportedMethods': ['https://google.com/pay'],
+      'data': data,
+    }];
+
+    const details = {
+      'total': {
+        'label': 'Estimated Total Price',
+        'amount': {
+          // currency and value are required fields in PaymentRequest, but these
+          // fields will never be used since PaymentRequest UI is skipped when
+          // we're the only payment method, so default to some value to by pass
+          // this requirement.
+          'currency': currencyCode || 'USD',
+          'value': totalPrice || '0',
+        }
+      }
+    };
+
+    return new PaymentRequest(supportedInstruments, details);
+  }
+
+  /**
+   * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
+   *     information to support a payment.
+   * @private
+   */
+  loadPaymentDataThroughPaymentRequest_(paymentDataRequest) {
+    const currencyCode = (paymentDataRequest.transactionInfo &&
+                          paymentDataRequest.transactionInfo.currencyCode) ||
+        undefined;
+    const totalPrice = (paymentDataRequest.transactionInfo &&
+                        paymentDataRequest.transactionInfo.totalPrice) ||
+        undefined;
+    const paymentRequest = this.createPaymentRequest_(
+        paymentDataRequest, this.environment_, currencyCode, totalPrice);
+    this.callback_(
+        /** @type{!Promise<!PaymentData>} */
+        (paymentRequest.show()
+             .then(
+                 /**
+                  * @param {!PaymentResponse} paymentResponse
+                  * @return {!PaymentData}
+                  */
+                 (paymentResponse) => {
+                   // Should be called to dismiss any remaining UI
+                   paymentResponse.complete('success');
+                   return paymentResponse.details;
+                 })
+             .catch(function(err) {
+               err['statusCode'] = Constants.ResponseStatus.CANCELED;
+               throw err;
+             })));
+  }
+}
+
+/**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  *
@@ -7586,6 +7827,122 @@ class LoginNotificationApi {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const MAX_Z_INDEX$1 = 2147483647;
+
+
+class Graypane$1 {
+
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+
+    /** @private @const {!Element} */
+    this.element_ = doc.createElement(Constants.GPAY_GRAYPANE);
+    setImportantStyles$1(this.element_, {
+      'z-index': MAX_Z_INDEX$1,
+      'display': 'none',
+      'position': 'fixed',
+      'top': 0,
+      'right': 0,
+      'bottom': 0,
+      'left': 0,
+      'background-color': 'rgba(32, 33, 36, .6)',
+    });
+
+    /** @private {?Window} */
+    this.popupWindow_ = null;
+
+    this.element_.addEventListener('click', () => {
+      if (this.popupWindow_) {
+        try {
+          this.popupWindow_.focus();
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+    });
+  }
+
+  /**
+   * Shows the graypane.
+   * @param {?Window|undefined} popupWindow
+   * @return {!Promise}
+   */
+  show(popupWindow) {
+    this.popupWindow_ = popupWindow || null;
+    this.doc_.body.appendChild(this.element_);
+    setImportantStyles$1(this.element_, {
+      'display': 'block',
+      'opacity': 0,
+    });
+    return transition$1(this.element_, {
+      'opacity': 1,
+    }, 300, 'ease-out');
+  }
+
+  /**
+   * Hides the graypane.
+   * @return {!Promise}
+   */
+  hide() {
+    this.popupWindow_ = null;
+    return transition$1(this.element_, {
+      'opacity': 0,
+    }, 300, 'ease-out').then(() => {
+      setImportantStyles$1(this.element_, {'display': 'none'});
+      this.doc_.body.removeChild(this.element_);
+    });
+  }
+}
+
+
+/**
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
+ *
+ * The `!important` styles are used to avoid accidental specificity overrides
+ * from the 3p page's stylesheet.
+ *
+ * @param {!Element} element
+ * @param {!Object<string, string|number>} styles
+ */
+function setImportantStyles$1(element, styles) {
+  for (const k in styles) {
+    element.style.setProperty(k, styles[k].toString(), 'important');
+  }
+}
+
+
+/**
+ * Returns a promise which is resolved after the given duration of animation
+ * @param {!Element} el - Element to be observed.
+ * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {number} durationMillis - duration of animation.
+ * @param {string} curve - transition function for the animation.
+ * @return {!Promise} Promise which resolves once the animation is done playing.
+ */
+function transition$1(el, props, durationMillis, curve) {
+  const win = el.ownerDocument.defaultView;
+  const previousTransitionValue = el.style.transition || '';
+  return new Promise(resolve => {
+    win.setTimeout(() => {
+      win.setTimeout(resolve, durationMillis);
+      const tr = `${durationMillis}ms ${curve}`;
+      setImportantStyles$1(el, Object.assign({
+        'transition': `transform ${tr}, opacity ${tr}`,
+      }, props));
+    });
+  }).then(() => {
+    // Stop transition and make sure that the final properties get set.
+    setImportantStyles$1(el, Object.assign({
+      'transition': previousTransitionValue,
+    }, props));
+  });
+}
 
 /**
  * @license
@@ -7605,21 +7962,26 @@ class LoginNotificationApi {
  */
 
 /**
- * @license
- * Copyright 2018 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Service wrapping window.parent.postMessage. This enables
+ * window.postMessage to be swapped out in unit tests.
  */
+class PostMessageService {
+  constructor(window) {
+    /** @private @const {!Window} */
+    this.window_ = window;
+  }
+
+  /**
+   * Passthrough to Window#postMessage. See Window#postMessage DOM API
+   * documentation for more information about arguments.
+   *
+   * @param {!Object} message
+   * @param {string} targetOrigin
+   */
+  postMessage(message, targetOrigin) {
+    this.window_.postMessage(message, targetOrigin);
+  }
+}
 
 /**
  * @license
@@ -7639,21 +8001,274 @@ class LoginNotificationApi {
  */
 
 /**
- * @license
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Supported interactions between iframe and merchant page.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @enum {number}
  */
+// Next Id: 9
+const PostMessageEventType = {
+  IS_READY_TO_PAY: 6,
+  LOG_BUTTON_CLICK: 5,
+  LOG_IS_READY_TO_PAY_API: 0,
+  LOG_LOAD_PAYMENT_DATA_API: 1,
+  LOG_RENDER_BUTTON: 2,
+  LOG_INLINE_PAYMENT_WIDGET_INITIALIZE: 4,
+  LOG_INLINE_PAYMENT_WIDGET_SUBMIT: 3,
+  LOG_INLINE_PAYMENT_WIDGET_DISPLAYED: 7,
+  LOG_INLINE_PAYMENT_WIDGET_HIDDEN: 8,
+};
+
+/**
+ * Types of buy flow activity modes.
+ *
+ * @enum {number}
+ */
+const BuyFlowActivityMode = {
+  UNKNOWN_MODE: 0,
+  IFRAME: 1,
+  POPUP: 2,
+  REDIRECT: 3,
+  ANDROID_NATIVE: 4,
+  PAYMENT_HANDLER: 5,
+};
+
+/**
+ * Types of buy flow activity modes.
+ *
+ * @enum {number}
+ */
+const PublicErrorCode = {
+  UNKNOWN_ERROR_TYPE: 0,
+  INTERNAL_ERROR: 1,
+  DEVELOPER_ERROR: 2,
+  BUYER_ACCOUNT_ERROR: 3,
+  MERCHANT_ACCOUNT_ERROR: 4,
+  UNSUPPORTED_API_VERSION: 5,
+  BUYER_CANCEL: 6,
+};
+
+/**
+ * Iframe used for logging and prefetching.
+ *
+ * @type {?Element}
+ */
+let iframe = null;
+
+/** @type {?PostMessageService} */
+let postMessageService = null;
+
+/** @type {?string} */
+let environment = null;
+
+/** @type {?BuyFlowActivityMode} */
+let buyFlowActivityMode = null;
+
+/** @type {boolean} */
+let iframeLoaded = false;
+
+/** @type {!Array<!Object>} */
+let buffer = [];
+
+class PayFrameHelper {
+  /**
+   * Creates a hidden iframe for logging and appends it to the top level
+   * document.
+   *
+   * @param {string} env
+   * @param {string} googleTransactionId
+   * @param {string|null=} merchantId
+   */
+  static load(env, googleTransactionId, merchantId) {
+    if (iframe) {
+      return;
+    }
+    environment = env;
+    iframe = document.createElement('iframe');
+    // Pass in origin because document.referrer inside iframe is empty in
+    // certain cases
+    // Can be replaced by iframe.src=... in non Google context.
+    iframe.src = PayFrameHelper.getIframeUrl_(
+            window.location.origin, Date.now(), googleTransactionId,
+            merchantId);
+    iframe.height = '0';
+    iframe.width = '0';
+    iframe.style.display = 'none';
+    iframe.style.visibility = 'hidden';
+    iframe.onload = function() {
+      PayFrameHelper.iframeLoaded();
+    };
+    document.body.appendChild(iframe);
+    postMessageService = new PostMessageService(iframe.contentWindow);
+  }
+
+  /**
+   * Sends a message to the iframe and wait for a response.
+   * Uses the responseHandler specified only if the responseType is a match.
+   *
+   * @param {!Object} data
+   * @param {!PostMessageEventType} eventType
+   * @param {string} responseType
+   * @param {function(!Event)} responseHandler
+   */
+  static sendAndWaitForResponse(
+      data, eventType, responseType, responseHandler) {
+    function callback(event) {
+      if (event.data[responseType]) {
+        responseHandler(event);
+        // We only want to process the response from the payframe once.
+        // so stop listening to the event once processed.
+        PayFrameHelper.removeMessageEventListener_(callback);
+      }
+    }
+
+    PayFrameHelper.addMessageEventListener_(callback);
+
+    const postMessageData = Object.assign({'eventType': eventType}, data);
+    PayFrameHelper.postMessage(postMessageData);
+  }
+
+  /**
+   * Add an event listener for listening to messages received.
+   *
+   * @param {function(!Event)} callback
+   * @private
+   */
+  static addMessageEventListener_(callback) {
+    window.addEventListener('message', callback);
+  }
+
+  /**
+   * Remove the event listener for listening to messages.
+   *
+   * @param {function(!Event)} callback
+   * @private
+   */
+  static removeMessageEventListener_(callback) {
+    window.removeEventListener('message', callback);
+  }
+
+  /**
+   * Posts a message to the iframe with the given data.
+   *
+   * @param {!Object} data
+   */
+  static postMessage(data) {
+    if (!iframeLoaded) {
+      buffer.push(data);
+      return;
+    }
+    const postMessageData = Object.assign(
+        {
+          'buyFlowActivityMode': buyFlowActivityMode,
+        },
+        data);
+    postMessageService.postMessage(
+        postMessageData, PayFrameHelper.getIframeOrigin_());
+  }
+
+  /**
+   *
+   * Sets the activity mode.
+   *
+   * @param {!BuyFlowActivityMode} mode
+   */
+  static setBuyFlowActivityMode(mode) {
+    buyFlowActivityMode = mode;
+  }
+
+  /**
+   * Override postMessageService for testing.
+   *
+   * @param {!PostMessageService} messageService
+   */
+  static setPostMessageService(messageService) {
+    postMessageService = messageService;
+  }
+
+  /**
+   * Clears the singleton variables.
+   */
+  static reset() {
+    iframe = null;
+    buffer.length = 0;
+    iframeLoaded = false;
+    buyFlowActivityMode = null;
+  }
+
+  /**
+   * Sets whether the iframe has been loaded or not.
+   *
+   * @param {boolean} loaded
+   */
+  static setIframeLoaded(loaded) {
+    iframeLoaded = loaded;
+  }
+
+  /**
+   * Called whenever the iframe is loaded.
+   */
+  static iframeLoaded() {
+    iframeLoaded = true;
+    buffer.forEach(function(data) {
+      PayFrameHelper.postMessage(data);
+    });
+  }
+
+  /**
+   * Returns the events that have been buffered.
+   *
+   * @return {!Array<!Object>}
+   */
+  static getBuffer() {
+    return buffer;
+  }
+
+  /**
+   * Mocks the iframe as an arbitrary html element instead of actually injecting
+   * it for testing.
+   */
+  static injectIframeForTesting() {
+    PayFrameHelper.reset();
+    iframe = document.createElement('p');
+    PayFrameHelper.iframeLoaded();
+  }
+
+  /**
+   * Returns the payframe origin based on the environment.
+   *
+   * @return {string}
+   * @private
+   */
+  static getIframeOrigin_() {
+    let iframeUrl = 'https://pay';
+    if (environment == Constants.Environment.SANDBOX) {
+      iframeUrl += '.sandbox';
+    } else if (environment == Constants.Environment.PREPROD) {
+      iframeUrl += '-preprod.sandbox';
+    }
+    return iframeUrl + '.google.com';
+  }
+
+  /**
+   * Returns the payframe URL based on the environment.
+   *
+   * @param {string} origin The origin that is opening the payframe.
+   * @param {number} initializeTimeMs The time the payframe was initialized.
+   * @param {string} googleTransactionId The transaction id for
+   * this payments client.
+   * @param {string|null=} merchantId The merchant id.
+   * @return {string}
+   * @private
+   */
+  static getIframeUrl_(
+      origin, initializeTimeMs, googleTransactionId, merchantId) {
+    // TrustedResourceUrl header needs to start with https or '//'.
+    const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
+             '-preprod.sandbox' :
+             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&t=${initializeTimeMs}&gTxnId=%{googleTransactionId}&mid=%{merchantId}`;
+    return iframeUrl;
+  }
+}
 
 /**
  * @license
@@ -7673,6 +8288,335 @@ class LoginNotificationApi {
  */
 
 /**
+ * @return {boolean} true if this version of Chrome supports PaymentHandler.
+ */
+function chromeSupportsPaymentHandler() {
+  // Check if feature is enabled for user
+  if (typeof google == 'undefined' ||
+      !null) {
+    return false;
+  }
+
+  // Payment handler isn't supported on mobile
+  const mobilePlatform = window.navigator.userAgent.match(
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+  if (mobilePlatform != null) {
+    return false;
+  }
+
+  const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
+  return 'PaymentRequest' in window && chromeVersion != null &&
+      Number(chromeVersion[1]) >= 68 &&
+      window.navigator.vendor == 'Google Inc.';
+}
+
+/**
+ * @return {boolean} true if this version of Chrome supports PaymentRequest.
+ */
+function chromeSupportsPaymentRequest() {
+  // Opera uses chrome as rendering engine and sends almost the exact same
+  // user agent as chrome thereby fooling us on android.
+  const isOpera = window.navigator.userAgent.indexOf('OPR/') != -1;
+  if (isOpera) {
+    return false;
+  }
+  if (chromeSupportsPaymentHandler()) {
+    return true;
+  }
+
+  if (typeof google != 'undefined' &&
+      null) {
+    return false;
+  }
+  const androidPlatform = window.navigator.userAgent.match(/Android/i);
+  const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
+  return androidPlatform != null && 'PaymentRequest' in window &&
+      // Make sure skipping PaymentRequest UI when only one PaymentMethod is
+      // supported (starts on Google Chrome 59).
+      window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
+      Number(chromeVersion[1]) >= 59;
+}
+
+/**
+ * @param {!IsReadyToPayRequest} isReadyToPayRequest
+ *
+ * @return {boolean} true if the merchant only supports tokenized cards.
+ */
+function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
+  if (isReadyToPayRequest.apiVersion >= 2) {
+    const allowedAuthMethods =
+        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+    if (allowedAuthMethods && allowedAuthMethods.length == 1 &&
+        allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
+      return true;
+    }
+  }
+  return isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
+      isReadyToPayRequest.allowedPaymentMethods[0] ==
+      Constants.PaymentMethod.TOKENIZED_CARD;
+}
+
+/**
+ * @param {!IsReadyToPayRequest} isReadyToPayRequest
+ * @param {Constants.AuthMethod} apiV2AuthMethod
+ *
+ * @return {boolean} true if the merchant supports pan cards.
+ */
+function apiV2DoesMerchantSupportSpecifiedCardType(
+    isReadyToPayRequest, apiV2AuthMethod) {
+  if (isReadyToPayRequest.apiVersion >= 2) {
+    const allowedAuthMethods =
+        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+    if (allowedAuthMethods && allowedAuthMethods.includes(apiV2AuthMethod)) {
+      return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+/**
+ * Validate if is secure context. Returns null if context is secure, otherwise
+ * return error message.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts
+ *
+ * @return {?string} null if current context is secure, otherwise return error
+ * message.
+ */
+function validateSecureContext() {
+  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
+    // This is for local development.
+    return null;
+  }
+  if (window.isSecureContext === undefined) {
+    // Browser not support isSecureContext, figure out a way to validate this
+    // for the unsupported browser.
+    return null;
+  }
+  return window.isSecureContext ?
+      null :
+      'Google Pay APIs should be called in secure context!';
+}
+
+/**
+ * Validate PaymentOptions.
+ *
+ * @param {!PaymentOptions} paymentOptions
+ */
+function validatePaymentOptions(paymentOptions) {
+  if (paymentOptions.environment &&
+      !Object.values(Constants.Environment)
+           .includes(paymentOptions.environment)) {
+    throw new Error(
+        'Parameter environment in PaymentOptions can optionally be set to ' +
+        'PRODUCTION, otherwise it defaults to TEST.');
+  }
+}
+
+/**
+ * Validate IsReadyToPayRequest.
+ *
+ * @param {!IsReadyToPayRequest} isReadyToPayRequest
+ * @return {?string} errorMessage if the request is invalid.
+ */
+function validateIsReadyToPayRequest(isReadyToPayRequest) {
+  if (!isReadyToPayRequest) {
+    return 'isReadyToPayRequest must be set!';
+  } else if (isReadyToPayRequest.apiVersion >= 2) {
+    if (!('apiVersionMinor' in isReadyToPayRequest)) {
+      return 'apiVersionMinor must be set!';
+    }
+    if (!isReadyToPayRequest.allowedPaymentMethods ||
+        !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+        isReadyToPayRequest.allowedPaymentMethods.length == 0) {
+      return 'for v2 allowedPaymentMethods must be set to an array containing a list of accepted payment methods';
+    }
+    for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
+      let allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
+      if (allowedPaymentMethod['type'] == Constants.PaymentMethod.CARD) {
+        if (!allowedPaymentMethod['parameters']) {
+          return 'Field parameters must be setup in each allowedPaymentMethod';
+        }
+        var allowedCardNetworks =
+            allowedPaymentMethod['parameters']['allowedCardNetworks'];
+        if (!allowedCardNetworks || !Array.isArray(allowedCardNetworks) ||
+            allowedCardNetworks.length == 0) {
+          return 'allowedCardNetworks must be setup in parameters for type CARD';
+        }
+        var allowedAuthMethods =
+            allowedPaymentMethod['parameters']['allowedAuthMethods'];
+        if (!allowedAuthMethods || !Array.isArray(allowedAuthMethods) ||
+            allowedAuthMethods.length == 0 ||
+            !allowedAuthMethods.every(isAuthMethodValid)) {
+          return 'allowedAuthMethods must be setup in parameters for type \'CARD\' ' +
+              ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
+        }
+      }
+    }
+    return null;
+  } else if (
+      !isReadyToPayRequest.allowedPaymentMethods ||
+      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+      isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
+      !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
+    return 'allowedPaymentMethods must be set to an array containing \'CARD\' ' +
+        'and/or \'TOKENIZED_CARD\'!';
+  }
+  return null;
+}
+
+/**
+ * Validate the payment method.
+ *
+ * @param {string} paymentMethod
+ * @return {boolean} if the current payment method is valid.
+ */
+function isPaymentMethodValid(paymentMethod) {
+  return Object.values(Constants.PaymentMethod).includes(paymentMethod);
+}
+
+/**
+ * Validate the auth method.
+ *
+ * @param {string} authMethod
+ * @return {boolean} if the current auth method is valid.
+ */
+function isAuthMethodValid(authMethod) {
+  return Object.values(Constants.AuthMethod).includes(authMethod);
+}
+
+/**
+ * Validate PaymentDataRequest.
+ *
+ * @param {!PaymentDataRequest} paymentDataRequest
+ * @return {?string} errorMessage if the request is invalid.
+ */
+function validatePaymentDataRequest(paymentDataRequest) {
+  if (!paymentDataRequest) {
+    return 'paymentDataRequest must be set!';
+  }
+  if (paymentDataRequest.swg) {
+    return validatePaymentDataRequestForSwg(paymentDataRequest.swg);
+  } else if (!paymentDataRequest.transactionInfo) {
+    return 'transactionInfo must be set!';
+  } else if (!paymentDataRequest.transactionInfo.currencyCode) {
+    return 'currencyCode in transactionInfo must be set!';
+  } else if (
+      !paymentDataRequest.transactionInfo.totalPriceStatus ||
+      !Object.values(Constants.TotalPriceStatus)
+           .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
+    return 'totalPriceStatus in transactionInfo must be set to one of' +
+        ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
+  } else if (
+      paymentDataRequest.transactionInfo.totalPriceStatus !==
+          'NOT_CURRENTLY_KNOWN' &&
+      !paymentDataRequest.transactionInfo.totalPrice) {
+    return 'totalPrice in transactionInfo must be set when' +
+        ' totalPriceStatus is ESTIMATED or FINAL!';
+  }
+
+  // Validate payment data request for UPI payment method
+  const allowedPaymentMethod = getUpiPaymentMethod(paymentDataRequest);
+  if (allowedPaymentMethod) {
+    if (!allowedPaymentMethod['parameters']) {
+      return 'parameters must be set in allowedPaymentMethod!';
+    }
+
+    var parameters = allowedPaymentMethod['parameters'];
+    if (!parameters['payeeVpa']) {
+      return 'payeeVpa in allowedPaymentMethod parameters must be set!';
+    } else if (!parameters['payeeName']) {
+      return 'payeeName in allowedPaymentMethod parameters must be set!';
+    } else if (!parameters['referenceUrl']) {
+      return 'referenceUrl in allowedPaymentMethod parameters must be set!';
+    } else if (!parameters['mcc']) {
+      return 'mcc in allowedPaymentMethod parameters must be set!';
+    } else if (!parameters['transactionReferenceId']) {
+      return 'transactionReferenceId in allowedPaymentMethod parameters' +
+          ' must be set!';
+    }
+
+    if (paymentDataRequest['transactionInfo']['currencyCode'] !== 'INR') {
+      return 'currencyCode in transactionInfo must be set to INR!';
+    } else if (
+        paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
+      return 'totalPriceStatus in transactionInfo must be set to FINAL!';
+    } else if (!paymentDataRequest['transactionInfo']['transactionNote']) {
+      return 'transactionNote in transactionInfo must be set!';
+    }
+  }
+  return null;
+}
+
+/**
+ * Returns upi payment method object if it exists in allowed payment methods
+ * or null if it doesn't
+ *
+ * @param {!IsReadyToPayRequest|!PaymentDataRequest} request
+ * @return {?Object}
+ */
+function getUpiPaymentMethod(request) {
+  if (!chromeSupportsPaymentRequest() || request.apiVersion < 2 ||
+      !request.allowedPaymentMethods) {
+    return null;
+  }
+  return getAllowedPaymentMethodForType_(request, Constants.PaymentMethod.UPI);
+}
+
+/**
+ * Validate parameters for swg.
+ *
+ * @param {?SwgParameters} swgParameters
+ * @return {?string} errorMessage if the request is invalid.
+ */
+function validatePaymentDataRequestForSwg(swgParameters) {
+  if (!swgParameters) {
+    return 'Swg parameters must be provided';
+  }
+  if (!swgParameters.skuId || !swgParameters.publicationId) {
+    return 'Both skuId and publicationId must be provided';
+  }
+  return null;
+}
+
+/**
+ * Returns the allowedAuthMethods for a card from the request.
+ *
+ * @param {!IsReadyToPayRequest} isReadyToPayRequest
+ * @return {?Array<string>}
+ * @private
+ */
+function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
+  if (isReadyToPayRequest.allowedPaymentMethods) {
+    const allowedPaymentMethod = getAllowedPaymentMethodForType_(
+        isReadyToPayRequest, Constants.PaymentMethod.CARD);
+    if (allowedPaymentMethod && allowedPaymentMethod.parameters) {
+      return allowedPaymentMethod.parameters['allowedAuthMethods'];
+    }
+  }
+  return null;
+}
+
+/**
+ * @param {!IsReadyToPayRequest} isReadyToPayRequest
+ * @param {string} paymentMethodType
+ * @return {?PaymentMethod} Return first payment method for the given type,
+ *     return null if not found.
+ * @private
+ */
+function getAllowedPaymentMethodForType_(
+    isReadyToPayRequest, paymentMethodType) {
+  for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
+    const allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
+    if (allowedPaymentMethod.type == paymentMethodType) {
+      return allowedPaymentMethod;
+    }
+  }
+  return null;
+}
+
+/**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  *
@@ -7688,6 +8632,863 @@ class LoginNotificationApi {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Injects the pay with google iframe.
+ * @param {string} iframeClassName The classname of the iFrame wrapper.
+ * @return {!{container: !Element, iframe:!HTMLIFrameElement}}
+ */
+function injectIframe(iframeClassName) {
+  const container = document.createElement('div');
+  container.classList.add(Constants.IFRAME_CONTAINER_CLASS);
+  const iframeContainer = document.createElement('div');
+  iframeContainer.classList.add('iframeContainer');
+  /** @private @const {!HTMLIFrameElement} */
+  const iframe =
+      /** @type {!HTMLIFrameElement} */ (document.createElement('iframe'));
+  iframe.classList.add(iframeClassName);
+  iframe.setAttribute('frameborder', '0');
+  iframe.setAttribute('scrolling', 'no');
+  iframeContainer.appendChild(iframe);
+  container.appendChild(iframeContainer);
+  document.body.appendChild(container);
+  return {'container': container, 'iframe': iframe};
+}
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const GPAY_ACTIVITY_REQUEST = 'GPAY';
+const IFRAME_CLOSE_DURATION_IN_MS = 250;
+const IFRAME_SHOW_UP_DURATION_IN_MS = 250;
+const IFRAME_SMOOTH_HEIGHT_TRANSITION =
+    `height ${IFRAME_SHOW_UP_DURATION_IN_MS}ms`;
+const ERROR_PREFIX = 'Error: ';
+
+/**
+ * Supported browser user agent keys.
+ *
+ * @enum {string}
+ */
+const BrowserUserAgent = {
+  CHROME: 'Chrome',
+  FIREFOX: 'Firefox',
+  SAFARI: 'Safari',
+};
+
+
+/**
+ * An implementation of PaymentsClientDelegateInterface that uses the custom
+ * hosting page along with web activities to actually get to the hosting page.
+ * @implements {PaymentsClientDelegateInterface}
+ */
+class PaymentsWebActivityDelegate {
+  /**
+   * @param {string} environment
+   * @param {string} googleTransactionId
+   * @param {boolean=} opt_useIframe
+   * @param {!ActivityPorts=} opt_activities Can be used to provide a shared
+   *   activities manager. By default, the new manager is created.
+   * @param {?string=} opt_redirectKey The redirect key used for redirect mode.
+   */
+  constructor(environment, googleTransactionId, opt_useIframe,
+             opt_activities, opt_redirectKey) {
+    this.environment_ = environment;
+    /** @private @const {boolean} */
+    
+    /** @const {!ActivityPorts} */
+    this.activities = opt_activities || new activityPorts_1(window);
+    /** @const @private {!Graypane} */
+    this.graypane_ = new Graypane$1(window.document);
+    /** @private {?function(!Promise<!PaymentData>)} */
+    this.callback_ = null;
+    /**
+     * @private {?{
+     *             container: !Element,
+     *             iframe:!HTMLIFrameElement,
+     *             request:!PaymentDataRequest,
+     *             dataPromise:?Promise<!PaymentData>}}
+     */
+    this.prefetchedObjects_ = null;
+    /** @private {boolean} */
+    this.shouldHandleResizing_ = false;
+    /** @private {?ActivityIframePort} */
+    this.port_ = null;
+    /** @private {?function(!Promise<void>)} */
+    this.dismissPromiseResolver_ = null;
+    /** @const @private {string} */
+    this.googleTransactionId_ = googleTransactionId;
+    /** @const @private {?string} */
+    this.redirectKey_ = opt_redirectKey || null;
+
+    /**
+     * @private {?ResizePayload}
+     */
+    this.savedResizePayload_ = null;
+  }
+
+  /** @override */
+  onResult(callback) {
+    if (this.callback_) {
+      return;
+    }
+    this.callback_ = callback;
+    this.activities.onResult(GPAY_ACTIVITY_REQUEST,
+                             this.onActivityResult_.bind(this));
+  }
+
+  /**
+   * @param {!ActivityPort} port
+   * @private
+   */
+  onActivityResult_(port) {
+    // Hide the graypane.
+    this.graypane_.hide();
+    // Only verified origins are allowed.
+    this.callback_(port.acceptResult().then(
+        (result) => {
+          const data = /** @type {!PaymentData} */ (result.data);
+          if (data['redirectEncryptedCallbackData']) {
+            PayFrameHelper.setBuyFlowActivityMode(
+                BuyFlowActivityMode.REDIRECT);
+            return this.fetchRedirectResponse_(
+                data['redirectEncryptedCallbackData'])
+                .then((decrypedJson) => {
+                  // Merge other non-encrypted fields into the final response.
+                  const clone = Object.assign({}, data);
+                  delete clone['redirectEncryptedCallbackData'];
+                  return Object.assign(clone, decrypedJson);
+                });
+          }
+          return data;
+        },
+        (error) => {
+          // TODO: Log the original and the inferred error to eye3.
+          let originalError = error['message'];
+          let inferredError = error['message'];
+          try {
+            // Try to parse the error message to a structured error, if it's
+            // not possible, fallback to use the error message string.
+            inferredError =
+                JSON.parse(originalError.substring(ERROR_PREFIX.length));
+          } catch (e) {
+          }
+          if (inferredError['statusCode'] && [
+                'DEVELOPER_ERROR', 'MERCHANT_ACCOUNT_ERROR'
+              ].indexOf(inferredError['statusCode']) == -1) {
+            inferredError = {
+              'statusCode': 'CANCELED',
+            };
+          }
+          if (inferredError == 'AbortError') {
+            inferredError = {
+              'statusCode': 'CANCELED',
+            };
+          }
+          return Promise.reject(inferredError);
+        }));
+  }
+
+  /**
+   * @param {string} redirectEncryptedCallbackData
+   * @return {!PaymentData}
+   * @private
+   */
+  fetchRedirectResponse_(redirectEncryptedCallbackData) {
+    // This method has to rely on the legacy XHR API because the redirect
+    // functionality is, in part, aimed at older browsers.
+    return new Promise((resolve, reject) => {
+      const url = this.getDecryptionUrl_();
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      if ('withCredentials' in xhr) {
+        // It's fine to proceed in a non-redirect mode because redirectVerifier
+        // plays the part of CORS propagation.
+        xhr.withCredentials = true;
+      }
+
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
+          return;
+        }
+        if (xhr.status < 100 || xhr.status > 599) {
+          xhr.onreadystatechange = null;
+          reject(new Error(`Unknown HTTP status ${xhr.status}`));
+          return;
+        }
+        if (xhr.readyState == /* COMPLETE */ 4) {
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch (e) {
+            // JSON parsing error is expected here.
+            reject(e);
+          }
+        }
+      };
+      xhr.onerror = () => {
+        reject(new Error('Network failure'));
+      };
+      xhr.onabort = () => {
+        reject(new Error('Request aborted'));
+      };
+
+      // Send POST.
+      xhr.send(redirectEncryptedCallbackData);
+    });
+  }
+
+  /** @override */
+  isReadyToPay(isReadyToPayRequest) {
+    return new Promise((resolve, reject) => {
+      if (doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest)) {
+        resolve({'result': false});
+        return;
+      }
+      const userAgent = window.navigator.userAgent;
+      const isIosGsa = userAgent.indexOf('GSA/') > 0 &&
+          userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
+      // pop up in IGSA doesn't work.
+      if (isIosGsa && !null) {
+        resolve({'result': false});
+        return;
+      }
+      const isFirefoxIos = userAgent.indexOf('FxiOS') > 0;
+      if (isFirefoxIos) {
+        resolve({'result': false});
+        return;
+      }
+      const isSupported = userAgent.indexOf(BrowserUserAgent.CHROME) > 0 ||
+          userAgent.indexOf(BrowserUserAgent.FIREFOX) > 0 ||
+          userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
+      if (isSupported && isReadyToPayRequest.apiVersion >= 2 &&
+          isReadyToPayRequest.existingPaymentMethodRequired) {
+        isReadyToPayRequest.environment = this.environment_;
+        PayFrameHelper.sendAndWaitForResponse(
+            isReadyToPayRequest, PostMessageEventType.IS_READY_TO_PAY,
+            'isReadyToPayResponse', function(event) {
+              const response = {
+                'result': isSupported,
+              };
+              if (isReadyToPayRequest.existingPaymentMethodRequired) {
+                response['paymentMethodPresent'] =
+                    event.data['isReadyToPayResponse'] == 'READY_TO_PAY';
+              }
+              resolve(response);
+            });
+      } else {
+        resolve({'result': isSupported});
+      }
+    });
+  }
+
+  /** @override */
+  prefetchPaymentData(paymentDataRequest) {
+    // Only handles prefetch for iframe for now.
+    {
+      return;
+    }
+    const containerAndFrame = this.injectIframe_(paymentDataRequest);
+    const paymentDataPromise = this.openIframe_(
+        containerAndFrame['container'], containerAndFrame['iframe'],
+        paymentDataRequest);
+    this.prefetchedObjects_ = {
+      'container': containerAndFrame['container'],
+      'iframe': containerAndFrame['iframe'],
+      'request': paymentDataRequest,
+      'dataPromise': paymentDataPromise,
+    };
+  }
+
+  /** @override */
+  loadPaymentData(paymentDataRequest) {
+    if (!paymentDataRequest.swg) {
+      // Only set the apiVersion if the merchant is not setting it.
+      if (!paymentDataRequest.apiVersion) {
+        paymentDataRequest.apiVersion = 1;
+      }
+    }
+    paymentDataRequest.environment = this.environment_;
+    PayFrameHelper.setBuyFlowActivityMode(
+        paymentDataRequest['forceRedirect'] ? BuyFlowActivityMode.REDIRECT :
+                                              BuyFlowActivityMode.POPUP);
+    const opener = this.activities.open(
+        GPAY_ACTIVITY_REQUEST, this.getHostingPageUrl_(),
+        this.getRenderMode_(paymentDataRequest), paymentDataRequest,
+        {'width': 600, 'height': 600});
+    this.graypane_.show(opener && opener.targetWin);
+  }
+
+  /**
+   * Returns the render mode whether need to force redirect.
+   *
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @return {string}
+   * @private
+   */
+  getRenderMode_(paymentDataRequest) {
+    return paymentDataRequest['forceRedirect'] ?
+        '_top' :
+        'gp-js-popup';
+  }
+
+  /**
+   * Returns the server origin based on the environment.
+   *
+   * @private
+   * @return {string}
+   */
+  getOrigin_() {
+    if (this.environment_ == Constants.Environment.LOCAL) {
+      return '';
+    }
+
+    var baseDomain;
+    if (this.environment_ == Constants.Environment.PREPROD) {
+      baseDomain = 'pay-preprod.sandbox';
+    } else if (this.environment_ == Constants.Environment.SANDBOX) {
+      baseDomain = 'pay.sandbox';
+    } else {
+      baseDomain = 'pay';
+    }
+    return 'https://' + baseDomain + '.google.com';
+  }
+
+  /**
+   * Returns the base path based on the environment.
+   *
+   * @private
+   * @return {string} The base path
+   */
+  getBasePath_() {
+    return this.getOrigin_() + '/gp/p';
+  }
+
+  /**
+   * Returns the decryption url to be used to decrypt the encrypted payload.
+   *
+   * @private
+   * @return {string} The decryption url
+   */
+  getDecryptionUrl_() {
+    let url = this.getBasePath_() + '/apis/buyflow/process';
+    if (this.redirectKey_) {
+      url += '?rk=' + encodeURIComponent(this.redirectKey_);
+    }
+    return url;
+  }
+
+  /**
+   * Returns the hosting page url.
+   *
+   * @private
+   * @return {string} The hosting page url
+   */
+  getHostingPageUrl_() {
+    // In Tin tests, the hosting page is requested from
+    // /testing/buyflow/merchantdemo.html and is accessed relatively since the
+    // base path is unknown ahead of time.
+    if (this.environment_ == Constants.Environment.TIN) {
+      // There is no /gp/p prefix since multilogin prefixes is broken in Tin:
+      // http://yaqs/4912322941550592
+      return '/ui/pay';
+    }
+    return this.getBasePath_() + '/ui/pay';
+  }
+
+  /**
+   * Returns the iframe pwg url to be used to be used for amp.
+   *
+   * @param {string} environment
+   * @param {string} origin
+   * @return {string} The iframe url
+   */
+  getIframeUrl(environment, origin) {
+    // TODO: These should be compile time constants and not dependent
+    // on the environment.
+    let iframeUrl = `https://pay.google.com/gp/p/ui/pay?origin=${origin}`;
+    if (environment == Constants.Environment.SANDBOX ||
+        environment == Constants.Environment.PREPROD) {
+      iframeUrl =   `https://pay'+  (environment == Constants.Environment.PREPROD ? '-preprod' : '')+  '.sandbox.google.com/gp/p/ui/pay?origin=${origin}`;
+    }
+    return iframeUrl;
+  }
+
+  /**
+   * Close iframe with animation.
+   *
+   * @param {!Element} container
+   * @param {!HTMLIFrameElement} iframe
+   * @private
+   */
+  removeIframeAndContainer_(container, iframe) {
+    const transitionStyle = 'all ' + IFRAME_CLOSE_DURATION_IN_MS + 'ms ease 0s';
+    this.setTransition_(iframe, transitionStyle);
+    iframe.height = '0px';
+    // TODO: This should be replaced by listening to TransitionEnd event
+    setTimeout(() => {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    }, IFRAME_CLOSE_DURATION_IN_MS);
+  }
+
+  /**
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @return {{container: !Element, iframe:!HTMLIFrameElement}}
+   * @private
+   */
+  injectIframe_(paymentDataRequest) {
+    const containerAndFrame = injectIframe(
+        this.isVerticalCenterExperimentEnabled_(paymentDataRequest) ?
+            Constants.IFRAME_STYLE_CENTER_CLASS :
+            Constants.IFRAME_STYLE_CLASS);
+    const iframe = containerAndFrame['iframe'];
+    const container = containerAndFrame['container'];
+    container.addEventListener(
+        'click', this.closeActionHandler_.bind(this, containerAndFrame));
+    // Hide iframe and disable resize at initialize.
+    container.style.display = 'none';
+    iframe.style.display = 'none';
+    iframe.height = '0px';
+    const transitionStyle =
+        'all ' + IFRAME_SHOW_UP_DURATION_IN_MS + 'ms ease 0s';
+    this.setTransition_(iframe, transitionStyle);
+    this.shouldHandleResizing_ = false;
+    return containerAndFrame;
+  }
+
+  /**
+   * Handler when back button is triggered, should dismiss iframe if present.
+   * @param {{container: !Element, iframe:!HTMLIFrameElement}} containerAndFrame
+   * @private
+   */
+  backButtonHandler_(containerAndFrame) {
+    this.dismissIframe_(containerAndFrame);
+  }
+
+  /**
+   * Handler when close action is triggered, will pop history state to close
+   * the iframe.
+   * @param {{container: !Element, iframe:!HTMLIFrameElement}} containerAndFrame
+   * @private
+   */
+  closeActionHandler_(containerAndFrame) {
+    if (containerAndFrame['container'].parentNode) {
+      // Close action only when container is still attached to the page.
+      history.back();
+    }
+  }
+
+  /**
+   * @param {{container: !Element, iframe:!HTMLIFrameElement}} containerAndFrame
+   * @private
+   */
+  dismissIframe_(containerAndFrame) {
+    // Dismiss iframe only when container is still attached in the page.
+    if (containerAndFrame['container'].parentNode) {
+      // TODO: Think about whether this could be just hide instead of
+      // disconnect and remove, the tricky part is how to handle the case where
+      // payment data request is not the same.
+      this.dismissPromiseResolver_(Promise.reject({'errorCode': 'CANCELED'}));
+      this.removeIframeAndContainer_(
+          containerAndFrame['container'], containerAndFrame['iframe']);
+      this.port_ && this.port_.disconnect();
+    }
+  }
+
+  /**
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @return {boolean}
+   * @private
+   */
+  isVerticalCenterExperimentEnabled_(paymentDataRequest) {
+    return null;
+  }
+
+  /**
+   * @param {!Element} container
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @private
+   */
+  showContainerAndIframeWithAnimation_(container, iframe, paymentDataRequest) {
+    container.style.display = 'block';
+    iframe.style.display = 'block';
+    setTimeout(() => {
+      // Hard code the apprx height here, it will be resize to expected height
+      // later.
+      iframe.height = '280px';
+      if (this.isVerticalCenterExperimentEnabled_(paymentDataRequest)) {
+        iframe.classList.add(Constants.IFRAME_ACTIVE_CONTAINER_CLASS);
+      }
+      // TODO: This should be handles properly by listening to
+      // TransitionEnd event.
+      setTimeout(() => {
+        this.shouldHandleResizing_ = true;
+        // TODO: Add browser test that catches this.
+        if (this.savedResizePayload_) {
+          this.setTransition_(iframe, this.savedResizePayload_['transition']);
+          iframe.height = this.savedResizePayload_['height'];
+          this.savedResizePayload_ = null;
+        }
+      }, IFRAME_SHOW_UP_DURATION_IN_MS);
+    }, 1);
+  }
+
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} transitionStyle
+   * @private
+   */
+  setTransition_(iframe, transitionStyle) {
+    iframe.style.setProperty('transition', transitionStyle);
+    // For safari.
+    iframe.style.setProperty('-webkit-transition', transitionStyle);
+  }
+
+  /**
+   * Use WebActivitiy to open iframe that's in given container.
+   *
+   * @param {!Element} container
+   * @param {!HTMLIFrameElement} iframe
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @return {!Promise<!PaymentData>}
+   * @private
+   */
+  openIframe_(container, iframe, paymentDataRequest) {
+    if (!paymentDataRequest.swg) {
+      if (!paymentDataRequest.apiVersion) {
+        paymentDataRequest.apiVersion = 1;
+      }
+    }
+    paymentDataRequest.environment = this.environment_;
+    let iframeLoadStartTime;
+    const trustedUrl =
+        this.getIframeUrl(this.environment_, window.location.origin);
+    return this.activities.openIframe(iframe, trustedUrl, paymentDataRequest)
+        .then(port => {
+          // Handle custom resize message.
+          this.port_ = port;
+          port.onMessage(payload => {
+            if (payload['type'] !== 'resize' || !this.shouldHandleResizing_) {
+              // Save the resize event later after initial animation is finished
+              this.savedResizePayload_ = {
+                'height': payload['height'],
+                'transition': payload['transition']
+              };
+              return;
+            }
+            // b/111310899: Smooth out initial iFrame loading
+            if (!iframeLoadStartTime) {
+              iframeLoadStartTime = Date.now();
+            }
+            if (Date.now() <
+                iframeLoadStartTime + IFRAME_SHOW_UP_DURATION_IN_MS) {
+              this.setTransition_(iframe, payload['transition'] + ', '
+                  + IFRAME_SMOOTH_HEIGHT_TRANSITION);
+            } else {
+              this.setTransition_(iframe, payload['transition']);
+            }
+            iframe.height = payload['height'];
+          });
+          return /** @type {!Promise<!Object>} */ (port.acceptResult());
+        })
+        .then(
+            /**
+             * @param {!Object} result
+             * @return {!PaymentData}
+             */
+            result => {
+              this.removeIframeAndContainer_(container, iframe);
+              // This is only for popping the state we pushed earlier.
+              history.back();
+              const data = /** @type {!PaymentData} */ (result['data']);
+              return data;
+            },
+            error => {
+              this.removeIframeAndContainer_(container, iframe);
+              // This is only for popping the state we pushed earlier.
+              history.back();
+              return Promise.reject(error);
+            });
+  }
+}
+
+/**
+ * @license
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class UpiHandler {
+  constructor() {}
+
+  /**
+   * Returns upi payment method object if it exists in allowed payment methods
+   * or null if it doesn't
+   *
+   * @param {!IsReadyToPayRequest|!PaymentDataRequest} request
+   * @return {boolean}
+   */
+  isUpiRequest(request) {
+    return !!getUpiPaymentMethod(request);
+  }
+
+  /**
+   * Returns upi payment method object if it exists in allowed payment methods
+   * or null if it doesn't
+   *
+   * @param {!IsReadyToPayRequest|!PaymentDataRequest} request
+   * @return {!Promise} The promise will contain the boolean result and error
+   *     message when possible.
+   */
+  isReadyToPay(request) {
+    // Always return true for UPI if api version is 2 and chrome supports
+    // payment request
+    if (getUpiPaymentMethod(request)) {
+      if (request.existingPaymentMethodRequired) {
+        return Promise.resolve({'result': true, 'paymentMethodPresent': true});
+      } else {
+        return Promise.resolve({'result': true});
+      }
+    }
+    throw new Error('No Upi payment method found in handler');
+  }
+
+  /**
+   * Request payment data when payment method is UPI
+   *
+   * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
+   *     information to support a payment.
+   * @param {!Object} upiPaymentMethod UPI paymentmethod in
+   *     allowedPaymentMethods array.
+   * @param {!Function} onResultCallback Function to call when everything is
+   *     done.
+   */
+  loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
+    const parameters = upiPaymentMethod['parameters'];
+    const transactionInfo = paymentDataRequest['transactionInfo'];
+    const supportedInstruments = [{
+          'supportedMethods': ['https://tez.google.com/pay'],
+          'data': {
+            'pa': parameters['payeeVpa'],
+            'pn': parameters['payeeName'],
+            'tr': parameters['transactionReferenceId'],
+            'url': parameters['referenceUrl'],
+            'mc': parameters['mcc'],
+            'tn': transactionInfo['transactionNote'],
+          },
+        }];
+
+    if (parameters['transactionId']) {
+      supportedInstruments[0]['data']['tid'] = parameters['transactionId'];
+    }
+
+    const details = {
+      'total': {
+        'label': 'Total',
+        'amount': {
+          'currency': transactionInfo['currencyCode'],
+          'value': transactionInfo['totalPrice'],
+        },
+      },
+      'displayItems': [{
+        'label': 'Original Amount',
+        'amount': {
+          'currency': transactionInfo['currencyCode'],
+          'value': transactionInfo['totalPrice'],
+        },
+      }],
+    };
+
+    let request = new PaymentRequest(supportedInstruments, details);
+
+    onResultCallback(
+        this.checkCanMakePayment_(request)
+            .then(result => {
+              if (result) {
+                return this.showUi_(request);
+              } else {
+                return this.redirectToGooglePlay_();
+              }
+            })
+            .then(paymentData => {
+              return this.processData_(
+                  paymentData, paymentDataRequest, upiPaymentMethod);
+            })
+            .catch(error => {
+              error['statusCode'] = Constants.ResponseStatus.CANCELED;
+              return Promise.reject(error);
+            }));
+  }
+
+  /**
+   * Show the Tez payment request UI.
+   *
+   * @private
+   * @param {!PaymentRequest} request The payment request object.
+   * @return {!Promise<!PaymentData>} A promise containing payment response.
+   */
+  showUi_(request) {
+    return request.show().then(paymentResponse => {
+      paymentResponse.complete('success');
+      return paymentResponse.details;
+    });
+  }
+
+  /**
+   * Checks whether can make a payment with Tez on this device.
+   *
+   * @private
+   * @param {!PaymentRequest} request The payment request object.
+   * @return {!Promise<boolean>} a promise containing the result of whether can
+   *     make payment.
+   */
+  checkCanMakePayment_(request) {
+    // Checks canMakePayment cache, and use the cache result if it exists.
+    const cacheResult =
+        window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
+    if (cacheResult) {
+      return Promise.resolve(cacheResult === 'true');
+    }
+
+    // Feature detect canMakePayment().
+    if (!request.canMakePayment) {
+      return Promise.resolve(true);
+    }
+
+    let canMakePaymentPromise = request.canMakePayment();
+
+    return canMakePaymentPromise.then(result => {
+      // Store the result in cache if the result is true to avoid quota error
+      // caused by querying multiple times with different data.
+      // Doesn't store false because if we do so, user will be redirected to
+      // Google Play again after installing Google Pay if Chrome is not closed.
+      if (result) {
+        window.sessionStorage.setItem(
+            Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
+      }
+      return result;
+    });
+  }
+
+  /**
+   * Redirect user to Google Pay app in Google Play store
+   *
+   * @private
+   * @returns {!Promise<!Object>} Rejected promise with error message
+   */
+  redirectToGooglePlay_() {
+    window.location.replace(
+        'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
+    return Promise.reject(
+        {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
+  }
+
+  /**
+   * Convert Tez payment data to GPay payment data if payment succeeded, or
+   * reject if payment failed
+   *
+   * @private
+   * @param {!PaymentData} tezPaymentData The payment data object from Tez.
+   * @param {!PaymentDataRequest} paymentDataRequest The payment data request.
+   * @param {!Object} upiPaymentMethod UPI paymentmethod in
+   * allowedPaymentMethods array
+   * @returns {!Promise<PaymentData>} A promise containing payment data or
+   *     error message.
+   */
+  processData_(tezPaymentData, paymentDataRequest, upiPaymentMethod) {
+    const tezResponse = JSON.parse(tezPaymentData['tezResponse']);
+    if (tezResponse['Status'] === 'FAILURE') {
+      let error;
+      switch (tezResponse['responseCode']) {
+        case 'ZM':
+          // payment failure due to invalid MPIN
+          error = {
+            'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
+            'errorMessage': 'Payment failure due to invalid MPIN.'
+          };
+          break;
+        case 'Z9':
+          // payment failure due to insufficient funds
+          error = {
+            'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
+            'errorMessage': 'Payment failure due to insufficient funds.'
+          };
+          break;
+        case '91':
+          // payment failure due to transaction timeout or connection issue
+          error = {
+            'errorCode': PublicErrorCode.INTERNAL_ERROR,
+            'errorMessage':
+                'Payment failure due to transaction timeout or connection' +
+                ' issue.'
+          };
+          break;
+        default:
+          // payment failure due to user cancel or other issues
+          error = {'errorMessage': 'Payment cancelled.'};
+      }
+      return Promise.reject(error);
+    }
+
+    const signedMessage = {
+      'paymentMethodType': 'UPI',
+      'payeeVpa': upiPaymentMethod['parameters']['payeeVpa'],
+      'status': tezResponse['Status'],
+      'transactionReferenceId':
+          upiPaymentMethod['parameters']['transactionReferenceId'],
+      'transactionId': upiPaymentMethod['parameters']['transactionId'] ?
+          upiPaymentMethod['parameters']['transactionId'] :
+          tezResponse['txnId'],
+      'transactionInfo': paymentDataRequest['transactionInfo'],
+    };
+
+    let paymentData = {
+      'apiVersion': paymentDataRequest['apiVersion'],
+      'apiVersionMinor': paymentDataRequest['apiVersionMinor'],
+      'paymentMethodData': {
+        'type': upiPaymentMethod['type'],
+        'tokenizationData': {
+          'type': 'DIRECT',
+          'token': {
+            'protocolVersion': 'ECv1',
+            // TODO: Verify that response comes from tez and
+            // add signature and encrypt signed message here
+            'signature': '',
+            'signedMessage': signedMessage
+          }
+        }
+      }
+    };
+    return Promise.resolve(paymentData);
+  }
+}
 
 /** @license
 Math.uuid.js (v1.4)
@@ -7697,6 +9498,89 @@ Copyright (c) 2010 Robert Kieffer
 Dual licensed under the MIT and GPL licenses.
 */
 
+/*
+ * Generate a random uuid.
+ *
+ * USAGE: Math.uuid(length, radix)
+ *   length - the desired number of characters
+ *   radix  - the number of allowable values for each character.
+ *
+ * EXAMPLES:
+ *   // No arguments  - returns RFC4122, version 4 ID
+ *   >>> Math.uuid()
+ *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ *
+ *   // One argument - returns ID of the specified length
+ *   >>> Math.uuid(15)     // 15 character ID (default base=62)
+ *   "VcydxgltxrVZSTV"
+ *
+ *   // Two arguments - returns ID of the specified length, and radix. (Radix must be <= 62)
+ *   >>> Math.uuid(8, 2)  // 8 character ID (base=2)
+ *   "01001010"
+ *   >>> Math.uuid(8, 10) // 8 character ID (base=10)
+ *   "47473046"
+ *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
+ *   "098F4D35"
+ */
+
+class Random_uuid {}  // Private array of chars to use
+  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+  Random_uuid.uuid = function (len, radix) {
+    var chars = CHARS, uuid = [], i;
+    radix = radix || chars.length;
+
+    if (len) {
+      // Compact form
+      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
+    } else {
+      // rfc4122, version 4 form
+      var r;
+
+      // rfc4122 requires these characters
+      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+      uuid[14] = '4';
+
+      // Fill in random data.  At i==19 set the high bits of clock sequence as
+      // per rfc4122, sec. 4.1.5
+      for (i = 0; i < 36; i++) {
+        if (!uuid[i]) {
+          r = 0 | Math.random()*16;
+          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+        }
+      }
+    }
+
+    return uuid.join('');
+  };
+
+  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+  // by minimizing calls to random()
+  Random_uuid.uuidFast = function() {
+    var chars = CHARS, uuid = new Array(36), rnd=0, r;
+    for (var i = 0; i < 36; i++) {
+      if (i==8 || i==13 ||  i==18 || i==23) {
+        uuid[i] = '-';
+      } else if (i==14) {
+        uuid[i] = '4';
+      } else {
+        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
+        r = rnd & 0xf;
+        rnd = rnd >> 4;
+        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+      }
+    }
+    return uuid.join('');
+  };
+
+  // A more compact, but less performant, RFC4122v4 solution:
+  Random_uuid.uuidCompact = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
+    });
+  };
+
 /**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -7715,6 +9599,16 @@ Dual licensed under the MIT and GPL licenses.
  */
 
 /**
+ * Returns a google transaction id.
+ *
+ * @param {string} environment
+ * @return {string}
+ */
+function createGoogleTransactionId(environment) {
+  return Random_uuid.uuidFast() + '.' + environment;
+}
+
+/**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
  *
@@ -7730,6 +9624,432 @@ Dual licensed under the MIT and GPL licenses.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const TRUSTED_DOMAINS = [
+  'actions.google.com',
+  'amp-actions.sandbox.google.com',
+  'amp-actions-staging.sandbox.google.com',
+  'amp-actions-autopush.sandbox.google.com',
+  'payments.developers.google.com',
+  'payments.google.com',
+];
+
+/**
+ * The client for interacting with the Google Payment APIs.
+ * <p>
+ * The async refers to the fact that this client supports redirects
+ * when using webactivties.
+ * <p>
+ * If you are using this be sure that this is what you want.
+ * <p>
+ * In almost all cases PaymentsClient is the better client to use because
+ * it exposes a promises based api which is easier to deal with.
+ * @final
+ */
+class PaymentsAsyncClient {
+  /**
+   * @param {!PaymentOptions} paymentOptions
+   * @param {function(!Promise<!PaymentData>)} onPaymentResponse
+   * @param {boolean=} opt_useIframe
+   * @param {!ActivityPorts=} opt_activities Can be used to provide a shared
+   *   activities manager. By default, the new manager is created.
+   */
+  constructor(paymentOptions, onPaymentResponse, opt_useIframe,
+             opt_activities) {
+    this.onPaymentResponse_ = onPaymentResponse;
+
+    validatePaymentOptions(paymentOptions);
+
+    /** @private {?number} */
+    this.loadPaymentDataApiStartTimeMs_ = null;
+
+    /** @private @const {string} */
+    this.environment_ =
+        paymentOptions.environment || Constants.Environment.TEST;
+    if (!PaymentsAsyncClient.googleTransactionId_) {
+      PaymentsAsyncClient.googleTransactionId_ =
+          /** @type {string} */ (
+              (this.isInTrustedDomain_() && paymentOptions['i'] &&
+               paymentOptions['i']['googleTransactionId']) ?
+                  paymentOptions['i']['googleTransactionId'] :
+                  createGoogleTransactionId(this.environment_));
+    }
+
+    /** @private @const {!PaymentOptions} */
+    this.paymentOptions_ = paymentOptions;
+
+    /** @private @const {!PaymentsClientDelegateInterface} */
+    this.webActivityDelegate_ = new PaymentsWebActivityDelegate(
+        this.environment_,
+        PaymentsAsyncClient.googleTransactionId_,
+        opt_useIframe,
+        opt_activities,
+        paymentOptions['i'] && paymentOptions['i']['redirectKey']);
+
+    const paymentRequestSupported = chromeSupportsPaymentRequest();
+    // TODO: Remove the temporary hack that disable payments
+    // request for inline flow.
+    /** @private @const {?PaymentsClientDelegateInterface} */
+    this.delegate_ = paymentRequestSupported && !opt_useIframe ?
+        new PaymentsRequestDelegate(this.environment_) :
+        this.webActivityDelegate_;
+
+    this.upiHandler_ = new UpiHandler();
+
+    this.webActivityDelegate_.onResult(this.onResult_.bind(this));
+    this.delegate_.onResult(this.onResult_.bind(this));
+
+    PayFrameHelper.load(
+        this.environment_, PaymentsAsyncClient.googleTransactionId_,
+        this.paymentOptions_.merchantInfo &&
+            this.paymentOptions_.merchantInfo.merchantId);
+    // If web delegate is used anyway then this is overridden in the web
+    // activity delegate when load payment data is called.
+    if (chromeSupportsPaymentHandler()) {
+      PayFrameHelper.setBuyFlowActivityMode(
+          BuyFlowActivityMode.PAYMENT_HANDLER);
+    } else if (paymentRequestSupported) {
+      PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.ANDROID_NATIVE);
+    }
+
+    window.addEventListener(
+        'message', event => this.handleMessageEvent_(event));
+  }
+
+  /**
+   * Check whether the user can make payments using the Payment API.
+   *
+   * @param {!IsReadyToPayRequest} isReadyToPayRequest
+   * @return {!Promise} The promise will contain the boolean result and error
+   *     message when possible.
+   * @export
+   */
+  isReadyToPay(isReadyToPayRequest) {
+    // Merge with paymentOptions, preferring values from isReadyToPayRequest
+    if (isReadyToPayRequest) {
+      isReadyToPayRequest =
+          Object.assign({}, this.paymentOptions_, isReadyToPayRequest);
+    }
+    const startTimeMs = Date.now();
+    /** @type {?string} */
+    const errorMessage = validateSecureContext() ||
+        validateIsReadyToPayRequest(isReadyToPayRequest);
+    if (errorMessage) {
+      return new Promise((resolve, reject) => {
+        PaymentsAsyncClient.logDevErrorToConsole_('isReadyToPay', errorMessage);
+        PayFrameHelper.postMessage({
+          'eventType': PostMessageEventType.LOG_IS_READY_TO_PAY_API,
+          'error': PublicErrorCode.DEVELOPER_ERROR,
+        });
+        reject({
+          'statusCode': Constants.ResponseStatus.DEVELOPER_ERROR,
+          'statusMessage': errorMessage
+        });
+      });
+    }
+
+    const isReadyToPayPromise = this.isReadyToPay_(isReadyToPayRequest);
+
+    isReadyToPayPromise.then(response => {
+      PayFrameHelper.postMessage({
+        'eventType': PostMessageEventType.LOG_IS_READY_TO_PAY_API,
+        'clientLatencyStartMs': startTimeMs,
+        'isReadyToPayApiResponse': response,
+      });
+      return response;
+    });
+    return isReadyToPayPromise;
+  }
+
+  /**
+   * Actual implementation of isReadyToPay in a private method so that
+   * we can add callbacks to the promise to measure latencies.
+   *
+   * @param {!IsReadyToPayRequest} isReadyToPayRequest
+   * @return {!Promise} The promise will contain the boolean result and error
+   *     message when possible.
+   * @private
+   */
+  isReadyToPay_(isReadyToPayRequest) {
+    if (this.upiHandler_.isUpiRequest(isReadyToPayRequest)) {
+      return this.upiHandler_.isReadyToPay(isReadyToPayRequest);
+    }
+    if (chromeSupportsPaymentRequest() &&
+       !isNativeDisabledInRequest(isReadyToPayRequest)) {
+      if (isReadyToPayRequest.apiVersion >= 2) {
+        return this.isReadyToPayApiV2ForChromePaymentRequest_(
+            isReadyToPayRequest);
+      } else {
+        // This is the apiVersion 1 branch.
+        // If the merchant supports only Tokenized cards then just rely on
+        // delegate to give us the result.
+        // This will need to change once b/78519188 is fixed.
+        const webPromise =
+            this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
+        const nativePromise = this.delegate_.isReadyToPay(isReadyToPayRequest);
+        if (doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) &&
+            !chromeSupportsPaymentHandler()) {
+          return nativePromise;
+        }
+        // Return webIsReadyToPay only if delegateIsReadyToPay has been
+        // executed.
+        return nativePromise.then(() => webPromise);
+      }
+    }
+    const webPromise =
+        this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
+    return webPromise;
+  }
+
+  /**
+   * Handle is ready to pay for api v2.
+   *
+   * @param {!IsReadyToPayRequest} isReadyToPayRequest
+   * @return {!Promise} The promise will contain the boolean result and error
+   *     message when possible.
+   * @private
+   */
+  isReadyToPayApiV2ForChromePaymentRequest_(isReadyToPayRequest) {
+    let defaultPromise = Promise.resolve({'result': false});
+    if (isReadyToPayRequest.existingPaymentMethodRequired) {
+      defaultPromise =
+          Promise.resolve({'result': false, 'paymentMethodPresent': false});
+    }
+
+    let nativePromise = defaultPromise;
+    if (apiV2DoesMerchantSupportSpecifiedCardType(
+            isReadyToPayRequest, Constants.AuthMethod.CRYPTOGRAM_3DS)) {
+      // If the merchant supports tokenized cards.
+      // Make a separate call to gms core to check if the user isReadyToPay
+      // with just tokenized cards. We can't pass in PAN_ONLY here
+      // because gms core always returns true for PAN_ONLY.
+      // Leave other payment methods as is.
+      const nativeRtpRequest = /** @type {!IsReadyToPayRequest} */
+          (JSON.parse(JSON.stringify(isReadyToPayRequest)));
+      for (var i = 0; i < nativeRtpRequest.allowedPaymentMethods.length; i++) {
+        if (nativeRtpRequest.allowedPaymentMethods[i].type ==
+            Constants.PaymentMethod.CARD) {
+          nativeRtpRequest.allowedPaymentMethods[i]
+              .parameters['allowedAuthMethods'] =
+              [Constants.AuthMethod.CRYPTOGRAM_3DS];
+        }
+      }
+
+      nativePromise = this.delegate_.isReadyToPay(nativeRtpRequest);
+    }
+
+    let webPromise = defaultPromise;
+    if (apiV2DoesMerchantSupportSpecifiedCardType(
+            isReadyToPayRequest, Constants.AuthMethod.PAN_ONLY)) {
+      webPromise = this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
+    }
+
+    // Update session storage with payment handler canMakePayment result but
+    // rely on web delegate for actual response
+    if (chromeSupportsPaymentHandler()) {
+      return nativePromise.then(() => webPromise);
+    }
+
+    return nativePromise.then(nativeResult => {
+      if ((nativeResult && nativeResult['result']) == true) {
+        return nativeResult;
+      }
+      return webPromise;
+    });
+  }
+
+  /**
+   * Prefetch paymentData to speed up loadPaymentData call. Note the provided
+   * paymentDataRequest should exactly be the same as provided in
+   * loadPaymentData to make the loadPaymentData call fast since current
+   * web flow prefetching is based on the full request parameters.
+   *
+   * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
+   *     information to support a payment.
+   * @export
+   */
+  prefetchPaymentData(paymentDataRequest) {
+    /** @type {?string} */
+    const errorMessage = validateSecureContext() ||
+        validatePaymentDataRequest(paymentDataRequest);
+    if (errorMessage) {
+      PaymentsAsyncClient.logDevErrorToConsole_(
+          'prefetchPaymentData', errorMessage);
+      return;
+    }
+    this.assignInternalParams_(paymentDataRequest);
+    if (chromeSupportsPaymentRequest()
+       && !isNativeDisabledInRequest(paymentDataRequest)) {
+      this.delegate_.prefetchPaymentData(paymentDataRequest);
+    } else {
+      // For non chrome supports always use the hosting page.
+      this.webActivityDelegate_.prefetchPaymentData(paymentDataRequest);
+    }
+  }
+
+  /**
+   * Request PaymentData, which contains necessary infomartion to complete a
+   * payment.
+   *
+   * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
+   *     information to support a payment.
+   * @export
+   */
+  loadPaymentData(paymentDataRequest) {
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_BUTTON_CLICK,
+    });
+    const errorMessage = validateSecureContext() ||
+        validatePaymentDataRequest(paymentDataRequest);
+    if (errorMessage) {
+      this.onPaymentResponse_(new Promise((resolve, reject) => {
+        PayFrameHelper.postMessage({
+          'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+          'error': PublicErrorCode.DEVELOPER_ERROR,
+        });
+        PaymentsAsyncClient.logDevErrorToConsole_(
+            'loadPaymentData', errorMessage);
+        reject({
+          'statusCode': Constants.ResponseStatus.DEVELOPER_ERROR,
+          'statusMessage': errorMessage
+        });
+      }));
+      return;
+    }
+
+    // Handler for UPI PaymentMethod
+    // Currently we don't support UPI along with other payment methods, if
+    // UPI is in payment methods then we assume it is UPI only.
+    const upiPaymentMethod = getUpiPaymentMethod(paymentDataRequest);
+    if (upiPaymentMethod) {
+      this.upiHandler_.loadPaymentData(
+          paymentDataRequest, upiPaymentMethod, this.onResult_.bind(this));
+      return;
+    }
+
+    const isReadyToPayResult =
+        window.sessionStorage.getItem(Constants.IS_READY_TO_PAY_RESULT_KEY);
+    this.loadPaymentDataApiStartTimeMs_ = Date.now();
+    this.assignInternalParams_(paymentDataRequest);
+    // We want to fall back to the web delegate if payment handler is supported
+    // and isReadyToPay bit is not explicitly set to true (fallback to web if
+    // isReadyToPay wasn't called for PH)
+    if ((chromeSupportsPaymentHandler() && isReadyToPayResult !== 'true')
+       || isNativeDisabledInRequest(paymentDataRequest)) {
+      this.webActivityDelegate_.loadPaymentData(paymentDataRequest);
+    } else {
+      this.delegate_.loadPaymentData(paymentDataRequest);
+    }
+  }
+
+  /**
+   * Log developer error to console.
+   *
+   * @param {string} apiName
+   * @param {?string} errorMessage
+   * @private
+   */
+  static logDevErrorToConsole_(apiName, errorMessage) {
+    console.error('DEVELOPER_ERROR in ' + apiName + ' : ' + errorMessage);
+  }
+
+  /**
+   * Return a <div> element containing a Google Pay payment button.
+   *
+   * @param {!ButtonOptions=} options
+   * @return {!Element}
+   * @export
+   */
+  createButton(options = {}) {
+    let button = null;
+    // Only log if button was created successfully
+    const startTimeMs = Date.now();
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_RENDER_BUTTON,
+      'clientLatencyStartMs': startTimeMs,
+    });
+    return button;
+  }
+
+  /**
+   * @param {!Event} e postMessage event from the AMP page.
+   * @private
+   */
+  handleMessageEvent_(e) {
+    if (this.isInTrustedDomain_()) {
+      // Only handles the event right now if loaded in trusted domain.
+      if (e.data['name'] === 'logPaymentData') {
+        PayFrameHelper.postMessage(e.data['data']);
+      }
+    }
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isInTrustedDomain_() {
+    return TRUSTED_DOMAINS.indexOf(window.location.hostname) != -1;
+  }
+
+  /**
+   * Called when load payment data result is returned. This triggers the payment
+   * response callback passed to the client.
+   *
+   * @private
+   */
+  onResult_(response) {
+    response
+        .then(result => {
+          PayFrameHelper.postMessage({
+            'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+            'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
+          });
+        })
+        .catch(result => {
+          if (result['errorCode']) {
+            PayFrameHelper.postMessage({
+              'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+              'error': /** @type {!PublicErrorCode} */ (result['errorCode']),
+            });
+          } else {
+            // If user closes window we don't get a error code
+            PayFrameHelper.postMessage({
+              'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+              'error': PublicErrorCode.BUYER_CANCEL,
+            });
+          }
+        });
+    this.onPaymentResponse_(response);
+  }
+
+  /**
+   * @param {!PaymentDataRequest} paymentDataRequest
+   * @return {!PaymentDataRequest}
+   * @private
+   */
+  assignInternalParams_(paymentDataRequest) {
+    const internalParam = {
+      'startTimeMs': Date.now(),
+      'googleTransactionId': PaymentsAsyncClient.googleTransactionId_,
+    };
+    paymentDataRequest['i'] = paymentDataRequest['i'] ?
+        Object.assign(internalParam, paymentDataRequest['i']) :
+        internalParam;
+    return paymentDataRequest;
+  }
+}
+
+
+/**
+ * Whether the request specifies that the native support has to be disabled.
+ *
+ * @param {!IsReadyToPayRequest|!PaymentDataRequest} request
+ * @return {boolean}
+ */
+function isNativeDisabledInRequest(request) {
+  return (request['i'] && request['i']['disableNative']) === true;
+}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -7781,6 +10101,17 @@ function getExperiments(unusedWin) {
 
 
 /**
+ * Whether the specified experiment is on or off.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function isExperimentOn(win, experimentId) {
+  return getExperiments(win)[experimentId] || false;
+}
+
+
+/**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
  * @param {!Window} win
@@ -7808,6 +10139,8 @@ function setExperiment(win, experimentId, on) {
  */
 
 const PAY_REQUEST_ID = 'swg-pay';
+
+const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
  * @const {!Object<string, string>}
@@ -7843,8 +10176,11 @@ class PayClient {
    * @param {*} dialogManager
    */
   constructor(win, activityPorts, dialogManager) {
-    // TODO(dvoytenko, #406): Support GPay API.
-    this.binding_ = new PayClientBindingSwg(win, activityPorts, dialogManager);
+    /** @const @private {!PayClientBindingDef} */
+    this.binding_ =
+        isExperimentOn(win, ExperimentFlags.GPAY_API) ?
+        new PayClientBindingPayjs(win, activityPorts) :
+        new PayClientBindingSwg(win, activityPorts, dialogManager);
   }
 
   /**
@@ -7950,7 +10286,12 @@ class PayClientBindingSwg {
           body: data['redirectEncryptedCallbackData'],
           mode: 'cors',
         });
-        return xhr.fetch(url, init).then(response => response.json());
+        return xhr.fetch(url, init).then(response => response.json())
+            .then(response => {
+              const dataClone = Object.assign({}, data);
+              delete dataClone['redirectEncryptedCallbackData'];
+              return Object.assign(dataClone, response);
+            });
       }
       // Data is supplied directly: must be a verified and secure channel.
       if (result.originVerified && result.secureChannel) {
@@ -7959,6 +10300,301 @@ class PayClientBindingSwg {
       throw new Error('channel mismatch');
     });
   }
+}
+
+
+/**
+ * Binding based on the https://github.com/google/payjs.
+ * @implements {PayClientBindingDef}
+ * @package Visible for testing only.
+ */
+class PayClientBindingPayjs {
+  /**
+   * @param {!Window} win
+   * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
+   */
+  constructor(win, activityPorts) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = activityPorts;
+
+    /** @private {?function(!Promise<!Object>)} */
+    this.responseCallback_ = null;
+
+    /** @private {?Promise<!Object>} */
+    this.response_ = null;
+
+    /** @private @const {!RedirectVerifierHelper} */
+    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
+
+    // TODO(dvoytenko): Pass activities instance.
+    // TODO(dvoytenko): Pass redirect verifier key.
+    /** @private @const {!PaymentsAsyncClient} */
+    this.client_ = this.createClient_({
+      environment: 'PRODUCTION',
+      'i': {
+        'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+      },
+    }, this.handleResponse_.bind(this));
+
+    // Prepare new verifier pair.
+    this.redirectVerifierHelper_.prepare();
+  }
+
+  /**
+   * @param {!Object} options
+   * @param {function(!Promise<!Object>)} handler
+   * @return {!PaymentsAsyncClient}
+   * @private
+   */
+  createClient_(options, handler) {
+    return new PaymentsAsyncClient(options, handler);
+  }
+
+  /** @override */
+  getType() {
+    return 'PAYJS';
+  }
+
+  /** @override */
+  start(paymentRequest, options) {
+    if (options.forceRedirect) {
+      paymentRequest = Object.assign(paymentRequest, {
+        'forceRedirect': options.forceRedirect || false,
+      });
+    }
+    setInternalParam(paymentRequest, 'disableNative',
+        // The page cannot be iframed at this time. May be relaxed later
+        // for AMP and similar contexts.
+        this.win_ != this.top_() ||
+        // Experiment must be enabled.
+        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE));
+    // Notice that the callback for verifier may execute asynchronously.
+    this.redirectVerifierHelper_.useVerifier(verifier => {
+      if (verifier) {
+        setInternalParam(paymentRequest, 'redirectVerifier', verifier);
+      }
+      this.client_.loadPaymentData(paymentRequest);
+    });
+  }
+
+  /** @override */
+  onResponse(callback) {
+    this.responseCallback_ = callback;
+    const response = this.response_;
+    if (response) {
+      Promise.resolve().then(() => {
+        if (response) {
+          callback(this.convertResponse_(response));
+        }
+      });
+    }
+  }
+
+  /**
+   * @param {!Promise<!Object>} responsePromise
+   * @private
+   */
+  handleResponse_(responsePromise) {
+    this.response_ = responsePromise;
+    if (this.responseCallback_) {
+      this.responseCallback_(this.convertResponse_(this.response_));
+    }
+  }
+
+  /**
+   * @param {!Promise<!Object>} response
+   * @return {!Promise<!Object>}
+   * @private
+   */
+  convertResponse_(response) {
+    return response.catch(reason => {
+      if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
+        return Promise.reject(createCancelError(this.win_));
+      }
+      return Promise.reject(reason);
+    });
+  }
+
+  /**
+   * @return {!Window}
+   * @private
+   */
+  top_() {
+    // Only exists for testing since it's not possible to override `window.top`.
+    return this.win_.top;
+  }
+}
+
+
+/**
+ * This helper generates key/verifier pair for the redirect mode. When the
+ * redirect mode is used, the encrypted payload is returned via nivigation URL.
+ * This payload need to be decrypted and to avoid session fixation attacks, a
+ * verifier has to be used. This redirect verifier is not the only session
+ * verifier in use: we also use GAIA. However, we have to fallback to this
+ * verifier when GAIA is not available.
+ *
+ * @package Visible for testing only.
+ */
+class RedirectVerifierHelper {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private {boolean} */
+    this.pairCreated_ = false;
+
+    /** @private {?RedirectVerifierPairDef} */
+    this.pair_ = null;
+
+    /** @private {?Promise<?RedirectVerifierPairDef>} */
+    this.pairPromise_ = null;
+  }
+
+  /**
+   * To avoid popup blockers, the key/verifier pair is created as soon as
+   * possible.
+   * @return {?Promise}
+   */
+  prepare() {
+    return this.getOrCreatePair_(() => {});
+  }
+
+  /**
+   * Calls the provided callback with the generated redirect verifier. This
+   * API is sync/async, which is a big anti-pattern. However, it's necessary
+   * to reduce the risk of popup blockers. If the verifier is already available
+   * (see `prepare` method), the callback will be called immediately and thus
+   * in the same event loop as the user action.
+   *
+   * The return verifier could be `null`. This could mean either that its
+   * generation failed, or if the platform doesn't support necessary APIs, such
+   * as Web Crypto. The redirect can still proceed and try to fallback on GAIA
+   * as a redirect verifier. The set of platforms where GAIA is not available
+   * and the redirect verifier cannot be created is negligible.
+   *
+   * The key corresponding to the returned verifier is stored in the session
+   * storage and can be later restored using `restoreKey` method.
+   *
+   * @param {function(?string)} callback
+   */
+  useVerifier(callback) {
+    this.getOrCreatePair_(pair => {
+      if (pair) {
+        try {
+          this.win_.localStorage.setItem(REDIRECT_STORAGE_KEY, pair.key);
+        } catch (e) {
+          // If storage has failed, there's no point in using the verifer.
+          // However, there are other ways to recover the redirect, so it's
+          // not necessarily a fatal condition.
+          pair = null;
+        }
+      }
+      callback(pair && pair.verifier || null);
+    });
+  }
+
+  /**
+   * Restores the redirect key from the session storage. The key may be null.
+   * @return {?string}
+   */
+  restoreKey() {
+    try {
+      return this.win_.localStorage
+          && this.win_.localStorage.getItem(REDIRECT_STORAGE_KEY)
+          || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * @param {function(?RedirectVerifierPairDef)} callback
+   * @return {?Promise}
+   * @private
+   */
+  getOrCreatePair_(callback) {
+    this.createPair_();
+    if (this.pairCreated_) {
+      // Already created.
+      callback(this.pair_);
+    } else if (this.pairPromise_) {
+      // Otherwise wait for it to be created.
+      this.pairPromise_.then(pair => callback(pair));
+    }
+    return this.pairPromise_;
+  }
+
+  /**
+   * @private
+   */
+  createPair_() {
+    // Either already created or already started.
+    if (this.pairCreated_ || this.pairPromise_) {
+      return;
+    }
+
+    // Check that the platform can fully support verification. That means
+    // that it's expected to implement the following APIs:
+    // a. Local storage (localStorage);
+    // b. WebCrypto (crypto.subtle);
+    // c. Crypto random (crypto.getRandomValues);
+    // d. SHA284 (crypto.subtle.digest).
+    const crypto = this.win_.crypto;
+    if (this.win_.localStorage
+        && crypto
+        && crypto.getRandomValues
+        && crypto.subtle
+        && crypto.subtle.digest) {
+      this.pairPromise_ = new Promise((resolve, reject) => {
+        // 1. Use crypto random to create a 128-bit (16 byte) redirect key.
+        const keyBytes = new Uint8Array(16);
+        crypto.getRandomValues(keyBytes);
+
+        // 2. Encode key as base64.
+        const key = btoa(bytesToString(keyBytes));
+
+        // 3. Create a hash.
+        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key))
+            .then(buffer => {
+              const verifier = btoa(bytesToString(new Uint8Array(
+                  /** @type {!ArrayBuffer} */ (buffer))));
+              resolve({key, verifier});
+            }, reason => {
+              reject(reason);
+            });
+      }).catch(() => {
+        // Ignore failures. A failure to create a redirect verifier is often
+        // recoverable.
+        return null;
+      }).then(pair => {
+        this.pairCreated_ = true;
+        this.pair_ = pair;
+        return pair;
+      });
+    } else {
+      // Not supported.
+      this.pairCreated_ = true;
+      this.pair_ = null;
+    }
+  }
+}
+
+
+/**
+ * @param {!Object} paymentRequest
+ * @param {string} param
+ * @param {*} value
+ */
+function setInternalParam(paymentRequest, param, value) {
+  paymentRequest['i'] = Object.assign(
+      paymentRequest['i'] || {},
+      {[param]: value});
 }
 
 /**
@@ -8574,6 +11210,279 @@ function storageKey(key) {
   return PREFIX + ':' + key;
 }
 
+/** @license
+Math.uuid.js (v1.4)
+http://www.broofa.com
+mailto:robert@broofa.com
+Copyright (c) 2010 Robert Kieffer
+Dual licensed under the MIT and GPL licenses.
+*/
+
+/*
+ * Generate a random uuid.
+ * EXAMPLES:
+ *   returns RFC4122, version 4 ID
+ *   >>> uuidFast()
+ *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ *
+ * Note: The original code was modified to ES6 and removed other functions,
+ * since we are only using uuidFast().
+ */
+
+const CHARS$1 =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+function uuidFast() {
+  const uuid = new Array(36);
+  let rnd = 0;
+  let r;
+  for (let i = 0; i < 36; i++) {
+    if (i === 8 || i === 13 || i === 18 || i === 23) {
+      uuid[i] = '-';
+    } else if (i === 14) {
+      uuid[i] = '4';
+    } else {
+      if (rnd <= 0x02) {
+        rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+      }
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = CHARS$1[(i == 19) ? (r & 0x3) | 0x8 : r];
+    }
+  }
+  return uuid.join('');
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class TransactionId {
+  /**
+   * @param {*} deps
+   */
+  constructor(deps) {
+    /** @private @const {*} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * Returns the current transaction id
+   *  @return {!Promise<string>}
+   */
+  get() {
+    return this.storage_.get('transaction_id').then(id => {
+      if (!id) {
+        id = uuidFast();
+        this.storage_.set('transaction_id', id);
+      }
+      return id;
+    });
+  }
+
+  /**
+   * Resets the transaction id
+   * @return {!Promise}
+   */
+  reset() {
+    return this.storage_.remove('transaction_id');
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeStyles = {
+  display: 'none',
+};
+
+
+class AnalyticsService {
+  /**
+   * @param {*} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {*} */
+    this.doc_ = deps.doc();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (createElement(
+            this.doc_.getWin().document, 'iframe', {}));
+
+    setImportantStyles(this.iframe_, iframeStyles);
+
+    /** @private @const {string} */
+    this.src_ = feUrl('/serviceiframe');
+
+    /** @private @const {string} */
+    this.publicationId_ = deps.pageConfig().getPublicationId();
+
+    this.args_ = feArgs({
+      publicationId: this.publicationId_,
+    });
+
+    /**
+     * @private @const {!AnalyticsContext}
+     */
+    this.context_ = new AnalyticsContext();
+
+    /**
+     * @private @const {!TransactionId}
+     */
+    this.xid_ = new TransactionId(deps);
+
+    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
+    this.serviceReady_ = null;
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+  }
+
+  /**
+   * @param {string} sku
+   */
+  setSku(sku) {
+    this.context_.setSku(sku);
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.doc_.getWin().location.search;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getReferrer_() {
+    return this.doc_.getWin().document.referrer;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  setContext_() {
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    const name = utmParams['utm_name'];
+    const medium = utmParams['utm_medium'];
+    const source = utmParams['utm_source'];
+    if (name) {
+      this.context_.setUtmName(name);
+    }
+    if (medium) {
+      this.context_.setUtmMedium(medium);
+    }
+    if (source) {
+      this.context_.setUtmSource(source);
+    }
+    return this.xid_.get().then(id => {
+      this.context_.setTransactionId(id);
+    });
+  }
+
+  /**
+   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   * @private
+   */
+  start_() {
+    if (!this.serviceReady_) {
+      // TODO(sohanirao): Potentially do this even earlier
+      this.doc_.getBody().appendChild(this.getElement());
+      this.serviceReady_ = this.activityPorts_.openIframe(
+          this.iframe_, this.src_, this.args_).then(port => {
+            this.setContext_();
+            return port.whenReady().then(() => port);
+          });
+    }
+    return this.serviceReady_;
+  }
+
+  /**
+   * @param {boolean} isReadyToPay
+   */
+  setReadyToPay(isReadyToPay) {
+    this.context_.setReadyToPay(isReadyToPay);
+  }
+
+  /**
+   */
+  close() {
+    this.doc_.getBody().removeChild(this.getElement());
+  }
+
+  /**
+   * @param {*} event
+   * @return {!AnalyticsRequest}
+   */
+  createLogRequest_(event) {
+    const /* {!AnalyticsRequest} */ request = new AnalyticsRequest();
+    request.setEvent(event);
+    request.setContext(this.context_);
+    return request;
+  }
+
+  /**
+   * @param {*} event
+   */
+  logEvent(event) {
+    this.lastAction_ = this.start_().then(port => {
+      port.message({'buf': this.createLogRequest_(event).toArray()});
+    });
+  }
+
+  /**
+   * Handles the message received by the port.
+   * @param {function(!Object<string, string|boolean>)} callback
+   */
+  onMessage(callback) {
+    this.lastAction_ = this.start_().then(port => {
+      port.onMessage(callback);
+    });
+  }
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -8644,6 +11553,9 @@ class ConfiguredRuntime {
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
+    /** @private @const {!AnalyticsService} */
+    this.analyticsService_ = new AnalyticsService(this);
+
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ = new EntitlementsManager(
         this.win_, this.pageConfig_, this.fetcher_, this);
@@ -8656,6 +11568,7 @@ class ConfiguredRuntime {
 
     const preconnect = new Preconnect(this.win_.document);
 
+    preconnect.prefetch('https://news.google.com/swg/js/v1/loader.svg');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
@@ -8709,6 +11622,11 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  analytics() {
+    return this.analyticsService_;
+  }
+
+  /** @override */
   init() {
     // Implemented by the `Runtime` class.
   }
@@ -8735,6 +11653,11 @@ class ConfiguredRuntime {
         }
       } else if (k == 'experiments') {
         v.forEach(experiment => setExperiment(this.win_, experiment, true));
+      } else if (k == 'analyticsMode') {
+        if (v != AnalyticsMode.DEFAULT &&
+            v != AnalyticsMode.IMPRESSIONS) {
+          error = 'Unknown analytics mode: ' + v;
+        }
       } else {
         error = 'Unknown config property: ' + k;
       }
