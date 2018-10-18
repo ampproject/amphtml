@@ -32,7 +32,17 @@ import {isArray} from '../../../../src/types';
  */
 const defaultTestData = {
   'in': [{
-    'baseUrl': 'base.com?',
+    'baseUrl': 'base.com',
+    'batchSegments': [{
+      'trigger': 'click',
+      'timestamp': 0,
+      'extraUrlParams': {
+        a: 1,
+        b: 'xyz',
+      },
+    }],
+  }, {
+    'baseUrl': 'base.com?${extraUrlParams}&z=1',
     'batchSegments': [{
       'trigger': 'click',
       'timestamp': 0,
@@ -42,7 +52,11 @@ const defaultTestData = {
       },
     }],
   }],
-  'out': ['base.com?a=1&b=xyz'],
+
+  'out': [
+    'base.com?a=1&b=xyz',
+    'base.com?a=1&b=xyz&z=1',
+  ],
 };
 
 /**

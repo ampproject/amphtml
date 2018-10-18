@@ -51,7 +51,7 @@ export const TransportPluginFunctions = {
 //  * @param {Array<!batchSegmentDef>} batchSegments
 //  * @return {string}
 //  */
-// function ping(baseUrl, batchSegments, isBatchEnabled, useBody) {}
+// function ping(baseUrl, batchSegments) {}
 
 /**
  * The default way for merging batch segments

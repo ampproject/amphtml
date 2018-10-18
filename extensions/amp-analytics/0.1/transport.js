@@ -66,11 +66,11 @@ export class Transport {
   /**
    * @param {string} url
    * @param {!batchSegmentDef} segment
-   * @param {string} batchPluginId
+   * @param {string} pluginId
    * @param {boolean|undefined} opt_useLegacyIframe
    */
-  sendSingle(url, segment, batchPluginId, opt_useLegacyIframe = false) {
-    const plugin = this.getPlugin_(batchPluginId);
+  sendSingle(url, segment, pluginId, opt_useLegacyIframe = false) {
+    const plugin = this.getPlugin_(pluginId);
     const request = plugin(url, [segment]);
     if (!request) {
       user().error(TAG_, 'Request not sent. Contents empty.');
@@ -86,10 +86,10 @@ export class Transport {
   /**
    * @param {string} url
    * @param {!Array<!batchSegmentDef>} segments
-   * @param {string} batchPluginId
+   * @param {string} pluginId
    */
-  sendBatch(url, segments, batchPluginId) {
-    const plugin = this.getPlugin_(batchPluginId);
+  sendBatch(url, segments, pluginId) {
+    const plugin = this.getPlugin_(pluginId);
     const request = plugin(url, segments);
     if (!request) {
       user().error(TAG_, 'Request not sent. Contents empty.');
