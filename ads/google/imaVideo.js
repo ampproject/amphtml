@@ -59,6 +59,8 @@ const icons = {
 const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
 
+const bigPlayDivDisplayStyle = 'table-cell';
+
 // Div wrapping our entire DOM.
 let wrapperDiv;
 
@@ -223,7 +225,7 @@ export function imaVideo(global, data) {
     'position': 'relative',
     'width': px(videoWidth),
     'height': px(videoHeight),
-    'display': 'table-cell',
+    'display': bigPlayDivDisplayStyle,
     'vertical-align': 'middle',
     'text-align': 'center',
     'cursor': 'pointer',
@@ -701,7 +703,7 @@ export function onContentEnded() {
   // If all ads are not completed,
   // onContentResume will show the bigPlayDiv
   if (allAdsCompleted) {
-    setStyle(bigPlayDiv, 'display', 'table-cell');
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
   }
 
   postMessage({event: VideoEvents.PAUSE});
@@ -807,7 +809,7 @@ export function onContentResumeRequested() {
     // resume content in that case.
     playVideo();
   } else {
-    setStyle(bigPlayDiv, 'display', 'table-cell');
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
   }
 
   videoPlayer.addEventListener('ended', onContentEnded);
@@ -1288,6 +1290,7 @@ export function getPropertiesForTesting() {
     adsManagerWidthOnLoad,
     adsManagerHeightOnLoad,
     adsRequest,
+    bigPlayDiv,
     contentComplete,
     controlsDiv,
     hideControlsTimeout,
@@ -1296,7 +1299,6 @@ export function getPropertiesForTesting() {
     playbackStarted,
     playerState,
     PlayerStates,
-    bigPlayDiv,
     playPauseDiv,
     progressLine,
     progressMarkerDiv,
