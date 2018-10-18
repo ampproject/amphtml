@@ -81,9 +81,16 @@ function appendAnalyticsRow(urlParams) {
 
 function getHoursMinutesSeconds() {
   var date = new Date();
-  return date.getHours() + ':' +
-      date.getMinutes() + ':' +
-      date.getSeconds();
+  return padTo2(date.getHours()) + ':' +
+      padTo2(date.getMinutes()) + ':' +
+      padTo2(date.getSeconds());
+}
+
+function padTo2(number) {
+  if (number < 10) {
+    return '0' + number;
+  }
+  return number.toString();
 }
 
 function createTableRow(cellsContent) {
