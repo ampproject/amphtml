@@ -20,7 +20,7 @@ import {Component, h, render} from 'preact';
 
 class ProxyForm extends Component {
 
-  handleSubmit = event => {
+  submit = event => {
     event.preventDefault();
 
     const input = event.target.querySelector('#proxy-input');
@@ -31,7 +31,7 @@ class ProxyForm extends Component {
   render() {
     return (
       <div class="block proxy-form-container">
-        <form id="proxy-form" onSubmit={this.handleSubmit}>
+        <form id="proxy-form" onSubmit={this.submit}>
           <label for="proxy-input">
             <span>Load URL by Proxy</span>
             <input type="text" class="text-input" id="proxy-input"
