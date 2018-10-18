@@ -20,44 +20,25 @@ import {Component, h, render} from 'preact';
 
 class ProxyForm extends Component {
 
-  constructor() {
-    super();
-    this.setState({
-      proxyInput: '',
-    });
-  }
-
-  handleProxyInputChange(event) {
-    this.setState({
-      ...this.state,
-      proxyInput: event.target.value,
-    });
-  }
-
-  handleSubmit(event) {
+  handleSubmit = (event) => {
     event.preventDefault();
+    
+    console.log(event)
 
-    const suffix = this.state.proxyInput.replace(/^http(s?):\/\//i, '');
-    const redirectUrl = '/proxy/s/' + suffix;
-
-    window.location = redirectUrl;
+    const input = event.target.querySelector('#proxy-input');
+    const suffix = input.value.replace(/^http(s?):\/\//i, '');
+    window.location = `/proxy/s/${suffix}`;
   }
 
   render() {
     return (
       <div class="block proxy-form-container">
-        <form id="proxy-form" onSubmit={event => this.handleSubmit(event)}>
+        <form id="proxy-form" onSubmit={this.handleSubmit}>
           <label for="proxy-input">
             <span>Load URL by Proxy</span>
-            {/*
-                Following regex is gnarly, but works.
-                Taken from https://justmarkup.com/log/2012/12/input-url/
-            */}
             <input type="text" class="text-input" id="proxy-input"
               required aria-required="true"
               placeholder="https://"
-              value={this.state.proxyInput}
-              onChange={event => this.handleProxyInputChange(event)}
               pattern="^(https?://)?[^\s]+$" />
           </label>
           <div class="form-info">
