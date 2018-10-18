@@ -61,6 +61,10 @@ Unsupported features:
 - embeded cameras
 - animation
 
+### CORS
+
+`amp-3d-gltf` makes a `fetch` request from the origin `https://<random>.ampproject.net` so `access-control-allow-origin: *.ampproject.net` must be set on the response header of the endpoint specified as `src`. Wildcard is needed since the origin has a random sub-domain component to it.
+
 ## Attributes
 
 ##### src [required]
