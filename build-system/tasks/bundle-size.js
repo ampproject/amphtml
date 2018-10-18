@@ -43,6 +43,12 @@ const {green, red, cyan, yellow} = colors;
  * @param {string} bundleSize the new bundle size in 99.99KB format.
  */
 function storeBundleSize(bundleSize) {
+  if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
+    log(yellow('Skipping'), cyan('--store') + ':',
+        'this action can only be performed on `push` builds on Travis');
+    return;
+  }
+
   const gitOriginUrlValue = gitOriginUrl();
   if (!gitOriginUrlValue.includes(expectedGitHubProject)) {
     log('Git origin URL is', cyan(gitOriginUrlValue));
