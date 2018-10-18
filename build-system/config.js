@@ -99,7 +99,8 @@ const devDashboardTestPaths = [
 ];
 
 const lintGlobs = [
-  '**/*.js',
+  //'**/*.js',
+  '**/iframe-transport-client.js',
   // To ignore a file / directory, add it to .eslintignore.
 ];
 
