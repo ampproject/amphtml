@@ -558,7 +558,9 @@ function main() {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files');
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
