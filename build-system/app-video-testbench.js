@@ -31,6 +31,7 @@ const requiredAttrs = {
   },
   'amp-dailymotion': {'data-videoid': 'x2m8jpp'},
   'amp-youtube': {'data-videoid': 'mGENRKrdoGY'},
+  'amp-video-iframe': {'src': '/examples/amp-video-iframe/frame.html'},
 };
 
 const optionalAttrs = [
@@ -43,6 +44,7 @@ const availableExtensions = [
   'amp-video',
   'amp-youtube',
   'amp-dailymotion',
+  'amp-video-iframe',
 
   // TODO(alanorozco): Enable the following once they have their `requiredAttrs`
   // 'amp-viqeo-player',
