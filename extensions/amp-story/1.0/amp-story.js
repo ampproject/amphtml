@@ -574,14 +574,17 @@ export class AmpStory extends AMP.BaseElement {
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.ACCESS_STATE)) {
+          this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
+          !this.storeService_
+              .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+        // Cancels the event for this gesture entirely, ensuring the hint won't
+        // show even if the user keeps swiping without releasing the touch.
+        gesture.event && gesture.event.preventDefault();
         return;
       }
-      if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
-        return;
-      }
-      if (!this.storeService_
-          .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+      if (gesture.event.defaultPrevented ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
 
