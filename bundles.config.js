@@ -215,6 +215,11 @@ exports.extensionBundles = [
   {name: 'amp-reach-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-reddit', version: '0.1', type: TYPES.MISC},
   {name: 'amp-riddle-quiz', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-script',
+    version: '0.1',
+    type: TYPES.MISC,
+  },
   {name: 'amp-share-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-sidebar',

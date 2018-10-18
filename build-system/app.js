@@ -29,8 +29,10 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const {serveIndex, serveListing} = require('./app-index/index');
 const pc = process;
 const countries = require('../examples/countries.json');
+const runVideoTestBench = require('./app-video-testbench');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -58,6 +60,15 @@ app.get('/serve_mode=:mode', (req, res) => {
     res.status(400).send(info);
   }
 });
+
+if (!global.AMP_TESTING) {
+  app.get('/', serveIndex);
+  app.get([
+    '/~',
+    '/*',
+  ], serveListing);
+}
+
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -735,6 +746,11 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
+
+/**
+ * Video testbench endpoint
+ */
+app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
