@@ -175,10 +175,6 @@ export class AmpForm {
     }
     this.form_.classList.add('i-amphtml-form');
 
-    const submitButtons = this.form_.querySelectorAll('button,[type="submit"]');
-    /** @const @private {!Array<!Element>} */
-    this.submitButtons_ = toArray(submitButtons);
-
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
 
