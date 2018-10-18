@@ -374,6 +374,12 @@ export function maybeReportErrorToViewer(win, data) {
     return Promise.resolve(false);
   }
 
+  // Don't report user errors to viewer because they don't contain valuable
+  // information.
+  if (data['a'] == 1) {
+    return Promise.resolve(false);
+  }
+
   return viewer.isTrustedViewer().then(viewerTrusted => {
     if (!viewerTrusted) {
       return false;
@@ -394,7 +400,6 @@ export function maybeReportErrorToViewer(win, data) {
 export function errorReportingDataForViewer(errorReportData) {
   return dict({
     'm': errorReportData['m'], // message
-    'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
     'el': errorReportData['el'], // tagName
     'v': errorReportData['v'], // runtime

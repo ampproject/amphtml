@@ -133,6 +133,9 @@ describe('reportErrorToServerOrViewer', () => {
 
     sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
+    // Make sure creating user error data won't be throttled.
+    sandbox.stub(Math, 'random').callsFake(() => 0);
+
     createXhr = sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
@@ -173,6 +176,16 @@ describe('reportErrorToServerOrViewer', () => {
         });
   });
 
+  it('should report to server if it is user error', () => {
+    const userErrorData = getErrorReportData(undefined, undefined, undefined,
+        undefined, user().createError('123'));
+    return reportErrorToServerOrViewer(win, userErrorData)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
+  });
+
   it('should report to server if viewer is not trusted', () => {
     sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
     return reportErrorToServerOrViewer(win, data)
@@ -190,7 +203,6 @@ describe('reportErrorToServerOrViewer', () => {
           expect(sendMessageStub).to.have.been
               .calledWith('error', errorReportingDataForViewer(data));
           expect(data['m']).to.not.be.undefined;
-          expect(data['a']).to.not.be.undefined;
           expect(data['s']).to.not.be.undefined;
           expect(data['el']).to.not.be.undefined;
           expect(data['v']).to.not.be.undefined;
