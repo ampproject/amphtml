@@ -971,6 +971,10 @@ export class AmpStory extends AMP.BaseElement {
         // covers the case where the story is rendered paused (eg: consent).
         if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
           targetPage.setState(PageState.ACTIVE);
+        } else {
+          // Even if the page won't be playing, setting the active attribute
+          // ensures it gets visible.
+          targetPage.element.setAttribute('active', '');
         }
 
         this.forceRepaintForSafari_();
