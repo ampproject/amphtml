@@ -1815,3 +1815,4 @@ export function signatureVerifierFor(win) {
   return win[propertyName] ||
       (win[propertyName] = new SignatureVerifier(win, signingServerURLs));
 }
+

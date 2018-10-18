@@ -78,6 +78,7 @@ import {
 } from '../../../ads/google/a4a/traffic-experiments';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {hasExtensionId} from '../../amp-a4a/0.1/amp-ad-utils';
 import {
   incrementLoadingAds,
   is3pThrottled,
@@ -913,21 +914,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
-    if (creativeMetaData) {
-      let ext = [];
-      const {extensions, customElementExtensions} = creativeMetaData;
-      if (extensions && extensions.length) {
-        ext = extensions;
-      } else if (customElementExtensions && customElementExtensions.length) {
-        ext = customElementExtensions;
-      }
-      if (ext.indexOf('amp-ad-exit') == -1) {
-        // Capture phase click handlers on the ad if amp-ad-exit not present
-        // (assume it will handle capture).
-        dev().assert(this.iframe);
-        Navigation.installAnchorClickInterceptor(
-            this.getAmpDoc(), this.iframe.contentWindow);
-      }
+    if (creativeMetaData && !hasExtensionId(creativeMetaData, 'amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      Navigation.installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);

@@ -141,3 +141,18 @@ export function getAmpAdMetadata(creative) {
     return null;
   }
 }
+
+/**
+ * @param {?./amp-ad-type-defs.CreativeMetaDataDef} metadata
+ * @param {string} extensionId
+ */
+export function hasExtensionId(metadata, extensionId) {
+  const {extensions, customElementExtensions} = metadata;
+  if (extensions && extensions.length) {
+    return extensions.some(ext => {
+      return ext['custom-element'] === extensionId;
+    });
+  } else if (customElementExtensions && customElementExtensions.length) {
+    return customElementExtensions.indexOf(extensionId) !== -1;
+  }
+}

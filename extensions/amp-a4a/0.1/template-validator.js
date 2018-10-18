@@ -20,7 +20,7 @@ import {
   ValidatorResult,
 } from './amp-ad-type-defs';
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
-import {getAmpAdMetadata} from './amp-ad-utils';
+import {getAmpAdMetadata, hasExtensionId} from './amp-ad-utils';
 import {preloadExtensions} from '../../../src/friendly-iframe-embed';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
@@ -116,29 +116,21 @@ export class TemplateValidator extends Validator {
   }
 
   /**
-   * @param {?../../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
+   * @param {?../../../extensions/amp-a4a/0.1/amp-ad-type-defs.CreativeMetaDataDef} creativeMetaData
    * @param {string} extensionId
    * @param {string} extensionSrc
    */
-  addExtensionIfApplicable_(creativeMetadata, extensionId, extensionSrc) {
-    if (creativeMetadata) {
-      let ext = [];
-      const {extensions, customElementExtensions} = creativeMetadata;
-      if (extensions && extensions.length) {
-        ext = extensions;
-      } else if (customElementExtensions && customElementExtensions.length) {
-        ext = customElementExtensions;
+  addExtensionIfApplicable_(creativeMetaData, extensionId, extensionSrc) {
+    if (creativeMetaData && !hasExtensionId(creativeMetaData, extensionId)) {
+      const {extensions, customElementExtensions} = creativeMetaData;
+      if (extensions) {
+        extensions.push({
+          'custom-element': extensionId,
+          'src': extensionSrc,
+        });
       }
-      if (ext.indexOf(extensionId) == -1) {
-        if (extensions) {
-          extensions.push({
-            'custom-element': extensionId,
-            'src': extensionSrc,
-          });
-        }
-        if (customElementExtensions) {
-          customElementExtensions.push(extensionId);
-        }
+      if (customElementExtensions) {
+        customElementExtensions.push(extensionId);
       }
     }
   }
