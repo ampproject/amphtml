@@ -114,9 +114,10 @@ function patchRegisterElement() {
  * have a .js file extension.
  */
 function patchWorkerDom() {
+  const dir = 'node_modules/@ampproject/worker-dom/dist/';
   fs.copyFileSync(
-      'node_modules/@ampproject/worker-dom/dist/unminified.index.safe.mjs',
-      'node_modules/@ampproject/worker-dom/dist/unminified.index.safe.mjs.js');
+      dir + 'unminified.index.safe.mjs',
+      dir + 'unminified.index.safe.mjs.patched.js');
 }
 
 /**

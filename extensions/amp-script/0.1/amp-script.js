@@ -24,7 +24,7 @@ import {getMode} from '../../../src/mode';
 import {
   sanitizer,
   upgradeElement,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs';
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
