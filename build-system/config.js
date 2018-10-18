@@ -81,6 +81,7 @@ const unitTestPaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
+  'build-system/app-index/test/**/*.js',
 ];
 
 const unitTestOnSaucePaths = [
