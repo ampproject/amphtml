@@ -15,6 +15,7 @@
  */
 
 import {getFormAsObject} from './form';
+import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
 /**
@@ -121,11 +122,23 @@ class NativeFormDataWrapper {
   constructor(opt_form) {
     /** @private @const {!FormData} */
     this.formData_ = new FormData(opt_form);
+
+    if (opt_form) {
+      iterateCursor(opt_form.elements, input => {
+        if (input.type == 'file' && input.files.length == 0) {
+          this.formData_.delete(input.name);
+        }
+      });
+    }
   }
 
   /** @override */
   append(name, value) {
-    return this.formData_.append(name, value);
+    // Safari 11 breaks on submitting empty File values.
+    if (value && typeof value == 'object' && isEmptyFile(value)) {
+      return;
+    }
+    this.formData_.append(name, value);
   }
 
   /** @override */
@@ -188,7 +201,7 @@ class FormDataWrapperInterface {
    *
    * @param {string} unusedName The name of the field whose data is contained in
    *     `value`.
-   * @param {string} unusedValue The field's value.
+   * @param {string|!File} unusedValue The field's value.
    */
   append(unusedName, unusedValue) {}
 
@@ -206,7 +219,7 @@ class FormDataWrapperInterface {
    *
    * For more details on this, see http://mdn.io/FormData/entries.
    *
-   * @return {!Iterator<!Array<string>>}
+   * @return {!Iterator<!Array<string|!File>>}
    */
   entries() {}
 
@@ -216,4 +229,16 @@ class FormDataWrapperInterface {
    * @return {!FormData}
    */
   getFormData() {}
+}
+
+/**
+ * Check if the given file is an empty file, which is the result of submitting
+ * an empty `<input type="file">`. These cause errors when submitting forms
+ * in Safari 11.
+ *
+ * @param {!File} file
+ * @return {boolean}
+ */
+function isEmptyFile(file) {
+  return file.name == '' && file.size == 0;
 }

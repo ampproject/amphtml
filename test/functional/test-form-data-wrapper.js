@@ -24,25 +24,27 @@ describes.realWin('FormDataWrapper', {}, env => {
   describe('entries', () => {
     let nativeEntries;
     let nativeDelete;
+
     const scenarios = [{
       description: 'when native `entries` is not available',
 
       beforeEach() {
-        nativeEntries = FormData.prototype.entries;
-        nativeDelete = FormData.prototype.delete;
+        nativeEntries = env.win.FormData.prototype.entries;
+        nativeDelete = env.win.FormData.prototype.delete;
         // Remove native entries from the prototype in case the browser running
         // the tests already have it to force the "no native `entries`"
         // scenario.
-        FormData.prototype.entries = undefined;
-        FormData.prototype.delete = undefined;
+        env.win.FormData.prototype.entries = undefined;
+        env.win.FormData.prototype.delete = undefined;
       },
 
       afterEach() {
-        FormData.prototype.entries = nativeEntries;
-        FormData.prototype.delete = nativeDelete;
+        env.win.FormData.prototype.entries = nativeEntries;
+        env.win.FormData.prototype.delete = nativeDelete;
       },
     }];
 
+    // Intentionally use the non-env global to detect the browser capability
     if (FormData.prototype.entries) {
       scenarios.push({
         description: 'when native `entries` is available',
@@ -296,6 +298,31 @@ describes.realWin('FormDataWrapper', {}, env => {
       });
     });
 
+    describe('NativeFormDataWrapper', () => {
+      it('removes empty file objects', () => {
+        const form = env.win.document.createElement('form');
+
+        const input = env.win.document.createElement('input');
+        input.type = 'file';
+        input.name = 'foo1';
+
+        env.win.document.body.appendChild(form);
+
+        const formData = createFormDataWrapper(form);
+
+        expect(fromIterator(formData.entries()))
+            .to.be.an('array').that.is.empty;
+      });
+
+      it('does not append empty file objects', () => {
+        const formData = createFormDataWrapper();
+        formData.append('myFile', new env.win.File([], ''));
+
+        expect(fromIterator(formData.entries()))
+            .to.be.an('array').that.is.empty;
+      });
+    });
+
     describe('PolyfillFormDataWrapper', () => {
       it('getFormData matches native behavior', () => {
 
@@ -316,15 +343,16 @@ describes.realWin('FormDataWrapper', {}, env => {
 
         const polyfillFormDataWrapper = new PolyfillFormDataWrapper(form);
 
-        if (FormData.prototype.entries) {
+        if (env.win.FormData.prototype.entries) {
           const polyfillFormData = polyfillFormDataWrapper.getFormData();
-          expect(fromIterator(polyfillFormData.entries()))
-              .to.deep.equal(fromIterator(new FormData(form).entries()));
+          expect(fromIterator(polyfillFormData.entries())).to.deep.equal(
+              fromIterator(new env.win.FormData(form).entries()));
         } else {
           // For testing in non-supporting browsers like IE.
           // We can't query the state of FormData, but we can check that
           // the polyfill appended to the real FormData enough.
-          const appendSpy = env.sandbox.spy(FormData.prototype, 'append');
+          const appendSpy =
+              env.sandbox.spy(env.win.FormData.prototype, 'append');
           polyfillFormDataWrapper.getFormData();
           expect(appendSpy).to.have.been.calledTwice;
         }
