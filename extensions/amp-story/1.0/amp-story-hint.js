@@ -172,6 +172,11 @@ export class AmpStoryHint {
       this.onRtlStateUpdate_(rtlState);
     }, true /** callToInitialize */);
 
+    this.storeService_.subscribe(
+        StateProperty.SYSTEM_UI_IS_VISIBLE_STATE, isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
+
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
@@ -273,6 +278,17 @@ export class AmpStoryHint {
         this.hintContainer_.setAttribute('dir', 'rtl') :
         this.hintContainer_.removeAttribute('dir');
     });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    if (!isVisible) {
+      this.hideAllNavigationHint();
+    }
   }
 }
 
