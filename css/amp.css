@@ -422,6 +422,16 @@ i-amphtml-sizer {
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
 }
+/* placeholder by design expands layout=container unlike other layouts where it
+   is position:absolute and overlays the component. However, when it goes away
+   it should not longer expand the parent so instead of visibility:hidden it
+   must be display:none */
+.i-amphtml-layout-container > [placeholder].hidden,
+[layout=container] > [placeholder].hidden,
+.i-amphtml-layout-container > [placeholder].amp-hidden,
+[layout=container] > [placeholder].amp-hidden {
+  display: none;
+}
 
 .i-amphtml-element:not(.amp-notsupported) > [fallback] {
   display: none;
