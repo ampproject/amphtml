@@ -13,6 +13,7 @@
   <style amp-custom>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
     }
 
     [fallback] {
@@ -51,9 +52,10 @@
       flex-wrap: wrap;
     }
 
-    .main, h1 {
+    .main, h1, .wrap {
       max-width: 960px;
-      margin: 0 auto;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .video-container {
@@ -62,12 +64,12 @@
 
     h1 {
       font-weight: bold;
-      margin: 40px auto;
-      font-size: 32px;
+      margin: 40px auto 20px;
+      font-size: 24px;
     }
     h2 {
       font-weight: bold;
-      margin: 40px 0;
+      margin: 40px 0 20px;
       font-size: 14px;
       display: block;
       flex: 0 0 100%;
@@ -79,17 +81,22 @@
     }
 
     .analytics-events-container {
-      padding: 40px 0;
+      padding: 10px 0 20px;
       background: #fafafa;
-      max-height: 260px;
       overflow: auto;
+      flex: 1;
     }
 
-    #analytics-events td {
+    td {
       padding: 6px 10px 0 0;
     }
-    #analytics-events thead td {
-      font-weight: bold;
+
+    .empty > td {
+      padding-top: 0;
+    }
+
+    button {
+      margin-right: 10px;
     }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -98,48 +105,67 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <h1>AMP Video Players</h1>
-
-  <div class="main">
-    <div class="video-container">
-      <amp-video
-          data-substitutable
-          data-removable-attrs="src"
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-          width="358"
-          height="204"
-          layout="responsive"
-          id="my-video"
-          controls>
-        <div placeholder>
-          This is a placeholder
+  <div style="display: flex; flex-direction: column; height: 100vh">
+    <div>
+      <h1>AMP Video Players</h1>
+      <div class="main">
+        <div class="video-container">
+          <amp-video
+              data-substitutable
+              data-removable-attrs="src"
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+              width="358"
+              height="204"
+              layout="responsive"
+              id="my-video"
+              controls>
+            <div placeholder>
+              This is a placeholder
+            </div>
+            <div fallback>
+              This is a fallback
+            </div>
+          </amp-video>
         </div>
-        <div fallback>
-          This is a fallback
-        </div>
-      </amp-video>
+        <aside>
+          <div class="dropdown-container"></div>
+          <div class="optional-attrs-container"></div>
+        </aside>
+        <h2>Actions</h2>
+        <button on="tap:my-video.play">Play</button>
+        <button on="tap:my-video.pause">Pause</button>
+        <button on="tap:my-video.mute">Mute</button>
+        <button on="tap:my-video.unmute">Unmute</button>
+        <button on="tap:my-video.fullscreen">Fullscreen</button>
+        <h2>Analytics Events</h2>
+        <table style="margin-bottom: 10px">
+          <thead>
+            <tr>
+              <td width="80px">Abs. time</td>
+              <td width="80px">Autoplay</td>
+              <td width="200px">Type</td>
+              <td width="150px">Current time</td>
+              <td width="150px">Played Total</td>
+              <td>Duration</td>
+            </tr>
+          </thead>
+        </table>
+      </div>
     </div>
-    <aside>
-      <div class="dropdown-container"></div>
-      <div class="optional-attrs-container"></div>
-    </aside>
-    <h2>Analytics Events</h2>
-  </div>
-
-  <div class="analytics-events-container">
-    <div class="main">
-      <table id="analytics-events">
-        <thead>
-          <tr>
-            <td width="80px">Abs. time</td>
-            <td width="80px">Autoplay</td>
-            <td width="200px">Type</td>
-            <td width="150px">Current time</td>
-            <td width="150px">Played Total</td>
-            <td>Duration</td>
+    <div class="analytics-events-container">
+      <div class="main">
+        <table id="analytics-events">
+          <!-- Empty row hack to force widths in disjointed tables. -->
+          <tr class="empty">
+            <td width="80px"></td>
+            <td width="80px"></td>
+            <td width="200px"></td>
+            <td width="150px"></td>
+            <td width="150px"></td>
+            <td></td>
           </tr>
-        </thead>
-      </table>
+        </table>
+      </div>
     </div>
   </div>
 
