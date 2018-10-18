@@ -20,7 +20,7 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, defaultPlugin} from './transport-plugins';
+import {batchSegmentDef, defaultSerializer} from './transport-serializer';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
@@ -55,12 +55,6 @@ export class RequestHandler {
 
     /** @private {?number} */
     this.batchIntervalPointer_ = null;
-
-    /** @private @const {string} */
-    this.batchPluginId_ = request['batchPlugin'] || 'default';
-
-    user().assert((request['batchPlugin'] ? this.batchInterval_ : true),
-        'Invalid request: batchPlugin cannot be set on non-batched request');
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
@@ -211,14 +205,11 @@ export class RequestHandler {
         if (trigger['iframePing']) {
           user().assert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
-          this.transport_.sendSingle(
-              baseUrl, batchSegments[0], this.batchPluginId_, true);
+          this.transport_.sendSingle(baseUrl, batchSegments[0], true);
         } else if (this.batchInterval_) {
-          this.transport_.sendBatch(
-              baseUrl, batchSegments, this.batchPluginId_);
+          this.transport_.sendBatch(baseUrl, batchSegments);
         } else {
-          this.transport_.sendSingle(
-              baseUrl, batchSegments[0], this.batchPluginId_);
+          this.transport_.sendSingle(baseUrl, batchSegments[0]);
         }
       });
     });
@@ -330,7 +321,7 @@ export function expandPostMessage(
     //return base url with the appended extra url params;
     return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
         .then(extraUrlParams => {
-          return defaultPlugin(expandedMsg, [{extraUrlParams}]);
+          return defaultSerializer(expandedMsg, [{extraUrlParams}]);
         });
   });
 }

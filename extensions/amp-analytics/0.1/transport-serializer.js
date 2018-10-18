@@ -32,8 +32,8 @@ export let batchSegmentDef;
  * Note: extraUrlParams passed in are not encoded. Please make sure to proper
  * encode segments and make sure the final output url is valid.
  */
-export const TransportPluginFunctions = {
-  'default': defaultPlugin,
+export const TransportSerializers = {
+  'default': defaultSerializer,
 };
 
 
@@ -60,7 +60,7 @@ export const TransportPluginFunctions = {
  * @param {!Array<!batchSegmentDef>} batchSegments
  * @return {string}
  */
-export function defaultPlugin(baseUrl, batchSegments) {
+export function defaultSerializer(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
       .map(item => serializeQueryString(item.extraUrlParams))
       .filter(queryString => !!queryString)

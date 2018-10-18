@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TransportPluginFunctions, batchSegmentDef} from './transport-plugins';
+import {TransportSerializers, batchSegmentDef} from './transport-serializer';
 
 import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {Services} from '../../../src/services';
@@ -66,12 +66,11 @@ export class Transport {
   /**
    * @param {string} url
    * @param {!batchSegmentDef} segment
-   * @param {string} pluginId
    * @param {boolean|undefined} opt_useLegacyIframe
    */
-  sendSingle(url, segment, pluginId, opt_useLegacyIframe = false) {
-    const plugin = this.getPlugin_(pluginId);
-    const request = plugin(url, [segment]);
+  sendSingle(url, segment, opt_useLegacyIframe = false) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, [segment]);
     if (!request) {
       user().error(TAG_, 'Request not sent. Contents empty.');
       return;
@@ -86,10 +85,9 @@ export class Transport {
   /**
    * @param {string} url
    * @param {!Array<!batchSegmentDef>} segments
-   * @param {string} pluginId
    */
-  sendBatch(url, segments, pluginId) {
-    const plugin = this.getPlugin_(pluginId);
+  sendBatch(url, segments) {
+    const plugin = this.getSerializer_();
     const request = plugin(url, segments);
     if (!request) {
       user().error(TAG_, 'Request not sent. Contents empty.');
@@ -207,12 +205,10 @@ export class Transport {
   }
 
   /**
-   * @param {string} pluginId
    * @return {function(string, !Array<!batchSegmentDef>):string}
    */
-  getPlugin_(pluginId) {
-    return user().assert(
-        TransportPluginFunctions[pluginId], 'Unsupported plugin %s', pluginId);
+  getSerializer_() {
+    return TransportSerializers['default'];
   }
 
   /**

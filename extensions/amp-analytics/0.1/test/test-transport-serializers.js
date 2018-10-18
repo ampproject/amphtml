@@ -15,7 +15,7 @@
  */
 
 
-import {TransportPluginFunctions} from '../transport-plugins';
+import {TransportSerializers} from '../transport-serializer';
 import {dict} from '../../../../src/utils/object';
 import {isArray} from '../../../../src/types';
 
@@ -62,22 +62,22 @@ const defaultTestData = {
 /**
  * Please register your custom test data to the test in alphabetic order.
  */
-const BatchingPluginTests = {
+const SerializerTests = {
   'default': defaultTestData,
 };
 
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Transport Plugins', () => {
-  it('TransportPluginFunctions sort in alphabetic order', () => {
-    const keys = Object.keys(TransportPluginFunctions);
-    const sorted = Object.keys(TransportPluginFunctions).sort();
+describe('Transport serializers', () => {
+  it('TransportSerializers sort in alphabetic order', () => {
+    const keys = Object.keys(TransportSerializers);
+    const sorted = Object.keys(TransportSerializers).sort();
     expect(keys).to.deep.equal(sorted);
   });
 
-  for (const name in TransportPluginFunctions) {
-    const plugin = TransportPluginFunctions[name];
+  for (const name in TransportSerializers) {
+    const plugin = TransportSerializers[name];
     describe('Default tests for every plugin', () => {
       it('should handle empty batchSegment array', () => {
         try {
@@ -138,7 +138,7 @@ describe('Transport Plugins', () => {
       let output;
 
       beforeEach(() => {
-        testData = BatchingPluginTests[name];
+        testData = SerializerTests[name];
         input = testData['in'];
         output = testData['out'];
       });
