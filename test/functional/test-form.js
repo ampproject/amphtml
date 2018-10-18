@@ -226,7 +226,9 @@ describes.realWin('getFormAsObject', {}, env => {
     form.appendChild(input);
     expect(getFormAsObject(form)).to.deep.equal({});
 
-    input.focus();
+    Object.defineProperty(form, 'ownerDocument', {get() {
+      return {activeElement: input};
+    }});
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
@@ -238,7 +240,9 @@ describes.realWin('getFormAsObject', {}, env => {
     form.appendChild(input);
     expect(getFormAsObject(form)).to.deep.equal({});
 
-    input.focus();
+    Object.defineProperty(form, 'ownerDocument', {get() {
+      return {activeElement: input};
+    }});
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
