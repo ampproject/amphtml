@@ -52,8 +52,8 @@ function storeBundleSize(bundleSize) {
   }
 
   if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
-    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle'),
-        red('size in the artifacts repository on GitHub!'));
+    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle' +
+        'size in the artifacts repository on GitHub!'));
     process.exitCode = 1;
     return;
   }
