@@ -43,7 +43,7 @@ export class AmpScript extends AMP.BaseElement {
     const config = purifyConfig();
     sanitizer.configure(config, {
       'beforeSanitize': purify => {
-        addPurifyHooks(purify);
+        addPurifyHooks(purify, /* diffing */ false);
       },
       'afterSanitize': purify => {
         purify.removeAllHooks();

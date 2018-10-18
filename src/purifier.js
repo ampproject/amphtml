@@ -225,13 +225,13 @@ const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /** @const {!JsonObject} */
-const PURIFY_CONFIG = {
+const PURIFY_CONFIG = dict({
   'USE_PROFILES': {
     'html': true,
     'svg': true,
     'svgFilters': true,
   },
-};
+});
 
 /**
  * Monotonically increasing counter used for keying nodes.
@@ -242,11 +242,12 @@ let KEY_COUNTER = 0;
 /**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
+ * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty) {
+export function purifyHtml(dirty, diffing = false) {
   const config = purifyConfig();
-  addPurifyHooks(DomPurify);
+  addPurifyHooks(DomPurify, diffing);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
   return body;
@@ -266,15 +267,15 @@ export function purifyConfig() {
     // Avoid need for serializing to/from string by returning Node directly.
     'RETURN_DOM': true,
   });
-  return config;
+  return /** @type {!JsonObject} */ (config);
 }
 
 /**
  * Adds AMP hooks to given DOMPurify object.
  * @param {!DomPurifyDef} purifier
- * @param {boolean=} diffing
+ * @param {boolean} diffing
  */
-export function addPurifyHooks(purifier, diffing = false) {
+export function addPurifyHooks(purifier, diffing) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
