@@ -434,13 +434,11 @@ export function imaVideo(global, data) {
     bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
     bigPlayDiv.addEventListener(
         'tapwithoutdrag',
-        onBigPlayClick.bind(null, global)
-    );
+        onBigPlayClick.bind(null, global));
   } else {
     bigPlayDiv.addEventListener(
         interactEvent,
-        onBigPlayClick.bind(null, global)
-    );
+        onBigPlayClick.bind(null, global));
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
@@ -1282,12 +1280,30 @@ function postMessage(data) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return {adContainerDiv, allAdsCompleted,
-    adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
-    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
-    playerState, PlayerStates, bigPlayDiv, playPauseDiv, progressLine,
-    progressMarkerDiv, timeNode, uiTicker, videoPlayer};
+  return {
+    adContainerDiv,
+    allAdsCompleted,
+    adRequestFailed,
+    adsActive,
+    adsManagerWidthOnLoad,
+    adsManagerHeightOnLoad,
+    adsRequest,
+    contentComplete,
+    controlsDiv,
+    hideControlsTimeout,
+    imaLoadAllowed,
+    interactEvent,
+    playbackStarted,
+    playerState,
+    PlayerStates,
+    bigPlayDiv,
+    playPauseDiv,
+    progressLine,
+    progressMarkerDiv,
+    timeNode,
+    uiTicker,
+    videoPlayer,
+  };
 }
 
 /**
