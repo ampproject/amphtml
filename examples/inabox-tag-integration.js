@@ -31,7 +31,7 @@ Array.prototype.push.apply(
  * @param {!Window} win
  */
 function initInaboxHost(win) {
-  const hostScriptUrl = 'http://localhost:8000/dist/amp-inabox-host.js';
+  const hostScriptUrl = 'http://localhost:8000/dist/amp4ads-host-v0.js';
   preloadScript(win, hostScriptUrl);
   // Optional: preload a4a-v0.js as well.
 

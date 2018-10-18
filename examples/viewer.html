@@ -5,7 +5,7 @@
   <title>Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script src="/dist/v0/examples/amp-viewer-host.max.js"></script>
+  <script src="/dist/v0/examples/amp-viewer-host.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -542,44 +542,9 @@
       new Viewer(
           'container2',
           '2',
-          './article.amp.html?amp_js_v=0.1',
+          './inabox.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('2');
-
-      new Viewer(
-          'container3',
-          '3',
-          './article-access.amp.html?amp_js_v=0.1',
-          false).start();
-      addShowContainer('3');
-
-      new Viewer(
-          'container4',
-          '4',
-          './alp.amp.html',
-          false).start();
-      addShowContainer('4');
-
-      new Viewer(
-          'container5',
-          '5',
-          './article-fixed-header.amp.html?amp_js_v=0.1',
-          false).start();
-      addShowContainer('5');
-
-      new Viewer(
-          'container6',
-          '6',
-          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1',
-          false).start();
-      addShowContainer('6');
-
-      new Viewer(
-          'container7',
-          '7',
-          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1',
-          false).start();
-      addShowContainer('7');
 
       showContainer('1');
     }
