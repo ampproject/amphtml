@@ -544,6 +544,10 @@ data.item;
 data.geo;
 data.categories;
 
+// pressboard.js
+data.media;
+data.baseUrl;
+
 // pubguru.js
 data.height;
 data.publisher;
