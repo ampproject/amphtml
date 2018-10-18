@@ -222,7 +222,8 @@ export class AmpForm {
       const urlService = Services.urlForDoc(this.form_);
       urlService.assertHttpsUrl(url, this.form_, attribute);
       user().assert(!urlService.isProxyOrigin(url),
-          `form ${attribute} should not be on AMP CDN: %s`,
+          'form %s should not be on AMP CDN: %s',
+          attribute,
           this.form_);
     }
     return url;
@@ -478,7 +479,7 @@ export class AmpForm {
       };
       this.formSubmitService_.fire(event);
     } catch (e) {
-      dev().error(TAG, `Form submit service failed: ${e}`);
+      dev().error(TAG, 'Form submit service failed: %s', e);
     }
 
     const varSubsFields = this.getVarSubsFields_();
@@ -606,7 +607,7 @@ export class AmpForm {
    */
   handleSsrTemplateFailure_(error) {
     this.setState_(FormState.SUBMIT_ERROR);
-    user().error(TAG, `Form submission failed: ${error}`);
+    user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(error || {}).then(() => {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
@@ -725,7 +726,7 @@ export class AmpForm {
         this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
       });
     }, error => {
-      user().error(TAG, `Failed to parse response JSON: ${error}`);
+      user().error(TAG, 'Failed to parse response JSON: %s', error);
     });
   }
 
@@ -750,7 +751,7 @@ export class AmpForm {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
       });
       this.maybeHandleRedirect_(error.response);
-      user().error(TAG, `Form submission failed: ${error}`);
+      user().error(TAG, 'Form submission failed: %s', error);
     });
   }
 
@@ -787,7 +788,7 @@ export class AmpForm {
   assertSsrTemplate_(value, msg) {
     const supported = this.ssrTemplateHelper_.isSupported();
     user().assert(
-        supported === value, `[${TAG}]: viewerRenderTemplate | ${msg}`);
+        supported === value, '[amp-form]: viewerRenderTemplate | %s', msg);
   }
 
   /**
