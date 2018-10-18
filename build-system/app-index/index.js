@@ -26,6 +26,8 @@ const templateFile = join(__dirname, '/template.html');
 const proxyFormFile = join(__dirname, '/proxy-form.html');
 const listingHeaderFile = join(__dirname, '/listing-header.html');
 
+const mainCssFile = join(__dirname, '/main.css');
+
 
 function renderFileLink(base, location) {
   return `<li>
@@ -61,10 +63,14 @@ function renderListing(basepath) {
     return Promise.all([
       fs.readdirAsync(path),
       fs.readFileAsync(templateFile),
+      fs.readFileAsync(mainCssFile),
     ]).then(result => {
       const files = result[0];
       const template = result[1].toString();
+      const css = result[2].toString();
+
       return template
+          .replace('<!-- main_style -->', `<style>${css}</style>`)
           .replace('<!-- basepath -->', basepath)
           .replace('<!-- listing -->',
               files.map(file => renderFileLink(basepath, file)).join(''));
