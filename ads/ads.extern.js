@@ -225,6 +225,7 @@ google.ima.AdEvent;
 google.ima.AdEvent.Type;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
 google.ima.settings;
