@@ -92,7 +92,7 @@ export function getIframe(
   count[attributes['type']] += 1;
 
   const baseUrl = getBootstrapBaseUrl(
-      parentWindow, undefined, opt_type, disallowCustom);
+      parentWindow, undefined, disallowCustom);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -179,12 +179,10 @@ export function addDataAndJsonAttributes_(element, attributes) {
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
  * @param {!./preconnect.Preconnect} preconnect
- * @param {string=} opt_type
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(
-  win, preconnect, opt_type, opt_disallowCustom) {
-  const url = getBootstrapBaseUrl(win, undefined, opt_type, opt_disallowCustom);
+export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
+  const url = getBootstrapBaseUrl(win, undefined, opt_disallowCustom);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
@@ -199,21 +197,16 @@ export function preloadBootstrap(
  * Returns the base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
- * @param {string=} opt_type
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {string}
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(
-  parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
-  // The value is cached in a global variable called `bootstrapBaseUrl`;
-  const {bootstrapBaseUrl} = parentWindow;
-  if (bootstrapBaseUrl) {
-    return bootstrapBaseUrl;
-  }
-  return parentWindow.bootstrapBaseUrl = getCustomBootstrapBaseUrl(
-      parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) ||
-      getDefaultBootstrapBaseUrl(parentWindow);
+  parentWindow, opt_strictForUnitTest, opt_disallowCustom) {
+  const customBootstrapBaseUrl = opt_disallowCustom
+    ? null
+    : getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest);
+  return customBootstrapBaseUrl || getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 /**
@@ -227,7 +220,6 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
  * @param {*} win
  */
 export function resetBootstrapBaseUrlForTesting(win) {
-  win.bootstrapBaseUrl = undefined;
   win.defaultBootstrapSubDomain = undefined;
 }
 
@@ -302,19 +294,12 @@ export function getRandom(win) {
  * Otherwise null.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
- * @param {string=} opt_type
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {?string}
  */
-function getCustomBootstrapBaseUrl(
-  parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
+function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   const meta = parentWindow.document
       .querySelector('meta[name="amp-3p-iframe-src"]');
   if (!meta) {
-    return null;
-  }
-  if (opt_disallowCustom) {
-    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
