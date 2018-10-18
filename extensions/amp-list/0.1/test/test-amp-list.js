@@ -28,6 +28,7 @@ describes.realWin('amp-list component', {
 }, env => {
   let win, doc, ampdoc, sandbox;
   let element, list, listMock;
+  let resource;
   let setBindService;
   let ssrTemplateHelper;
   let templates;
@@ -45,11 +46,19 @@ describes.realWin('amp-list component', {
     };
     sandbox.stub(Services, 'templatesFor').returns(templates);
 
+    resource = {
+      resetPendingChangeSize: sandbox.stub(),
+    };
+    const resources = {
+      getResourceForElement: e => (e === element) ? resource : null,
+    };
+
     element = doc.createElement('div');
     element.setAttribute('src', 'https://data.com/list.json');
     element.getAmpDoc = () => ampdoc;
     element.getFallback = () => null;
     element.getPlaceholder = () => null;
+    element.getResources = () => resources;
 
     const template = doc.createElement('template');
     template.content.appendChild(doc.createTextNode('{{template}}'));
@@ -143,6 +152,15 @@ describes.realWin('amp-list component', {
       return list.layoutCallback().then(() => rendered).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
       });
+    });
+
+    it('should reset pending change-size request after render', function*() {
+      const items = [{title: 'Title1'}];
+      const itemElement = doc.createElement('div');
+      const rendered = expectFetchAndRender(items, [itemElement]);
+      yield list.layoutCallback();
+      yield rendered;
+      expect(resource.resetPendingChangeSize).calledOnce;
     });
 
     it('should attemptChangeHeight the placeholder, if present', () => {

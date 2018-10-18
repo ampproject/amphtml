@@ -465,6 +465,13 @@ export class AmpList extends AMP.BaseElement {
           AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
       this.container_.dispatchEvent(event);
 
+      // Now that new contents have been rendered, clear pending size requests
+      // from previous calls to attemptToFit_(). Rejected size requests are
+      // saved as "pending" and are fulfilled later on 'focus' event.
+      // See resources-impl.checkPendingChangeSize_().
+      const r = this.element.getResources().getResourceForElement(this.element);
+      r.resetPendingChangeSize();
+
       // Attempt to resize to fit new rendered contents.
       this.attemptToFit_(this.container_);
 
