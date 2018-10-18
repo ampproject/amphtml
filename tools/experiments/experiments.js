@@ -156,6 +156,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
+    id: 'ios-embed-sd-notransfer',
+    name: 'Disables transfer mode for the new iOS embedded viewport model',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
+  },
+  {
     id: 'chunked-amp',
     name: 'Split AMP\'s loading phase into chunks',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
@@ -246,6 +253,12 @@ const EXPERIMENTS = [
     name: 'Scrollable experience for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/16465',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
+  },
+  {
+    id: 'amp-story-hold-to-pause',
+    name: 'Hold to pause an amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/18714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
   },
   {
     id: 'url-replacement-v2',
@@ -353,6 +366,11 @@ const EXPERIMENTS = [
     id: 'linker-form',
     name: 'Enables form support in linker',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
+  },
+  {
+    id: 'fie-metadata-extension',
+    name: 'Use version supporting extension field in amp-ad-metadata.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
   },
 ];
 
