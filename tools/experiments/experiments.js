@@ -174,8 +174,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before '
+      'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
