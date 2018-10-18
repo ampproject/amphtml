@@ -26,8 +26,14 @@ function createButton(label, onClick) {
   root.appendChild(btn);
 }
 
+createButton('Insert Hello World!', () => {
+  const el = document.createElement('h1');
+  el.textContent = 'Hello World!';
+  document.body.appendChild(el);
+});
+
 // <amp-img> should be allowed.
-createButton('Insert <amp-img>', () => {
+createButton('Insert amp-img', () => {
   const el = document.createElement('amp-img');
   el.setAttribute('width', '300');
   el.setAttribute('height', '200');
@@ -35,22 +41,14 @@ createButton('Insert <amp-img>', () => {
   document.body.appendChild(el);
 });
 
-// TODO(choumx): Adding more buttons breaks hydration. Figure out why.
-
-// createButton('Insert Hello World!', () => {
-//   const el = document.createElement('h1');
-//   el.textContent = 'Hello World!';
-//   document.body.appendChild(el);
-// });
-
 // <script> should be sanitized.
-// createButton('Insert <script>', () => {
-//   const el = document.createElement('script');
-//   document.body.appendChild(el);
-// });
+createButton('Insert <script>', () => {
+  const el = document.createElement('script');
+  document.body.appendChild(el);
+});
 
 // <img> should be sanitized.
-// createButton('Insert <img>', () => {
-//   const el = document.createElement('img');
-//   document.body.appendChild(el);
-// });
+createButton('Insert <img>', () => {
+  const el = document.createElement('img');
+  document.body.appendChild(el);
+});
