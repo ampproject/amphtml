@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const generate = require('escodegen').generate;
 
 /**
  * @typedef {{
@@ -72,6 +71,18 @@ const selector = transformableMethods.map(method => {
   return `CallExpression[callee.property.name=${method.name}]`;
 }).join(',');
 
+function collectMessage(node, acc) {
+  if (node.type === 'Literal') {
+    acc.push(node);
+    return acc;
+  }
+  // Allow for string concatenation operations.
+  if (node.type === 'BinaryExpression' && node.operator === '+') {
+    return isMessageString(node.left) && isMessageString(node.right);
+  }
+  return acc;
+}
+
 
 module.exports = function(context) {
   return {
@@ -122,10 +133,14 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
-            console.log(generate);
-            node.arguments[metadata.startPos] = { type: 'Literal', value: "blah", raw: "blah" };
-            const output = generate(node);
-            console.log(output);
+             const text = context.getSourceCode().text;
+            const callExpr = text.slice(node.start, node.end);
+            const argsMatcher = new RegExp(`${calleeObject.callee.name}\\(\\)\\.${metadata.name}\\(([.\\n]*)\\)`);
+            console.log('str:', callExpr)
+            console.log('matcher:', argsMatcher);
+            const logMethodCall = callExpr.match(argsMatcher);
+            console.log('match this:', logMethodCall[1])
+            //node.arguments[metadata.startPos] = { type: 'Literal', value: "blah", raw: "blah" };
             //const callConstruct = `${calleeObject.callee.name}().${methodInvokedName}`;
             //return fixer.replaceText(node, 'blah().wah()');
           }
