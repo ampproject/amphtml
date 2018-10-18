@@ -26,7 +26,7 @@ const {getStdout} = require('../exec');
 const {gitCommitHash, gitOriginUrl} = require('../git');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '82.6KB'; // Only use 0.1 KB of precision (no hundredths digit)
+const maxSize = '82.7KB'; // Only use 0.1 KB of precision (no hundredths digit)
 
 const buildArtifactsRepoOptions = {
   owner: 'ampproject',
