@@ -1081,6 +1081,11 @@ describe('ValidatorRulesMakeSense', () => {
               expect(atRuleSpecRegex.test(atRuleSpec.name)).toBe(true);
             });
           }
+          if (atRuleSpec.mediaQuerySpec !== null) {
+            it('only media atrule contains mediaQuerySpec', () => {
+              expect(atRuleSpec.name === 'media');
+            });
+          }
           it('unique at_rule_spec name', () => {
             expect(atRuleSpecNameIsUnique.hasOwnProperty(atRuleSpec.name))
                 .toBe(false);
