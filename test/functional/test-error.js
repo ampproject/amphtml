@@ -25,9 +25,9 @@ import {
   getErrorReportData,
   installErrorReporting,
   isCancellation,
-  maybeReportErrorToViewer,
   reportError,
   reportErrorToAnalytics,
+  reportErrorToServerOrViewer,
 } from '../../src/error';
 import {
   getMode,
@@ -101,12 +101,13 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 });
 
-describe('maybeReportErrorToViewer', () => {
+describe('reportErrorToServerOrViewer', () => {
   let win;
   let viewer;
   let sandbox;
   let ampdocServiceForStub;
   let sendMessageStub;
+  let createXhr;
 
   const data = getErrorReportData(undefined, undefined, undefined, undefined,
       new Error('XYZ', false));
@@ -131,46 +132,61 @@ describe('maybeReportErrorToViewer', () => {
     sendMessageStub = sandbox.stub(viewer, 'sendMessage');
 
     sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+    createXhr = sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('should not report if AMP doc is not single', () => {
+  it('should report to server if AMP doc is not single', () => {
     ampdocServiceForStub.returns({isSingleDoc: () => false});
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should not report if AMP doc is not opted in', () => {
+  it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc =
-          window.document.implementation.createHTMLDocument('');
+      window.document.implementation.createHTMLDocument('');
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
       getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
     });
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should not report if viewer is not capable', () => {
+  it('should report to server if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
         .returns(false);
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
-  });
-
-  it('should not report if viewer is not trusted', () => {
-    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
-  });
-
-  it('should send viewer message named `error` with stripped down error data '
-    + 'set', () => {
-    return maybeReportErrorToViewer(win, data)
+    return reportErrorToServerOrViewer(win, data)
         .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
+  });
+
+  it('should report to server if viewer is not trusted', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
+  });
+
+  it('should report to viewer with message named `error` with stripped down '
+    + 'error data set', () => {
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.not.have.been.called;
           expect(sendMessageStub).to.have.been
               .calledWith('error', errorReportingDataForViewer(data));
           expect(data['m']).to.not.be.undefined;
@@ -183,7 +199,7 @@ describe('maybeReportErrorToViewer', () => {
   });
 });
 
-describe('reportErrorToServer', () => {
+describe('getErrorReportData', () => {
   let sandbox;
   let onError;
   let nextRandomNumber;

@@ -209,7 +209,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+    onError['call'](undefined, undefined, undefined, undefined,
         undefined, error);
   } catch (errorReportingError) {
     setTimeout(function() {
@@ -275,7 +275,7 @@ export function isBlockedByConsent(errorOrMessage) {
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = /** @type {!Function} */ (reportErrorToServer);
+  win.onerror = /** @type {!Function} */ (onError);
   win.addEventListener('unhandledrejection', event => {
     if (event.reason &&
       (event.reason.message === CANCELLED ||
@@ -296,7 +296,7 @@ export function installErrorReporting(win) {
  * @param {*|undefined} error
  * @this {!Window|undefined}
  */
-function reportErrorToServer(message, filename, line, col, error) {
+function onError(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
     makeBodyVisibleRecovery(this.document);
@@ -319,16 +319,28 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
-    // Report the error to viewer if it has the capability. The data passed
-    // to the viewer is exactly the same as the data passed to the server
-    // below.
-    maybeReportErrorToViewer(this, data);
-    reportingBackoff(() => {
+    reportingBackoff(() =>
+      reportErrorToServerOrViewer(this, /** @type {!JsonObject} */ (data)));
+  }
+}
+
+/**
+ * Passes the given error data to either server or viewer.
+ * @param {!Window} win
+ * @param {!JsonObject} data Data from `getErrorReportData`.
+ * @return {Promise<undefined>}
+ */
+export function reportErrorToServerOrViewer(win, data) {
+  // Report the error to viewer if it has the capability. The data passed
+  // to the viewer is exactly the same as the data passed to the server
+  // below.
+  return maybeReportErrorToViewer(win, data).then(reportedErrorToViewer => {
+    if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
-    });
-  }
+    }
+  });
 }
 
 /**
