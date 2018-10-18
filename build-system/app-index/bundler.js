@@ -25,8 +25,8 @@ const plugins = [
   babel({
     exclude: '**/node_modules/**',
     plugins: [
-      ['transform-react-jsx', {'pragma': 'h'}], 
-      ['@babel/plugin-proposal-class-properties']
+      ['transform-react-jsx', {'pragma': 'h'}],
+      ['@babel/plugin-proposal-class-properties'],
     ],
     presets: [['@babel/preset-env', {modules: false}]],
   }),

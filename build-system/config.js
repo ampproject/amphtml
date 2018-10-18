@@ -95,7 +95,7 @@ const integrationTestPaths = [
 ];
 
 const devDashboardTestPaths = [
-  'build-system/app-index/test/**/*.js'
+  'build-system/app-index/test/**/*.js',
 ];
 
 const lintGlobs = [

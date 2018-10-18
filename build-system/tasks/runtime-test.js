@@ -23,10 +23,10 @@ const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
-const Mocha = require('mocha');
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
@@ -159,7 +159,7 @@ function printArgvMessages() {
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Prerequisite: ' +
         cyan('gulp build'),
-    dev_dashboard: 'Only running tests for the Dev Dashboard.',
+    'dev_dashboard': 'Only running tests for the Dev Dashboard.',
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -697,7 +697,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'ie': '  Runs tests on IE',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
-    'dev_dashboard': ' Run only the dev dashboard tests. ' + 
+    'dev_dashboard': ' Run only the dev dashboard tests. ' +
         'Reccomend using with --nobuild',
     'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',

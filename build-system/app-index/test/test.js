@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-const {join} = require('path');
 const assert = require('assert');
+const {join} = require('path');
 
 const bundler = require('../bundler');
 const devDashboard = require('../index');
 
 const expressResMock = {
-  end: () => {}
-}
+  end: () => {},
+};
 
 describe('Tests for the dev dashboard', () => {
 
   it('should bundle', () => {
     return bundler.bundleComponent(join(__dirname, '../components/proxy-form.js'))
-      .then((bundle) => {
-        assert.ok(bundle);
-    });
+        .then(bundle => {
+          assert.ok(bundle);
+        });
   });
 
   it('should be able to return HTML', () => {
     return devDashboard.serveIndex(undefined, expressResMock)
-      .then(renderedHtml => {
-      assert.ok(renderedHtml);
-    });
+        .then(renderedHtml => {
+          assert.ok(renderedHtml);
+        });
   });
 });

@@ -20,10 +20,8 @@ import {Component, h, render} from 'preact';
 
 class ProxyForm extends Component {
 
-  handleSubmit = (event) => {
+  handleSubmit = event => {
     event.preventDefault();
-    
-    console.log(event)
 
     const input = event.target.querySelector('#proxy-input');
     const suffix = input.value.replace(/^http(s?):\/\//i, '');
