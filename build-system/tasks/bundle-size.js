@@ -15,16 +15,83 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const octokit = require('@octokit/rest')();
+const path = require('path');
 const {getStdout} = require('../exec');
+const {gitCommitHash, gitOriginUrl} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 const maxSize = '82.6KB'; // Only use 0.1 KB of precision (no hundredths digit)
 
+const buildArtifactsRepoOptions = {
+  owner: 'ampproject',
+  repo: 'amphtml-build-artifacts',
+};
+const expectedGitHubProject = 'ampproject/amphtml';
+
 const {green, red, cyan, yellow} = colors;
+
+/**
+ * Store the bundle size of a commit hash in the build artifacts storage
+ * repository to the passed value.
+ *
+ * @param {string} bundleSize the new bundle size in 99.99KB format.
+ */
+function storeBundleSize(bundleSize) {
+  if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
+    log(yellow('Skipping'), cyan('--store') + ':',
+        'this action can only be performed on `push` builds on Travis');
+    return;
+  }
+
+  const gitOriginUrlValue = gitOriginUrl();
+  if (!gitOriginUrlValue.includes(expectedGitHubProject)) {
+    log('Git origin URL is', cyan(gitOriginUrlValue));
+    log('Skipping storing the bundle size in the artifacts repository on',
+        'GitHub...');
+    return;
+  }
+
+  if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
+    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle ' +
+        'size in the artifacts repository on GitHub!'));
+    process.exitCode = 1;
+    return;
+  }
+
+  const commitHash = gitCommitHash();
+  const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
+    path: path.join('bundle-size', commitHash),
+  });
+
+  octokit.authenticate({
+    type: 'token',
+    token: process.env.GITHUB_ARTIFACTS_TOKEN,
+  });
+
+  return octokit.repos.getContent(githubApiCallOptions).then(() => {
+    log('The file', cyan(`bundle-size/${commitHash}`), 'already exists in the',
+        'build artifacts repository on GitHub. Skipping...');
+  }).catch(() => {
+    return octokit.repos.createFile(Object.assign(githubApiCallOptions, {
+      message: `bundle-size: ${commitHash} (${bundleSize})`,
+      content: Buffer.from(bundleSize).toString('base64'),
+    })).then(() => {
+      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
+          'repository on GitHub');
+    }).catch(error => {
+      log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
+          red('the build artifacts repository on GitHub!'));
+      log(red('Error message was:'), error.message);
+      process.exitCode = 1;
+    });
+  });
+}
 
 /**
  * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
@@ -46,8 +113,16 @@ function checkBundleSize() {
   const pass = output.match(/PASS .*/);
   const fail = output.match(/FAIL .*/);
   const error = output.match(/ERROR .*/);
+  const bundleSizeFormatMatches = output.match(/: (\d+.?\d*KB)/);
   if (error && error.length > 0) {
     log(yellow(error[0]));
+    process.exitCode = 1;
+    return;
+  } else if (!bundleSizeFormatMatches) {
+    log(red('ERROR:'), 'could not infer bundle size from output.');
+    log(yellow(output));
+    process.exitCode = 1;
+    return;
   } else if (fail && fail.length > 0) {
     log(red(fail[0]));
     log(red('ERROR:'), cyan('bundlesize'), red('found that'),
@@ -62,10 +137,20 @@ function checkBundleSize() {
   } else {
     log(yellow(output));
   }
+
+  if (argv.store) {
+    return storeBundleSize(bundleSizeFormatMatches[1]);
+  }
 }
 
 
 gulp.task(
     'bundle-size',
     'Checks if the minified AMP binary has exceeded its size cap',
-    checkBundleSize);
+    checkBundleSize,
+    {
+      options: {
+        'store': '  Store bundle size in AMP build artifacts repo (used only '
+            + 'for `master` builds)',
+      },
+    });
