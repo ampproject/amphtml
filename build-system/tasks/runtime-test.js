@@ -159,6 +159,7 @@ function printArgvMessages() {
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Prerequisite: ' +
         cyan('gulp build'),
+    dev_dashboard: 'Only running tests for the Dev Dashboard.',
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -175,7 +176,7 @@ function printArgvMessages() {
     log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
-        !argv['local-changes']) {
+        !argv['local-changes'] && !argv.dev_dashboard) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
