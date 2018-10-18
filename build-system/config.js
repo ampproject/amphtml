@@ -81,7 +81,6 @@ const unitTestPaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
-  'build-system/app-index/test/**/*.js',
 ];
 
 const unitTestOnSaucePaths = [
@@ -93,6 +92,10 @@ const integrationTestPaths = [
   'test/integration/**/*.js',
   'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
+];
+
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js'
 ];
 
 const lintGlobs = [
@@ -110,6 +113,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  devDashboardTestPaths,
   lintGlobs,
   jsonGlobs: [
     '**/*.json',

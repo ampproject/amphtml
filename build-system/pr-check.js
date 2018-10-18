@@ -342,6 +342,9 @@ const command = {
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
   },
+  runDevDashboardTests: function() {
+    timedExecOrDie('gulp test --dev_dashboard --nobuild');
+  },
   runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
@@ -429,6 +432,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
+    command.runDevDashboardTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.

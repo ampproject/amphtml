@@ -130,8 +130,9 @@ function serveIndex(req, res) {
       serveIndexCache = renderedHtml;
     }
     res.end(renderedHtml);
+    return renderedHtml;
   };
-  serveIndexTask();
+  return serveIndexTask();
 }
 
 
