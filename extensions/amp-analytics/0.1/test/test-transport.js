@@ -41,7 +41,7 @@ describes.realWin('amp-analytics.transport', {
   }
 
   function sendRequest(win, request, options) {
-    new Transport(win, options).sendRequest(request);
+    new Transport(win, options).sendRequest(request, []);
   }
 
   function assertCallCounts(
@@ -132,7 +132,7 @@ describes.realWin('amp-analytics.transport', {
     const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
 
     function sendRequestUsingIframe(win, url) {
-      new Transport(win).sendRequestUsingIframe(url);
+      new Transport(win).sendRequestUsingIframe(url, {});
     }
 
     it('should create and delete an iframe', () => {
@@ -227,7 +227,7 @@ describes.realWin('amp-analytics.transport', {
       transport.iframeTransport_ = {
         sendRequest: iframeTransportSendRequestSpy,
       };
-      transport.sendRequest('test test');
+      transport.sendRequest('test test', []);
       assertCallCounts(0, 0, 0);
       expect(iframeTransportSendRequestSpy).to.be.calledWith('test test');
     });
