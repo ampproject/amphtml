@@ -19,7 +19,7 @@ import {Observable} from '../../../src/observable';
 
 /**
  * @typedef {{
- *   form: HTMLFormElement,
+ *   form: !HTMLFormElement,
  *   actionXhrMutator: function(string)
  * }}
  */
