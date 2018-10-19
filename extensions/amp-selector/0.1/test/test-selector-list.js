@@ -100,10 +100,10 @@ describes.realWin('amp-selector amp-list interaction', {
     list.fetch_ = () => {
       return new Promise(resolve => {
         setTimeout(() => {
-          resolve([
+          resolve({items: [
             {value: 0, text: 'ZERO'},
             {value: 1, text: 'ONE'},
-          ]);
+          ]});
         }, 100);
       });
     };

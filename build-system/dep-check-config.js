@@ -249,6 +249,10 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/position-observer/position-observer-worker.js',
       'src/service/video/docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'src/service/video/docking.js->' +
