@@ -125,6 +125,9 @@ function isBuildSystemFile(filePath) {
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
       !isFlagConfig(filePath) &&
+      // Exclude the dev dashboard from build-system, since we want it to 
+      // trigger the devDashboard check
+      !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
       !isVisualDiffFile(filePath))
@@ -607,6 +610,9 @@ function main() {
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
     }
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      command.runDevDashboardTests();
+    }
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
@@ -625,10 +631,6 @@ function main() {
         // PR contains only test changes. Run just the modified unit tests.
         command.runUnitTestsOnLocalChanges();
       }
-    }
-
-    if (buildTargets.has('DEV_DASHBOARD')) {
-      command.runDevDashboardTests();
     }
   }
 
