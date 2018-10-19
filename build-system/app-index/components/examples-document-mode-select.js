@@ -26,15 +26,15 @@ const options = {
 };
 
 export class ExamplesDocumentModeSelect extends Component {
-  render() {
+  render(props) {
     return (
       <form id="examples-mode-form">
         <label for="examples-mode-select">
           Document mode:
-          <select id="examples-mode-select" onchange={this.props.onchange}>
+          <select id="examples-mode-select" onchange={props.onchange}>
             {Object.keys(options).map(key => (
               <option value={options[key]}
-                selected={this.props.value == options[key]}>
+                selected={props.value == options[key]}>
                 {key}
               </option>
             ))}

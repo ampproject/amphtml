@@ -21,6 +21,71 @@ import {ExamplesDocumentModeSelect} from './examples-document-mode-select';
 import {ProxyForm} from './proxy-form';
 
 
+function SelectModeOptional({basepath, changeHandler, value}) {
+  return !/^\/examples/.test(basepath) ? null : (
+    <ExamplesDocumentModeSelect
+      onchange={changeHandler}
+      value={value} />
+  );
+}
+
+function Header({isMainPage}) {
+  return (
+    <header>
+      <h1 class="amp-logo">AMP</h1>
+      <div class="right-of-logo">
+        {!isMainPage && (<a href="/">← Back to main</a>)}
+      </div>
+      <ul>
+        <li>
+          <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md"
+            target="_blank">
+            Developing
+          </a>
+        </li>
+        <li class="divider">
+          <a href="https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md"
+            target="_blank">
+            Contributing
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ampproject/amphtml/"
+            target="_blank">
+            Github
+          </a>
+        </li>
+        <li>
+          <a href="https://travis-ci.org/ampproject/amphtml"
+            target="_blank">
+            Travis
+          </a>
+        </li>
+        <li>
+          <a href="https://percy.io/ampproject/amphtml/"
+            target="_blank">
+            Percy
+          </a>
+        </li>
+      </ul>
+    </header>
+  );
+}
+
+function FileList({files}) {
+  return (
+    <ul class="file-list">
+      {files.map(({name, href}) => (<li>
+        <a class="file-link" href={href}>{name}</a>
+      </li>))}
+    </ul>
+  );
+}
+
+function ProxyFormOptional({isMainPage}) {
+  return isMainPage ? (<ProxyForm />) : null;
+}
+
 class Main extends Component {
 
   constructor(props) {
@@ -33,57 +98,11 @@ class Main extends Component {
   }
 
   render(unusedProps, state) {
-    const documentSelectModeOrNothing = !/^\/examples/.test(state.basepath) ?
-      null : (
-        <ExamplesDocumentModeSelect
-          onchange={this.changeDocumentMode}
-          value={state.selectModePrefix} />
-      );
-
     return (
       <div>
         <wrap>
-          <header>
-            <h1 class="amp-logo">AMP</h1>
-            <div class="right-of-logo">
-              {!state.isMainPage && (
-                <a href="/">← Back to main</a>
-              )}
-            </div>
-            <ul>
-              <li>
-                <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md"
-                  target="_blank">
-                  Developing
-                </a>
-              </li>
-              <li class="divider">
-                <a href="https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md"
-                  target="_blank">
-                  Contributing
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/ampproject/amphtml/"
-                  target="_blank">
-                  Github
-                </a>
-              </li>
-              <li>
-                <a href="https://travis-ci.org/ampproject/amphtml"
-                  target="_blank">
-                  Travis
-                </a>
-              </li>
-              <li>
-                <a href="https://percy.io/ampproject/amphtml/"
-                  target="_blank">
-                  Percy
-                </a>
-              </li>
-            </ul>
-          </header>
-          {state.isMainPage && <ProxyForm />}
+          <Header isMainPage={state.isMainPage} />
+          <ProxyFormOptional isMainPage={state.isMainPage} />
         </wrap>
         <div class="file-list-container">
           <wrap>
@@ -96,36 +115,35 @@ class Main extends Component {
               </a>
             </h3>
             <div class="push-right-after-heading">
-              {documentSelectModeOrNothing}
+              <SelectModeOptional
+                basepath={state.basepath}
+                changeHandler={this.changeDocumentMode}
+                value={this.selectModePrefix} />
               <a href="/~" class="underlined">List root directory</a>
             </div>
-            <ul class="file-list">
-              {state.fileSet.map(file => this.renderLink(file, state))}
-            </ul>
+            <FileList files={this.getFileSet_()} />
           </wrap>
         </div>
       </div>
     );
   }
 
-  renderLink(file) {
-    const prefix = /\.html$/.test(file) ?
-      this.state.selectModePrefix :
-      '/';
+  getFileSet_() {
+    return this.state.fileSet.map(name => {
+      const prefix = /\.html$/.test(name) ?
+        this.state.selectModePrefix :
+        '/';
 
-    // TODO(alanorozco): Fix path generation mess.
-    const href = [
-      prefix,
-      this.state.basepath.replace(/(^\/)|(\/$)/g, ''),
-      '/',
-      file,
-    ].join('').replace(/^\/\//, '/');
+      // TODO(alanorozco): Fix href generation mess.
+      const href = [
+        prefix,
+        this.state.basepath.replace(/(^\/)|(\/$)/g, ''),
+        '/',
+        name,
+      ].join('').replace(/^\/\//, '/');
 
-    return (
-      <li>
-        <a class="file-link"href={href}>{file}</a>
-      </li>
-    );
+      return {name, href};
+    });
   }
 }
 
