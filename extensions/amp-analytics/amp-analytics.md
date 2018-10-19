@@ -206,7 +206,6 @@ To reduce the number of request pings, you can specify batching behaviors in the
 
 The batching properties are:
   - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
-  - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
 For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 ```javascript

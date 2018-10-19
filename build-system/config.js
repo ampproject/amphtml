@@ -94,6 +94,10 @@ const integrationTestPaths = [
   'extensions/**/test/integration/**/*.js',
 ];
 
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
+];
+
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
@@ -109,6 +113,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  devDashboardTestPaths,
   lintGlobs,
   jsonGlobs: [
     '**/*.json',

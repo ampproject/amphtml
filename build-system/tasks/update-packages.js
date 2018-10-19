@@ -110,15 +110,14 @@ function patchRegisterElement() {
 }
 
 /**
- * Patch @ampproject/worker-dom/dist/index.safe.js with ES6 export.
+ * Closure Compiler doesn't recognize .mjs extension yet, so copy the file to
+ * have a .js file extension.
  */
 function patchWorkerDom() {
-  replaceInFile(
-      'node_modules/@ampproject/worker-dom/dist/index.safe.js',
-      'node_modules/@ampproject/worker-dom/dist/index.safe.patched.js',
-      // Replace local var with an ES6 export.
-      'var MainThread=function(R){',
-      'export const MainThread=function(R){');
+  const dir = 'node_modules/@ampproject/worker-dom/dist/';
+  fs.copyFileSync(
+      dir + 'unminified.index.safe.mjs',
+      dir + 'unminified.index.safe.mjs.patched.js');
 }
 
 /**
