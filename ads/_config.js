@@ -770,6 +770,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'recomad': {
+    renderStartImplemented: true,
+  },
+
   'relap': {
     renderStartImplemented: true,
   },
