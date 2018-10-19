@@ -125,7 +125,7 @@ function isBuildSystemFile(filePath) {
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
       !isFlagConfig(filePath) &&
-      // Exclude the dev dashboard from build-system, since we want it to 
+      // Exclude the dev dashboard from build-system, since we want it to
       // trigger the devDashboard check
       !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
