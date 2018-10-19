@@ -113,8 +113,8 @@ a.underlined::before {
   margin-top: -70px;
   line-height: 20px;
 }
-#examples-mode-form {
-  margin-right: 20px;
+#examples-mode-select {
+  margin: 0 20px 0 10px;
 }
 .center {
   margin: 40px 0;

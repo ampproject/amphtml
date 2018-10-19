@@ -68,13 +68,8 @@ if (!global.AMP_TESTING) {
     devDashboard.setCacheStatus(false);
   }
 
-  app.get('/', devDashboard.serveIndex);
-  app.get([
-    '/~',
-    '/*',
-  ], devDashboard.serveListing);
+  app.get(['/', '/*'], devDashboard.serveIndex);
 }
-
 
 // Deprecate usage of .min.html/.max.html
 app.get([
