@@ -214,6 +214,23 @@ and the user can select a date range with a starting date and ending date.
   </noscript>
 </amp-img>
 
+## Date formats
+
+`amp-date-picker` attributes accept dates in ISO 8601 and RFC 5545 RRULE formats.
+
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formats dates as `YYYY-MM-DD`
+and is the standard for sharing dates between electronic systems.
+For example, ISO 8601 formats the date February 28 2018 as `2018-02-28`.
+
+[RFC 5545 Recurrence Rules (RRULEs)](https://icalendar.org/iCalendar-RFC-5545/3-3-10-recurrence-rule.html)
+standardize a format for specifying repeating dates.
+For example, RFC 5545 formats Halloween as `RRULE:FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=31`.
+More complex dates are also possible, such as the United States Thanksgiving holiday,
+which is every November on the fourth Thursday: `RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=+4TH`.
+The API is not friendly to memorize, but there are various
+[RRULE generators](https://jakubroztocil.github.io/rrule) available online.
+
+
 ## Attributes
 
 ##### mode
@@ -304,12 +321,12 @@ an initial end date dynamically.
 
 ##### min
 
-The earliest date that the user may select.
+The earliest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `min` attribute is present, the current date will be the minimum date.
 
 ##### max
 
-The latest date that the user may select.
+The latest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `max` attribute is present, the date picker will have no maximum date.
 
 #####  month-format
