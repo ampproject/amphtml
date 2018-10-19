@@ -21,7 +21,6 @@ import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {
@@ -163,11 +162,8 @@ describes.realWin('BaseElement', {amp: true}, env => {
 
   it('should return true for inabox experiment renderOutsideViewport', () => {
     expect(element.renderOutsideViewport()).to.eql(3);
-    // Still 3 if inabox w/o experiment.
+    // Should be true with inabox
     env.win.AMP_MODE.runtime = 'inabox';
-    expect(element.renderOutsideViewport()).to.eql(3);
-    // Enable experiment and now should be true.
-    toggleExperiment(env.win, 'inabox-rov', true);
     expect(element.renderOutsideViewport()).to.be.true;
   });
 
