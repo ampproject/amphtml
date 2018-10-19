@@ -23,13 +23,13 @@ const app = require('express')();
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
+const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {serveIndex, serveListing} = require('./app-index/index');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
@@ -62,11 +62,17 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  app.get('/', serveIndex);
+
+  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
+      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
+    devDashboard.setCacheStatus(false);
+  }
+
+  app.get('/', devDashboard.serveIndex);
   app.get([
     '/~',
     '/*',
-  ], serveListing);
+  ], devDashboard.serveListing);
 }
 
 

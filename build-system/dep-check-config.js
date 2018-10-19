@@ -59,8 +59,9 @@ exports.rules = [
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
       'src/sanitizer.js->src/purifier.js',
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
     ],
   },
   {
@@ -249,6 +250,10 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/position-observer/position-observer-worker.js',
       'src/service/video/docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'src/service/video/docking.js->' +
