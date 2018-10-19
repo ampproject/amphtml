@@ -26,7 +26,7 @@ import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {
 
-/** @param {!AmpElement} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 

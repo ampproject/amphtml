@@ -81,7 +81,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   it('should set an active attribute when state becomes active', () => {
     page.buildCallback();
     return page.layoutCallback().then(() => {
-      page.setState(PageState.ACTIVE);
+      page.setState(PageState.PLAYING);
 
       expect(page.element).to.have.attribute('active');
     });
@@ -92,7 +92,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     page.buildCallback();
     return page.layoutCallback().then(() => {
-      page.setState(PageState.ACTIVE);
+      page.setState(PageState.PLAYING);
 
       expect(advancementStartStub).to.have.been.calledOnce;
     });
@@ -108,7 +108,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     return page.layoutCallback().then(() => {
       const animateInStub = sandbox.stub(page.animationManager_, 'animateIn');
 
-      page.setState(PageState.ACTIVE);
+      page.setState(PageState.PLAYING);
 
       expect(animateInStub).to.have.been.calledOnce;
     });
@@ -142,7 +142,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
               .withExactArgs(videoEl)
               .once();
 
-          page.setState(PageState.ACTIVE);
+          page.setState(PageState.PLAYING);
 
           // `setState` runs code that creates subtasks (Promise callbacks).
           // Waits for the next frame to make sure all the subtasks are
