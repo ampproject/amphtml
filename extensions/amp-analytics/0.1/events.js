@@ -1131,9 +1131,6 @@ export class VisibilityTracker extends EventTracker {
 
     /** @private */
     this.waitForTrackers_ = {};
-
-    /** @private */
-    this.reportWhenTrackers_ = {};
   }
 
   /** @override */
@@ -1145,12 +1142,16 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
-    const reportWhenSpec = visibilitySpec['reportWhen'];
+    let reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
     // special polyfill for eventType: 'hidden'
     let createReadyReportPromiseFunc = null;
     if (eventType == 'hidden') {
-      createReadyReportPromiseFunc = this.createReportReadyPromise_.bind(this);
+      reportWhenSpec = eventType;
+    }
+    if (reportWhenSpec) {
+      createReadyReportPromiseFunc =
+          this.createReportReadyPromise_.bind(this, reportWhenSpec);
     }
 
     // Root selectors are delegated to analytics roots.
@@ -1189,23 +1190,35 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * @param {string|undefined} reportWhenSpec
+   * @param {string} reportWhenSpec
    * @return {!Promise}
    */
   createReportReadyPromise_(reportWhenSpec) {
     const viewer = this.root.getViewer();
 
-    if (!viewer.isVisible()) {
-      return Promise.resolve();
-    }
-
-    return new Promise(resolve => {
-      viewer.onVisibilityChanged(() => {
+    switch (reportWhenSpec) {
+      case 'hidden':
         if (!viewer.isVisible()) {
-          resolve();
+          return Promise.resolve();
         }
-      });
-    });
+
+        return new Promise(resolve => {
+          viewer.onVisibilityChanged(() => {
+            if (!viewer.isVisible()) {
+              resolve();
+            }
+          });
+        });
+      case 'endOfFrame':
+        return new Promise(resolve => {
+          // TODO Only resolve when endOfFrame occurs. How to detect this?
+          resolve();
+        });
+      default:
+        user().assert(reportWhenSpec == 'none',
+            'reportWhen value %s not supported', reportWhenSpec);
+        return Promise.resolve();
+    }
   }
 
   /**
