@@ -106,6 +106,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'third_party/rrule/',
     'third_party/react-dates/',
+    'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
     // Can't seem to suppress `(0, win.eval)` suspicious code warning
@@ -218,6 +219,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-bind/**/*.js',
       // Needed to access form impl from other extensions
       'extensions/amp-form/**/*.js',
+      // Needed to access inputmask impl from other extensions
+      'extensions/amp-inputmask/**/*.js',
       // Needed for AccessService
       'extensions/amp-access/**/*.js',
       // Needed for AmpStoryVariableService
@@ -251,6 +254,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
+      'third_party/inputmask/**/*.js',
       'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/set-dom/src/**/*.js',
