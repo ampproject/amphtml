@@ -17,8 +17,8 @@
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe.configure().ifNewChrome();
-config.run('amp-inputmask', () => {
+const config = describe.configure().retryOnSaucelabs().ifNewChrome();
+config.skip('amp-inputmask', () => {
   describes.integration('attributes', {
     body: `
     <form method="post" action-xhr="http://localhost:31862/form/post" target="_blank">

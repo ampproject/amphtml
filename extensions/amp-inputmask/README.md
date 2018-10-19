@@ -119,8 +119,9 @@ The hyphen will be automatically added as the user types the sixth digit.
 ```
 
 This mask accepts a North American phone number.
+The characters "+", "1", " ", "(", ")" and "-" will be automatically added as the user types.
 ```html
-<input type="tel" mask="+\1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+<input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
 ```
 
 #### mask-output
