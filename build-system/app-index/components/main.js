@@ -108,31 +108,31 @@ class Main extends Component {
             <a href="/~" class="underlined">List root directory</a>
           </div>
           <ul class="file-list">
-            {this.state.fileSet.map(file => {
-              const prefix = /\.html$/.test(file) ?
-                this.state.selectModePrefix :
-                '/';
-
-              return (
-                <li>
-                  <a class="file-link"
-                    href={
-                      [
-                        prefix,
-                        this.state.basepath.replace(/^\/|\/$/, ''),
-                        '/',
-                        file,
-                      ].join('')
-                    }>
-                    {file}
-                  </a>
-                </li>
-              );
-            })}
+            {this.state.fileSet.map(file => this.renderLink(file))}
           </ul>
         </wrap>
       </div>
     </div>);
+  }
+
+  renderLink(file) {
+    const prefix = /\.html$/.test(file) ?
+      this.state.selectModePrefix :
+      '/';
+
+    // TODO(alanorozco): Fix path generation mess.
+    const href = [
+      prefix,
+      this.state.basepath.replace(/(^\/)|(\/$)/g, ''),
+      '/',
+      file,
+    ].join('').replace(/^\/\//, '/');
+
+    return (
+      <li>
+        <a class="file-link"href={href}>{file}</a>
+      </li>
+    );
   }
 }
 
