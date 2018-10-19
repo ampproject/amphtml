@@ -438,7 +438,7 @@ export class SubscriptionApi {
       }
       requestCallback(data, source, origin);
     }, this.is3p_,
-        // For 3P frames we also allow nested frames within them to subscribe..
+    // For 3P frames we also allow nested frames within them to subscribe..
     this.is3p_ /* opt_includingNestedWindows */);
   }
 
