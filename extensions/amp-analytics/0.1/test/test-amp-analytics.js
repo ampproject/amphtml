@@ -1472,9 +1472,10 @@ describes.realWin('amp-analytics', {
     it('does not send with parentPostMessage not inabox', function() {
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/bar'},
-        'triggers': [{'on': 'visible',
-          'request': 'foo',
-          'parentPostMessage': 'foo'}],
+        'triggers': [{
+          'on': 'visible',
+          'parentPostMessage': 'foo',
+        }],
       });
       return waitForNoSendRequest(analytics).then(() => {
         expect(postMessageSpy).to.have.not.been.called;
