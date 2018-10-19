@@ -59,12 +59,19 @@ const NUM_ALL_CHARS_LIMIT = 1500;
 let HighlightInfoDef;
 
 /**
- * The upper bound of the height of scrolling-down animation to highlighted
- * texts. If the height for animation exceeds this limit, we scroll the viewport
- * to the certain position before animation to control the speed of animation.
+ * The height of scrolling-down animation to highlighted texts.
  * @type {number}
  */
-const SCROLL_ANIMATION_HEIGHT_LIMIT = 1000;
+const SCROLL_ANIMATION_HEIGHT = 500;
+
+/**
+ * The height of the margin placed before highlighted texts.
+ * This margin is necessary to avoid the overlap with the common floating
+ * header UI.
+ * TODO(yunabe): Calculate this dynamically using elements in FixedLayer.
+ * @type {number}
+ */
+const PAGE_TOP_MARGIN = 80;
 
 /**
  * Returns highlight param in the URL hash.
@@ -119,6 +126,8 @@ export class HighlightHandler {
     this.ampdoc_ = ampdoc;
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
@@ -193,10 +202,10 @@ export class HighlightHandler {
     if (visibility == 'visible') {
       this.animateScrollToTop_(scrollTop);
     } else {
-      if (scrollTop > SCROLL_ANIMATION_HEIGHT_LIMIT) {
-        Services.viewportForDoc(this.ampdoc_).setScrollTop(
-            scrollTop - SCROLL_ANIMATION_HEIGHT_LIMIT);
-      }
+      // Scroll to the animation start position before the page becomes visible
+      // so that the top of the page is not painted when it becomes visible.
+      this.scrollToAnimationStart_(scrollTop);
+
       let called = false;
       this.viewer_.onVisibilityChanged(() => {
         // TODO(yunabe): Unregister the handler.
@@ -220,7 +229,7 @@ export class HighlightHandler {
     if (!nodes) {
       return 0;
     }
-    const viewport = Services.viewportForDoc(this.ampdoc_);
+    const viewport = this.viewport_;
     let minTop = Number.MAX_VALUE;
     let maxBottom = 0;
     const paddingTop = viewport.getPaddingTop();
@@ -237,10 +246,10 @@ export class HighlightHandler {
       return 0;
     }
     const height = viewport.getHeight() - paddingTop;
-    if (maxBottom - minTop > height) {
-      return minTop;
+    let pos = (maxBottom + minTop - height) / 2;
+    if (pos > minTop - PAGE_TOP_MARGIN) {
+      pos = minTop - PAGE_TOP_MARGIN;
     }
-    const pos = (maxBottom + minTop - height) / 2;
     return pos > 0 ? pos : 0;
   }
 
@@ -248,7 +257,19 @@ export class HighlightHandler {
    * @param {number} top
    * @private
    */
+  scrollToAnimationStart_(top) {
+    const start = Math.max(0, top - SCROLL_ANIMATION_HEIGHT);
+    this.viewport_.setScrollTop(start);
+  }
+
+  /**
+   * @param {number} top
+   * @private
+   */
   animateScrollToTop_(top) {
+    // First, move to the start position of scroll animation.
+    this.scrollToAnimationStart_(top);
+
     const sentinel = this.ampdoc_.win.document.createElement('div');
     // Notes:
     // The CSS of sentinel can be overwritten by user custom CSS.
@@ -270,11 +291,10 @@ export class HighlightHandler {
     const body = this.ampdoc_.getBody();
     body.appendChild(sentinel);
     this.sendHighlightState_('auto_scroll');
-    Services.viewportForDoc(this.ampdoc_)
-        .animateScrollIntoView(sentinel).then(() => {
-          this.sendHighlightState_('shown');
-          body.removeChild(sentinel);
-        });
+    this.viewport_.animateScrollIntoView(sentinel).then(() => {
+      this.sendHighlightState_('shown');
+      body.removeChild(sentinel);
+    });
   }
 
   /**
