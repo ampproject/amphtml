@@ -289,10 +289,6 @@ function removeAttrs(node) {
 
 
 function replaceExtension(doc, toExtension) {
-  if (!availableExtensions.includes(toExtension)) {
-    throw 'Invalid extension';
-  }
-
   const substitutable = getSubstitutable(doc);
 
   const substitutableTagNameLowerCase = substitutable.tagName.toLowerCase();
@@ -342,6 +338,11 @@ function appendClientScript(doc) {
 }
 
 
+function isValidExtension(extension) {
+  return availableExtensions.includes(extension);
+}
+
+
 function runVideoTestBench(req, res) {
   fs.readFileAsync(sourceFile).then(contents => {
     const dom = new JSDOM(contents);
@@ -353,6 +354,11 @@ function runVideoTestBench(req, res) {
     setOptionalAttrs(req, doc);
 
     if (extension) {
+      if (!isValidExtension(extension)) {
+        res.status(403);
+        res.end('Invalid extension parameter.');
+        return;
+      }
       replaceExtension(doc, extension);
     }
 
