@@ -159,7 +159,7 @@ const EXPERIMENTS = [
     id: 'ios-embed-sd-notransfer',
     name: 'Disables transfer mode for the new iOS embedded viewport model',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -174,8 +174,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
