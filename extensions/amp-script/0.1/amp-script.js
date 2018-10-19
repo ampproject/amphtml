@@ -15,15 +15,20 @@
  */
 
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {MainThread} from '@ampproject/worker-dom/dist/index.safe.patched';
+import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {
+  sanitizer,
+  upgradeElement,
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
+
 
 export class AmpScript extends AMP.BaseElement {
   /** @override */
@@ -34,9 +39,25 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Configure worker-dom's sanitizer with AMP-specific config and hooks.
+    const config = purifyConfig();
+    sanitizer.configure(config, {
+      'beforeSanitize': purify => {
+        addPurifyHooks(purify, /* diffing */ false);
+      },
+      'afterSanitize': purify => {
+        purify.removeAllHooks();
+      },
+      'nodeWasRemoved': node => {
+        user().warn(TAG, 'Node was sanitized:', node);
+      },
+    });
+
     const url = this.workerThreadUrl_();
     dev().fine(TAG, 'Fetching amp-script-worker from:', url);
-    MainThread.upgradeElement(this.element, url);
+
+    upgradeElement(this.element, url);
+
     return Promise.resolve();
   }
 

@@ -59,8 +59,9 @@ exports.rules = [
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
       'src/sanitizer.js->src/purifier.js',
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
     ],
   },
   {
