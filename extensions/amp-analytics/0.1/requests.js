@@ -202,6 +202,7 @@ export class RequestHandler {
           [baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
         const baseUrl = results[0];
         const batchSegments = results[1];
+        // TODO: iframePing will not work with batch. Add a config validation.
         if (trigger['iframePing']) {
           user().assert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
