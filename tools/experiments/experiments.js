@@ -363,6 +363,12 @@ const EXPERIMENTS = [
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
+  },
+  {
     id: 'linker-form',
     name: 'Enables form support in linker',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
