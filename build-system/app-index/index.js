@@ -17,16 +17,20 @@
 
 
 const BBPromise = require('bluebird');
+const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {join, normalize, sep} = require('path');
 
-
 // TODO(alanorozco): Use JSX once we're ready.
+// HTML Templates
 const templateFile = join(__dirname, '/template.html');
 const proxyFormFile = join(__dirname, '/proxy-form.html');
 const listingHeaderFile = join(__dirname, '/listing-header.html');
 
+// JS Component
+const proxyFormComponent = join(__dirname, '/components/proxy-form.js');
 const mainCssFile = join(__dirname, '/main.css');
+
 
 
 function renderFileLink(base, location) {
@@ -102,11 +106,39 @@ function serveListingWithReplacements(
   });
 }
 
+let shouldCache = true;
+function setCacheStatus(cacheStatus) {
+  shouldCache = cacheStatus;
+}
 
-function serveIndex(req, res, next) {
-  serveListingWithReplacements(req, res, next, '/examples', {
-    '<!-- bottom_of_header -->': proxyFormFile,
-  });
+let serveIndexCache;
+function serveIndex(req, res) {
+
+  if (shouldCache && serveIndexCache) {
+    res.end(serveIndexCache);
+    return;
+  }
+
+  const serveIndexTask = async() => {
+    const bundle = await bundler.bundleComponent(proxyFormComponent);
+    let renderedHtml = await renderListing('/examples');
+
+    renderedHtml = renderedHtml.replace(
+        '<!-- bottom_of_header -->',
+        fs.readFileSync(proxyFormFile, 'utf8').toString()
+    );
+    renderedHtml = renderedHtml.replace(
+        '<!-- bundle -->',
+        bundle
+    );
+
+    if (shouldCache) {
+      serveIndexCache = renderedHtml;
+    }
+    res.end(renderedHtml);
+    return renderedHtml;
+  };
+  return serveIndexTask();
 }
 
 
@@ -116,5 +148,8 @@ function serveListing(req, res, next) {
   });
 }
 
-
-module.exports = {serveIndex, serveListing};
+module.exports = {
+  setCacheStatus,
+  serveIndex,
+  serveListing,
+};
