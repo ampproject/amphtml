@@ -74,3 +74,7 @@ amp-consent.consent-iframe-active {
 .i-amphtml-consent-ui-in {
   animation: i-amphtml-consent-ui-in 0.5s linear;
 }
+
+.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
+  /*TODO: @torch2424 some fullscreen CSS magic*/
+}
