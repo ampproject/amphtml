@@ -27,14 +27,14 @@ const mandatoryParams = [],
       'design', 'asins', 'debug', 'aax_src_id',
       'header_style', 'link_style', 'link_hover_style',
       'text_style', 'random_permute', 'render_full_page',
-      'url', 'axf_exp_name',
-      'axf_treatment', 'disable_borders', 'attributes',
-      'carousel', 'feedback_enable', 'max_ads_in_a_row',
-      'list_price', 'prime', 'prime_position', 'widget_padding',
+      'axf_exp_name', 'axf_treatment', 'disable_borders',
+      'attributes', 'carousel', 'feedback_enable',
+      'max_ads_in_a_row', 'list_price', 'prime',
+      'prime_position', 'widget_padding',
       'strike_text_style', 'brand_text_link', 'brand_position',
       'large_rating', 'rating_position', 'max_title_height',
       'enable_swipe_on_mobile', 'overrides',
-      'ead', 'force_win_bid', 'fallback_mode',
+      'ead', 'force_win_bid', 'fallback_mode', 'url',
       'regionurl', 'divid', 'recomtype', 'adinstanceid',
     ];
 const prefix = 'amzn_assoc_';
@@ -77,7 +77,7 @@ export function a9(global, data) {
 function getURL(data) {
   let url = 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';
   if (data.regionurl && (data.regionurl !== '')) {
-    url = data['regionurl'];
+    url = data.regionurl;
   }
 
   return url;
@@ -127,7 +127,7 @@ function loadSearTag(global, data) {
     const url = getURL(data);
     let i;
 
-    for (i = 0; i < 45; i++) {
+    for (i = 0; i < 44; i++) {
       setMacro(optionalParams[i]);
     }
 
