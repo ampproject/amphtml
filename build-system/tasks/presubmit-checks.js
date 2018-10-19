@@ -290,6 +290,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
