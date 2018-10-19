@@ -107,8 +107,8 @@ function serveIndex(req, res, next) {
     }
 
     const bundle = await bundleMain();
-    const template = (await fs.readFileSync(templateFile)).toString();
-    const css = (await fs.readFileSync(mainCssFile)).toString();
+    const template = (await fs.readFileAsync(templateFile)).toString();
+    const css = (await fs.readFileAsync(mainCssFile)).toString();
 
     const initialState = {
       basepath,
