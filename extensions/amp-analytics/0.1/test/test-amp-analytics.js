@@ -44,7 +44,6 @@ describes.realWin('amp-analytics', {
 }, function(env) {
   let win, doc, sandbox;
   let sendRequestSpy;
-  let postMessageSpy;
   let configWithCredentials;
   let uidService;
   let crypto;
@@ -149,7 +148,6 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
 
@@ -1474,14 +1472,40 @@ describes.realWin('amp-analytics', {
   });
 
   describe('parentPostMessage in inabox case', () => {
+    let postMessageSpy;
+
+    function waitForParentPostMessage(opt_max) {
+      if (postMessageSpy.callCount) {
+        return Promise.resolve();
+      }
+      return new Promise(resolve => {
+        const start = Date.now();
+        const interval = setInterval(() => {
+          const time = Date.now();
+          if (postMessageSpy.callCount ||
+              (opt_max && (time - start) > opt_max)) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 4);
+      });
+    }
+
+    function waitForNoParentPostMessage() {
+      return waitForParentPostMessage(100).then(() => {
+        expect(postMessageSpy).to.not.be.called;
+      });
+    }
+
     it('does send a hit when parentPostMessage is provided inabox', function() {
       env.win.AMP_MODE.runtime = 'inabox';
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/bar'},
         'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
       });
+      postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
       return waitForNoSendRequest(analytics).then(() => {
-        expect(postMessageSpy).to.have.been.called;
+        return waitForParentPostMessage();
       });
     });
 
@@ -1493,8 +1517,9 @@ describes.realWin('amp-analytics', {
           'parentPostMessage': 'foo',
         }],
       });
+      postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
       return waitForNoSendRequest(analytics).then(() => {
-        expect(postMessageSpy).to.have.not.been.called;
+        return waitForNoParentPostMessage();
       });
     });
 
@@ -1506,20 +1531,25 @@ describes.realWin('amp-analytics', {
             'requests': {'foo': 'https://example.com/bar'},
             'triggers': [{'on': 'visible'}],
           });
-          return waitForNoSendRequest(analytics);
+          postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+          return waitForNoSendRequest(analytics).then(() => {
+            return waitForNoParentPostMessage();
+          });
         });
 
     it('send when request and parentPostMessage are provided', function() {
       env.win.AMP_MODE.runtime = 'inabox';
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/bar'},
-        'triggers': [{'on': 'visible',
+        'triggers': [{
+          'on': 'visible',
           'parentPostMessage': 'bar',
-          'request': 'foo'}],
+          'request': 'foo',
+        }],
       });
+      postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar');
-        expect(postMessageSpy).to.have.been.called;
+        return waitForParentPostMessage(analytics);
       });
     });
   });
