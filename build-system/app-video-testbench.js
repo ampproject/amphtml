@@ -60,7 +60,6 @@ const requiredAttrs = {
     'data-playerid': '26e2e3c1049c4e70ae08a242638b5c40',
     'data-playerversion': 'v4',
   },
-  'amp-youtube': {'data-videoid': 'mGENRKrdoGY'},
   'amp-video-iframe': {'src': '/examples/amp-video-iframe/frame.html'},
   'amp-vimeo': {'data-videoid': '27246366'},
   'amp-viqeo-player': {
@@ -68,6 +67,7 @@ const requiredAttrs = {
     'data-videoid': 'b51b70cdbb06248f4438',
   },
   'amp-wistia-player': {'data-media-hashed-id': 'u8p9wq6mq8'},
+  'amp-youtube': {'data-videoid': 'mGENRKrdoGY'},
 };
 
 /**
@@ -100,11 +100,11 @@ const availableExtensions = [
   'amp-ima-video',
   'amp-mowplayer',
   'amp-ooyala-player',
-  'amp-youtube',
   'amp-video',
   'amp-video-iframe',
   'amp-viqeo-player',
   'amp-wistia-player',
+  'amp-youtube',
 
   // TODO(alanorozco): Reenable with valid params, if possible.
   // 'amp-nexxtv-player',
