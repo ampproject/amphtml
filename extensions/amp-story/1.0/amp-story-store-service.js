@@ -81,7 +81,7 @@ export const UIType = {
  *    supportedbrowserstate: boolean,
  *    systemuiisvisiblestate: boolean,
  *    uistate: !UIType,
- *    actionswhitelist: !Array<{tagOrTarget: string, method: string}>
+ *    actionswhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentid: ?string,
  *    currentpageid: string,
  *    currentpageindex: number,
@@ -129,6 +129,7 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
+  ADD_TO_ACTIONS_WHITELIST: 'addtoactionswhitelist',
   CHANGE_PAGE: 'setcurrentpageid',
   SET_CONSENT_ID: 'setconsentid',
   TOGGLE_ACCESS: 'toggleaccess',
@@ -153,7 +154,7 @@ export const Action = {
 /**
  * Functions to compare a data structure from the previous to the new state and
  * detect a mutation, when a simple equality test would not work.
- * @private @const {!Object<!StateProperty: !function}
+ * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
@@ -169,9 +170,7 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
-    case Action.ADD_TO_ACTION_WHITELIST:
-      // TODO: check the data for the right action properties.
-      // data could be an action, or an array of actions.
+    case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist =
           [].concat(state[StateProperty.ACTIONS_WHITELIST], data);
       return /** @type {!State} */ (Object.assign(
@@ -345,8 +344,8 @@ export class AmpStoryStoreService {
     Object.keys(this.listeners_).forEach(key => {
       comparisonFn = stateComparisonFunctions[key];
       if (comparisonFn ?
-          comparisonFn(oldState[key], this.state_[key]) :
-          oldState[key] !== this.state_[key]) {
+        comparisonFn(oldState[key], this.state_[key]) :
+        oldState[key] !== this.state_[key]) {
         this.listeners_[key].fire(this.state_[key]);
       }
     });

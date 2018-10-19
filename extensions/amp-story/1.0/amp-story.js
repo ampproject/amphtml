@@ -1891,7 +1891,7 @@ export class AmpStory extends AMP.BaseElement {
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(Action.ADD_ACTION_TO_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
   /** @private */

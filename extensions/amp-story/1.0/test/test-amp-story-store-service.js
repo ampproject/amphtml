@@ -237,13 +237,12 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
 
-    storeService.dispatch(Action.ADD_ACTION_TO_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
 
     const actionsListenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
 
-    const action = {tagOrTarget: 'foo'};
-    storeService.dispatch(Action.ADD_ACTION_TO_WHITELIST, action2);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action2);
 
     expect(actionsListenerSpy)
         .to.have.been.calledOnceWithExactly([action1, action2]);
@@ -254,12 +253,12 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     const action2 = {tagOrTarget: 'foo', method: 2};
     const action3 = {tagOrTarget: 'foo', method: 3};
 
-    storeService.dispatch(Action.ADD_ACTION_TO_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
 
     const actionsListenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
 
-    storeService.dispatch(Action.ADD_ACTION_TO_WHITELIST, [action2, action3]);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [action2, action3]);
 
     expect(actionsListenerSpy)
         .to.have.been.calledOnceWithExactly([action1, action2, action3]);

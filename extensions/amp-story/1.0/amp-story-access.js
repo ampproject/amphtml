@@ -302,7 +302,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     });
 
-    this.storeService_.dispatch(Action.ADD_ACTION_TO_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
   /**
