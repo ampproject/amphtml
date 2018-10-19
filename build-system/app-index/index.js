@@ -124,6 +124,8 @@ function serveIndex(req, res, next) {
             `window.AMP_PREACT_STATE = ${JSON.stringify(initialState)};`);
 
     res.end(renderedHtml);
+
+    return renderedHtml; // for testing
   })();
 }
 
