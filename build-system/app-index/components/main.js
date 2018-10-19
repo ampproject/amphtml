@@ -17,14 +17,37 @@
 /* eslint-disable no-unused-vars */
 
 import {Component, h, render} from 'preact';
-import {ExamplesDocumentModeSelect} from './examples-document-mode-select';
 import {ProxyForm} from './proxy-form';
 
+
+const examplesDocumentModes = {
+  'standard': '/',
+  'a4a': '/a4a/',
+  'a4a-3p': '/a4a-3p/',
+  'inabox': '/inabox/1/',
+};
+
+
+function ExamplesDocumentModeSelect({changeHandler, value}) {
+  return (
+    <label for="examples-mode-select">
+      Document mode:
+      <select id="examples-mode-select" onchange={changeHandler}>
+        {Object.keys(examplesDocumentModes).map(key => (
+          <option value={examplesDocumentModes[key]}
+            selected={value == examplesDocumentModes[key]}>
+            {key}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 function SelectModeOptional({basepath, changeHandler, value}) {
   return !/^\/examples/.test(basepath) ? null : (
     <ExamplesDocumentModeSelect
-      onchange={changeHandler}
+      changeHandler={changeHandler}
       value={value} />
   );
 }
