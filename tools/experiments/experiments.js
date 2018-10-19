@@ -272,10 +272,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
-  },
-  {
     id: 'amp-live-list-sorting',
     name: 'Allows "newest last" insertion algorithm to be used',
     spec: 'https://github.com/ampproject/amphtml/issues/5396',
