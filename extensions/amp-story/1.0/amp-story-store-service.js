@@ -81,6 +81,7 @@ export const UIType = {
  *    supportedbrowserstate: boolean,
  *    systemuiisvisiblestate: boolean,
  *    uistate: !UIType,
+ *    actionswhitelist: !Array<{tagOrTarget: string, method: string}>
  *    consentid: ?string,
  *    currentpageid: string,
  *    currentpageindex: number,
@@ -119,6 +120,7 @@ export const StateProperty = {
   UI_STATE: 'uistate',
 
   // App data.
+  ACTIONS_WHITELIST: 'actionswhitelist',
   CONSENT_ID: 'consentid',
   CURRENT_PAGE_ID: 'currentpageid',
   CURRENT_PAGE_INDEX: 'currentpageindex',
@@ -149,6 +151,16 @@ export const Action = {
 
 
 /**
+ * Functions to compare a data structure from the previous to the new state and
+ * detect a mutation, when a simple equality test would not work.
+ * @private @const {!Object<!StateProperty: !function}
+ */
+const stateComparisonFunctions = {
+  [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+};
+
+
+/**
  * Returns the new sate.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
@@ -157,6 +169,13 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_TO_ACTION_WHITELIST:
+      // TODO: check the data for the right action properties.
+      // data could be an action, or an array of actions.
+      const newActionsWhitelist =
+          [].concat(state[StateProperty.ACTIONS_WHITELIST], data);
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist}));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -322,8 +341,12 @@ export class AmpStoryStoreService {
     const oldState = Object.assign({}, this.state_);
     this.state_ = actions(this.state_, action, data);
 
+    let comparisonFn;
     Object.keys(this.listeners_).forEach(key => {
-      if (oldState[key] !== this.state_[key]) {
+      comparisonFn = stateComparisonFunctions[key];
+      if (comparisonFn ?
+          comparisonFn(oldState[key], this.state_[key]) :
+          oldState[key] !== this.state_[key]) {
         this.listeners_[key].fire(this.state_[key]);
       }
     });
@@ -361,6 +384,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.ACTIONS_WHITELIST]: [],
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
