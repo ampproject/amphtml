@@ -48,6 +48,12 @@ export class ConsentUI {
     /** @private {boolean} */
     this.isPostPrompt_ = false;
 
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
+    /** @private {boolean} */
+    this.isFullscreen = false;
+
     /** @private {?Element} */
     this.ui_ = null;
 
@@ -140,6 +146,8 @@ export class ConsentUI {
         this.baseInstance_.scheduleLayout(this.ui_);
       }
     }
+    
+    this.isVisible_ = true;
   }
 
   /**
@@ -161,6 +169,36 @@ export class ConsentUI {
     if (this.isCreatedIframe_) {
       this.resetIframe_();
     }
+
+    this.isVisible_ = false;
+  }
+
+  /**
+   * Enter the fullscreen state for the UI
+   */
+  enterFullscreen() {
+    if (!this.ui_ || !this.isVisible_ || this.isFullscreen) {
+      return;
+    }
+
+    const {classList} = this.parent_;
+    classList.add('i-amphtml-consent-ui-fullscreen');
+
+    this.isFullscreen = true;
+  }
+
+  /**
+   * Enter the fullscreen state for the UI
+   */
+  exitFullscreen() {
+    if (!this.ui_ || !this.isVisible_ || !this.isFullscreen) {
+      return;
+    }
+    
+    const {classList} = this.parent_;
+    classList.add('i-amphtml-consent-ui-fullscreen');
+
+    this.isFullscreen = false;
   }
 
   /**
