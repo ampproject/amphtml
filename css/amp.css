@@ -610,6 +610,21 @@ amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
   visibility: visible;
 }
 
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button]{
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible,
+amp-list[load-more] > [load-more-button].amp-visible {
+  visibility: visible;
+}
 
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
