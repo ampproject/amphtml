@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
+import {
+  appendEncodedParamStringToUrl,
+  serializeQueryString,
+} from '../../../src/url';
 
 /** @typedef {{
  *    trigger: string,
@@ -29,8 +32,8 @@ export let batchSegmentDef;
  * Note: extraUrlParams passed in are not encoded. Please make sure to proper
  * encode segments and make sure the final output url is valid.
  */
-export const BatchingPluginFunctions = {
-  '_ping_': ping,
+export const TransportSerializers = {
+  'default': defaultSerializer,
 };
 
 
@@ -51,13 +54,22 @@ export const BatchingPluginFunctions = {
 // function ping(baseUrl, batchSegments) {}
 
 /**
- * @param {string} unusedBaseUrlForTesting
- * @param {Array<!batchSegmentDef>} unusedBatchSegmentsForTesting
+ * The default way for merging batch segments
+ *
+ * @param {string} baseUrl
+ * @param {!Array<!batchSegmentDef>} batchSegments
  * @return {string}
  */
-function ping(unusedBaseUrlForTesting, unusedBatchSegmentsForTesting) {
-  if (getMode().localDev || getMode().test) {
-    return 'testFinalUrl';
+export function defaultSerializer(baseUrl, batchSegments) {
+  const extraUrlParamsStr = batchSegments
+      .map(item => serializeQueryString(item.extraUrlParams))
+      .filter(queryString => !!queryString)
+      .join('&');
+  let requestUrl;
+  if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+    requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+  } else {
+    requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
   }
-  throw new Error('batchPlugin _ping_ is for testing only');
+  return requestUrl;
 }

@@ -15,7 +15,7 @@
  */
 
 
-import {BatchingPluginFunctions} from '../batching-plugins';
+import {TransportSerializers} from '../transport-serializer';
 import {dict} from '../../../../src/utils/object';
 import {isArray} from '../../../../src/types';
 
@@ -30,37 +30,54 @@ import {isArray} from '../../../../src/types';
  *   'out': Array<string>
  * }
  */
-const pingTestData = {
+const defaultTestData = {
   'in': [{
-    'baseUrl': 'base.com?',
+    'baseUrl': 'base.com',
     'batchSegments': [{
       'trigger': 'click',
       'timestamp': 0,
-      'extraUrlParams': 123,
+      'extraUrlParams': {
+        a: 1,
+        b: 'xyz',
+      },
+    }],
+  }, {
+    'baseUrl': 'base.com?${extraUrlParams}&z=1',
+    'batchSegments': [{
+      'trigger': 'click',
+      'timestamp': 0,
+      'extraUrlParams': {
+        a: 1,
+        b: 'xyz',
+      },
     }],
   }],
-  'out': ['testFinalUrl'],
+
+  'out': [
+    'base.com?a=1&b=xyz',
+    'base.com?a=1&b=xyz&z=1',
+  ],
 };
 
 /**
  * Please register your custom test data to the test in alphabetic order.
  */
-const BatchingPluginTests = {
-  '_ping_': pingTestData,
+const SerializerTests = {
+  'default': defaultTestData,
 };
 
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Batching Plugins', () => {
-  it('BatchPluginFunctions sort in alphabetic order', () => {
-    const keys = Object.keys(BatchingPluginFunctions);
-    const sorted = Object.keys(BatchingPluginFunctions).sort();
+describe('Transport serializers', () => {
+  it('TransportSerializers sort in alphabetic order', () => {
+    const keys = Object.keys(TransportSerializers);
+    const sorted = Object.keys(TransportSerializers).sort();
     expect(keys).to.deep.equal(sorted);
   });
 
-  for (const name in BatchingPluginFunctions) {
-    const plugin = BatchingPluginFunctions[name];
+  for (const name in TransportSerializers) {
+    const plugin = TransportSerializers[name];
     describe('Default tests for every plugin', () => {
       it('should handle empty batchSegment array', () => {
         try {
@@ -121,7 +138,7 @@ describe('Batching Plugins', () => {
       let output;
 
       beforeEach(() => {
-        testData = BatchingPluginTests[name];
+        testData = SerializerTests[name];
         input = testData['in'];
         output = testData['out'];
       });

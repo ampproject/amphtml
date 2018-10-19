@@ -54,10 +54,15 @@ describes.realWin('amp-analytics', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
   });
 
 
   function getAnalyticsTag(config, attrs) {
+    config['transport'] = {
+      xhrpost: false,
+      beacon: false,
+    };
     config = JSON.stringify(config);
     const el = doc.createElement('amp-analytics');
     const script = doc.createElement('script');
@@ -74,7 +79,6 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.stub(Transport.prototype, 'sendRequest');
     return analytics;
   }
 
@@ -157,7 +161,7 @@ describes.realWin('amp-analytics', {
             });
             yield macroTask();
             expect(sendRequestSpy).to.be.calledOnce;
-            let url = sendRequestSpy.args[0][0];
+            let url = sendRequestSpy.args[0][1];
 
             const vendorData = VENDOR_REQUESTS[vendor];
             if (!vendorData) {

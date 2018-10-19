@@ -18,7 +18,6 @@ import * as ResourceTiming from '../resource-timing';
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
-import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 
 describes.realWin('Requests', {amp: 1}, env => {
@@ -296,7 +295,10 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({'e1': 'e1'}, {}, expansionOptions);
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledWith('r1?e1=e1&e1=e1');
+        expect(spy).to.be.calledWith('r1', [
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+        ]);
       });
 
       it('should respect trigger extraUrlParam', function* () {
@@ -315,10 +317,14 @@ describes.realWin('Requests', {amp: 1}, env => {
             {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledWith('r1?e1=e1&e2=%E4%B8%AD&e1=e1');
+        expect(spy).to.be.calledWith('r1', [
+          {extraUrlParams: {e1: 'e1', e2: '中'},
+            timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+        ]);
       });
 
-      it('should replace extraUrlParam', function* () {
+      it('should keep extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
         const handler = new RequestHandler(
@@ -330,7 +336,10 @@ describes.realWin('Requests', {amp: 1}, env => {
             {}, {'extraUrlParams': {'e2': 'e2'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledWith('r1&e1=e1&e2=e2&r2');
+        expect(spy).to.be.calledWith('r1&${extraUrlParams}&r2', [
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e2: 'e2'}, timestamp: 0, trigger: undefined},
+        ]);
       });
     });
 
@@ -357,49 +366,6 @@ describes.realWin('Requests', {amp: 1}, env => {
         } catch (e) {
           expect(e).to.match(/unsupported batch plugin/);
         }
-      });
-
-      it('should pass in correct batchSegments', function* () {
-        const spy = sandbox.spy();
-        const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
-        const handler = new RequestHandler(
-            ampdoc, r, preconnect, {sendRequest: spy}, false);
-        // Overwrite batchPlugin function
-        const batchPluginSpy = sandbox.spy(handler, 'batchingPlugin_');
-        const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {'on': 'timer', 'extraUrlParams': {'e1': 'e1'}},
-            expansionOptions);
-        clock.tick(5);
-        // Test that we decode when pass to batchPlugin function
-        handler.send({}, {'on': 'click', 'extraUrlParams': {'e2': '&e2'}},
-            expansionOptions);
-        clock.tick(5);
-        handler.send({}, {'on': 'visible', 'extraUrlParams': {'e3': ''}},
-            expansionOptions);
-        clock.tick(1000);
-        yield macroTask();
-        expect(batchPluginSpy).to.be.calledOnce;
-        expect(batchPluginSpy).to.be.calledWith('r', [dict({
-          'trigger': 'timer',
-          'timestamp': 0,
-          'extraUrlParams': {
-            'e1': 'e1',
-          },
-        }), dict({
-          'trigger': 'click',
-          'timestamp': 5,
-          'extraUrlParams': {
-            'e2': '&e2',
-          },
-        }), dict({
-          'trigger': 'visible',
-          'timestamp': 10,
-          'extraUrlParams': {
-            'e3': '',
-          },
-        })]);
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('testFinalUrl');
       });
     });
   });

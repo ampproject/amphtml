@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {TransportSerializers, batchSegmentDef} from './transport-serializer';
+
 import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {
@@ -62,9 +64,17 @@ export class Transport {
   }
 
   /**
-   * @param {string} request
+   * @param {string} url
+   * @param {!Array<!batchSegmentDef>} segments
    */
-  sendRequest(request) {
+  sendRequest(url, segments) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, segments);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+
     if (this.options_['iframe']) {
       if (!this.iframeTransport_) {
         dev().error(TAG_, 'iframe transport was inadvertently deleted');
@@ -143,9 +153,18 @@ export class Transport {
    * specific, whitelisted requests.
    * Note that this is unrelated to the cross-domain iframe use case above in
    * sendRequestUsingCrossDomainIframe()
-   * @param {string} request The request URL.
+   *
+   * @param {string} url
+   * @param {!batchSegmentDef} segment
    */
-  sendRequestUsingIframe(request) {
+  sendRequestUsingIframe(url, segment) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, [segment]);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+
     assertHttpsUrl(request, 'amp-analytics request');
     user().assert(
         parseUrlDeprecated(request).origin !=
@@ -167,6 +186,13 @@ export class Transport {
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.src = request;
     this.win_.document.body.appendChild(iframe);
+  }
+
+  /**
+   * @return {function(string, !Array<!batchSegmentDef>):string}
+   */
+  getSerializer_() {
+    return TransportSerializers['default'];
   }
 
   /**
