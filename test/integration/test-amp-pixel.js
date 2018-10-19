@@ -25,7 +25,7 @@ import {
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);
 
-  describes.integration('amp-pixel integration test', {
+  describes.integration('amp-pixel referrer integration test', {
     body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
   }, env => {
     it('should keep referrer if no referrerpolicy specified', () => {
@@ -35,36 +35,22 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     });
   });
 
-  describes.integration('amp-pixel integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('has-referrer&title=TITLE')}">`,
+  describes.integration('amp-pixel macro integration test', {
+    body: `<amp-pixel src="${depositRequestUrl(
+        'has-referrer&title=TITLE&qp=QUERY_PARAM(a)')}">`,
+    params: {
+      a: 123,
+    },
   }, env => {
     it('should expand the TITLE macro', () => {
-      return withdrawRequest(env.win, 'has-referrer&title=AMP-TEST')
+      return withdrawRequest(env.win, 'has-referrer&title=AMP-TEST&qp=123')
           .then(request => {
             expect(request.headers.referer).to.be.ok;
           });
     });
   });
 
-  const requestUrl = depositRequestUrl('has-referrer&b=QUERY_PARAM(body)');
-  describes.integration('amp-pixel integration test', {
-    body: `<amp-pixel src="${requestUrl}">`,
-  }, env => {
-    it('should expand the QUERY_PARAM macro', () => {
-      const doubleEncodedUA = encodeURIComponent(
-          encodeURIComponent(env.win.navigator.userAgent));
-      const bodyStr = '%3Camp-pixel%20src%3D%22%2F%2Flocalhost%3A9876%2F' +
-          'amp4test%2Frequest-bank%2Fdeposit%2Fhas-referrer%26b%3D' +
-          `QUERY_PARAM(body)-${doubleEncodedUA}%22%3E`;
-
-      return withdrawRequest(env.win, `has-referrer&b=${bodyStr}`)
-          .then(request => {
-            expect(request.headers.referer).to.be.ok;
-          });
-    });
-  });
-
-  describes.integration('amp-pixel integration test', {
+  describes.integration('amp-pixel no-referrer integration test', {
     body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
              referrerpolicy="no-referrer">`,
   }, env => {
