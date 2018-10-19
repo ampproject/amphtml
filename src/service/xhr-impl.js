@@ -79,7 +79,9 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
+            const formDataWrapper =
+              /** @type {!FormDataWrapperInterface} */ (init.body);
+            init.body = formDataWrapper.getFormData();
           }
           return (this.win.fetch).apply(null, arguments);
         });

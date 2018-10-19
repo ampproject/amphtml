@@ -178,6 +178,8 @@ describes.realWin('in single ampdoc', {
     });
 
     it('should fail if element is not in page.', () => {
+      expectAsyncConsoleError(
+          /e1 was requested to be provided through element-bar/);
       markElementScheduledForTesting(env.win, 'element-foo');
 
       return getElementService(env.win, 'e1', 'element-bar').then(() => {
@@ -227,6 +229,8 @@ describes.realWin('in single ampdoc', {
     });
 
     it('should fail if element is not in page.', () => {
+      expectAsyncConsoleError(
+          /e1 was requested to be provided through element-bar/);
       markElementScheduledForTesting(env.win, 'element-foo');
 
       return getElementServiceForDoc(ampdoc, 'e1', 'element-bar').then(() => {

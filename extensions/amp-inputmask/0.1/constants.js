@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-const root = document.createElement('div');
-const btn = document.createElement('button');
-const text = document.createTextNode('Insert Hello World!');
+export const MaskChars = {
+  ALPHANUMERIC_REQUIRED: 'A',
+  ALPHANUMERIC_OPTIONAL: 'a',
+  ALPHABETIC_REQUIRED: 'L',
+  ALPHABETIC_OPTIONAL: 'l',
+  ARBITRARY_REQUIRED: 'C',
+  ARBITRARY_OPTIONAL: 'c',
+  NUMERIC_REQUIRED: '0',
+  NUMERIC_OPTIONAL: '9',
+  ESCAPE: '\\',
+};
 
-root.className = "root";
-btn.appendChild(text);
-root.appendChild(btn);
+export const MASK_SEPARATOR_CHAR = ' ';
 
-btn.addEventListener('click', () => {
-  const h1 = document.createElement('h1');
-  h1.textContent = 'Hello World!'
-  document.body.appendChild(h1);
-});
+export const NamedMasks = {
+  EMAIL: 'email',
+  PHONE: 'phone',
+  PHONE_US: 'phone-us',
+  DATE_INTL: 'date-intl',
+  DATE_US: 'date-us',
+  DATE_ISO: 'date-iso',
+};
 
-document.body.appendChild(root);
+/** @enum {string} */
+export const OutputMode = {
+  RAW: 'raw',
+  ALPHANUMERIC: 'alphanumeric',
+};

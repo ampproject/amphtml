@@ -94,6 +94,10 @@ const integrationTestPaths = [
   'extensions/**/test/integration/**/*.js',
 ];
 
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
+];
+
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
@@ -109,6 +113,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  devDashboardTestPaths,
   lintGlobs,
   jsonGlobs: [
     '**/*.json',
@@ -140,7 +145,7 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/*.js',
+    '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
   ],
