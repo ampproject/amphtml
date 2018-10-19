@@ -465,7 +465,8 @@ describes.realWin('amp-analytics', {
         'triggers': [
           {'on': 'visible', 'request': 'pageview1'},
           {'on': 'visible', 'request': 'pageview2'},
-        ]});
+        ],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('/test1=1');
         verifyRequest('/test2=2');
@@ -477,8 +478,9 @@ describes.realWin('amp-analytics', {
   describe('expand variables', () => {
     it('expands trigger vars', () => {
       const analytics = getAnalyticsTag({
-        'requests': {'pageview':
-          'https://example.com/test1=${var1}&test2=${var2}'},
+        'requests': {
+          'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+        },
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
@@ -486,7 +488,8 @@ describes.realWin('amp-analytics', {
             'var1': 'x',
             'var2': 'test2',
           },
-        }]});
+        }],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('https://example.com/test1=x&test2=test2');
       });
@@ -498,9 +501,11 @@ describes.realWin('amp-analytics', {
           'var1': 'x',
           'var2': 'test2',
         },
-        'requests': {'pageview':
-          'https://example.com/test1=${var1}&test2=${var2}'},
-        'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+        'requests': {
+          'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+        },
+        'triggers': [{'on': 'visible', 'request': 'pageview'}],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('https://example.com/test1=x&test2=test2');
       });
@@ -508,9 +513,11 @@ describes.realWin('amp-analytics', {
 
     it('expands platform vars', () => {
       const analytics = getAnalyticsTag({
-        'requests': {'pageview':
-          'https://example.com/title=${title}&ref=${documentReferrer}'},
-        'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+        'requests': {
+          'pageview': 'https://example.com/title=${title}&ref=${documentReferrer}',
+        },
+        'triggers': [{'on': 'visible', 'request': 'pageview'}],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequestMatch(/https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/);
       });
@@ -533,14 +540,17 @@ describes.realWin('amp-analytics', {
           'var1': 'config1',
           'var2': 'config2',
         },
-        'requests': {'pageview':
-          'https://example.com/test1=${var1}&test2=${var2}'},
+        'requests': {
+          'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+        },
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
           'vars': {
             'var1': 'trigger1',
-          }}]});
+          },
+        }],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('https://example.com/test1=trigger1&test2=config2');
       });
@@ -572,8 +582,9 @@ describes.realWin('amp-analytics', {
         'than platform vars', () => {
       const analytics = getAnalyticsTag({
         'vars': {'random': 428},
-        'requests': {'pageview':
-          'https://example.com/test1=${title}&test2=${random}'},
+        'requests': {
+          'pageview': 'https://example.com/test1=${title}&test2=${random}',
+        },
         'triggers': [{'on': 'visible', 'request': 'pageview'}],
       });
       return waitForSendRequest(analytics).then(() => {
@@ -598,7 +609,9 @@ describes.realWin('amp-analytics', {
           'vars': {
             't1': 'trigger=1',
             't2': 'trigger?2',
-          }}]});
+          },
+        }],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2');
       });
@@ -617,7 +630,8 @@ describes.realWin('amp-analytics', {
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
-        }]});
+        }],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequest('https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
       });
@@ -626,8 +640,8 @@ describes.realWin('amp-analytics', {
     it('expands url-replacements vars', () => {
       const analytics = getAnalyticsTag({
         'requests': {
-          'pageview':
-            'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
+          'pageview': 'https://example.com/test1=${var1}&test2=${var2}&title=TITLE',
+        },
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
@@ -635,7 +649,8 @@ describes.realWin('amp-analytics', {
             'var1': 'x',
             'var2': 'DOCUMENT_REFERRER',
           },
-        }]});
+        }],
+      });
       return waitForSendRequest(analytics).then(() => {
         verifyRequestMatch(/https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/);
       });
@@ -644,14 +659,16 @@ describes.realWin('amp-analytics', {
     it('expands complex vars', () => {
       const analytics = getAnalyticsTag({
         'requests': {
-          'pageview': 'https://example.com/test1=${qp_foo}'},
+          'pageview': 'https://example.com/test1=${qp_foo}',
+        },
         'triggers': [{
           'on': 'visible',
           'request': 'pageview',
           'vars': {
             'qp_foo': '${queryParam(foo)}',
           },
-        }]});
+        }],
+      });
       const urlReplacements =
           Services.urlReplacementsForDoc(analytics.element);
       sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
@@ -773,8 +790,7 @@ describes.realWin('amp-analytics', {
     beforeEach(() => {
       config = {
         vars: {host: 'example.com', path: 'helloworld'},
-        extraUrlParams:
-            {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
+        extraUrlParams: {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
         triggers: {trig: {'on': 'visible', 'request': 'foo'}},
       };
       config['requests'] = {'foo': 'https://${host}/${path}?a=b'};
