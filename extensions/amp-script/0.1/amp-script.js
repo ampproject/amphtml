@@ -21,6 +21,7 @@ import {
 } from '../../../src/service/extension-location';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   sanitizer,
   upgradeElement,
@@ -39,6 +40,10 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!isExperimentOn(this.win, 'amp-script')) {
+      user().error(TAG, 'Experiment "amp-script" is not enabled.');
+      return Promise.reject();
+    }
     // Configure worker-dom's sanitizer with AMP-specific config and hooks.
     const config = purifyConfig();
     sanitizer.configure(config, {
@@ -55,9 +60,7 @@ export class AmpScript extends AMP.BaseElement {
 
     const url = this.workerThreadUrl_();
     dev().fine(TAG, 'Fetching amp-script-worker from:', url);
-
     upgradeElement(this.element, url);
-
     return Promise.resolve();
   }
 
