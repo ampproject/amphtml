@@ -221,10 +221,13 @@ export class FixedLayer {
    */
   removeElement(element) {
     const removed = this.removeElement_(element);
-    if (removed && this.transferLayer_) {
+    if (removed.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        if (removed.position == 'fixed') {
-          this.transferLayer_.returnFrom(removed);
+        for (let i = 0; i < removed.length; i++) {
+          const fe = removed[i];
+          if (fe.position == 'fixed') {
+            this.transferLayer_.returnFrom(fe);
+          }
         }
       });
     }
@@ -528,10 +531,11 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
-   * @return {!ElementDef|undefined}
+   * @return {!Array<!ElementDef>}
    * @private
    */
   removeElement_(element) {
+    const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       const fe = this.elements_[i];
       if (fe.element == element) {
@@ -539,9 +543,10 @@ export class FixedLayer {
           setStyle(element, 'top', '');
         });
         this.elements_.splice(i, 1);
-        return fe;
+        removed.push(fe);
       }
     }
+    return removed;
   }
 
   /**
