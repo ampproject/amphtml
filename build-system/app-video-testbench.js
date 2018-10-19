@@ -68,6 +68,7 @@ const requiredAttrs = {
   },
   'amp-wistia-player': {'data-media-hashed-id': 'u8p9wq6mq8'},
   'amp-youtube': {'data-videoid': 'mGENRKrdoGY'},
+  'amp-video-iframe': {'src': '/examples/amp-video-iframe/frame.html'},
 };
 
 /**
