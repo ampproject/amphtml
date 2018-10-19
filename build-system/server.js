@@ -80,14 +80,14 @@ if (noCachingExtensions) {
 }
 
 // Start gulp webserver
-(async () => {
+(async() => {
   await app.beforeServeTasks();
   gulp.src(process.cwd())
-    .pipe(webserver({
-      port,
-      host,
-      directoryListing: true,
-      https: useHttps,
-      middleware,
-    }));
+      .pipe(webserver({
+        port,
+        host,
+        directoryListing: true,
+        https: useHttps,
+        middleware,
+      }));
 })();

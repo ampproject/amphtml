@@ -1326,5 +1326,5 @@ function generateInfo(filePath) {
 
 module.exports = {
   middleware: app,
-  beforeServeTasks: devDashboard.beforeServeTasks
+  beforeServeTasks: devDashboard.beforeServeTasks,
 };
