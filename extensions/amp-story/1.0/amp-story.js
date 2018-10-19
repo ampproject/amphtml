@@ -970,7 +970,7 @@ export class AmpStory extends AMP.BaseElement {
         // Note: navigation is prevented when the story is paused, this test
         // covers the case where the story is rendered paused (eg: consent).
         if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
-          targetPage.setState(PageState.ACTIVE);
+          targetPage.setState(PageState.PLAYING);
         } else {
           // Even if the page won't be playing, setting the active attribute
           // ensures it gets visible.
@@ -1343,7 +1343,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
+    const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
     isPaused ? this.advancement_.stop() : this.advancement_.start();
 

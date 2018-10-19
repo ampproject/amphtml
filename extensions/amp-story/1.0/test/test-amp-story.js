@@ -463,7 +463,7 @@ describes.realWin('amp-story', {
             expect(setStateStub.getCall(0))
                 .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
             expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
+                .to.have.been.calledWithExactly(PageState.PLAYING);
           });
     });
 
@@ -503,7 +503,7 @@ describes.realWin('amp-story', {
             expect(setStateStub.getCall(0))
                 .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
             expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
+                .to.have.been.calledWithExactly(PageState.PLAYING);
           });
     });
   });
