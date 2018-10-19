@@ -22,15 +22,60 @@ const {JSDOM} = require('jsdom');
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 
-// These are taken from the respective example files.
+// These are taken from the respective example or validation files.
+/**
+ * Please keep these alphabetically sorted.
+ */
 const requiredAttrs = {
+  'amp-3q-player': {
+    'data-id': 'c8dbe7f4-7f7f-11e6-a407-0cc47a188158',
+  },
   'amp-brid-player': {
     'data-partner': '264',
     'data-player': '4144',
     'data-video': '13663',
   },
+  'amp-brightcove': {
+    'data-account': '1290862519001',
+    'data-video-id': 'ref:amp-docs-sample',
+    'data-player-id': 'SyIOV8yWM',
+  },
   'amp-dailymotion': {'data-videoid': 'x2m8jpp'},
+  'amp-gfycat': {'data-gfyid': 'TautWhoppingCougar'},
+  'amp-ima-video': {
+    'data-tag': 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=&debug_experiment_id=1269069638',
+    'data-poster': '/examples/img/ima-poster.png',
+  },
+  'amp-mowplayer': {'data-mediaid': 'meeqmaqg5js'},
+
+  // These one seems obsolete, 404'ing with current params.
+  // 'amp-nexxtv-player': {
+  //   'data-mediaid': '71QQG852413DU7J',
+  //   'data-client': '761',
+  // },
+
+  'amp-ooyala-player': {
+    'data-embedcode': 'xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg',
+    'data-pcode': '5zb2wxOlZcNCe_HVT3a6cawW298X',
+    'data-playerid': '26e2e3c1049c4e70ae08a242638b5c40',
+    'data-playerversion': 'v4',
+  },
   'amp-youtube': {'data-videoid': 'mGENRKrdoGY'},
+  'amp-vimeo': {'data-videoid': '27246366'},
+  'amp-viqeo-player': {
+    'data-profileid': '184',
+    'data-videoid': 'b51b70cdbb06248f4438',
+  },
+  'amp-wistia-player': {'data-media-hashed-id': 'u8p9wq6mq8'},
+};
+
+/**
+ * Please keep these alphabetically sorted.
+ */
+const requiredInnerHtml = {
+  'amp-ima-video': `<source
+      src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4"
+      type="video/mp4">`,
 };
 
 const optionalAttrs = [
@@ -39,21 +84,25 @@ const optionalAttrs = [
   'rotate-to-fullscreen',
 ];
 
+/**
+ * Please keep these alpahbetically sorted.
+ */
 const availableExtensions = [
-  'amp-video',
-  'amp-youtube',
+  'amp-3q-player',
+  'amp-brid-player',
+  'amp-brightcove',
   'amp-dailymotion',
+  'amp-gfycat',
+  'amp-ima-video',
+  'amp-mowplayer',
+  'amp-ooyala-player',
+  'amp-youtube',
+  'amp-video',
+  'amp-viqeo-player',
+  'amp-wistia-player',
 
-  // TODO(alanorozco): Enable the following once they have their `requiredAttrs`
-  // 'amp-viqeo-player',
-  // 'amp-mowplayer',
-  // 'amp-mowplayer',
-  // 'amp-brid-player',
-  // 'amp-brightcove',
-  // 'amp-kaltura-player',
+  // TODO(alanorozco): Reenable with valid params, if possible.
   // 'amp-nexxtv-player',
-  // 'amp-o2-player',
-  // 'amp-ooyala-player',
 ];
 
 
@@ -262,6 +311,8 @@ function replaceExtension(doc, toExtension) {
       substitutable.setAttribute(attr, attrs[attr]);
     });
   }
+
+  substitutable./*OK*/innerHTML = requiredInnerHtml[toExtensionLowerCase] || '';
 
   // `replaceTagName` has to run at the end since it manipulates `outerHTML`.
   replaceTagName(substitutable, toExtension);
