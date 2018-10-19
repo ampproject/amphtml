@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
   ExpansionOptions,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {
-  appendEncodedParamStringToUrl,
-  serializeQueryString,
-} from '../../../src/url';
+import {batchSegmentDef, defaultSerializer} from './transport-serializer';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber} from '../../../src/types';
-
-const TAG = 'amp-analytics/requests';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -61,18 +55,6 @@ export class RequestHandler {
 
     /** @private {?number} */
     this.batchIntervalPointer_ = null;
-
-    /** @private @const {string} */
-    const batchPluginId = request['batchPlugin'];
-
-    user().assert((batchPluginId ? this.batchInterval_ : true),
-        'Invalid request: batchPlugin cannot be set on non-batched request');
-
-    /** @const {function(string, !Array<!batchSegmentDef>):string} */
-    this.batchingPlugin_ = batchPluginId
-      ? user().assert(BatchingPluginFunctions[batchPluginId],
-          `Invalid request: unsupported batch plugin ${batchPluginId}`)
-      : defaultBatchPlugin;
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
@@ -220,17 +202,16 @@ export class RequestHandler {
           [baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
         const baseUrl = results[0];
         const batchSegments = results[1];
-        const request = this.batchingPlugin_(baseUrl, batchSegments);
-        if (!request) {
-          user().error(TAG, 'Request not sent. Contents empty.');
+        if (batchSegments.length === 0) {
           return;
         }
+        // TODO: iframePing will not work with batch. Add a config validation.
         if (trigger['iframePing']) {
           user().assert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
-          this.transport_.sendRequestUsingIframe(request);
+          this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
-          this.transport_.sendRequest(request);
+          this.transport_.sendRequest(baseUrl, batchSegments);
         }
       });
     });
@@ -262,12 +243,12 @@ export class RequestHandler {
     for (let i = 0; i < this.batchInterval_.length; i++) {
       let interval = this.batchInterval_[i];
       user().assert(isFiniteNumber(interval),
-          `Invalid batchInterval value: ${this.batchInterval_}` +
-          'interval must be a number');
+          'Invalid batchInterval value: %s', this.batchInterval_);
       interval = Number(interval) * 1000;
       user().assert(interval >= BATCH_INTERVAL_MIN,
-          `Invalid batchInterval value: ${this.batchInterval_}, ` +
-          `interval value must be greater than ${BATCH_INTERVAL_MIN}ms.`);
+          'Invalid batchInterval value: %s, ' +
+          'interval value must be greater than %s ms.',
+          this.batchInterval_, BATCH_INTERVAL_MIN);
       this.batchInterval_[i] = interval;
     }
 
@@ -342,7 +323,7 @@ export function expandPostMessage(
     //return base url with the appended extra url params;
     return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
         .then(extraUrlParams => {
-          return defaultBatchPlugin(expandedMsg, [{extraUrlParams}]);
+          return defaultSerializer(expandedMsg, [{extraUrlParams}]);
         });
   });
 }
@@ -380,26 +361,4 @@ function expandExtraUrlParams(
     }
   }
   return Promise.all(requestPromises).then(() => params);
-}
-
-/**
- * The default way for merging batch segments
- *
- * @param {string} baseUrl
- * @param {!Array<!batchSegmentDef>} batchSegments
- * @return {string}
- * @private
- */
-function defaultBatchPlugin(baseUrl, batchSegments) {
-  const extraUrlParamsStr = batchSegments
-      .map(item => serializeQueryString(item.extraUrlParams))
-      .filter(queryString => !!queryString)
-      .join('&');
-  let requestUrl;
-  if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-    requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-  } else {
-    requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
-  }
-  return requestUrl;
 }
