@@ -31,7 +31,7 @@ const mainComponent = join(__dirname, '/components/main.js');
 const mainCssFile = join(__dirname, '/main.css');
 
 
-function getListing(basepath) {
+async function getListing(basepath) {
   // currently sitting on build-system/app-index, so we go back two dirs for the
   // repo root.
   const rootPath = join(__dirname, '../../');
@@ -41,17 +41,22 @@ function getListing(basepath) {
 
   // null byte(s), bad request
   if (~path.indexOf('\0')) {
-    return Promise.resolve(null);
+    return null;
   }
 
   // malicious path
   if ((path + sep).substr(0, rootPath.length) !== rootPath) {
-    return Promise.resolve(null);
+    return null;
   }
 
-  return fs.statAsync(path).then(stat =>
-    !stat.isDirectory() ? null : fs.readdirAsync(path))
-      .catch(() => /* empty catch for fallbacks */ null);
+  try {
+    if ((await fs.statAsync(path)).isDirectory()) {
+      return fs.readdirAsync(path);
+    }
+  } catch (unusedE) {
+    /* empty catch for fallbacks */
+    return null;
+  }
 }
 
 
