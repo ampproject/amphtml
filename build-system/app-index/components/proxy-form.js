@@ -18,7 +18,7 @@
 
 import {Component, h, render} from 'preact';
 
-class ProxyForm extends Component {
+export class ProxyForm extends Component {
 
   submit = event => {
     event.preventDefault();
@@ -49,6 +49,3 @@ class ProxyForm extends Component {
     );
   }
 }
-
-
-render(<ProxyForm />, document.getElementById('proxy-form-root'));
