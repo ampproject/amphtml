@@ -89,7 +89,7 @@ async function getAncestorBundleSize() {
     const ancestorBundleSize =
         Buffer.from(result.data.content, 'base64').toString().trim();
     log('Bundle size of', cyan(gitBranchPointShortSha), 'is',
-        ancestorBundleSize);
+        cyan(ancestorBundleSize));
     return ancestorBundleSize;
   }).catch(() => {
     log(yellow('WARNING: Failed to retrieve bundle size of'),
@@ -160,18 +160,24 @@ function storeBundleSize(bundleSize) {
 function compareBundleSize(maxBundleSize) {
   const cmd = `npx bundlesize -f "${runtimeFile}" -s "${maxBundleSize}"`;
   log('Running ' + cyan(cmd) + '...');
-  const output = getStdout(cmd);
+  const output = getStdout(cmd).trim();
+
+  const error = output.match(/ERROR .*/);
+  if (error || output.length == 0) {
+    return [error || '[no output from npx command]', STATUS_ERROR, ''];
+  }
+
   const bundleSizeFormatMatches = output.match(/: (\d+.?\d*KB)/);
   if (bundleSizeFormatMatches) {
-    if (output.match(/PASS .*/)) {
-      return [output, STATUS_PASS, bundleSizeFormatMatches[1]];
-    } else if (output.match(/FAIL .*/)) {
-      return [output, STATUS_FAIL, bundleSizeFormatMatches[1]];
+    const pass = output.match(/PASS .*/);
+    const fail = output.match(/FAIL .*/);
+    if (pass) {
+      return [pass, STATUS_PASS, bundleSizeFormatMatches[1]];
+    } else if (fail) {
+      return [fail, STATUS_FAIL, bundleSizeFormatMatches[1]];
     }
-  } else {
-    log(red('ERROR:'), 'could not infer bundle size from output.');
-    log(yellow(output));
   }
+  log(red('ERROR:'), 'could not infer bundle size from output.');
   return [output, STATUS_ERROR, ''];
 }
 
@@ -203,7 +209,7 @@ async function checkBundleSize() {
         return;
       case STATUS_FAIL:
         log(yellow('New bundle size of'), cyan(newBundleSize),
-            'is larger than the ancestor\'s bundle size of',
+            yellow('is larger than the ancestor\'s bundle size of'),
             cyan(ancestorBundleSize));
         log('Continuing to compare to max bundle size...');
         compareAgainstMaxSize = true;
