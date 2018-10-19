@@ -15,7 +15,7 @@
  */
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdMetadata} from '../amp-ad-utils';
+import {getAmpAdMetadata, hasExtensionId} from '../amp-ad-utils';
 
 describe('getAmpAdMetadata', () => {
 
@@ -43,4 +43,26 @@ describe('getAmpAdMetadata', () => {
     expect(creativeMetadata).to.be.null;
   });
 
+});
+
+describe('hasExtensionId', () => {
+  it('should work with customElementExtensions legacy field', () => {
+    const creativeMetadata = getAmpAdMetadata(data.reserialized);
+    expect(creativeMetadata).to.be.ok;
+    // Ensure that new field isn't set.
+    creativeMetadata.extensions = [];
+    // Verify that old field is present.
+    expect(creativeMetadata.customElementExtensions.length).to.equal(1);
+    expect(hasExtensionId(creativeMetadata, 'amp-font')).to.be.true;
+  });
+
+  it('should work with now favored extension field', () => {
+    const creativeMetadata = getAmpAdMetadata(data.reserialized);
+    expect(creativeMetadata).to.be.ok;
+    // Ensure that old field isn't set.
+    creativeMetadata.customElementExtensions = [];
+    // Verify that old field is present.
+    expect(creativeMetadata.extensions.length).to.equal(1);
+    expect(hasExtensionId(creativeMetadata, 'amp-font')).to.be.true;
+  });
 });

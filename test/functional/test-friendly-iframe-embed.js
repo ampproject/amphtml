@@ -149,8 +149,9 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), [{'custom-element': 'amp-test', 'src': null}],
-            /* preinstallCallback */ undefined)
+        }),
+        [{'custom-element': 'amp-test', 'src': null}],
+        /* preinstallCallback */ undefined)
         .once();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
@@ -178,8 +179,9 @@ describe('friendly-iframe-embed', () => {
         .withExactArgs(sinon.match(arg => {
           installExtWin = arg;
           return true;
-        }), [{'custom-element': 'amp-mustache', 'src': '0.2'}],
-            /* preinstallCallback */ undefined)
+        }),
+        [{'custom-element': 'amp-mustache', 'src': '0.2'}],
+        /* preinstallCallback */ undefined)
         .once();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {

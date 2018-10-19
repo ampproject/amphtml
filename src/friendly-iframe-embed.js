@@ -666,22 +666,21 @@ export function isInFie(element) {
  * @param {!Window} win
  */
 export function preloadExtensions(metaData, win) {
+  const extensions = Services.extensionsFor(win);
   if (isExperimentOn(win, 'fie-metadata-extension')
       && metaData.extensions && metaData.extensions.length) {
     metaData.extensions.forEach(
         extensionDef => {
           const extensionId = extensionDef['custom-element'];
           const version = extensionDef['src'];
-          Services.extensionsFor(win)
-              ./*OK*/preloadExtension(extensionId, version);
+          extensions./*OK*/preloadExtension(extensionId, version);
         });
   } else if (metaData.customElementExtensions
         && metaData.customElementExtensions.length) {
     user().warn(TAG, 'Legacy field customElementExtensions on '
         + 'amp-ad-metadata used.');
     metaData.customElementExtensions.forEach(extensionId => {
-      Services.extensionsFor(win)
-          ./*OK*/preloadExtension(extensionId);
+      extensions./*OK*/preloadExtension(extensionId);
     });
   }
 }
