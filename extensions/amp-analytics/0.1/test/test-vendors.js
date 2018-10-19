@@ -54,6 +54,7 @@ describes.realWin('amp-analytics', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
   });
 
 
@@ -78,7 +79,6 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
     return analytics;
   }
 

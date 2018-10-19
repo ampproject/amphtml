@@ -121,6 +121,7 @@ describes.realWin('amp-analytics', {
     viewer = win.services.viewer.obj;
     ins = instrumentationServiceForDocForTesting(ampdoc);
     installUserNotificationManagerForTesting(ampdoc);
+    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
     return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
       uidService = manager;
     });
@@ -148,7 +149,6 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
     postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
     return analytics;
   }
@@ -210,7 +210,6 @@ describes.realWin('amp-analytics', {
       analytics.buildCallback();
       // Initialization has not started.
       expect(analytics.iniPromise_).to.be.null;
-      sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
 
       return waitForNoSendRequest(analytics);
     });
@@ -262,7 +261,6 @@ describes.realWin('amp-analytics', {
           el.connectedCallback();
           analytics.createdCallback();
           analytics.buildCallback();
-          sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
 
           return waitForNoSendRequest(analytics);
         });
@@ -281,7 +279,6 @@ describes.realWin('amp-analytics', {
       el.connectedCallback();
       analytics.createdCallback();
       analytics.buildCallback();
-      sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
 
       return waitForNoSendRequest(analytics);
     });
