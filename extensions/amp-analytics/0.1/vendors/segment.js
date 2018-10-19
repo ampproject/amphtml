@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
@@ -50,6 +49,11 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
       'ids': {
         'ajs_aid': '${anonymousId}',
       },
+    },
+  },
+  'cookies': {
+    'segment_amp_id': {
+      'value': 'LINKER_PARAM(segment, ajs_id)',
     },
   },
 });
