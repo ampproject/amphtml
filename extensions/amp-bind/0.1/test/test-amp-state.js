@@ -82,17 +82,19 @@ describes.realWin('AmpState', {
     sandbox.spy(ampState, 'registerAction');
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
-     whenFirstVisiblePromiseResolve();
+
+    whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
       expect(ampState.registerAction)
           .calledWithExactly('refresh', sinon.match.any, ActionTrust.HIGH);
     });
   });
-   it('should call fetchAndUpdate on refresh', () => {
+
+  it('should call fetchAndUpdate on refresh', () => {
     sandbox.spy(ampState, 'registerAction');
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
-     whenFirstVisiblePromiseResolve();
+    whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
       return ampState.executeAction({
         method: 'refresh',

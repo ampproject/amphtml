@@ -86,19 +86,15 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
-    if (this.element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(this.element).then(bind => {
     const {element} = this;
     if (element.hasAttribute('overridable')) {
       Services.bindForDocOrNull(element).then(bind => {
         dev().assert(bind, 'Bind service can not be found.');
-        bind.makeStateKeyOverridable(this.element.getAttribute('id'));
         bind.makeStateKeyOverridable(element.getAttribute('id'));
       });
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
-    const {children} = this.element;
     const {children} = element;
     if (children.length > 0) {
       this.parseChildAndUpdateState_();
@@ -110,6 +106,7 @@ export class AmpState extends AMP.BaseElement {
       this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
     }, ActionTrust.HIGH);
   }
+
 
   /**
    * Parses JSON in child script element and updates state.
@@ -164,7 +161,7 @@ export class AmpState extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  fetchAndUpdate_(isInit) {
+  fetchAndUpdate_(isInit, opt_refresh) {
     const ampdoc = this.getAmpDoc();
     return this.fetch_(ampdoc, this.element, isInit, opt_refresh)
         .then(json => {
