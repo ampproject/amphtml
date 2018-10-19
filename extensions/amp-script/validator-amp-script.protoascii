@@ -15,7 +15,6 @@
 #
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-script"
@@ -35,18 +34,18 @@ tags: {  # <amp-script>
     mandatory: true
     value_url: {
       protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
+      allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   amp_layout {
+    supported_layouts: CONTAINER
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
-    supported_layouts: CONTAINER
   }
 }
