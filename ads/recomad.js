@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * Add a container for the recomAD widget,
@@ -54,13 +54,7 @@ function createWidgetContainer(
  * @param {!Object} data
  */
 export function recomad(global, data) {
-  const dataIsInvalid =
-    [data['appId'], data['widgetId']].some(d => !d)
-    || [data['searchTerm'], data['origin']].every(d => !d);
-
-  if (dataIsInvalid) {
-    return;
-  }
+  validateData(data, ['appId', 'widgetId', ['searchTerm', 'origin']]);
 
   createWidgetContainer(
       window.document.createElement('div'),
