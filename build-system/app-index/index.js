@@ -109,12 +109,14 @@ function serveIndex(req, res, next) {
       basepath,
       fileSet,
       isMainPage,
+      selectModePrefix: '/',
     };
 
     const renderedHtml = template
         .replace('<!-- bundle -->', bundle)
         .replace('<!-- main_style -->', css)
-        .replace('<!-- initial_state_json -->', JSON.stringify(initialState));
+        .replace('<!-- initial_state -->',
+            `window.AMP_PREACT_STATE = ${JSON.stringify(initialState)};`);
 
     res.end(renderedHtml);
   })();

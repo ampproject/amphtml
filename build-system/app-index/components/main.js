@@ -25,94 +25,87 @@ class Main extends Component {
 
   constructor(props) {
     super(props);
-
-    this.state = JSON.parse(document.querySelector('#initial-state').innerHTML);
-
-    this.state.selectModePrefix = this.state.selectModePrefix || '/';
+    this.state = window.AMP_PREACT_STATE;
   }
 
   changeDocumentMode = event => {
-    this.setState({
-      selectModePrefix: event.target.value,
-    });
+    this.setState({selectModePrefix: event.target.value});
   }
 
-  renderSelectModeOrNothing() {
-    if (!/^\/examples/.test(this.state.basepath)) {
-      return '';
-    }
-    return (<ExamplesDocumentModeSelect
-      onchange={this.changeDocumentMode}
-      value={this.state.selectModePrefix} />);
-  }
+  render(unusedProps, state) {
+    const documentSelectModeOrNothing = !/^\/examples/.test(state.basepath) ?
+      null : (
+        <ExamplesDocumentModeSelect
+          onchange={this.changeDocumentMode}
+          value={state.selectModePrefix} />
+      );
 
-  render() {
-    const documentSelectModeOrNothing = this.renderSelectModeOrNothing();
-
-    return (<div>
-      <wrap>
-        <header>
-          <h1 class="amp-logo">AMP</h1>
-          <div class="right-of-logo">
-            {!this.state.isMainPage && (
-              <a href="/">← Back to main</a>
-            )}
-          </div>
-          <ul>
-            <li>
-              <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md"
-                target="_blank">
-                Developing
-              </a>
-            </li>
-            <li class="divider">
-              <a href="https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md"
-                target="_blank">
-                Contributing
-              </a>
-            </li>
-            <li>
-              <a href="https://github.com/ampproject/amphtml/"
-                target="_blank">
-                Github
-              </a>
-            </li>
-            <li>
-              <a href="https://travis-ci.org/ampproject/amphtml"
-                target="_blank">
-                Travis
-              </a>
-            </li>
-            <li>
-              <a href="https://percy.io/ampproject/amphtml/"
-                target="_blank">
-                Percy
-              </a>
-            </li>
-          </ul>
-        </header>
-        {this.state.isMainPage && <ProxyForm />}
-      </wrap>
-      <div class="file-list-container">
+    return (
+      <div>
         <wrap>
-          <h3 class="code" id="basepath">
-            {this.state.basepath}
-            <a href="https://github.com/ampproject/amphtml/find/master"
-              target="_blank"
-              class="find-icon">
-              Find file
-            </a>
-          </h3>
-          <div class="push-right-after-heading">
-            {documentSelectModeOrNothing}
-            <a href="/~" class="underlined">List root directory</a>
-          </div>
-          <ul class="file-list">
-            {this.state.fileSet.map(file => this.renderLink(file))}
-          </ul>
+          <header>
+            <h1 class="amp-logo">AMP</h1>
+            <div class="right-of-logo">
+              {!state.isMainPage && (
+                <a href="/">← Back to main</a>
+              )}
+            </div>
+            <ul>
+              <li>
+                <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md"
+                  target="_blank">
+                  Developing
+                </a>
+              </li>
+              <li class="divider">
+                <a href="https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md"
+                  target="_blank">
+                  Contributing
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/ampproject/amphtml/"
+                  target="_blank">
+                  Github
+                </a>
+              </li>
+              <li>
+                <a href="https://travis-ci.org/ampproject/amphtml"
+                  target="_blank">
+                  Travis
+                </a>
+              </li>
+              <li>
+                <a href="https://percy.io/ampproject/amphtml/"
+                  target="_blank">
+                  Percy
+                </a>
+              </li>
+            </ul>
+          </header>
+          {state.isMainPage && <ProxyForm />}
         </wrap>
+        <div class="file-list-container">
+          <wrap>
+            <h3 class="code" id="basepath">
+              {state.basepath}
+              <a href="https://github.com/ampproject/amphtml/find/master"
+                target="_blank"
+                class="find-icon">
+                Find file
+              </a>
+            </h3>
+            <div class="push-right-after-heading">
+              {documentSelectModeOrNothing}
+              <a href="/~" class="underlined">List root directory</a>
+            </div>
+            <ul class="file-list">
+              {state.fileSet.map(file => this.renderLink(file, state))}
+            </ul>
+          </wrap>
+        </div>
       </div>
-    </div>);
+    );
   }
 
   renderLink(file) {
