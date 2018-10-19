@@ -42,7 +42,7 @@ describes.realWin('amp-analytics', {
     extensions: ['amp-analytics'],
   },
 }, function(env) {
-  let win, doc;
+  let win, doc, sandbox;
   let sendRequestSpy;
   let postMessageSpy;
   let configWithCredentials;
@@ -88,6 +88,7 @@ describes.realWin('amp-analytics', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     configWithCredentials = false;
     doc.title = 'Test Title';
