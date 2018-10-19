@@ -125,6 +125,9 @@ function isBuildSystemFile(filePath) {
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
       !isFlagConfig(filePath) &&
+      // Exclude the dev dashboard from build-system, since we want it to
+      // trigger the devDashboard check
+      !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
       !isVisualDiffFile(filePath))
@@ -204,6 +207,18 @@ function isUnitTest(filePath) {
 }
 
 /**
+ * Determines if the given file is,
+ * a file concerning the dev dashboard
+ * Concerning the dev dashboard
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isDevDashboardFile(filePath) {
+  return (filePath === 'build-system/app.js' ||
+  filePath.startsWith('build-system/app-index/'));
+}
+
+/**
  * Determines if the given file is an integration test.
  * @param {string} filePath
  * @return {boolean}
@@ -239,6 +254,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR',
       'RUNTIME',
       'UNIT_TEST',
+      'DEV_DASHBOARD',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -259,6 +275,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isUnitTest(p)) {
       targetSet.add('UNIT_TEST');
+    } else if (isDevDashboardFile(p)) {
+      targetSet.add('DEV_DASHBOARD');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -345,6 +363,9 @@ const command = {
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
+  runDevDashboardTests: function() {
+    timedExecOrDie('gulp test --dev_dashboard --nobuild');
   },
   runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
@@ -433,6 +454,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
+    command.runDevDashboardTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -587,6 +609,9 @@ function main() {
     command.runLintCheck();
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
+    }
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      command.runDevDashboardTests();
     }
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
