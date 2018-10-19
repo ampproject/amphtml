@@ -347,7 +347,14 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => onMessage(tryParseJson(getData(e))));
+  listen(win, 'message', e => {
+    const message = tryParseJson(getData(e));
+    if (!message) {
+      // only process valid JSON.
+      return;
+    }
+    onMessage(message);
+  });
 }
 
 /**
