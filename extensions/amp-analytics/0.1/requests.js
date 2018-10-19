@@ -202,15 +202,16 @@ export class RequestHandler {
           [baseUrlPromise, Promise.all(segmentPromises)]).then(results => {
         const baseUrl = results[0];
         const batchSegments = results[1];
+        if (batchSegments.length === 0) {
+          return;
+        }
         // TODO: iframePing will not work with batch. Add a config validation.
         if (trigger['iframePing']) {
           user().assert(trigger['on'] == 'visible',
               'iframePing is only available on page view requests.');
-          this.transport_.sendSingle(baseUrl, batchSegments[0], true);
-        } else if (this.batchInterval_) {
-          this.transport_.sendBatch(baseUrl, batchSegments);
+          this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
-          this.transport_.sendSingle(baseUrl, batchSegments[0]);
+          this.transport_.sendRequest(baseUrl, batchSegments);
         }
       });
     });

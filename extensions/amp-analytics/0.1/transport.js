@@ -65,41 +65,16 @@ export class Transport {
 
   /**
    * @param {string} url
-   * @param {!batchSegmentDef} segment
-   * @param {boolean|undefined} opt_useLegacyIframe
-   */
-  sendSingle(url, segment, opt_useLegacyIframe = false) {
-    const serializer = this.getSerializer_();
-    const request = serializer(url, [segment]);
-    if (!request) {
-      user().error(TAG_, 'Request not sent. Contents empty.');
-      return;
-    }
-    if (opt_useLegacyIframe) {
-      this.sendRequestUsingIframe(request);
-    } else {
-      this.sendRequest(request);
-    }
-  }
-
-  /**
-   * @param {string} url
    * @param {!Array<!batchSegmentDef>} segments
    */
-  sendBatch(url, segments) {
-    const plugin = this.getSerializer_();
-    const request = plugin(url, segments);
+  sendRequest(url, segments) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, segments);
     if (!request) {
       user().error(TAG_, 'Request not sent. Contents empty.');
       return;
     }
-    this.sendRequest(request);
-  }
 
-  /**
-   * @param {string} request
-   */
-  sendRequest(request) {
     if (this.options_['iframe']) {
       if (!this.iframeTransport_) {
         dev().error(TAG_, 'iframe transport was inadvertently deleted');
@@ -178,9 +153,18 @@ export class Transport {
    * specific, whitelisted requests.
    * Note that this is unrelated to the cross-domain iframe use case above in
    * sendRequestUsingCrossDomainIframe()
-   * @param {string} request The request URL.
+   *
+   * @param {string} url
+   * @param {!batchSegmentDef} segment
    */
-  sendRequestUsingIframe(request) {
+  sendRequestUsingIframe(url, segment) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, [segment]);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+
     assertHttpsUrl(request, 'amp-analytics request');
     user().assert(
         parseUrlDeprecated(request).origin !=
