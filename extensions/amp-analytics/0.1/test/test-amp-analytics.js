@@ -297,6 +297,7 @@ describes.realWin('amp-analytics', {
 
     it('does not send a hit when request type is not defined', function() {
       expectAsyncConsoleError(noRequestStringsError);
+      expectAsyncConsoleError(/Request string not found/);
       const analytics = getAnalyticsTag({
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
@@ -346,6 +347,7 @@ describes.realWin('amp-analytics', {
     });
 
     it('should tolerate invalid triggers', function() {
+      expectAsyncConsoleError(/No request strings defined/);
       const analytics = getAnalyticsTag({
         'request': {'foo': 'https://example.com'},
         'triggers': [],
@@ -365,9 +367,13 @@ describes.realWin('amp-analytics', {
     });
 
     it('sends multiple requests per trigger', function() {
+      expectAsyncConsoleError(/Request string not found/);
       const analytics = getAnalyticsTag({
-        'requests': {'foo':
-          'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
+        'requests': {
+          'foo': 'https://example.com/bar&${foobar}',
+          'foobar': '${baz}',
+          'baz': 'b1',
+        },
         'triggers': [{'on': 'visible', 'request': ['foo', 'foobar', 'foo2']}],
       });
 
