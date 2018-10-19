@@ -159,9 +159,9 @@ describes.realWin('amp-list component', {
     });
 
     it('should reset pending change-size request after render', function*() {
-      const items = [{title: 'Title1'}];
       const itemElement = doc.createElement('div');
-      const rendered = expectFetchAndRender(items, [itemElement]);
+      const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA,
+          [itemElement]);
       yield list.layoutCallback();
       yield rendered;
       expect(resource.resetPendingChangeSize).calledOnce;
@@ -169,7 +169,6 @@ describes.realWin('amp-list component', {
 
     it('should attemptChangeHeight the placeholder, if present', () => {
       const itemElement = doc.createElement('div');
-
       const placeholder = doc.createElement('div');
       placeholder.style.height = '1337px';
       element.appendChild(placeholder);
