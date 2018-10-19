@@ -41,7 +41,9 @@ class Main extends Component {
     if (!/^\/examples/.test(this.state.basepath)) {
       return '';
     }
-    return (<ExamplesDocumentModeSelect onchange={this.changeDocumentMode} />);
+    return (<ExamplesDocumentModeSelect
+      onchange={this.changeDocumentMode}
+      value={this.state.selectModePrefix} />);
   }
 
   render() {

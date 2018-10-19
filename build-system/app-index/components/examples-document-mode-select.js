@@ -18,6 +18,13 @@
 
 import {Component, h, render} from 'preact';
 
+const options = {
+  'standard': '/',
+  'a4a': '/a4a/',
+  'a4a-3p': '/a4a-3p/',
+  'inabox': '/inabox/1/',
+};
+
 export class ExamplesDocumentModeSelect extends Component {
   render() {
     return (
@@ -25,22 +32,12 @@ export class ExamplesDocumentModeSelect extends Component {
         <label for="examples-mode-select">
           Document mode:
           <select id="examples-mode-select" onchange={this.props.onchange}>
-            <option value="/"
-              selected={this.state.selectModePrefix == '/'}>
-              standard
-            </option>
-            <option value="/a4a/"
-              selected={this.state.selectModePrefix == '/a4a/'}>
-              a4a
-            </option>
-            <option value="/a4a-3p/"
-              selected={this.state.selectModePrefix == '/a4a-3p/'}>
-              a4a-3p
-            </option>
-            <option value="/inabox/1/"
-              selected={this.state.selectModePrefix == '/inabox/1/'}>
-              inabox
-            </option>
+            {Object.keys(options).map(key => (
+              <option value={options[key]}
+                selected={this.props.value == options[key]}>
+                {key}
+              </option>
+            ))}
           </select>
         </label>
       </form>
