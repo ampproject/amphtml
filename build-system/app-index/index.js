@@ -94,6 +94,7 @@ function isMainPageFromUrl(url) {
   return url == '/';
 }
 
+
 function serveIndex(req, res, next) {
   const isMainPage = isMainPageFromUrl(req.url);
   const basepath = getListingPath(req.url);
@@ -129,7 +130,15 @@ function serveIndex(req, res, next) {
   })();
 }
 
+// Promises to run before serving
+async function beforeServeTasks () {
+  if (shouldCache) {
+    await bundleMain();
+  }
+}
+
 module.exports = {
   setCacheStatus,
   serveIndex,
+  beforeServeTasks
 };

@@ -62,7 +62,7 @@ const middleware = [];
 if (!quiet) {
   middleware.push(morgan('dev'));
 }
-middleware.push(app);
+middleware.push(app.middleware);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
@@ -80,7 +80,9 @@ if (noCachingExtensions) {
 }
 
 // Start gulp webserver
-gulp.src(process.cwd())
+(async () => {
+  await app.beforeServeTasks();
+  gulp.src(process.cwd())
     .pipe(webserver({
       port,
       host,
@@ -88,4 +90,4 @@ gulp.src(process.cwd())
       https: useHttps,
       middleware,
     }));
-
+})();
