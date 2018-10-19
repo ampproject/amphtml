@@ -29,16 +29,21 @@ FAIL
 |    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 |  </head>
 |  <body>
-|    <!-- Valid -->
-|    <amp-script layout=container src="/examples/amp-script/hello-world.js"><div class="root"><button>prompt</button><button>prompt</button><button>prompt</button><button>prompt</button></div></amp-script>
+|    <!-- Valid. -->
+|    <amp-script layout=container src="https://example.com/foo.js"><div class="root"><p>Some text to hydrate.</p></div></amp-script>
+|
+|    <!-- Invalid: Relative URL. -->
+|    <amp-script layout=container src="/foo.js"></amp-script>
+>>   ^~~~~~~~~
+amp-script/0.1/test/validator-amp-script.html:35:2 The relative URL '/foo.js' for attribute 'src' in tag 'amp-script' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: Missing 'src' attribute. -->
 |    <amp-script layout=container></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:35:2 The mandatory attribute 'src' is missing in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:38:2 The mandatory attribute 'src' is missing in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: Non-https 'src' attribute. -->
 |    <amp-script layout=container src="http://not.https.url"></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:38:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
+amp-script/0.1/test/validator-amp-script.html:41:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
 |  </body>

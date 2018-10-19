@@ -28,8 +28,11 @@
   <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
-  <!-- Valid -->
-  <amp-script layout=container src="/examples/amp-script/hello-world.js"><div class="root"><button>prompt</button><button>prompt</button><button>prompt</button><button>prompt</button></div></amp-script>
+  <!-- Valid. -->
+  <amp-script layout=container src="https://example.com/foo.js"><div class="root"><p>Some text to hydrate.</p></div></amp-script>
+
+  <!-- Invalid: Relative URL. -->
+  <amp-script layout=container src="/foo.js"></amp-script>
 
   <!-- Invalid: Missing 'src' attribute. -->
   <amp-script layout=container></amp-script>
