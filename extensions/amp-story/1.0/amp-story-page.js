@@ -92,7 +92,7 @@ const REWIND_TIMEOUT_MS = 350;
  */
 export const PageState = {
   NOT_ACTIVE: 0, // Page is not displayed. Could still be visible on desktop.
-  ACTIVE: 1, // Page is currently the main page, and playing.
+  PLAYING: 1, // Page is currently the main page, and playing.
   PAUSED: 2, // Page is currently the main page, but not playing.
 };
 
@@ -250,7 +250,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.pauseCallback();
         this.state_ = state;
         break;
-      case PageState.ACTIVE:
+      case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resumeCallback();
