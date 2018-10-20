@@ -94,6 +94,17 @@ function isMainPageFromUrl(url) {
   return url == '/';
 }
 
+
+/**
+ * Adds a trailing slash if missing.
+ * @param {string} basepath
+ * @return {string}
+ */
+function formatBasepath(basepath) {
+  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
+}
+
+
 function serveIndex(req, res, next) {
   const isMainPage = isMainPageFromUrl(req.url);
   const basepath = getListingPath(req.url);
@@ -111,7 +122,7 @@ function serveIndex(req, res, next) {
     const css = (await fs.readFileAsync(mainCssFile)).toString();
 
     const initialState = {
-      basepath,
+      basepath: formatBasepath(basepath),
       fileSet,
       isMainPage,
       selectModePrefix: '/',

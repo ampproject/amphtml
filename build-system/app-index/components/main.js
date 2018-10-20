@@ -152,18 +152,17 @@ class Main extends Component {
   }
 
   getFileSet_() {
-    return this.state.fileSet.map(name => {
-      const prefix = /\.html$/.test(name) ?
-        this.state.selectModePrefix :
-        '/';
+    const {basepath, selectModePrefix} = this.state;
 
-      // TODO(alanorozco): Fix href generation mess.
-      const href = [
-        prefix,
-        this.state.basepath.replace(/(^\/)|(\/$)/g, ''),
-        '/',
-        name,
-      ].join('').replace(/^\/\//, '/');
+    // Set at top-level so RegEx is compiled once per call.
+    const documentLinkRegex = /\.html$/;
+
+    return this.state.fileSet.map(name => {
+      const prefix = documentLinkRegex.test(name) ?
+        basepath.replace(/^\//, selectModePrefix) :
+        basepath;
+
+      const href = prefix + name;
 
       return {name, href};
     });
