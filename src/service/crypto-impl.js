@@ -76,7 +76,7 @@ export class Crypto {
     if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_())
-          .then(polyfill => polyfill.sha384(input));
+          .then(polyfillSha384 => polyfillSha384(input));
     }
 
     try {
