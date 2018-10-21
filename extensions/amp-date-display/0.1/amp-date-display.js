@@ -19,6 +19,13 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
+import {user} from '../../../src/log';
+
+/** @const {string} */
+const DEFAULT_LOCALE = 'en';
+
+/** @const {number} */
+const DEFAULT_OFFSET_SECONDS = 0;
 
 export class ampDateDisplay extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -52,12 +59,34 @@ export class ampDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Store this in buildCallback() because `this.element` sometimes
+    // is missing attributes in the constructor.
+
+    // Note: One of datetime, timestamp-ms, timestamp-seconds is required.
+
+    /** @private {string} */
     this.datetime_ = this.element.getAttribute('datetime') || '';
-    this.timestampSeconds_ = this.element.getAttribute('timestamp-seconds');
-    this.timestampMiliseconds_ = this.element.getAttribute('timestamp-ms');
+
+    /** @private {number} */
+    this.timestampSeconds_ = Number(
+        this.element.getAttribute('timestamp-seconds')
+    );
+
+    /** @private {number} */
+    this.timestampMiliseconds_ = Number(
+        this.element.getAttribute('timestamp-ms')
+    );
+
+    /** @private {string} */
     this.displayIn_ = this.element.getAttribute('display-in') || '';
-    this.offsetSeconds_ = this.element.getAttribute('offset-seconds') || 0;
-    this.locale_ = this.element.getAttribute('locale') || 'en';
+
+    /** @private {number} */
+    this.offsetSeconds_ =
+      Number(this.element.getAttribute('offset-seconds')) ||
+      DEFAULT_OFFSET_SECONDS;
+
+    /** @private {string} */
+    this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
     const epoch = this.getEpoch_();
     const offset = this.offsetSeconds_ * 1000;
@@ -79,6 +108,7 @@ export class ampDateDisplay extends AMP.BaseElement {
   }
 
   /**
+   * @return {number|undefined}
    * @private
    */
   getEpoch_() {
@@ -89,15 +119,15 @@ export class ampDateDisplay extends AMP.BaseElement {
     } else if (this.datetime_) {
       epoch = Date.parse(this.datetime_);
     } else if (this.timestampMiliseconds_) {
-      epoch = parseInt(this.timestampMiliseconds_, 10);
+      epoch = this.timestampMiliseconds_;
     } else if (this.timestampSeconds_) {
-      epoch = parseInt(this.timestampSeconds_, 10) * 1000;
+      epoch = this.timestampSeconds_ * 1000;
     }
 
-    if (isNaN(epoch)) {
-      // throw error?
-    }
-
+    user().assert(
+        !isNaN(epoch),
+        'One of datetime, timestamp-ms, timestamp-seconds is required'
+    );
     return epoch;
   }
 
@@ -181,6 +211,7 @@ export class ampDateDisplay extends AMP.BaseElement {
 
   /**
    * @param {number} input
+   * @return {string}
    * @private
    */
   padStart_(input) {
