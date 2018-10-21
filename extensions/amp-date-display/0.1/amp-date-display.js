@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { AmpEvents } from '../../../src/amp-events';
-import { Services } from '../../../src/services';
-import { createCustomEvent } from '../../../src/event-helper';
-import { isLayoutSizeDefined } from '../../../src/layout';
-import { removeChildren } from '../../../src/dom';
+import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeChildren} from '../../../src/dom';
 
 export class ampDateDisplay extends AMP.BaseElement {
   /** @param {!AmpElement} element */
