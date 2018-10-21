@@ -301,9 +301,14 @@ class AmpApesterMedia extends AMP.BaseElement {
       const {publisherId, trackingPixel} = publisher;
       const {affiliateId} = trackingPixel;
       if (affiliateId) {
-        const pixelElement = this.element.ownerDocument.createElement('amp-pixel');
-        pixelElement.setAttribute('src', generatePixelURL(publisherId, affiliateId));
+        const pixelElement =
+          this.element.ownerDocument.createElement('amp-pixel');
+
+        const pixelUrl = generatePixelURL(publisherId, affiliateId);
+
+        pixelElement.setAttribute('src', pixelUrl);
         pixelElement.setAttribute('layout', 'nodisplay');
+
         return pixelElement;
       }
     }

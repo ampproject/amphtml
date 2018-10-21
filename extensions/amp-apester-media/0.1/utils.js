@@ -187,17 +187,17 @@ export function registerEvent(eventName, callback, win, iframe, unlisteners) {
  */
 export function generatePixelURL(publisherId, affiliateId) {
   const qsObj = {
-    offer_id: 2,
-    aff_id: affiliateId,
-    aff_sub: publisherId,
-    aff_sub2: window.location.hostname,
-    aff_sub3: 'amp',
+    'offer_id': 2,
+    'aff_id': affiliateId,
+    'aff_sub': publisherId,
+    'aff_sub2': window.location.hostname,
+    'aff_sub3': 'amp',
     cb: Math.random(),
   };
 
   const qs = Object.keys(qsObj)
-    .map(key => `${key}=${qsObj[key]}`)
-    .join('&');
+      .map(key => `${key}=${qsObj[key]}`)
+      .join('&');
 
-  return `${ampPixelURL}?${qs}`
-};
+  return `${ampPixelURL}?${qs}`;
+}
