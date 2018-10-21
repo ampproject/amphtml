@@ -22,9 +22,7 @@ import {sha384} from '../../../third_party/closure-library/sha384-generated';
  * @param {!Window} win
  */
 export function installCryptoPolyfill(win) {
-  registerServiceBuilder(win, 'crypto-polyfill', function() {
-    return sha384;
-  });
+  registerServiceBuilder(win, 'crypto-polyfill', () => sha384);
 }
 
 installCryptoPolyfill(window);

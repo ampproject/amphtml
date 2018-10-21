@@ -24,8 +24,12 @@ import {stringToBytes, utf8Encode} from '../utils/bytes';
 const TAG = 'Crypto';
 const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
-export class Crypto {
+/**
+ * @typedef {function((string|Uint8Array))}
+ */
+let CryptoPolyfillDef;
 
+export class Crypto {
   /**
    * Creates an instance of Crypto.
    * @param {!Window} win
@@ -57,7 +61,7 @@ export class Crypto {
     /** @private @const {boolean} */
     this.isLegacyWebkit_ = isLegacyWebkit;
 
-    /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
+    /** @private {?Promise<!CryptoPolyfillDef>} */
     this.polyfillPromise_ = null;
   }
 
@@ -131,7 +135,7 @@ export class Crypto {
 
   /**
    * Loads Crypto polyfill library.
-   * @return {!Promise<{sha384: function((string|Uint8Array))}>}
+   * @return {!Promise<!CryptoPolyfillDef>}
    * @private
    */
   loadPolyfill_() {
