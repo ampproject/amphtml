@@ -78,6 +78,9 @@ export class ampDateDisplay extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * @private
+   */
   getEpoch_() {
     let epoch;
 
@@ -100,6 +103,7 @@ export class ampDateDisplay extends AMP.BaseElement {
 
   /**
    * @param {!Date} date
+   * @param {string} locale
    * @private
    */
   getVariablesInLocal_(date, locale) {
@@ -107,10 +111,14 @@ export class ampDateDisplay extends AMP.BaseElement {
       year: date.getFullYear(),
       month: date.getMonth() + 1,
       monthName: date.toLocaleDateString(locale, {month: 'long'}),
-      monthNameShort: date.toLocaleDateString(locale, {month: 'short'}),
+      monthNameShort: date.toLocaleDateString(locale, {
+        month: 'short',
+      }),
       day: date.getDate(),
       dayName: date.toLocaleDateString(locale, {weekday: 'long'}),
-      dayNameShort: date.toLocaleDateString(locale, {weekday: 'short'}),
+      dayNameShort: date.toLocaleDateString(locale, {
+        weekday: 'short',
+      }),
       hour: date.getHours(),
       minute: date.getMinutes(),
       second: date.getSeconds(),
@@ -120,6 +128,7 @@ export class ampDateDisplay extends AMP.BaseElement {
 
   /**
    * @param {!Date} date
+   * @param {string} locale
    * @private
    */
   getVariablesInUTC_(date, locale) {

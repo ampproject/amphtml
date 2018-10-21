@@ -460,7 +460,7 @@ exports.extensionBundles.forEach(c => {
   console./*OK*/ assert('name' in c, `name key must exist. Found ${strRep}.`);
   console./*OK*/ assert(
       'version' in c,
-      'version key must exist. ' + `Found ${strRep}.`
+      `version key must exist. Found ${strRep}.`
   );
   console./*OK*/ assert('type' in c, `type key must exist. Found ${strRep}.`);
   const validTypes = Object.keys(TYPES).map(x => TYPES[x]);
