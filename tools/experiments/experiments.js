@@ -159,7 +159,7 @@ const EXPERIMENTS = [
     id: 'ios-embed-sd-notransfer',
     name: 'Disables transfer mode for the new iOS embedded viewport model',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -174,8 +174,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
@@ -272,10 +272,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
-  },
-  {
     id: 'amp-live-list-sorting',
     name: 'Allows "newest last" insertion algorithm to be used',
     spec: 'https://github.com/ampproject/amphtml/issues/5396',
@@ -363,6 +359,12 @@ const EXPERIMENTS = [
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
+  },
+  {
     id: 'linker-form',
     name: 'Enables form support in linker',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
@@ -371,6 +373,11 @@ const EXPERIMENTS = [
     id: 'fie-metadata-extension',
     name: 'Use version supporting extension field in amp-ad-metadata.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
 ];
 
