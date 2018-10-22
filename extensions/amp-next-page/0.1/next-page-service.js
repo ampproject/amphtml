@@ -29,6 +29,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -459,7 +460,10 @@ export class NextPageService {
   triggerAnalyticsEvent_(eventType, toURL, fromURL) {
     fromURL = fromURL || '';
 
-    const vars = {toURL, fromURL};
+    const vars = dict({
+      'toURL': toURL,
+      'fromURL': fromURL,
+    });
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }

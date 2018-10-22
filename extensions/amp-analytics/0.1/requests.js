@@ -324,7 +324,9 @@ export function expandPostMessage(
     return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
         .then(extraUrlParams => {
           debugger;
-          return defaultSerializer(expandedMsg, [{'extraUrlParams': extraUrlParams}]);
+          return defaultSerializer(expandedMsg, [
+            dict({'extraUrlParams': extraUrlParams})
+          ]);
         });
   });
 }

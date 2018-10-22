@@ -24,7 +24,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
+import {hasOwn, dict} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -182,7 +182,8 @@ export class AnalyticsEvent {
   /**
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
+   * @dict
    */
   constructor(target, type, opt_vars) {
     /** @const */
@@ -493,12 +494,12 @@ export class ScrollEventTracker extends EventTracker {
    * as keys and false as values.
    *
    * @param {!Array<number>} bounds array of bounds.
-   * @return {!Object<number,boolean>} Object with normalized bounds as keys
+   * @return {!JsonObject} Object with normalized bounds as keys
    * and false as value.
    * @private
    */
   normalizeBoundaries_(bounds) {
-    const result = {};
+    const result = dict({});
     if (!bounds || !Array.isArray(bounds)) {
       return result;
     }
@@ -1244,7 +1245,7 @@ export class VisibilityTracker extends EventTracker {
    * @param {string} eventType
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Element} target
-   * @param {!Object<string, *>} state
+   * @param {!JsonObject} state
    * @private
    */
   onEvent_(eventType, listener, target, state) {

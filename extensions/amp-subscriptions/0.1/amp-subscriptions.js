@@ -33,6 +33,7 @@ import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {dict} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -495,10 +496,10 @@ export class SubscriptionService {
         dev().assert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
             SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-            {
-              action,
-              serviceId,
-            }
+            dict({
+              'action': action,
+              'serviceId': serviceId,
+            })
         );
         resolve(platform.executeAction(action));
       });

@@ -1131,7 +1131,6 @@ export class UrlReplacements {
     if (opt_sync) {
       return replacement;
     }
-    debugger;
     return replacementPromise || Promise.resolve(replacement);
   }
 

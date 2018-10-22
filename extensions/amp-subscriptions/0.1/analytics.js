@@ -15,6 +15,7 @@
  */
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {dict} from '../../../src/utils/object';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor
@@ -50,20 +51,20 @@ export class SubscriptionAnalytics {
    *
    * @param {string} eventType
    * @param {string} serviceId
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, Object.assign({
-      serviceId,
-    }, opt_vars));
+    this.event(eventType, dict(Object.assign(dict({
+      'serviceId': serviceId,
+    }), opt_vars)));
   }
 
   /**
    *
    * @param {string} eventType
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
   }
 }

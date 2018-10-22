@@ -272,7 +272,6 @@ export class Expander {
    * @return {!Promise<string>} Resolved value.
    */
   evaluateBindingAsync_(binding, name, opt_args, opt_collectVars) {
-    debugger;
     let value;
     try {
       if (typeof binding === 'function') {
@@ -323,7 +322,6 @@ export class Expander {
    * @return {string} Resolved value.
    */
   evaluateBindingSync_(binding, name, opt_args, opt_collectVars) {
-    debugger;
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
@@ -367,7 +365,6 @@ export class Expander {
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    */
   maybeCollectVars_(name, value, opt_collectVars, opt_args) {
-    debugger;
     if (!opt_collectVars) {
       return;
     }

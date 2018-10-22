@@ -796,7 +796,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

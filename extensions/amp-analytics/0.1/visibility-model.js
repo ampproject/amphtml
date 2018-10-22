@@ -26,7 +26,7 @@ import {dev} from '../../../src/log';
  */
 export class VisibilityModel {
   /**
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {function():number} calcVisibility
    */
   constructor(spec, calcVisibility) {
@@ -35,27 +35,20 @@ export class VisibilityModel {
 
     /**
      * Spec parameters.
-     * @private {{
-     *   visiblePercentageMin: number,
-     *   visiblePercentageMax: number,
-     *   totalTimeMin: number,
-     *   totalTimeMax: number,
-     *   continuousTimeMin: number,
-     *   continuousTimeMax: number,
-     * }}
+     * @private {!JsonObject}
      */
-    this.spec_ = {
-      visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
-      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
-      totalTimeMin: Number(spec['totalTimeMin']) || 0,
-      totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
-      continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
-      continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
-    };
+    this.spec_ = dict({
+      'visiblePercentageMin': Number(spec['visiblePercentageMin']) / 100 || 0,
+      'visiblePercentageMax': Number(spec['visiblePercentageMax']) / 100 || 1,
+      'totalTimeMin': Number(spec['totalTimeMin']) || 0,
+      'totalTimeMax': Number(spec['totalTimeMax']) || Infinity,
+      'continuousTimeMin': Number(spec['continuousTimeMin']) || 0,
+      'continuousTimeMax': Number(spec['continuousTimeMax']) || Infinity,
+    });
     // Above, if visiblePercentageMax was not specified, assume 100%.
     // Here, do allow 0% to be the value if that is what was specified.
     if (String(spec['visiblePercentageMax']).trim() === '0') {
-      this.spec_.visiblePercentageMax = 0;
+      this.spec_['visiblePercentageMax'] = 0;
     }
 
     /** @private {boolean} */
@@ -267,9 +260,10 @@ export class VisibilityModel {
   /**
    * Returns the calculated state of visibility.
    * @param {time} startTime
-   * @return {!JsonObject<string|number>}
+   * @return {!JsonObject}
    */
   getState(startTime) {
+    debugger;
     return dict({
       // Observed times, relative to the `startTime`.
       'firstSeenTime': timeBase(this.firstSeenTime_, startTime),
@@ -354,16 +348,16 @@ export class VisibilityModel {
         'invalid visibility value: %s', visibility);
     // Special case: If visiblePercentageMin is 100%, then it doesn't make
     // sense to do the usual (min, max] since that would never be true.
-    if (this.spec_.visiblePercentageMin == 1) {
+    if (this.spec_['visiblePercentageMin'] == 1) {
       return visibility == 1;
     }
     // Special case: If visiblePercentageMax is 0%, then we
     // want to ping when the creative becomes not visible.
-    if (this.spec_.visiblePercentageMax == 0) {
+    if (this.spec_['visiblePercentageMax'] == 0) {
       return visibility == 0;
     }
-    return visibility > this.spec_.visiblePercentageMin &&
-        visibility <= this.spec_.visiblePercentageMax;
+    return visibility > this.spec_['visiblePercentageMin'] &&
+        visibility <= this.spec_['visiblePercentageMax'];
   }
 
   /**
@@ -427,10 +421,10 @@ export class VisibilityModel {
     }
 
     return this.everMatchedVisibility_ &&
-        (this.totalVisibleTime_ >= this.spec_.totalTimeMin) &&
-        (this.totalVisibleTime_ <= this.spec_.totalTimeMax) &&
-        (this.maxContinuousVisibleTime_ >= this.spec_.continuousTimeMin) &&
-        (this.maxContinuousVisibleTime_ <= this.spec_.continuousTimeMax);
+        (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
+        (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
+        (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
+        (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
   }
 
   /**
@@ -441,9 +435,9 @@ export class VisibilityModel {
    */
   computeTimeToWait_() {
     const waitForContinuousTime = Math.max(
-        this.spec_.continuousTimeMin - this.continuousTime_, 0);
+        this.spec_['continuousTimeMin'] - this.continuousTime_, 0);
     const waitForTotalTime = Math.max(
-        this.spec_.totalTimeMin - this.totalVisibleTime_, 0);
+        this.spec_['totalTimeMin'] - this.totalVisibleTime_, 0);
     const maxWaitTime = Math.max(waitForContinuousTime, waitForTotalTime);
     return Math.min(
         maxWaitTime,
