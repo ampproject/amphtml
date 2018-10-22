@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
@@ -266,25 +267,25 @@ export class VisibilityModel {
   /**
    * Returns the calculated state of visibility.
    * @param {time} startTime
-   * @return {!Object<string, string|number>}
+   * @return {!JsonObject<string|number>}
    */
   getState(startTime) {
-    return {
+    return dict({
       // Observed times, relative to the `startTime`.
-      firstSeenTime: timeBase(this.firstSeenTime_, startTime),
-      lastSeenTime: timeBase(this.lastSeenTime_, startTime),
-      lastVisibleTime: timeBase(this.lastVisibleTime_, startTime),
-      firstVisibleTime: timeBase(this.firstVisibleTime_, startTime),
+      'firstSeenTime': timeBase(this.firstSeenTime_, startTime),
+      'lastSeenTime': timeBase(this.lastSeenTime_, startTime),
+      'lastVisibleTime': timeBase(this.lastVisibleTime_, startTime),
+      'firstVisibleTime': timeBase(this.firstVisibleTime_, startTime),
 
       // Durations.
-      maxContinuousVisibleTime: this.maxContinuousVisibleTime_,
-      totalVisibleTime: this.totalVisibleTime_,
+      'maxContinuousVisibleTime': this.maxContinuousVisibleTime_,
+      'totalVisibleTime': this.totalVisibleTime_,
 
       // Visibility percents.
-      loadTimeVisibility: this.loadTimeVisibility_ * 100 || 0,
-      minVisiblePercentage: this.minVisiblePercentage_ * 100,
-      maxVisiblePercentage: this.maxVisiblePercentage_ * 100,
-    };
+      'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
+      'minVisiblePercentage': this.minVisiblePercentage_ * 100,
+      'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
+    });
   }
 
   /**

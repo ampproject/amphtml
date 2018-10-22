@@ -500,7 +500,8 @@ export class GlobalVariableSource extends VariableSource {
     // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
-        return activity.getIncrementalEngagedTime(name, reset !== 'false');
+        return activity.getIncrementalEngagedTime(/** @type {string} */ (name),
+            reset !== 'false');
       });
     });
 
@@ -1043,6 +1044,7 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
+    debugger;
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         'url-replacement-v2');
     if (isV2ExperimentOn) {
@@ -1129,6 +1131,7 @@ export class UrlReplacements {
     if (opt_sync) {
       return replacement;
     }
+    debugger;
     return replacementPromise || Promise.resolve(replacement);
   }
 

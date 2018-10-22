@@ -368,7 +368,6 @@ export class VisibilityManager {
       model.maybeDispose();
 
       if (layoutBox) {
-        debugger;
         Object.assign(state, {
           'elementX': layoutBox.left,
           'elementY': layoutBox.top,
