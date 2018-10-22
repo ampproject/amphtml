@@ -63,13 +63,13 @@ authorization, but it's striclty defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. They are executed
 concurrently and prioritized based on which service returns the positive response.
-3. AMP viewers are allowed to provide a signed authorization response based
-on an independent agreement with publishers as a proof of access.
-4. Content markup is standardized allowing apps and crawlers to easily detect
-premium content sections.
+3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
+response based on an independent agreement with publishers as a proof of access.
+4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
 
-It is recommended that new publisher and paywall provider implementations use
-`amp-subscriptions`.
+Because of standardization of marker, multi provider support and improved viewer
+support it is recommended that new publisher and paywall provider implementations
+use `amp-subscriptions`.
 
 ## Services
 
