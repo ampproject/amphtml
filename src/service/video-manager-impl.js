@@ -1225,7 +1225,7 @@ function isLandscape(win) {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents|string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */
