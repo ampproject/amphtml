@@ -22,11 +22,11 @@ import {
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map, dict} from '../../../src/utils/object';
 
 const TAG = 'amp-analytics/visibility-manager';
 

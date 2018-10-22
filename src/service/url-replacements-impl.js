@@ -260,7 +260,8 @@ export class GlobalVariableSource extends VariableSource {
           /*OK*/' Cookie name, is required');
 
       if (getMode().runtime == 'inabox') {
-        return /** @type {!Promise<ResolverReturnDef>} */(Promise.resolve(null));
+        return /** @type {!Promise<ResolverReturnDef>} */(
+          Promise.resolve(null));
       }
 
       let consent = Promise.resolve();
@@ -1044,7 +1045,6 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    debugger;
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         'url-replacement-v2');
     if (isV2ExperimentOn) {

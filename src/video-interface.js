@@ -438,35 +438,6 @@ export const VideoAnalyticsEvents = {
   SECONDS_PLAYED: 'video-seconds-played',
 };
 
-/**
- * @constructor
- * @dict
- */
-function VideoAnalyticsDetails() {};
-/** @type {boolean} */
-VideoAnalyticsDetails.prototype.autoplay;
-/** @type {number} */
-VideoAnalyticsDetails.prototype.currentTime;
-/** @type {number} */
-VideoAnalyticsDetails.prototype.duration;
-/** @type {number} */
-VideoAnalyticsDetails.prototype.height;
-/** @type {string} */
-VideoAnalyticsDetails.prototype.id;
-/** @type {string} */
-VideoAnalyticsDetails.prototype.playedRangesJson;
-/** @type {number} */
-VideoAnalyticsDetails.prototype.playedTotal;
-/** @type {boolean} */
-VideoAnalyticsDetails.prototype.muted;
-/** @type {string} */
-VideoAnalyticsDetails.prototype.state;
-/** @type {number} */
-VideoAnalyticsDetails.prototype.width;
-
-/** @typedef {!VideoAnalyticsDetails} */
-export let VideoAnalyticsDetailsDef;
-
 
 /**
  * Helper union type to be used internally, so that the compiler treats

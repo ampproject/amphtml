@@ -36,7 +36,7 @@ import {
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
@@ -389,7 +389,6 @@ export class AmpAnalytics extends AMP.BaseElement {
           break;
         }
 
-        debugger;
         for (const extraUrlParamsKey in params) {
           const newkey = extraUrlParamsKey.replace(
               replaceMapKey,

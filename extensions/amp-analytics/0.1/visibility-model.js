@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dict} from '../../../src/utils/object';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /**
  * This class implements visibility calculations based on the
@@ -263,7 +263,6 @@ export class VisibilityModel {
    * @return {!JsonObject}
    */
   getState(startTime) {
-    debugger;
     return dict({
       // Observed times, relative to the `startTime`.
       'firstSeenTime': timeBase(this.firstSeenTime_, startTime),

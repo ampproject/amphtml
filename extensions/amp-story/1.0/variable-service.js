@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {StateChangeType} from './navigation-state';
-import {dict} from '../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 
 /**
  * @typedef {!JsonObject}

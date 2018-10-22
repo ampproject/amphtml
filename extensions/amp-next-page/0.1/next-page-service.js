@@ -21,6 +21,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -29,7 +30,6 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
 import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 

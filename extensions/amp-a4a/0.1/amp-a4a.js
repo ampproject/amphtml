@@ -1667,7 +1667,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const analyticsEvent =
         dev().assert(LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]);
-    const analyticsVars = dict(Object.assign(
+    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
         dict({'time': Math.round(this.getNow_())}),
         this.getA4aAnalyticsVars(analyticsEvent)));
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);

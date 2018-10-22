@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {dict} from '../../../src/utils/object';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor
@@ -54,7 +54,7 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, dict(Object.assign(dict({
+    this.event(eventType, /** @type {!JsonObject} */ (Object.assign(dict({
       'serviceId': serviceId,
     }), opt_vars)));
   }

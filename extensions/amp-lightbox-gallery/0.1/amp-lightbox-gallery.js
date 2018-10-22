@@ -27,7 +27,6 @@ import {
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
-import {dict} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -47,6 +46,7 @@ import {
   translate,
 } from '../../../src/transition';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,

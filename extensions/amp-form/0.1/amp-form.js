@@ -384,7 +384,7 @@ export class AmpForm {
    */
   triggerFormSubmitInAnalytics_(eventType) {
     this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = {};
+    const formDataForAnalytics = dict({});
     const formObject = this.getFormAsObject_();
 
     for (const k in formObject) {
