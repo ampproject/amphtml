@@ -26,7 +26,6 @@ const {getStdout} = require('../exec');
 const {gitCommitHash, gitOriginUrl} = require('../git');
 
 const runtimeFile = './dist/v0.js';
-const maxSize = '82.6KB'; // Only use 0.1 KB of precision (no hundredths digit)
 
 const buildArtifactsRepoOptions = {
   owner: 'ampproject',
@@ -37,10 +36,40 @@ const expectedGitHubProject = 'ampproject/amphtml';
 const {green, red, cyan, yellow} = colors;
 
 /**
+ * Get the max bundle size from the build artifacts repository.
+ *
+ * @return {number} the max allowed bundle size.
+ */
+async function getMaxBundleSize() {
+  if (process.env.GITHUB_ARTIFACTS_RO_TOKEN) {
+    octokit.authenticate({
+      type: 'token',
+      token: process.env.GITHUB_ARTIFACTS_RO_TOKEN,
+    });
+  }
+
+  return await octokit.repos.getContent(
+      Object.assign(buildArtifactsRepoOptions, {
+        path: path.join('bundle-size', '.max_size'),
+      })
+  ).then(result => {
+    const maxSize =
+        Buffer.from(result.data.content, 'base64').toString().trim();
+    log('Max bundle size from GitHub is', cyan(maxSize));
+    return maxSize;
+  }).catch(error => {
+    log(red('ERROR: Failed to retrieve the max allowed bundle size from' +
+            ' GitHub.'));
+    throw error;
+  });
+}
+
+/**
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  *
  * @param {string} bundleSize the new bundle size in 99.99KB format.
+ * @return {!Promise}
  */
 function storeBundleSize(bundleSize) {
   if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
@@ -57,9 +86,9 @@ function storeBundleSize(bundleSize) {
     return;
   }
 
-  if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
-    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle ' +
-        'size in the artifacts repository on GitHub!'));
+  if (!process.env.GITHUB_ARTIFACTS_RW_TOKEN) {
+    log(red('ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
+        'bundle size in the artifacts repository on GitHub!'));
     process.exitCode = 1;
     return;
   }
@@ -71,7 +100,7 @@ function storeBundleSize(bundleSize) {
 
   octokit.authenticate({
     type: 'token',
-    token: process.env.GITHUB_ARTIFACTS_TOKEN,
+    token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
   });
 
   return octokit.repos.getContent(githubApiCallOptions).then(() => {
@@ -97,7 +126,7 @@ function storeBundleSize(bundleSize) {
  * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
  * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
  */
-function checkBundleSize() {
+async function checkBundleSize() {
   if (!fs.existsSync(runtimeFile)) {
     log(yellow('Could not find'), cyan(runtimeFile) +
         yellow('. Skipping bundlesize check.'));
@@ -106,6 +135,8 @@ function checkBundleSize() {
         yellow('before'), cyan('gulp bundle-size') + yellow('.'));
     return;
   }
+
+  const maxSize = await getMaxBundleSize();
 
   const cmd = `npx bundlesize -f "${runtimeFile}" -s "${maxSize}"`;
   log('Running ' + cyan(cmd) + '...');
