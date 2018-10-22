@@ -383,6 +383,8 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      // amp-story only allows actions on a case-by-case basis to preserve UX
+      // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_WHITELIST]: [],
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
