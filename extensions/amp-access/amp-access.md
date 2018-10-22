@@ -42,7 +42,7 @@ limitations under the License.
 
 ## Relationship to `amp-subscriptions`
 
-The [`amp-subscriptions`](../amp-access/amp-subscriptions.md) extension offers
+The [`amp-subscriptions`](../amp-subscriptions/amp-subscriptions.md) extension offers
 similar features to `amp-access`. However, it supports a more specialized access
 paywall protocol. Some notable notable differences are:
 
