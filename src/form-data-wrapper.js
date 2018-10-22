@@ -65,8 +65,13 @@ export class PolyfillFormDataWrapper {
     this.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
   }
 
-  /** @override */
-  append(name, value) {
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
     // Coercion to string is required to match
     // the native FormData.append behavior
     const nameString = String(name);
@@ -127,18 +132,25 @@ class NativeFormDataWrapper {
       iterateCursor(opt_form.elements, input => {
         if (input.type == 'file' && input.files.length == 0) {
           this.formData_.delete(input.name);
+          this.formData_.append(input.name, new Blob([]), '');
         }
       });
     }
   }
 
-  /** @override */
-  append(name, value) {
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
     // Safari 11 breaks on submitting empty File values.
     if (value && typeof value == 'object' && isEmptyFile(value)) {
-      return;
+      this.formData_.append(name, new Blob([]), opt_filename || '');
+    } else {
+      this.formData_.append(name, value);
     }
-    this.formData_.append(name, value);
   }
 
   /** @override */
@@ -202,8 +214,9 @@ class FormDataWrapperInterface {
    * @param {string} unusedName The name of the field whose data is contained in
    *     `value`.
    * @param {string|!File} unusedValue The field's value.
+   * @param {string=} opt_filename The filename to use if the value is a file.
    */
-  append(unusedName, unusedValue) {}
+  append(unusedName, unusedValue, opt_filename) {}
 
   /**
    * Remove the given value from the FormData.

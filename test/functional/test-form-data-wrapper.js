@@ -29,18 +29,18 @@ describes.realWin('FormDataWrapper', {}, env => {
       description: 'when native `entries` is not available',
 
       beforeEach() {
-        nativeEntries = env.win.FormData.prototype.entries;
-        nativeDelete = env.win.FormData.prototype.delete;
+        nativeEntries = FormData.prototype.entries;
+        nativeDelete = FormData.prototype.delete;
         // Remove native entries from the prototype in case the browser running
         // the tests already have it to force the "no native `entries`"
         // scenario.
-        env.win.FormData.prototype.entries = undefined;
-        env.win.FormData.prototype.delete = undefined;
+        FormData.prototype.entries = undefined;
+        FormData.prototype.delete = undefined;
       },
 
       afterEach() {
-        env.win.FormData.prototype.entries = nativeEntries;
-        env.win.FormData.prototype.delete = nativeDelete;
+        FormData.prototype.entries = nativeEntries;
+        FormData.prototype.delete = nativeDelete;
       },
     }];
 
@@ -50,11 +50,11 @@ describes.realWin('FormDataWrapper', {}, env => {
         description: 'when native `entries` is available',
 
         beforeEach() {
-          // Do nothing as `env.win.FormData.prototype` already has `entires`.
+          // Do nothing as `FormData.prototype` already has `entires`.
         },
 
         afterEach() {
-          // Do nothing as `env.win.FormData.prototype` is intact.
+          // Do nothing as `FormData.prototype` is intact.
         },
       });
     }
@@ -299,27 +299,30 @@ describes.realWin('FormDataWrapper', {}, env => {
     });
 
     describe('NativeFormDataWrapper', () => {
-      it('removes empty file objects', () => {
+      it('replaces empty file objects in forms with empty blobs', () => {
         const form = env.win.document.createElement('form');
 
         const input = env.win.document.createElement('input');
         input.type = 'file';
         input.name = 'foo1';
 
+        form.appendChild(input);
         env.win.document.body.appendChild(form);
 
         const formData = createFormDataWrapper(form);
-
-        expect(fromIterator(formData.entries()))
-            .to.be.an('array').that.is.empty;
+        const actual = fromIterator(formData.entries());
+        expect(actual[0][0]).to.equal('foo1');
+        expect(actual[0][1] instanceof Blob).to.be.true;
       });
 
-      it('does not append empty file objects', () => {
+      it('appends empty blobs instead of empty file objects', () => {
+        const file = new File([], '');
         const formData = createFormDataWrapper();
-        formData.append('myFile', new env.win.File([], ''));
+        formData.append('myFile', file);
 
-        expect(fromIterator(formData.entries()))
-            .to.be.an('array').that.is.empty;
+        const actual = fromIterator(formData.entries());
+        expect(actual[0][0]).to.equal('myFile');
+        expect(actual[0][1] instanceof Blob).to.be.true;
       });
     });
 
@@ -343,16 +346,16 @@ describes.realWin('FormDataWrapper', {}, env => {
 
         const polyfillFormDataWrapper = new PolyfillFormDataWrapper(form);
 
-        if (env.win.FormData.prototype.entries) {
+        if (FormData.prototype.entries) {
           const polyfillFormData = polyfillFormDataWrapper.getFormData();
           expect(fromIterator(polyfillFormData.entries())).to.deep.equal(
-              fromIterator(new env.win.FormData(form).entries()));
+              fromIterator(new FormData(form).entries()));
         } else {
           // For testing in non-supporting browsers like IE.
           // We can't query the state of FormData, but we can check that
           // the polyfill appended to the real FormData enough.
           const appendSpy =
-              env.sandbox.spy(env.win.FormData.prototype, 'append');
+              env.sandbox.spy(FormData.prototype, 'append');
           polyfillFormDataWrapper.getFormData();
           expect(appendSpy).to.have.been.calledTwice;
         }
