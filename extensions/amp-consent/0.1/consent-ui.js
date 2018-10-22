@@ -22,6 +22,7 @@ import {dev, user} from '../../../src/log';
 import {
   elementByTag,
   insertAfterOrAtStart,
+  isAmpElement,
   removeElement,
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
@@ -132,13 +133,25 @@ export class ConsentUI {
         });
       });
     } else {
-      toggle(this.ui_, true);
-      if (!this.isPostPrompt_) {
-        // scheduleLayout is required everytime because some AMP element may
-        // get un laid out after toggle display (#unlayoutOnPause)
-        // for example <amp-iframe>
-        this.baseInstance_.scheduleLayout(this.ui_);
-      }
+      const show = () => {
+        if (!this.ui_) {
+          return;
+        }
+        toggle(this.ui_, true);
+        if (!this.isPostPrompt_) {
+          // scheduleLayout is required everytime because some AMP element may
+          // get un laid out after toggle display (#unlayoutOnPause)
+          // for example <amp-iframe>
+          this.baseInstance_.scheduleLayout(this.ui_);
+        }
+      };
+
+      // If the UI is an AMP Element, wait until it's built before showing it,
+      // to avoid race conditions where the UI would be hidden by the runtime
+      // at build time. (see #18841).
+      isAmpElement(this.ui_) ?
+        this.ui_.whenBuilt().then(() => show()) :
+        show();
     }
   }
 
