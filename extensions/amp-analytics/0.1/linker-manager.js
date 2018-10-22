@@ -19,12 +19,14 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addParamToUrl} from '../../../src/url';
+import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
+/** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
 
 export class LinkerManager {
@@ -51,9 +53,16 @@ export class LinkerManager {
     this.allLinkerPromises_ = [];
 
     /** @private {!JsonObject} */
-    this.resolvedLinkers_ = dict();
+    this.resolvedIds_ = dict();
 
+    /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.ampdoc_);
+
+    /** @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
+    this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
+
+    /** @private {?UnlistenDef} */
+    this.formSubmitUnlistener_ = null;
   }
 
 
@@ -92,8 +101,7 @@ export class LinkerManager {
             expandedIds[keys[i]] = value;
           }
         });
-        this.resolvedLinkers_[name] =
-            createLinker(/* version */ '1', expandedIds);
+        this.resolvedIds_[name] = expandedIds;
       });
     });
 
@@ -103,7 +111,19 @@ export class LinkerManager {
           this.handleAnchorMutation_.bind(this), Priority.ANALYTICS_LINKER);
     }
 
+
+    this.maybeEnableFormSupport_();
+
     return Promise.all(this.allLinkerPromises_);
+  }
+
+  /**
+   * Remove any listeners created to manage form submission.
+   */
+  dispose() {
+    if (this.formSubmitUnlistener_) {
+      this.formSubmitUnlistener_();
+    }
   }
 
   /**
@@ -133,7 +153,7 @@ export class LinkerManager {
           Object.assign({}, defaultConfig, config[name]);
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(TAG, `linker config for ${name} is not enabled and` +
+        user().info(TAG, `linker config for ${name} is not enabled and ` +
             'will be ignored.');
         return;
       }
@@ -211,7 +231,7 @@ export class LinkerManager {
     for (const linkerName in linkerConfigs) {
       // The linker param is created asynchronously. This callback should be
       // synchronous, so we skip if value is not there yet.
-      if (this.resolvedLinkers_[linkerName]) {
+      if (this.resolvedIds_[linkerName]) {
         this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
       }
     }
@@ -230,15 +250,29 @@ export class LinkerManager {
     const {href, hostname} = el;
 
     const /** @type {Array} */ domains = config['destinationDomains'];
+
+    if (this.isDomainMatch_(hostname, domains)) {
+      const linkerValue = createLinker(/* version */ '1',
+          this.resolvedIds_[name]);
+      el.href = addParamToUrl(href, name, linkerValue);
+    }
+  }
+
+  /**
+   * Check to see if the url is a match for the given set of domains.
+   * @param {string} hostname
+   * @param {?Array} domains
+   */
+  isDomainMatch_(hostname, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, `${name} destinationDomains must be an array.`);
-      return;
+      return false;
     }
 
     // See if any domains match.
     if (domains && !domains.includes(hostname)) {
-      return;
+      return false;
     }
 
     // If no domains given, default to friendly domain matching.
@@ -249,11 +283,108 @@ export class LinkerManager {
       const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
       if (!areFriendlyDomains(sourceOrigin, hostname)
           && !areFriendlyDomains(canonicalOrigin, hostname)) {
-        return;
+        return false;
       }
     }
+    return true;
+  }
 
-    el.href = addParamToUrl(href, name, this.resolvedLinkers_[name]);
+  /**
+   * Enable form support if experiment is on.
+   * TODO(ccordry): remove this method and use `enableFormSupport_` when fully
+   * launched.
+   * @private
+   */
+  maybeEnableFormSupport_() {
+    if (isExperimentOn(this.ampdoc_.win, 'linker-form')) {
+      this.enableFormSupport_();
+    }
+  }
+
+  /**
+   * Register callback that will handle form sumbits.
+   */
+  enableFormSupport_() {
+    if (this.formSubmitUnlistener_) {
+      return;
+    }
+
+    this.formSubmitService_.then(formService => {
+      this.formSubmitUnlistener_ =
+          formService.beforeSubmit(this.handleFormSubmit_.bind(this));
+    });
+  }
+
+  /**
+   * Check to see if any linker configs match this form's url, if so, send
+   * along the resolved linker value
+   * @param {!../../amp-form/0.1/form-submit-service.FormSubmitEventDef} event
+   */
+  handleFormSubmit_(event) {
+    const {form, actionXhrMutator} = event;
+
+    for (const linkerName in this.config_) {
+      const config = this.config_[linkerName];
+      const /** @type {Array} */ domains = config['destinationDomains'];
+
+      const url = form.getAttribute('action-xhr') ||
+          form.getAttribute('action');
+      const {hostname} = this.urlService_.parse(url);
+
+      if (this.isDomainMatch_(hostname, domains)) {
+        this.addDataToForm_(form, actionXhrMutator, linkerName);
+      }
+    }
+  }
+
+
+  /**
+   * Add the linker data to form. If action-xhr is present we can update the
+   * action-xhr, if not we fallback to adding hidden inputs.
+   * @param {!Element} form
+   * @param {function(string)} actionXhrMutator
+   * @param {string} linkerName
+   */
+  addDataToForm_(form, actionXhrMutator, linkerName) {
+    const ids = this.resolvedIds_[linkerName];
+    if (!ids) {
+      // Form was clicked before macros resolved.
+      return;
+    }
+
+    const linkerValue = createLinker(/* version */ '1', ids);
+
+    // Runtime controls submits with `action-xhr`, so we can append the linker
+    // param
+    const actionXhrUrl = form.getAttribute('action-xhr');
+    if (actionXhrUrl) {
+      const decoratedUrl = addParamToUrl(actionXhrUrl, linkerName, linkerValue);
+      return actionXhrMutator(decoratedUrl);
+    }
+
+    // If we are not using `action-xhr` it must be a GET request using the
+    // standard action attribute. Browsers will not let you change this in the
+    // middle of a submit, so we add the input hidden attributes.
+    this.addHiddenInputs_(form, linkerName, linkerValue);
+  }
+
+  /**
+   * Add the linker pairs as <input> elements to form.
+   * @param {!Element} form
+   * @param {string} linkerName
+   * @param {string} linkerValue
+   */
+  addHiddenInputs_(form, linkerName, linkerValue) {
+    const attrs = dict({
+      'type': 'hidden',
+      'name': linkerName,
+      'value': linkerValue,
+    });
+
+    const inputEl = createElementWithAttributes(
+        /** @type {!Document} */ (form.ownerDocument),
+        'input', attrs);
+    form.appendChild(inputEl);
   }
 }
 

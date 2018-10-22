@@ -31,7 +31,11 @@ const PlayerStates = {
   PAUSED: 2,
 };
 
-/*eslint-disable */
+/**
+ * Icons from Google Material Icons
+ * https://material.io/tools/icons
+ */
+/*eslint-disable*/
 const icons = {
   'play':
     `<path d="M8 5v14l11-7z"></path>
@@ -49,10 +53,13 @@ const icons = {
     `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
   'seek':
-    `<circle cx="12" cy="12" r="12" />`,
-}
+  `<circle cx="12" cy="12" r="12" />`
+};
+
 const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
+
+const bigPlayDivDisplayStyle = 'table-cell';
 
 // Div wrapping our entire DOM.
 let wrapperDiv;
@@ -90,6 +97,9 @@ let progressMarkerDiv;
 // Div for fullscreen icon.
 let fullscreenDiv;
 
+// Div for mute/unmute icon.
+let muteUnmuteDiv;
+
 // Div for ad container.
 let adContainerDiv;
 
@@ -117,6 +127,9 @@ let seekPercent;
 
 // Flag tracking whether or not content has played to completion.
 let contentComplete;
+
+// Flag tracking whether or not all ads have been played and been completed.
+let allAdsCompleted;
 
 // Flag tracking if an ad request has failed.
 let adRequestFailed;
@@ -212,7 +225,7 @@ export function imaVideo(global, data) {
     'position': 'relative',
     'width': px(videoWidth),
     'height': px(videoHeight),
-    'display': 'table-cell',
+    'display': bigPlayDivDisplayStyle,
     'vertical-align': 'middle',
     'text-align': 'center',
     'cursor': 'pointer',
@@ -312,6 +325,19 @@ export function imaVideo(global, data) {
   progressBarWrapperDiv.appendChild(progressMarkerDiv);
   progressBarWrapperDiv.appendChild(totalTimeLine);
   controlsDiv.appendChild(progressBarWrapperDiv);
+
+  // Mute/Unmute button
+  muteUnmuteDiv = createIcon(global, 'volume_max');
+  muteUnmuteDiv.id = 'ima-mute-unmute';
+  setStyles(muteUnmuteDiv, {
+    'width': '30px',
+    'height': '30px',
+    'margin-right': '20px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+  });
+  controlsDiv.appendChild(muteUnmuteDiv);
+
   // Fullscreen button
   fullscreenDiv = createIcon(global, 'fullscreen');
   fullscreenDiv.id = 'ima-fullscreen';
@@ -385,6 +411,7 @@ export function imaVideo(global, data) {
 
   contentComplete = false;
   adsActive = false;
+  allAdsCompleted = false;
   playbackStarted = false;
   nativeFullscreen = false;
   imaLoadAllowed = true;
@@ -407,12 +434,17 @@ export function imaVideo(global, data) {
     // Create our own tap listener that ignores tap and drag.
     bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
     bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
-    bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        'tapwithoutdrag',
+        onBigPlayClick.bind(null, global));
   } else {
-    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    bigPlayDiv.addEventListener(
+        interactEvent,
+        onBigPlayClick.bind(null, global));
   }
   playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
   progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
+  muteUnmuteDiv.addEventListener(interactEvent, onMuteUnmuteClick);
   fullscreenDiv.addEventListener(interactEvent,
       toggleFullscreen.bind(null, global));
 
@@ -563,17 +595,23 @@ function changeIcon(element, name, fill = '#FFFFFF') {
  * @param {!Object} global
  * @visibleForTesting
  */
-export function onClick(global) {
-  playbackStarted = true;
-  uiTicker = setInterval(uiTickerClick, 500);
-  setInterval(playerDataTick, 1000);
-  bigPlayDiv.removeEventListener(interactEvent, onClick);
-  setStyle(bigPlayDiv, 'display', 'none');
-  if (adDisplayContainer) {
-    adDisplayContainer.initialize();
+export function onBigPlayClick(global) {
+  if (playbackStarted) {
+    // Resart the video
+    playVideo();
+  } else {
+    // Play the video for the first time
+    playbackStarted = true;
+    uiTicker = setInterval(uiTickerClick, 500);
+    setInterval(playerDataTick, 1000);
+    if (adDisplayContainer) {
+      adDisplayContainer.initialize();
+    }
+    videoPlayer.load();
+    playAds(global);
   }
-  videoPlayer.load();
-  playAds(global);
+
+  setStyle(bigPlayDiv, 'display', 'none');
 }
 
 /**
@@ -635,10 +673,8 @@ export function playAds(global) {
     try {
       adsManager.init(
           videoWidth, videoHeight, global.google.ima.ViewMode.NORMAL);
-      postMessage({event: VideoEvents.PLAYING});
       adsManager.start();
     } catch (adError) {
-      postMessage({event: VideoEvents.PLAYING});
       playVideo();
     }
   } else if (!adRequestFailed) {
@@ -646,7 +682,6 @@ export function playAds(global) {
     setTimeout(playAds.bind(null, global), 250);
   } else {
     // Ad request failed.
-    postMessage({event: VideoEvents.PLAYING});
     playVideo();
   }
 }
@@ -661,6 +696,13 @@ export function onContentEnded() {
   if (adsLoader) {
     adsLoader.contentComplete();
   }
+
+  // If all ads are not completed,
+  // onContentResume will show the bigPlayDiv
+  if (allAdsCompleted) {
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
+  }
+
   postMessage({event: VideoEvents.PAUSE});
   postMessage({event: VideoEvents.ENDED});
 }
@@ -687,6 +729,9 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
       onContentResumeRequested);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
+      onAllAdsCompleted);
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
@@ -759,9 +804,21 @@ export function onContentResumeRequested() {
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
-    videoPlayer.addEventListener('ended', onContentEnded);
     playVideo();
+  } else {
+    setStyle(bigPlayDiv, 'display', bigPlayDivDisplayStyle);
   }
+
+  videoPlayer.addEventListener('ended', onContentEnded);
+}
+
+/**
+ * Called by the IMA SDK. Signifies all ads have been played for the video.
+ *
+ * @visibleForTesting
+ */
+export function onAllAdsCompleted() {
+  allAdsCompleted = true;
 }
 
 /**
@@ -953,6 +1010,51 @@ export function pauseVideo(event = null) {
   }
 }
 
+/**
+ * Handler when the mute/unmute button is clicked
+ */
+export function onMuteUnmuteClick() {
+  if (videoPlayer.muted) {
+    unmuteVideo();
+  } else {
+    muteVideo();
+  }
+}
+
+/**
+ * Function to mute the video
+ */
+export function muteVideo() {
+  if (!videoPlayer.muted) {
+    videoPlayer.volume = 0;
+    videoPlayer.muted = true;
+    if (adsManager) {
+      adsManager.setVolume(0);
+    } else {
+      muteAdsManagerOnLoaded = true;
+    }
+    changeIcon(muteUnmuteDiv, 'mute');
+    postMessage({event: VideoEvents.MUTED});
+  }
+}
+
+/**
+ * Function to unmute the video
+ */
+export function unmuteVideo() {
+  if (videoPlayer.muted) {
+    videoPlayer.volume = 1;
+    videoPlayer.muted = false;
+    if (adsManager) {
+      adsManager.setVolume(1);
+    } else {
+      muteAdsManagerOnLoaded = false;
+    }
+    changeIcon(muteUnmuteDiv, 'volume_max');
+    postMessage({event: VideoEvents.UNMUTED});
+  }
+}
+
 
 /**
  * @param {Object} global
@@ -1094,7 +1196,7 @@ function onMessage(global, event) {
         playVideo();
       } else {
         // Auto-play support
-        onClick(global);
+        onBigPlayClick(global);
       }
       break;
     case 'pauseVideo':
@@ -1106,24 +1208,10 @@ function onMessage(global, event) {
       }
       break;
     case 'mute':
-      videoPlayer.volume = 0;
-      videoPlayer.muted = true;
-      if (adsManager) {
-        adsManager.setVolume(0);
-      } else {
-        muteAdsManagerOnLoaded = true;
-      }
-      postMessage({event: VideoEvents.MUTED});
+      muteVideo();
       break;
     case 'unMute':
-      videoPlayer.volume = 1;
-      videoPlayer.muted = false;
-      if (adsManager) {
-        adsManager.setVolume(1);
-      } else {
-        muteAdsManagerOnLoaded = false;
-      }
-      postMessage({event: VideoEvents.UNMUTED});
+      unmuteVideo();
       break;
     case 'hideControls':
       if (!adsActive) {
@@ -1191,11 +1279,30 @@ function postMessage(data) {
  * @visibleForTesting
  */
 export function getPropertiesForTesting() {
-  return {adContainerDiv, adRequestFailed, adsActive, adsManagerWidthOnLoad,
-    adsManagerHeightOnLoad, adsRequest, contentComplete, controlsDiv,
-    hideControlsTimeout, imaLoadAllowed, interactEvent, playbackStarted,
-    playerState, PlayerStates, playPauseDiv, progressLine,
-    progressMarkerDiv, timeNode, uiTicker, videoPlayer};
+  return {
+    adContainerDiv,
+    allAdsCompleted,
+    adRequestFailed,
+    adsActive,
+    adsManagerWidthOnLoad,
+    adsManagerHeightOnLoad,
+    adsRequest,
+    bigPlayDiv,
+    contentComplete,
+    controlsDiv,
+    hideControlsTimeout,
+    imaLoadAllowed,
+    interactEvent,
+    playbackStarted,
+    playerState,
+    PlayerStates,
+    playPauseDiv,
+    progressLine,
+    progressMarkerDiv,
+    timeNode,
+    uiTicker,
+    videoPlayer,
+  };
 }
 
 /**
@@ -1225,6 +1332,24 @@ export function setAdDisplayContainerForTesting(adc) {
 export function setVideoWidthAndHeightForTesting(width, height) {
   videoWidth = width;
   videoHeight = height;
+}
+
+/**
+ * Sets the video muted state
+ * @param {boolean} shouldMute
+ * @visibleForTesting
+ */
+export function setVideoPlayerMutedForTesting(shouldMute) {
+  videoPlayer.muted = shouldMute;
+}
+
+/**
+ * Sets the allAdsCompleted flag.
+ * @param {boolean} newValue
+ * @visibleForTesting
+ */
+export function setAllAdsCompletedForTesting(newValue) {
+  allAdsCompleted = newValue;
 }
 
 /**

@@ -23,6 +23,7 @@ const app = require('express')();
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
+const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -31,6 +32,7 @@ const path = require('path');
 const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
+const runVideoTestBench = require('./app-video-testbench');
 
 app.use(bodyParser.json());
 app.use('/amp4test', require('./amp4test'));
@@ -58,6 +60,16 @@ app.get('/serve_mode=:mode', (req, res) => {
     res.status(400).send(info);
   }
 });
+
+if (!global.AMP_TESTING) {
+
+  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
+      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
+    devDashboard.setCacheStatus(false);
+  }
+
+  app.get(['/', '/*'], devDashboard.serveIndex);
+}
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -736,6 +748,11 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
   setTimeout(next, sleep);
 });
 
+/**
+ * Video testbench endpoint
+ */
+app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
+
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
@@ -1142,7 +1159,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         hostName + '/dist/amp-shadow.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox-lite.js');
+        hostName + '/dist/amp-inabox.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');

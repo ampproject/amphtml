@@ -206,7 +206,6 @@ To reduce the number of request pings, you can specify batching behaviors in the
 
 The batching properties are:
   - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
-  - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
 For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 ```javascript
@@ -684,6 +683,14 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
   "referrerPolicy": "no-referrer"
 }
 ```
+
+#### Linkers
+
+The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+
+Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
+
+If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
 
 ## Validation
 

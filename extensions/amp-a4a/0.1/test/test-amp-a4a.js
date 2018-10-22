@@ -410,6 +410,18 @@ describe('amp-a4a', () => {
       });
     });
 
+    it('detachedCallback should destroy FIE and detach frame', () => {
+      const fieDestroySpy =
+          sandbox./*OK*/spy(FriendlyIframeEmbed.prototype, 'destroy');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        a4a.detachedCallback();
+        expect(fieDestroySpy).to.be.called;
+        expect(a4aElement.querySelector('iframe')).to.not.be.ok;
+      });
+    });
+
     it('for A4A FIE should wait for initial layout', () => {
       let iniLoadResolver;
       const iniLoadPromise = new Promise(resolve => {

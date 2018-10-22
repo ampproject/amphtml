@@ -17,17 +17,19 @@
 /** @externs */
 
 /**
- * The "init" argument of the Fetch API. Currently, only "credentials: include"
- * is implemented.  Note ampCors with explicit false indicates that
- * __amp_source_origin should not be appended to the URL to allow for
- * potential caching or response across pages.
+ * The "init" argument of the Fetch API. Externed due to being passes across
+ * component/runtime boundary.
  *
- * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ * Currently, only "credentials: include" is implemented.
  *
- * Externed for use in the amp-form component when reconstructing
- * the request for SSR and then passed to runtime.
+ * Note ampCors === false indicates that __amp_source_origin should not be
+ * appended to the URL to allow for potential caching or response across pages.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+ *
  * @typedef {{
- *   body: (!JsonObject|!FormData|!FormDataWrapper|undefined|string),
+ *   body: (!JsonObject|!FormData|!FormDataWrapperInterface|undefined|string),
+ *   cache: (string|undefined),
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
@@ -37,21 +39,23 @@
  */
 var FetchInitDef;
 
-/** @constructor **/
-var FormDataWrapper = function() {};
-
-FormDataWrapper.prototype.entries = function() {};
-FormDataWrapper.prototype.getFormData = function() {};
-
 /**
- * Externed as this is constructed in the amp-form component and
- * then passed to runtime.
- * @typedef {{
- *  xhrUrl: string,
- *  fetchOpt: !FetchInitDef
- * }}
+ * Externed due to being passed across component/runtime boundary.
+ * @typedef {{xhrUrl: string, fetchOpt: !FetchInitDef}}
  */
 var FetchRequestDef;
+
+/** @constructor **/
+var FormDataWrapperInterface = function() {};
+
+FormDataWrapperInterface.prototype.entries = function() {};
+FormDataWrapperInterface.prototype.getFormData = function() {};
+
+FormData.prototype.entries = function () {};
+/**
+ * @param {string} unusedName
+ */
+FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from
@@ -109,6 +113,9 @@ process.env;
 process.env.NODE_ENV;
 process.env.SERVE_MODE;
 
+/** @type {boolean|undefined} */
+window.IS_AMP_ALT;
+
 // Exposed to ads.
 window.context = {};
 window.context.sentinel;
@@ -162,7 +169,7 @@ window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream
+window.AMP.attachShadowDocAsStream;
 
 
 /** @constructor */

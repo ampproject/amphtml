@@ -404,10 +404,10 @@ CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the J
  - CSS extensions such as [`width()`, `height()`, `num()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
 
 
-#### Whitelisted properties for keyframes
+#### White listed properties for keyframes
 
 Not all CSS properties can be used in keyframes. Only CSS properties that modern browsers can optimize and
-animate quickly are whitelisted. This list will grow as more properties are confirmed to provide good
+animate quickly are white listed. This list will grow as more properties are confirmed to provide good
 performance. Currently the list contains:
  - `opacity`
  - `transform`
@@ -624,7 +624,7 @@ For instance, the following expression calculates the delay in seconds proportio
 
 SVGs are awesome and we certainly recommend their use for animations!
 
-SVG animations are supported via the same CSS properties described in [Whitelisted properties for keyframes](#whitelisted-properties-for-keyframes) with some nuances:
+SVG animations are supported via the same CSS properties described in [White listed properties for keyframes](#whitelisted-properties-for-keyframes) with some nuances:
 
 - IE/Edge SVG elements [do not support CSS `transform` properties](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/1173754/). The `transform` animation itself is polyfilled. However, initial state defined in a stylesheet is not applied. If the initial transformed state is important on IE/Edge, it's recommended to duplicate it via [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
 - While `transform` CSS is polyfilled for IE/Edge, unfortunately, it's impossible to polyfill `transform-origin`. Thus, where compatibility with IE/Edge is desired, it's recommended to only use the default `transform-origin`.

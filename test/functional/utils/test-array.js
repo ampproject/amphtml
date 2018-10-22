@@ -16,10 +16,10 @@
 
 import {
   areEqualOrdered,
-  filterSplice,
   findIndex,
   fromIterator,
   pushIfNotExist,
+  remove,
 } from '../../../src/utils/array';
 
 describe('areEqualOrdered', function() {
@@ -81,32 +81,25 @@ describe('areEqualOrdered', function() {
   });
 });
 
-describe('filterSplice', function() {
+describe('remove', function() {
   let array;
   beforeEach(() => {
     array = [1, 2, 3, 4, 5];
   });
 
-  it('should splice elements that filter true', () => {
-    filterSplice(array, i => i > 2);
-    expect(array).to.deep.equal([3, 4, 5]);
-  });
-
-  it('should return filtered elements', () => {
-    const filtered = filterSplice(array, i => i > 2);
-    expect(filtered).to.deep.equal([1, 2]);
+  it('should remove elements that return true', () => {
+    remove(array, i => i > 2);
+    expect(array).to.deep.equal([1, 2]);
   });
 
   it('handles no removals', () => {
-    const filtered = filterSplice(array, () => true);
+    remove(array, () => false);
     expect(array).to.deep.equal([1, 2, 3, 4, 5]);
-    expect(filtered).to.deep.equal([]);
   });
 
   it('handles consecutive removals', () => {
-    const filtered = filterSplice(array, () => false);
+    remove(array, () => true);
     expect(array).to.deep.equal([]);
-    expect(filtered).to.deep.equal([1, 2, 3, 4, 5]);
   });
 });
 

@@ -68,6 +68,7 @@ export const UIType = {
  *    adstate: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    hassidebarstate: boolean,
  *    infodialogstate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
@@ -75,8 +76,10 @@ export const UIType = {
  *    pausedstate: boolean,
  *    rtlstate: boolean,
  *    sharemenustate: boolean,
+ *    sidebarstate: boolean,
  *    storyaudiostate: boolean,
  *    supportedbrowserstate: boolean,
+ *    systemuiisvisiblestate: boolean,
  *    uistate: !UIType,
  *    consentid: ?string,
  *    currentpageid: string,
@@ -101,6 +104,7 @@ export const StateProperty = {
   AD_STATE: 'adstate',
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
+  HAS_SIDEBAR_STATE: 'hassidebarstate',
   INFO_DIALOG_STATE: 'infodialogstate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
@@ -108,8 +112,10 @@ export const StateProperty = {
   PAUSED_STATE: 'pausedstate',
   RTL_STATE: 'rtlstate',
   SHARE_MENU_STATE: 'sharemenustate',
+  SIDEBAR_STATE: 'sidebarstate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   STORY_HAS_AUDIO_STATE: 'storyaudiostate',
+  SYSTEM_UI_IS_VISIBLE_STATE: 'systemuiisvisiblestate',
   UI_STATE: 'uistate',
 
   // App data.
@@ -133,8 +139,11 @@ export const Action = {
   TOGGLE_PAUSED: 'togglepaused',
   TOGGLE_RTL: 'togglertl',
   TOGGLE_SHARE_MENU: 'togglesharemenu',
+  TOGGLE_SIDEBAR: 'togglesidebar',
+  TOGGLE_HAS_SIDEBAR: 'togglehassidebar',
   TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
+  TOGGLE_SYSTEM_UI_IS_VISIBLE: 'togglesystemuiisvisible',
   TOGGLE_UI: 'toggleui',
 };
 
@@ -170,7 +179,10 @@ const actions = (state, action, data) => {
         return state;
       }
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
+          {}, state, {
+            [StateProperty.BOOKEND_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ (Object.assign(
@@ -198,6 +210,19 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.RTL_STATE]: !!data}));
+    case Action.TOGGLE_SIDEBAR:
+      // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
+      if (state[StateProperty.SIDEBAR_STATE] === data) {
+        return state;
+      }
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.SIDEBAR_STATE]: !!data,
+          }));
+    case Action.TOGGLE_HAS_SIDEBAR:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.HAS_SIDEBAR_STATE]: !!data}));
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SUPPORTED_BROWSER_STATE]: !!data}));
@@ -207,6 +232,9 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
+    case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -320,6 +348,7 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
@@ -327,8 +356,10 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
+      [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',

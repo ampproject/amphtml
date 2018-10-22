@@ -17,6 +17,7 @@
 import {Services} from '../services';
 import {
   computedStyle,
+  getStyle,
   getVendorJsPropertyName,
   setImportantStyles,
   setInitialDisplay,
@@ -124,7 +125,7 @@ export class FixedLayer {
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
     // Sort in document order.
-    this.sortInDomOrder_();
+    this.sortInDomOrder_(this.elements_);
 
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
@@ -191,8 +192,10 @@ export class FixedLayer {
   /**
    * Adds the element directly into the fixed/sticky layer, bypassing discovery.
    * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the transfer layer.
+   * @param {boolean=} opt_forceTransfer If set to true, then the element needs
+   *    to be forcefully transferred to the transfer layer. If false, then it
+   *    will only receive top-padding compensation for the header and never be
+   *    transferred.
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
@@ -207,7 +210,7 @@ export class FixedLayer {
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
-    this.sortInDomOrder_();
+    this.sortInDomOrder_(this.elements_);
     return this.update();
   }
 
@@ -305,7 +308,7 @@ export class FixedLayer {
 
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
-          const {element} = fe;
+          const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
           const {offsetWidth, offsetHeight, offsetTop} = element;
@@ -319,12 +322,8 @@ export class FixedLayer {
           const transform = style[getVendorJsPropertyName(style, 'transform')];
           let {top} = style;
 
-          // Element is indeed fixed. Visibility is added to the test to
-          // avoid moving around invisible elements.
-          const isFixed = (
-            position == 'fixed' &&
-              (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
-          // Element is indeed sticky.
+          const isFixed = position === 'fixed' &&
+            (forceTransfer || (offsetWidth > 0 && offsetHeight > 0));
           const isSticky = endsWith(position, 'sticky');
           const isDisplayed = (display !== 'none');
 
@@ -353,8 +352,19 @@ export class FixedLayer {
           // transparent elements used for "service" needs and thus best kept
           // in the original tree. The visibility, however, is not considered
           // because `visibility` CSS is inherited.
-          const isTransferrable = isFixed && (
-            fe.forceTransfer || (opacity > 0 && !!(top || bottom)));
+          let isTransferrable = false;
+          if (isFixed) {
+            if (forceTransfer === true) {
+              isTransferrable = true;
+            } else if (forceTransfer === false) {
+              isTransferrable = false;
+            } else {
+              isTransferrable = (
+                opacity > 0 &&
+                offsetHeight < 300 &&
+                !!(top || bottom));
+            }
+          }
           if (isTransferrable) {
             hasTransferables = true;
           }
@@ -456,7 +466,7 @@ export class FixedLayer {
    */
   warnAboutInlineStylesIfNecessary_(element) {
     if (element.hasAttribute('style')
-        && (element.style.top || element.style.bottom)) {
+        && (getStyle(element, 'top') || getStyle(element, 'bottom'))) {
       user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
           'CSS rules are not supported yet for fixed or sticky elements ' +
           '(#14186). Unexpected behavior may occur.', element);
@@ -513,7 +523,7 @@ export class FixedLayer {
       this.elements_.push(fe);
     }
 
-    fe.forceTransfer = isFixed && !!opt_forceTransfer;
+    fe.forceTransfer = isFixed ? opt_forceTransfer : false;
   }
 
   /**
@@ -538,16 +548,26 @@ export class FixedLayer {
     return removed;
   }
 
-  /** @private */
-  sortInDomOrder_() {
-    this.elements_.sort(function(fe1, fe2) {
-      // 8 | 2 = 0x0A
-      // 2 - preceeding
-      // 8 - contains
-      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
-        return 1;
+  /**
+   * @param {!Array<ElementDef>} elements
+   * @private */
+  sortInDomOrder_(elements) {
+    elements.sort(function(fe1, fe2) {
+      if (fe1.element && (fe1.element == fe2.element)) {
+        return 0;
       }
-      return -1;
+
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
+      const pos = fe1.element.compareDocumentPosition(fe2.element);
+
+      // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
+      if (pos & Node.DOCUMENT_POSITION_PRECEDING ||
+          pos & Node.DOCUMENT_POSITION_CONTAINS) {
+        return 1;
+      } else {
+        // if fe2 is following or contained by fe1, then fe1 is before fe2
+        return -1;
+      }
     });
   }
 

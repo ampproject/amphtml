@@ -58,7 +58,6 @@ goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
-goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('goog.asserts');
 
@@ -296,39 +295,30 @@ class Tokenizer {
 
     // Line number information.
     let eofToken;
-    if (amp.validator.LIGHT) {
-      eofToken = parse_css.TRIVIAL_EOF_TOKEN;
-    } else {
-      /** @private @type {!Array<number>} */
-      this.lineByPos_ = [];
-      /** @private @type {!Array<number>} */
-      this.colByPos_ = [];
-      let currentLine = line || 1;
-      let currentCol = col || 0;
-      for (let i = 0; i < this.codepoints_.length; ++i) {
-        this.lineByPos_[i] = currentLine;
-        this.colByPos_[i] = currentCol;
-        if (newline(this.codepoints_[i])) {
-          ++currentLine;
-          currentCol = 0;
-        } else {
-          ++currentCol;
-        }
+    /** @private @type {!Array<number>} */
+    this.lineByPos_ = [];
+    /** @private @type {!Array<number>} */
+    this.colByPos_ = [];
+    let currentLine = line || 1;
+    let currentCol = col || 0;
+    for (let i = 0; i < this.codepoints_.length; ++i) {
+      this.lineByPos_[i] = currentLine;
+      this.colByPos_[i] = currentCol;
+      if (newline(this.codepoints_[i])) {
+        ++currentLine;
+        currentCol = 0;
+      } else {
+        ++currentCol;
       }
-      eofToken = new parse_css.EOFToken();
-      eofToken.line = currentLine;
-      eofToken.col = currentCol;
     }
+    eofToken = new parse_css.EOFToken();
+    eofToken.line = currentLine;
+    eofToken.col = currentCol;
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
       if (token.tokenType === parse_css.TokenType.ERROR) {
-        if (amp.validator.LIGHT) {
-          this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          this.tokens_ = [];
-          return;
-        }
         this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
       } else {
         this.tokens_.push(token);
@@ -423,17 +413,12 @@ class Tokenizer {
     this.consumeComments();
     this.consume();
     const mark = new parse_css.Token();
-    if (!amp.validator.LIGHT) {
-      mark.line = this.getLine();
-      mark.col = this.getCol();
-    }
+    mark.line = this.getLine();
+    mark.col = this.getCol();
     if (whitespace(this.code_)) {
       // Merge consecutive whitespace into one token.
       while (whitespace(this.next())) {
         this.consume();
-      }
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_WHITESPACE_TOKEN;
       }
       return mark.copyPosTo(new parse_css.WhitespaceToken());
     } else if (this.code_ === /* '"' */ 0x22) {
@@ -453,47 +438,26 @@ class Tokenizer {
         }
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_23;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '$' */ 0x24) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_SUFFIX_MATCH_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.SuffixMatchToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_24;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ''' */ 0x27) {
       return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '(' */ 0x28) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_OPEN_PAREN_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.OpenParenToken());
     } else if (this.code_ === /* ')' */ 0x29) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_CLOSE_PAREN_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.CloseParenToken());
     } else if (this.code_ === /* '*' */ 0x2a) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_SUBSTRING_MATCH_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.SubstringMatchToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_2A;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '+' */ 0x2b) {
@@ -501,15 +465,9 @@ class Tokenizer {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_2B;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ',' */ 0x2c) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_COMMA_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.CommaToken());
     } else if (this.code_ === /* '-' */ 0x2d) {
       if (this./*OK*/ startsWithANumber()) {
@@ -518,17 +476,11 @@ class Tokenizer {
       } else if (
         this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_CDC_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.CDCToken());
       } else if (this./*OK*/ startsWithAnIdentifier()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_2D;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '.' */ 0x2e) {
@@ -536,33 +488,18 @@ class Tokenizer {
         this.reconsume();
         return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_2E;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* ':' */ 0x3a) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_COLON_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.ColonToken());
     } else if (this.code_ === /* ';' */ 0x3b) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_SEMICOLON_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.SemicolonToken());
     } else if (this.code_ === /* '<' */ 0x3c) {
       if (this.next(1) === /* '!' */ 0x21 && this.next(2) === /* '-' */ 0x2d &&
           this.next(3) === /* '-' */ 0x2d) {
         this.consume(3);
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_CDO_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.CDOToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_3C;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '@' */ 0x40) {
@@ -572,24 +509,15 @@ class Tokenizer {
         token.value = this.consumeAName();
         return mark.copyPosTo(token);
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_40;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '[' */ 0x5b) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_OPEN_SQUARE_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.OpenSquareToken());
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this./*OK*/ startsWithAValidEscape()) {
         this.reconsume();
         return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
-        }
         // This condition happens if we are in consumeAToken (this method),
         // the current codepoint is 0x5c (\) and the next codepoint is a
         // newline (\n).
@@ -599,63 +527,33 @@ class Tokenizer {
             ['style']));
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_CLOSE_SQUARE_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.CloseSquareToken());
     } else if (this.code_ === /* '^' */ 0x5e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_PREFIX_MATCH_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.PrefixMatchToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_5E;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '{' */ 0x7b) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_OPEN_CURLY_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.OpenCurlyToken());
     } else if (this.code_ === /* '|' */ 0x7c) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DASH_MATCH_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.DashMatchToken());
       } else if (this.next() === /* '|' */ 0x7c) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_COLUMN_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.ColumnToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_7C;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '}' */ 0x7d) {
-      if (amp.validator.LIGHT) {
-        return TRIVIAL_CLOSE_CURLY_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.CloseCurlyToken());
     } else if (this.code_ === /* '~' */ 0x7e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_CLOSE_CURLY_TOKEN;
-        }
         return mark.copyPosTo(new parse_css.IncludeMatchToken());
       } else {
-        if (amp.validator.LIGHT) {
-          return TRIVIAL_DELIM_TOKEN_7E;
-        }
         return mark.copyPosTo(new parse_css.DelimToken(this.code_));
       }
     } else if (digit(this.code_)) {
@@ -665,9 +563,6 @@ class Tokenizer {
       this.reconsume();
       return mark.copyPosTo(this.consumeAnIdentlikeToken());
     } else if (this.eof()) {
-      if (amp.validator.LIGHT) {
-        return parse_css.TRIVIAL_EOF_TOKEN;
-      }
       return mark.copyPosTo(new parse_css.EOFToken());
     } else {
       const token = new parse_css.DelimToken(this.code_);
@@ -681,10 +576,8 @@ class Tokenizer {
    */
   consumeComments() {
     const mark = new parse_css.Token();
-    if (!amp.validator.LIGHT) {
-      mark.line = this.getLine();
-      mark.col = this.getCol();
-    }
+    mark.line = this.getLine();
+    mark.col = this.getCol();
     while (this.next(1) === /* '/' */ 0x2f && this.next(2) === /* '*' */ 0x2a) {
       this.consume(2);
       while (true) {
@@ -693,16 +586,12 @@ class Tokenizer {
           this.consume();
           break;
         } else if (this.eof()) {
-          if (amp.validator.LIGHT) {
-            this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          } else {
-            // For example "h1 { color: red; } \* " would emit this parse error
-            // at the end of the string.
-            this.errors_.push(mark.copyPosTo(new parse_css.ErrorToken(
-                amp.validator.ValidationError.Code
-                    .CSS_SYNTAX_UNTERMINATED_COMMENT,
-                ['style'])));
-          }
+          // For example "h1 { color: red; } \* " would emit this parse error
+          // at the end of the string.
+          this.errors_.push(mark.copyPosTo(new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_UNTERMINATED_COMMENT,
+              ['style'])));
           return;
         }
       }
@@ -796,9 +685,6 @@ class Tokenizer {
         return token;
       } else if (newline(this.code_)) {
         this.reconsume();
-        if (amp.validator.LIGHT) {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
-        }
         return new parse_css.ErrorToken(
             amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
             ['style']);
@@ -843,9 +729,6 @@ class Tokenizer {
           return token;
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.LIGHT) {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
           return new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
@@ -853,9 +736,6 @@ class Tokenizer {
         this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
-        if (amp.validator.LIGHT) {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
-        }
         return new parse_css.ErrorToken(
             amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
@@ -863,9 +743,6 @@ class Tokenizer {
           token.value += stringFromCode(this.consumeEscape());
         } else {
           this.consumeTheRemnantsOfABadURL();
-          if (amp.validator.LIGHT) {
-            return parse_css.TRIVIAL_ERROR_TOKEN;
-          }
           return new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
@@ -1225,12 +1102,10 @@ const TokenType_NamesById = [
  */
 parse_css.Token = class {
   constructor() {
-    if (!amp.validator.LIGHT) {
-      /** @type {number} */
-      this.line = 1;
-      /** @type {number} */
-      this.col = 0;
-    }
+    /** @type {number} */
+    this.line = 1;
+    /** @type {number} */
+    this.col = 0;
   }
 
   /**
@@ -1240,26 +1115,22 @@ parse_css.Token = class {
    * @template T
    */
   copyPosTo(other) {
-    if (!amp.validator.LIGHT) {
-      other.line = this.line;
-      other.col = this.col;
-    }
+    other.line = this.line;
+    other.col = this.col;
     return other;
   }
 };
 /** @type {!parse_css.TokenType} */
 parse_css.Token.prototype.tokenType = parse_css.TokenType.UNKNOWN;
 
-if (!amp.validator.LIGHT) {
-  /** @return {!Object} */
-  parse_css.Token.prototype.toJSON = function() {
-    return {
-      'tokenType': TokenType_NamesById[this.tokenType],
-      'line': this.line,
-      'col': this.col,
-    };
+/** @return {!Object} */
+parse_css.Token.prototype.toJSON = function() {
+  return {
+    'tokenType': TokenType_NamesById[this.tokenType],
+    'line': this.line,
+    'col': this.col,
   };
-}
+};
 
 /**
  * Error tokens carry an error code and parameters, which can be
@@ -1273,35 +1144,24 @@ parse_css.ErrorToken = class extends parse_css.Token {
    */
   constructor(opt_code, opt_params) {
     super();
-    if (!amp.validator.LIGHT) {
-      goog.asserts.assert(opt_code !== undefined);
-      goog.asserts.assert(opt_params !== undefined);
-      /** @type {!amp.validator.ValidationError.Code} */
-      this.code = opt_code;
-      /** @type {!Array<string>} */
-      this.params = opt_params;
-    }
+    goog.asserts.assert(opt_code !== undefined);
+    goog.asserts.assert(opt_params !== undefined);
+    /** @type {!amp.validator.ValidationError.Code} */
+    this.code = opt_code;
+    /** @type {!Array<string>} */
+    this.params = opt_params;
   }
 };
 /** @type {!parse_css.TokenType} */
 parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.ErrorToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['code'] = this.code;
-    json['params'] = this.params;
-    return json;
-  };
-}
-
-if (amp.validator.LIGHT) {
-  /**
-   * @type {!parse_css.ErrorToken}
-   */
-  parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken();
-}
+/** @inheritDoc */
+parse_css.ErrorToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['code'] = this.code;
+  json['params'] = this.params;
+  return json;
+};
 
 parse_css.WhitespaceToken = class extends parse_css.Token {};
 /** @type {!parse_css.TokenType} */
@@ -1460,14 +1320,12 @@ const TRIVIAL_DELIM_TOKEN_5E = new parse_css.DelimToken(0x5E);
 const TRIVIAL_DELIM_TOKEN_7C = new parse_css.DelimToken(0x7C);
 const TRIVIAL_DELIM_TOKEN_7E = new parse_css.DelimToken(0x7E);
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.DelimToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.DelimToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 parse_css.StringValuedToken = class extends parse_css.Token {
   constructor() {
@@ -1484,14 +1342,12 @@ parse_css.StringValuedToken = class extends parse_css.Token {
     return this.value.toLowerCase() === str.toLowerCase();
   }
 };
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.StringValuedToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.StringValuedToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
 
 parse_css.IdentToken = class extends parse_css.StringValuedToken {};
 /** @type {!parse_css.TokenType} */
@@ -1518,14 +1374,12 @@ parse_css.HashToken = class extends parse_css.StringValuedToken {
 /** @type {!parse_css.TokenType} */
 parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.HashToken.prototype.toJSON = function() {
-    const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
-    json['type'] = this.type;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.HashToken.prototype.toJSON = function() {
+  const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
+  json['type'] = this.type;
+  return json;
+};
 
 parse_css.StringToken = class extends parse_css.StringValuedToken {};
 /** @type {!parse_css.TokenType} */
@@ -1549,16 +1403,14 @@ parse_css.NumberToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.NumberToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['type'] = this.type;
-    json['repr'] = this.repr;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.NumberToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['type'] = this.type;
+  json['repr'] = this.repr;
+  return json;
+};
 
 parse_css.PercentageToken = class extends parse_css.Token {
   constructor() {
@@ -1572,15 +1424,13 @@ parse_css.PercentageToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.PercentageToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['repr'] = this.repr;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.PercentageToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['repr'] = this.repr;
+  return json;
+};
 
 parse_css.DimensionToken = class extends parse_css.Token {
   constructor() {
@@ -1598,14 +1448,12 @@ parse_css.DimensionToken = class extends parse_css.Token {
 /** @type {!parse_css.TokenType} */
 parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
 
-if (!amp.validator.LIGHT) {
-  /** @inheritDoc */
-  parse_css.DimensionToken.prototype.toJSON = function() {
-    const json = parse_css.Token.prototype.toJSON.call(this);
-    json['value'] = this.value;
-    json['type'] = this.type;
-    json['repr'] = this.repr;
-    json['unit'] = this.unit;
-    return json;
-  };
-}
+/** @inheritDoc */
+parse_css.DimensionToken.prototype.toJSON = function() {
+  const json = parse_css.Token.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  json['type'] = this.type;
+  json['repr'] = this.repr;
+  json['unit'] = this.unit;
+  return json;
+};

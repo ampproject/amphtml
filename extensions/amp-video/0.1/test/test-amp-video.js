@@ -503,7 +503,7 @@ describes.realWin('amp-video', {
         v.getPlaceholder = sandbox.stub();
       }
       if (addBlurClass) {
-        img.classList.add('i-amphtml-blur');
+        img.classList.add('i-amphtml-blurry-placeholder');
       }
       v.setAttribute('poster', 'img.png');
       doc.body.appendChild(v);

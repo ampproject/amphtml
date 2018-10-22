@@ -51,7 +51,13 @@ body {
   text-size-adjust: 100%;
 }
 
+/**
+ * We intentionally break with HTML5's default [hidden] styling to apply
+ * !important.
+ */
 [hidden] {
+  /* This must be !important, else the toggle helper system would break down
+     due to specificity */
   display: none !important;
 }
 
@@ -69,12 +75,20 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
  * Override a user-supplied `body{overflow: visible; position:relative}`. This
  * style is set in runtime vs css to avoid conflicts with ios-embedded mode
  * and fixed transfer layer.
+ *
+ * Reasoning behind not targeting inabox can be found at:
+ * https://github.com/ampproject/amphtml/issues/18065
  */
 html.i-amphtml-singledoc > body,
 html.i-amphtml-fie > body {
   overflow: visible !important;
+}
+
+html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
+html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
 }
+
 
 /**
  * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
@@ -168,9 +182,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
 }
 
 
-.i-amphtml-blur {
-  filter: blur(20px) !important;
-  transform: scale(1.1) !important;
+.i-amphtml-blurry-placeholder {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
@@ -271,7 +283,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-fill-content,
-.i-amphtml-blur {
+.i-amphtml-blurry-placeholder {
   display: block;
   /* These lines are a work around to this issue in iOS:     */
   /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
@@ -480,12 +492,21 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 /**
  * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
  * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
- * for alighning the loading indicator, while `i-amphtml-loader` and
+ * for aligning the loading indicator, while `i-amphtml-loader` and
  * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
  * default implementation includes the three-dot layout and animation.
  */
 .i-amphtml-loading-container.amp-hidden {
   visibility: hidden;
+}
+
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the auto-resize attribute, the loader
+ * should be fully hidden and not take up space.
+ */
+amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
 }
 
 .i-amphtml-loader-line {
@@ -589,6 +610,21 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: visible;
 }
 
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button]{
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible,
+amp-list[load-more] > [load-more-button].amp-visible {
+  visibility: visible;
+}
 
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
@@ -681,7 +717,7 @@ form [submit-error] {
 /**
  * Form validation error messages should be hidden at first.
  */
-[visible-when-invalid] {
+[visible-when-invalid]:not(.visible) {
   display: none;
 }
 

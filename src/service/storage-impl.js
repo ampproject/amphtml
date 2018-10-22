@@ -82,14 +82,26 @@ export class Storage {
   }
 
   /**
-   * Saves the value of the specified property. Returns the promise that's
-   * resolved when the operation completes.
+   * Saves the value (restricted to boolean value) of the specified property.
+   * Returns the promise that's resolved when the operation completes.
    * @param {string} name
    * @param {*} value
    * @return {!Promise}
    */
   set(name, value) {
     dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
+    return this.setNonBoolean(name, value);
+  }
+
+  /**
+   * Saves the value of the specified property. Returns the promise that's
+   * resolved when the operation completes.
+   * Note: More restrict privacy review is required to store non boolean value.
+   * @param {string} name
+   * @param {*} value
+   * @return {!Promise}
+   */
+  setNonBoolean(name, value) {
     return this.saveStore_(store => store.set(name, value));
   }
 

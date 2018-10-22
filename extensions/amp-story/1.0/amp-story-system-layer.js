@@ -59,13 +59,19 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
 
 /** @private @const {string} */
+const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
+
+/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
 
+/** @private @const {string} */
+const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
+
 /** @private @const {number} */
-const hideTimeout = 1500;
+const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -143,6 +149,13 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -315,6 +328,8 @@ export class SystemLayer {
         this.onShareClick_();
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
+      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
+        this.onSidebarClick_();
       }
     });
 
@@ -354,6 +369,16 @@ export class SystemLayer {
     this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
       this.onPageAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
+        hasSidebar => {
+          this.onHasSidebarStateUpdate_(hasSidebar);
+        }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
   }
 
   /**
@@ -391,6 +416,20 @@ export class SystemLayer {
   onBookendStateUpdate_(isActive) {
     this.getShadowRoot()
         .classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Checks if the story has a sidebar in order to display the icon representing
+   * the opening of the sidebar.
+   * @param {boolean} hasSidebar
+   * @private
+   */
+  onHasSidebarStateUpdate_(hasSidebar) {
+    if (hasSidebar) {
+      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
+    } else {
+      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
+    }
   }
 
   /**
@@ -444,21 +483,24 @@ export class SystemLayer {
   }
 
   /**
-   * Hides element after elapsed time.
+   * Hides audio message after elapsed time.
    * @private
    */
-  hideAfterTimeout_() {
+  hideAudioMessageAfterTimeout_() {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
-    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    this.timeoutId_ =
+        this.timer_.delay(
+            () => this.hideAudioMessageInternal_(),
+            HIDE_AUDIO_MESSAGE_TIMEOUT_MS);
   }
 
   /**
-   * Hides message.
+   * Hides audio message.
    * @private
    */
-  hideInteral_() {
+  hideAudioMessageInternal_() {
     if (!this.isBuilt_) {
       return;
     }
@@ -481,6 +523,18 @@ export class SystemLayer {
       uiState === UIType.DESKTOP ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-hidden', !isVisible);
     });
   }
 
@@ -516,7 +570,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAfterTimeout_();
+      this.hideAudioMessageAfterTimeout_();
     });
   }
 
@@ -536,6 +590,14 @@ export class SystemLayer {
   onInfoClick_() {
     const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
     this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
+  }
+
+  /**
+   * Handles click events on the sidebar button and toggles the sidebar.
+   * @private
+   */
+  onSidebarClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
   }
 
   /**

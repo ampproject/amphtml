@@ -59,8 +59,9 @@ exports.rules = [
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
       'src/sanitizer.js->src/purifier.js',
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/purifier.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
     ],
   },
   {
@@ -92,6 +93,9 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
+      'extensions/amp-inputmask/**->third_party/inputmask/inputmask.js',
+      'extensions/amp-inputmask/**->' +
+          'third_party/inputmask/inputmask.dependencyLib.js',
       'extensions/amp-subscriptions/**/*.js->' +
           'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
@@ -249,11 +253,17 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js->' +
+            'src/service/position-observer/position-observer-worker.js',
       'src/service/video/docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'src/service/video/docking.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
+          'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cookie-writer.js->' +
           'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-impl.js',
@@ -288,6 +298,9 @@ exports.rules = [
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
           'src/service/xhr-impl.js',
+      // Accessing extension-location.calculateExtensionScriptUrl().
+      'extensions/amp-script/0.1/amp-script.js->' +
+            'src/service/extension-location.js',
     ],
   },
   {
