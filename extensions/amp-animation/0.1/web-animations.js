@@ -94,20 +94,15 @@ export class AnimationRunner {
   constructor(requests) {
     /** @const @protected */
     this.requests_ = requests;
-
-    /** @protected {?Array<!Animation>} */
-    this.players_ = null;
   }
 
   /**
-   * @override
    * @return {!WebAnimationPlayState}
    */
   getPlayState() {
   }
 
   /**
-   * @override
    * @param {function(!WebAnimationPlayState)} unusedHandler
    * @return {!UnlistenDef}
    */
@@ -115,14 +110,12 @@ export class AnimationRunner {
   }
 
   /**
-  * @override
   * Initializes the players but does not change the state.
    */
   init() {
   }
 
   /**
-   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -130,25 +123,21 @@ export class AnimationRunner {
   }
 
   /**
-   * @override
    */
   pause() {
   }
 
   /**
-   * @override
    */
   resume() {
   }
 
   /**
-   * @override
    */
   reverse() {
   }
 
   /**
-   * @override
    * @param {time} unusedTime
    */
   seekTo(unusedTime) {
@@ -163,19 +152,16 @@ export class AnimationRunner {
   }
 
   /**
-   * @override
    */
   finish() {
   }
 
   /**
-   * @override
    */
   cancel() {
   }
 
   /**
-   * @override
    * @param {!WebAnimationPlayState} unusedPlayState
    * @private
    */
@@ -196,6 +182,9 @@ export class AnimationWorkletRunner extends AnimationRunner {
 
     /** @const @private */
     this.win_ = win;
+
+    /** @protected {?Array<!WorkletAnimation>} */
+    this.players_ = null;
   }
 
   /**
@@ -221,7 +210,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
   * Initializes the players but does not change the state.
    */
   init() {
-    this.players_ = this.requests_.map(request => {
+    this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target,
@@ -232,7 +221,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource = this.win_.document.scrollingElement;
+        const scrollSource = this.win_.document./*OK*/scrollingElement;
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
@@ -244,11 +233,12 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline);
         player.play();
-        return player;
+        this.players_.push(player);
       });
     });
   }
   /**
+   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -259,6 +249,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   cancel() {
     if (!this.players_) {
@@ -281,6 +272,9 @@ export class WebAnimationRunner extends AnimationRunner {
   constructor(requests) {
     super(requests);
 
+    /** @protected {?Array<!Animation>} */
+    this.players_ = null;
+
     /** @private {number} */
     this.runningCount_ = 0;
 
@@ -292,6 +286,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * @return {!WebAnimationPlayState}
    */
   getPlayState() {
@@ -299,6 +294,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * @param {function(!WebAnimationPlayState)} handler
    * @return {!UnlistenDef}
    */
@@ -307,6 +303,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players but does not change the state.
    */
   init() {
@@ -334,6 +331,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -345,9 +343,10 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   pause() {
-    dev().assert(this.players_ || this.workletPlayers_);
+    dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       if (player.playState == WebAnimationPlayState.RUNNING) {
@@ -357,9 +356,10 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   resume() {
-    dev().assert(this.players_ || this.workletPlayers_);
+    dev().assert(this.players_);
     const oldRunnerPlayState = this.playState_;
     if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
@@ -376,9 +376,10 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   reverse() {
-    dev().assert(this.players_ || this.workletPlayers_);
+    dev().assert(this.players_);
     // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach(player => {
       player.reverse();
@@ -386,10 +387,11 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * @param {time} time
    */
   seekTo(time) {
-    dev().assert(this.players_ || this.workletPlayers_);
+    dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       player.pause();
@@ -398,6 +400,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number).
    * @param {number} percent between 0 and 1
@@ -410,6 +413,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   finish() {
     if (!this.players_) {
@@ -424,6 +428,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    */
   cancel() {
     if (!this.players_) {
@@ -436,6 +441,7 @@ export class WebAnimationRunner extends AnimationRunner {
   }
 
   /**
+   * @override
    * @param {!WebAnimationPlayState} playState
    * @private
    */
