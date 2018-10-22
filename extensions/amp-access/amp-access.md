@@ -43,11 +43,11 @@ limitations under the License.
 ## Relationship to `amp-subscriptions`
 
 The [`amp-subscriptions`](../amp-access/amp-subscriptions.md) extension offers
-similar features to `amp-access`. However it supports a more specialized access
+similar features to `amp-access`. However, it supports a more specialized access
 paywall protocol. Some notable notable differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it's striclty defined and standardized.
+authorization, but it is striclty defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. They are executed
 concurrently and prioritized based on which service returns the positive response.
