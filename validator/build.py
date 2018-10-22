@@ -155,6 +155,29 @@ def GenValidatorPb2Py(out_dir):
   logging.info('... done')
 
 
+def CheckValidatorPbGo(out_dir):
+  """Verifies that validator.pb.go is up-to-date.
+
+  Args:
+    out_dir: directory name of the scratch directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
+
+  subprocess.check_call(
+      ['protoc', 'validator.proto',
+       '--go_out=paths=source_relative:%s' % out_dir])
+  try:
+    subprocess.check_call(
+        ['diff', '-u', 'validator.pb.go', '%s/validator.pb.go' % out_dir])
+  except subprocess.CalledProcessError:
+    logging.info('Please run `protoc validator/validator.proto '
+                 '--go_out=paths=source_relative:.`.')
+    raise
+  logging.info('... done')
+
+
 def GenValidatorProtoascii(out_dir):
   """Assembles the validator protoascii file from the main and extensions.
 
@@ -584,6 +607,7 @@ def Main(parsed_args):
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
+  CheckValidatorPbGo(out_dir='dist')
   GenValidatorProtoGeneratedJs(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
