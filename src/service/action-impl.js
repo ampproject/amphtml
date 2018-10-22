@@ -444,9 +444,12 @@ export class ActionService {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
   }
 
-  /** Empties the current action whitelist (if any). */
-  clearWhitelist() {
-    this.whitelist_ = [];
+  /**
+   * Sets the action whitelist. Can be used to clear it.
+   * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
+   */
+  setWhitelist(whitelist) {
+    this.whitelist_ = whitelist;
   }
 
   /**
