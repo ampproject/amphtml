@@ -696,8 +696,12 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
 
     const storyLayoutPromise = this.initializePages_()
-        .then(() => this.buildSystemLayer_())
         .then(() => {
+          this.buildSystemLayer_();
+
+          this.handleConsentExtension_();
+          this.initializeStoryAccess_();
+
           this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
@@ -724,9 +728,6 @@ export class AmpStory extends AMP.BaseElement {
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
-
-    this.handleConsentExtension_();
-    this.initializeStoryAccess_();
 
     return storyLayoutPromise;
   }
@@ -827,6 +828,16 @@ export class AmpStory extends AMP.BaseElement {
           accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(
           () => this.onAccessApplyAuthorizations_());
+
+      const firstPage = this.pages_[0].element;
+      // First amp-story-page can't be paywall protected.
+      // Throws an error during development, but just ignore the amp-access rule
+      // in production.
+      user().assert(
+          !(firstPage.hasAttribute('amp-access') ||
+              firstPage.hasAttribute('amp-access-hide')),
+          'First amp-story-page cannot have amp-access or amp-access-hide ' +
+              'attributes');
     });
   }
 
@@ -940,18 +951,21 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    // First page can't be paywall protected.
+    const bypassPaywall = pageIndex === 0;
+
     // If the next page might be paywall protected, and the access
     // authorizations did not resolve yet, wait before navigating.
     // TODO(gmajoulet): implement a loading state.
     if (targetPage.element.hasAttribute('amp-access') &&
-        !this.areAccessAuthorizationsCompleted_) {
+        !this.areAccessAuthorizationsCompleted_ && !bypassPaywall) {
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
 
     // If the next page is paywall protected, display the access UI and wait for
     // the document to be reauthorized.
-    if (targetPage.element.hasAttribute('amp-access-hide')) {
+    if (targetPage.element.hasAttribute('amp-access-hide') && !bypassPaywall) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
