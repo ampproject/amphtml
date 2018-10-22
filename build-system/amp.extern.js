@@ -113,6 +113,9 @@ process.env;
 process.env.NODE_ENV;
 process.env.SERVE_MODE;
 
+/** @type {boolean|undefined} */
+window.IS_AMP_ALT;
+
 // Exposed to ads.
 window.context = {};
 window.context.sentinel;
@@ -166,7 +169,7 @@ window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream
+window.AMP.attachShadowDocAsStream;
 
 
 /** @constructor */

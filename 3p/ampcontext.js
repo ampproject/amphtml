@@ -128,7 +128,7 @@ export class AbstractAmpContext {
         MessageType.SEND_EMBED_STATE,
         MessageType.EMBED_STATE,
         data => {
-          this.hidden = data.pageHidden;
+          this.hidden = data['pageHidden'];
           this.dispatchVisibilityChangeEvent_();
         });
   }
@@ -169,7 +169,7 @@ export class AbstractAmpContext {
         MessageType.SEND_INTERSECTIONS,
         MessageType.INTERSECTION,
         intersection => {
-          callback(intersection.changes);
+          callback(intersection['changes']);
         });
 
     if (!isExperimentOn('no-initial-intersection')) { // eslint-disable-line

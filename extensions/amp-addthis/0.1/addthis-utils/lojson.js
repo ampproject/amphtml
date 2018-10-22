@@ -27,6 +27,7 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
+import {dict} from '../../../../src/utils/object';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
@@ -102,37 +103,37 @@ const getLojsonData = (/** @type {!LojsonDataDef} */ {
       win.navigator.doNotTrack !== 'no' &&
       win.navigator.doNotTrack !== '0';
 
-  return {
-    amp: 1,
-    bl: 0 |
+  return dict({
+    'amp': 1,
+    'bl': 0 |
     (atConfig['use_cookies'] !== false ? 1 : 0) |
     (atConfig['track_textcopy'] === true ? 2 : 0) |
     (atConfig['track_addressbar'] === true ? 4 : 0),
-    cb: classifyPage(pageInfo, metaElements),
-    colc: Date.now(),
-    ct: atConfig['track_clickback'] !== false &&
+    'cb': classifyPage(pageInfo, metaElements),
+    'colc': Date.now(),
+    'ct': atConfig['track_clickback'] !== false &&
     atConfig['track_linkback'] !== false ? 1 : 0,
-    dc: 1,
-    dp: host,
-    dr: host === parsedReferrer.host ? undefined : parsedReferrer.host,
-    fcu: service ? '' : getFragmentId(pageInfo.du),
-    fp: parseUrlDeprecated(clearOurFragment(pageInfo.du)).pathname,
-    fr: parsedReferrer.pathname || '',
-    gen: VIEW_EVENT_CHANNEL,
-    ln: langWithoutLocale,
-    lnlc: locale,
-    mk: getKeywordsString(metaElements),
-    of: isDNTEnabled ? 4 :
+    'dc': 1,
+    'dp': host,
+    'dr': host === parsedReferrer.host ? undefined : parsedReferrer.host,
+    'fcu': service ? '' : getFragmentId(pageInfo.du),
+    'fp': parseUrlDeprecated(clearOurFragment(pageInfo.du)).pathname,
+    'fr': parsedReferrer.pathname || '',
+    'gen': VIEW_EVENT_CHANNEL,
+    'ln': langWithoutLocale,
+    'lnlc': locale,
+    'mk': getKeywordsString(metaElements),
+    'of': isDNTEnabled ? 4 :
       nonTrackedDomainMatcher.test(hostname) ? 1 :
         0,
-    pd: isProductPage(win.document, metaElements) ? 1 : 0,
-    pub: pubId,
-    rb: classifyReferrer(referrer, parsedReferrer,
+    'pd': isProductPage(win.document, metaElements) ? 1 : 0,
+    'pub': pubId,
+    'rb': classifyReferrer(referrer, parsedReferrer,
         parseUrlDeprecated(pageInfo.du)),
-    sid: getSessionId(),
-    skipb: 1,
-    sr: service,
-  };
+    'sid': getSessionId(),
+    'skipb': 1,
+    'sr': service,
+  });
 };
 
 export const callLojson = props => {

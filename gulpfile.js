@@ -962,7 +962,11 @@ function dist() {
         return copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget).then(() => {
+          return Promise.all([
+            enableLocalTesting(minifiedRuntimeTarget),
+            enableLocalTesting(minifiedAdsTarget),
+            enableLocalTesting(minifiedShadowRuntimeTarget),
+          ]).then(() => {
             if (!argv.single_pass) {
               return enableLocalTesting(minifiedRuntimeEsmTarget)
                   .then(() => {
@@ -1300,6 +1304,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             if (destFilename === 'amp.js') {
               return enableLocalTesting(unminifiedRuntimeTarget);
             } else if (destFilename === 'amp-esm.js') {
+              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'amp4ads-v0.js') {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);

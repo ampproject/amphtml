@@ -30,7 +30,7 @@ const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const tempy = require('tempy');
 const through = require('through2');
-const {extensionBundles, TYPES} = require('../bundles.config');
+const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -48,22 +48,28 @@ ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
-let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
-  const path = buildFullPathFromConfig(ext);
-  if (Array.isArray(path)) {
-    path.forEach((p, index) => {
-      extensionsInfo[p] = Object.create(ext);
-      extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+let extensions = extensionBundles.concat(altMainBundles)
+    .filter(unsupportedExtensions).map(ext => {
+      const path = buildFullPathFromConfig(ext);
+      if (Array.isArray(path)) {
+        path.forEach((p, index) => {
+          extensionsInfo[p] = Object.create(ext);
+          extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+        });
+      } else {
+        extensionsInfo[path] = Object.create(ext);
+        if (isAltMainBundle(ext.name) && ext.path) {
+          extensionsInfo[path].filename = ext.name;
+        } else {
+          extensionsInfo[path].filename = ext.name + '-' + ext.version;
+        }
+      }
+      return path;
     });
-  } else {
-    extensionsInfo[path] = Object.create(ext);
-    extensionsInfo[path].filename = ext.name + '-' + ext.version;
-  }
-  return path;
-});
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
 
+const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
@@ -169,7 +175,8 @@ exports.getBundleFlags = function(g) {
     } else {
       // TODO(@cramforce): Remove special case.
       if (!/_base/.test(bundle.name)) {
-        throw new Error('Unexpected missing extension info ' + bundle.name);
+        throw new Error('Unexpected missing extension info ' + bundle.name +
+            ',' + JSON.stringify(bundle));
       }
       name = bundle.name;
       info = {
@@ -185,7 +192,7 @@ exports.getBundleFlags = function(g) {
         cmd += `:${configEntry.type}`;
         bundleDeps.push('_base_i', configEntry.type);
       } else {
-        // All lower tier bundles depend on v0.js
+        // All lower tier bundles depend on _base_i
         if (TYPES_VALUES.includes(name)) {
           cmd += ':_base_i';
           bundleDeps.push('_base_i');
@@ -200,9 +207,11 @@ exports.getBundleFlags = function(g) {
         return (w.replace('<%= contents %>', '%s')
         /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
       }
-      if (isMain) {
-        flagsArray.push('--module_wrapper', name + ':' +
-            massageWrapper(wrappers.mainBinary));
+      // We need to post wrap the main bundles. We can't wrap v0.js either
+      // since it would have the wrapper already when we read it and prepend
+      // it.
+      if (isMain || isAltMainBundle(name)) {
+        jsFilesToWrap.push(name);
       } else {
         flagsArray.push('--module_wrapper', name + ':' +
            massageWrapper(wrappers.extension(
@@ -434,14 +443,33 @@ function buildFullPathFromConfig(ext) {
     return `extensions/${ext.name}/${version}/${ext.name}.js`;
   }
 
+  // Allow alternate bundles to declare their own source location path.
+  if (isAltMainBundle(ext.name) && ext.path) {
+    return ext.path;
+  }
+
   if (Array.isArray(ext.version)) {
     return ext.version.map(ver => getPath(ver));
   }
+
   return getPath(ext.version);
 }
 
 function unsupportedExtensions(name) {
   return name;
+}
+
+/**
+ * Predicate to identify if a given extension name is an alternate main bundle
+ * like amp-shadow, amp-inabox etc.
+ *
+ * @param {string} name
+ * @return {boolean}
+ */
+function isAltMainBundle(name) {
+  return altMainBundles.some(altMainBundle => {
+    return altMainBundle.name === name;
+  });
 }
 
 exports.singlePassCompile = function(entryModule, options) {
@@ -455,15 +483,44 @@ exports.singlePassCompile = function(entryModule, options) {
     // Move things into place as AMP expects them.
     fs.ensureDirSync(`${singlePassDest}/v0`);
     return Promise.all([
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
+      // Move all files that need to live in /v0/. ex. _base files
+      // all extensions.
+      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
+        return move('dist/v0/amp4ads*', 'dist');
+      }),
       move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
-  }, e => {
+  }).then(wrapMainBinaries).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
   });
 };
+
+/**
+ * Wrap AMPs main binaries with the compiler wrappers. We are not able to
+ * use closures wrapper mechanism for this since theres some concatenation
+ * we need to do to build the alternative binaries such as shadow-v0 and
+ * amp4ads-v0.
+ * TODO(#18811, erwinm): this breaks source maps and we need a way to fix this.
+ * magic-string might be part of the solution here so explore that (pre or post
+ * process)
+ */
+function wrapMainBinaries() {
+  const pair = wrappers.mainBinary.split('<%= contents %>');
+  const prefix = pair[0];
+  const suffix = pair[1];
+  // Cache the v0 file so we can prepend it to alternative binaries.
+  const mainFile = fs.readFileSync('dist/v0.js');
+  jsFilesToWrap.forEach(x => {
+    const path = `dist/${x}.js`;
+    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
+    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
+    fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
+        `${fs.readFileSync(path).toString()}${suffix}`);
+  });
+}
+
 
 function compile(flagsArray) {
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));

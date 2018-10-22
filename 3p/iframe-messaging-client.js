@@ -77,7 +77,7 @@ export class IframeMessagingClient {
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
-   * @param {function(Object)} callback The callback function to call
+   * @param {function(JsonObject)} callback The callback function to call
    *   when a message with type responseType is received.
    */
   makeRequest(requestType, responseType, callback) {
