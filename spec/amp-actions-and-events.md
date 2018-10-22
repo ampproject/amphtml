@@ -356,6 +356,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-bind
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refetch <code>&lt;amp-state></code> json data <code>src</code>.</td>
+  </tr>
+</table>
+
 ### amp-bodymovin-animation
 <table>
   <tr>
