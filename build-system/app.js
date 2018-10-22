@@ -1324,4 +1324,7 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = app;
+module.exports = {
+  middleware: app,
+  beforeServeTasks: devDashboard.beforeServeTasks,
+};
