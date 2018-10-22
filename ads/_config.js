@@ -727,6 +727,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
@@ -763,6 +767,10 @@ export const adConfig = {
   },
 
   'realclick': {
+    renderStartImplemented: true,
+  },
+
+  'recomad': {
     renderStartImplemented: true,
   },
 
