@@ -26,10 +26,10 @@ const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {exec, getStdout} = require('../exec');
@@ -39,7 +39,6 @@ const {green, yellow, cyan, red, bold} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
-const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 /**
@@ -158,6 +157,7 @@ function printArgvMessages() {
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Prerequisite: ' +
         cyan('gulp build'),
+    'dev_dashboard': 'Only running tests for the Dev Dashboard.',
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -174,7 +174,7 @@ function printArgvMessages() {
     log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
-        !argv['local-changes']) {
+        !argv['local-changes'] && !argv.dev_dashboard) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
@@ -198,41 +198,6 @@ function printArgvMessages() {
         log(yellow('--' + arg + ':'), green(message));
       }
     });
-  }
-}
-
-/**
- * Applies the prod or canary AMP config to the AMP runtime.
- * @return {Promise}
- */
-function applyAmpConfig() {
-  if (argv.unit || argv.a4a) {
-    return Promise.resolve();
-  }
-  if (!process.env.TRAVIS) {
-    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
-  }
-  return writeConfig('dist/amp.js').then(() => {
-    return writeConfig('dist/v0.js');
-  });
-}
-
-/**
- * Writes the prod or canary AMP config to file.
- * @param {string} targetFile File to which the config is to be written.
- * @return {Promise}
- */
-function writeConfig(targetFile) {
-  const configFile =
-      'build-system/global-configs/' + ampConfig + '-config.json';
-  if (fs.existsSync(targetFile)) {
-    return removeConfig(targetFile).then(() => {
-      return applyConfig(
-          ampConfig, targetFile, configFile,
-          /* opt_localDev */ true, /* opt_localBranch */ true);
-    });
-  } else {
-    return Promise.resolve();
   }
 }
 
@@ -409,6 +374,34 @@ function unitTestsToRun() {
  * Runs all the tests.
  */
 function runTests() {
+
+  if (argv.dev_dashboard) {
+
+    const mocha = new Mocha();
+
+    // Add our files
+    const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
+    allDevDashboardTests.forEach(file => {
+      mocha.addFile(file);
+    });
+
+    // Create our deffered
+    let resolver;
+    const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+
+    // Listen for Ctrl + C to cancel testing
+    const handlerProcess = createCtrlcHandler('test');
+
+    // Run the tests.
+    mocha.run(function(failures) {
+      if (failures) {
+        process.exit(1);
+      }
+      resolver();
+    });
+    return deferred.then(() => exitCtrlcHandler(handlerProcess));
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
@@ -649,10 +642,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
   if (!argv.nohelp) {
     printArgvMessages();
   }
-
-  return applyAmpConfig().then(() => {
-    return runTests();
-  });
+  return runTests();
 }, {
   options: {
     'verbose': '  With logging enabled',
@@ -667,13 +657,14 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'ie': '  Runs tests on IE',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
+    'dev_dashboard': ' Run only the dev dashboard tests. ' +
+        'Reccomend using with --nobuild',
     'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
-    'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
     'local-changes': '  Run unit tests directly affected by the files ' +

@@ -574,14 +574,17 @@ export class AmpStory extends AMP.BaseElement {
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
-          this.storeService_.get(StateProperty.ACCESS_STATE)) {
+          this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
+          !this.storeService_
+              .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+        // Cancels the event for this gesture entirely, ensuring the hint won't
+        // show even if the user keeps swiping without releasing the touch.
+        gesture.event && gesture.event.preventDefault();
         return;
       }
-      if (!this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
-        return;
-      }
-      if (!this.storeService_
-          .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+      if (gesture.event.defaultPrevented ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
 
@@ -970,7 +973,11 @@ export class AmpStory extends AMP.BaseElement {
         // Note: navigation is prevented when the story is paused, this test
         // covers the case where the story is rendered paused (eg: consent).
         if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
-          targetPage.setState(PageState.ACTIVE);
+          targetPage.setState(PageState.PLAYING);
+        } else {
+          // Even if the page won't be playing, setting the active attribute
+          // ensures it gets visible.
+          targetPage.element.setAttribute('active', '');
         }
 
         this.forceRepaintForSafari_();
@@ -1339,7 +1346,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const pageState = isPaused ? PageState.PAUSED : PageState.ACTIVE;
+    const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
     isPaused ? this.advancement_.stop() : this.advancement_.start();
 
