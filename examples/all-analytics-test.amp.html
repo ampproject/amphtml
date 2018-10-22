@@ -14,17 +14,18 @@
  <script type="application/json">
     {
       "requests": {
-        "endpoint": "/analytics/foo"
+        "base": "/analytics/",
+        "foo": "${base}foo?cid=CLIENT_ID(_ga)&rc_1=${bar}"
       },
       "triggers": {
         "pageview": {
           "on": "visible",
-          "request": "endpoint"
+          "request": "foo"
         }
       },
-      "extraUrlParams": {
-        "accessReaderId": "$UPPERCASE(${accessReaderId})"
-      }
+      "vars": {
+        "bar": "${requestCount}"
+      },
     }
   </script>
 </amp-analytics>

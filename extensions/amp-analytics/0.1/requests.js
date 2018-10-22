@@ -323,7 +323,8 @@ export function expandPostMessage(
     //return base url with the appended extra url params;
     return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
         .then(extraUrlParams => {
-          return defaultSerializer(expandedMsg, [{extraUrlParams}]);
+          debugger;
+          return defaultSerializer(expandedMsg, [{'extraUrlParams': extraUrlParams}]);
         });
   });
 }

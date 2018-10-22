@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 app.get('/serve_mode=:mode', (req, res) => {
   const newMode = req.params.mode;
   let info;
-  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn') {
+  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn' || newMode == 'old') {
     pc.env.SERVE_MODE = newMode;
     info = '<h2>Serve mode changed to ' + newMode + '</h2>';
     res.send(info);
@@ -1222,6 +1222,31 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         filename = '/dist/amp4ads-lite-v0.js';
       }
       file = file.replace(/\/dist\/v0\.js/g, filename);
+    }
+  }  else if (mode == 'old') {
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+        hostName + '/old-dist/v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/old-dist/shadow-v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
+        hostName + '/old-dist/amp4ads-v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+        hostName + '/old-dist/v0/$1.js');
+    file = file.replace(
+        /\/dist.3p\/current\/(.*)\.max.html/g,
+        hostName + '/dist.3p/current-min/$1.html');
+    if (inabox) {
+      let filename;
+      if (inabox == '1') {
+        filename = '/old-dist/amp4ads-v0.js';
+      } else if (inabox == '2') {
+        filename = '/old-dist/amp4ads-lite-v0.js';
+      }
+      file = file.replace(/\/old-dist\/v0\.js/g, filename);
     }
   }
   return file;
