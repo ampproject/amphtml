@@ -80,6 +80,11 @@
         // Unsupported in example. This should be a call to `exitFullscreen`
         // or browser equivalents.
       });
+
+      setInterval(function() {
+        // Post a custom analytics event every 3 seconds.
+        ampIntegration.postAnalyticsEvent('video-custom');
+      }, 2000);
     }
   </script>
 </body>

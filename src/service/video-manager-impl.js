@@ -445,8 +445,9 @@ class VideoEntry {
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
     listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      const data = getData(e);
       this.logCustomAnalytics_(
-          dev().assertString(e.data.eventType, '`eventType` missing'));
+          dev().assertString(data['eventType'], '`eventType` missing'));
     });
 
     video.signals().whenSignal(VideoEvents.REGISTERED)
@@ -1234,8 +1235,7 @@ function analyticsEvent(entry, eventType, opt_vars) {
     entry.getAnalyticsDetails();
 
   detailsPromise.then(details => {
-    video.element.dispatchCustomEvent(
-        eventType, details);
+    video.element.dispatchCustomEvent(eventType, details);
   });
 }
 

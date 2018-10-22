@@ -444,7 +444,7 @@ export const VideoAnalyticsEvents = {
    * @property {!VideoAnalyticsDetailsDef} details
    * @event video-custom
    */
-  CUSTOM: 'video-custom',
+  CUSTOM: 'video-hosted-custom',
 };
 
 
