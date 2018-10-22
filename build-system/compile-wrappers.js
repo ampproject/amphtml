@@ -19,7 +19,7 @@ const {VERSION} = require('./internal-version');
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
 exports.mainBinary = 'var global=self;self.AMP=self.AMP||[];' +
-    'try{(function(_){\n<%= contents %>})(AMP._={})}catch(e){' +
+    'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
     'setTimeout(function(){' +
     'var s=document.body.style;' +
     's.opacity=1;' +
