@@ -15,6 +15,7 @@
  */
 
 import {getMode} from './mode';
+import {install as installArrayFrom} from './polyfills/array-from';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {
@@ -22,6 +23,9 @@ import {
 } from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
+import {
+  install as installKeyboardEventKey,
+} from './polyfills/keyboardevent-key';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
@@ -31,11 +35,13 @@ import {isExperimentOn} from './experiments';
 
 installDOMTokenListToggle(self);
 installFetch(self);
+installKeyboardEventKey(self);
 installMathSign(self);
 installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+installArrayFrom(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
   installCustomElements(self, class {});

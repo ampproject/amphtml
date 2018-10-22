@@ -287,6 +287,9 @@ ReactDatesConstants.ANCHOR_LEFT;
 /** @const {string} */
 ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
+/** @type {!function(?IArrayLike):!Array} */
+Array.prototype.from;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
