@@ -23,6 +23,8 @@ amp-consent {
   background: rgba(255, 255, 255, .7);
   z-index: 1000;
   width: 100%;
+  height: 100vh;
+  transform: translate3d(0px, calc(100vh - 30px), 0px);
 }
 
 amp-consent[i-amphtml-notbuilt] > * {
@@ -43,11 +45,11 @@ amp-consent.amp-hidden {
 
 amp-consent.loading {
   /* TODO: Finalize the placeholder design */
-  height: 30px;
 }
 
 amp-consent.consent-iframe-active {
-  height: 30vh;
+  transition: transform 0.5s;
+  transform: translate3d(0px, 70vh, 0px);
 }
 
 .i-amphtml-consent-placeholder {
@@ -66,15 +68,12 @@ amp-consent.consent-iframe-active {
   width: 100%;
 }
 
-@keyframes i-amphtml-consent-ui-in {
-  0% {transform: translateY(100%);}
-  100% {transform: translateY(0);}
-}
-
 .i-amphtml-consent-ui-in {
-  animation: i-amphtml-consent-ui-in 0.5s linear;
 }
 
-.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
-  /*TODO: @torch2424 some fullscreen CSS magic*/
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
+  transform: translate3d(0px, 0px, 0px);
+}
+
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill {
 }
