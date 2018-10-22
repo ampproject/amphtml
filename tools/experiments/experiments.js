@@ -379,6 +379,11 @@ const EXPERIMENTS = [
     name: 'Enables load-more related functionality in amp-list',
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
+  {
+    id: 'amp-script',
+    name: 'Enables <amp-script>.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
+  },
 ];
 
 if (getMode().localDev) {
