@@ -118,6 +118,11 @@ export class ampDateDisplay extends AMP.BaseElement {
       epoch = Date.now();
     } else if (this.datetime_) {
       epoch = Date.parse(this.datetime_);
+      user().assert(
+          !isNaN(epoch),
+          'amp-date-display',
+          `Invalid date: '${this.datetime_}'`
+      );
     } else if (this.timestampMiliseconds_) {
       epoch = this.timestampMiliseconds_;
     } else if (this.timestampSeconds_) {
@@ -125,9 +130,11 @@ export class ampDateDisplay extends AMP.BaseElement {
     }
 
     user().assert(
-        !isNaN(epoch),
-        'One of datetime, timestamp-ms, timestamp-seconds is required'
+        epoch !== undefined,
+        'amp-date-display',
+        'One of datetime, timestamp-ms, or timestamp-seconds is required'
     );
+
     return epoch;
   }
 
