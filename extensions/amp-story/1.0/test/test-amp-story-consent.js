@@ -239,15 +239,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should whitelist the <amp-consent> actions', () => {
-    const addToWhitelistStub =
-        sandbox.stub(storyConsent.actions_, 'addToWhitelist');
-
     storyConsent.buildCallback();
 
-    expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
+    const actions =
+        storyConsent.storeService_.get(StateProperty.ACTIONS_WHITELIST);
+    expect(actions)
+        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'accept'});
+    expect(actions)
+        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'prompt'});
+    expect(actions)
+        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'reject'});
   });
 
   it('should broadcast the amp actions', () => {
