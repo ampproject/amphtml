@@ -910,7 +910,7 @@ export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
 }
 
-const PRECEDING_OR_CONTAINS = 
+const PRECEDING_OR_CONTAINS =
     Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
 /**
