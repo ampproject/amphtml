@@ -84,6 +84,8 @@ export function getFormAsObject(form) {
       continue;
     }
 
+    // In a form, the button's value is only submitted if the button itself was
+    // used to submit the form. We can detect that using the document focus.
     // Browsers vary on the conditions that focus the form submit button.
     // Generally, the button is only focused if the user triggers the button
     // itself. If a script calls `button.click` or `form.submit` the button
