@@ -174,7 +174,7 @@ If no service returns an entitlement that grants access, all services are compar
 
 The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
 
-If publisher wishes to ignore a score factor they may either excplicitly set it's value to `0` or omit it from the `score` map.
+If publisher wishes to ignore a score factor they may either explicitly set it's value to `0` or omit it from the `score` map.
 
 Available scoring factors:
 
