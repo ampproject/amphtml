@@ -345,7 +345,7 @@ The first dialog with matching `subscriptions-display` is shown.
 
 ## Expressions
 
-The `subscriptions-display` attribute uses expressions for actions and dialogs.  The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
+The `subscriptions-display` attribute uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
 Values in the `data` object of an Entitlements response can be used to build expressions.  In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
 
