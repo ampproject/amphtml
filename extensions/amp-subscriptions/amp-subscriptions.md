@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental. Only in Canary.</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -54,11 +54,22 @@ The `amp-subscriptions` extensions implements the subscription-style access/payw
 
 ## Relationship to `amp-access`
 
-The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md) and in many features builds on top of `amp-access`. However, it's a much more specialized version of access/paywall protocol. Some of the key differences are:
+The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md)
+and in many features builds on top of `amp-access`. However, it's a much more
+specialized version of access/paywall protocol. Some of the key differences are:
 
-1. Entitlements response is similar to the amp-access authorization, but it's striclty defined and standardized.
-2. The `amp-subscriptions` allows multiple services to be configured for the page to participate in access/paywall decisions. They are executed in parallel and paralized based on which service returns the positive response.
-3. The viewers are allowed to provide a signed authorization response based on an independent agreement with publishers as a proof of access.
+1. The `amp-subscriptions` entitlements response is similar to the amp-access
+authorization, but it's striclty defined and standardized.
+2. The `amp-subscriptions` extension allows multiple services to be configured
+for the page to participate in access/paywall decisions. They are executed in
+parallel and paralized based on which service returns the positive response.
+3. AMP viewers are allowed to provide a signed authorization response based
+on an independent agreement with publishers as a proof of access.
+4. Content markup is standardized allowing apps and crawlers to easily detect
+premium content sections.
+
+It is recommended that new publisher and paywall provider implementations use
+`amp-subscriptions`.
 
 ## Services
 
@@ -163,7 +174,7 @@ If no service returns an entitlement that grants access, all services are compar
 
 The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
 
-With the excption of `supportsViewer` score factors do not have default values. If publisher wishes to ignore a score factor they may either set it's value to `0` or omit it from the `score` map.
+If publisher wishes to ignore a score factor they may either excplicitly set it's value to `0` or omit it from the `score` map.
 
 Available scoring factors:
 
