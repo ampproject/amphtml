@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
@@ -115,6 +116,10 @@ export class Amp3dGltf extends AMP.BaseElement {
         'autoRotate': getOption('autoRotate', bool, false),
       },
     });
+    this.registerAction('setModelRotation', invocation => {
+      this.sendCommandWhenReady_('setModelRotation', invocation.args)
+          .catch(dev().error);
+    }, ActionTrust.LOW);
   }
 
   /** @override */
