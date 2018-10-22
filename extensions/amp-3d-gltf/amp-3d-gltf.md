@@ -94,7 +94,7 @@ A Boolean attribute that specifies whether to automatically rotate the camera ar
 
 A Boolean attribute that specifies whether to turn on zoom. Default value is `true`.
 
-## Attributes
+## Actions
 
 ##### setModelRotation(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)
 sets model rotation. rotation order is ZYX
