@@ -31,21 +31,19 @@ const mainComponent = join(__dirname, '/components/main.js');
 const mainCssFile = join(__dirname, '/main.css');
 
 
-async function getListing(basepath) {
-  // currently sitting on build-system/app-index, so we go back two dirs for the
-  // repo root.
-  const rootPath = join(__dirname, '../../');
+function isMaliciousPath(path, rootPath) {
+  return (path + sep).substr(0, rootPath.length) !== rootPath;
+}
 
-  // join / normalize from root dir
+
+async function getListing(rootPath, basepath) {
   const path = normalize(join(rootPath, basepath));
 
-  // null byte(s), bad request
   if (~path.indexOf('\0')) {
     return null;
   }
 
-  // malicious path
-  if ((path + sep).substr(0, rootPath.length) !== rootPath) {
+  if (isMaliciousPath(path, rootPath)) {
     return null;
   }
 
@@ -79,54 +77,64 @@ async function bundleMain() {
 }
 
 
-function getListingPath(url) {
-  if (url == '/') {
-    return '/examples';
-  }
-  if (url == '/~') {
-    return '/';
-  }
-  return url;
-}
-
-
 function isMainPageFromUrl(url) {
   return url == '/';
 }
 
-function serveIndex(req, res, next) {
-  const isMainPage = isMainPageFromUrl(req.url);
-  const basepath = getListingPath(req.url);
 
-  return (async() => {
-    const fileSet = await getListing(basepath);
+/**
+ * Adds a trailing slash if missing.
+ * @param {string} basepath
+ * @return {string}
+ */
+function formatBasepath(basepath) {
+  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
+}
 
-    if (fileSet == null) {
-      next();
+
+function serveIndex({root, mapBasepath}) {
+  const mapBasepathOrPassthru = mapBasepath || (url => url);
+
+  return (req, res, next) => {
+    if (!root) {
+      res.status(500);
+      res.end('Misconfigured: missing `root`.');
       return;
     }
 
-    const bundle = await bundleMain();
-    const template = (await fs.readFileAsync(templateFile)).toString();
-    const css = (await fs.readFileAsync(mainCssFile)).toString();
+    return (async() => {
+      const isMainPage = isMainPageFromUrl(req.url);
+      const basepath = mapBasepathOrPassthru(req.url);
 
-    const initialState = {
-      basepath,
-      fileSet,
-      isMainPage,
-      selectModePrefix: '/',
-    };
+      const fileSet = await getListing(root, basepath);
 
-    const renderedHtml = template
-        .replace('<!-- bundle -->', bundle)
-        .replace('<!-- main_style -->', css)
-        .replace('<!-- initial_state -->',
-            `window.AMP_PREACT_STATE = ${JSON.stringify(initialState)};`);
+      if (fileSet == null) {
+        next();
+        return;
+      }
 
-    res.end(renderedHtml);
+      const bundle = await bundleMain();
+      const template = (await fs.readFileAsync(templateFile)).toString();
+      const css = (await fs.readFileAsync(mainCssFile)).toString();
 
-    return renderedHtml; // for testing
-  })();
+      const initialState = {
+        basepath: formatBasepath(basepath),
+        fileSet,
+        isMainPage,
+        selectModePrefix: '/',
+      };
+
+      const renderedHtml = template
+          .replace('<!-- bundle -->', bundle)
+          .replace('<!-- main_style -->', css)
+          .replace('<!-- initial_state -->',
+              `window.AMP_PREACT_STATE = ${JSON.stringify(initialState)};`);
+
+      res.end(renderedHtml);
+
+      return renderedHtml; // for testing
+    })();
+  };
 }
 
 // Promises to run before serving
