@@ -99,7 +99,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
-    options.setPrettyPrint(true);
     return options;
   }
 

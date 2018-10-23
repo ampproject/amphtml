@@ -242,7 +242,7 @@ class AmpViewer {
     this.amp_ = null;
 
     // Immediately install amp-shadow.js.
-    this.installScript_('/dist/shadow-v0.js');
+    this.installScript_('/dist/amp-shadow.js');
   }
 
   /**
