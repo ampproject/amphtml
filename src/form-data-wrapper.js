@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {getFormAsObject} from './form';
 import {iterateCursor} from './dom';
 import {map} from './utils/object';
@@ -23,11 +24,16 @@ import {map} from './utils/object';
  * API for FormData objects on all browsers. For example, not all browsers
  * support the FormData#entries or FormData#delete functions.
  *
+ * @param {!Window} win
  * @param {!HTMLFormElement=} opt_form
  * @return {!FormDataWrapperInterface}
  */
-export function createFormDataWrapper(opt_form) {
-  if (FormData.prototype.entries && FormData.prototype.delete) {
+export function createFormDataWrapper(win, opt_form) {
+  const platform = Services.platformFor(win);
+
+  if (platform.isIos() && platform.getMajorVersion() == 11) {
+    return new Ios11NativeFormDataWrapper(opt_form);
+  } else if (FormData.prototype.entries && FormData.prototype.delete) {
     return new NativeFormDataWrapper(opt_form);
   } else {
     return new PolyfillFormDataWrapper(opt_form);
@@ -127,6 +133,42 @@ class NativeFormDataWrapper {
   constructor(opt_form) {
     /** @private @const {!FormData} */
     this.formData_ = new FormData(opt_form);
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    this.formData_.append(name, value);
+  }
+
+  /** @override */
+  delete(name) {
+    this.formData_.delete(name);
+  }
+
+  /** @override */
+  entries() {
+    return this.formData_.entries();
+  }
+
+  /** @override */
+  getFormData() {
+    return this.formData_;
+  }
+}
+
+/**
+ * iOS 11 has a bug when submitting empty file inputs.
+ * This works around the bug by replacing the empty files with Blob objects.
+ */
+class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
+  /** @override */
+  constructor(opt_form) {
+    super(opt_form);
 
     if (opt_form) {
       iterateCursor(opt_form.elements, input => {
@@ -151,21 +193,6 @@ class NativeFormDataWrapper {
     } else {
       this.formData_.append(name, value);
     }
-  }
-
-  /** @override */
-  delete(name) {
-    this.formData_.delete(name);
-  }
-
-  /** @override */
-  entries() {
-    return this.formData_.entries();
-  }
-
-  /** @override */
-  getFormData() {
-    return this.formData_;
   }
 }
 

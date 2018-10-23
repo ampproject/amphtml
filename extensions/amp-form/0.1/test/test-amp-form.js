@@ -862,7 +862,7 @@ describes.repeated('', {
           const config = xhrCall.args[1];
           expect(isFormDataWrapper(config.body)).to.be.true;
           const entriesInForm =
-              fromIterator(createFormDataWrapper(getForm()).entries());
+              fromIterator(createFormDataWrapper(env.win, getForm()).entries());
           expect(fromIterator(config.body.entries())).to.have.deep.members(
               entriesInForm);
           expect(config.method).to.equal('POST');
