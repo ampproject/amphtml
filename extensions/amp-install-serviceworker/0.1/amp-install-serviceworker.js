@@ -296,10 +296,38 @@ function install(win, src) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
+    sendScriptAndURLToSWOnFirstVisit(registration, win);
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
   });
+}
+
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ */
+function sendScriptAndURLToSWOnFirstVisit(registration, win) {
+  const installingServiceWorker = registration.installing;
+  if (installingServiceWorker && 'performance' in win) {
+    installingServiceWorker.addEventListener('statechange', evt => {
+      if (evt.target.state === 'activated' &&
+        win.navigator.serviceWorker.controller) {
+        // Fetch all AMP-scripts used on the page
+        const ampScriptsUsed = win.performance.getEntriesByType('resource')
+            .filter(item => item.initiatorType === 'script' &&
+                /https:\/\/cdn.ampproject.org\//.test(item.name))
+            .map(script => script.name);
+        // using https://github.com/redux-utilities/flux-standard-action
+        win.navigator.serviceWorker.controller.postMessage(JSON.stringify({
+          type: 'FIRST_VISIT_CACHING',
+          payload: ampScriptsUsed,
+        }));
+      }
+    });
+  }
 }
 
 
