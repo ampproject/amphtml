@@ -26,6 +26,7 @@ import {
   toggle,
 } from '../style';
 import {dev, user} from '../log';
+import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
 
 const TAG = 'FixedLayer';
@@ -124,8 +125,8 @@ export class FixedLayer {
 
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
-    // Sort in document order.
-    this.sortInDomOrder_(this.elements_);
+    // Sort tracked elements in document order.
+    this.sortInDomOrder_();
 
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
@@ -210,7 +211,7 @@ export class FixedLayer {
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
-    this.sortInDomOrder_(this.elements_);
+    this.sortInDomOrder_();
     return this.update();
   }
 
@@ -549,25 +550,11 @@ export class FixedLayer {
   }
 
   /**
-   * @param {!Array<ElementDef>} elements
-   * @private */
-  sortInDomOrder_(elements) {
-    elements.sort(function(fe1, fe2) {
-      if (fe1.element && (fe1.element == fe2.element)) {
-        return 0;
-      }
-
-      // See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
-      const pos = fe1.element.compareDocumentPosition(fe2.element);
-
-      // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
-      if (pos & Node.DOCUMENT_POSITION_PRECEDING ||
-          pos & Node.DOCUMENT_POSITION_CONTAINS) {
-        return 1;
-      } else {
-        // if fe2 is following or contained by fe1, then fe1 is before fe2
-        return -1;
-      }
+   * @private
+   */
+  sortInDomOrder_() {
+    this.elements_.sort((fe1, fe2) => {
+      return domOrderComparator(fe1.element, fe2.element);
     });
   }
 
@@ -649,18 +636,23 @@ export class FixedLayer {
   discoverSelectors_(rules, foundSelectors, stickySelectors) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
+      if (rule.type == /* CSSMediaRule */ 4 ||
+          rule.type == /* CSSSupportsRule */ 12) {
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        continue;
+      }
+
       if (rule.type == /* CSSStyleRule */ 1) {
-        if (rule.selectorText != '*' && rule.style.position) {
-          if (rule.style.position == 'fixed') {
-            foundSelectors.push(rule.selectorText);
-          } else if (endsWith(rule.style.position, 'sticky')) {
-            stickySelectors.push(rule.selectorText);
-          }
+        const {selectorText} = rule;
+        const {position} = rule.style;
+        if (selectorText === '*' || !position) {
+          continue;
         }
-      } else if (rule.type == /* CSSMediaRule */ 4) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
-      } else if (rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        if (position === 'fixed') {
+          foundSelectors.push(selectorText);
+        } else if (endsWith(position, 'sticky')) {
+          stickySelectors.push(selectorText);
+        }
       }
     }
   }
@@ -847,19 +839,12 @@ class TransferLayerBody {
    */
   matches_(element, selector) {
     try {
-      const matcher = element.matches ||
-          element.webkitMatchesSelector ||
-          element.mozMatchesSelector ||
-          element.msMatchesSelector ||
-          element.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(element, selector);
-      }
+      return matches(element, selector);
     } catch (e) {
       // Fail silently.
       dev().error(TAG, 'Failed to test query match:', e);
+      return false;
     }
-    return false;
   }
 }
 
