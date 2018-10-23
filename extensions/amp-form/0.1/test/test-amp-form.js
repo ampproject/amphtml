@@ -973,20 +973,12 @@ describes.repeated('', {
           target: form,
           preventDefault: sandbox.spy(),
         };
-        const button1 = form.querySelectorAll('input[type=submit]')[0];
-        const button2 = form.querySelectorAll('input[type=submit]')[1];
-        const button3 = form.querySelectorAll('button[type=submit]')[0];
-        expect(button1.hasAttribute('disabled')).to.be.false;
-        expect(button2.hasAttribute('disabled')).to.be.false;
-        expect(button3.hasAttribute('disabled')).to.be.false;
 
         ampForm.handleSubmitEvent_(event);
         expect(ampForm.state_).to.equal('submitting');
 
         return whenCalled(ampForm.xhr_.fetch).then(() => {
           expect(ampForm.xhr_.fetch.calledOnce).to.be.true;
-          expect(button1.hasAttribute('disabled')).to.be.true;
-          expect(button2.hasAttribute('disabled')).to.be.true;
 
           ampForm.handleSubmitEvent_(event);
           ampForm.handleSubmitEvent_(event);
@@ -1001,8 +993,6 @@ describes.repeated('', {
           sandbox.stub(ampForm, 'maybeHandleRedirect_');
 
           return whenCalled(ampForm.maybeHandleRedirect_).then(() => {
-            expect(button1.hasAttribute('disabled')).to.be.false;
-            expect(button2.hasAttribute('disabled')).to.be.false;
             expect(ampForm.state_).to.equal('submit-success');
             expect(form.className).to.not.contain('amp-form-submitting');
             expect(form.className).to.not.contain('amp-form-submit-error');
@@ -1069,13 +1059,7 @@ describes.repeated('', {
           target: form,
           preventDefault: sandbox.spy(),
         };
-        const button1 = form.querySelectorAll('input[type=submit]')[0];
-        const button2 = form.querySelectorAll('input[type=submit]')[1];
-        expect(button1.hasAttribute('disabled')).to.be.false;
-        expect(button2.hasAttribute('disabled')).to.be.false;
         ampForm.handleSubmitEvent_(event);
-        expect(button1.hasAttribute('disabled')).to.be.true;
-        expect(button2.hasAttribute('disabled')).to.be.true;
         expect(event.preventDefault).to.be.called;
         expect(event.stopImmediatePropagation).to.not.be.called;
         expect(ampForm.state_).to.equal('submitting');
@@ -1087,8 +1071,6 @@ describes.repeated('', {
         return ampForm.xhrSubmitPromiseForTesting().then(() => {
           assert.fail('Submit should have failed.');
         }, () => {
-          expect(button1.hasAttribute('disabled')).to.be.false;
-          expect(button2.hasAttribute('disabled')).to.be.false;
           expect(ampForm.state_).to.equal('submit-error');
           expect(form.className).to.not.contain('amp-form-submitting');
           expect(form.className).to.not.contain('amp-form-submit-success');

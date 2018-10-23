@@ -40,22 +40,34 @@ export function setFormForElement(element, form) {
 
 /**
  * Returns form data in the passed-in form as an object.
+ * Includes focused submit buttons.
  * @param {!HTMLFormElement} form
  * @return {!JsonObject}
  */
 export function getFormAsObject(form) {
+  const {
+    elements,
+    ownerDocument,
+  } = form;
   const data = /** @type {!JsonObject} */ ({});
-  const inputs = form.elements;
-  const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+  const submittableTagsRegex = /^(?:input|select|textarea|button)$/i;
   const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
   const checkableType = /^(?:checkbox|radio)$/i;
-  for (let i = 0; i < inputs.length; i++) {
-    const input = inputs[i];
-    const {name} = input;
+  for (let i = 0; i < elements.length; i++) {
+    const input = elements[i];
+    const {
+      checked,
+      name,
+      multiple,
+      options,
+      tagName,
+      type,
+      value,
+    } = input;
     if (!name || isDisabled(input) ||
-        !submittableTagsRegex.test(input.tagName) ||
-        unsubmittableTypesRegex.test(input.type) ||
-        (checkableType.test(input.type) && !input.checked)) {
+        !submittableTagsRegex.test(tagName) ||
+        unsubmittableTypesRegex.test(type) ||
+        (checkableType.test(type) && !checked)) {
       continue;
     }
 
@@ -63,15 +75,28 @@ export function getFormAsObject(form) {
       data[name] = [];
     }
 
-    if (input.multiple) {
-      iterateCursor(input.options, option => {
+    if (multiple) {
+      iterateCursor(options, option => {
         if (option.selected) {
           data[name].push(option.value);
         }
       });
-    } else {
-      data[name].push(input.value);
+      continue;
     }
+
+    // In a form, the button's value is only submitted if the button itself was
+    // used to submit the form. We can detect that using the document focus.
+    // Browsers vary on the conditions that focus the form submit button.
+    // Generally, the button is only focused if the user triggers the button
+    // itself. If a script calls `button.click` or `form.submit` the button
+    // will not be focused. If the user presses enter inside a field, the button
+    // will not be focused.
+    if ((type == 'submit' || tagName == 'BUTTON')
+        && input != ownerDocument.activeElement) {
+      continue;
+    }
+
+    data[name].push(value);
   }
 
   // Wait until the end to remove the empty values, since
