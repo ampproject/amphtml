@@ -204,6 +204,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
     const data = parseIfNeeded(getData(event));
+
     if (!data || !data['sentinel']) {
       return;
     }
