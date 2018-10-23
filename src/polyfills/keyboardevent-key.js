@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Original shim code: https://github.com/shvaikalesh/shim-keyboard-event-key
+
 import {hasOwn} from '../utils/object';
 
 const keys = {
