@@ -18,6 +18,7 @@
 
 import {Component, h, render} from 'preact';
 import {ProxyForm} from './proxy-form';
+import {SettingsOpener} from './settings';
 
 
 const examplesDocumentModes = {
@@ -26,6 +27,32 @@ const examplesDocumentModes = {
   'a4a-3p': '/a4a-3p/',
   'inabox': '/inabox/1/',
 };
+
+
+const headerLinks = [
+  {
+    'name': 'Developing',
+    'href': 'https://' +
+      'github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md',
+  },
+  {
+    'divider': true,
+    'name': 'Contributing',
+    'href': 'https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md',
+  },
+  {
+    'name': 'Github',
+    'href': 'https://github.com/ampproject/amphtml/',
+  },
+  {
+    'name': 'Travis',
+    'href': 'https://travis-ci.org/ampproject/amphtml',
+  },
+  {
+    'name': 'Percy',
+    'href': 'https://percy.io/ampproject/amphtml/',
+  },
+];
 
 
 function ExamplesDocumentModeSelect({changeHandler, value}) {
@@ -52,43 +79,23 @@ function SelectModeOptional({basepath, changeHandler, value}) {
   );
 }
 
-function Header({isMainPage}) {
+function Header({isMainPage, links}) {
   return (
     <header>
       <h1 class="amp-logo">AMP</h1>
       <div class="right-of-logo">
         {!isMainPage && (<a href="/">← Back to main</a>)}
       </div>
-      <ul>
+      <ul class="right-nav">
+        {(links.map(({name, href, divider}, i) => (
+          <li class={(divider || i == links.length - 1) && 'divider'}>
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {name}
+            </a>
+          </li>
+        )))}
         <li>
-          <a href="https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md"
-            target="_blank">
-            Developing
-          </a>
-        </li>
-        <li class="divider">
-          <a href="https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md"
-            target="_blank">
-            Contributing
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/ampproject/amphtml/"
-            target="_blank">
-            Github
-          </a>
-        </li>
-        <li>
-          <a href="https://travis-ci.org/ampproject/amphtml"
-            target="_blank">
-            Travis
-          </a>
-        </li>
-        <li>
-          <a href="https://percy.io/ampproject/amphtml/"
-            target="_blank">
-            Percy
-          </a>
+          <SettingsOpener open={false} />
         </li>
       </ul>
     </header>
@@ -124,7 +131,7 @@ class Main extends Component {
     return (
       <div>
         <wrap>
-          <Header isMainPage={state.isMainPage} />
+          <Header isMainPage={state.isMainPage} links={headerLinks} />
           <ProxyFormOptional isMainPage={state.isMainPage} />
         </wrap>
         <div class="file-list-container">
@@ -133,7 +140,8 @@ class Main extends Component {
               {state.basepath}
               <a href="https://github.com/ampproject/amphtml/find/master"
                 target="_blank"
-                class="find-icon">
+                rel="noopener noreferrer"
+                class="find-icon icon">
                 Find file
               </a>
             </h3>
