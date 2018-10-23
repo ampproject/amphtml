@@ -41,6 +41,13 @@ const {green, red, cyan, yellow} = colors;
  * @return {number} the max allowed bundle size.
  */
 async function getMaxBundleSize() {
+  if (process.env.GITHUB_ARTIFACTS_RO_TOKEN) {
+    octokit.authenticate({
+      type: 'token',
+      token: process.env.GITHUB_ARTIFACTS_RO_TOKEN,
+    });
+  }
+
   return await octokit.repos.getContent(
       Object.assign(buildArtifactsRepoOptions, {
         path: path.join('bundle-size', '.max_size'),
@@ -79,9 +86,9 @@ function storeBundleSize(bundleSize) {
     return;
   }
 
-  if (!process.env.GITHUB_ARTIFACTS_TOKEN) {
-    log(red('ERROR: Missing GITHUB_ARTIFACTS_TOKEN, cannot store the bundle ' +
-        'size in the artifacts repository on GitHub!'));
+  if (!process.env.GITHUB_ARTIFACTS_RW_TOKEN) {
+    log(red('ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
+        'bundle size in the artifacts repository on GitHub!'));
     process.exitCode = 1;
     return;
   }
@@ -93,7 +100,7 @@ function storeBundleSize(bundleSize) {
 
   octokit.authenticate({
     type: 'token',
-    token: process.env.GITHUB_ARTIFACTS_TOKEN,
+    token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
   });
 
   return octokit.repos.getContent(githubApiCallOptions).then(() => {
