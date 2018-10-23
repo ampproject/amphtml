@@ -18,6 +18,7 @@ import {
   PolyfillFormDataWrapper,
   createFormDataWrapper,
 } from '../../src/form-data-wrapper';
+import {Services} from '../../src/services';
 import {fromIterator} from '../../src/utils/array';
 
 describes.realWin('FormDataWrapper', {}, env => {
@@ -43,16 +44,17 @@ describes.realWin('FormDataWrapper', {}, env => {
       },
     }];
 
+    // Intentionally use the non-env global to detect the browser capability
     if (FormData.prototype.entries) {
       scenarios.push({
         description: 'when native `entries` is available',
 
         beforeEach() {
-          // Do nothing as `env.win.FormData.prototype` already has `entires`.
+          // Do nothing as `FormData.prototype` already has `entires`.
         },
 
         afterEach() {
-          // Do nothing as `env.win.FormData.prototype` is intact.
+          // Do nothing as `FormData.prototype` is intact.
         },
       });
     }
@@ -63,8 +65,14 @@ describes.realWin('FormDataWrapper', {}, env => {
 
         afterEach(scenario.afterEach);
 
+        beforeEach(() => {
+          sandbox.stub(Services, 'platformFor').returns({
+            isIos() { return false; },
+          });
+        });
+
         it('returns empty if no form passed and no entries appended', () => {
-          const formData = createFormDataWrapper();
+          const formData = createFormDataWrapper(env.win);
           expect(fromIterator(formData.entries()))
               .to.be.an('array').that.is.empty;
         });
@@ -72,7 +80,7 @@ describes.realWin('FormDataWrapper', {}, env => {
         describe('when entries appended', () => {
           let formData;
 
-          beforeEach(() => formData = createFormDataWrapper());
+          beforeEach(() => formData = createFormDataWrapper(env.win));
 
           it('returns appended string entries', () => {
             formData.append('a', '1');
@@ -127,7 +135,7 @@ describes.realWin('FormDataWrapper', {}, env => {
           });
 
           it('returns empty if no entries in form', () => {
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
             expect(fromIterator(formData.entries()))
                 .to.be.an('array').that.is.empty;
           });
@@ -139,7 +147,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             input.value = 'bar';
             form.appendChild(input);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
@@ -152,7 +160,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             textarea.value = 'bar';
             form.appendChild(textarea);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
@@ -167,7 +175,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             input.checked = true;
             form.appendChild(input);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
@@ -191,7 +199,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             select.appendChild(unselectedOption);
             form.appendChild(select);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
@@ -215,7 +223,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             select.appendChild(unselectedOption);
             form.appendChild(select);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
               ['foo', 'bar'],
@@ -236,7 +244,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             input2.value = 'qux';
             form.appendChild(input2);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
             formData.delete('foo');
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
@@ -257,7 +265,7 @@ describes.realWin('FormDataWrapper', {}, env => {
             input2.value = 'qux';
             form.appendChild(input2);
 
-            const formData = createFormDataWrapper(form);
+            const formData = createFormDataWrapper(env.win, form);
             formData.delete('foo');
 
             expect(fromIterator(formData.entries())).to.have.deep.members([
@@ -282,7 +290,7 @@ describes.realWin('FormDataWrapper', {}, env => {
           form.appendChild(textarea);
           env.win.document.body.appendChild(form);
 
-          const formData = createFormDataWrapper(form);
+          const formData = createFormDataWrapper(env.win, form);
           formData.append('foo1', 'baz');
           formData.append('42', 'bang');
 
@@ -293,6 +301,41 @@ describes.realWin('FormDataWrapper', {}, env => {
             ['42', 'bang'],
           ]);
         });
+      });
+    });
+
+    describe('Ios11NativeFormDataWrapper', () => {
+      beforeEach(() => {
+        sandbox.stub(Services, 'platformFor').returns({
+          isIos() { return true; },
+          getMajorVersion() { return 11; },
+        });
+      });
+
+      it('replaces empty file objects in forms with empty blobs', () => {
+        const form = env.win.document.createElement('form');
+
+        const input = env.win.document.createElement('input');
+        input.type = 'file';
+        input.name = 'foo1';
+
+        form.appendChild(input);
+        env.win.document.body.appendChild(form);
+
+        const formData = createFormDataWrapper(env.win, form);
+        const actual = fromIterator(formData.entries());
+        expect(actual[0][0]).to.equal('foo1');
+        expect(actual[0][1] instanceof Blob).to.be.true;
+      });
+
+      it('appends empty blobs instead of empty file objects', () => {
+        const file = new File([], '');
+        const formData = createFormDataWrapper(env.win);
+        formData.append('myFile', file);
+
+        const actual = fromIterator(formData.entries());
+        expect(actual[0][0]).to.equal('myFile');
+        expect(actual[0][1] instanceof Blob).to.be.true;
       });
     });
 
@@ -318,13 +361,14 @@ describes.realWin('FormDataWrapper', {}, env => {
 
         if (FormData.prototype.entries) {
           const polyfillFormData = polyfillFormDataWrapper.getFormData();
-          expect(fromIterator(polyfillFormData.entries()))
-              .to.deep.equal(fromIterator(new FormData(form).entries()));
+          expect(fromIterator(polyfillFormData.entries())).to.deep.equal(
+              fromIterator(new FormData(form).entries()));
         } else {
           // For testing in non-supporting browsers like IE.
           // We can't query the state of FormData, but we can check that
           // the polyfill appended to the real FormData enough.
-          const appendSpy = env.sandbox.spy(FormData.prototype, 'append');
+          const appendSpy =
+              env.sandbox.spy(FormData.prototype, 'append');
           polyfillFormDataWrapper.getFormData();
           expect(appendSpy).to.have.been.calledTwice;
         }

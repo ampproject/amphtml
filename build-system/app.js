@@ -224,7 +224,14 @@ const upload = multer();
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);
 
-  const fileData = req.files['myFile'][0];
+  /** @type {!Array<!File>|undefined} */
+  const myFile = req.files['myFile'];
+
+  if (!myFile) {
+    res.json({message: 'No file data received'});
+    return;
+  }
+  const fileData = myFile[0];
   const contents = fileData.buffer.toString();
 
   res.json({message: contents});
