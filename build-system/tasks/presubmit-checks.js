@@ -313,6 +313,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
+      '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -352,6 +353,7 @@ const forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/recaptcha.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
