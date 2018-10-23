@@ -123,10 +123,19 @@ v_spec = #v_range
 v_range = sh-integer / sh-integer OWS ".." OWS sh-integer
 ```
 
-Each `sh-integer` must be non-negative. If the parameter fails to meet these
-criteria, then the server cannot satisfy the request. Otherwise, the server can
-satisfy the request if any of the following is true for any `v_range` in the
-list:
+If the contents of the parameter string fail to parse as `v_spec` , then the
+server should fail to satisfy this parameterised identifier, but should not
+immediately fail the entire parameterised list.
+
+There are additional semantic constraints on the spec:
+ * Each `sh-integer` must be non-negative.
+ * Two integers in a pair `X..Y` must satisfy `X<=Y`.
+ * No two ranges in a spec should intersect. (`A..B` and `C..D` intersect if `B
+   >= C && A <= D`.)
+
+If the parameter fails to meet these criteria, then the server may choose not to
+satisfy the parameterised identifier. Otherwise, the server can satisfy the
+identifier if any of the following is true for any `v_range` in the list:
 
  1. The `v_range` is a single integer, and the server can produce exactly that
     version.
