@@ -39,6 +39,7 @@ import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
+import {AmpStoryClickLayer} from './amp-story-click-layer';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
@@ -218,6 +219,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
+
+    /** @private @const {!ClickLayer} */
+    this.clickLayer_ = new AmpStoryClickLayer(this.win);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -547,6 +551,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.TOOLTIP_STATE, isActive => {
+      this.onTooltipStateUpdate_(isActive);
+    });
+
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
       this.onCurrentPageIdUpdate_(pageId);
     });
@@ -729,7 +737,9 @@ export class AmpStory extends AMP.BaseElement {
           if (infoDialog) {
             infoDialog.build();
           }
-        });
+        })
+        // TODO(enriqe): only build when story contains clickable elements.
+        .then(() => this.element.appendChild(this.clickLayer_.build()));
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -1522,6 +1532,15 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Reacts to tooltip state updates.
+   * @param {boolean} isActive
+   */
+  onTooltipStateUpdate_(isActive) {
+    this.element.classList
+        .toggle('i-amphtml-story-click-layer-active', isActive);
   }
 
   /**

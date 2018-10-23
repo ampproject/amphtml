@@ -57,7 +57,8 @@ amp-story[standalone][desktop] {
   transition: opacity 0.3s !important;
 }
 
-.i-amphtml-story-bookend-active .i-amphtml-story-background-overlay::after {
+.i-amphtml-story-bookend-active .i-amphtml-story-background-overlay::after,
+.i-amphtml-story-tooltip-active .i-amphtml-story-background-overlay::after {
   opacity: 1 !important;
 }
 
