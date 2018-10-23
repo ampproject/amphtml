@@ -175,10 +175,6 @@ export class AmpForm {
     }
     this.form_.classList.add('i-amphtml-form');
 
-    const submitButtons = this.form_.querySelectorAll('[type="submit"]');
-    /** @const @private {!Array<!Element>} */
-    this.submitButtons_ = toArray(submitButtons);
-
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
 
@@ -913,13 +909,6 @@ export class AmpForm {
     this.form_.classList.add(`amp-form-${newState}`);
     this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
-    this.submitButtons_.forEach(button => {
-      if (newState == FormState.SUBMITTING) {
-        button.setAttribute('disabled', '');
-      } else {
-        button.removeAttribute('disabled');
-      }
-    });
   }
 
   /**
