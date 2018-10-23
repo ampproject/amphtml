@@ -2,17 +2,18 @@ import {
   Action,
   StateProperty,
   getStoreService,
+  UIType,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-click-layer-1.0.css';
+import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, childElements, closest, childElement} from '../../../src/dom';
+import {addAttributesToElement, childElement, closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {getSourceOriginForBookendComponent} from './bookend/components/bookend-component-interface';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {setImportantStyles} from '../../../src/style';
-import { EventType, dispatch } from './events';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -29,17 +30,6 @@ import { EventType, dispatch } from './events';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-//TODO:
-//1. Layout tooltip and navigation buttons.
-//1.1 Nav buttons: update class if on last/first page.
-//1.2 nav buttons: test on rtl / don't show on desktop (?)
-// **1.3 tooltip: calculate where to position it depending on the link position.
-// **2. Add click listener to tooltip and nav buttons.
-// **3. Make sure to close and unpause when clicking outside of tooltip.
-// **4. And navigate if clicking on navigation arrows.
-// **5. Or proceed with action if clicked on tooltip.
-// RTL (icon on right, open in new in left of tooltip)
 
 /**
  * Minimum vertical space needed to position tooltip.
@@ -105,6 +95,10 @@ export class AmpStoryClickLayer {
       this.onTooltipStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
+      this.onUIStateUpdate_(isDesktop);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.TOOLTIP_ELEMENT, elem => {
       if (this.storeService_.get(StateProperty.TOOLTIP_STATE) &&
         elem != this.builtElem_) {
@@ -130,34 +124,24 @@ export class AmpStoryClickLayer {
 
   /**
    *
+   * @param {*} uiState
+   */
+  onUIStateUpdate_(uiState) {
+    this.resources_.mutateElement(this.tooltipOverlayEl_, () => {
+      uiState === UIType.DESKTOP ?
+        this.tooltipOverlayEl_.setAttribute('desktop', '') :
+        this.tooltipOverlayEl_.removeAttribute('desktop');
+    });
+  }
+
+  /**
+   *
    * @param {!Element} elem
    */
   attachTooltipToEl_(elem) {
     const href = elem.getAttribute('i-amphtml-data-amp-story-tooltip-href');
     const iconSrc = elem.getAttribute('icon');
     const domainName = getSourceOriginForBookendComponent(elem, href);
-
-    // let tooltipText;
-
-    // this.resources_.measureMutateElement(this.tootlip_, () => {
-    //   tooltipText =
-    //       childElements(this.tooltip_,
-    //           el => el.classList.contains('i-amphtml-tooltip-next'));
-    //   const html = htmlFor(this.win_.document);
-    //   tooltipText = tooltipText ? tooltipText :
-    //     html`<p class="i-amphtml-tooltip-text" ref="text"></p>`;
-    // }, () => {
-    //   this.positionTooltip_(elem);
-    //   addAttributesToElement(this.tooltip_, {'href': href});
-    //   tooltipText.textContent = domainName;
-    //   if (!this.builtElem_) {
-    //     this.tooltip_.insertBefore(tooltipText, this.tooltip_.firstChild);
-    //   }
-
-    //   if (iconSrc) {
-    //     this.appendIconToTooltip_(iconSrc);
-    //   }
-    // });
 
     this.resources_.mutateElement(this.tooltip_, () => {
       addAttributesToElement(this.tooltip_, {'href': href});
@@ -183,9 +167,6 @@ export class AmpStoryClickLayer {
       this.positionTooltip_(elem);
     });
   }
-
-
-
 
   /**
    *
@@ -227,7 +208,8 @@ export class AmpStoryClickLayer {
             el => el.classList.contains('i-amphtml-story-tooltip-icon'));
 
     if (existingTooltipIcon) {
-      addAttributesToElement(existingTooltipIcon.firstElementChild, {'src': iconSrc});
+      addAttributesToElement(existingTooltipIcon.firstElementChild,
+          {'src': iconSrc});
     } else {
       const html = htmlFor(this.win_.document);
       const iconEl =
@@ -254,6 +236,7 @@ export class AmpStoryClickLayer {
       this.closeTooltip_();
     }
   }
+
 
   /**
    * Builds the template.
@@ -284,19 +267,29 @@ export class AmpStoryClickLayer {
         `;
     const {tooltip, buttonLeft, buttonRight} = htmlRefs(tooltipOverlay);
     this.tooltip_ = tooltip;
-    buttonLeft.addEventListener('click', e => {
-      e.preventDefault();
-      dispatch(this.win_, this.root_, EventType.PREVIOUS_PAGE, undefined,
-          {bubbles: true});
-    });
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    buttonRight.addEventListener('click', e => {
-      e.preventDefault();
-      dispatch(this.win_, this.root_, EventType.NEXT_PAGE, undefined,
-          {bubbles: true});
-    });
+    buttonLeft.addEventListener('click', e =>
+      this.onNavigationalClick_(e, rtlState ?
+        EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE));
+
+
+    buttonRight.addEventListener('click', e =>
+      this.onNavigationalClick_(e, rtlState ?
+        EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE));
 
     return tooltipOverlay;
+  }
+
+  /**
+   *
+   * @param {*} event
+   * @param {*} direction
+   */
+  onNavigationalClick_(event, direction) {
+    event.preventDefault();
+    dispatch(this.win_, this.root_, direction, undefined,
+        {bubbles: true});
   }
 
   /**

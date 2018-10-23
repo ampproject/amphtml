@@ -491,6 +491,12 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
+      if (this.storeService_.get(StateProperty.TOOLTIP_STATE)) {
+        // Hide active tooltip when page switch is triggered by keyboard or
+        // desktop buttons.
+        this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, false);
+      }
+
       this.switchTo_(getDetail(e)['targetPageId']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -549,10 +555,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
-    });
-
-    this.storeService_.subscribe(StateProperty.TOOLTIP_STATE, isActive => {
-      this.onTooltipStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
@@ -1532,15 +1534,6 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-  }
-
-  /**
-   * Reacts to tooltip state updates.
-   * @param {boolean} isActive
-   */
-  onTooltipStateUpdate_(isActive) {
-    this.element.classList
-        .toggle('i-amphtml-story-click-layer-active', isActive);
   }
 
   /**
