@@ -1,17 +1,16 @@
 import {
   Action,
   StateProperty,
-  getStoreService,
   UIType,
+  getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-click-layer-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, childElement, closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
-import {getSourceOriginForBookendComponent} from './bookend/components/bookend-component-interface';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {setImportantStyles} from '../../../src/style';
 
@@ -141,8 +140,8 @@ export class AmpStoryClickLayer {
   attachTooltipToEl_(elem) {
     const href = elem.getAttribute('i-amphtml-data-amp-story-tooltip-href');
     const iconSrc = elem.getAttribute('icon');
-    const domainName = getSourceOriginForBookendComponent(elem, href);
 
+    const domainName = getSourceOriginForElement(elem, href);
     this.resources_.mutateElement(this.tooltip_, () => {
       addAttributesToElement(this.tooltip_, {'href': href});
 

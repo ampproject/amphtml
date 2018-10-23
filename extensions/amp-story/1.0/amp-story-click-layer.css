@@ -16,7 +16,7 @@
 
 .i-amphtml-story-click-layer-button-container {
   height: 100% !important;
-  width: 160px !important;
+  width: 60px !important;
   position: absolute !important;
 }
 
@@ -72,7 +72,6 @@
   transition: opacity 0.225s linear !important;
   transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 
-  width: 155px !important;
   max-width: 248px !important;
   height: 40px !important;
   text-decoration: none !important;
