@@ -29,6 +29,7 @@ import {
 import {dev, user} from '../log';
 import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 
@@ -157,6 +158,9 @@ export class FixedLayer {
    * Begin observing changes to the hidden attribute.
    */
   observeHiddenMutations_() {
+    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
+      return;
+    }
     const mo = this.initMutationObserver_();
     mo.observe(this.ampdoc.getRootNode(), {
       attributes: true,
