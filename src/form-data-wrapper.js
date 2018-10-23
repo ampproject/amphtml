@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {getFormAsObject} from './form';
+import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
 /**
@@ -22,11 +24,16 @@ import {map} from './utils/object';
  * API for FormData objects on all browsers. For example, not all browsers
  * support the FormData#entries or FormData#delete functions.
  *
+ * @param {!Window} win
  * @param {!HTMLFormElement=} opt_form
  * @return {!FormDataWrapperInterface}
  */
-export function createFormDataWrapper(opt_form) {
-  if (FormData.prototype.entries && FormData.prototype.delete) {
+export function createFormDataWrapper(win, opt_form) {
+  const platform = Services.platformFor(win);
+
+  if (platform.isIos() && platform.getMajorVersion() == 11) {
+    return new Ios11NativeFormDataWrapper(opt_form);
+  } else if (FormData.prototype.entries && FormData.prototype.delete) {
     return new NativeFormDataWrapper(opt_form);
   } else {
     return new PolyfillFormDataWrapper(opt_form);
@@ -64,8 +71,13 @@ export class PolyfillFormDataWrapper {
     this.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
   }
 
-  /** @override */
-  append(name, value) {
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
     // Coercion to string is required to match
     // the native FormData.append behavior
     const nameString = String(name);
@@ -123,9 +135,14 @@ class NativeFormDataWrapper {
     this.formData_ = new FormData(opt_form);
   }
 
-  /** @override */
-  append(name, value) {
-    return this.formData_.append(name, value);
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    this.formData_.append(name, value);
   }
 
   /** @override */
@@ -141,6 +158,41 @@ class NativeFormDataWrapper {
   /** @override */
   getFormData() {
     return this.formData_;
+  }
+}
+
+/**
+ * iOS 11 has a bug when submitting empty file inputs.
+ * This works around the bug by replacing the empty files with Blob objects.
+ */
+class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
+  /** @override */
+  constructor(opt_form) {
+    super(opt_form);
+
+    if (opt_form) {
+      iterateCursor(opt_form.elements, input => {
+        if (input.type == 'file' && input.files.length == 0) {
+          this.formData_.delete(input.name);
+          this.formData_.append(input.name, new Blob([]), '');
+        }
+      });
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    // Safari 11 breaks on submitting empty File values.
+    if (value && typeof value == 'object' && isEmptyFile(value)) {
+      this.formData_.append(name, new Blob([]), opt_filename || '');
+    } else {
+      this.formData_.append(name, value);
+    }
   }
 }
 
@@ -188,9 +240,10 @@ class FormDataWrapperInterface {
    *
    * @param {string} unusedName The name of the field whose data is contained in
    *     `value`.
-   * @param {string} unusedValue The field's value.
+   * @param {string|!File} unusedValue The field's value.
+   * @param {string=} opt_filename The filename to use if the value is a file.
    */
-  append(unusedName, unusedValue) {}
+  append(unusedName, unusedValue, opt_filename) {}
 
   /**
    * Remove the given value from the FormData.
@@ -206,7 +259,7 @@ class FormDataWrapperInterface {
    *
    * For more details on this, see http://mdn.io/FormData/entries.
    *
-   * @return {!Iterator<!Array<string>>}
+   * @return {!Iterator<!Array<string|!File>>}
    */
   entries() {}
 
@@ -216,4 +269,16 @@ class FormDataWrapperInterface {
    * @return {!FormData}
    */
   getFormData() {}
+}
+
+/**
+ * Check if the given file is an empty file, which is the result of submitting
+ * an empty `<input type="file">`. These cause errors when submitting forms
+ * in Safari 11.
+ *
+ * @param {!File} file
+ * @return {boolean}
+ */
+function isEmptyFile(file) {
+  return file.name == '' && file.size == 0;
 }
