@@ -384,6 +384,11 @@ const EXPERIMENTS = [
     name: 'Enables <amp-script>.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
+  {
+    id: 'amp-list-resizable-children',
+    name: 'Experiment for allowing amp-list to resize when its children resize',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
 ];
 
 if (getMode().localDev) {

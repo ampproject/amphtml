@@ -45,6 +45,8 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   attrs: {
     name: "auto-resize"
     value: ""
+    deprecation: "replacement-to-be-determined-at-a-later-date"
+    deprecation_url: "https://github.com/ampproject/amphtml/issues/18849"
   }
   attrs: {
     name: "binding"
