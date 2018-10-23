@@ -1456,43 +1456,4 @@ describes.realWin('FixedLayer', {}, env => {
       expect(root.children).to.have.length(1);
     });
   });
-
-  describe('Sorting DOM elements', () => {
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-      ampdoc = new AmpDocSingle(win);
-      fixedLayer = new FixedLayer(ampdoc, vsyncApi,
-          /* borderTop */ 0, /* paddingTop */ 11, /* transfer */ true);
-    });
-
-    it('should sort elements by dom order', () => {
-      //
-      // <div id='elem1'>
-      //   <div id='elem2'>
-      //      <div id='elem3'>
-      // <div id='elem4'>
-      //
-
-      const elem1 = doc.createElement('div');
-      const elem2 = doc.createElement('div');
-      const elem3 = doc.createElement('div');
-      const elem4 = doc.createElement('div');
-
-      elem1.appendChild(elem2);
-      elem2.appendChild(elem3);
-      elem1.appendChild(elem4);
-      doc.body.appendChild(elem1);
-
-      const fe1 = {element: elem1, id: 'elem1'};
-      const fe2 = {element: elem2, id: 'elem2'};
-      const fe3 = {element: elem3, id: 'elem3'};
-      const fe4 = {element: elem4, id: 'elem4'};
-
-      // random order list
-      const list = [fe3, fe1, fe4, fe2];
-      fixedLayer.sortInDomOrder_(list);
-      expect(list).to.deep.equal([fe1, fe2, fe3, fe4]);
-    });
-  });
 });
