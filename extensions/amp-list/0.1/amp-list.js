@@ -164,9 +164,9 @@ export class AmpList extends AMP.BaseElement {
     // It will relaunched under a new attribute (resizable-children) soon.
     // please see https://github.com/ampproject/amphtml/issues/18849
     if (this.element.hasAttribute('auto-resize')) {
-      user().warn('auto-resize attribute is deprecated and its behavior is ' +
-          'disabled. This feature will be relaunched under a new name soon. ' +
-          'Please see https://github.com/ampproject/amphtml/issues/18849.'
+      user().warn(TAG, 'auto-resize attribute is deprecated and its behavior' +
+          ' is disabled. This feature will be relaunched under a new name' +
+          ' soon. Please see https://github.com/ampproject/amphtml/issues/18849'
       );
     }
 
