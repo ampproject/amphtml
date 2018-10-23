@@ -356,7 +356,7 @@ const EXPERIMENTS = [
     id: 'video-dock',
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
     id: 'amp-inputmask',
@@ -367,7 +367,7 @@ const EXPERIMENTS = [
   {
     id: 'linker-form',
     name: 'Enables form support in linker',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
   {
     id: 'fie-metadata-extension',
@@ -388,6 +388,12 @@ const EXPERIMENTS = [
     id: 'amp-list-resizable-children',
     name: 'Experiment for allowing amp-list to resize when its children resize',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
 ];
 

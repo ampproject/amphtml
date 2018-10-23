@@ -15,12 +15,15 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {FakeMutationObserver} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
+import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import {toggle} from '../../src/style';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
-
 
 describes.sandboxed('FixedLayer', {}, () => {
   let documentApi;
@@ -35,6 +38,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let element5;
   let element6;
   let allRules;
+  let timer;
 
   beforeEach(() => {
     allRules = {};
@@ -137,10 +141,16 @@ describes.sandboxed('FixedLayer', {}, () => {
         return (!!elem.parentElement);
       },
       defaultView: {
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
+        Promise: window.Promise,
+        MutationObserver: FakeMutationObserver,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
         navigator: window.navigator,
+        location: window.location,
+        cookie: '',
       },
       createElement: name => {
         return createElement(name);
@@ -151,6 +161,8 @@ describes.sandboxed('FixedLayer', {}, () => {
     documentApi.defaultView.document = documentApi;
     ampdoc = new AmpDocSingle(documentApi.defaultView);
     installPlatformService(documentApi.defaultView);
+    installTimerService(documentApi.defaultView);
+    timer = Services.timerFor(documentApi.defaultView);
 
     vsyncTasks = [];
     vsyncApi = {
@@ -1060,6 +1072,44 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(userError).calledWithMatch('FixedLayer',
           /not supported yet for fixed or sticky elements/);
     });
+
+    describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
+      it('should trigger an update', () => {
+        element1.computedStyle['position'] = 'fixed';
+        element1.offsetWidth = 10;
+        element1.offsetHeight = 10;
+        element1.computedStyle['display'] = 'none';
+
+        expect(vsyncTasks).to.have.length(1);
+        const state = {};
+        vsyncTasks[0].measure(state);
+
+        expect(state['F0'].fixed).to.be.false;
+
+        element1.computedStyle['display'] = '';
+
+        sandbox.stub(timer, 'delay').callsFake(callback => {
+          callback();
+        });
+        return fixedLayer.mutationObserver_.__mutate({
+          attributeName: 'hidden',
+        }).then(() => {
+          expect(vsyncTasks).to.have.length(2);
+          const state = {};
+          vsyncTasks[0].measure(state);
+
+          expect(state['F0'].fixed).to.be.true;
+          expect(state['F0'].top).to.equal('');
+          expect(state['F0'].zIndex).to.equal('');
+        });
+      });
+    });
   });
 
   describe('with-transfer', () => {
@@ -1362,6 +1412,44 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(userError).calledWithMatch('FixedLayer',
           /not supported yet for fixed or sticky elements/);
     });
+
+    describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
+      it('should trigger an update', () => {
+        element1.computedStyle['position'] = 'fixed';
+        element1.offsetWidth = 10;
+        element1.offsetHeight = 10;
+        element1.computedStyle['display'] = 'none';
+
+        expect(vsyncTasks).to.have.length(1);
+        const state = {};
+        vsyncTasks[0].measure(state);
+
+        expect(state['F0'].fixed).to.be.false;
+
+        element1.computedStyle['display'] = '';
+
+        sandbox.stub(timer, 'delay').callsFake(callback => {
+          callback();
+        });
+        return fixedLayer.mutationObserver_.__mutate({
+          attributeName: 'hidden',
+        }).then(() => {
+          expect(vsyncTasks).to.have.length(2);
+          const state = {};
+          vsyncTasks[0].measure(state);
+
+          expect(state['F0'].fixed).to.be.true;
+          expect(state['F0'].top).to.equal('');
+          expect(state['F0'].zIndex).to.equal('');
+        });
+      });
+    });
   });
 });
 
@@ -1394,6 +1482,7 @@ describes.realWin('FixedLayer', {}, env => {
       doc = win.document;
 
       installPlatformService(win);
+      installTimerService(win);
       ampdoc = new AmpDocSingle(win);
       shadowRoot = win.document.body.attachShadow({mode: 'open'});
       fixedLayer = new FixedLayer(ampdoc, vsyncApi,

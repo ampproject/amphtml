@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from '../pass';
 import {Services} from '../services';
 import {
   computedStyle,
@@ -28,6 +29,7 @@ import {
 import {dev, user} from '../log';
 import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 
@@ -81,6 +83,14 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @const @private {!Pass} */
+    this.updatePass_ = new Pass(ampdoc.win, () => {
+      this.update();
+    });
+
+    /** @private {?MutationObserver} */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -106,6 +116,8 @@ export class FixedLayer {
       return;
     }
 
+
+
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
@@ -128,6 +140,10 @@ export class FixedLayer {
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
 
+    if (this.elements_.length > 0) {
+      this.observeHiddenMutations();
+    }
+
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
       user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
@@ -136,6 +152,70 @@ export class FixedLayer {
     }
 
     this.update();
+  }
+
+  /**
+   * Begin observing changes to the hidden attribute.
+   * @visibleForTesting
+   */
+  observeHiddenMutations() {
+    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
+      return;
+    }
+    const mo = this.initMutationObserver_();
+    mo.observe(this.ampdoc.getRootNode(), {
+      attributes: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * Stop observing changes to the hidden attribute. Does not destroy the
+   * mutation observer.
+   */
+  unobserveHiddenMutations_() {
+    this.clearMutationObserver_();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.disconnect();
+    }
+  }
+
+  /**
+   * Clears the mutation observer and its pass queue.
+   */
+  clearMutationObserver_() {
+    this.updatePass_.cancel();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.takeRecords();
+    }
+  }
+
+  /**
+   * @return {!MutationObserver}
+   */
+  initMutationObserver_() {
+    if (this.mutationObserver_) {
+      return this.mutationObserver_;
+    }
+
+    const mo = new this.ampdoc.win.MutationObserver(mutations => {
+      if (this.updatePass_.isPending()) {
+        return;
+      }
+
+      for (let i = 0; i < mutations.length; i++) {
+        const mutation = mutations[i];
+        if (mutation.attributeName === 'hidden') {
+          // Wait one animation frame so that other mutations may arrive.
+          this.updatePass_.schedule(16);
+          return;
+        }
+      }
+    });
+
+    return this.mutationObserver_ = mo;
   }
 
   /**
@@ -200,18 +280,17 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    const {win} = this.ampdoc;
-    if (!element./*OK*/offsetParent &&
-        computedStyle(win, element).display === 'none') {
-      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
-          element.tagName);
-    }
     this.setupElement_(
         element,
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+
+    // If this is the first element, we need to start the mutation observer.
+    // This'll only be created once.
+    this.observeHiddenMutations();
+
     return this.update();
   }
 
@@ -230,6 +309,9 @@ export class FixedLayer {
           }
         }
       });
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
     }
   }
 
@@ -270,6 +352,9 @@ export class FixedLayer {
     if (this.elements_.length == 0) {
       return Promise.resolve();
     }
+
+    // Clear out the mutation observer's queue since we're doing the work now.
+    this.clearMutationObserver_();
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
