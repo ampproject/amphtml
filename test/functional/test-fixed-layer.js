@@ -22,6 +22,7 @@ import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {toggle} from '../../src/style';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, () => {
@@ -148,6 +149,8 @@ describes.sandboxed('FixedLayer', {}, () => {
           return elem.computedStyle;
         },
         navigator: window.navigator,
+        location: window.location,
+        cookie: '',
       },
       createElement: name => {
         return createElement(name);
@@ -1071,6 +1074,12 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
       it('should trigger an update', () => {
         element1.computedStyle['position'] = 'fixed';
         element1.offsetWidth = 10;
@@ -1405,6 +1414,12 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
       it('should trigger an update', () => {
         element1.computedStyle['position'] = 'fixed';
         element1.offsetWidth = 10;

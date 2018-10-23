@@ -141,7 +141,7 @@ export class FixedLayer {
     this.sortInDomOrder_();
 
     if (this.elements_.length > 0) {
-      this.observeHiddenMutations_();
+      this.observeHiddenMutations();
     }
 
     const platform = Services.platformFor(this.ampdoc.win);
@@ -156,8 +156,9 @@ export class FixedLayer {
 
   /**
    * Begin observing changes to the hidden attribute.
+   * @visibleForTesting
    */
-  observeHiddenMutations_() {
+  observeHiddenMutations() {
     if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
       return;
     }
@@ -288,7 +289,7 @@ export class FixedLayer {
 
     // If this is the first element, we need to start the mutation observer.
     // This'll only be created once.
-    this.observeHiddenMutations_();
+    this.observeHiddenMutations();
 
     return this.update();
   }
