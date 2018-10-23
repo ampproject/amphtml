@@ -69,6 +69,10 @@ if (!global.AMP_TESTING) {
   }
 
   app.get(['/', '/*'], devDashboard.serveIndex);
+
+  app.get('/serve_mode.json', (req, res) => {
+    res.json({serveMode: pc.env.SERVE_MODE || 'default'});
+  });
 }
 
 // Deprecate usage of .min.html/.max.html
