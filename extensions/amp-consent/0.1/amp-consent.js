@@ -263,7 +263,7 @@ export class AmpConsent extends AMP.BaseElement {
   show_(instanceId) {
     if (this.currentDisplayInstance_) {
       dev().error(TAG,
-          'other consent instance on display %s', this.currentDisplayInstante_);
+          'other consent instance on display %s', this.currentDisplayInstance_);
     }
 
     this.vsync_.mutate(() => {
@@ -283,7 +283,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.currentDisplayInstance_ ||
         !this.consentUI_[this.currentDisplayInstance_]) {
       dev().error(TAG,
-          '%s no consent ui to hide', this.currentDisplayInstante_);
+          '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
     const uiToHide = this.consentUI_[this.currentDisplayInstance_];
