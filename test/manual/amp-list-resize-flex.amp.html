@@ -75,7 +75,7 @@
 
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
-    <amp-list width="396" height="80" layout="flex-item" auto-resize
+    <amp-list width="396" height="80" layout="flex-item" resizable-children
         src="/test/manual/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry">
@@ -94,7 +94,7 @@
   <h2>AMP List Resize with Accordion</h2>
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
-    <amp-list width="396" height="80" layout="flex-item" auto-resize reset-on-refresh
+    <amp-list width="396" height="80" layout="flex-item" resizable-children reset-on-refresh
         src="/test/manual/amp-list-data.json">
       <template type="amp-mustache">
         <div class="story-entry">
@@ -129,7 +129,7 @@
       height="80"
       layout="flex-item"
       reset-on-refresh
-      auto-resize
+      resizable-children
       src="/test/manual/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry" [class]="'story-entry ' + listStyle">
@@ -169,7 +169,7 @@
       layout="flex-item"
       src="/search/countries"
       reset-on-refresh
-      auto-resize
+      resizable-children
       [src]="'/search/countries?q=' + query">
       <template type="amp-mustache">
         {{#results}}
