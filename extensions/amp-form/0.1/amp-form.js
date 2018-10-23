@@ -255,7 +255,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = createFormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.win_, this.form_);
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach(name => {
           body.delete(name);

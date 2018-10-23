@@ -137,7 +137,12 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should allow FormData as body', () => {
-          const formData = createFormDataWrapper();
+          const fakeWin = null;
+          sandbox.stub(Services, 'platformFor').returns({
+            isIos() { return false; },
+          });
+
+          const formData = createFormDataWrapper(fakeWin);
           sandbox.stub(JSON, 'stringify');
           formData.append('name', 'John Miller');
           formData.append('age', 56);
@@ -796,7 +801,12 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should post correct structurally-cloneable FormData request', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      const formData = createFormDataWrapper();
+      const fakeWin = null;
+      sandbox.stub(Services, 'platformFor').returns({
+        isIos() { return false; },
+      });
+
+      const formData = createFormDataWrapper(fakeWin);
       formData.append('a', 42);
       formData.append('b', '24');
       formData.append('b', true);
