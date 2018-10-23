@@ -17,7 +17,7 @@
 import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {dict} from '../../../src/utils/object';
-import {getNormalizedHostnameFromUrl, isExcludedDomain} from './utils';
+import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 
 /**
  * @enum {string}
@@ -210,9 +210,8 @@ export class AffiliateLinkResolver {
    * @private
    */
   getNewDomains_(anchorList) {
-    const domains = anchorList.map(this.getAnchorDomain_);
-
-    return domains.reduce(((acc, domain) => {
+    return anchorList.reduce(((acc, anchor) => {
+      const domain = this.getAnchorDomain_(anchor);
       const isResolved = this.domains_[domain];
       const isExcluded = isExcludedDomain(domain, this.skimOptions_);
       const isDuplicate = acc.indexOf(domain) !== -1;
@@ -308,6 +307,6 @@ export class AffiliateLinkResolver {
    * @private
    */
   getAnchorDomain_(anchor) {
-    return getNormalizedHostnameFromUrl(anchor.href);
+    return getNormalizedHostnameFromAnchor(anchor);
   }
 }

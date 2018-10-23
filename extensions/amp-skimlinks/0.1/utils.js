@@ -54,6 +54,18 @@ export function getNormalizedHostnameFromUrl(url) {
 }
 
 /**
+ * @param {!HTMLElement} anchor
+ * @return {string}
+ */
+export function getNormalizedHostnameFromAnchor(anchor) {
+  if (!anchor) {
+    return '';
+  }
+
+  return anchor.hostname.replace(/^www\./, '');
+}
+
+/**
  * Check if a domain is excluded, (i.e all URLs from this domains should
  * be ignored). The list of excluded was generated based on the
  * 'excluded-domains' skim-option & the internal domains.
@@ -70,11 +82,11 @@ export function isExcludedDomain(domain, skimOptions) {
 
 /**
  * Check if a url belongs to an excluded domain.
- * @param {string} url
+ * @param {!HTMLElement} anchor
  * @param {!Object} skimOptions
  * @return {boolean}
  */
-export function isExcludedUrl(url, skimOptions) {
-  const domain = getNormalizedHostnameFromUrl(url);
+export function isExcludedAnchorUrl(anchor, skimOptions) {
+  const domain = getNormalizedHostnameFromAnchor(anchor);
   return isExcludedDomain(domain, skimOptions);
 }

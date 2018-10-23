@@ -16,7 +16,7 @@
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {dict} from '../../../src/utils/object';
-import {generatePageImpressionId, isExcludedUrl} from './utils';
+import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {
   LINKS_IMPRESSIONS_TRACKING_URL,
@@ -130,7 +130,7 @@ export class Tracking {
    * @public
    */
   sendNaClickTracking(anchor) {
-    if (!this.tracking_ || isExcludedUrl(anchor.href, this.skimOptions_)) {
+    if (!this.tracking_ || isExcludedAnchorUrl(anchor, this.skimOptions_)) {
       return;
     }
     const {
@@ -266,7 +266,7 @@ export class Tracking {
     const urls = dict({});
 
     anchorReplacementList.forEach(({replacementUrl, anchor}) => {
-      if (isExcludedUrl(anchor.href, this.skimOptions_)) {
+      if (isExcludedAnchorUrl(anchor, this.skimOptions_)) {
         return;
       }
 
