@@ -32,8 +32,7 @@ const serveModes = [
   },
   {
     value: 'cdn',
-    description: `Minified AMP JavaScript is served from
-      \`cdn.ampproject.org\`.`,
+    description: 'Minified AMP JavaScript is served from the AMP Project CDN.',
   },
 ];
 
@@ -46,7 +45,7 @@ function toggleBodyScroll(opt_bodyForTesting) {
 }
 
 function scrollToTop(opt_winForTesting) {
-  (opt_winForTesting || window).scrollTo(0, 0);
+  (opt_winForTesting || window)./*OK*/scrollTo(0, 0);
 }
 
 function SettingsOpenerButton({open, handler}) {

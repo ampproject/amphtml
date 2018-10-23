@@ -20,7 +20,6 @@ const BBPromise = require('bluebird');
 const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {join, normalize, sep} = require('path');
-const pc = process;
 
 // HTML Templates
 const templateFile = join(__dirname, '/template.html');
