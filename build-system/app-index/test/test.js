@@ -34,9 +34,10 @@ describe('Tests for the dev dashboard', () => {
   });
 
   it('should be able to return HTML', () => {
-    return devDashboard.serveIndex({url: '/'}, expressResMock)
-        .then(renderedHtml => {
-          assert.ok(renderedHtml);
-        });
+    return devDashboard.serveIndex({
+      root: __dirname,
+    })({url: '/'}, expressResMock).then(renderedHtml => {
+      assert.ok(renderedHtml);
+    });
   });
 });

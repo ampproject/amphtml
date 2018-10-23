@@ -62,13 +62,27 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-
   if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
       process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
     devDashboard.setCacheStatus(false);
   }
 
-  app.get(['/', '/*'], devDashboard.serveIndex);
+  app.get(['/', '/*'], devDashboard.serveIndex({
+    // Sitting on build-system/, so we go back one dir for the repo root.
+    root: path.join(__dirname, '../'),
+    mapBasepath(url) {
+      // Serve /examples/ on main page.
+      if (url == '/') {
+        return '/examples';
+      }
+      // Serve root on /~ as a fallback.
+      if (url == '/~') {
+        return '/';
+      }
+      // Serve basepath from URL otherwise.
+      return url;
+    },
+  }));
 }
 
 // Deprecate usage of .min.html/.max.html
@@ -224,7 +238,14 @@ const upload = multer();
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);
 
-  const fileData = req.files['myFile'][0];
+  /** @type {!Array<!File>|undefined} */
+  const myFile = req.files['myFile'];
+
+  if (!myFile) {
+    res.json({message: 'No file data received'});
+    return;
+  }
+  const fileData = myFile[0];
   const contents = fileData.buffer.toString();
 
   res.json({message: contents});
