@@ -146,7 +146,7 @@ class ServeModeSelector extends Component {
           );
         })}
       </div>
-    )
+    );
   }
 }
 
