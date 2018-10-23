@@ -24,6 +24,9 @@ limitations under the License.
     <td>AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.</td>
   </tr>
   <tr>
+    <td><strong>Availability</strong></td>
+    <td>Stable</td>
+  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -36,6 +39,26 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-access/">Annotated code example for amp-access</a></td>
   </tr>
 </table>
+
+## Relationship to `amp-subscriptions`
+
+The [`amp-subscriptions`](../amp-subscriptions/amp-subscriptions.md) extension offers
+similar features to `amp-access`. However, it supports a more specialized access
+paywall protocol. Some notable notable differences are:
+
+1. The `amp-subscriptions` entitlements response is similar to the amp-access
+authorization, but it is striclty defined and standardized.
+2. The `amp-subscriptions` extension allows multiple services to be configured
+for the page to participate in access/paywall decisions. They are executed
+concurrently and prioritized based on which service returns the positive response.
+3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
+response based on an independent agreement with publishers as a proof of access.
+4. In `amp-subscriptions` content markup is standardized allowing apps and
+crawlers to easily detect premium content sections.
+
+Because of standardization of marker, multi provider support and improved viewer
+support it is recommended that new publisher and paywall provider implementations
+use `amp-subscriptions`.
 
 ## Solution
 
