@@ -15,7 +15,6 @@
  */
 
 import {getMode} from './mode';
-import {install as installArrayFrom} from './polyfills/array-from';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {
@@ -41,7 +40,6 @@ installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
-installArrayFrom(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
   installCustomElements(self, class {});
