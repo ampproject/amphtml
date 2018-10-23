@@ -89,7 +89,7 @@ function Header({isMainPage, links}) {
       <ul class="right-nav">
         {(links.map(({name, href, divider}, i) => (
           <li class={(divider || i == links.length - 1) && 'divider'}>
-            <a href={href} target="_blank">
+            <a href={href} target="_blank" rel="noopener noreferrer">
               {name}
             </a>
           </li>
@@ -140,6 +140,7 @@ class Main extends Component {
               {state.basepath}
               <a href="https://github.com/ampproject/amphtml/find/master"
                 target="_blank"
+                rel="noopener noreferrer"
                 class="find-icon icon">
                 Find file
               </a>
