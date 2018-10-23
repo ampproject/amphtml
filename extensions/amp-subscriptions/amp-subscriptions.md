@@ -67,7 +67,7 @@ concurrently and prioritized based on which service returns the positive respons
 response based on an independent agreement with publishers as a proof of access.
 4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
 
-Because of standardization of marker, multi provider support and improved viewer
+Because of standardization of markup, multi provider support and improved viewer
 support it is recommended that new publisher and paywall provider implementations
 use `amp-subscriptions`.
 
