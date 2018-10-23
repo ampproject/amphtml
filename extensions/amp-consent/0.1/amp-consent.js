@@ -263,7 +263,7 @@ export class AmpConsent extends AMP.BaseElement {
   show_(instanceId) {
     if (this.currentDisplayInstance_) {
       dev().error(TAG,
-          `other consent instance on display ${this.currentDisplayInstance_}`);
+          'other consent instance on display %s', this.currentDisplayInstante_);
     }
 
     this.vsync_.mutate(() => {
@@ -283,7 +283,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.currentDisplayInstance_ ||
         !this.consentUI_[this.currentDisplayInstance_]) {
       dev().error(TAG,
-          `${this.currentDisplayInstance_} no consent ui to hide`);
+          '%s no consent ui to hide', this.currentDisplayInstante_);
     }
 
     const uiToHide = this.consentUI_[this.currentDisplayInstance_];
@@ -561,20 +561,20 @@ export class AmpConsent extends AMP.BaseElement {
    */
   validateAndParseConfig_(config) {
     const consents = config['consents'];
-    user().assert(consents, `${TAG}: consents config is required`);
+    user().assert(consents, '%s: consents config is required', TAG);
     user().assert(Object.keys(consents).length != 0,
-        `${TAG}: can't find consent instance`);
+        '%s: can\'t find consent instance', TAG);
     if (!this.isMultiSupported_) {
       // Assert single consent instance
       user().assert(Object.keys(consents).length <= 1,
-          `${TAG}: only single consent instance is supported`);
+          '%s: only single consent instance is supported', TAG);
       if (config['policy']) {
         // Only respect 'default' consent policy;
         const keys = Object.keys(config['policy']);
         for (let i = 0; i < keys.length; i++) {
           if (keys[i] != 'default') {
-            user().warn(TAG, `policy ${keys[i]} is currently not supported` +
-              'and will be ignored');
+            user().warn(TAG, 'policy %s is currently not supported' +
+              'and will be ignored', keys[i]);
             delete config['policy'][keys[i]];
           }
         }
@@ -625,7 +625,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (!type) {
       return null;
     }
-    user().assert(CMP_CONFIG[type], `invalid CMP type ${type}`);
+    user().assert(CMP_CONFIG[type], 'invalid CMP type %s', type);
     const importConfig = CMP_CONFIG[type];
     this.validateCMPConfig_(importConfig);
     const constentInstance = importConfig['consentInstanceId'];
@@ -648,7 +648,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   handlePostPrompt_(consentId) {
     user().assert(this.consentConfig_[consentId],
-        `consent with id ${consentId} not found`);
+        'consent with id %s not found', consentId);
     // toggle the UI for this consent
     this.scheduleDisplay_(consentId);
   }
@@ -662,7 +662,7 @@ export class AmpConsent extends AMP.BaseElement {
         ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
-      dev().assert(config[attribute], `CMP config must specify ${attribute}`);
+      dev().assert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
 

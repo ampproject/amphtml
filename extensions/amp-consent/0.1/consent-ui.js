@@ -52,7 +52,7 @@ export class ConsentUI {
     this.isVisible_ = false;
 
     /** @private {boolean} */
-    this.isFullscreen = false;
+    this.isFullscreen_ = false;
 
     /** @private {?Element} */
     this.ui_ = null;
@@ -88,7 +88,7 @@ export class ConsentUI {
           this.ampdoc_.getElementById(opt_postPromptUI);
       if (!postPromptUI) {
         user().error(TAG, 'postPromptUI element with ' +
-          `id=${opt_postPromptUI} not found`);
+          'id=%s not found', opt_postPromptUI);
       }
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
@@ -101,7 +101,7 @@ export class ConsentUI {
       const promptElement = this.ampdoc_.getElementById(promptUI);
       if (!promptElement || !this.parent_.contains(promptElement)) {
         user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
+          'promptUI id %s not found', promptUI);
       }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
@@ -177,21 +177,21 @@ export class ConsentUI {
    * Enter the fullscreen state for the UI
    */
   enterFullscreen() {
-    if (!this.ui_ || !this.isVisible_ || this.isFullscreen) {
+    if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
 
     const {classList} = this.parent_;
     classList.add('i-amphtml-consent-ui-fullscreen');
 
-    this.isFullscreen = true;
+    this.isFullscreen_ = true;
   }
 
   /**
    * Enter the fullscreen state for the UI
    */
   exitFullscreen() {
-    if (!this.ui_ || !this.isVisible_ || !this.isFullscreen) {
+    if (!this.ui_ || !this.isVisible_ || !this.isFullscreen_) {
       return;
     }
 
@@ -199,12 +199,12 @@ export class ConsentUI {
     classList.add('i-amphtml-consent-ui-fullscreen-exit');
     classList.remove('i-amphtml-consent-ui-fullscreen');
 
-    this.isFullscreen = false;
+    this.isFullscreen_ = false;
 
     // Set a timeout to remove the fullscreen exit class
     // This timeout should match our CSS animation speed.
     const removeExitFullscreen = () => {
-      if (this.isFullscreen === false) {
+      if (this.isFullscreen_ === false) {
         classList.remove('i-amphtml-consent-ui-fullscreen-exit');
       }
       this.parent_.removeEventListener('transitionend', removeExitFullscreen);
