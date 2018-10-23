@@ -43,6 +43,7 @@ addons:
     packages:
       - protobuf-compiler
       - python-protobuf
+      - golang-goprotobuf-dev
 matrix:
   include:
     - env: BUILD_SHARD="unit_tests"
