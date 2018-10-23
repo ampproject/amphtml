@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 01.22.33 */
+/** Version: 0.1.22.34 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -3412,16 +3412,19 @@ class DeferredAccountCreationResponse {
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
-   * @param {!PurchaseData} purchaseData
+   * @param {!Array<!PurchaseData>} purchaseDataList
    * @param {function():!Promise} completeHandler
    */
-  constructor(entitlements, userData, purchaseData, completeHandler) {
+  constructor(entitlements, userData, purchaseDataList, completeHandler) {
     /** @const {!Entitlements} */
     this.entitlements = entitlements;
     /** @const {!UserData} */
     this.userData = userData;
+    /** @const {!Array<!PurchaseData>} */
+    this.purchaseDataList = purchaseDataList;
+    // TODO(dvoytenko): deprecate.
     /** @const {!PurchaseData} */
-    this.purchaseData = purchaseData;
+    this.purchaseData = purchaseDataList[0];
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3433,7 +3436,7 @@ class DeferredAccountCreationResponse {
     return new DeferredAccountCreationResponse(
         this.entitlements,
         this.userData,
-        this.purchaseData,
+        this.purchaseDataList,
         this.completeHandler_);
   }
 
@@ -3444,6 +3447,8 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
+      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
   }
@@ -3993,7 +3998,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 01.22.33',
+    '_client': 'SwG 0.1.22.34',
   });
 }
 
@@ -4035,6 +4040,9 @@ const AnalyticsEvent = {
   UNKNOWN: 0,
   IMPRESSION_PAYWALL: 1,
   ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
 };
 
 class AnalyticsContext {
@@ -4066,6 +4074,9 @@ class AnalyticsContext {
 
     /** @private {?boolean} */
     this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
   }
 
   /**
@@ -4181,6 +4192,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {!Array<string>}
+   */
+  getLabel() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabel(value) {
+    this.label_ = value;
+  }
+
+  /**
    * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
    */
   toArray() {
@@ -4194,6 +4219,7 @@ class AnalyticsContext {
       this.utmMedium_,  // field 6 - utm_medium
       this.sku_,  // field 7 - sku
       this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
     ];
   }
 }
@@ -4267,6 +4293,14 @@ class AnalyticsRequest {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * The Flow goes like this:
+ * a. Start Payments
+ * b. Complete Payments
+ * c. Create Account
+ * d. Acknowledge Account
+ *
+ * In other words, Flow = Payments + Account Creation.
  */
 
 /**
@@ -4319,6 +4353,7 @@ class PayStartFlow {
       },
       'i': {
         'startTimeMs': Date.now(),
+        'googleTransactionId': this.analyticsService_.getTransactionId(),
       },
     }, {
       forceRedirect:
@@ -4379,6 +4414,9 @@ class PayCompleteFlow {
 
     /** @private {?Promise} */
     this.readyPromise_ = null;
+
+    /** @private @const {*} */
+    this.analyticsService_ = deps.analytics();
   }
 
   /**
@@ -4387,6 +4425,7 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   start(response) {
+    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_PAYMENT_COMPLETE);
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
     const args = {
@@ -4425,6 +4464,7 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   complete() {
+    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
       this.activityIframeView_.message({'complete': true});
@@ -4432,6 +4472,8 @@ class PayCompleteFlow {
     return this.activityIframeView_.acceptResult().catch(() => {
       // Ignore errors.
     }).then(() => {
+      this.analyticsService_.logEvent(
+          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED);
       this.deps_.entitlementsManager().setToastShown(true);
     });
   }
@@ -4445,8 +4487,12 @@ class PayCompleteFlow {
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
-  return payPromise.then(data =>
-      parseSubscriptionResponse(deps, data, completeHandler));
+  return payPromise.then(data => {
+    if (typeof data == 'object' && data['googleTransactionId']) {
+      deps.analytics().setTransactionId(data['googleTransactionId']);
+    }
+    return parseSubscriptionResponse(deps, data, completeHandler);
+  });
 }
 
 
@@ -4648,9 +4694,16 @@ class DeferredAccountFlow {
     const userData = new UserData(
         idToken,
         /** @type {!Object} */ (new JwtHelper().decode(idToken)));
-    const purchaseData = new PurchaseData(
-        data['purchaseData']['data'],
-        data['purchaseData']['signature']);
+    const purchaseDataList =
+        data['purchaseDataList'] ?
+        data['purchaseDataList'].map(pd =>
+            new PurchaseData(pd['data'], pd['signature'])) :
+        [
+          // TODO(dvoytenko): cleanup/deprecate.
+          new PurchaseData(
+              data['purchaseData']['data'],
+              data['purchaseData']['signature']),
+        ];
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -4660,13 +4713,13 @@ class DeferredAccountFlow {
     const response = new DeferredAccountCreationResponse(
         entitlements,
         userData,
-        purchaseData,
+        purchaseDataList,
         completeHandler);
 
     // Start the "sync" flow.
     creatingFlow.start(new SubscribeResponse(
         '',  // raw field doesn't matter in this case
-        purchaseData,
+        purchaseDataList[0],
         userData,
         entitlements,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
@@ -7427,7 +7480,7 @@ Constants.IFRAME_STYLE = `
     left: 0;
 }
 @media (min-width: 480px) {
-  .${Constants.IFRAME_STYLE_CLASS}{
+  .${Constants.IFRAME_STYLE_CLASS} {
     width: 480px !important;
     left: -240px !important;
     margin-left: calc(100vw - 100vw / 2) !important;
@@ -7460,7 +7513,7 @@ Constants.IFRAME_STYLE_CENTER = `
   left: -240px;
   letter-spacing: normal;
   margin-left: calc(100vw - 100vw / 2) !important;
-  max-height: 600px;
+  max-height: 90%;
   overflow: visible;
   position: absolute;
   top: 100%;
@@ -7468,6 +7521,11 @@ Constants.IFRAME_STYLE_CENTER = `
   width: 480px;
   z-index: ${MAX_Z_INDEX};
   -webkit-appearance: none;
+}
+@media (min-height: 667px) {
+  .${Constants.IFRAME_STYLE_CENTER_CLASS} {
+    max-height: 600px;
+  }
 }
 .${Constants.IFRAME_ACTIVE_CONTAINER_CLASS} {
   top: 50%;
@@ -8005,13 +8063,17 @@ class PostMessageService {
  *
  * @enum {number}
  */
-// Next Id: 9
+// Next Id: 10
 const PostMessageEventType = {
   IS_READY_TO_PAY: 6,
   LOG_BUTTON_CLICK: 5,
   LOG_IS_READY_TO_PAY_API: 0,
   LOG_LOAD_PAYMENT_DATA_API: 1,
   LOG_RENDER_BUTTON: 2,
+  LOG_INITIALIZE_PAYMENTS_CLIENT: 9,
+  LOG_PAY_FRAME_REQUESTED: 15,
+  LOG_PAY_FRAME_LOADED: 16,
+  LOG_PAY_FRAME_LOADED_WITH_ALL_JS: 17,
   LOG_INLINE_PAYMENT_WIDGET_INITIALIZE: 4,
   LOG_INLINE_PAYMENT_WIDGET_SUBMIT: 3,
   LOG_INLINE_PAYMENT_WIDGET_DISPLAYED: 7,
@@ -8060,6 +8122,12 @@ let postMessageService = null;
 /** @type {?string} */
 let environment = null;
 
+/** @type {?string} */
+let googleTransactionId = null;
+
+/** @type {number} */
+let originTimeMs = Date.now();
+
 /** @type {?BuyFlowActivityMode} */
 let buyFlowActivityMode = null;
 
@@ -8073,30 +8141,52 @@ class PayFrameHelper {
   /**
    * Creates a hidden iframe for logging and appends it to the top level
    * document.
-   *
-   * @param {string} env
-   * @param {string} googleTransactionId
-   * @param {string|null=} merchantId
    */
-  static load(env, googleTransactionId, merchantId) {
+  static load() {
     if (iframe) {
       return;
     }
-    environment = env;
+    const initOptions =
+        /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
+    environment = initOptions.environment || Constants.Environment.PRODUCTION;
     iframe = document.createElement('iframe');
     // Pass in origin because document.referrer inside iframe is empty in
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin, Date.now(), googleTransactionId,
-            merchantId);
+            window.location.origin,
+            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
+      'clientLatencyStartMs': Date.now(),
+    });
     iframe.height = '0';
     iframe.width = '0';
     iframe.style.display = 'none';
     iframe.style.visibility = 'hidden';
     iframe.onload = function() {
+      PayFrameHelper.postMessage({
+        'eventType': PostMessageEventType.LOG_PAY_FRAME_LOADED_WITH_ALL_JS,
+        'clientLatencyStartMs': Date.now(),
+      });
       PayFrameHelper.iframeLoaded();
     };
+    // If the body is already loaded, just append the iframe. Otherwise, we wait
+    // until the DOM has loaded to append the iframe, otherwise document.body is
+    // null.
+    if (document.body) {
+      PayFrameHelper.initialize_();
+    } else {
+      document.addEventListener(
+          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+    }
+  }
+
+  /**
+   * Appends the iframe to the DOM and updates the post message service.
+   * @private
+   */
+  static initialize_() {
     document.body.appendChild(iframe);
     postMessageService = new PostMessageService(iframe.contentWindow);
   }
@@ -8160,6 +8250,8 @@ class PayFrameHelper {
     const postMessageData = Object.assign(
         {
           'buyFlowActivityMode': buyFlowActivityMode,
+          'googleTransactionId': googleTransactionId,
+          'originTimeMs': originTimeMs,
         },
         data);
     postMessageService.postMessage(
@@ -8167,13 +8259,30 @@ class PayFrameHelper {
   }
 
   /**
-   *
    * Sets the activity mode.
    *
    * @param {!BuyFlowActivityMode} mode
    */
   static setBuyFlowActivityMode(mode) {
     buyFlowActivityMode = mode;
+  }
+
+  /**
+   * Sets the google transaction id.
+   *
+   * @param {string} txnId
+   */
+  static setGoogleTransactionId(txnId) {
+    googleTransactionId = txnId;
+  }
+
+  /**
+   * Sets the originTimeMs. To be used only for tests.
+   *
+   * @param {number} originTimeMsTemp
+   */
+  static setOriginTimeMs(originTimeMsTemp) {
+    originTimeMs = originTimeMsTemp;
   }
 
   /**
@@ -8212,6 +8321,7 @@ class PayFrameHelper {
     buffer.forEach(function(data) {
       PayFrameHelper.postMessage(data);
     });
+    buffer.length = 0;
   }
 
   /**
@@ -8253,22 +8363,21 @@ class PayFrameHelper {
    * Returns the payframe URL based on the environment.
    *
    * @param {string} origin The origin that is opening the payframe.
-   * @param {number} initializeTimeMs The time the payframe was initialized.
-   * @param {string} googleTransactionId The transaction id for
-   * this payments client.
    * @param {string|null=} merchantId The merchant id.
    * @return {string}
    * @private
    */
-  static getIframeUrl_(
-      origin, initializeTimeMs, googleTransactionId, merchantId) {
+  static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
     const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
              '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&t=${initializeTimeMs}&gTxnId=%{googleTransactionId}&mid=%{merchantId}`;
+             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
+
+// Start loading pay frame early
+PayFrameHelper.load();
 
 /**
  * @license
@@ -8761,6 +8870,10 @@ class PaymentsWebActivityDelegate {
     // Only verified origins are allowed.
     this.callback_(port.acceptResult().then(
         (result) => {
+          // Origin must always match: popup, iframe or redirect.
+          if (result.origin != this.getOrigin_()) {
+            throw new Error('channel mismatch');
+          }
           const data = /** @type {!PaymentData} */ (result.data);
           if (data['redirectEncryptedCallbackData']) {
             PayFrameHelper.setBuyFlowActivityMode(
@@ -8773,6 +8886,10 @@ class PaymentsWebActivityDelegate {
                   delete clone['redirectEncryptedCallbackData'];
                   return Object.assign(clone, decrypedJson);
                 });
+          }
+          // Unencrypted data supplied: must be a verified and secure channel.
+          if (!result.originVerified || !result.secureChannel) {
+            throw new Error('channel mismatch');
           }
           return data;
         },
@@ -9680,10 +9797,8 @@ class PaymentsAsyncClient {
 
     /** @private @const {!PaymentsClientDelegateInterface} */
     this.webActivityDelegate_ = new PaymentsWebActivityDelegate(
-        this.environment_,
-        PaymentsAsyncClient.googleTransactionId_,
-        opt_useIframe,
-        opt_activities,
+        this.environment_, PaymentsAsyncClient.googleTransactionId_,
+        opt_useIframe, opt_activities,
         paymentOptions['i'] && paymentOptions['i']['redirectKey']);
 
     const paymentRequestSupported = chromeSupportsPaymentRequest();
@@ -9699,10 +9814,6 @@ class PaymentsAsyncClient {
     this.webActivityDelegate_.onResult(this.onResult_.bind(this));
     this.delegate_.onResult(this.onResult_.bind(this));
 
-    PayFrameHelper.load(
-        this.environment_, PaymentsAsyncClient.googleTransactionId_,
-        this.paymentOptions_.merchantInfo &&
-            this.paymentOptions_.merchantInfo.merchantId);
     // If web delegate is used anyway then this is overridden in the web
     // activity delegate when load payment data is called.
     if (chromeSupportsPaymentHandler()) {
@@ -9711,6 +9822,13 @@ class PaymentsAsyncClient {
     } else if (paymentRequestSupported) {
       PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.ANDROID_NATIVE);
     }
+
+    PayFrameHelper.setGoogleTransactionId(
+        PaymentsAsyncClient.googleTransactionId_);
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_INITIALIZE_PAYMENTS_CLIENT,
+      'clientLatencyStartMs': Date.now(),
+    });
 
     window.addEventListener(
         'message', event => this.handleMessageEvent_(event));
@@ -10122,6 +10240,21 @@ function setExperiment(win, experimentId, on) {
   getExperiments(win)[experimentId] = on;
 }
 
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -10139,6 +10272,7 @@ function setExperiment(win, experimentId, on) {
  */
 
 const PAY_REQUEST_ID = 'swg-pay';
+const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
 
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
@@ -10247,7 +10381,7 @@ class PayClientBindingSwg {
   /** @override */
   start(paymentRequest, options) {
     const opener = this.activityPorts_.open(
-        PAY_REQUEST_ID,
+        GPAY_ACTIVITY_REQUEST$1,
         payUrl(),
         options.forceRedirect ? '_top' : '_blank',
         feArgs(paymentRequest),
@@ -10257,10 +10391,12 @@ class PayClientBindingSwg {
 
   /** @override */
   onResponse(callback) {
-    this.activityPorts_.onResult(PAY_REQUEST_ID, port => {
+    const responseCallback = port => {
       this.dialogManager_.popupClosed();
       callback(this.validatePayResponse_(port));
-    });
+    };
+    this.activityPorts_.onResult(GPAY_ACTIVITY_REQUEST$1, responseCallback);
+    this.activityPorts_.onResult(PAY_REQUEST_ID, responseCallback);
   }
 
   /**
@@ -11269,54 +11405,6 @@ function uuidFast() {
  * limitations under the License.
  */
 
-class TransactionId {
-  /**
-   * @param {*} deps
-   */
-  constructor(deps) {
-    /** @private @const {*} */
-    this.storage_ = deps.storage();
-  }
-
-  /**
-   * Returns the current transaction id
-   *  @return {!Promise<string>}
-   */
-  get() {
-    return this.storage_.get('transaction_id').then(id => {
-      if (!id) {
-        id = uuidFast();
-        this.storage_.set('transaction_id', id);
-      }
-      return id;
-    });
-  }
-
-  /**
-   * Resets the transaction id
-   * @return {!Promise}
-   */
-  reset() {
-    return this.storage_.remove('transaction_id');
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string>} */
 const iframeStyles = {
   display: 'none',
@@ -11357,16 +11445,27 @@ class AnalyticsService {
      */
     this.context_ = new AnalyticsContext();
 
-    /**
-     * @private @const {!TransactionId}
-     */
-    this.xid_ = new TransactionId(deps);
+    this.context_.setTransactionId(uuidFast());
 
     /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
     this.serviceReady_ = null;
 
     /** @private {?Promise} */
     this.lastAction_ = null;
+  }
+
+  /**
+   * @param {string} transactionId
+   */
+  setTransactionId(transactionId) {
+    this.context_.setTransactionId(transactionId);
+  }
+
+  /**
+   * @return {string}
+   */
+  getTransactionId() {
+    return /** @type {string} */ (this.context_.getTransactionId());
   }
 
   /**
@@ -11400,7 +11499,7 @@ class AnalyticsService {
   }
 
   /**
-   * @return {!Promise}
+   * @private
    */
   setContext_() {
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -11417,9 +11516,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    return this.xid_.get().then(id => {
-      this.context_.setTransactionId(id);
-    });
+    this.context_.setLabel(getOnExperiments(this.doc_.getWin()));
   }
 
   /**
