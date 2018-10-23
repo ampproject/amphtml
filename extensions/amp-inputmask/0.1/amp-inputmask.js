@@ -30,7 +30,7 @@ export class AmpInputmaskService {
    */
   constructor(ampdoc) {
     user().assert(
-        isExperimentOn(this.ampdoc.win, 'amp-inputmask'),
+        isExperimentOn(ampdoc.win, 'amp-inputmask'),
         'Experiment amp-inputmask is disabled');
 
     this.ampdoc = ampdoc;
