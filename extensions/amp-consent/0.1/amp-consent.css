@@ -24,6 +24,12 @@ amp-consent {
   z-index: 1000;
   width: 100%;
   height: 100vh;
+  /* 
+    This transform will: 
+    * Push the consent to the bottom of the page (100vh),
+    * Raise it up to our desired height (-30px),
+    * Raise it up by any padding applied to the element (- calc(100% - 100vh))
+   */
   transform: translate3d(0px, calc(100vh - 30px - calc(100% - 100vh)), 0px);
 }
 
@@ -49,7 +55,7 @@ amp-consent.loading {
 
 amp-consent.consent-iframe-active {
   transition: transform 0.5s;
-  transform: translate3d(0px, calc(70vh), 0px);
+  transform: translate3d(0px, 70vh, 0px);
 }
 
 .i-amphtml-consent-placeholder {
@@ -73,6 +79,8 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
   transform: translate3d(0px, 0px, 0px);
 }
 
-amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill {
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill, 
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen-exit > .i-amphtml-consent-fill {
   height: 100vh;
 }
+

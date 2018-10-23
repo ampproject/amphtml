@@ -54,7 +54,7 @@ export const ACTION_TYPE = {
   REJECT: 'reject',
   DISMISS: 'dismiss',
   ENTER_FULLSCREEN: 'enter_fullscreen',
-  EXIT_FULLSCREEN: 'exit_fullscreen'
+  EXIT_FULLSCREEN: 'exit_fullscreen',
 };
 
 
@@ -179,14 +179,14 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept', 
-      () => this.handleAction_(ACTION_TYPE.ACCEPT));
-    this.registerAction('reject', 
-      () => this.handleAction_(ACTION_TYPE.REJECT));
+    this.registerAction('accept',
+        () => this.handleAction_(ACTION_TYPE.ACCEPT));
+    this.registerAction('reject',
+        () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
-      () => this.handleAction_(ACTION_TYPE.DISMISS));
+        () => this.handleAction_(ACTION_TYPE.DISMISS));
     this.registerAction('dismiss',
-      () => this.handleAction_(ACTION_TYPE.ENTER_FULLSCREEN));
+        () => this.handleAction_(ACTION_TYPE.ENTER_FULLSCREEN));
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
@@ -321,14 +321,14 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
-    
+
     if (action == ACTION_TYPE.ENTER_FULLSCREEN) {
       this.vsync_.mutate(() => {
         this.consentUI_[this.currentDisplayInstance_].enterFullscreen();
       });
       return;
-    } 
-    
+    }
+
     if (action == ACTION_TYPE.EXIT_FULLSCREEN) {
       this.vsync_.mutate(() => {
         this.consentUI_[this.currentDisplayInstance_].exitFullscreen();
@@ -337,7 +337,7 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
 
-    
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -350,8 +350,8 @@ export class AmpConsent extends AMP.BaseElement {
       // dismiss
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED);
-    }     
-    
+    }
+
     // Hide current dialog
     this.hide_();
   }

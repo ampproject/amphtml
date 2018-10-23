@@ -146,7 +146,7 @@ export class ConsentUI {
         this.baseInstance_.scheduleLayout(this.ui_);
       }
     }
-    
+
     this.isVisible_ = true;
   }
 
@@ -194,11 +194,22 @@ export class ConsentUI {
     if (!this.ui_ || !this.isVisible_ || !this.isFullscreen) {
       return;
     }
-    
+
     const {classList} = this.parent_;
+    classList.add('i-amphtml-consent-ui-fullscreen-exit');
     classList.remove('i-amphtml-consent-ui-fullscreen');
 
     this.isFullscreen = false;
+
+    // Set a timeout to remove the fullscreen exit class
+    // This timeout should match our CSS animation speed.
+    const removeExitFullscreen = () => {
+      if (this.isFullscreen === false) {
+        classList.remove('i-amphtml-consent-ui-fullscreen-exit');
+      }
+      this.parent_.removeEventListener('transitionend', removeExitFullscreen);
+    };
+    this.parent_.addEventListener('transitionend', removeExitFullscreen);
   }
 
   /**

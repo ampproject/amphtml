@@ -1,10 +1,20 @@
 <html>
-  afdsafdsfqewrfdsdasvcx cvfewsadf
-  <button id='a'>Accept</button>
-  <button id='r'>Reject</button>
-  <button id='d'>Dismiss</button>
-  <button id='f'>Learn More (Fullscreen)</button>
-  <button id='ef'>Go Back (Exit Fullscreen)</button>
+  <div id="decision-state">
+    <h1>Hello! I am a consent Iframe.</h1> 
+    <h3>I am in `test/manual/diy-consent.html`</h3>
+    <button id='a'>Accept</button>
+    <button id='r'>Reject</button>
+    <button id='d'>Dismiss</button>
+    <button id='f'>Learn More</button>
+  </div>
+  <div id="learn-more-state">
+    <p>
+      I am glad you decided to learn more! Learning is great!
+    </p>
+    <div>
+      <button id='ef'>Go Back</button>
+    </div>
+  </div>
   <script type="text/javascript">
 
     // Default values for non-3P iframe.
@@ -42,6 +52,16 @@ function registerClickConsentResponse(querySelector, action) {
   };
 }
 
+function showDecisionState() {
+  document.querySelector('#decision-state').style = 'display: block';
+  document.querySelector('#learn-more-state').style = 'display: none';
+}
+
+function showLearnMoreState() {
+  document.querySelector('#decision-state').style = 'display: none';
+  document.querySelector('#learn-more-state').style = 'display: block';
+}
+
 const consentResponseObjects = [
   {
     querySelector: '#a',
@@ -57,11 +77,17 @@ const consentResponseObjects = [
   },
   {
     querySelector: '#f',
-    action: 'enter_fullscreen'
+    action: 'enter_fullscreen',
+    onclick: () => {
+      showLearnMoreState();
+    }
   },
   {
     querySelector: '#ef',
-      action: 'exit_fullscreen'
+    action: 'exit_fullscreen',
+    onclick: () => {
+      showDecisionState();
+    }
   }
 ]
 consentResponseObjects.forEach(consentResponse => {
@@ -69,6 +95,16 @@ consentResponseObjects.forEach(consentResponse => {
     consentResponse.querySelector,
     consentResponse.action
   );
+
+  if (consentResponse.onclick) {
+    document
+      .querySelector(consentResponse.querySelector)
+      .addEventListener('click', () => {
+        consentResponse.onclick();
+      });
+  }
 });
+
+showDecisionState();
 </script>
 </html>
