@@ -177,7 +177,7 @@ export class FixedLayer {
   }
 
   /**
-   * Clears the mutation observer and it's pass queue.
+   * Clears the mutation observer and its pass queue.
    */
   clearMutationObserver_() {
     this.updatePass_.cancel();
@@ -188,7 +188,7 @@ export class FixedLayer {
   }
 
   /**
-   * @return {?MutationObserver}
+   * @return {!MutationObserver}
    */
   initMutationObserver_() {
     if (this.mutationObserver_) {
@@ -203,6 +203,7 @@ export class FixedLayer {
       for (let i = 0; i < mutations.length; i++) {
         const mutation = mutations[i];
         if (mutation.attributeName === 'hidden') {
+          // Wait one animation frame so that other mutations may arrive.
           this.updatePass_.schedule(16);
           return;
         }
