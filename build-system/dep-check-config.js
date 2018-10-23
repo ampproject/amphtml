@@ -321,6 +321,8 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/object-assign.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
+      'src/polyfills.js->src/polyfills/array-from.js',
+      'src/polyfills.js->src/polyfills/keyboardevent-key.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/service/extensions-impl.js->src/polyfills/custom-elements.js',
       'src/service/extensions-impl.js->src/polyfills/document-contains.js',
