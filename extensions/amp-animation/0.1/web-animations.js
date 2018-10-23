@@ -233,7 +233,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline);
         player.play();
-        this.players_.push(player);
+        this.players_ = player;
       });
     });
   }
