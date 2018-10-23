@@ -830,14 +830,16 @@ export class AmpStory extends AMP.BaseElement {
           () => this.onAccessApplyAuthorizations_());
 
       const firstPage = this.pages_[0].element;
+
       // First amp-story-page can't be paywall protected.
-      // Throws an error during development, but just ignore the amp-access rule
-      // in production.
-      user().assert(
-          !(firstPage.hasAttribute('amp-access') ||
-              firstPage.hasAttribute('amp-access-hide')),
-          'First amp-story-page cannot have amp-access or amp-access-hide ' +
-              'attributes');
+      // Removes the access attributes, and throws an error during development.
+      if (firstPage.hasAttribute('amp-access') ||
+          firstPage.hasAttribute('amp-access-hide')) {
+        firstPage.removeAttribute('amp-access');
+        firstPage.removeAttribute('amp-access-hide');
+        user().error(TAG, 'First amp-story-page cannot have amp-access ' +
+            'or amp-access-hide attributes');
+      }
     });
   }
 
@@ -951,21 +953,18 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // First page can't be paywall protected.
-    const bypassPaywall = pageIndex === 0;
-
     // If the next page might be paywall protected, and the access
     // authorizations did not resolve yet, wait before navigating.
     // TODO(gmajoulet): implement a loading state.
     if (targetPage.element.hasAttribute('amp-access') &&
-        !this.areAccessAuthorizationsCompleted_ && !bypassPaywall) {
+        !this.areAccessAuthorizationsCompleted_) {
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
 
     // If the next page is paywall protected, display the access UI and wait for
     // the document to be reauthorized.
-    if (targetPage.element.hasAttribute('amp-access-hide') && !bypassPaywall) {
+    if (targetPage.element.hasAttribute('amp-access-hide')) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
