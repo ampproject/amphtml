@@ -4,6 +4,7 @@
   <button id='r'>Reject</button>
   <button id='d'>Dismiss</button>
   <button id='f'>Learn More (Fullscreen)</button>
+  <button id='ef'>Go Back (Exit Fullscreen)</button>
   <script type="text/javascript">
 
     // Default values for non-3P iframe.
@@ -57,6 +58,10 @@ const consentResponseObjects = [
   {
     querySelector: '#f',
     action: 'enter_fullscreen'
+  },
+  {
+    querySelector: '#ef',
+      action: 'exit_fullscreen'
   }
 ]
 consentResponseObjects.forEach(consentResponse => {

@@ -196,7 +196,7 @@ export class ConsentUI {
     }
     
     const {classList} = this.parent_;
-    classList.add('i-amphtml-consent-ui-fullscreen');
+    classList.remove('i-amphtml-consent-ui-fullscreen');
 
     this.isFullscreen = false;
   }
