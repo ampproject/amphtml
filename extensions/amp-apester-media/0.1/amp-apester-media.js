@@ -293,13 +293,13 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} publisher
-   * @return {!Element}
+   * @param {JsonObject} publisher
+   * @return {Element}
    */
   constructAmpPixel_(publisher) {
-    if (publisher && publisher.trackingPixel) {
-      const {publisherId, trackingPixel} = publisher;
-      const {affiliateId} = trackingPixel;
+    if (publisher && publisher['trackingPixel']) {
+      const affiliateId = publisher['trackingPixel']['affiliateId'];
+      const publisherId = publisher['publisherId'];
       if (affiliateId) {
         const pixelElement =
           this.element.ownerDocument.createElement('amp-pixel');
@@ -347,7 +347,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const overflow = this.constructOverflow_();
                 this.element.appendChild(overflow);
                 this.element.appendChild(iframe);
-                const ampPixel = this.constructAmpPixel_(media.publisher);
+                const ampPixel = this.constructAmpPixel_(media['publisher']);
                 if (ampPixel) {
                   this.element.appendChild(ampPixel);
                 }
