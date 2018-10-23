@@ -16,13 +16,13 @@
 
 export const TEAANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   vars: {
-    user_unique_id: '${clientId(__tea_sdk__user_unique_id)}',
+    userUniqueId: '${clientId(__tea_sdk__user_unique_id)}',
     debug: 0,
   },
   requests: {
     domain: 'https://${channel}/v1/amp',
     commonParams:
-        'user.user_unique_id=${user_unique_id}' +
+        'user.user_unique_id=${userUniqueId}' +
         '&header.app_id=${app_id}' +
         '&header.language=${browserLanguage}' +
         '&header.screen_height=${screenHeight}' +
