@@ -175,10 +175,6 @@ export class AmpForm {
     }
     this.form_.classList.add('i-amphtml-form');
 
-    const submitButtons = this.form_.querySelectorAll('[type="submit"]');
-    /** @const @private {!Array<!Element>} */
-    this.submitButtons_ = toArray(submitButtons);
-
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
 
@@ -199,6 +195,7 @@ export class AmpForm {
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
+    this.installInputMasking_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -254,7 +251,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = createFormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.win_, this.form_);
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach(name => {
           body.delete(name);
@@ -366,6 +363,15 @@ export class AmpForm {
     this.form_.addEventListener('input', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
+    });
+  }
+
+  /** @private */
+  installInputMasking_() {
+    Services.inputmaskServiceForDocOrNull(this.form_).then(inputmaskService => {
+      if (inputmaskService) {
+        inputmaskService.install();
+      }
     });
   }
 
@@ -903,13 +909,6 @@ export class AmpForm {
     this.form_.classList.add(`amp-form-${newState}`);
     this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
-    this.submitButtons_.forEach(button => {
-      if (newState == FormState.SUBMITTING) {
-        button.setAttribute('disabled', '');
-      } else {
-        button.removeAttribute('disabled');
-      }
-    });
   }
 
   /**

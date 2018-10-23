@@ -27,16 +27,17 @@ const expressResMock = {
 describe('Tests for the dev dashboard', () => {
 
   it('should bundle', () => {
-    return bundler.bundleComponent(join(__dirname, '../components/proxy-form.js'))
+    return bundler.bundleComponent(join(__dirname, '../components/main.js'))
         .then(bundle => {
           assert.ok(bundle);
         });
   });
 
   it('should be able to return HTML', () => {
-    return devDashboard.serveIndex(undefined, expressResMock)
-        .then(renderedHtml => {
-          assert.ok(renderedHtml);
-        });
+    return devDashboard.serveIndex({
+      root: __dirname,
+    })({url: '/'}, expressResMock).then(renderedHtml => {
+      assert.ok(renderedHtml);
+    });
   });
 });

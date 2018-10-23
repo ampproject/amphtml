@@ -4115,7 +4115,8 @@ tags: {
   attrs: { name: "for" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
-# 4.10.5 The input element
+# 4.10.5 The input element.
+# The input tag is also defined by extensions/amp-inputmask/validator-amp-inputmask.protoascii
 tags: {
   html_format: AMP
   html_format: AMP4ADS

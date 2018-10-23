@@ -290,6 +290,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -312,6 +313,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
+      '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -351,6 +353,7 @@ const forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/recaptcha.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
