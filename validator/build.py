@@ -172,7 +172,7 @@ def CheckValidatorPbGo(out_dir):
     subprocess.check_call(
         ['diff', '-u', 'validator.pb.go', '%s/validator.pb.go' % out_dir])
   except subprocess.CalledProcessError:
-    logging.info('Please run `protoc validator/validator.proto '
+    logging.info('Please run `cd validator && protoc validator.proto '
                  '--go_out=paths=source_relative:.`.')
     raise
   logging.info('... done')
