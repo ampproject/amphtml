@@ -199,10 +199,9 @@ export class Log {
   /**
    * Reports a fine-grained message.
    * @param {string} tag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    */
-  fine(tag, opt_message, var_args) {
+  fine(tag, var_args) {
     if (this.getLevel_() >= LogLevel.FINE) {
       this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
     }
@@ -211,10 +210,9 @@ export class Log {
   /**
    * Reports a informational message.
    * @param {string} tag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    */
-  info(tag, opt_message, var_args) {
+  info(tag, var_args) {
     if (this.getLevel_() >= LogLevel.INFO) {
       this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
     }
@@ -223,10 +221,9 @@ export class Log {
   /**
    * Reports a warning message.
    * @param {string} tag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    */
-  warn(tag, opt_message, var_args) {
+  warn(tag, var_args) {
     if (this.getLevel_() >= LogLevel.WARN) {
       this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
     }
@@ -236,12 +233,11 @@ export class Log {
    * Reports an error message. If the logging is disabled, the error is rethrown
    * asynchronously.
    * @param {string} tag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    * @return {!Error|undefined}
    * @private
    */
-  error_(tag, opt_message, var_args) {
+  error_(tag, var_args) {
     if (this.getLevel_() >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
@@ -255,10 +251,9 @@ export class Log {
   /**
    * Reports an error message.
    * @param {string} tag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    */
-  error(tag, opt_message, var_args) {
+  error(tag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
@@ -271,10 +266,9 @@ export class Log {
    * Reports an error message and marks with an expected property. If the
    * logging is disabled, the error is rethrown asynchronously.
    * @param {string} unusedTag
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    */
-  expectedError(unusedTag, opt_message, var_args) {
+  expectedError(unusedTag, var_args) {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
@@ -285,11 +279,10 @@ export class Log {
 
   /**
    * Creates an error object.
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    * @return {!Error}
    */
-  createError(opt_message, var_args) {
+  createError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
     return error;
@@ -297,11 +290,10 @@ export class Log {
 
   /**
    * Creates an error object with its expected property set to true.
-   * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} var_args
    * @return {!Error}
    */
-  createExpectedError(opt_message, var_args) {
+  createExpectedError(var_args) {
     const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
     error.expected = true;
@@ -366,12 +358,11 @@ export class Log {
    *
    * @param {*} shouldBeElement
    * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
    * eslint "google-camelcase/google-camelcase": 2
    */
-  assertElement(shouldBeElement, opt_message, var_args) {
+  assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
         shouldBeElement);
@@ -386,11 +377,10 @@ export class Log {
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {string} The string value. Can be an empty string.
    * eslint "google-camelcase/google-camelcase": 2
    */
-  assertString(shouldBeString, opt_message, var_args) {
+  assertString(shouldBeString, opt_message) {
     this.assert(typeof shouldBeString == 'string',
         (opt_message || 'String expected') + ': %s', shouldBeString);
     return /** @type {string} */ (shouldBeString);
@@ -404,11 +394,10 @@ export class Log {
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {number} The number value. The allowed values include `0`
    *   and `NaN`.
    */
-  assertNumber(shouldBeNumber, opt_message, var_args) {
+  assertNumber(shouldBeNumber, opt_message) {
     this.assert(typeof shouldBeNumber == 'number',
         (opt_message || 'Number expected') + ': %s', shouldBeNumber);
     return /** @type {number} */ (shouldBeNumber);
@@ -421,10 +410,9 @@ export class Log {
    *
    * @param {*} shouldBeBoolean
    * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {boolean} The boolean value.
    */
-  assertBoolean(shouldBeBoolean, opt_message, var_args) {
+  assertBoolean(shouldBeBoolean, opt_message) {
     this.assert(!!shouldBeBoolean === shouldBeBoolean,
         (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
     return /** @type {boolean} */ (shouldBeBoolean);

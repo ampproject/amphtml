@@ -29,7 +29,7 @@ let LogMethodMetadataDef;
  * @type {!Array<LogMethodMetadataDef>}
  */
 const transformableMethods = [
-  {name: 'assert', variadic: false, startPos: 1},
+  {name: 'assert', variadic: true, startPos: 1},
   {name: 'assertString', variadic: false, startPos: 1},
   {name: 'assertNumber', variadic: false, startPos: 1},
   {name: 'assertBoolean', variadic: false, startPos: 1},
@@ -76,7 +76,7 @@ module.exports = function(context) {
   return {
     [selector]: function(node) {
       // Don't evaluate or transform log.js
-      if (context.getFileName() === 'src/log.js') {
+      if (context.getFilename().endsWith('src/log.js')) {
         return;
       }
       // Make sure that callee is a CallExpression as well.
@@ -135,8 +135,10 @@ module.exports = function(context) {
             if (!hasStringInArg) {
               return;
             }
+
             let argFixer = new ArgFixer(tokens).parse();
-            return fixer.replaceText(argToEval, argFixer.toString());
+            fixer.replaceTextRange([argToEval.start, context.getLastToken(node).end] ,
+                argFixer.getSanitizedArg() + argFixer.getRefsAsArgumentsString());
           }
         });
       }
@@ -226,7 +228,7 @@ class ArgFixer {
           continue;
         }
 
-        // The start of an interpolation segment. It meanswe need to start
+        // The start of an interpolation segment. It means we need to start
         // collecting a new ref.
         if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
           inTemplateEval = true;
@@ -261,7 +263,8 @@ class ArgFixer {
     //const next = this.cur(1);
     return (this.cur().type === 'Identifier'||
             (this.cur().type === 'Keyword' && this.cur().value === 'this')) &&
-      (this.cursor === 0 || (this.cur(-1).type === 'Punctuator' && this.cur(-1).value === '+'));
+      (this.cursor === 0 ||
+       (this.cur(-1).type === 'Punctuator' && this.cur(-1).value === '+'));
   }
 
   startNewRef() {
