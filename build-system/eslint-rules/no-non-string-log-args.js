@@ -137,8 +137,13 @@ module.exports = function(context) {
             }
 
             let argFixer = new ArgFixer(tokens).parse();
-            return fixer.replaceTextRange([argToEval.start, context.getLastToken(node).end] ,
-                argFixer.getSanitizedArg() + argFixer.getRefsAsArgumentsString());
+            const tokensInExpr = context.getTokens(node);
+            const lastArgToken = tokensInExpr[tokensInExpr.length - 2];
+            return fixer.replaceTextRange(
+                [argToEval.start, lastArgToken.end],
+                argFixer.getSanitizedArg() +
+                argFixer.getRefsAsArgumentsString()
+            );
           }
         });
       }
@@ -159,7 +164,7 @@ class ArgFixer {
   }
 
   getRefsAsArgumentsString() {
-    ', ' + this.refs.join(',');
+    return ', ' + this.refs.join(',');
   }
 
   parse() {
