@@ -30,8 +30,8 @@ import {
 } from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
-  getService,
-  registerServiceBuilder,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {
   isProxyOrigin,
@@ -64,15 +64,15 @@ import {urls} from '../../../src/config';
 export class AmpRecaptchaService {
 
   /**
-   * @param {!Window} window
+   * @param {!./ampdoc-impl.AmpDoc} nodeOrDoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    
+    /** @const @private {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @const @private {!Window} */
-    this.win_ = window;
-
-    /** @const @private {!Element} */
-    this.body_ = this.win_.document.body;
+    this.win_ = this.ampdoc_.win;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -183,7 +183,7 @@ export class AmpRecaptchaService {
       ];
       this.executeMap_ = {};
 
-      this.body_.appendChild(this.iframe_);
+      this.win_.document.body.appendChild(this.iframe_);
       return loadPromise(this.iframe_);
     });
   }
@@ -212,7 +212,6 @@ export class AmpRecaptchaService {
    * @private
    */
   createRecaptchaFrame_(sitekey) {
-
     const iframe = this.win_.document.createElement('iframe');
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
@@ -311,17 +310,17 @@ export class AmpRecaptchaService {
 }
 
 /**
- * @param {!Window} win
+ * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
-export function installRecaptchaService(win) {
-  registerServiceBuilder(win, 'amp-recaptcha', AmpRecaptchaService);
+export function installRecaptchaServiceForDoc(nodeOrDoc) {
+  registerServiceBuilderForDoc(nodeOrDoc, 'amp-recaptcha', AmpRecaptchaService);
 }
 
 /**
- * @param {!Window} win
+ * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!AmpRecaptchaService}
  */
-export function recaptchaServiceFor(win) {
-  return getService(win, 'amp-recaptcha');
+export function recaptchaServiceForDoc(nodeOrDoc) {
+  return getServiceForDoc(nodeOrDoc, 'amp-recaptcha');
 }
 

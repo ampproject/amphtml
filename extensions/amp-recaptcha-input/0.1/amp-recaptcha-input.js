@@ -23,8 +23,9 @@
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
-  installRecaptchaService,
-  recaptchaServiceFor,
+  AmpRecaptchaService,
+  installRecaptchaServiceForDoc,
+  recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
@@ -47,7 +48,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
-    this.recaptchaService_ = recaptchaServiceFor(this.win);
+    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
@@ -133,6 +134,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaService(AMP.win);
+  installRecaptchaServiceForDoc(AMP.ampdoc);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });
