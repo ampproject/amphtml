@@ -42,6 +42,9 @@ import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
+/** @private @const {string} */
+const TAG = 'amp-recaptcha-input';
+
 /**
  * @fileoverview
  * Service used by AMP recaptcha elements, to utilize
@@ -73,6 +76,9 @@ export class AmpRecaptchaService {
 
     /** @const @private {!Element} */
     this.body_ = this.win_.document.body;
+    
+    /** @private {?string} */
+    this.sitekey_ = null;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -100,9 +106,17 @@ export class AmpRecaptchaService {
    * @return {Promise}
    */
   register(sitekey) {
+    if (!this.sitekey_) {
+      this.sitekey_ = sitekey;
+    } else if (this.sitekey_ !== sitekey) {
+      return Promise.reject(
+        new Error('You must supply the same sitekey to all amp-recaptcha-input elements.')
+      );
+    }
+
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.iframeLoadPromise_ = this.initialize_(sitekey);
+      this.iframeLoadPromise_ = this.initialize_();
     }
     return this.iframeLoadPromise_;
   }
@@ -135,6 +149,12 @@ export class AmpRecaptchaService {
       ));
     }
 
+    if (this.sitekey_ !== sitekey) {
+      return Promise.reject(new Error(
+        'You must supply the same sitekey that was used to register the element.'
+      ));
+    }
+
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
@@ -145,7 +165,7 @@ export class AmpRecaptchaService {
 
       const message = dict({
         'id': messageId,
-        'sitekey': sitekey,
+        'sitekey': this.sitekey_,
         'action': 'amp_' + action,
       });
 
@@ -163,11 +183,10 @@ export class AmpRecaptchaService {
   /**
    * Function to create our recaptcha boostrap iframe.
    * Should be assigned to this.iframeLoadPromise_
-   * @param {string} sitekey
    * @private
    */
-  initialize_(sitekey) {
-    return this.createRecaptchaFrame_(sitekey).then(iframe => {
+  initialize_() {
+    return this.createRecaptchaFrame_(this.sitekey_).then(iframe => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
@@ -207,11 +226,10 @@ export class AmpRecaptchaService {
   /**
    * Function to create our bootstrap iframe.
    *
-   * @param {string} sitekey
    * @return {!Promise<!Element>}
    * @private
    */
-  createRecaptchaFrame_(sitekey) {
+  createRecaptchaFrame_() {
 
     const iframe = this.win_.document.createElement('iframe');
 
@@ -220,7 +238,7 @@ export class AmpRecaptchaService {
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute('name', JSON.stringify(dict({
-        'sitekey': sitekey,
+        'sitekey': this.sitekey_,
         'sentinel': 'amp-recaptcha',
       })));
       iframe.classList.add('i-amphtml-recaptcha-iframe');

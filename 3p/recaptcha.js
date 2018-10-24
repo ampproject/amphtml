@@ -50,6 +50,9 @@ const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
+/** {?string} **/
+let sitekey = null;
+
 /**
  * Initialize 3p frame.
  */
@@ -85,7 +88,7 @@ window.initRecaptcha = function() {
       dataObject.sitekey,
       'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
-  const {sitekey} = dataObject;
+  sitekey = dataObject.sitekey;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
   loadScript(window, recaptchaApiUrl, function() {
@@ -129,7 +132,16 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  */
 function actionTypeHandler(grecaptcha, data) {
   // TODO: @torch2424: Verify message origin
-  // TODO: @torch2424: Verify sitekey is the same as original
+  
+  if (sitekey !== data.sitekey) {
+    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
+      'id': data.id,
+      'error': 'sitekey in action data must be the same sitekey, ' + 
+        'used to create the recaptcha bootstrap iframe.',
+    }));
+    return;
+  }
+
   const executePromise = grecaptcha.execute(data.sitekey, {
     action: data.action,
   });
