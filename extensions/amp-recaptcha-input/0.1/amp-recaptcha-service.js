@@ -33,13 +33,11 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {
-  isProxyOrigin,
-} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
+import {Services} from '../../../src/services';
 import {urls} from '../../../src/config';
 
 /**
@@ -258,7 +256,7 @@ export class AmpRecaptchaService {
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    if (isProxyOrigin(this.win_.location.href)) {
+    if (Services.viewerForDoc(this.ampdoc_).isProxyOrigin(this.win_.location.href)) {
       curlsSubdomainPromise = tryResolve(() => {
         return this.win_.location.hostname.split('.')[0];
       });
