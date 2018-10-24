@@ -69,7 +69,8 @@ const {green, red, cyan} = colors;
 const minifiedRuntimeTarget = 'dist/v0.js';
 const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
 const minifiedAdsTarget = 'dist/amp4ads-v0.js';
-const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
+// TODO(#18934, erwinm): temporary fix.
+//const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 
 // Unminified targets to which AMP_CONFIG must be written.
@@ -408,7 +409,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
-  // TODO(erwinm): temporarily commented out to unblock master builds.
+  // TODO(#18934, erwinm): temporarily commented out to unblock master builds.
   // theres a race condition between the read to amp.js here, and on the
   // main v0.js compile above.
   /**
@@ -990,10 +991,9 @@ function dist() {
             enableLocalTesting(minifiedShadowRuntimeTarget),
           ]).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget)
-                  .then(() => {
-                    return enableLocalTesting(minifiedShadowRuntimeTarget);
-                  })
+              // TODO(#18934, erwinm): temporary fix.
+              //return enableLocalTesting(minifiedRuntimeEsmTarget)
+              return enableLocalTesting(minifiedShadowRuntimeTarget)
                   .then(() => {
                     return enableLocalTesting(minifiedAdsTarget);
                   });
@@ -1328,7 +1328,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             } else if (destFilename === 'amp-esm.js') {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
             } else if (destFilename === 'amp4ads-v0.js') {
-              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+              return enableLocalTesting(unminifiedAdsTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
             } else if (destFilename === 'amp-shadow.js') {
