@@ -17,6 +17,9 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
+import ampToolboxCacheUrl from
+'../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
@@ -50,6 +53,9 @@ const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
+/** {?ModeDef} **/
+let mode = null;
+
 /**
  * Initialize 3p frame.
  */
@@ -79,6 +85,13 @@ window.initRecaptcha = function() {
     dev().error(TAG + ' Could not parse the window name.');
     return;
   }
+
+  // Get our mode from the iframe name attribture
+  dev().assert(
+    dataObject.mode,
+    'The mode is required for the <amp-recaptcha-input> iframe'
+  );
+  mode = dataObject.mode;
 
   // Get our sitekey from the iframe name attribute
   dev().assert(
@@ -111,7 +124,7 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
   iframeMessagingClient.setSentinel(dataObject.sentinel);
   iframeMessagingClient.registerCallback(
       'amp-recaptcha-action',
-      actionTypeHandler.bind(this, grecaptcha)
+      actionTypeHandler.bind(this, window, grecaptcha)
   );
 }
 
@@ -124,28 +137,63 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  * action {string} - action to be dispatched with grecaptcha.execute
  * id {number} - id given to us by a counter in the recaptcha service
  *
+ * @param {Window} window
  * @param {*} grecaptcha
  * @param {Object} data
  */
-function actionTypeHandler(grecaptcha, data) {
-  // TODO: @torch2424: Verify message origin
-  // TODO: @torch2424: Verify sitekey is the same as original
-  const executePromise = grecaptcha.execute(data.sitekey, {
-    action: data.action,
-  });
+function actionTypeHandler(window, grecaptcha, data) {
+  doesOriginDomainMatchIframeSrc(window, data).then(() => {
+    // TODO: @torch2424: Verify sitekey is the same as original
+    const executePromise = grecaptcha.execute(data.sitekey, {
+      action: data.action,
+    });
 
-  // .then() promise pollyfilled by recaptcha api script
-  executePromise./*OK*/then(function(token) {
-    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-token', dict({
-      'id': data.id,
-      'token': token,
-    }));
-  }, function(err) {
-    user().error(TAG, '%s', err.message);
-    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
-      'id': data.id,
-      'error': err.message,
-    }));
+    // .then() promise pollyfilled by recaptcha api script
+    executePromise./*OK*/then(function(token) {
+      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-token', dict({
+        'id': data.id,
+        'token': token,
+      }));
+    }, function(err) {
+      user().error(TAG, '%s', err.message);
+      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
+        'id': data.id,
+        'error': err.message,
+      }));
+    });
+  }).catch(error => {
+    if (error) {
+      console.log(error);
+      dev().error(error.message);
+    } else {
+      dev().error(TAG + ' Origin domain does not match Iframe src');
+    }
+  });
+}
+
+/**
+ * Function to verify our origin domain from the 
+ * parent window.
+ * @param {Window} window
+ * @param {Object} data
+ * @return {!Promise}
+ */
+function doesOriginDomainMatchIframeSrc(window, data) {
+  if (mode.localDev || mode.test) {
+    return Promise.resolve();
+  }
+
+  if (!data.origin) {
+    return Promise.reject(new Error(TAG + ' Could not retreive the origin domain'));
+  }
+
+  return ampToolboxCacheUrl.createCurlsSubdomain(data.origin).then(curlsSubdomain => {
+    const iframeSrcCurlsSubdomain = window.location.hostname.split('.')[0];
+    if (curlsSubdomain === iframeSrcCurlsSubdomain) {
+      return Promise.resolve();
+    }
+
+    return Promise.reject();
   });
 }
 
