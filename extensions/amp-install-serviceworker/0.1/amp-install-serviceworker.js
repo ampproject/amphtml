@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
@@ -296,7 +297,7 @@ function install(win, src) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
-    sendScriptAndURLToSWOnFirstVisit(registration, win);
+    sendAmpScriptToSwOnFirstVisit(registration, win);
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
@@ -309,23 +310,25 @@ function install(win, src) {
  * @param {ServiceWorkerRegistration} registration
  * @param {!Window} win
  */
-function sendScriptAndURLToSWOnFirstVisit(registration, win) {
+function sendAmpScriptToSwOnFirstVisit(registration, win) {
   const installingServiceWorker = registration.installing;
   if (installingServiceWorker && 'performance' in win) {
     installingServiceWorker.addEventListener('statechange', evt => {
-      if (evt.target.state === 'activated' &&
-        win.navigator.serviceWorker.controller) {
-        // Fetch all AMP-scripts used on the page
-        const ampScriptsUsed = win.performance.getEntriesByType('resource')
-            .filter(item => item.initiatorType === 'script' &&
-                /https:\/\/cdn.ampproject.org\//.test(item.name))
-            .map(script => script.name);
-        // using https://github.com/redux-utilities/flux-standard-action
-        win.navigator.serviceWorker.controller.postMessage(JSON.stringify({
-          type: 'FIRST_VISIT_CACHING',
-          payload: ampScriptsUsed,
-        }));
+      const controllerSw = win.navigator.serviceWorker.controller;
+      if (evt.target.state !== 'activated' || !controllerSw) {
+        return;
       }
+
+      // Fetch all AMP-scripts used on the page
+      const ampScriptsUsed = win.performance.getEntriesByType('resource')
+          .filter(item => item.initiatorType === 'script' &&
+              /https:\/\/cdn.ampproject.org\//.test(item.name))
+          .map(script => script.name);
+      // using https://github.com/redux-utilities/flux-standard-action
+      controllerSw.postMessage(JSON.stringify(dict({
+        'type': 'FIRST_VISIT_CACHING',
+        'payload': ampScriptsUsed,
+      })));
     });
   }
 }
