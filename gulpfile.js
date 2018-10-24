@@ -66,7 +66,10 @@ const adVendors = [];
 const {green, red, cyan} = colors;
 
 const minifiedRuntimeTarget = 'dist/v0.js';
-const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
+const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
+const minifiedAdsTarget = 'dist/amp4ads-v0.js';
+// TODO(#18934, erwinm): temporary fix.
+//const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
 const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
@@ -390,7 +393,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
-  // TODO(erwinm): temporarily commented out to unblock master builds.
+  // TODO(#18934, erwinm): temporarily commented out to unblock master builds.
   // theres a race condition between the read to amp.js here, and on the
   // main v0.js compile above.
   /**
@@ -952,7 +955,12 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minifiedRuntimeTarget).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget);
+              // TODO(#18934, erwinm): temporary fix.
+              //return enableLocalTesting(minifiedRuntimeEsmTarget)
+              return enableLocalTesting(minifiedShadowRuntimeTarget)
+                  .then(() => {
+                    return enableLocalTesting(minifiedAdsTarget);
+                  });
             }
           });
         }
@@ -1281,6 +1289,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               return enableLocalTesting(unminifiedRuntimeTarget);
             } else if (destFilename === 'amp-esm.js') {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'amp4ads-v0.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
             } else {
