@@ -134,6 +134,12 @@ module.exports = function(context) {
           message: errMsg,
           fix: function(fixer) {
             let tokens = context.getTokens(argToEval);
+            let hasStringInArg = tokens.some(x => x.type === 'String');
+            // If it doesn't have any string then it's unfixable and needs
+            // to be manually refactored to have a message.
+            if (!hasStringInArg) {
+              return;
+            }
             let argFixer = new ArgFixer(tokens).parse();
             return fixer.replaceText(argToEval, argFixer.toString());
           }
@@ -149,7 +155,6 @@ class ArgFixer {
     this.cursor = 0;
     this.sanitizedStr = '';
     this.refs = [];
-    console.table(tokens);
   }
 
   toString() {
@@ -160,8 +165,7 @@ class ArgFixer {
     while (this.cursor < this.tokens.length) {
       this.chomp();
     }
-    console.log(this.sanitizedStr);
-    console.log(this.refs);
+    return this;
   }
 
   next() {
@@ -213,11 +217,16 @@ class ArgFixer {
     while (!this.isTemplateEnd()) {
       for (let i = 0; i < this.cur().value.length; i++) {
 
+        // If we're at the beginning of a Token and the first char is
+        // one of these then this is either a closing tick of a template
+        // or a closing of an interpolation segment.
         if (i === 0 && (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
           inTemplateEval = false;
           continue;
         }
 
+        // The start of an interpolation segment. It meanswe need to start
+        // collecting a new ref.
         if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
           inTemplateEval = true;
           this.startNewRef();
