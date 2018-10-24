@@ -81,13 +81,13 @@ export const UIType = {
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
+ *    tooltipElement: ?Element,
  *    tooltipState: boolean,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    tooltipElement: ?Element,
  * }}
  */
 export let State;
@@ -123,6 +123,7 @@ export const StateProperty = {
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
+  TOOLTIP_ELEMENT: 'tooltipElement',
   TOOLTIP_STATE: 'tooltipState',
   UI_STATE: 'uiState',
 
@@ -131,7 +132,6 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  TOOLTIP_ELEMENT: 'tooltipElement',
 };
 
 
@@ -386,9 +386,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [StateProperty.CONSENT_ID]: null,
-      [StateProperty.CURRENT_PAGE_ID]: '',
-      [StateProperty.CURRENT_PAGE_INDEX]: 0,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
@@ -402,6 +399,7 @@ export class AmpStoryStoreService {
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SIDEBAR_STATE]: false,
+      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
