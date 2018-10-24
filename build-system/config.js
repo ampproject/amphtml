@@ -148,6 +148,7 @@ module.exports = {
     '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!firebase/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };
