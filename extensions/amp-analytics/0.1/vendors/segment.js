@@ -44,4 +44,17 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'page',
     },
   },
+  'linkers': {
+    'segment': {
+      'ids': {
+        's_amp_id': '${anonymousId}',
+      },
+      'proxyOnly': false,
+    },
+  },
+  'cookies': {
+    'segment_amp_id': {
+      'value': 'LINKER_PARAM(segment, s_amp_id)',
+    },
+  },
 });
