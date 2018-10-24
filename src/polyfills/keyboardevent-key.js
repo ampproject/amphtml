@@ -44,9 +44,13 @@ const keys = {
  * @param {!Window} win
  */
 export function install(win) {
+  const isIe = /Trident|MSIE|IEMobile/i.test(win.navigator.userAgent);
+  if (!isIe) {
+    return;
+  }
+
   const descriptor = win.Object.getOwnPropertyDescriptor(
       win.KeyboardEvent.prototype, 'key');
-
   if (descriptor) {
     win.Object.defineProperty(win.KeyboardEvent.prototype, 'key', {
       get: function key() {
