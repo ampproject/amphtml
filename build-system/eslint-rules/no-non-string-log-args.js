@@ -141,7 +141,7 @@ module.exports = function(context) {
             const lastArgToken = tokensInExpr[tokensInExpr.length - 2];
             return fixer.replaceTextRange(
                 [argToEval.start, lastArgToken.end],
-                argFixer.getSanitizedArg() +
+                argFixer.getSanitizedArg() + ', ' +
                 argFixer.getRefsAsArgumentsString()
             );
           }
@@ -160,11 +160,11 @@ class ArgFixer {
   }
 
   getSanitizedArg() {
-    return '\'' + this.sanitizedStr + '\'';
+    return '\'' + this.sanitizedStr.replace(/'/g, '\\\'') + '\'';
   }
 
   getRefsAsArgumentsString() {
-    return ', ' + this.refs.join(',');
+    return this.refs.join(',');
   }
 
   parse() {
