@@ -634,7 +634,7 @@ export class AmpSlideScroll extends BaseSlides {
       const error = new Error(
           `Attempting to access a non-existant slide ${newIndex}/${noOfSlides_}`
       );
-      dev().error(TAG, 'DO NOT SUBMIT', error.message);
+      dev().error(TAG, error);
       return false;
     }
     this.updateInViewport(newSlideInView, true);

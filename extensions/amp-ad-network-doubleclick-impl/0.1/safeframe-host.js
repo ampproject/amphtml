@@ -354,7 +354,7 @@ export class SafeframeHostApi {
         newGeometry: formattedGeom,
         uid: this.uid_,
       }, SERVICE.GEOMETRY_UPDATE);
-    }).catch(err => dev().error(TAG, 'DO NOT SUBMIT', err));
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -620,7 +620,7 @@ export class SafeframeHostApi {
         'expand_l': this.currentGeometry_['allowedExpansion_l'],
         push: true,
       }, messageType);
-    }).catch(err => dev().error(TAG, 'DO NOT SUBMIT', err));
+    }).catch(err => dev().error(TAG, err));
   }
 
   /**
@@ -687,7 +687,7 @@ export class SafeframeHostApi {
           this.onFluidResize_(newHeight);
         }).catch(err => {
           if (err.message == 'CANCELLED') {
-            dev().error(TAG, 'DO NOT SUBMIT', err);
+            dev().error(TAG, err);
             return;
           }
           // TODO(levitzky) Add more error handling here

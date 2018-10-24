@@ -1643,6 +1643,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       const {minHeight} = computedStyle(this.win, container);
       if (minHeight === DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT) {
         user().warn(TAG,
+            this.element,
             'The "day-size" attribute is changed from the default value ' +
             `"${DEFAULT_DAY_SIZE}". You must specify a new "min-height" ` +
             `for the "${TRANSITION_CONTAINER_SELECTOR}" element in your ` +

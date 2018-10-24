@@ -132,7 +132,7 @@ export class CacheCidApi {
           dev().error(TAG_, JSON.stringify(res));
         });
       } else {
-        dev().error(TAG_, 'DO NOT SUBMIT: add string here', e);
+        dev().error(TAG_, e);
       }
       return null;
     });

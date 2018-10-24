@@ -957,12 +957,12 @@ export class AmpA4A extends AMP.BaseElement {
     assignAdUrlToError(/** @type {!Error} */(error), this.adUrl_);
 
     if (getMode().development || getMode().localDev || getMode().log) {
-      user().error(TAG, 'DO NOT SUBMIT', error);
+      user().error(TAG, error);
     } else {
-      user().warn(TAG, 'DO NOT SUBMIT', error);
+      user().warn(TAG, error);
       // Report with 1% sampling as an expected dev error.
       if (Math.random() < 0.01) {
-        dev().expectedError(TAG, 'DO NOT SUBMIT', error);
+        dev().expectedError(TAG, error);
       }
     }
   }

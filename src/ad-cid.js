@@ -54,7 +54,7 @@ export function getOrCreateAdCid(
       cookieName: opt_clientIdCookieName,
     }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
-      dev().error('AD-CID', 'DO NOT SUBMIT', error.message);
+      dev().error('AD-CID', error);
       return undefined;
     });
   });
@@ -63,7 +63,7 @@ export function getOrCreateAdCid(
   return Services.timerFor(ampDoc.win)
       .timeoutPromise(timeout, cidPromise, 'cid timeout').catch(error => {
         // Timeout is not fatal.
-        dev().warn('AD-CID', 'DO NOT SUBMIT', error.message);
+        dev().warn('AD-CID', error);
         return undefined;
       });
 }

@@ -1346,7 +1346,7 @@ export class Bind {
     if (opt_elementOrExpr) {
       if (typeof opt_elementOrExpr == 'string') {
         const value = getValueForExpr(this.state_, opt_elementOrExpr);
-        user().info(TAG, 'DO NOT SUBMIT', value);
+        user().info(TAG, value);
       } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
@@ -1356,7 +1356,7 @@ export class Bind {
             'AMP.printState($0) after selecting an element.');
       }
     } else {
-      user().info(TAG, 'DO NOT SUBMIT', this.state_);
+      user().info(TAG, this.state_);
     }
   }
 
@@ -1396,7 +1396,7 @@ export class Bind {
    */
   debugEvaluate_(expression) {
     this.evaluateExpression_(expression, this.state_).then(result => {
-      user().info(TAG, 'DO NOT SUBMIT', result);
+      user().info(TAG, result);
     });
   }
 
