@@ -23,6 +23,7 @@ import ampToolboxCacheUrl from
   '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -37,7 +38,6 @@ import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-import {Services} from '../../../src/services';
 import {urls} from '../../../src/config';
 
 /**
@@ -62,11 +62,11 @@ import {urls} from '../../../src/config';
 export class AmpRecaptchaService {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    
-    /** @const @private {!./ampdoc-impl.AmpDoc} */
+
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @const @private {!Window} */
@@ -256,7 +256,9 @@ export class AmpRecaptchaService {
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    if (Services.viewerForDoc(this.ampdoc_).isProxyOrigin(this.win_.location.href)) {
+    const isProxyOrigin = Services.viewerForDoc(this.ampdoc_)
+        .isProxyOrigin();
+    if (isProxyOrigin) {
       curlsSubdomainPromise = tryResolve(() => {
         return this.win_.location.hostname.split('.')[0];
       });
@@ -308,17 +310,17 @@ export class AmpRecaptchaService {
 }
 
 /**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installRecaptchaServiceForDoc(nodeOrDoc) {
-  registerServiceBuilderForDoc(nodeOrDoc, 'amp-recaptcha', AmpRecaptchaService);
+export function installRecaptchaServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'amp-recaptcha', AmpRecaptchaService);
 }
 
 /**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!AmpRecaptchaService}
  */
-export function recaptchaServiceForDoc(nodeOrDoc) {
-  return getServiceForDoc(nodeOrDoc, 'amp-recaptcha');
+export function recaptchaServiceForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'amp-recaptcha');
 }
 

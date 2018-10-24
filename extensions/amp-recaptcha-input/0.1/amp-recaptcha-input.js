@@ -23,7 +23,6 @@
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
-  AmpRecaptchaService,
   installRecaptchaServiceForDoc,
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
