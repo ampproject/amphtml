@@ -178,10 +178,11 @@ If publisher wishes to ignore a score factor they may either explicitly set it's
 
 Available scoring factors:
 
-1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view. `supportsViewer` has a default score of 10.
+1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view.
 1. `isReadyToPay` returns `1` when the user is known to the service and the service has a form of payment on file allowing a purchase without entering payment details.
 
-In the event of a tie the local service wins.
+All scoring factors have default value of `0`. In the event of a tie the local service wins.
+
 
 ## Error fallback
 If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.

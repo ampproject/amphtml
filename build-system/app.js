@@ -83,7 +83,7 @@ if (!global.AMP_TESTING) {
       return url;
     },
   }));
-  
+
   app.get('/serve_mode.json', (req, res) => {
     res.json({serveMode: pc.env.SERVE_MODE || 'default'});
   });

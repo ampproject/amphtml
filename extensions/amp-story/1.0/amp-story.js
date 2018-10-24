@@ -330,6 +330,13 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
+    // buildCallback already runs in a mutate context. Calling another
+    // mutateElement explicitly will force the runtime to remeasure the
+    // amp-story element, fixing rendering bugs where the story is inactive
+    // (layoutCallback not called) when accessed from any viewer using
+    // prerendering, because of a height incorrectly set to 0.
+    this.mutateElement(() => {});
+
     const pageEl = this.element.querySelector('amp-story-page');
     pageEl && pageEl.setAttribute('active', '');
 
@@ -696,8 +703,12 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
 
     const storyLayoutPromise = this.initializePages_()
-        .then(() => this.buildSystemLayer_())
         .then(() => {
+          this.buildSystemLayer_();
+
+          this.handleConsentExtension_();
+          this.initializeStoryAccess_();
+
           this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
@@ -724,9 +735,6 @@ export class AmpStory extends AMP.BaseElement {
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
-
-    this.handleConsentExtension_();
-    this.initializeStoryAccess_();
 
     return storyLayoutPromise;
   }
@@ -827,6 +835,18 @@ export class AmpStory extends AMP.BaseElement {
           accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(
           () => this.onAccessApplyAuthorizations_());
+
+      const firstPage = this.pages_[0].element;
+
+      // First amp-story-page can't be paywall protected.
+      // Removes the access attributes, and throws an error during development.
+      if (firstPage.hasAttribute('amp-access') ||
+          firstPage.hasAttribute('amp-access-hide')) {
+        firstPage.removeAttribute('amp-access');
+        firstPage.removeAttribute('amp-access-hide');
+        user().error(TAG, 'First amp-story-page cannot have amp-access ' +
+            'or amp-access-hide attributes');
+      }
     });
   }
 
