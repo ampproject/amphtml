@@ -781,10 +781,10 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ === null ?
           'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = {
-      fromSlide,
+    const vars = dict({
+      'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    };
+    });
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
@@ -796,7 +796,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
