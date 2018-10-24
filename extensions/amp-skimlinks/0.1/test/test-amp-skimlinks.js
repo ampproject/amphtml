@@ -17,6 +17,7 @@
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
 import * as Utils from '../utils';
+import * as chunkModule from '../../../../src/chunk';
 import {Deferred} from '../../../../src/utils/promise';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
 import {SKIMLINKS_REWRITER_ID} from '../constants';
@@ -132,6 +133,11 @@ describes.fakeWin(
 
             env.sandbox.stub(ampSkimlinks, 'onClick_');
             env.sandbox.stub(ampSkimlinks, 'onPageScanned_');
+            // Chunk executes the provided task when the browser is Idle. We can
+            // execute the task straight away for the purpose of the test.
+            env.sandbox.stub(chunkModule, 'chunk').callsFake((node, task) => {
+              task();
+            });
             linkRewriter = ampSkimlinks.initSkimlinksLinkRewriter_();
           });
 
