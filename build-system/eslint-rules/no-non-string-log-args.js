@@ -133,26 +133,10 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
-            const text = context.getSourceCode().text;
-            const callExpr = text.slice(node.start, node.end);
-            // matches the string inside the parens dev().someMethod(...);
-            const argsMatcher = new RegExp(
-              `${calleeObject.callee.name}\\(\\)\\.`+
-              `${metadata.name}\\(((?:.|\n)*)\\)`);
-            const logMethodCall = callExpr.match(argsMatcher);
-            // ArgParser retrieves the raw string arguments into the
-            // method call.
-            const parser = new ArgsParser(logMethodCall[1]).parse();
-            const arg = parser.args[metadata.startPos];
-            if (/'|"|`/.test(arg)) {
-              try {
-              const [fixedArg, refs] = fixerHelper(arg);
-              parser.args[metadata.startPos] = fixedArg;
-              fixer.replaceText(node, `${calleeObject.callee.name}.${metadata.name}(${parser.toString()})`);
-              } catch (e) {
-                console.error('error', e.stack);
-              }
-            }
+            let tokens = context.getTokens(argToEval);
+            const lexer = new ArgLexer(tokens);
+            lexer.parse();
+            return fixer.replaceText(argToEval, lexer.toString());
           }
         });
       }
@@ -160,71 +144,103 @@ module.exports = function(context) {
   };
 };
 
-function fixerHelper(arg) {
-  // Capture all template strings inside the current argument.
-  // The extra '' + and + '' for prefix and suffix makes it easier for us to
-  // match reference concatenations without having to worry about boundaries.
-  let noTemplateArg = '\'\' + ' + arg.replace(/`(.*?)`/g, function(full, outerGrp1, startPos) {
-    // Escape all single quoutes inside template literal since we will transform
-    // this into a normal string concat.
-    outerGrp1 = outerGrp1.replace(/'/, '\\\'')
-    return '\'' + outerGrp1.replace(/\$\{(.*?)\}/g, function(full, grp1, startPos) {
-      const  suffix = startPos + full.length == grp1.length ? '' : ' + \'';
-      return `\' + ${grp1}${suffix}`;
-     }) + '\'';
-  }) + '+ \'\'';
-  const references = [];
-  // Replace all reference concat ops with '%s' strings.
-  // We try and match + symbol + patterns and replace them with %s and then
-  // accumulate then in references to be added as variadic arguments when possible.
-  const sanitizedStr = noTemplateArg.replace(/(\+)(?!(?:\s*'))(?:.)*?\1/g, function(full, grp1, startPos) {
-    references.push(full.slice(1, full.length - 1).trim());
-    return '+ \'%s\' +';
-  });
-  const evol = eval;
-  return [evol(sanitizedStr), references];
+class ArgLexer {
+  constructor(tokens) {
+    this.tokens = tokens;
+    this.cursor = 0;
+    this.sanitizedStr = '';
+    this.refs = [];
+  }
+
+  toString() {
+    return '\'' + this.sanitizedStr + '\'';
+  }
+
+  parse() {
+    while (this.cursor < this.tokens.length) {
+      this.chomp();
+    }
+  }
+
+  next() {
+    this.cursor++;
+  }
+
+  cur(val = 0) {
+    return this.tokens[this.cursor + val];
+  }
+
+  chomp() {
+    if (this.isLiteralString()) {
+      this.chompString();
+    } else if (this.isVarReference()) {
+      this.chompVarReference();
+    } else if (this.isTemplateStart()) {
+      this.chompTemplateValueTilEnd();
+    } else {
+      this.next();
+    }
+  }
+
+  chompString() {
+    this.sanitizedStr += this.cur().value.slice(1, -1);
+    this.next();
+  }
+
+  chompVarReference() {
+    this.refs.push(this.cur().value);
+    this.sanitizedStr += '%s';
+    this.next();
+  }
+
+  chompTemplateValueTilEnd() {
+    let templateValue = '';
+    let inTemplateEval = false;
+
+    while (!this.isTemplateEnd()) {
+      if (this.isVarReference()) {
+        this.chompVarReference();
+      }
+      for (let i = 0; i < this.cur().value.length; i++) {
+
+        if (i === 0 && this.cur().value[i] === '}') {
+          inTemplateEval = false;
+          continue;
+        }
+        if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
+          inTemplateEval = true;
+          this.refs.push('');
+          this.sanitizedStr += '%s';
+          break;
+        }
+
+        if (!inTemplateEval) {
+          this.sanitizedStr += this.cur().value[i];
+        } else {
+          this.refs[this.refs.length - 1] += this.cur().value[i];
+        }
+      }
+      this.next()
+    }
+  }
+
+
+  isTemplateStart() {
+    return this.cur().type === 'Template' && this.cur().value.startsWith('`');
+  }
+
+  isTemplateEnd() {
+    return this.cur().type === 'Template' && this.cur().value.endsWith('`');
+  }
+
+  isLiteralString() {
+    return this.cur().type === 'String';
+  }
+
+  isVarReference() {
+    const next = this.cur(1);
+    // End of the token list
+    return this.cur().type === 'Identifier' &&
+      (!next || (next.type === 'Punctuator' && next.value === '+'));
+  }
 }
-
-
-function ArgsParser(expr) {
-  this.expr = expr;
-  this.curPos = 0;
-  this.args = [];
-  this.curArg = 0;
-  this.isInStr = false;
-}
-
-ArgsParser.prototype.getCur = function() {
-  return this.expr[this.curPos];
-}
-
-ArgsParser.prototype.parse = function() {
-  while (this.curPos < this.expr.length) {
-    this.chomp();
-    this.curPos++;
-  }
-  this.args = this.args.map(x => x.replace(/\n/g, ''));
-  return this;
-};
-
-ArgsParser.prototype.chomp = function() {
-  if (!this.isInStr && this.getCur() === ',') {
-    this.curArg++;
-  } else if (!this.isInStr && this.getCur() === '\'') {
-    this.isInStr = true;
-  } else if (this.isInStr && this.getCur() === '\'') {
-    this.isInStr = false;
-  }
-
-  if (!this.args[this.curArg]) {
-    this.args[this.curArg] = '';
-  }
-  if (!this.isInStr && this.getCur() === ',') {
-    return;
-  }
-  this.args[this.curArg] += this.getCur();
-};
-
-ArgsParser.prototype.toString = function() {
-  return + this.args.map(x => `"${x}"`).join(',');
-};
