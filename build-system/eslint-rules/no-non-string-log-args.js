@@ -157,6 +157,8 @@ class ArgFixer {
     this.cursor = 0;
     this.sanitizedStr = '';
     this.refs = [];
+    this.enteredParen = 0;
+    console.table(this.tokens);
   }
 
   getSanitizedArg() {
@@ -207,14 +209,32 @@ class ArgFixer {
 
   chompRefTilPunctuatorOrEnd() {
     let refValue = '';
-    while (this.cur() &&
-        !(this.cur().type === "Punctuator" && this.cur().value === '+')) {
+    while (!this.isRefEnd()) {
       refValue += this.cur().value;
       this.next();
     }
+
     this.startNewRef();
     this.addToCurRef(refValue);
-
+  }
+  
+  isRefEnd() {
+    if (!this.cur()) {
+      return true;
+    }
+    
+    if (this.cur().type === 'Punctuator') {
+      if (this.cur().value === '(') {
+        this.enteredParen++;
+      } else if (this.cur().value === ')') {
+        this.enteredParen--;
+      }
+    }
+    
+    if (this.enteredParen !== 0) {
+      return false;
+    }
+    return this.cur().type === 'Punctuator' && this.cur().value === '+'; 
   }
 
   chompTemplateValueTilEnd() {
