@@ -380,6 +380,14 @@
     "pageview": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=$w_page_view&_eprops=!eventProps",
     "event": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=!eventName&_eprops=!eventProps"
   },
+  "upscore":{
+      "host":"https://hit-pool.upscore.com/amp?",
+      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time",
+      "initialHit":"author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_",
+      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=final",
+      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&type=pulse",
+      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=domain&load=_dom_interactive_time_&timespent=_total_engaged_time&author=author&creator=creator&o_id=object_id&o_type=object_type&pubdate=pubdate&ref=_document_referrer_&section=section&url=_ampdoc_url_&agent=_user_agent&location=_amp_geo_&type=init"
+  },
   "webtrekk": {
     "trackURL": "https://!trackDomain/!trackId/wt",
     "parameterPrefix": "?p=432,!contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
