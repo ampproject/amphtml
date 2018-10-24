@@ -42,9 +42,6 @@ import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
-/** @private @const {string} */
-const TAG = 'amp-recaptcha-input';
-
 /**
  * @fileoverview
  * Service used by AMP recaptcha elements, to utilize
@@ -76,7 +73,7 @@ export class AmpRecaptchaService {
 
     /** @const @private {!Element} */
     this.body_ = this.win_.document.body;
-    
+
     /** @private {?string} */
     this.sitekey_ = null;
 
@@ -110,7 +107,8 @@ export class AmpRecaptchaService {
       this.sitekey_ = sitekey;
     } else if (this.sitekey_ !== sitekey) {
       return Promise.reject(
-        new Error('You must supply the same sitekey to all amp-recaptcha-input elements.')
+          new Error('You must supply the same sitekey ' +
+          'to all amp-recaptcha-input elements.')
       );
     }
 
@@ -151,7 +149,8 @@ export class AmpRecaptchaService {
 
     if (this.sitekey_ !== sitekey) {
       return Promise.reject(new Error(
-        'You must supply the same sitekey that was used to register the element.'
+          'You must supply the same sitekey that ' +
+          'was used to register the element.'
       ));
     }
 

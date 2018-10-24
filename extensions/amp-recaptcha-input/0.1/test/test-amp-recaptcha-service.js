@@ -100,23 +100,23 @@ describes.realWin('amp-recaptcha-service', {
           expect(recaptchaService.unlisteners_.length).to.be.equal(0);
           expect(unlistener).to.be.called;
         });
-    });
+  });
 
   it('should not allow elements to register,' +
     ' if they pass a different sitekey', () => {
-      expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-      return recaptchaService
+    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+    return recaptchaService
         .register(fakeSitekey).then(() => {
           expect(recaptchaService.registeredElementCount_).to.be.equal(1);
           expect(recaptchaService.iframe_).to.be.ok;
-          
+
           return recaptchaService.register(anotherFakeSitekey).catch(err => {
             expect(err).to.be.ok;
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
         });
-    });
+  });
 
   it('should return when the iframe is' +
     ' loaded and ready', () => {
@@ -158,14 +158,14 @@ describes.realWin('amp-recaptcha-service', {
   it('should reject if different sitekey passed to execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     return recaptchaService
-      .register(fakeSitekey).then(() => {
-        expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-        expect(recaptchaService.iframe_).to.be.ok;
+        .register(fakeSitekey).then(() => {
+          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+          expect(recaptchaService.iframe_).to.be.ok;
 
-        recaptchaService.execute(0, anotherFakeSitekey, '').catch(err => {
-          expect(err).to.be.ok;
+          recaptchaService.execute(0, anotherFakeSitekey, '').catch(err => {
+            expect(err).to.be.ok;
+          });
         });
-      });
   });
 });
 

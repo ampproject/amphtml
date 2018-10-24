@@ -132,11 +132,11 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  */
 function actionTypeHandler(grecaptcha, data) {
   // TODO: @torch2424: Verify message origin
-  
+
   if (sitekey !== data.sitekey) {
     iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
       'id': data.id,
-      'error': 'sitekey in action data must be the same sitekey, ' + 
+      'error': 'sitekey in action data must be the same sitekey, ' +
         'used to create the recaptcha bootstrap iframe.',
     }));
     return;
