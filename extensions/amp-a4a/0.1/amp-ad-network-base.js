@@ -198,7 +198,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   handleFailure_(failureType, error) {
     const recoveryMode = this.recoveryModes_[failureType];
     if (error) {
-      dev().warn(TAG, 'DO NOT SUBMIT', error);
+      dev().warn(TAG, error);
     }
     switch (recoveryMode) {
       case RecoveryModeType.COLLAPSE:
