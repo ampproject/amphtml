@@ -164,21 +164,27 @@ function compareBundleSize(maxBundleSize) {
 
   const error = output.match(/ERROR .*/);
   if (error || output.length == 0) {
-    return [error || '[no output from npx command]', STATUS_ERROR, ''];
+    return {
+      output: error || '[no output from npx command]',
+      status: STATUS_ERROR,
+      newBundleSize: '',
+    };
   }
 
-  const bundleSizeFormatMatches = output.match(/: (\d+.?\d*KB)/);
-  if (bundleSizeFormatMatches) {
-    const pass = output.match(/PASS .*/);
-    const fail = output.match(/FAIL .*/);
-    if (pass) {
-      return [pass, STATUS_PASS, bundleSizeFormatMatches[1]];
-    } else if (fail) {
-      return [fail, STATUS_FAIL, bundleSizeFormatMatches[1]];
-    }
+  const bundleSizeOutputMatches = output.match(/(PASS|FAIL) .*: (\d+.?\d*KB) .*/);
+  if (bundleSizeOutputMatches) {
+    return {
+      output: bundleSizeOutputMatches[0],
+      status: bundleSizeOutputMatches[1] == 'PASS' ? STATUS_PASS : STATUS_FAIL,
+      newBundleSize: bundleSizeOutputMatches[2],
+    };
   }
   log(red('ERROR:'), 'could not infer bundle size from output.');
-  return [output, STATUS_ERROR, ''];
+  return {
+    output,
+    status: STATUS_ERROR,
+    newBundleSize: '',
+  };
 }
 
 /**
@@ -201,16 +207,20 @@ async function checkBundleSize() {
   let compareAgainstMaxSize = true;
   let output, status, newBundleSize;
   if (ancestorBundleSize) {
-    [output, status, newBundleSize] = compareBundleSize(ancestorBundleSize);
+    ({output, status, newBundleSize} = compareBundleSize(ancestorBundleSize));
     switch (status) {
       case STATUS_ERROR:
-        log(yellow(output));
+        log(red(output));
         process.exitCode = 1;
         return;
       case STATUS_FAIL:
+        const sizeDelta =
+            (parseFloat(newBundleSize) - parseFloat(ancestorBundleSize))
+                .toFixed(2);
         log(yellow('New bundle size of'), cyan(newBundleSize),
             yellow('is larger than the ancestor\'s bundle size of'),
-            cyan(ancestorBundleSize));
+            cyan(ancestorBundleSize),
+            yellow('(Δ +') + cyan(sizeDelta) + yellow('KB)'));
         log('Continuing to compare to max bundle size...');
         compareAgainstMaxSize = true;
         break;
@@ -222,17 +232,20 @@ async function checkBundleSize() {
   }
 
   if (compareAgainstMaxSize) {
-    [output, status, newBundleSize] = compareBundleSize(maxSize);
+    ({output, status, newBundleSize} = compareBundleSize(maxSize));
     switch (status) {
       case STATUS_ERROR:
-        log(yellow(output));
+        log(red(output));
         process.exitCode = 1;
         return;
       case STATUS_FAIL:
+        const sizeDelta =
+            (parseFloat(newBundleSize) - parseFloat(maxSize))
+                .toFixed(2);
         log(red(output));
         log(red('ERROR:'), cyan('bundlesize'), red('found that'),
             cyan(runtimeFile), red('has exceeded its size cap of'),
-            cyan(maxSize) + red('.'));
+            cyan(maxSize), red('(Δ +') + cyan(sizeDelta) + red('KB)'));
         log(red('This is part of a new effort to reduce AMP\'s binary size ' +
                 '(#14392).'));
         log(red('Please contact @choumx or @jridgewell for assistance.'));
