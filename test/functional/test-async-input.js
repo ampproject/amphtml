@@ -41,4 +41,10 @@ describes.realWin('BaseElement', {amp: true}, env => {
       expect(true).to.be.ok;
     });
   });
+
+  it('should have the i-amphtml-async-input class', () => {
+    const hasAsyncInputClass = 
+      customElement.classList.contains('i-amphtml-async-input');
+    expect(hasAsyncInputClass).to.be.ok;
+  });
 });
