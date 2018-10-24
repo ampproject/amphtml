@@ -37,15 +37,15 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
 
   describes.integration('amp-pixel macro integration test', {
     body: `<amp-pixel src="${depositRequestUrl(
-        'has-referrer&title=TITLE&qp=QUERY_PARAM(a)')}">`,
+        'hello-world&title=TITLE&qp=QUERY_PARAM(a)')}">`,
     params: {
       a: 123,
     },
   }, env => {
     it('should expand the TITLE macro', () => {
-      return withdrawRequest(env.win, 'has-referrer&title=AMP-TEST&qp=123')
+      return withdrawRequest(env.win, 'hello-world&title=AMP-TEST&qp=123')
           .then(request => {
-            expect(request.headers.referer).to.be.ok;
+            expect(request.headers.host).to.be.ok;
           });
     });
   });
