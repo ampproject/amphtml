@@ -185,7 +185,7 @@ export class AmpRecaptchaService {
    * @private
    */
   initialize_() {
-    return this.createRecaptchaFrame_(this.sitekey_).then(iframe => {
+    return this.createRecaptchaFrame_().then(iframe => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
