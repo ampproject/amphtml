@@ -177,11 +177,13 @@ export class AmpStoryClickLayer {
 
     // Top property
     // Tooltip fits between element and top of screen.
+    this.tooltipArrow_.removeAttribute('on-top');
     if (rect.top > MIN_VERTICAL_SPACE) {
       top = rect.top - MIN_VERTICAL_SPACE;
     } else if (this.win_.innerHeight - rect.bottom > MIN_VERTICAL_SPACE) {
       // Position under element.
       top = rect.bottom + 8;
+      this.tooltipArrow_.setAttribute('on-top', '');
     } else {
       // Element takes whole vertical space. Place on the middle.
       top = this.win_.innerHeight / 2;
@@ -194,6 +196,11 @@ export class AmpStoryClickLayer {
     left = Math.min(left, maxLeft);
     left = Math.max(8, left);
 
+    let arrowOffset = elCenter / this.win_.innerWidth * 100;
+    arrowOffset = Math.min(arrowOffset, 80);
+    arrowOffset = Math.max(arrowOffset, 0);
+
+    setImportantStyles(this.tooltipArrow_, {left: `calc(${arrowOffset}%)`});
     setImportantStyles(this.tooltip_, {top: `${top}px`, left: `${left}px`});
   }
 
@@ -261,11 +268,13 @@ export class AmpStoryClickLayer {
           </div>
           <a class="i-amphtml-story-tooltip" target="_top" ref="tooltip">
             <div class="i-amphtml-tooltip-launch-icon"></div>
+            <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
           </a>
         </section>
         `;
-    const {tooltip, buttonLeft, buttonRight} = htmlRefs(tooltipOverlay);
+    const {tooltip, buttonLeft, buttonRight, arrow} = htmlRefs(tooltipOverlay);
     this.tooltip_ = tooltip;
+    this.tooltipArrow_ = arrow;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
     buttonLeft.addEventListener('click', e =>
