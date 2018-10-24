@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /**
@@ -50,20 +51,20 @@ export class SubscriptionAnalytics {
    *
    * @param {string} eventType
    * @param {string} serviceId
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, Object.assign({
-      serviceId,
-    }, opt_vars));
+    this.event(eventType, /** @type {!JsonObject} */ (Object.assign(dict({
+      'serviceId': serviceId,
+    }), opt_vars)));
   }
 
   /**
    *
    * @param {string} eventType
-   * @param {Object<string, string>=} opt_vars
+   * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
   }
 }

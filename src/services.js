@@ -97,10 +97,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Activity>}
+   * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
    */
   static activityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Activity>} */ (
+    return /** @type {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>} */ (
       getElementServiceForDoc(elementOrAmpDoc, 'activity', 'amp-analytics'));
   }
 

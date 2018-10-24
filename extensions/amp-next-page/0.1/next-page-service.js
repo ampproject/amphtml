@@ -21,6 +21,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -459,7 +460,10 @@ export class NextPageService {
   triggerAnalyticsEvent_(eventType, toURL, fromURL) {
     fromURL = fromURL || '';
 
-    const vars = {toURL, fromURL};
+    const vars = dict({
+      'toURL': toURL,
+      'fromURL': fromURL,
+    });
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }
