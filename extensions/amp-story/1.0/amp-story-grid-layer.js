@@ -112,7 +112,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.initializeClickableItems_();
+    this.prepareTooltipForClickableEls_();
   }
 
   /** @override */
@@ -180,9 +180,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   *
+   * Finds elements that could trigger a tooltip and builds them so that they
+   * trigger a tooltip when clicked.
    */
-  initializeClickableItems_() {
+  prepareTooltipForClickableEls_() {
     const clickableEls =
       scopedQuerySelectorAll(this.element, Selectors.ANCHOR_TAGS);
 
