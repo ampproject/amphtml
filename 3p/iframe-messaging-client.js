@@ -154,7 +154,7 @@ export class IframeMessagingClient {
         return;
       }
 
-      message.origin = event.origin;
+      message['origin'] = event.origin;
 
       this.fireObservable_(message['type'], message);
     });

@@ -18,7 +18,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import ampToolboxCacheUrl from
-'../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+  '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
@@ -88,8 +88,8 @@ window.initRecaptcha = function() {
 
   // Get our mode from the iframe name attribture
   dev().assert(
-    dataObject.mode,
-    'The mode is required for the <amp-recaptcha-input> iframe'
+      dataObject.mode,
+      'The mode is required for the <amp-recaptcha-input> iframe'
   );
   mode = dataObject.mode;
 
@@ -162,17 +162,12 @@ function actionTypeHandler(window, grecaptcha, data) {
       }));
     });
   }).catch(error => {
-    if (error) {
-      console.log(error);
-      dev().error(error.message);
-    } else {
-      dev().error(TAG + ' Origin domain does not match Iframe src');
-    }
+    dev().error(TAG, '%s', error.message);
   });
 }
 
 /**
- * Function to verify our origin domain from the 
+ * Function to verify our origin domain from the
  * parent window.
  * @param {Window} window
  * @param {Object} data
@@ -184,16 +179,21 @@ function doesOriginDomainMatchIframeSrc(window, data) {
   }
 
   if (!data.origin) {
-    return Promise.reject(new Error(TAG + ' Could not retreive the origin domain'));
+    return Promise.reject(
+        new Error('Could not retreive the origin domain')
+    );
   }
 
-  return ampToolboxCacheUrl.createCurlsSubdomain(data.origin).then(curlsSubdomain => {
-    const iframeSrcCurlsSubdomain = window.location.hostname.split('.')[0];
-    if (curlsSubdomain === iframeSrcCurlsSubdomain) {
-      return Promise.resolve();
-    }
+  return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
+      .then(curlsSubdomain => {
+        const iframeSrcCurlsSubdomain = window.location.hostname.split('.')[0];
+        if (curlsSubdomain === iframeSrcCurlsSubdomain) {
+          return Promise.resolve();
+        }
 
-    return Promise.reject();
-  });
+        return Promise.reject(
+            new Error('Origin domain does not match Iframe src')
+        );
+      });
 }
 
