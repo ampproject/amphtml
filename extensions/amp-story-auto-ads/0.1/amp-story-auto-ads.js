@@ -51,6 +51,9 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 /** @const */
 const LOADING_ATTR = 'i-amphtml-loading';
 
+/** @const {string} */
+const AD_BLOCK_ATTR = 'block-ads';
+
 /** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
@@ -618,10 +621,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    if (!this.isCurrentAdLoaded_ || pageBeforeAd.isAd() ||
-        pageAfterAd.isAd()) {
-      // if we are going to cause two consecutive ads or ad is still
-      // loading we will try again on next user interaction
+    if (!this.isCurrentAdLoaded_ || this.adsAreBlocked_(pageBeforeAd) ||
+        pageBeforeAd.isAd() || pageAfterAd.isAd()) {
+      // There are three checks here that we check before inserting an ad. If
+      // any of these fail we will try again on next page navigation.
+      // 1. Ad must be loaded.
+      // 2. Pubs can opt out of ad placement using 'block-ads' attribute.
+      // 3. We will not show two ads in a row.
       return AD_STATE.PENDING;
     }
 
@@ -660,6 +666,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
 
+  /**
+   * Users may put an 'block-ads' attribute on their pages to prevent ads from
+   * showing in specific slots
+   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @return {boolean}
+   * @private
+   */
+  adsAreBlocked_(page) {
+    return page.element.hasAttribute(AD_BLOCK_ATTR);
+  }
 
   /**
    * Call an analytics event with the last created Ad.
