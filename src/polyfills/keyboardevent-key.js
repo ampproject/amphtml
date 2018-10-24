@@ -16,28 +16,26 @@
 
 // Original shim code: https://github.com/shvaikalesh/shim-keyboard-event-key
 
-import {hasOwn} from '../utils/object';
+import {dict, hasOwn} from '../utils/object';
 
-const keys = {
-  Win: 'Meta',
-  Scroll: 'ScrollLock',
-  Spacebar: ' ',
-
-  Down: 'ArrowDown',
-  Left: 'ArrowLeft',
-  Right: 'ArrowRight',
-  Up: 'ArrowUp',
-
-  Del: 'Delete',
-  Apps: 'ContextMenu',
-  Esc: 'Escape',
-
-  Multiply: '*',
-  Add: '+',
-  Subtract: '-',
-  Decimal: '.',
-  Divide: '/',
-};
+/** @dict */
+const keys = dict({
+  'Win': 'Meta',
+  'Scroll': 'ScrollLock',
+  'Spacebar': ' ',
+  'Down': 'ArrowDown',
+  'Left': 'ArrowLeft',
+  'Right': 'ArrowRight',
+  'Up': 'ArrowUp',
+  'Del': 'Delete',
+  'Apps': 'ContextMenu',
+  'Esc': 'Escape',
+  'Multiply': '*',
+  'Add': '+',
+  'Subtract': '-',
+  'Decimal': '.',
+  'Divide': '/',
+});
 
 /**
  * Sets the KeyboardEvent#key shim if it does not exist.
