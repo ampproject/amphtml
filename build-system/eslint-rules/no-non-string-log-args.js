@@ -71,22 +71,14 @@ const selector = transformableMethods.map(method => {
   return `CallExpression[callee.property.name=${method.name}]`;
 }).join(',');
 
-function collectMessage(node, acc) {
-  if (node.type === 'Literal') {
-    acc.push(node);
-    return acc;
-  }
-  // Allow for string concatenation operations.
-  if (node.type === 'BinaryExpression' && node.operator === '+') {
-    return isMessageString(node.left) && isMessageString(node.right);
-  }
-  return acc;
-}
-
 
 module.exports = function(context) {
   return {
     [selector]: function(node) {
+      // Don't evaluate or transform log.js
+      if (context.getFileName() === 'src/log.js') {
+        return;
+      }
       // Make sure that callee is a CallExpression as well.
       // dev().assert() // enforce rule
       // dev.assert() // ignore
@@ -133,6 +125,9 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
+            if (!metadata.variadic) {
+              return;
+            }
             let tokens = context.getTokens(argToEval);
             let hasStringInArg = tokens.some(x => x.type === 'String');
             // If it doesn't have any string then it's unfixable and needs
@@ -157,8 +152,12 @@ class ArgFixer {
     this.refs = [];
   }
 
-  toString() {
+  getSanitizedArg() {
     return this.sanitizedStr;
+  }
+
+  getRefsAsArgumentsString() {
+    ', ' + this.refs.join(',');
   }
 
   parse() {
@@ -201,7 +200,8 @@ class ArgFixer {
 
   chompRefTilPunctuatorOrEnd() {
     let refValue = '';
-    while (this.cur() && !(this.cur().type === "Punctuator" && this.cur().value === '+')) {
+    while (this.cur() &&
+        !(this.cur().type === "Punctuator" && this.cur().value === '+')) {
       refValue += this.cur().value;
       this.next();
     }
@@ -220,7 +220,8 @@ class ArgFixer {
         // If we're at the beginning of a Token and the first char is
         // one of these then this is either a closing tick of a template
         // or a closing of an interpolation segment.
-        if (i === 0 && (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
+        if (i === 0 &&
+            (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
           inTemplateEval = false;
           continue;
         }
