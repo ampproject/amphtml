@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import {StateChangeType} from './navigation-state';
+import {dict} from '../../../src/utils/object';
 
 /**
- * @typedef {!Object<string, *>}
+ * @typedef {!JsonObject}
  */
 export let StoryVariableDef;
 
@@ -41,13 +42,13 @@ export class AmpStoryVariableService {
    */
   constructor() {
     /** @private {!StoryVariableDef} */
-    this.variables_ = {
+    this.variables_ = dict({
       [Variable.STORY_PAGE_INDEX]: null,
       [Variable.STORY_PAGE_ID]: null,
       [Variable.STORY_PAGE_COUNT]: null,
       [Variable.STORY_PROGRESS]: null,
       [Variable.STORY_IS_MUTED]: null,
-    };
+    });
   }
 
   /**

@@ -22,9 +22,9 @@ import {
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
 import {dev, user} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -177,20 +177,21 @@ class SignalTrackerDef {
 
 /**
  * The analytics event.
+ * @dict
  */
 export class AnalyticsEvent {
   /**
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {?JsonObject=} opt_vars A map of vars and their values.
    */
   constructor(target, type, opt_vars) {
     /** @const */
-    this.target = target;
+    this['target'] = target;
     /** @const */
-    this.type = type;
+    this['type'] = type;
     /** @const */
-    this.vars = opt_vars || Object.create(null);
+    this['vars'] = opt_vars || dict();
   }
 }
 
@@ -296,7 +297,7 @@ export class CustomEventTracker extends EventTracker {
         setTimeout(() => {
           for (let i = 0; i < bufferLength; i++) {
             const event = buffer[i];
-            if (target.contains(event.target)) {
+            if (target.contains(event['target'])) {
               listener(event);
             }
           }
@@ -318,7 +319,7 @@ export class CustomEventTracker extends EventTracker {
     return this.observables_[eventType].add(event => {
       // Wait for target selected
       targetReady.then(target => {
-        if (target.contains(event.target)) {
+        if (target.contains(event['target'])) {
           listener(event);
         }
       });
@@ -330,7 +331,7 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
-    const eventType = event.type;
+    const eventType = event['type'];
     const isSandboxEvent = startsWith(eventType, 'sandbox-');
     const observables = this.observables_[eventType];
 
@@ -493,12 +494,12 @@ export class ScrollEventTracker extends EventTracker {
    * as keys and false as values.
    *
    * @param {!Array<number>} bounds array of bounds.
-   * @return {!Object<number,boolean>} Object with normalized bounds as keys
+   * @return {!JsonObject} Object with normalized bounds as keys
    * and false as value.
    * @private
    */
   normalizeBoundaries_(bounds) {
-    const result = {};
+    const result = dict({});
     if (!bounds || !Array.isArray(bounds)) {
       return result;
     }
@@ -540,7 +541,7 @@ export class ScrollEventTracker extends EventTracker {
         continue;
       }
       bounds[bound] = true;
-      const vars = Object.create(null);
+      const vars = dict();
       vars[varName] = b;
       listener(
           new AnalyticsEvent(
@@ -849,17 +850,17 @@ class TimerEventHandler {
     return 0;
   }
 
-  /** @return {{timerDuration: number, timerStart: number}} */
+  /** @return {!JsonObject} */
   getTimerVars() {
     let timerDuration = 0;
     if (this.isRunning()) {
       timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    return {
+    return dict({
       'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
-    };
+    });
   }
 }
 
@@ -1079,7 +1080,7 @@ export class VideoEventTracker extends EventTracker {
       const isVisibleType = (type === VideoAnalyticsEvents.SESSION_VISIBLE);
       const normalizedType =
           isVisibleType ? VideoAnalyticsEvents.SESSION : type;
-      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+      const details = /** @type {?JsonObject|undefined} */ (getData(event));
 
       if (normalizedType !== on) {
         return;
@@ -1244,7 +1245,7 @@ export class VisibilityTracker extends EventTracker {
    * @param {string} eventType
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Element} target
-   * @param {!Object<string, *>} state
+   * @param {!JsonObject} state
    * @private
    */
   onEvent_(eventType, listener, target, state) {

@@ -19,11 +19,12 @@ import {
   serializeQueryString,
 } from '../../../src/url';
 
-/** @typedef {{
- *    trigger: string,
- *    timestamp: null,
- *    extraUrlParams: !JsonObject
- *  }} */
+/**
+ * "trigger": string
+ * "timestamp": null,
+ *  "extraUrlParams": !JsonObject
+ */
+/** @typedef {!JsonObject} */
 export let batchSegmentDef;
 
 /**
@@ -62,7 +63,7 @@ export const TransportSerializers = {
  */
 export function defaultSerializer(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
-      .map(item => serializeQueryString(item.extraUrlParams))
+      .map(item => serializeQueryString(item['extraUrlParams']))
       .filter(queryString => !!queryString)
       .join('&');
   let requestUrl;

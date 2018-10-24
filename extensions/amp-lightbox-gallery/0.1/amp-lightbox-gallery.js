@@ -46,6 +46,7 @@ import {
   translate,
 } from '../../../src/transition';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
@@ -463,7 +464,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
-    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', {});
+    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', dict({}));
     let isInStandardMode, isInOverflowMode, descriptionOverflows;
     const measureOverflowState = () => {
       isInStandardMode = this.descriptionBox_.classList
@@ -633,7 +634,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
-    triggerAnalyticsEvent(this.element, 'controlsToggled', {});
+    triggerAnalyticsEvent(this.element, 'controlsToggled', dict({}));
   }
 
   /**
@@ -797,7 +798,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }).then(() => this.openLightboxForElement_(element))
         .then(() => {
           this.showControls_();
-          triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
+          triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
         });
   }
 
@@ -1313,7 +1314,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       toggle(dev().assertElement(this.carousel_), false);
       toggle(dev().assertElement(this.descriptionBox_), false);
     });
-    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', {});
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
   }
 
   /**

@@ -79,7 +79,7 @@ export class AmpStoryAnalytics {
     variablesPromise.then(
         variables => {
           triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!Object<string, string>} */ (variables));
+              /** @type {!JsonObject} */ (variables));
         },
         reason => {
           dev().error('AMP-STORY', 'Could not get analytics variables', reason);

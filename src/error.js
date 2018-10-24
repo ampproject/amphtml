@@ -660,10 +660,10 @@ export function detectJsEngineFromStack() {
  */
 export function reportErrorToAnalytics(error, win) {
   if (isExperimentOn(win, 'user-error-reporting')) {
-    const vars = {
+    const vars = dict({
       'errorName': error.name,
       'errorMessage': error.message,
-    };
+    });
     triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
   }
 }
