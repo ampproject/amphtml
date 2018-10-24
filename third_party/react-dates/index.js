@@ -4,7 +4,7 @@ import 'react-dates';
 // A very basic polyfill for Array.from,
 // to avoid needing to use a full 3p implementation
 if (!Array.from) {
-  Array.from = function (arrayLike) {
+  function simpleArrayFrom(arrayLike) {
     if (!arrayLike) {
       return [];
     }
@@ -13,6 +13,17 @@ if (!Array.from) {
       return [];
     }
 
-    return [].concat(arrayLike);
+    const result = [];
+    for (let i = 0; i < arrayLike.length; i++) {
+      result[i] = arrayLike[i];
+    }
+    return result;
   }
+
+  Object.defineProperty(Array, 'from', {
+    writable: true,
+    enumerable: false,
+    configurable: true,
+    value: simpleArrayFrom,
+  });
 }
