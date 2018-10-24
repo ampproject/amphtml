@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 
 /**
@@ -34,11 +32,6 @@ export class FocusHandler {
     /** @const @private {!./messaging/messaging.Messaging} */
     this.messaging_ = messaging;
 
-    /**
-     * @const @private {!Array<function()>}
-     */
-    this.unlistenHandlers_ = [];
-
     this.listenForFocusEvents_();
   }
 
@@ -46,22 +39,13 @@ export class FocusHandler {
    * @private
    */
   listenForFocusEvents_() {
-    const handleEvent = this.handleEvent_.bind(this);
     const doc = this.win.document;
 
     const options = {
       capture: false,
     };
-    this.unlistenHandlers_.push(
-        listen(doc, 'focusin', handleEvent, options));
-  }
 
-  /**
-   * @private
-   */
-  unlisten_() {
-    this.unlistenHandlers_.forEach(unlisten => unlisten());
-    this.unlistenHandlers_.length = 0;
+    listen(doc, 'focusin', this.handleEvent_.bind(this), options);
   }
 
   /**
