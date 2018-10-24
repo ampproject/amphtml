@@ -173,8 +173,8 @@ describes.realWin('amp-install-serviceworker', {
             expect(fakeRegistration.installing.addEventListener)
                 .to.be.calledWith('statechange', sinon.match.func);
             expect(postMessageStub).to.be.calledWith(JSON.stringify({
-              type: 'first-visit-caching',
-              data: AMP_SCRIPTS,
+              type: 'FIRST_VISIT_CACHING',
+              payload: AMP_SCRIPTS,
             }));
           });
         });
