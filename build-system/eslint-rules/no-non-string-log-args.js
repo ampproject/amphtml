@@ -133,20 +133,98 @@ module.exports = function(context) {
           node: argToEval,
           message: errMsg,
           fix: function(fixer) {
-             const text = context.getSourceCode().text;
+            const text = context.getSourceCode().text;
             const callExpr = text.slice(node.start, node.end);
-            const argsMatcher = new RegExp(`${calleeObject.callee.name}\\(\\)\\.${metadata.name}\\(([.\\n]*)\\)`);
-            console.log('str:', callExpr)
-            console.log('matcher:', argsMatcher);
+            // matches the string inside the parens dev().someMethod(...);
+            const argsMatcher = new RegExp(
+              `${calleeObject.callee.name}\\(\\)\\.`+
+              `${metadata.name}\\(((?:.|\n)*)\\)`);
             const logMethodCall = callExpr.match(argsMatcher);
-            console.log('match this:', logMethodCall[1])
-            //node.arguments[metadata.startPos] = { type: 'Literal', value: "blah", raw: "blah" };
-            //const callConstruct = `${calleeObject.callee.name}().${methodInvokedName}`;
-            //return fixer.replaceText(node, 'blah().wah()');
+            // ArgParser retrieves the raw string arguments into the
+            // method call.
+            const parser = new ArgsParser(logMethodCall[1]).parse();
+            const arg = parser.args[metadata.startPos];
+            if (/'|"|`/.test(arg)) {
+              try {
+              const [fixedArg, refs] = fixerHelper(arg);
+              parser.args[metadata.startPos] = fixedArg;
+              fixer.replaceText(node, `${calleeObject.callee.name}.${metadata.name}(${parser.toString()})`);
+              } catch (e) {
+                console.error('error', e.stack);
+              }
+            }
           }
         });
       }
     },
   };
+};
 
+function fixerHelper(arg) {
+  // Capture all template strings inside the current argument.
+  // The extra '' + and + '' for prefix and suffix makes it easier for us to
+  // match reference concatenations without having to worry about boundaries.
+  let noTemplateArg = '\'\' + ' + arg.replace(/`(.*?)`/g, function(full, outerGrp1, startPos) {
+    // Escape all single quoutes inside template literal since we will transform
+    // this into a normal string concat.
+    outerGrp1 = outerGrp1.replace(/'/, '\\\'')
+    return '\'' + outerGrp1.replace(/\$\{(.*?)\}/g, function(full, grp1, startPos) {
+      const  suffix = startPos + full.length == grp1.length ? '' : ' + \'';
+      return `\' + ${grp1}${suffix}`;
+     }) + '\'';
+  }) + '+ \'\'';
+  const references = [];
+  // Replace all reference concat ops with '%s' strings.
+  // We try and match + symbol + patterns and replace them with %s and then
+  // accumulate then in references to be added as variadic arguments when possible.
+  const sanitizedStr = noTemplateArg.replace(/(\+)(?!(?:\s*'))(?:.)*?\1/g, function(full, grp1, startPos) {
+    references.push(full.slice(1, full.length - 1).trim());
+    return '+ \'%s\' +';
+  });
+  const evol = eval;
+  return [evol(sanitizedStr), references];
+}
+
+
+function ArgsParser(expr) {
+  this.expr = expr;
+  this.curPos = 0;
+  this.args = [];
+  this.curArg = 0;
+  this.isInStr = false;
+}
+
+ArgsParser.prototype.getCur = function() {
+  return this.expr[this.curPos];
+}
+
+ArgsParser.prototype.parse = function() {
+  while (this.curPos < this.expr.length) {
+    this.chomp();
+    this.curPos++;
+  }
+  this.args = this.args.map(x => x.replace(/\n/g, ''));
+  return this;
+};
+
+ArgsParser.prototype.chomp = function() {
+  if (!this.isInStr && this.getCur() === ',') {
+    this.curArg++;
+  } else if (!this.isInStr && this.getCur() === '\'') {
+    this.isInStr = true;
+  } else if (this.isInStr && this.getCur() === '\'') {
+    this.isInStr = false;
+  }
+
+  if (!this.args[this.curArg]) {
+    this.args[this.curArg] = '';
+  }
+  if (!this.isInStr && this.getCur() === ',') {
+    return;
+  }
+  this.args[this.curArg] += this.getCur();
+};
+
+ArgsParser.prototype.toString = function() {
+  return + this.args.map(x => `"${x}"`).join(',');
 };
