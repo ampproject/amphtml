@@ -39,6 +39,8 @@ Skimlinks allows you to monetise your content through affiliate marketing. It gi
 
 ## Getting started
 
+A skimlinks account is required in order to use [amp-skimlinks](https://skimlinks.com/)
+
 **Add the required script**
 Inside the `<head>...</head>` section of your AMP page, insert this code before the line `<script async src="https://cdn.ampproject.org/v0.js"></script>`
 
@@ -148,3 +150,7 @@ The `custom-tracking-id` (also `called xcust`) is an optional parameter used to 
 ## Validation
 
 See [amp-skimlinks rules](validator-amp-skimlinks.protoascii) in the AMP validator specification.
+
+## Analytics data
+
+amp-skimlinks uses amp-analytics to collect analytics data. If you require any more information about our privacy policy please visit https://skimlinks.com/privacy-policies/.
