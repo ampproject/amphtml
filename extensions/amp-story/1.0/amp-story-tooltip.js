@@ -4,12 +4,11 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-click-layer-1.0.css';
+import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, childElement, closest} from '../../../src/dom';
+import {addAttributesToElement, childElement} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {setImportantStyles} from '../../../src/style';
@@ -35,7 +34,15 @@ import {setImportantStyles} from '../../../src/style';
  */
 const MIN_VERTICAL_SPACE = 56;
 
-export class AmpStoryClickLayer {
+/**
+ * Padding between tooltip and edges of screen.
+ */
+const EDGE_PADDING = 8;
+
+/**
+ * Tooltip element triggered by clickable elements in the amp-story-grid-layer.
+ */
+export class AmpStoryTooltip {
   /**
    * @param {!Window} win
    */
@@ -50,7 +57,7 @@ export class AmpStoryClickLayer {
      * Root element containing a shadow DOM root.
      * @private {?Element}
      */
-    this.root_ = null;
+    this.shadowRoot_ = null;
 
     /**
      * Tooltip overlay layer.
@@ -81,14 +88,14 @@ export class AmpStoryClickLayer {
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win_.document.createElement('div');
+    this.shadowRoot_ = this.win_.document.createElement('div');
 
     this.tooltipOverlayEl_ = this.buildTemplate_(this.win_.document);
 
-    createShadowRootWithStyle(this.root_, this.tooltipOverlayEl_, CSS);
+    createShadowRootWithStyle(this.shadowRoot_, this.tooltipOverlayEl_, CSS);
 
     this.tooltipOverlayEl_
-        .addEventListener('click', event => this.onClick_(event));
+        .addEventListener('click', event => this.onOutsideClickableEls_(event));
 
     this.storeService_.subscribe(StateProperty.TOOLTIP_STATE, isActive => {
       this.onTooltipStateUpdate_(isActive);
@@ -107,11 +114,11 @@ export class AmpStoryClickLayer {
       }
     });
 
-    return this.root_;
+    return this.shadowRoot_;
   }
 
   /**
-   *
+   * Reacts to store updates related to tooltip active status.
    * @param {boolean} tooltipIsActive
    */
   onTooltipStateUpdate_(tooltipIsActive) {
@@ -122,8 +129,9 @@ export class AmpStoryClickLayer {
   }
 
   /**
-   *
-   * @param {*} uiState
+   * Reacts to desktop state updates and hides navigation buttons since we
+   * already have in the desktop UI.
+   * @param {!UIType} uiState
    */
   onUIStateUpdate_(uiState) {
     this.resources_.mutateElement(this.tooltipOverlayEl_, () => {
@@ -134,79 +142,53 @@ export class AmpStoryClickLayer {
   }
 
   /**
-   *
-   * @param {!Element} elem
+   * Builds tooltip and attaches it depending on the clicked element content and
+   * position.
+   * @param {!Element} clickedEl
    */
-  attachTooltipToEl_(elem) {
-    const href = elem.getAttribute('i-amphtml-data-amp-story-tooltip-href');
-    const iconSrc = elem.getAttribute('icon');
+  attachTooltipToEl_(clickedEl) {
+    const href = clickedEl.getAttribute('i-amphtml-data-amp-story-tooltip-href');
+    const iconSrc = clickedEl.getAttribute('icon');
+    const domainName = getSourceOriginForElement(clickedEl, href);
 
-    const domainName = getSourceOriginForElement(elem, href);
     this.resources_.mutateElement(this.tooltip_, () => {
       addAttributesToElement(this.tooltip_, {'href': href});
 
-      const existingTooltipText =
-        childElement(this.tooltip_,
-            el => el.classList.contains('i-amphtml-tooltip-text'));
-
-      if (existingTooltipText) {
-        existingTooltipText.textContent = domainName;
-      } else {
-        const html = htmlFor(this.win_.document);
-        const tooltipText =
-          html`<p class="i-amphtml-tooltip-text" ref="text"></p>`;
-        tooltipText.textContent = domainName;
-        this.tooltip_.insertBefore(tooltipText, this.tooltip_.firstChild);
-      }
+      this.appendTextToTooltip_(domainName);
 
       if (iconSrc) {
         this.appendIconToTooltip_(iconSrc);
       }
 
-      this.positionTooltip_(elem);
+      this.positionTooltip_(clickedEl);
     });
   }
 
   /**
-   *
-   * @param {*} elem
+   * Checks for existing text content and modifies it or appends a new text node
+   * if building tooltip for the first time.
+   * @param {string} domainName
    */
-  positionTooltip_(elem) {
-    const rect = elem.getBoundingClientRect();
-    let top, left;
+  appendTextToTooltip_(domainName) {
+    const existingTooltipText =
+    childElement(this.tooltip_,
+        el => el.classList.contains('i-amphtml-tooltip-text'));
 
-    // Top property
-    // Tooltip fits between element and top of screen.
-    this.tooltipArrow_.removeAttribute('on-top');
-    if (rect.top > MIN_VERTICAL_SPACE) {
-      top = rect.top - MIN_VERTICAL_SPACE;
-    } else if (this.win_.innerHeight - rect.bottom > MIN_VERTICAL_SPACE) {
-      // Position under element.
-      top = rect.bottom + 8;
-      this.tooltipArrow_.setAttribute('on-top', '');
+    if (existingTooltipText) {
+      existingTooltipText.textContent = domainName;
     } else {
-      // Element takes whole vertical space. Place on the middle.
-      top = this.win_.innerHeight / 2;
+      const html = htmlFor(this.win_.document);
+      const tooltipText =
+        html`<p class="i-amphtml-tooltip-text" ref="text"></p>`;
+      tooltipText.textContent = domainName;
+      this.tooltip_.insertBefore(tooltipText, this.tooltip_.firstChild);
     }
-
-    // Left property
-    const elCenter = (rect.width / 2) + rect.left;
-    left = elCenter - (this.tooltip_.offsetWidth / 2);
-    const maxLeft = (this.win_.innerWidth - this.tooltip_.offsetWidth - 8);
-    left = Math.min(left, maxLeft);
-    left = Math.max(8, left);
-
-    let arrowOffset = elCenter / this.win_.innerWidth * 100;
-    arrowOffset = Math.min(arrowOffset, 80);
-    arrowOffset = Math.max(arrowOffset, 0);
-
-    setImportantStyles(this.tooltipArrow_, {left: `calc(${arrowOffset}%)`});
-    setImportantStyles(this.tooltip_, {top: `${top}px`, left: `${left}px`});
   }
 
   /**
-   *
-   * @param {*} iconSrc
+   * Checks for existing icon source and modifies it or appends a new tooltip
+   * icon node if building tooltip for the first time.
+   * @param {string} iconSrc
    */
   appendIconToTooltip_(iconSrc) {
     const existingTooltipIcon =
@@ -231,39 +213,79 @@ export class AmpStoryClickLayer {
   }
 
   /**
-   *
-   * @param {*} event
+   * Positions tooltip and its pointing arrow according to the position of the
+   * clicked element.
+   * @param {!Element} clickedEl
    */
-  onClick_(event) {
-    const target = dev().assertElement(event.target);
+  positionTooltip_(clickedEl) {
+    const clickedRect = clickedEl.getBoundingClientRect();
 
-    if (this.elementOutsideUsableArea_(target)) {
-      event.stopPropagation();
-      this.closeTooltip_();
+    // Reset tooltip arrow positioning.
+    this.tooltipArrow_.removeAttribute('on-top');
+
+    // Vertical positioning.
+    let top;
+    // Tooltip fits above clicked element.
+    if (clickedRect.top > MIN_VERTICAL_SPACE) {
+      top = clickedRect.top - MIN_VERTICAL_SPACE;
+    } else if (this.win_.innerHeight - clickedRect.bottom >
+        MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element.
+      top = clickedRect.bottom + EDGE_PADDING;
+      this.tooltipArrow_.setAttribute('on-top', '');
+    } else { // Element takes whole vertical space. Place tooltip on the middle.
+      top = this.win_.innerHeight / 2;
     }
+
+    // Horizontal positioning.
+    let left;
+    const elCenter = (clickedRect.width / 2) + clickedRect.left;
+    left = elCenter - (this.tooltip_.offsetWidth / 2);
+    const maxLeft =
+      (this.win_.innerWidth - this.tooltip_.offsetWidth - EDGE_PADDING);
+
+    // Make sure tooltip is not out of screen.
+    left = Math.min(left, maxLeft);
+    left = Math.max(EDGE_PADDING, left);
+
+    // Position tooltip arrow horizontally depending on clicked element's center
+    // in relation to the screen width.
+    let arrowLeftOffset = elCenter / this.win_.innerWidth * 100;
+    arrowLeftOffset = Math.min(arrowLeftOffset, 80);
+    arrowLeftOffset = Math.max(arrowLeftOffset, 0);
+
+    setImportantStyles(this.tooltipArrow_, {left: `calc(${arrowLeftOffset}%)`});
+    setImportantStyles(this.tooltip_, {top: `${top}px`, left: `${left}px`});
   }
 
+  /**
+   * Handles click outside of clickable elements.
+   * @param {!Event} event
+   */
+  onOutsideClickableEls_(event) {
+    event.stopPropagation();
+    this.closeTooltip_();
+  }
 
   /**
-   * Builds the template.
+   * Builds the template and adds corresponding listeners to nav buttons.
    * @param {!Document} doc
    */
   buildTemplate_(doc) {
     const html = htmlFor(doc);
     const tooltipOverlay =
         html`
-        <section class="i-amphtml-story-click-layer i-amphtml-hidden"
-            ref="overlay">
-          <div class="i-amphtml-story-click-layer-button-container" left-button
-              ref="buttonLeft">
-            <button class="i-amphtml-story-tooltip-nav-button" left-button
-                role="button">
+        <section class="i-amphtml-story-tooltip-layer i-amphtml-hidden">
+          <div class="i-amphtml-tooltip-background"></div>
+          <div class="i-amphtml-story-tooltip-layer-nav-button-container"
+              left-button>
+            <button class="i-amphtml-story-tooltip-layer-nav-button" left-button
+                role="button" ref="buttonLeft">
             </button>
           </div>
-          <div class="i-amphtml-story-click-layer-button-container"
-              right-button ref="buttonRight">
-            <button class="i-amphtml-story-tooltip-nav-button" right-button
-                role="button">
+          <div class="i-amphtml-story-tooltip-layer-nav-button-container"
+              right-button>
+            <button class="i-amphtml-story-tooltip-layer-nav-button"
+                right-button role="button" ref="buttonRight">
             </button>
           </div>
           <a class="i-amphtml-story-tooltip" target="_top" ref="tooltip">
@@ -290,32 +312,20 @@ export class AmpStoryClickLayer {
   }
 
   /**
-   *
-   * @param {*} event
-   * @param {*} direction
+   * Navigates to next/previous page.
+   * @param {!Event} event
+   * @param {string} direction
    */
   onNavigationalClick_(event, direction) {
     event.preventDefault();
-    dispatch(this.win_, this.root_, direction, undefined,
+    dispatch(this.win_, this.shadowRoot_, direction, undefined,
         {bubbles: true});
   }
 
   /**
-   *
+   * Hides the tooltip layer.
    */
   closeTooltip_() {
     this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, false);
-  }
-
-  /**
-   * @param {!Element} el
-   * @return {boolean}
-   * @private
-   */
-  elementOutsideUsableArea_(el) {
-    const clickableEls = htmlRefs(this.tooltipOverlayEl_);
-    const {buttonLeft, buttonRight, tooltip} = clickableEls;
-    return !closest(el,
-        el => el == buttonLeft || el == buttonRight || el == tooltip);
   }
 }

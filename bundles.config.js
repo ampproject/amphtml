@@ -261,7 +261,7 @@ exports.extensionBundles = [
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
-        'amp-story-click-layer',
+        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
         'amp-story-unsupported-browser-layer',

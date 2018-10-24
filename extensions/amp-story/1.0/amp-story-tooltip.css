@@ -1,40 +1,48 @@
-.i-amphtml-story-click-layer {
+.i-amphtml-story-tooltip-layer {
   bottom: 0 !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  color: #fff !important;
   z-index: 100001 !important;
   position: absolute !important;
 }
 
-.i-amphtml-story-click-layer.i-amphtml-hidden {
+.i-amphtml-tooltip-background {
+  bottom: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+  background-color: black !important;
+  opacity: 0.3 !important
+}
+
+.i-amphtml-story-tooltip-layer.i-amphtml-hidden {
   opacity: 0 !important;
-  transition: background-image 0.225s linear !important;
   pointer-events: none !important;
 }
 
-.i-amphtml-story-click-layer-button-container {
+.i-amphtml-story-tooltip-layer-nav-button-container {
   height: 100% !important;
-  width: 60px !important;
+  width: 160px !important;
   position: absolute !important;
 }
 
-.i-amphtml-story-click-layer-button-container[left-button] {
+.i-amphtml-story-tooltip-layer-nav-button-container[left-button] {
   background-image: linear-gradient(89deg, rgba(33,33,33,0.30) 2%, rgba(33,33,33,0) 100%) !important;
   left: 0 !important;
 }
 
-.i-amphtml-story-click-layer-button-container[right-button] {
+.i-amphtml-story-tooltip-layer-nav-button-container[right-button] {
   background-image: linear-gradient(89deg, rgba(33,33,33,0) 2%, rgba(33,33,33,0.30) 100%) !important;
   right: 0 !important;
 }
 
-.i-amphtml-story-tooltip-nav-button {
+.i-amphtml-story-tooltip-layer-nav-button {
   position: absolute !important;
   top: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
+  width: 48px !important;
+  height: 48px !important;
   padding: 0 !important;
   border: 0 !important;
   background-color: transparent !important;
@@ -42,25 +50,25 @@
   transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-tooltip-nav-button[left-button] {
+.i-amphtml-story-tooltip-layer-nav-button[left-button] {
   left: 0 !important;
-  background-image: url('data:image/svg+xml; charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="36px" height="36px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M30.83 14.83L28 12 16 24l12 12 2.83-2.83L21.66 24z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml; charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M30.83 14.83L28 12 16 24l12 12 2.83-2.83L21.66 24z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
 }
 
-.i-amphtml-hidden .i-amphtml-story-tooltip-nav-button[left-button] {
+.i-amphtml-hidden .i-amphtml-story-tooltip-layer-nav-button[left-button] {
   transform: translateX(8px);
 }
 
-.i-amphtml-story-tooltip-nav-button[right-button] {
+.i-amphtml-story-tooltip-layer-nav-button[right-button] {
   right: 0 !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="36px" height="36px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M20 12l-2.83 2.83L26.34 24l-9.17 9.17L20 36l12-12z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M20 12l-2.83 2.83L26.34 24l-9.17 9.17L20 36l12-12z"/><path d="M0 0h48v48H0z" fill="none"/></svg>') !important;
 }
 
-.i-amphtml-hidden .i-amphtml-story-tooltip-nav-button[right-button] {
+.i-amphtml-hidden .i-amphtml-story-tooltip-layer-nav-button[right-button] {
   transform: translateX(-8px);
 }
 
-[desktop] .i-amphtml-story-click-layer-button-container {
+[desktop] .i-amphtml-story-tooltip-layer-nav-button-container {
   display: none !important;
 }
 
@@ -115,17 +123,17 @@
 }
 
 .i-amphtml-story-tooltip-arrow {
-  border-right: 12px solid transparent !important;
-  border-left: 12px solid transparent !important;
-  border-top: 18px solid white !important;
+  border-right: 8px solid transparent !important;
+  border-left: 8px solid transparent !important;
+  border-top: 10px solid white !important;
   content: "" !important;
   position: absolute !important;
-  bottom: -12px !important;
+  bottom: -8px !important;
 }
 
 .i-amphtml-story-tooltip-arrow[on-top] {
   bottom: auto !important;
-  top: -12px !important;
+  top: -8px !important;
   border-top: 0px !important;
-  border-bottom: 18px solid white !important;
+  border-bottom: 8px solid white !important;
 }

@@ -196,7 +196,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
           el.setAttribute('i-amphtml-data-amp-story-tooltip-href', href);
           el.addEventListener('click', event => {
             event.stopPropagation();
-            // clickLayer.onAnchorClick(href, event);
             this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, {
               isActive: true,
               element: el,

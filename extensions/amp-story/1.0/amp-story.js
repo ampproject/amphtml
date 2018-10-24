@@ -39,12 +39,12 @@ import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
-import {AmpStoryClickLayer} from './amp-story-click-layer';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, PageState} from './amp-story-page';
+import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -221,7 +221,7 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
     /** @private @const {!ClickLayer} */
-    this.clickLayer_ = new AmpStoryClickLayer(this.win);
+    this.tooltip_ = new AmpStoryTooltip(this.win);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -741,7 +741,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         })
         // TODO(enriqe): only build when story contains clickable elements.
-        .then(() => this.element.appendChild(this.clickLayer_.build()));
+        .then(() => this.element.appendChild(this.tooltip_.build()));
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
