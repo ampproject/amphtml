@@ -408,20 +408,23 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
-  if (!argv.single_pass) {
-    promises.push(
-        compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          checkTypes: opt_checkTypes,
-          watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        }));
-  }
+  //if (!argv.single_pass) {
+    // TODO(erwinm): temporarily commented out to unblock master builds.
+    // theres a race condition between the read to amp.js here, and on the
+    // main v0.js compile above.
+    //promises.push(
+        //compileJs('./src/', 'amp.js', './dist', {
+          //toName: 'amp-esm.js',
+          //minifiedName: 'v0-esm.js',
+          //includePolyfills: true,
+          //includeOnlyESMLevelPolyfills: true,
+          //checkTypes: opt_checkTypes,
+          //watch,
+          //preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          //minify: shouldMinify,
+          //wrapper: wrappers.mainBinary,
+        //}));
+  //}
 
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
