@@ -9,3 +9,4 @@ https://github.com/vega/vega/tree/4.x
 Local Modifications:
 Replace the universal module definition with a factory wrapper.
 Changed initial unmask behavior when value patching is disabled.
+Altered trigger implementation to not use CustomElement for triggering events

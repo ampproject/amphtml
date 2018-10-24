@@ -83,7 +83,8 @@ export function factory(window, document) {
                     };
                     if (document.createEvent) {
                         try {
-                            evnt = new CustomEvent(ev, params);
+                            // evnt = new CustomEvent(ev, params);
+                            evnt = ["change","input","click"].indexOf(ev) > -1 ? new Event(ev, params) : new CustomEvent(ev, params);
                         } catch (e) {
                             (evnt = document.createEvent("CustomEvent")).initCustomEvent(ev, params.bubbles, params.cancelable, params.detail);
                         }
