@@ -54,11 +54,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.rendererBaseUrl_ = 'https://renderer.apester.com';
+    this.rendererBaseUrl_ = 'http://renderer.apester.local.com';
     /**
      * @const @private {string}
      */
-    this.displayBaseUrl_ = 'https://display.apester.com';
+    this.displayBaseUrl_ = 'http://display.apester.local.com';
     /**
      * @const @private {string}
      */
