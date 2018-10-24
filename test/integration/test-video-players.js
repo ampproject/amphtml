@@ -41,14 +41,6 @@ describe.configure().skipIos().run('amp-video', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-video-iframe', () => {
-  runVideoPlayerIntegrationTests(fixture => {
-    const video = fixture.doc.createElement('amp-video-iframe');
-    video.setAttribute('src', '/examples/amp-video-iframe/frame.html');
-    return video;
-  });
-});
-
 //TODO(aghassemi, #9379): unskip
 describe.skip('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
