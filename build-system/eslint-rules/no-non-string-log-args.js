@@ -134,9 +134,8 @@ module.exports = function(context) {
           message: errMsg,
           fix: function(fixer) {
             let tokens = context.getTokens(argToEval);
-            const lexer = new ArgLexer(tokens);
-            lexer.parse();
-            return fixer.replaceText(argToEval, lexer.toString());
+            let argFixer = new ArgFixer(tokens).parse();
+            return fixer.replaceText(argToEval, argFixer.toString());
           }
         });
       }
@@ -144,22 +143,25 @@ module.exports = function(context) {
   };
 };
 
-class ArgLexer {
+class ArgFixer {
   constructor(tokens) {
     this.tokens = tokens;
     this.cursor = 0;
     this.sanitizedStr = '';
     this.refs = [];
+    console.table(tokens);
   }
 
   toString() {
-    return '\'' + this.sanitizedStr + '\'';
+    return this.sanitizedStr;
   }
 
   parse() {
     while (this.cursor < this.tokens.length) {
       this.chomp();
     }
+    console.log(this.sanitizedStr);
+    console.log(this.refs);
   }
 
   next() {
@@ -173,10 +175,10 @@ class ArgLexer {
   chomp() {
     if (this.isLiteralString()) {
       this.chompString();
-    } else if (this.isVarReference()) {
-      this.chompVarReference();
     } else if (this.isTemplateStart()) {
       this.chompTemplateValueTilEnd();
+    } else if (this.isRefStart()) {
+      this.chompRefTilPunctuatorOrEnd();
     } else {
       this.next();
     }
@@ -193,31 +195,39 @@ class ArgLexer {
     this.next();
   }
 
+  chompRefTilPunctuatorOrEnd() {
+    let refValue = '';
+    while (this.cur() && !(this.cur().type === "Punctuator" && this.cur().value === '+')) {
+      refValue += this.cur().value;
+      this.next();
+    }
+    this.startNewRef();
+    this.addToCurRef(refValue);
+
+  }
+
   chompTemplateValueTilEnd() {
     let templateValue = '';
     let inTemplateEval = false;
 
     while (!this.isTemplateEnd()) {
-      if (this.isVarReference()) {
-        this.chompVarReference();
-      }
       for (let i = 0; i < this.cur().value.length; i++) {
 
-        if (i === 0 && this.cur().value[i] === '}') {
+        if (i === 0 && (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
           inTemplateEval = false;
           continue;
         }
+
         if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
           inTemplateEval = true;
-          this.refs.push('');
-          this.sanitizedStr += '%s';
+          this.startNewRef();
           break;
         }
 
         if (!inTemplateEval) {
           this.sanitizedStr += this.cur().value[i];
         } else {
-          this.refs[this.refs.length - 1] += this.cur().value[i];
+          this.addToCurRef(this.cur().value[i]);
         }
       }
       this.next()
@@ -237,10 +247,19 @@ class ArgLexer {
     return this.cur().type === 'String';
   }
 
-  isVarReference() {
-    const next = this.cur(1);
-    // End of the token list
-    return this.cur().type === 'Identifier' &&
-      (!next || (next.type === 'Punctuator' && next.value === '+'));
+  isRefStart() {
+    //const next = this.cur(1);
+    return (this.cur().type === 'Identifier'||
+            (this.cur().type === 'Keyword' && this.cur().value === 'this')) &&
+      (this.cursor === 0 || (this.cur(-1).type === 'Punctuator' && this.cur(-1).value === '+'));
+  }
+
+  startNewRef() {
+    this.sanitizedStr += '%s';
+    this.refs.push('');
+  }
+
+  addToCurRef(ref) {
+    this.refs[this.refs.length - 1] += ref;
   }
 }
