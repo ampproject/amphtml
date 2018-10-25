@@ -37,14 +37,26 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
+
+/** @const {!Array<string>} */
+const ATTRIBUTES_TO_PROPAGATE = [
+  'allowfullscreen',
+  'allowpaymentrequest',
+  'allowtransparency',
+  'allow',
+  'frameborder',
+  'referrerpolicy',
+  'scrolling',
+  'sandbox',
+];
 
 /** @const {string} */
 const BYSIDE_DOMAIN_ = 'byside.com';
@@ -76,11 +88,25 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @private {?string} */
     this.iframeSrc_ = null;
 
-    /** @private {?Element} */
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
+    /**
+     * @private {?Promise}
+     * @visibleForTesting
+     */
     this.iframePromise_ = null;
+
+    /**
+     * The element which will contain the iframe.
+	 * This may be the amp-byside-content itself if the iframe is non-scrolling,
+	 * or a wrapper element if it is.
+     * @private {?Element}
+     */
+    this.container_ = null;
+
+    /** @private {boolean} */
+    this.isResizable_ = false;
 
     /** @private {string}  */
     this.webcareZone_ = MAIN_WEBCARE_ZONE_;
@@ -131,13 +157,17 @@ export class AmpBysideContent extends AMP.BaseElement {
   buildCallback() {
     this.webcareId_ = user().assert(
         this.element.getAttribute('data-webcare-id'),
-        'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-webcare-id attribute is required for <%s> %s',
+        TAG_,
+        this.element
+    );
 
     this.label_ = user().assert(
         this.element.getAttribute('data-label'),
-        'The data-label attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-label attribute is required for <%s> %s',
+        TAG_,
+        this.element
+    );
 
     this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
         DEFAULT_WEBCARE_ZONE_);
@@ -145,9 +175,28 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.lang_ = (this.element.getAttribute('data-lang') || DEFAULT_LANG_);
     this.fid_ = (this.element.getAttribute('data-fid') || '');
 
+    this.isResizable_ = this.element.hasAttribute('resizable');
+    if (this.isResizable_) {
+      this.element.setAttribute('scrolling', 'no');
+    }
+
+    if (!this.element.hasAttribute('frameborder')) {
+      this.element.setAttribute('frameborder', '0');
+    }
+
+    if (!this.element.hasAttribute('allowtransparency')) {
+      this.element.setAttribute('allowtransparency', 'true');
+    }
+
+    if (!this.element.hasAttribute('allowfullscreen')) {
+      this.element.setAttribute('allowfullscreen', 'true');
+    }
+
     this.origin_ = this.composeOrigin_();
     this.baseUrl_ = this.origin_ + '/BWA' +
         encodeURIComponent(this.webcareId_) + '/amp/';
+
+    this.container_ = makeIOsScrollable(this.element);
   }
 
   /** @override */
@@ -167,10 +216,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     iframe.name = 'amp_byside_content_iframe' + iframeCount_++;
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowtransparency', 'true');
-    iframe.setAttribute('allowfullscreen', 'true');
+
     iframe.setAttribute('title', this.element.getAttribute('title') || '');
 
     setStyles(iframe, {
@@ -179,6 +225,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     this.element.appendChild(this.getOverflowElement_());
     this.applyFillContent(iframe);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
 
     return this.composeSrcUrl_().then(src => {
       this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
@@ -187,8 +234,20 @@ export class AmpBysideContent extends AMP.BaseElement {
       const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
       this.unlisteners_.push(unlisten);
 
-      this.element.appendChild(iframe);
-      return (this.iframePromise_ = this.loadPromise(iframe));
+      this.container_.appendChild(iframe);
+
+      return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
+        // On iOS the iframe at times fails to render inside the `overflow:auto`
+        // container. To avoid this problem, we set the `overflow:auto` property
+        // 1s later via `amp-active` class.
+        if (this.container_ != this.element) {
+          Services.timerFor(this.win).delay(() => {
+            this.mutateElement(() => {
+              this.container_.classList.add('amp-active');
+            });
+          }, 1000);
+        }
+      }));
     }).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
@@ -290,23 +349,47 @@ export class AmpBysideContent extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
+   * @param {Object} data
    * @private
    */
   updateSize_(data) {
+    if (!this.iframe_.hasAttribute('scrollable')) {
+      this.iframe_.setAttribute('scrollable', '0');
+    }
+
     this.getVsync().measure(() => {
       // Calculate new height of the container to include the padding.
       // If padding is negative, just use the requested height directly.
-      let newHeight;
+      let newHeight, newWidth;
       const height = parseInt(data['height'], 10);
       if (!isNaN(height)) {
         newHeight = Math.max(
             height + (this.element./*OK*/offsetHeight
             - this.iframe_./*OK*/offsetHeight),
             height);
-        this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
+      }
+
+      const width = parseInt(data['width'], 10);
+      if (!isNaN(width)) {
+        newWidth = Math.max(
+            width + (this.element./*OK*/offsetWidth
+              - this.iframe_./*OK*/offsetWidth),
+            width);
+      }
+
+      if (newHeight !== undefined || newWidth !== undefined) {
+        this.attemptChangeSize(newHeight, newWidth).then(() => {
+          if (newHeight !== undefined) {
+			  this.element.setAttribute('height', newHeight);
+          }
+          if (newWidth !== undefined) {
+			  this.element.setAttribute('width', newWidth);
+          }
+        }, () => {});
       } else {
-        dev().warn(TAG_,
-            'Ignoring embed-size request because no height value is provided',
+        user().warn(TAG_,
+            'Ignoring embed-size request because '
+			+ 'no width or height value is provided',
             this.element);
       }
     });
@@ -324,6 +407,22 @@ export class AmpBysideContent extends AMP.BaseElement {
     }
     return true; // Call layoutCallback again.
   }
+}
+
+/**
+ * If scrolling is allowed for the iframe, wraps the element into a container
+ * that is scrollable because iOS auto expands iframes to their size.
+ * @param {!Element} element
+ * @return {!Element} The container or the iframe.
+ */
+function makeIOsScrollable(element) {
+  if (element.getAttribute('scrolling') != 'no') {
+    const wrapper = element.ownerDocument.createElement(
+        'i-amphtml-scroll-container');
+    element.appendChild(wrapper);
+    return wrapper;
+  }
+  return element;
 }
 
 AMP.extension('amp-byside-content', '0.1', AMP => {

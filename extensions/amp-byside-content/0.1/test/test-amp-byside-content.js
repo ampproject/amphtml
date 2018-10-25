@@ -62,7 +62,7 @@ describes.realWin('amp-byside-content', {
   function testIframe(elem) {
     const iframe = elem.querySelector('iframe');
     expect(iframe).to.not.be.null;
-    expect(iframe.getAttribute('scrolling')).to.equal('no');
+    expect(iframe.getAttribute('frameborder')).to.equal('0');
     expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.fakeSrc).to.satisfy(src => {
       return src.startsWith(elem.implementation_.baseUrl_);
@@ -72,7 +72,7 @@ describes.realWin('amp-byside-content', {
   it('renders', () => {
     return getElement({
       'data-webcare-id': 'D6604AE5D0',
-      'data-label': 'amp-simple',
+	  'data-label': 'amp-simple',
     }).then(elem => {
       testIframe(elem);
     });
@@ -157,6 +157,37 @@ describes.realWin('amp-byside-content', {
       elem.implementation_.iframePromise_.then(() => {
         expect(placeholder).to.have.display('none');
       });
+    });
+  });
+
+  it('passes down sandbox attribute to iframe', () => {
+    const sandbox = 'allow-scripts allow-same-origin allow-popups';
+    const attributes = {
+      'data-webcare-id': 'D6604AE5D0',
+      'data-label': 'placeholder-label',
+      'sandbox': sandbox,
+	  };
+
+    return getElement(attributes, false).then(elem => {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('sandbox')).to.equal(sandbox);
+    });
+  });
+
+  it('sets scrollable atribute in iframe', () => {
+    const sandbox = 'allow-scripts allow-same-origin allow-popups';
+    const attributes = {
+      'data-webcare-id': 'D6604AE5D0',
+      'data-label': 'placeholder-label',
+      'sandbox': sandbox,
+	  'resizable': true,
+	  };
+
+    return getElement(attributes, false).then(elem => {
+      const iframe = elem.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.getAttribute('scrolling')).to.equal('no');
     });
   });
 });
