@@ -123,7 +123,6 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  * and sending the token back to the parent amp-recaptcha component
  *
  * Data Object will have the following fields
- * sitekey {string} - reCAPTCHA sitekey used to identify the site
  * action {string} - action to be dispatched with grecaptcha.execute
  * id {number} - id given to us by a counter in the recaptcha service
  *
@@ -133,16 +132,7 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
 function actionTypeHandler(grecaptcha, data) {
   // TODO: @torch2424: Verify message origin
 
-  if (sitekey !== data.sitekey) {
-    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
-      'id': data.id,
-      'error': 'sitekey in action data must be the same sitekey, ' +
-        'used to create the recaptcha bootstrap iframe.',
-    }));
-    return;
-  }
-
-  const executePromise = grecaptcha.execute(data.sitekey, {
+  const executePromise = grecaptcha.execute(sitekey, {
     action: data.action,
   });
 

@@ -136,24 +136,15 @@ export class AmpRecaptchaService {
    * Takes in an element resource ID, sitekey, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
-   * @param {string} sitekey
    * @param {string} action
    * @return {Promise}
    */
-  execute(resourceId, sitekey, action) {
+  execute(resourceId, action) {
     if (!this.iframe_) {
       return Promise.reject(new Error(
           'An iframe is not created. You must register before executing'
       ));
     }
-
-    if (this.sitekey_ !== sitekey) {
-      return Promise.reject(new Error(
-          'You must supply the same sitekey that ' +
-          'was used to register the element.'
-      ));
-    }
-
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
@@ -164,7 +155,6 @@ export class AmpRecaptchaService {
 
       const message = dict({
         'id': messageId,
-        'sitekey': this.sitekey_,
         'action': 'amp_' + action,
       });
 
