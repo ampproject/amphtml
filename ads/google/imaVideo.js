@@ -73,6 +73,12 @@ let playButtonDiv;
 // Div containing player controls.
 let controlsDiv;
 
+// Wrapper for ad countdown element.
+let countdownWrapperDiv;
+
+// Div containing ad countdown timer.
+let countdownDiv;
+
 // Div containing play or pause button.
 let playPauseDiv;
 
@@ -260,6 +266,21 @@ export function imaVideo(global, data) {
     'user-select': 'none',
     'z-index': '1',
   });
+  // Ad progress
+  countdownWrapperDiv = global.document.createElement('div');
+  countdownWrapperDiv.id = 'ima-countdown';
+  setStyles(countdownWrapperDiv, {
+    'align-items': 'center',
+    'display': 'none',
+    'flex-grow': '1',
+    'font-family': 'Helvetica, Arial, Sans-serif',
+    'font-size': '14px',
+    'text-shadow': '0px 0px 10px black',
+    'height': '30px',
+  });
+  countdownDiv = global.document.createElement('div');
+  countdownWrapperDiv.appendChild(countdownDiv);
+  controlsDiv.appendChild(countdownWrapperDiv);
   // Play button
   playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
@@ -717,13 +738,13 @@ export function onContentEnded() {
 export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
-  adsRenderingSettings.uiElements =
-  [global.google.ima.UiElements.AD_ATTRIBUTION,
-    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
       onAdError);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.AD_PROGRESS,
+      onAdProgress);
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested.bind(null, global));
@@ -768,6 +789,27 @@ export function onAdError() {
   }
   videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
+}
+
+/**
+ * Called intermittently as the ad plays, allowing us to display ad counter.
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdProgress(global) {
+  const {adPosition, totalAds} = global.getAdData();
+  const remainingTime = adsManager.getRemainingTime();
+  const remainingMinutes = Math.floor(remainingTime / 60);
+  let remainingSeconds = Math.floor(remainingTime % 60);
+  if (remainingSeconds.toString().length < 2) {
+    remainingSeconds = '0' + remainingSeconds;
+  }
+  let podCount = ': ';
+  if (totalAds > 1) {
+    podCount = ' (' + adPosition + ' of ' + totalAds + '): ';
+  }
+  countdownDiv./*OK*/innerHTML
+    = 'Ad' + podCount + remainingMinutes + ':' + remainingSeconds;
 }
 
 /**
@@ -1160,6 +1202,7 @@ function onFullscreenChange(global) {
  */
 export function showAdControls() {
   setStyle(controlsDiv, 'justify-content', 'flex-end');
+  setStyle(countdownWrapperDiv, 'display', 'flex');
   setStyle(playPauseDiv, 'display', 'none');
   setStyle(timeDiv, 'display', 'none');
   setStyle(progressBarWrapperDiv, 'display', 'none');
@@ -1173,6 +1216,7 @@ export function showAdControls() {
  */
 export function resetControlsAfterAd() {
   setStyle(controlsDiv, 'justify-content', 'center');
+  setStyle(countdownWrapperDiv, 'display', 'none');
   setStyle(playPauseDiv, 'display', 'block');
   setStyle(timeDiv, 'display', 'block');
   setStyle(progressBarWrapperDiv, 'display', 'block');

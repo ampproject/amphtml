@@ -122,6 +122,46 @@ describes.realWin('amp-ima-video', {
     //expect(playAdsSpy).to.be.called;
   });
 
+  it('updates ad countdown timer', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+
+    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+    const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
+
+    let mockRemainingTime = 0;
+    const triggerProgressEvent = mockAdData => imaVideoObj.onAdProgress({
+      getAdData: () => mockAdData,
+    });
+    imaVideoObj.setAdsManagerForTesting({
+      getRemainingTime: () => mockRemainingTime,
+    });
+
+    mockRemainingTime = 0;
+    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
+    expect(countdownDiv.innerHTML).to.eql('Ad: 0:00');
+    mockRemainingTime = 2;
+    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
+    expect(countdownDiv.innerHTML).to.eql('Ad: 0:02');
+    mockRemainingTime = 3.923462062;
+    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
+    expect(countdownDiv.innerHTML).to.eql('Ad: 0:03');
+    mockRemainingTime = 1;
+    triggerProgressEvent({'adPosition': 1, 'totalAds': 3});
+    expect(countdownDiv.innerHTML).to.eql('Ad (1 of 3): 0:01');
+    mockRemainingTime = 7600;
+    triggerProgressEvent({'adPosition': 2, 'totalAds': 79});
+    expect(countdownDiv.innerHTML).to.eql('Ad (2 of 79): 126:40');
+  });
+
   it('plays ads with ads manager', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -215,16 +255,13 @@ describes.realWin('amp-ima-video', {
     mockGlobal.google.ima.AdsRenderingSettings = function() {
       return mockAdsRenderingSettings;
     };
-    mockGlobal.google.ima.UiElements = {
-      AD_ATTRIBUTION: 'adattr',
-      COUNTDOWN: 'countdown',
-    };
     mockGlobal.google.ima.AdErrorEvent = {};
     mockGlobal.google.ima.AdErrorEvent.Type = {
       AD_ERROR: 'aderror',
     };
     mockGlobal.google.ima.AdEvent = {};
     mockGlobal.google.ima.AdEvent.Type = {
+      AD_PROGRESS: 'adprogress',
       CONTENT_PAUSE_REQUESTED: 'cpr',
       CONTENT_RESUME_REQUESTED: 'crr',
     };
@@ -249,11 +286,10 @@ describes.realWin('amp-ima-video', {
     expect(
         mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
         .to.be.true;
-    expect(mockAdsRenderingSettings.uiElements)
-        .to.eql(['adattr', 'countdown']);
     expect(amleSpy).to.be.calledWith(
         mockVideoPlayer, mockAdsRenderingSettings);
     expect(addEventListenerSpy).to.be.calledWith('aderror');
+    expect(addEventListenerSpy).to.be.calledWith('adprogress');
     expect(addEventListenerSpy).to.be.calledWith('cpr');
     expect(addEventListenerSpy).to.be.calledWith('crr');
   });
@@ -276,16 +312,13 @@ describes.realWin('amp-ima-video', {
     mockGlobal.google.ima.AdsRenderingSettings = function() {
       return mockAdsRenderingSettings;
     };
-    mockGlobal.google.ima.UiElements = {
-      AD_ATTRIBUTION: 'adattr',
-      COUNTDOWN: 'countdown',
-    };
     mockGlobal.google.ima.AdErrorEvent = {};
     mockGlobal.google.ima.AdErrorEvent.Type = {
       AD_ERROR: 'aderror',
     };
     mockGlobal.google.ima.AdEvent = {};
     mockGlobal.google.ima.AdEvent.Type = {
+      AD_PROGRESS: 'adprogress',
       CONTENT_PAUSE_REQUESTED: 'cpr',
       CONTENT_RESUME_REQUESTED: 'crr',
     };
@@ -311,11 +344,10 @@ describes.realWin('amp-ima-video', {
     expect(
         mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
         .to.be.true;
-    expect(mockAdsRenderingSettings.uiElements)
-        .to.eql(['adattr', 'countdown']);
     expect(amleSpy).to.be.calledWith(
         mockVideoPlayer, mockAdsRenderingSettings);
     expect(addEventListenerSpy).to.be.calledWith('aderror');
+    expect(addEventListenerSpy).to.be.calledWith('adprogress');
     expect(addEventListenerSpy).to.be.calledWith('cpr');
     expect(addEventListenerSpy).to.be.calledWith('crr');
     expect(setVolumeSpy).to.be.calledWith(0);
@@ -457,38 +489,43 @@ describes.realWin('amp-ima-video', {
     });
     const videoMock = getVideoPlayerMock();
     const adsManagerMock = {
-      resize: function() {}
+      resize: function() {},
     };
     const mockGlobal = {
       google: {
         ima: {
           ViewMode: {
             NORMAL: 'normal',
-          }
+          },
         },
       },
     };
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
     imaVideoObj.setAdsManagerForTesting(adsManagerMock);
-    const controlsDiv = imaVideoObj.getPropertiesForTesting().controlsDiv;
-    expect(controlsDiv).not.to.be.undefined;
+    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+    expect(controlsDiv).not.to.be.null;
+    const countdownWrapperDiv = controlsDiv.querySelector('#ima-countdown');
+    expect(countdownWrapperDiv).not.to.be.null;
     const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
-    expect(playPauseDiv).not.to.be.undefined;
+    expect(playPauseDiv).not.to.be.null;
     const timeDiv = controlsDiv.querySelector('#ima-time');
-    expect(timeDiv).not.to.be.undefined;
-    const progressBarWrapperDiv = controlsDiv.querySelector('#ima-progress-wrapper');
-    expect(progressBarWrapperDiv).not.to.be.undefined;
+    expect(timeDiv).not.to.be.null;
+    const progressBarWrapperDiv
+      = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.null;
     const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
-    expect(muteUnmuteDiv).not.to.be.undefined;
+    expect(muteUnmuteDiv).not.to.be.null;
     const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
-    expect(fullscreenDiv).not.to.be.undefined;
+    expect(fullscreenDiv).not.to.be.null;
     // expect controls to be hidden initially
     expect(controlsDiv.style.display).to.eql('none');
+    expect(countdownWrapperDiv.style.display).to.eql('none');
     // call pause function to display ads
     imaVideoObj.onContentPauseRequested(mockGlobal);
     // expect a subset of controls to be hidden / displayed
     expect(controlsDiv.style.display).not.to.eql('none');
+    expect(countdownWrapperDiv.style.display).not.to.eql('none');
     expect(playPauseDiv.style.display).to.eql('none');
     expect(timeDiv.style.display).to.eql('none');
     expect(progressBarWrapperDiv.style.display).to.eql('none');
@@ -563,20 +600,24 @@ describes.realWin('amp-ima-video', {
     imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
     imaVideoObj.setContentCompleteForTesting(true);
     // expect a subset of controls to be hidden / displayed during ad
-    const controlsDiv = imaVideoObj.getPropertiesForTesting().controlsDiv;
-    expect(controlsDiv).not.to.be.undefined;
+    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+    expect(controlsDiv).not.to.be.null;
+    const countdownWrapperDiv = controlsDiv.querySelector('#ima-countdown');
+    expect(countdownWrapperDiv).not.to.be.null;
     const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
-    expect(playPauseDiv).not.to.be.undefined;
+    expect(playPauseDiv).not.to.be.null;
     const timeDiv = controlsDiv.querySelector('#ima-time');
-    expect(timeDiv).not.to.be.undefined;
-    const progressBarWrapperDiv = controlsDiv.querySelector('#ima-progress-wrapper');
-    expect(progressBarWrapperDiv).not.to.be.undefined;
+    expect(timeDiv).not.to.be.null;
+    const progressBarWrapperDiv
+      = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.null;
     const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
-    expect(muteUnmuteDiv).not.to.be.undefined;
+    expect(muteUnmuteDiv).not.to.be.null;
     const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
-    expect(fullscreenDiv).not.to.be.undefined;
+    expect(fullscreenDiv).not.to.be.null;
     imaVideoObj.showAdControls();
     expect(controlsDiv.style.display).not.to.eql('none');
+    expect(countdownWrapperDiv.style.display).not.to.eql('none');
     expect(playPauseDiv.style.display).to.eql('none');
     expect(timeDiv.style.display).to.eql('none');
     expect(progressBarWrapperDiv.style.display).to.eql('none');
@@ -584,7 +625,8 @@ describes.realWin('amp-ima-video', {
     expect(fullscreenDiv.style.display).not.to.eql('none');
     // resume content after ad finishes
     imaVideoObj.onContentResumeRequested();
-    // expect control buttons to be displayed again
+    // expect default control buttons to be displayed again
+    expect(countdownWrapperDiv.style.display).to.eql('none');
     expect(playPauseDiv.style.display).not.to.eql('none');
     expect(timeDiv.style.display).not.to.eql('none');
     expect(progressBarWrapperDiv.style.display).not.to.eql('none');
