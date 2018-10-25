@@ -95,7 +95,7 @@ module.exports = function(context) {
       }
 
       const methodInvokedName = callee.property.name;
-      // Find the position of the argumen we care about.
+      // Find the position of the argument we care about.
       const metadata = getMetadata(methodInvokedName);
 
       // If there's no metadata, this is most likely a test file running
@@ -197,6 +197,7 @@ class ArgFixer {
   }
 
   chompString() {
+    // We remove the quotes surrounding the string.
     this.sanitizedStr += this.cur().value.slice(1, -1);
     this.next();
   }
@@ -217,12 +218,13 @@ class ArgFixer {
     this.startNewRef();
     this.addToCurRef(refValue);
   }
-  
+
   isRefEnd() {
+    // This means we are at the last token.
     if (!this.cur()) {
       return true;
     }
-    
+
     if (this.cur().type === 'Punctuator') {
       if (this.cur().value === '(') {
         this.enteredParen++;
@@ -230,11 +232,11 @@ class ArgFixer {
         this.enteredParen--;
       }
     }
-    
+
     if (this.enteredParen !== 0) {
       return false;
     }
-    return this.cur().type === 'Punctuator' && this.cur().value === '+'; 
+    return this.cur().type === 'Punctuator' && this.cur().value === '+';
   }
 
   chompTemplateValueTilEnd() {
