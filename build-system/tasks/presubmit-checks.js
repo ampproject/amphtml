@@ -50,7 +50,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal class form',
     whitelist: [
       'build-system/amp4test.js',
-      'build-system/app-index/template.js',
+      'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
