@@ -269,23 +269,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (eventReceived == 'analytics') {
-      const analyticsEventType = data['eventType'];
-      const vars = data['vars'] || {};
-
-      user().assertString(
-          analyticsEventType, '`eventType` missing in analytics event');
-
-      user().assert(
-          analyticsEventType != VideoAnalyticsEvents.CUSTOM,
-          'Invalid `eventType`. `%s` is a reserved event.',
-          VideoAnalyticsEvents.CUSTOM);
-
-      this.element.dispatchCustomEvent(
-          VideoAnalyticsEvents.CUSTOM, {
-            eventType: analyticsEventType,
-            vars,
-          });
-
+      this.dispatchCustomAnalyticsEvent_(data['eventType'], data['vars']);
       return;
     }
 
@@ -293,6 +277,26 @@ class AmpVideoIframe extends AMP.BaseElement {
       this.element.dispatchCustomEvent(eventReceived);
       return;
     }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} vars
+   */
+  dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
+    const requiredEventTypePrefix = 'video-custom-';
+
+    user().assertString(
+      analyticsEventType, '`eventType` missing in analytics event');
+
+    user().assert(
+      (new RegExp(`^${requiredEventTypePrefix}`)).test(analyticsEventType),
+      'Invalid analytics `eventType`. Value must start with `%s`.',
+      requiredEventTypePrefix);
+
+    this.element.dispatchCustomEvent(
+        VideoAnalyticsEvents.CUSTOM,
+        {eventType, vars});
   }
 
   /**

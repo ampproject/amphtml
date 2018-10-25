@@ -83,8 +83,8 @@
 
       setInterval(function() {
         // Post a custom analytics event every 3 seconds.
-        ampIntegration.postAnalyticsEvent('video-custom', /* optional */ {
-          'myVar': 'foo',
+        ampIntegration.postAnalyticsEvent('video-custom-foo', /* optional */ {
+          'myVar': Math.random().toString(),
         });
       }, 3000);
     }
