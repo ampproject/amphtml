@@ -68,7 +68,7 @@ const ExtensionScript = ({name, version}) =>
 
 
 const HeaderLink = ({name, href, divider}) => html`
-  <li class="${divider ? 'divider' : ''}"">
+  <li class="${divider ? 'divider' : ''}">
     <a target="_blank" rel="noopener noreferrer" href="${href}">
       ${name}
     </a>
@@ -135,7 +135,7 @@ const SelectModeOptional = ({basepath, selectModePrefix}) =>
 
 
 const FileListItem = ({name, href, selectModePrefix}) => {
-  if (!/^\/examples/.test(href)) {
+  if (!/^\/examples/.test(href) || !/\.html$/.test(href)) {
     return html`<li>
       <a class="file-link" href="${href}">${name}</a>
     </li>`;
