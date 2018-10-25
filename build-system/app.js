@@ -87,6 +87,11 @@ if (!global.AMP_TESTING) {
   app.get('/serve_mode.json', (req, res) => {
     res.json({serveMode: pc.env.SERVE_MODE || 'default'});
   });
+
+  app.get('/proxy', (req, res) => {
+    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`proxy/s/${sufix}`);
+  });
 }
 
 // Deprecate usage of .min.html/.max.html
