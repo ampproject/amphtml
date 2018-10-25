@@ -385,12 +385,19 @@ export class AmpConsent extends AMP.BaseElement {
       promptPromise =
           this.getConsentRemote_(instanceId).then(remoteConfigResponse => {
             if (!remoteConfigResponse ||
-                !hasOwn(remoteConfigResponse, 'promptIfUnknown')) {
-              this.user().error(TAG, 'Expecting promptIfUnknown from ' +
-                'checkConsentHref when promptIfUnknownForGeoGroup is not ' +
-                'specified');
+                (!hasOwn(remoteConfigResponse, 'promptIfUnknown') && 
+                 !hasOwn(remoteConfigResponse, 'revokeAndPrompt'))) {
+              this.user().error(TAG, 'Expecting promptIfUnknown or ' +
+                'revokeAndPrompt from checkConsentHref when ' +
+                'promptIfUnknownForGeoGroup is not specified');
               // Set to false if not defined
               return false;
+            }
+            if (!!remoteConfigResponse['revokeAndPrompt']) {
+              // revoke consent state to unknown & re-prompt for consent
+              this.consentStateManager_.updateConsentInstanceState(
+                this.currentDisplayInstance_, CONSENT_ITEM_STATE.UNKNOWN);
+              return true;
             }
             return !!remoteConfigResponse['promptIfUnknown'];
           });
