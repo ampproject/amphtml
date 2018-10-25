@@ -184,7 +184,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
     this.win_ = win;
 
     /** @protected {?Array<!WorkletAnimation>} */
-    this.players_ = null;
+    this.players_ = [];
   }
 
   /**
@@ -210,7 +210,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
   * Initializes the players but does not change the state.
    */
   init() {
-    this.players_ = this.requests_.map(request => {
+    this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target,
@@ -234,6 +234,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline);
         player.play();
+        this.players_.push(player);
       });
     });
   }
