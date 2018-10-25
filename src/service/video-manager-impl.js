@@ -1223,7 +1223,6 @@ function analyticsEvent(entry, eventType, opt_vars) {
     if (opt_vars) {
       Object.assign(details, opt_vars);
     }
-    console.log({eventType, details});
     video.element.dispatchCustomEvent(eventType, details);
   });
 }
