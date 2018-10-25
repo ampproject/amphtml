@@ -30,8 +30,11 @@ import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @const */
-const MIN_INTERVAL = 4;
+/** @const {number} */
+const FIRST_AD_MIN = 7;
+
+/** @const {number} */
+const MIN_INTERVAL = 8;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -146,8 +149,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
-    /** @private {number} */
-    this.uniquePagesCount_ = 0;
+    /**
+     * Set to one here because we count on navigation event, and we do have
+     * an event before first page.
+     * @private {number}
+     */
+    this.uniquePagesCount_ = 1;
 
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = dict({});
@@ -181,6 +188,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {number|null} */
     this.idOfAdShowing_ = null;
+
+    /** @private {boolean} */
+    this.firstAdShown_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -557,7 +567,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL) {
+    if (this.enoughPagesShown_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
@@ -576,13 +586,36 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Determine if user has seen enough pages to show an ad. We want a certain
+   * number of pages before the first ad, and then a separate interval
+   * thereafter.
+   * @return {boolean}
+   * @private
+   */
+  enoughPagesShown_() {
+    if (this.firstAdShown_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
+      return true;
+    }
+
+    if (!this.firstAdShown_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * start the process over
    * @private
    */
   startNextPage_() {
-    this.uniquePagesCount_ = 0;
+    if (!this.firstAdShown_) {
+      this.firstAdShown_ = true;
+    }
+
+    // Set to -1 because there is still one page to be viewed before ad.
+    this.uniquePagesCount_ = -1;
     this.schedulePage_();
   }
 
