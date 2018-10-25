@@ -1,9 +1,10 @@
 ⚡⚡⚡
 
-**Our last release for 2018 will be created on Tuesday, December 11, 2018 (targeting full rollout on December 18).**
+**Our last scheduled release for 2018 will be created on Tuesday, December 11, 2018 (targeting full rollout on December 18).**
 
-After this the next release will be created on Wednesday, January 3, 2019 (targeting full rollout on January 9).
+After this the next scheduled release will be created on Wednesday, January 3, 2019 (targeting full rollout on January 9).
 
+If necessary, fixes for P0 issues may be cherry-picked into the production release and pushed during this time.
 ⚡⚡⚡
 
 # Release Schedule
