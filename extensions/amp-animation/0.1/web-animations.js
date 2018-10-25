@@ -184,7 +184,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
     this.win_ = win;
 
     /** @protected {?Array<!WorkletAnimation>} */
-    this.players_ = null;
+    this.players_ = [];
   }
 
   /**
@@ -221,7 +221,8 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource = this.win_.document./*OK*/scrollingElement;
+        const scrollSource =
+          Services.viewportForDoc(this.win_.document).getScrollingElement();
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
@@ -233,10 +234,11 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline);
         player.play();
-        this.players_ = player;
+        this.players_.push(player);
       });
     });
   }
+
   /**
    * @override
    * Initializes the players if not already initialized,
