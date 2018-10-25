@@ -445,6 +445,57 @@ describes.realWin('amp-ima-video', {
     expect(pauseSpy).to.have.been.called;
   });
 
+  it('shows modified controls when content is paused', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const adsManagerMock = {
+      resize: function() {}
+    };
+    const mockGlobal = {
+      google: {
+        ima: {
+          ViewMode: {
+            NORMAL: 'normal',
+          }
+        },
+      },
+    };
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    const controlsDiv = imaVideoObj.getPropertiesForTesting().controlsDiv;
+    expect(controlsDiv).not.to.be.undefined;
+    const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
+    expect(playPauseDiv).not.to.be.undefined;
+    const timeDiv = controlsDiv.querySelector('#ima-time');
+    expect(timeDiv).not.to.be.undefined;
+    const progressBarWrapperDiv = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.undefined;
+    const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+    expect(muteUnmuteDiv).not.to.be.undefined;
+    const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+    expect(fullscreenDiv).not.to.be.undefined;
+    // expect controls to be hidden initially
+    expect(controlsDiv.style.display).to.eql('none');
+    // call pause function to display ads
+    imaVideoObj.onContentPauseRequested(mockGlobal);
+    // expect a subset of controls to be hidden / displayed
+    expect(controlsDiv.style.display).not.to.eql('none');
+    expect(playPauseDiv.style.display).to.eql('none');
+    expect(timeDiv.style.display).to.eql('none');
+    expect(progressBarWrapperDiv.style.display).to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+  });
+
   it('resumes content', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -497,6 +548,49 @@ describes.realWin('amp-ima-video', {
     expect(addEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(playVideoSpy).to.have.been.called;
+  });
+
+  it('controls are restored after content resumes', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
+    imaVideoObj.setContentCompleteForTesting(true);
+    // expect a subset of controls to be hidden / displayed during ad
+    const controlsDiv = imaVideoObj.getPropertiesForTesting().controlsDiv;
+    expect(controlsDiv).not.to.be.undefined;
+    const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
+    expect(playPauseDiv).not.to.be.undefined;
+    const timeDiv = controlsDiv.querySelector('#ima-time');
+    expect(timeDiv).not.to.be.undefined;
+    const progressBarWrapperDiv = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.undefined;
+    const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+    expect(muteUnmuteDiv).not.to.be.undefined;
+    const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+    expect(fullscreenDiv).not.to.be.undefined;
+    imaVideoObj.showAdControls();
+    expect(controlsDiv.style.display).not.to.eql('none');
+    expect(playPauseDiv.style.display).to.eql('none');
+    expect(timeDiv.style.display).to.eql('none');
+    expect(progressBarWrapperDiv.style.display).to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+    // resume content after ad finishes
+    imaVideoObj.onContentResumeRequested();
+    // expect control buttons to be displayed again
+    expect(playPauseDiv.style.display).not.to.eql('none');
+    expect(timeDiv.style.display).not.to.eql('none');
+    expect(progressBarWrapperDiv.style.display).not.to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+    expect(controlsDiv.style.display).not.to.eql('none');
   });
 
   it('shows bigPlayDiv with content complete, ' +

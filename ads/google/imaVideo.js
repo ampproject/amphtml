@@ -258,6 +258,7 @@ export function imaVideo(global, data) {
     'justify-content': 'center',
     'align-items': 'center',
     'user-select': 'none',
+    'z-index': '1',
   });
   // Play button
   playPauseDiv = createIcon(global, 'play');
@@ -788,7 +789,7 @@ export function onContentPauseRequested(global) {
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
-  hideControls();
+  showAdControls();
   videoPlayer.pause();
 }
 
@@ -801,6 +802,7 @@ export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
   postMessage({event: VideoEvents.AD_END});
+  resetControlsAfterAd();
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -1151,6 +1153,32 @@ function onFullscreenChange(global) {
 }
 
 /**
+ * Show a subset of controls when ads are playing.
+ * Visible controls are muteUnmuteDiv and fullscreenDiv
+ *
+ * @visibleForTesting
+ */
+export function showAdControls() {
+  setStyle(controlsDiv, 'justify-content', 'flex-end');
+  setStyle(playPauseDiv, 'display', 'none');
+  setStyle(timeDiv, 'display', 'none');
+  setStyle(progressBarWrapperDiv, 'display', 'none');
+  showControls();
+}
+
+/**
+ * Reinstate access to all controls when ads have ended.
+ *
+ * @visibleForTesting
+ */
+export function resetControlsAfterAd() {
+  setStyle(controlsDiv, 'justify-content', 'center');
+  setStyle(playPauseDiv, 'display', 'block');
+  setStyle(timeDiv, 'display', 'block');
+  setStyle(progressBarWrapperDiv, 'display', 'block');
+}
+
+/**
  * Show video controls and reset hide controls timeout.
  *
  * @visibleForTesting
@@ -1166,12 +1194,14 @@ export function showControls() {
 }
 
 /**
- * Hide video controls.
+ * Hide video controls, except when ads are active.
  *
  * @visibleForTesting
  */
 export function hideControls() {
-  setStyle(controlsDiv, 'display', 'none');
+  if (!adsActive) {
+    setStyle(controlsDiv, 'display', 'none');
+  }
 }
 
 /**
