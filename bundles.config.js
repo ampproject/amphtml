@@ -383,6 +383,7 @@ exports.extensionBundles = [
   {name: 'amp-yotpo', version: '0.1', type: TYPES.MISC},
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
 ];
 
 exports.aliasBundles = [
