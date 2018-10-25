@@ -348,6 +348,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
   {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
     id: 'amp-consent-v2',
     name: 'Enables CMP support to amp-consent component',
     spec: 'https://github.com/ampproject/amphtml/issues/17742',
