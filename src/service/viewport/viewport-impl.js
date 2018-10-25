@@ -640,6 +640,14 @@ export class Viewport {
   }
 
   /**
+   * @return {!Element}
+   */
+  getScrollingElement() {
+    return this.binding_.getScrollingElement();
+  }
+
+
+  /**
    * Registers the handler for ViewportChangedEventDef events.
    * @param {function(!ViewportChangedEventDef)} handler
    * @return {!UnlistenDef}
