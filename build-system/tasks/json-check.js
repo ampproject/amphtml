@@ -27,25 +27,28 @@ const expectedCaches = ['cloudflare', 'google'];
  * Fail if caches.json is missing some expected caches.
  */
 function checkCachesJson() {
-  return gulp.src(['caches.json',])
+  return gulp.src(['caches.json'])
       .pipe(through2.obj(function(file) {
         try {
           const obj = JSON.parse(file.contents.toString());
         } catch (e) {
           // Do nothing since this is handled in checkValidJson.
+          log(colors.yellow('Could not parse caches.json. '
+                            'This is most likely a fatal error that '
+                            'will be found by checkValidJson'))
         }
         let foundCaches = [];
-        for (var i = 0; i < obj.caches.length; i++) {
-          foundCaches.push(obj.caches[i].id);
+        for (const foundCache of obj.caches) {
+          foundCaches.push(foundCache.id);
         }
         for (const cache of expectedCaches) {
-          if (!cache in foundCaches) {
+          if (!(cache in foundCaches)) {
             log(colors.red('Missing expected cache "'
                   + cache + '" in caches.json'));
-            process.exit(1);
+            process.exitCode = 1;
           }
         }
-      });
+      })
 }
 
 /**
