@@ -459,10 +459,15 @@ class IntegrationFixture {
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
 
+    let url = '/amp4test/compose-doc';
+    if (this.spec.params) {
+      url = addParamsToUrl(url, this.spec.params);
+    }
+
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc',
-            {body, css, experiments, extensions}) + `#${this.hash}`,
+        src: addParamsToUrl(url, {body, css, experiments, extensions})
+            + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
