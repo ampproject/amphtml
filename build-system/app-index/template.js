@@ -68,7 +68,7 @@ const ExtensionScript = ({name, version}) =>
 
 
 const HeaderLink = ({name, href, divider}) => html`
-  <li class="${divider ? 'divider' : ''}"">
+  <li class="${divider ? 'divider' : ''}">
     <a target="_blank" rel="noopener noreferrer" href="${href}">
       ${name}
     </a>
