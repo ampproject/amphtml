@@ -23,6 +23,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
+  generatePixelURL,
   getPlatform,
   registerEvent,
   setFullscreenOff,
@@ -291,6 +292,29 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
+  /**
+   * @param {JsonObject} publisher
+   * @return {Element}
+   */
+  constructAmpPixel_(publisher) {
+    if (publisher && publisher['trackingPixel']) {
+      const affiliateId = publisher['trackingPixel']['affiliateId'];
+      const publisherId = publisher['publisherId'];
+      if (affiliateId) {
+        const pixelElement =
+          this.element.ownerDocument.createElement('amp-pixel');
+
+        const pixelUrl = generatePixelURL(publisherId, affiliateId);
+
+        pixelElement.setAttribute('src', pixelUrl);
+        pixelElement.setAttribute('layout', 'nodisplay');
+
+        return pixelElement;
+      }
+    }
+    return null;
+  }
+
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -323,6 +347,10 @@ class AmpApesterMedia extends AMP.BaseElement {
                 const overflow = this.constructOverflow_();
                 this.element.appendChild(overflow);
                 this.element.appendChild(iframe);
+                const ampPixel = this.constructAmpPixel_(media['publisher']);
+                if (ampPixel) {
+                  this.element.appendChild(ampPixel);
+                }
               })
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
