@@ -409,9 +409,6 @@ export class AmpForm {
     }
     // `submit` has the same trust level as the AMP Action that caused it.
     this.submit_(invocation.trust);
-    if (this.method_ == 'GET' && !this.xhrAction_) {
-      this.form_.submit();
-    }
   }
 
   /**
@@ -477,6 +474,7 @@ export class AmpForm {
    * @private
    */
   submit_(trust) {
+    // TODO @torch2424
     try {
       const event = {
         form: this.form_,
@@ -487,14 +485,46 @@ export class AmpForm {
       dev().error(TAG, `Form submit service failed: ${e}`);
     }
 
-    const varSubsFields = this.getVarSubsFields_();
-    if (this.xhrAction_) {
-      this.handleXhrSubmit_(varSubsFields, trust);
-    } else if (this.method_ == 'POST') {
-      this.handleNonXhrPost_();
-    } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(varSubsFields);
+    // Do any assertions we may need to do
+    // For NonXhrGET
+    if (!this.xhrAction_ && this.method_ == 'GET') {
+      this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
+      this.assertNoSensitiveFields_();
+      
+      // NOTE: @torch2424
+      // sync nonxhr get
+      // this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
+    
+    // Set ourselves to the SUBMITTING State
+    this.setState_(FormState.SUBMITTING);
+
+    // Get any Async fields
+    const varSubsFields = this.getVarSubsFields_();
+    const asyncInputs = toArray(this.form_.querySelectorAll('.i-amphtml-async-input'));
+    
+    // Promises to run before submitting the form
+    const presubmitPromises = [];
+    presubmitPromises.push(this.doVarSubs_(varSubFields));
+    if (asyncInputs.length > 0) {
+      asyncInput.forEach(asyncInput => {
+        presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      });
+    }
+
+    Promise.all(presubmitPromises).then(() => {
+      if (this.xhrAction_) {
+        this.handleXhrSubmit_(trust);
+      } else if (this.method_ == 'POST') {
+        this.handleNonXhrPost_();
+      } else if (this.method_ == 'GET') {
+        // took out all the code in handleNonXhrGet_
+        // because alot was assertions we want to fail on before getting var subs
+        this.triggerFormSubmitInAnalytics_('amp-form-submit');
+        this.form_.submit();
+        this.setState_(FormState.INITIAL);
+      }
+    });
   }
 
   /**
@@ -524,18 +554,15 @@ export class AmpForm {
   }
 
   /**
-   * @param {!IArrayLike<!HTMLInputElement>} varSubsFields
    * @param {ActionTrust} trust
    * @private
    */
-  handleXhrSubmit_(varSubsFields, trust) {
-    this.setState_(FormState.SUBMITTING);
-    const varSubPromise = this.doVarSubs_(varSubsFields);
+  handleXhrSubmit_(trust) {
     let p;
     if (this.ssrTemplateHelper_.isSupported()) {
-      p = varSubPromise.then(() => this.handleSsrTemplate_(trust));
+      p = Promise.resolve().then(() => this.handleSsrTemplate_(trust));
     } else {
-      p = varSubPromise
+      p = Promise.resolve()
           .then(() => {
             this.submittingWithTrust_(trust);
             return this.doActionXhr_();
@@ -650,6 +677,18 @@ export class AmpForm {
     }
     return this.waitOnPromisesOrTimeout_(varSubPromises, 100);
   }
+
+  /**
+   * Call getValue() on Async Input elements, and
+   * Create hidden inputs containing their returned values
+   * @param {!Element} asyncInput
+   * @return {!Promise}
+   * @private
+   */
+  getValueForAsyncInput_(asyncInput) {
+    // TODO @torch2424
+  }
+
 
   /**
    * Send a request to the form's action endpoint.
@@ -767,21 +806,6 @@ export class AmpForm {
         'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
         this.form_);
-  }
-
-  /**
-   * Executes variable substitutions on the passed fields.
-   * @param {IArrayLike<!HTMLInputElement>} varSubsFields
-   * @private
-   */
-  handleNonXhrGet_(varSubsFields) {
-    this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
-    this.assertNoSensitiveFields_();
-    // Non-xhr GET requests replacement should happen synchronously.
-    for (let i = 0; i < varSubsFields.length; i++) {
-      this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
-    }
-    this.triggerFormSubmitInAnalytics_('amp-form-submit');
   }
 
   /**
