@@ -21,6 +21,33 @@ const log = require('fancy-log');
 const through2 = require('through2');
 const {jsonGlobs} = require('../config');
 
+const expectedCaches = ['cloudflare', 'google'];
+
+/**
+ * Fail if caches.json is missing some expected caches.
+ */
+function checkCachesJson() {
+  return gulp.src(['caches.json',])
+      .pipe(through2.obj(function(file) {
+        try {
+          const obj = JSON.parse(file.contents.toString());
+        } catch (e) {
+          // Do nothing since this is handled in checkValidJson.
+        }
+        let foundCaches = [];
+        for (var i = 0; i < obj.caches.length; i++) {
+          foundCaches.push(obj.caches[i].id);
+        }
+        for (const cache of expectedCaches) {
+          if (!cache in foundCaches) {
+            log(colors.red('Missing expected cache "'
+                  + cache + '" in caches.json'));
+            process.exit(1);
+          }
+        }
+      });
+}
+
 /**
  * Fail if JSON files are valid.
  */
@@ -42,6 +69,9 @@ function checkValidJson() {
         }
       });
 }
+
+gulp.task('caches-json', 'Check that some expected caches are included.',
+    checkCachesJson);,
 
 gulp.task(
     'json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);
