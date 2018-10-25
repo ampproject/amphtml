@@ -20,6 +20,7 @@
  * recaptcha tokens
  */
 
+import {AsyncInput} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
@@ -34,7 +35,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-export class AmpRecaptchaInput extends AMP.AsyncInput {
+export class AmpRecaptchaInput extends AsyncInput {
 
   /** @param {!AmpElement} element */
   constructor(element) {

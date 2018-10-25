@@ -23,9 +23,25 @@
         .push-down {
           margin-top: 4000px;
         }
+
+        form.amp-form-submit-success [submit-success],
+        form.amp-form-submit-error [submit-error]{
+          margin-top: 16px;
+        }
+        form.amp-form-submit-success [submit-success] {
+          color: green;
+        }
+        form.amp-form-submit-error [submit-error] {
+          color: red;
+        }
+        form.amp-form-submit-success.hide-inputs > input {
+          display: none;
+        }
       </style>
       <script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js"></script>
       <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+      <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
       <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
@@ -43,8 +59,49 @@
       </amp-lightbox>
     <div>
 
+    <div>
+      <h2>amp-recaptcha-input inside amp-form (intended use case)</h2>
+      <h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
+      <form method="get" action="https://httpbin.org/html" target="_blank">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+      </form>
+      <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
+      <form method="get"
+            action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+            action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+            target="_blank">
+        <fieldset>
+          <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+          <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+          <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+          </label>
+          <input name="submit-button" type="submit" value="Search">
+          <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
+          </amp-recaptcha-input>
+        </fieldset>
+
+        <div submit-success>
+          <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+          </template>
+        </div>
+      </form>
+    </div>
+
     <div class="push-down">
-      <h2>amp-recaptcha-input</h2>
+      <h2>amp-recaptcha-input no container</h2>
       <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
       </amp-recaptcha-input>
     </div>
