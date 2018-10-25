@@ -114,17 +114,12 @@ function serveIndex({root, mapBasepath}) {
       const bundle = await bundleMain();
       const css = (await fs.readFileAsync(mainCssFile)).toString();
 
-      const initialState = {
+      const renderedHtml = renderTemplate({
         basepath: formatBasepath(basepath),
         fileSet,
         isMainPage,
-        selectModePrefix: '/',
-      };
-
-      const renderedHtml = renderTemplate({
         bundle,
         css,
-        initialState,
       });
 
       res.end(renderedHtml);
