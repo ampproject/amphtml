@@ -34,7 +34,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const FIRST_AD_MIN = 7;
 
 /** @const {number} */
-const MIN_INTERVAL = 8;
+const MIN_INTERVAL = 7;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
