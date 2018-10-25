@@ -32,9 +32,11 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
       'sendMessageAwaitResponse',
       'hasCapability',
       'isTrustedViewer',
+      'whenFirstVisible',
     ]);
 
     api = new ViewerCidApi(env.ampdoc);
+    viewerMock.whenFirstVisible.returns(Promise.resolve());
   });
 
   describe('isSupported', () => {
