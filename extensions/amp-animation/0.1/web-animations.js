@@ -210,7 +210,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
   * Initializes the players but does not change the state.
    */
   init() {
-    this.requests_.map(request => {
+    this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target,
@@ -221,7 +221,8 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource = this.win_.document./*OK*/scrollingElement;
+        const scrollSource =
+          Services.viewportForDoc(this.win_.document).getScrollingElement();
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
@@ -233,10 +234,10 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline);
         player.play();
-        this.players_ = player;
       });
     });
   }
+
   /**
    * @override
    * Initializes the players if not already initialized,
