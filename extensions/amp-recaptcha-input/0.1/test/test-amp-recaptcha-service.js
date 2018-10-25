@@ -139,7 +139,7 @@ describes.realWin('amp-recaptcha-service', {
         .register(fakeSitekey).then(() => {
           expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
-          recaptchaService.execute(0, fakeSitekey, '');
+          recaptchaService.execute(0, '');
 
           const executeMapKeys = Object.keys(recaptchaService.executeMap_);
           expect(executeMapKeys.length).to.be.equal(1);
@@ -150,22 +150,9 @@ describes.realWin('amp-recaptcha-service', {
   it('should reject if there is no iframe on execute', () => {
     expect(recaptchaService.registeredElementCount_).to.be.equal(0);
     expect(recaptchaService.iframe_).to.not.be.ok;
-    return recaptchaService.execute(0, '', '').catch(err => {
+    return recaptchaService.execute(0, '').catch(err => {
       expect(err).to.be.ok;
     });
-  });
-
-  it('should reject if different sitekey passed to execute', () => {
-    expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-    return recaptchaService
-        .register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-
-          recaptchaService.execute(0, anotherFakeSitekey, '').catch(err => {
-            expect(err).to.be.ok;
-          });
-        });
   });
 });
 
