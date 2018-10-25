@@ -243,16 +243,6 @@ export class VisibilityModel {
   }
 
   /**
-   * Sets that the model should defer calling report handler until a condition
-   * has been met
-   * @param {function():!Promise} callback
-   */
-  setReportWhen(callback) {
-    this.reportReady_ = false;
-    this.createReportReadyPromise_ = callback;
-  }
-
-  /**
    * @return {number}
    * @private
    */
