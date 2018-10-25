@@ -604,7 +604,7 @@ export class Builder {
    * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, hasPositionObserver, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
