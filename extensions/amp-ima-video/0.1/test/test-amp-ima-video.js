@@ -127,39 +127,66 @@ describes.realWin('amp-ima-video', {
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
 
-    imaVideoObj.imaVideo(win, {
+    const videoDefaults = {
       width: 640,
       height: 360,
       src: srcUrl,
       tag: adTagUrl,
-    });
+    };
+    const experiments = [
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 0},
+        'expected': 'Ad (1 of 1): 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 2},
+        'expected': 'Ad (1 of 1): 0:02',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 3.923462062},
+        'expected': 'Ad (1 of 1): 0:03',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 1},
+        'expected': 'Ad (1 of 3): 0:01',
+      },
+      {
+        'mock': {'adPosition': 2, 'totalAds': 79, 'remainingTime': 7600},
+        'expected': 'Ad (2 of 79): 126:40',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 0},
+        'label': 'Publicidad',
+        'expected': 'Publicidad: 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 0},
+        'label': 'Publicidad (%s de %s)',
+        'expected': 'Publicidad (1 de 1): 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 0},
+        'label': 'Publicidad %s',
+        'expected': 'Publicidad 1: 0:00',
+      },
+    ];
 
-    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
-    const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
-
-    let mockRemainingTime = 0;
-    const triggerProgressEvent = mockAdData => imaVideoObj.onAdProgress({
-      getAdData: () => mockAdData,
+    experiments.forEach(({mock, label, expected}) => {
+      let defaults = videoDefaults;
+      if (label) {
+        defaults = Object.assign(defaults, {adLabel: label});
+      }
+      imaVideoObj.imaVideo(win, defaults);
+      const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+      const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
+      imaVideoObj.setAdsManagerForTesting({
+        getRemainingTime: () => mock.remainingTime,
+      });
+      imaVideoObj.onAdProgress({
+        getAdData: () => mock,
+      });
+      expect(countdownDiv.innerHTML).to.eql(expected);
     });
-    imaVideoObj.setAdsManagerForTesting({
-      getRemainingTime: () => mockRemainingTime,
-    });
-
-    mockRemainingTime = 0;
-    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
-    expect(countdownDiv.innerHTML).to.eql('Ad: 0:00');
-    mockRemainingTime = 2;
-    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
-    expect(countdownDiv.innerHTML).to.eql('Ad: 0:02');
-    mockRemainingTime = 3.923462062;
-    triggerProgressEvent({'adPosition': 1, 'totalAds': 1});
-    expect(countdownDiv.innerHTML).to.eql('Ad: 0:03');
-    mockRemainingTime = 1;
-    triggerProgressEvent({'adPosition': 1, 'totalAds': 3});
-    expect(countdownDiv.innerHTML).to.eql('Ad (1 of 3): 0:01');
-    mockRemainingTime = 7600;
-    triggerProgressEvent({'adPosition': 2, 'totalAds': 79});
-    expect(countdownDiv.innerHTML).to.eql('Ad (2 of 79): 126:40');
   });
 
   it('plays ads with ads manager', () => {

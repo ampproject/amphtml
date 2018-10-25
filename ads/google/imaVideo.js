@@ -56,7 +56,6 @@ const icons = {
   `<circle cx="12" cy="12" r="12" />`
 };
 
-const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
 
 const bigPlayDivDisplayStyle = 'table-cell';
@@ -167,6 +166,9 @@ let fullscreenWidth;
 // Height the player should be in fullscreen mode.
 let fullscreenHeight;
 
+// "Ad" label used in ad controls.
+let adLabel;
+
 // Flag tracking if ads are currently active.
 let adsActive;
 
@@ -216,6 +218,7 @@ export function imaVideo(global, data) {
 
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
+  adLabel = data.adLabel || 'Ad (%s of %s)';
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -254,11 +257,12 @@ export function imaVideo(global, data) {
     'bottom': '0px',
     'width': '100%',
     'height': '100px',
+    'background-color': 'rgba(7, 20, 30, .7)',
+    'background':
+      'linear-gradient(0, rgba(7, 20, 30, .7) 0%, rgba(7, 20, 30, 0) 100%)',
     'box-sizing': 'border-box',
     'padding': '10px',
     'padding-top': '60px',
-    'background-image': `url(${controlsBg})`,
-    'background-position': 'bottom',
     'color': 'white',
     'display': 'none',
     'justify-content': 'center',
@@ -271,12 +275,16 @@ export function imaVideo(global, data) {
   countdownWrapperDiv.id = 'ima-countdown';
   setStyles(countdownWrapperDiv, {
     'align-items': 'center',
+    'box-sizing': 'border-box',
     'display': 'none',
     'flex-grow': '1',
     'font-family': 'Helvetica, Arial, Sans-serif',
-    'font-size': '14px',
+    'font-size': '12px',
+    'height': '20px',
+    'overflow': 'hidden',
+    'padding': '5px',
     'text-shadow': '0px 0px 10px black',
-    'height': '30px',
+    'white-space': 'nowrap',
   });
   countdownDiv = global.document.createElement('div');
   countdownWrapperDiv.appendChild(countdownDiv);
@@ -354,6 +362,7 @@ export function imaVideo(global, data) {
   setStyles(muteUnmuteDiv, {
     'width': '30px',
     'height': '30px',
+    'flex-shrink': '0',
     'margin-right': '20px',
     'font-size': '1.25em',
     'cursor': 'pointer',
@@ -366,6 +375,7 @@ export function imaVideo(global, data) {
   setStyles(fullscreenDiv, {
     'width': '30px',
     'height': '30px',
+    'flex-shrink': '0',
     'font-size': '1.25em',
     'cursor': 'pointer',
     'text-align': 'center',
@@ -804,12 +814,9 @@ export function onAdProgress(global) {
   if (remainingSeconds.toString().length < 2) {
     remainingSeconds = '0' + remainingSeconds;
   }
-  let podCount = ': ';
-  if (totalAds > 1) {
-    podCount = ' (' + adPosition + ' of ' + totalAds + '): ';
-  }
+  const label = adLabel.replace('%s', adPosition).replace('%s', totalAds);
   countdownDiv./*OK*/innerHTML
-    = 'Ad' + podCount + remainingMinutes + ':' + remainingSeconds;
+    = `${label}: ${remainingMinutes}:${remainingSeconds}`;
 }
 
 /**
@@ -1196,16 +1203,27 @@ function onFullscreenChange(global) {
 
 /**
  * Show a subset of controls when ads are playing.
- * Visible controls are muteUnmuteDiv and fullscreenDiv
+ * Visible controls are countdownDiv, muteUnmuteDiv, and fullscreenDiv
  *
  * @visibleForTesting
  */
 export function showAdControls() {
-  setStyle(controlsDiv, 'justify-content', 'flex-end');
+  // hide non-ad controls
+  const hideElement = button => setStyle(button, 'display', 'none');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(hideElement);
+  // set ad control styles
+  setStyles(controlsDiv, {
+    'justify-content': 'flex-end',
+    'height': '30px',
+    'padding': '10px',
+  });
+  const buttonDefaults = {'height': '20px'};
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '10px',
+  }));
+  // show ad controls
   setStyle(countdownWrapperDiv, 'display', 'flex');
-  setStyle(playPauseDiv, 'display', 'none');
-  setStyle(timeDiv, 'display', 'none');
-  setStyle(progressBarWrapperDiv, 'display', 'none');
   showControls();
 }
 
@@ -1215,11 +1233,22 @@ export function showAdControls() {
  * @visibleForTesting
  */
 export function resetControlsAfterAd() {
-  setStyle(controlsDiv, 'justify-content', 'center');
+  // hide ad controls
   setStyle(countdownWrapperDiv, 'display', 'none');
-  setStyle(playPauseDiv, 'display', 'block');
-  setStyle(timeDiv, 'display', 'block');
-  setStyle(progressBarWrapperDiv, 'display', 'block');
+  // set non-ad control styles
+  setStyles(controlsDiv, {
+    'justify-content': 'center',
+    'height': '100px',
+    'padding': '60px 10px 10px',
+  });
+  const buttonDefaults = {'height': '30px'};
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '20px',
+  }));
+  // show non-ad controls
+  const showElement = button => setStyle(button, 'display', 'block');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(showElement);
 }
 
 /**
