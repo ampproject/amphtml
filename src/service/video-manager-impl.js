@@ -14,50 +14,27 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
-import {
-  EMPTY_METADATA,
-  parseFavicon,
-  parseOgImage,
-  parseSchemaImage,
-  setMediaSession,
-} from '../mediasession-helper';
-import {
-  MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  PlayingStates,
-  VideoAnalyticsEvents,
-  VideoAttributes,
-  VideoEvents,
-} from '../video-interface';
-import {Services} from '../services';
-import {VideoDocking} from './video/docking';
-import {
-  VideoServiceInterface,
-  VideoServiceSignals,
-} from './video-service-interface';
-import {
-  VideoServiceSync,
-  setVideoComponentClassname,
-} from './video-service-sync-impl';
-import {VideoSessionManager} from './video-session-manager';
-import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
-import {
-  createCustomEvent,
-  getData,
-  listen,
-  listenOncePromise,
-} from '../event-helper';
-import {dev, user} from '../log';
-import {dict, map} from '../utils/object';
-import {getMode} from '../mode';
-import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {isFiniteNumber} from '../types';
-import {once} from '../utils/function';
-import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
-import {renderIcon, renderInteractionOverlay} from './video/autoplay';
-import {startsWith} from '../string';
-import {toggle} from '../style';
+import { ActionTrust } from '../action-constants';
+import { removeElement } from '../dom';
+import { createCustomEvent, getData, listen, listenOncePromise } from '../event-helper';
+import { dev, user } from '../log';
+import { EMPTY_METADATA, parseFavicon, parseOgImage, parseSchemaImage, setMediaSession } from '../mediasession-helper';
+import { getMode } from '../mode';
+import { registerServiceBuilderForDoc } from '../service';
+import { Services } from '../services';
+import { startsWith } from '../string';
+import { toggle } from '../style';
+import { isFiniteNumber } from '../types';
+import { once } from '../utils/function';
+import { dict, map } from '../utils/object';
+import { getInternalVideoElementFor, VideoUtils } from '../utils/video';
+import { MIN_VISIBILITY_RATIO_FOR_AUTOPLAY, PlayingStates, VideoAnalyticsEvents, VideoAttributes, VideoEvents } from '../video-interface';
+import { VideoServiceSignals } from './video-service-interface';
+import { setVideoComponentClassname, VideoServiceSync } from './video-service-sync-impl';
+import { VideoSessionManager } from './video-session-manager';
+import { renderIcon, renderInteractionOverlay } from './video/autoplay';
+import { VideoDocking } from './video/docking';
+import { installAutoplayStylesForDoc } from './video/install-autoplay-styles';
 
 
 /** @private @const {string} */
@@ -446,8 +423,11 @@ class VideoEntry {
 
     listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
       const data = getData(e);
+      const eventType = data['eventType'];
+      const vars = data['vars'];
       this.logCustomAnalytics_(
-          dev().assertString(data['eventType'], '`eventType` missing'));
+          dev().assertString(eventType, '`eventType` missing'),
+          vars);
     });
 
     video.signals().whenSignal(VideoEvents.REGISTERED)
@@ -471,9 +451,16 @@ class VideoEntry {
 
   /**
    * @param {string} eventType
+   * @param {!Object<string, string>} vars
    */
-  logCustomAnalytics_(eventType) {
-    analyticsEvent(this, eventType);
+  logCustomAnalytics_(eventType, vars) {
+    const preffixedVars = {};
+
+    Object.keys(vars).forEach(key => {
+      preffixedVars[`custom_${key}`] = vars[key];
+    });
+
+    analyticsEvent(this, eventType, preffixedVars);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
@@ -1231,10 +1218,12 @@ function isLandscape(win) {
  */
 function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
-  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-    entry.getAnalyticsDetails();
 
-  detailsPromise.then(details => {
+  entry.getAnalyticsDetails().then(details => {
+    if (opt_vars) {
+      Object.assign(details, opt_vars);
+    }
+    console.log({eventType, details});
     video.element.dispatchCustomEvent(eventType, details);
   });
 }

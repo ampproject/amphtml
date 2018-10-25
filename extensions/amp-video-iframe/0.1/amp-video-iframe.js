@@ -249,7 +249,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      dev().assert(false, 'Unknown method.');
+      user().assert(false, 'Unknown method `%s`.', eventReceived);
       return;
     }
 
@@ -270,16 +270,21 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (eventReceived == 'analytics') {
       const analyticsEventType = data['eventType'];
+      const vars = data['vars'] || {};
 
       user().assertString(
           analyticsEventType, '`eventType` missing in analytics event');
 
       user().assert(
           analyticsEventType != VideoAnalyticsEvents.CUSTOM,
-          'Invalid `eventType`. `video-hosted-custom` is a reserved event.');
+          'Invalid `eventType`. `%s` is a reserved event.',
+          VideoAnalyticsEvents.CUSTOM);
 
       this.element.dispatchCustomEvent(
-          VideoAnalyticsEvents.CUSTOM, {eventType: analyticsEventType});
+          VideoAnalyticsEvents.CUSTOM, {
+            eventType: analyticsEventType,
+            vars,
+          });
 
       return;
     }

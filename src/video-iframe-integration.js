@@ -306,11 +306,13 @@ export class AmpVideoIntegration {
   /**
    * Posts a custom analytics event.
    * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars
    */
-  postAnalyticsEvent(eventType) {
+  postAnalyticsEvent(eventType, opt_vars) {
     this.postToParent_(dict({
       'event': 'analytics',
       'eventType': eventType,
+      'vars': opt_vars,
     }));
   }
 
