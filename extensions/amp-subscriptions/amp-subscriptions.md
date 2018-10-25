@@ -351,7 +351,7 @@ Values in the `data` object of an Entitlements response can be used to build exp
 
 ```
 <section>
-  <div subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</div>
+  <button subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</button>
   <div subscriptions-actions subscriptions-display="data.isLoggedIn">
     <div>My Account</div>
     <div>Sign out</div>
