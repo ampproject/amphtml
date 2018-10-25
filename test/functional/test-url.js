@@ -882,25 +882,25 @@ describe('removeAmpJsParamsFromUrl', () => {
   });
 
   it('should remove all internal params', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&usqp=4'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&amp_kit=4&usqp=4'))
         .to.equal('http://example.com/');
-    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&usqp'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&amp_kit&usqp'))
         .to.equal('http://example.com/');
   });
 
   it('should remove all internal params, leaving others intact', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e'))
         .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e');
   });
 
   it('should preserve the fragment', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e#frag=yes'))
         .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e#frag=yes');
   });
 
   it('should preserve the path', () => {
     expect(
-        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e#frag=yes'))
         .to.equal('http://example.com/toast?a=a&b=b&c=c&d=d&e=e#frag=yes');
   });
 });
