@@ -97,7 +97,11 @@ export class ConsentPolicyManager {
    */
   registerConsentPolicyInstance(policyId, config) {
     if (this.instances_[policyId]) {
-      dev().error(TAG, `policy ${policyId} already registered`);
+      // Note <amp-next-page> could wait for the same consent policy.
+      // Return without thowing error.
+      // TODO: Make sure multiple consentPolicyManager services is installed
+      // for every <amp-next-page>
+      return;
     }
 
     const waitFor = Object.keys(config['waitFor'] || {});
