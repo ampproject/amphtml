@@ -408,7 +408,7 @@ export class Viewport {
   /**
    * Returns the rect of the element within the document.
    * Note that this function should be called in vsync measure. Please consider
-   * using `getLayoutRectAsync` instead.
+   * using `getClientRectAsync` instead.
    * @param {!Element} el
    * @return {!../../layout-rect.LayoutRectDef}
    */

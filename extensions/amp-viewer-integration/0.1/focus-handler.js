@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
-
 /**
  * @fileoverview Forward focus events' related data from the AMP doc to the
  * viewer.
@@ -29,8 +31,12 @@ export class FocusHandler {
   constructor(win, messaging) {
     /** @const {!Window} */
     this.win = win;
+
     /** @const @private {!./messaging/messaging.Messaging} */
     this.messaging_ = messaging;
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(win.document);
 
     this.listenForFocusEvents_();
   }
@@ -50,28 +56,33 @@ export class FocusHandler {
 
   /**
    * @param {!Event} e
+   * @return {!Promise}
    * @private
    */
   handleEvent_(e) {
     switch (e.type) {
       case 'focusin':
-        this.forwardEventToViewer_(e);
-        break;
+        return this.forwardEventToViewer_(e);
       default:
         // fall through.
-        return;
+        return Promise.resolve();
     }
   }
 
   /**
    * @param {!Event} e
+   * @return {!Promise}
    * @private
    */
   forwardEventToViewer_(e) {
     if (e.defaultPrevented) {
-      return;
+      return Promise.resolve();
     }
-    this.messaging_.sendRequest(
-        e.type, {'focusTargetRect': e.target.getBoundingClientRect()}, false);
+
+    return this.viewport_.getClientRectAsync(dev.assertElement(e.target))
+        .then(elementBox => {
+          this.messaging_.sendRequest(
+              e.type, dict({'focusTargetRect': elementBox}), false);
+        });
   }
 }
