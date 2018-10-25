@@ -32,7 +32,6 @@ function checkCachesJson() {
         try {
           const obj = JSON.parse(file.contents.toString());
         } catch (e) {
-          // Do nothing since this is handled in checkValidJson.
           log(colors.yellow('Could not parse caches.json. '
                             'This is most likely a fatal error that '
                             'will be found by checkValidJson'))
