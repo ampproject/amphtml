@@ -1,3 +1,11 @@
+⚡⚡⚡
+
+**Our last release for 2018 will be created on Tuesday, December 11, 2018 (targeting full rollout on December 18).**
+
+After this the next release will be created on Wednesday, January 3, 2019 (targeting full rollout on January 9).
+
+⚡⚡⚡
+
 # Release Schedule
 
 - [Detailed schedule](#detailed-schedule)
