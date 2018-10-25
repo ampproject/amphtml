@@ -190,7 +190,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.idOfAdShowing_ = null;
 
     /** @private {boolean} */
-    this.firstAdShown_ = false;
+    this.firstAdViewed_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -567,7 +567,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
 
-    if (this.enoughPagesShown_()) {
+    if (this.enoughContentPagesShown_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
@@ -575,13 +575,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
             {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
         // start loading next ad
-        this.startNextPage_();
+        this.startNextAdPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
         this.analyticsEventWithCurrentAd_(Events.AD_DISCARDED,
             {[Vars.AD_DISCARDED]: Date.now()});
-        this.startNextPage_();
+        this.startNextAdPage_();
       }
     }
   }
@@ -593,12 +593,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  enoughPagesShown_() {
-    if (this.firstAdShown_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
+  enoughContentPagesShown_() {
+    if (this.firstAdViewed_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
       return true;
     }
 
-    if (!this.firstAdShown_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
+    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
       return true;
     }
 
@@ -609,9 +609,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * start the process over
    * @private
    */
-  startNextPage_() {
-    if (!this.firstAdShown_) {
-      this.firstAdShown_ = true;
+  startNextAdPage_() {
+    if (!this.firstAdViewed_) {
+      this.firstAdViewed_ = true;
     }
 
     // Set to -1 because there is still one page to be viewed before ad.
