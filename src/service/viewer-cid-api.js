@@ -61,14 +61,16 @@ export class ViewerCidApi {
    * @return {!Promise<?JsonObject|string|undefined>}
    */
   getScopedCid(apiKey, scope) {
-    const payload = dict({
-      'scope': scope,
-      'clientIdApi': !!apiKey,
-      'canonicalOrigin': this.canonicalOrigin_,
+    return this.viewer_.whenFirstVisible().then(() => {
+      const payload = dict({
+        'scope': scope,
+        'clientIdApi': !!apiKey,
+        'canonicalOrigin': this.canonicalOrigin_,
+      });
+      if (apiKey) {
+        payload['apiKey'] = apiKey;
+      }
+      return this.viewer_.sendMessageAwaitResponse('cid', payload);
     });
-    if (apiKey) {
-      payload['apiKey'] = apiKey;
-    }
-    return this.viewer_.sendMessageAwaitResponse('cid', payload);
   }
 }

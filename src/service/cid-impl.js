@@ -510,19 +510,20 @@ export function viewerBaseCid(ampdoc, opt_data) {
     }
     // TODO(lannka, #11060): clean up when all Viewers get migrated
     dev().expectedError('CID', 'Viewer does not provide cap=cid');
-    return viewer.sendMessageAwaitResponse('cid', opt_data)
-        .then(data => {
-          // For backward compatibility: #4029
-          if (data && !tryParseJson(data)) {
-            // TODO(lannka, #11060): clean up when all Viewers get migrated
-            dev().expectedError('CID', 'invalid cid format');
-            return JSON.stringify(dict({
-              'time': Date.now(), // CID returned from old API is always fresh
-              'cid': data,
-            }));
-          }
-          return data;
-        });
+    return viewer.whenFirstVisible().then(() => {
+      return viewer.sendMessageAwaitResponse('cid', opt_data);
+    }).then(data => {
+      // For backward compatibility: #4029
+      if (data && !tryParseJson(data)) {
+        // TODO(lannka, #11060): clean up when all Viewers get migrated
+        dev().expectedError('CID', 'invalid cid format');
+        return JSON.stringify(dict({
+          'time': Date.now(), // CID returned from old API is always fresh
+          'cid': data,
+        }));
+      }
+      return data;
+    });
   });
 }
 
