@@ -1192,33 +1192,54 @@ export class VisibilityTracker extends EventTracker {
   /**
    * @param {string} reportWhenSpec
    * @return {!Promise}
+   * @private
    */
   createReportReadyPromise_(reportWhenSpec) {
-    const viewer = this.root.getViewer();
-
     switch (reportWhenSpec) {
       case 'hidden':
-        if (!viewer.isVisible()) {
-          return Promise.resolve();
-        }
-
-        return new Promise(resolve => {
-          viewer.onVisibilityChanged(() => {
-            if (!viewer.isVisible()) {
-              resolve();
-            }
-          });
-        });
+        return this.createReportReadyPromiseForHidden_();
       case 'endOfFrame':
-        return new Promise(resolve => {
-          // TODO Only resolve when endOfFrame occurs. How to detect this?
-          resolve();
-        });
+        return this.createReportReadyPromiseForEndOfFrame_();
       default:
         user().assert(reportWhenSpec == 'none',
             'reportWhen value %s not supported', reportWhenSpec);
         return Promise.resolve();
     }
+  }
+
+  /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: hidden
+   * @return {!Promise}
+   * @private
+   */
+  createReportReadyPromiseForHidden_() {
+    const viewer = this.root.getViewer();
+
+    if (!viewer.isVisible()) {
+      return Promise.resolve();
+    }
+
+    return new Promise(resolve => {
+      viewer.onVisibilityChanged(() => {
+        if (!viewer.isVisible()) {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: endOfFrame
+   * @return {!Promise}
+   * @private
+   */
+  createReportReadyPromiseForEndOfFrame_() {
+    return new Promise(resolve => {
+      // TODO Only resolve when endOfFrame occurs. How to detect this?
+      resolve();
+    });
   }
 
   /**
