@@ -79,7 +79,7 @@ export class FocusHandler {
       return Promise.resolve();
     }
 
-    return this.viewport_.getClientRectAsync(dev.assertElement(e.target))
+    return this.viewport_.getClientRectAsync(dev().assertElement(e.target))
         .then(elementBox => {
           this.messaging_.sendRequest(
               e.type, dict({'focusTargetRect': elementBox}), false);
