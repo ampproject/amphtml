@@ -249,7 +249,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      user().assert(false, 'Unknown method `%s`.', eventReceived);
+      user().assert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
 
