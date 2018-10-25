@@ -38,7 +38,7 @@ function checkCachesJson() {
                 + 'will be found by checkValidJson'));
           return;
         }
-        let foundCaches = [];
+        const foundCaches = [];
         for (const foundCache of obj.caches) {
           foundCaches.push(foundCache.id);
         }
