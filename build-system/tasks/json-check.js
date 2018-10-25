@@ -29,25 +29,27 @@ const expectedCaches = ['cloudflare', 'google'];
 function checkCachesJson() {
   return gulp.src(['caches.json'])
       .pipe(through2.obj(function(file) {
+        let obj;
         try {
-          const obj = JSON.parse(file.contents.toString());
+          obj = JSON.parse(file.contents.toString());
         } catch (e) {
           log(colors.yellow('Could not parse caches.json. '
                 + 'This is most likely a fatal error that '
-                + 'will be found by checkValidJson'))
+                + 'will be found by checkValidJson'));
+          return;
         }
         let foundCaches = [];
         for (const foundCache of obj.caches) {
           foundCaches.push(foundCache.id);
         }
         for (const cache of expectedCaches) {
-          if (!(cache in foundCaches)) {
+          if (foundCaches.indexOf(cache) == -1) {
             log(colors.red('Missing expected cache "'
                   + cache + '" in caches.json'));
             process.exitCode = 1;
           }
         }
-      })
+      }));
 }
 
 /**
@@ -73,7 +75,7 @@ function checkValidJson() {
 }
 
 gulp.task('caches-json', 'Check that some expected caches are included.',
-    checkCachesJson);,
+    checkCachesJson);
 
 gulp.task(
     'json-syntax', 'Check that JSON files are valid JSON.', checkValidJson);
