@@ -49,7 +49,7 @@ const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 /**
  * We ignore base cids that are older than (roughly) one year.
  */
-const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
+export const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
 
 const SCOPE_NAME_VALIDATOR = /^[a-zA-Z0-9-_.]+$/;
 

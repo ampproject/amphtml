@@ -52,7 +52,7 @@ import {
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {
   LocalizationService,
@@ -301,6 +301,13 @@ export class AmpStory extends AMP.BaseElement {
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.initializeStandaloneStory_();
     }
+
+    // buildCallback already runs in a mutate context. Calling another
+    // mutateElement explicitly will force the runtime to remeasure the
+    // amp-story element, fixing rendering bugs where the story is inactive
+    // (layoutCallback not called) when accessed from any viewer using
+    // prerendering, because of a height incorrectly set to 0.
+    this.mutateElement(() => {});
 
     this.element.querySelector('amp-story-page').setAttribute('active', '');
 
@@ -967,12 +974,12 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    switch (e.keyCode) {
+    switch (e.key) {
       // TODO(newmuis): This will need to be flipped for RTL.
-      case KeyCodes.LEFT_ARROW:
+      case Keys.LEFT_ARROW:
         this.previous_();
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         this.next_();
         break;
     }

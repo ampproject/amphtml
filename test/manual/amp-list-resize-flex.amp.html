@@ -57,7 +57,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 </head>
 <body>
@@ -75,7 +75,7 @@
 
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
-    <amp-list width="396" height="80" layout="flex-item"
+    <amp-list width="396" height="80" layout="flex-item" resizable-children
         src="/test/manual/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry">
@@ -94,7 +94,7 @@
   <h2>AMP List Resize with Accordion</h2>
   <div class="flex">
     <amp-img src="/examples/img/sample.jpg" width=80 height=60></amp-img>
-    <amp-list width="396" height="80" layout="flex-item" reset-on-refresh
+    <amp-list width="396" height="80" layout="flex-item" resizable-children reset-on-refresh
         src="/test/manual/amp-list-data.json">
       <template type="amp-mustache">
         <div class="story-entry">
@@ -129,6 +129,7 @@
       height="80"
       layout="flex-item"
       reset-on-refresh
+      resizable-children
       src="/test/manual/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
         <div class="story-entry" [class]="'story-entry ' + listStyle">
@@ -168,6 +169,7 @@
       layout="flex-item"
       src="/search/countries"
       reset-on-refresh
+      resizable-children
       [src]="'/search/countries?q=' + query">
       <template type="amp-mustache">
         {{#results}}

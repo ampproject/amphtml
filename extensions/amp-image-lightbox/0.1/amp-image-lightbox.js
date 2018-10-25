@@ -26,7 +26,7 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
@@ -849,7 +849,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == KeyCodes.ESCAPE) {
+    if (event.key == Keys.ESCAPE) {
       this.close();
     }
   }
@@ -903,7 +903,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.sourceElement_ = sourceElement;
 
     // Initialize the viewer.
-    this.sourceImage_ = dom.elementByTag(sourceElement, 'img');
+    this.sourceImage_ = dom.childElementByTag(sourceElement, 'img');
     this.imageViewer_.init(this.sourceElement_, this.sourceImage_);
 
     // Discover caption.
@@ -966,7 +966,7 @@ class AmpImageLightbox extends AMP.BaseElement {
             this.sourceImage_.src) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.element.ownerDocument.body.appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -1017,7 +1017,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       setStyles(this.element, {opacity: ''});
       setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.element.ownerDocument.body.removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
     });
   }
@@ -1043,7 +1043,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (isLoaded(image) && image.src && this.sourceImage_) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.element.ownerDocument.body.appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -1108,7 +1108,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.element.ownerDocument.body.removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
       this.reset_();
     });

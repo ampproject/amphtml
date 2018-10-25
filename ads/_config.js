@@ -88,7 +88,7 @@ export const adConfig = {
   },
 
   'a9': {
-    prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+    prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
   },
 
   'accesstrade': {
@@ -727,6 +727,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
@@ -763,6 +767,10 @@ export const adConfig = {
   },
 
   'realclick': {
+    renderStartImplemented: true,
+  },
+
+  'recomad': {
     renderStartImplemented: true,
   },
 
@@ -878,10 +886,9 @@ export const adConfig = {
   'taboola': {},
 
   'teads': {
-    prefetch: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1028,6 +1035,14 @@ export const adConfig = {
 
   'zedo': {
     prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
+  },
+
+  'zen': {
+    prefetch: 'https://zen.yandex.ru/widget-loader',
+    preconnect: [
+      'https://yastatic.net/',
+    ],
     renderStartImplemented: true,
   },
 

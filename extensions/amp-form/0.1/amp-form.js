@@ -19,11 +19,12 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
+  FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
-import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {FormEvents} from './form-events';
+import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
@@ -36,6 +37,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {
@@ -53,6 +55,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {
   setupAMPCors,
   setupInit,
+  setupInput,
 } from '../../../src/utils/xhr-utils';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -155,7 +158,7 @@ export class AmpForm {
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
 
-    /** @const @private {?string} */
+    /** @private {?string} */
     this.xhrAction_ = this.getXhrUrl_('action-xhr');
 
     /** @const @private {?string} */
@@ -171,10 +174,6 @@ export class AmpForm {
       this.form_.setAttribute('amp-novalidate', '');
     }
     this.form_.classList.add('i-amphtml-form');
-
-    const submitButtons = this.form_.querySelectorAll('[type="submit"]');
-    /** @const @private {!Array<!Element>} */
-    this.submitButtons_ = toArray(submitButtons);
 
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
@@ -196,12 +195,16 @@ export class AmpForm {
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
+    this.installInputMasking_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
 
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
+
+    /** @private {./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = Services.formSubmitForDoc(element);
   }
 
   /**
@@ -227,21 +230,34 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @return {!../../../src/service/xhr-impl.FetchRequestDef}
+   * @param {!Array<string>=} opt_fieldBlacklist
+   * @return {!FetchRequestDef}
    */
-  requestForFormFetch(url, method, opt_extraFields) {
+  requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
+      if (opt_fieldBlacklist) {
+        opt_fieldBlacklist.forEach(name => {
+          delete values[name];
+        });
+      }
+
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
       }
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = new FormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.win_, this.form_);
+      if (opt_fieldBlacklist) {
+        opt_fieldBlacklist.forEach(name => {
+          body.delete(name);
+        });
+      }
+
       for (const key in opt_extraFields) {
         body.append(key, opt_extraFields[key]);
       }
@@ -257,6 +273,13 @@ export class AmpForm {
     };
   }
 
+  /**
+   * Setter to change cached action-xhr.
+   * @param {string} url
+   */
+  setXhrAction(url) {
+    this.xhrAction_ = url;
+  }
 
   /**
    * Handle actions that require at least high trust.
@@ -343,6 +366,15 @@ export class AmpForm {
     });
   }
 
+  /** @private */
+  installInputMasking_() {
+    Services.inputmaskServiceForDocOrNull(this.form_).then(inputmaskService => {
+      if (inputmaskService) {
+        inputmaskService.install();
+      }
+    });
+  }
+
   /**
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
@@ -352,7 +384,7 @@ export class AmpForm {
    */
   triggerFormSubmitInAnalytics_(eventType) {
     this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = {};
+    const formDataForAnalytics = dict({});
     const formObject = this.getFormAsObject_();
 
     for (const k in formObject) {
@@ -445,6 +477,16 @@ export class AmpForm {
    * @private
    */
   submit_(trust) {
+    try {
+      const event = {
+        form: this.form_,
+        actionXhrMutator: this.setXhrAction.bind(this),
+      };
+      this.formSubmitService_.fire(event);
+    } catch (e) {
+      dev().error(TAG, `Form submit service failed: ${e}`);
+    }
+
     const varSubsFields = this.getVarSubsFields_();
     if (this.xhrAction_) {
       this.handleXhrSubmit_(varSubsFields, trust);
@@ -526,8 +568,11 @@ export class AmpForm {
         }).then(() => {
           request = this.requestForFormFetch(
               dev().assertString(this.xhrAction_), this.method_);
-          setupInit(request.fetchOpt);
-          setupAMPCors(this.win_, request.xhrUrl, request.fetchOpt);
+          request.fetchOpt = setupInit(request.fetchOpt);
+          request.fetchOpt = setupAMPCors(
+              this.win_, request.xhrUrl, request.fetchOpt);
+          request.xhrUrl = setupInput(
+              this.win_, request.xhrUrl, request.fetchOpt);
           return this.ssrTemplateHelper_.fetchAndRenderTemplate(
               this.form_,
               request,
@@ -621,8 +666,13 @@ export class AmpForm {
    * @private
    */
   doVerifyXhr_() {
+    const noVerifyFields = toArray(this.form_.querySelectorAll(
+        `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`));
+    const blacklist = noVerifyFields.map(field => field.name || field.id);
+
     return this.doXhr_(dev().assertString(this.xhrVerify_), this.method_,
-        {[FORM_VERIFY_PARAM]: true});
+        /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
+        /**opt_fieldBlacklist*/ blacklist);
   }
 
   /**
@@ -630,19 +680,21 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
+   * @param {!Array<string>=} opt_fieldBlacklist
    * @return {!Promise<!Response>}
    * @private
    */
-  doXhr_(url, method, opt_extraFields) {
+  doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const request = this.requestForFormFetch(url, method, opt_extraFields);
+    const request = this.requestForFormFetch(
+        url, method, opt_extraFields, opt_fieldBlacklist);
     return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
   }
 
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject|string|undefined} response
-   * @param {!../../../src/service/xhr-impl.FetchRequestDef} request
+   * @param {!FetchRequestDef} request
    * @return {!Promise}
    * @private visible for testing
    */
@@ -652,8 +704,6 @@ export class AmpForm {
     this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
     return this.handleSubmitSuccess_(tryResolve(() => response['html']));
   }
-
-
 
   /**
    * Transition the form to the submit success state.
@@ -832,7 +882,7 @@ export class AmpForm {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
@@ -859,13 +909,6 @@ export class AmpForm {
     this.form_.classList.add(`amp-form-${newState}`);
     this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
-    this.submitButtons_.forEach(button => {
-      if (newState == FormState.SUBMITTING) {
-        button.setAttribute('disabled', '');
-      } else {
-        button.removeAttribute('disabled');
-      }
-    });
   }
 
   /**
@@ -1165,4 +1208,5 @@ export class AmpFormService {
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(TAG, AmpFormService);
+  AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
 });

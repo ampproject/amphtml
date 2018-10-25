@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 733
+spec_file_revision: 749
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -74,47 +74,13 @@ tags: {
 # 4.1.1 The html element
 tags: {  # AMP
   html_format: AMP
-  tag_name: "HTML"
-  spec_name: "html ⚡ for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡"
-    alternative_names: "amp"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
-}
-tags: {  # AMP4ADS
   html_format: AMP4ADS
-  tag_name: "HTML"
-  spec_name: "html ⚡4ads for top-level html"
-  mandatory: true
-  mandatory_parent: "!DOCTYPE"
-  unique: true
-  attrs: {
-    name: "⚡4ads"
-    alternative_names: "amp4ads"
-    mandatory: true
-    value: ""
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#a4a-format-rules"
-}
-tags: {  # AMP4EMAIL
   html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "HTML"
-  spec_name: "html ⚡4email for top-level html"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
-  attrs: {
-    name: "⚡4email"
-    alternative_names: "amp4email"
-    mandatory: true
-    value: ""
-  }
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 
@@ -311,6 +277,7 @@ tags: {
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+"
                  "/css/(all|brands|solid|regular|light|fontawesome)\\.css|"
+                 "https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z]+\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
@@ -1169,7 +1136,7 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
@@ -1191,7 +1158,7 @@ tags: {
     # This regex allows arbitrary whitespace around the body statement, but
     # not inside it. This is a compromise to keep things simple, but allow
     # pretty printing tools some latitude.
-    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#boilerplate"
 }
@@ -1212,7 +1179,7 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
@@ -1235,7 +1202,7 @@ tags: {
   }
   attrs: { name: "nonce" }
   cdata {
-    cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
+    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
@@ -1570,7 +1537,9 @@ tags: {
       protocol: "mailto"
       protocol: "maps"
       # Whitelisting additional commonly observed third party
-      # protocols which should be safe
+      # protocols which should be safe.
+      # BiP Messenger
+      protocol: "bip"
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
@@ -4146,12 +4115,17 @@ tags: {
   attrs: { name: "for" }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
-# 4.10.5 The input element
+# 4.10.5 The input element.
+# The input tag is also defined by extensions/amp-inputmask/validator-amp-inputmask.protoascii
 tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: EXPERIMENTAL
   tag_name: "INPUT"
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
@@ -4172,6 +4146,10 @@ tags: {
   html_format: AMP
   tag_name: "INPUT"
   spec_name: "INPUT [type=file]"
+   attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: {
     name: "type"
     value_casei: "file"
@@ -4278,6 +4256,10 @@ tags: {
   attrs: { name: "autofocus" }
   attrs: { name: "disabled" }
   attrs: { name: "multiple" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: { name: "required" }
   attrs: { name: "size" }
   # <amp-bind>
@@ -4344,6 +4326,10 @@ tags: {
   attrs: { name: "disabled" }
   attrs: { name: "maxlength" }
   attrs: { name: "minlength" }
+  attrs: {
+    name: "no-verify"
+    value: ""
+  }
   attrs: { name: "placeholder" }
   attrs: { name: "readonly" }
   attrs: { name: "required" }

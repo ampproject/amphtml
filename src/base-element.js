@@ -429,8 +429,7 @@ export class BaseElement {
    */
   renderOutsideViewport() {
     // Inabox allow layout independent of viewport location.
-    return getMode(this.win).runtime == 'inabox' &&
-        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
+    return getMode(this.win).runtime == 'inabox' || 3;
   }
 
   /**
@@ -677,15 +676,6 @@ export class BaseElement {
       }));
 
     return () => unlisteners.forEach(unlisten => unlisten());
-  }
-
-  /**
-   * Must be executed in the mutate context. Removes `display:none` from the
-   * element set via `layout=nodisplay`.
-   * @param {boolean} displayOn
-   */
-  toggleLayoutDisplay(displayOn) {
-    this.element.toggleLayoutDisplay(displayOn);
   }
 
   /**

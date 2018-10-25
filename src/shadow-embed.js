@@ -127,7 +127,12 @@ function createShadowRootPolyfill(hostElement) {
     // TODO(@dvoytenko) Consider to switch to a type union instead.
     /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
-  hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
+  hostElement.__AMP_SHADOW_ROOT = shadowRoot;
+  Object.defineProperty(hostElement, 'shadowRoot', {
+    enumerable: true,
+    configurable: true,
+    value: shadowRoot,
+  });
 
   // API: https://www.w3.org/TR/shadow-dom/#the-shadowroot-interface
 
