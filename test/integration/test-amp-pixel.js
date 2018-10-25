@@ -25,7 +25,7 @@ import {
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);
 
-  describes.integration('amp-pixel integration test', {
+  describes.integration('amp-pixel referrer integration test', {
     body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
   }, env => {
     it('should keep referrer if no referrerpolicy specified', () => {
@@ -35,7 +35,22 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     });
   });
 
-  describes.integration('amp-pixel integration test', {
+  describes.integration('amp-pixel macro integration test', {
+    body: `<amp-pixel src="${depositRequestUrl(
+        'hello-world&title=TITLE&qp=QUERY_PARAM(a)')}">`,
+    params: {
+      a: 123,
+    },
+  }, env => {
+    it('should expand the TITLE macro', () => {
+      return withdrawRequest(env.win, 'hello-world&title=AMP-TEST&qp=123')
+          .then(request => {
+            expect(request.headers.host).to.be.ok;
+          });
+    });
+  });
+
+  describes.integration('amp-pixel no-referrer integration test', {
     body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
              referrerpolicy="no-referrer">`,
   }, env => {
