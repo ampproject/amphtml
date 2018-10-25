@@ -150,8 +150,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.navigationState_ = null;
 
     /**
-     * Set to one here because we count on navigation event, and we do have
-     * an event before first page.
+     * We are counting pages on page-clicks. We initialize this to 1 because
+     * even though we have not yet seen a page click, we have already seen one
+     * page.
      * @private {number}
      */
     this.uniquePagesCount_ = 1;
@@ -561,6 +562,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         [Vars.AD_INDEX]: adIndex,
       });
 
+      // Start loading next ad.
+      this.startNextAdPage_();
+
       // Keeping track of this here so that we can contain the logic for when
       // we exit the ad within this extension.
       this.idOfAdShowing_ = adIndex;
@@ -574,14 +578,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.analyticsEventWithCurrentAd_(Events.AD_INSERTED,
             {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
-        // start loading next ad
-        this.startNextAdPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
         this.analyticsEventWithCurrentAd_(Events.AD_DISCARDED,
             {[Vars.AD_DISCARDED]: Date.now()});
-        this.startNextAdPage_();
+        this.startNextAdPage_(/* failure */ true);
       }
     }
   }
@@ -606,16 +608,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * start the process over
+   * Start the process over.
    * @private
+   * @param {boolean} failure If we are calling this due to failed ad.
    */
-  startNextAdPage_() {
+  startNextAdPage_(failure) {
     if (!this.firstAdViewed_) {
       this.firstAdViewed_ = true;
     }
 
-    // Set to -1 because there is still one page to be viewed before ad.
-    this.uniquePagesCount_ = -1;
+    if (!failure) {
+      // Don't reset the count on a failed ad.
+      this.uniquePagesCount_ = 0;
+    }
+
     this.schedulePage_();
   }
 
