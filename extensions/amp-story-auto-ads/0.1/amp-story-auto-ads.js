@@ -610,14 +610,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Start the process over.
    * @private
-   * @param {boolean} failure If we are calling this due to failed ad.
+   * @param {boolean=} opt_failure If we are calling this due to failed ad.
    */
-  startNextAdPage_(failure) {
+  startNextAdPage_(opt_failure) {
     if (!this.firstAdViewed_) {
       this.firstAdViewed_ = true;
     }
 
-    if (!failure) {
+    if (!opt_failure) {
       // Don't reset the count on a failed ad.
       this.uniquePagesCount_ = 0;
     }
