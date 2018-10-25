@@ -73,7 +73,6 @@ class Animation {
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation
  * @interface
- * @extend {EventTarget}
  */
 class WorkletAnimation {
   constructor() {
