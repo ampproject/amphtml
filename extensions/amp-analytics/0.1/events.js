@@ -1147,6 +1147,10 @@ export class VisibilityTracker extends EventTracker {
     // special polyfill for eventType: 'hidden'
     let createReadyReportPromiseFunc = null;
     if (eventType == 'hidden') {
+      if (reportWhenSpec) {
+        user().error(TAG,
+            'ReportWhen should not be defined when eventType is "hidden"');
+      }
       reportWhenSpec = eventType;
     }
     if (reportWhenSpec) {
