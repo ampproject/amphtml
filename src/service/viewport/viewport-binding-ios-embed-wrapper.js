@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../observable';
+import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
