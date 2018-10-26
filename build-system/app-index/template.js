@@ -24,6 +24,7 @@ const html = require('./html');
 const ProxyForm = require('./proxy-form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
+
 const examplesDocumentModes = {
   'standard': '/',
   'a4a': '/a4a/',
@@ -57,12 +58,14 @@ const headerLinks = [
   },
 ];
 
+
 const requiredExtensions = [
   {name: 'amp-bind'},
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
 ];
+
 
 const ExtensionScript = ({name, version}) =>
   html`<script
@@ -245,5 +248,6 @@ const renderTemplate = ({
     ${SettingsModal({serveMode})}
   </body>
   </html>`;
+
 
 module.exports = {renderTemplate};
