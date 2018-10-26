@@ -16,6 +16,7 @@
 
 import * as lolex from 'lolex';
 import {Transport} from '../transport';
+import {getMode} from '../../../../src/mode';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -200,6 +201,34 @@ describes.realWin('amp-analytics.transport', {
       doc.body.appendChild(ad);
       const frame = doc.createElement('iframe');
       ad.appendChild(frame);
+      frame.contentWindow.document.write(
+          '<amp-analytics type="bg"></amp-analytics>');
+      frame.contentWindow.__AMP_TOP = win;
+      const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
+
+      const preconnectSpy = sandbox.spy();
+      transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
+        preload: preconnectSpy,
+      });
+      expect(transport.iframeTransport_).to.be.ok;
+      expect(preconnectSpy).to.be.called;
+
+      transport.deleteIframeTransport();
+      expect(transport.iframeTransport_).to.be.null;
+    });
+
+    it('initialize iframe transport when used with inabox', () => {
+      win.AMP_MODE = win.AMP_MODE || {};
+      win.AMP_MODE.runtime = 'inabox';
+      expect(getMode(win).runtime).to.equal('inabox');
+
+      const transport = new Transport(win, {
+        iframe: '//test',
+      });
+
+      const frame = doc.createElement('iframe');
+      doc.body.appendChild(frame);
       frame.contentWindow.document.write(
           '<amp-analytics type="bg"></amp-analytics>');
       frame.contentWindow.__AMP_TOP = win;
