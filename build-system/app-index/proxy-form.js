@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const html = require('./html');
 
-/* eslint-disable no-unused-vars */
-
-import {Component, h, render} from 'preact';
-
-function goToProxyUrlOnSubmit(event) {
-  event.preventDefault();
-
-  const input = event.target.querySelector('#proxy-input');
-  const suffix = input.value.replace(/^http(s?):\/\//i, '');
-  window.location = `/proxy/s/${suffix}`;
-}
-
-export function ProxyForm() {
-  return (
-    <form id="proxy-form" onSubmit={goToProxyUrlOnSubmit}>
+module.exports = () => html`
+  <div class="block">
+    <form id="proxy-form" action="/proxy" target="_top">
       <label for="proxy-input">
         <span>Load URL by Proxy</span>
-        <input type="text" class="text-input" id="proxy-input"
+        <input type="text"
+          class="text-input"
+          id="proxy-input"
+          name="url"
           required aria-required="true"
           placeholder="https://"
           pattern="^(https?://)?[^\\s]+$" />
@@ -43,5 +35,4 @@ export function ProxyForm() {
         </a>
       </div>
     </form>
-  );
-}
+  </div>`;
