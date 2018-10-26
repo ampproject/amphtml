@@ -68,11 +68,11 @@ function Modal({className, children}) {
 function SettingsModal() {
   return (
     <Modal className="settings-modal">
-      <wrap class="modal-main">
+      <div class="wrap modal-main">
         <h3>Settings</h3>
         <h4>Javascript Serve Mode</h4>
         <ServeModeSelector />
-      </wrap>
+      </div>
     </Modal>
   );
 }
