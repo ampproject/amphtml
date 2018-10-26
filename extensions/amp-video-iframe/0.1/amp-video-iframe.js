@@ -286,13 +286,12 @@ class AmpVideoIframe extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
     const requiredEventTypePrefix = 'video-custom-';
 
-    user().assertString(
-      analyticsEventType, '`eventType` missing in analytics event');
+    user().assertString(eventType, '`eventType` missing in analytics event');
 
     user().assert(
-      (new RegExp(`^${requiredEventTypePrefix}`)).test(analyticsEventType),
-      'Invalid analytics `eventType`. Value must start with `%s`.',
-      requiredEventTypePrefix);
+        (new RegExp(`^${requiredEventTypePrefix}`)).test(eventType),
+        'Invalid analytics `eventType`. Value must start with `%s`.',
+        requiredEventTypePrefix);
 
     this.element.dispatchCustomEvent(
         VideoAnalyticsEvents.CUSTOM,
