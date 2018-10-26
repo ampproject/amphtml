@@ -54,6 +54,9 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 /** @const */
 const LOADING_ATTR = 'i-amphtml-loading';
 
+/** @const {string} */
+const NEXT_PAGE_NO_AD = 'next-page-no-ad';
+
 /** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
@@ -657,10 +660,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    if (!this.isCurrentAdLoaded_ || pageBeforeAd.isAd() ||
-        pageAfterAd.isAd()) {
-      // if we are going to cause two consecutive ads or ad is still
-      // loading we will try again on next user interaction
+    // There are three checks here that we check before inserting an ad. If
+    // any of these fail we will try again on next page navigation.
+    if (!this.isCurrentAdLoaded_ // 1. Ad must be loaded.
+        // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
+        || this.nextPageNoAd_(pageBeforeAd)
+        // 3. We will not show two ads in a row.
+        || pageBeforeAd.isAd() || pageAfterAd.isAd()) {
       return AD_STATE.PENDING;
     }
 
@@ -699,6 +705,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
 
+  /**
+   * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
+   * from showing as the next page.
+   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @return {boolean}
+   * @private
+   */
+  nextPageNoAd_(page) {
+    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
+  }
 
   /**
    * Call an analytics event with the last created Ad.
