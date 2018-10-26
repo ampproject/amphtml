@@ -67,6 +67,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?Pass} */
     this.restartPass_ = null;
+
+    /** @private {boolean} */
+    this.hasPositionObserver_ = false;
   }
 
   /** @override */
@@ -150,6 +153,19 @@ export class AmpAnimation extends AMP.BaseElement {
         }
       });
     }
+
+    // See if page has a PositionObserver in it associated with this animation.
+    const positionObservers =
+    this.element.ownerDocument.querySelectorAll('amp-position-observer');
+    positionObservers.forEach(observer => {
+      const onAttr = observer.getAttribute('on');
+      // We are only concerned with positionObservers that are associated with
+      // this animation and are controlling it using the seekTo event.
+      if (onAttr.indexOf(this.element.id) !== -1 &&
+        onAttr.indexOf('seekTo') !== -1) {
+        this.hasPositionObserver_ = true;
+      }
+    });
 
     // Actions.
     this.registerAction('start',
@@ -468,7 +484,7 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, args);
+      return builder.createRunner(configJson, this.hasPositionObserver_, args);
     });
   }
 
