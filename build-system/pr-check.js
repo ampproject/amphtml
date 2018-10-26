@@ -320,6 +320,7 @@ const command = {
     timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
+    timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
