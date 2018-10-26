@@ -377,6 +377,14 @@ export class Viewport {
   }
 
   /**
+   * Resource manager signals to the viewport that content height is changed
+   * and some action may need to be taken.
+   */
+  contentHeightChanged() {
+    this.binding_.contentHeightChanged();
+  }
+
+  /**
    * Returns the rect of the viewport which includes scroll positions and size.
    * @return {!../../layout-rect.LayoutRectDef}}
    */

@@ -157,6 +157,12 @@ export class ViewportBindingDef {
   getContentHeight() {}
 
   /**
+   * Resource manager signals to the viewport that content height is changed
+   * and some action may need to be taken.
+   */
+  contentHeightChanged() {}
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} unusedEl
    * @param {number=} unusedScrollLeft Optional arguments that the caller may

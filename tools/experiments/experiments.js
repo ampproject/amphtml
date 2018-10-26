@@ -400,6 +400,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
 ];
 
 if (getMode().localDev) {
