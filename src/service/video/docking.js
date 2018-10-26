@@ -1055,7 +1055,8 @@ export class VideoDocking {
     const event = createCustomEvent(this.ampdoc_.win,
         /** @type {string} */ (action), /* detail */ dict({}));
     const actions = Services.actionServiceForDoc(this.ampdoc_);
-    actions.trigger(element, action, event, trust);
+
+    actions.trigger(dev().assertElement(element), action, event, trust);
   }
 
   /**
