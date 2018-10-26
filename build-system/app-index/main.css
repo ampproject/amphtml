@@ -33,7 +33,7 @@ body.scroll-locked {
   background-position: left center;
   background-repeat: no-repeat;
 }
-wrap {
+.wrap {
   display: block;
   max-width: 960px;
   padding: 0 40px;

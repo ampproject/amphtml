@@ -21,6 +21,7 @@
 
 const boilerPlate = require('./boilerplate');
 const html = require('./html');
+const ProxyForm = require('./proxy-form');
 
 const examplesDocumentModes = {
   'standard': '/',
@@ -57,6 +58,7 @@ const headerLinks = [
 
 const requiredExtensions = [
   {name: 'amp-bind'},
+  {name: 'amp-form'},
 ];
 
 const ExtensionScript = ({name, version}) =>
@@ -179,11 +181,7 @@ const getFileSet = ({basepath, fileSet, selectModePrefix}) => {
 
 
 const ProxyFormOptional = ({isMainPage}) => {
-  if (!isMainPage) {
-    return '';
-  }
-  // preact-rendered, for now
-  return html`<div class="block proxy-form-component-root"></div>`;
+  return isMainPage ? ProxyForm() : '';
 };
 
 
@@ -204,18 +202,21 @@ const renderTemplate = ({
     <style amp-custom>
     ${css}
     </style>
+    <link rel="canonical" href="${basepath}">
+    <meta name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1">
     ${boilerPlate}
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     ${requiredExtensions.map(({name, version}) =>
         ExtensionScript({name, version})).join('')}
   </head>
   <body>
-    <wrap>
+    <div class="wrap">
       ${Header({isMainPage, links: headerLinks})}
       ${ProxyFormOptional({isMainPage})}
-    </wrap>
+    </div>
     <div class="file-list-container">
-      <wrap>
+      <div class="wrap">
         <h3 class="code" id="basepath">
           ${basepath}
           <a href="https://github.com/ampproject/amphtml/find/master"
@@ -237,11 +238,9 @@ const renderTemplate = ({
           }),
           selectModePrefix,
         })}
-      </wrap>
+      </div>
     </div>
-    <script>
-      ${bundle}
-    </script>
+    <script>${bundle}</script>
     <div class="center">
       Built with 💙  by
       <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
