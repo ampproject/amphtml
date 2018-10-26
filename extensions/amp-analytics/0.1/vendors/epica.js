@@ -24,7 +24,7 @@ export const EPICA_CONFIG = /** @type {!JsonObject} */ ({
     'anonymousId': 'CLIENT_ID(epica_amp_id)',
   },
   'requests': {
-    'host': 'https://cat.poder.io/v1/pixel',
+    'host': 'https://cat.poder.io/api/v1/pixel',
     'base': '?writeKey=${writeKey}' +
       '&context.library.name=amp' +
       '&anonymousId=${anonymousId}' +
