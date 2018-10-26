@@ -36,6 +36,12 @@ export class BaseSlides extends BaseCarousel {
     /** @private {number} */
     this.autoplayDelay_ = 5000;
 
+    /** @protected {?number} */
+    this.autoplayLoops_ = null;
+
+    /** @protected {number} */
+    this.loopsMade_ = 0;
+
     /** @protected {boolean} */
     this.shouldLoop = false;
 
@@ -48,6 +54,10 @@ export class BaseSlides extends BaseCarousel {
     this.hasLoop_ = this.element.hasAttribute('loop');
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    const autoplayVal = this.element.getAttribute('autoplay');
+    if (autoplayVal != '') {
+      this.autoplayLoops_ = parseInt(autoplayVal, 10);
+    }
 
     this.buildSlides();
 
@@ -196,4 +206,18 @@ export class BaseSlides extends BaseCarousel {
       this.autoplayTimeoutId_ = null;
     }
   }
+
+  /**
+  * Remove autoplay.
+  * @protected
+  */
+  removeAutoplay() {
+    this.clearAutoplay();
+    this.hasAutoplay_ = false;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+    this.element.removeAttribute('loop');
+    this.hasLoop_ = false;
+    this.shouldLoop = false;
+  }
+
 }
