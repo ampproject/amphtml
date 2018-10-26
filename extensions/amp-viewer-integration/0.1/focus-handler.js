@@ -19,7 +19,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 /**
- * @fileoverview Forward focus events' related data from the AMP doc to the
+ * Forward focus events' related data from the AMP doc to the
  * viewer.
  */
 export class FocusHandler {

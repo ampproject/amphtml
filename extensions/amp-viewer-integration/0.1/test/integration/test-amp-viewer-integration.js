@@ -169,7 +169,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           sandbox.stub(messaging, 'sendRequest').callsFake(() => {
             return Promise.resolve();
           });
-          sandbox.stub(viewer, 'hasCapability').withArgs('focus-events')
+          sandbox.stub(viewer, 'hasCapability').withArgs('focus-rect')
               .returns(true);
           const initFocusHandlerStub =
             sandbox.stub(ampViewerIntegration, 'initFocusHandler_');

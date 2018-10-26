@@ -31,12 +31,12 @@ const data = {
 
 function fakeFocusEvent(type) {
   return {
-    nodeType: 1,
     type,
     target: {
       getBoundingClientRect: () => {
         return data;
       },
+      nodeType: 1,
     },
   };
 }
