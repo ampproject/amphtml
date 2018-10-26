@@ -571,7 +571,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
 
-    if (this.enoughContentPagesShown_()) {
+    if (this.enoughContentPagesViewed_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
@@ -595,7 +595,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  enoughContentPagesShown_() {
+  enoughContentPagesViewed_() {
     if (this.firstAdViewed_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
       return true;
     }
