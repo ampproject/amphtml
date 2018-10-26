@@ -96,7 +96,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_MUTED, false);
     expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
     expect(systemLayer.getShadowRoot()).to.not.have.attribute(
-        'i-amphtml-story-audio-state');
+        'i-amphtml-current-page-has-audio');
   });
 
   it('should show that the sound is on when unmuted', () => {
@@ -105,7 +105,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_MUTED, false);
     expect(systemLayer.getShadowRoot()).to.not.have.attribute('muted');
     expect(systemLayer.getShadowRoot()).to.have.attribute(
-        'i-amphtml-story-audio-state');
+        'i-amphtml-current-page-has-audio');
   });
 
   it('should show the sidebar control only if a sidebar exists', () => {

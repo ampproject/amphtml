@@ -193,15 +193,15 @@
   display: block !important;
 }
 
-.audio-playing:not([muted]) .i-amphtml-story-mute-audio-control,
-.audio-playing[muted] .i-amphtml-story-unmute-audio-control {
+.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
 
-.audio-playing[muted] .i-amphtml-story-mute-text,
-[i-amphtml-story-audio-state].audio-playing:not([muted]) .i-amphtml-story-unmute-sound-text,
-:not([i-amphtml-story-audio-state]).audio-playing:not([muted]) .i-amphtml-story-unmute-no-sound-text {
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
+:not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
   display: block !important;
 }
 
