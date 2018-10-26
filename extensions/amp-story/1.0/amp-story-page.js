@@ -264,7 +264,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.advancement_.stop();
+        this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.state_ = state;
         break;
