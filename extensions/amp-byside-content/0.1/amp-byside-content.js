@@ -135,8 +135,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
         this.win, data => {
-		  const data_ = /** @type {Object} */ data;
-          this.updateSize_(data_);
+          this.updateSize_(/** @type {Object} */ (data));
         }, 100
     );
   }
