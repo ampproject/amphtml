@@ -301,8 +301,8 @@ export function googlePageParameters(a4a, startTime) {
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == canonicalUrl ? null : win.location.href,
           'ref': referrer || null,
-          'dlt': win.performance && win.performance.timing ?
-              win.performance.timing.domLoading : null,
+          'bdt': win.performance && win.performance.timing ?
+              startTime - win.performance.timing.domLoading : null,
         };
       });
 }

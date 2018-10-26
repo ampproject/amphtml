@@ -522,11 +522,9 @@ describe('Google A4A utils', () => {
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        const expectedDlt = impl.win.performance.timing.domLoading;
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url => {
-            expect(url).to.match(/[&?]dlt=[1-9][0-9]{12}[&$]/);
-            expect(url).to.match(new RegExp(`[&?]dlt=${expectedDlt}[&$]`));
+            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
       });
