@@ -52,7 +52,7 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 const LOADING_ATTR = 'i-amphtml-loading';
 
 /** @const {string} */
-const AD_BLOCK_ATTR = 'next-page-no-ad';
+const NEXT_PAGE_NO_AD = 'next-page-no-ad';
 
 /** @const */
 const DATA_ATTR = {
@@ -625,7 +625,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // any of these fail we will try again on next page navigation.
     if (!this.isCurrentAdLoaded_ // 1. Ad must be loaded.
         // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
-        || this.adsAreBlocked_(pageBeforeAd)
+        || this.nextPageNoAd_(pageBeforeAd)
         // 3. We will not show two ads in a row.
         || pageBeforeAd.isAd() || pageAfterAd.isAd()) {
       return AD_STATE.PENDING;
@@ -673,8 +673,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  adsAreBlocked_(page) {
-    return page.element.hasAttribute(AD_BLOCK_ATTR);
+  nextPageNoAd_(page) {
+    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
   }
 
   /**
