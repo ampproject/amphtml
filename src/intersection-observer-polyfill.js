@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -193,8 +194,10 @@ export class IntersectionObserverPolyfill {
   /**
    * @param {function(!Array<!IntersectionObserverEntry>)} callback
    * @param {Object=} opt_option
+   * @param {Window} opt_window
+   * @param {!./service/viewport/viewport-impl.Viewport} opt_viewport
    */
-  constructor(callback, opt_option) {
+  constructor(callback, opt_option, opt_window, opt_viewport) {
     /** @private @const {function(!Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
@@ -233,6 +236,29 @@ export class IntersectionObserverPolyfill {
      * @private {Array<!ElementIntersectionStateDef>}
      */
     this.observeEntries_ = [];
+
+    // Fix for Safari not sending Intersection Observer events
+    /** @private {Window} */
+    this.window_ = undefined;
+    /** @private {./service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = undefined;
+    /** @private @const {./platform-impl.Platform} */
+    this.platform_ = undefined;
+    /** @private {Object} */
+    this.mutationObserver_ = undefined; 
+    if (opt_window && opt_viewport) {
+      this.window_ = opt_window;
+      this.viewport_ = opt_viewport;
+      this.platform_ = Services.platformFor(this.window_);
+
+      if (this.platform_.isSafari()) {
+        // Add a mutation observer to tick ourself
+        this.mutationObserver = new MutationObserver(
+          this.handleSafariMutationObserverNotification.bind(this)
+        );
+        this.mutationObserver.observe(this.window_.document);
+      }
+    }
   }
 
   /**
@@ -374,6 +400,16 @@ export class IntersectionObserverPolyfill {
         (opt_iframe ? null : hostViewport), intersectionRect, ratio);
     changeEntry.target = element;
     return changeEntry;
+  }
+
+  /**
+   * Handle Safari Mutation Oberserver events
+   * @param {!Array<Object>} mutationList
+   */
+  handleSafariMutationObserverNotification(mutationList) {
+    console.log('hi', mutationList);
+
+    this.tick(this.viewport_);
   }
 }
 
