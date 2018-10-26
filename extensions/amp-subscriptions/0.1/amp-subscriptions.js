@@ -338,7 +338,7 @@ export class SubscriptionService {
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
         }).catch(reason => {
           this.platformStore_.reportPlatformFailure('local');
-          throw user().createError('Viewer auth failed:', reason);
+          dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }
     });
