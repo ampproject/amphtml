@@ -28,22 +28,20 @@ function goToProxyUrlOnSubmit(event) {
 
 export function ProxyForm() {
   return (
-    <div class="block proxy-form-container">
-      <form id="proxy-form" onSubmit={goToProxyUrlOnSubmit}>
-        <label for="proxy-input">
-          <span>Load URL by Proxy</span>
-          <input type="text" class="text-input" id="proxy-input"
-            required aria-required="true"
-            placeholder="https://"
-            pattern="^(https?://)?[^\\s]+$" />
-        </label>
-        <div class="form-info">
-          <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy"
-            target="_blank">
-            What's this?
-          </a>
-        </div>
-      </form>
-    </div>
+    <form id="proxy-form" onSubmit={goToProxyUrlOnSubmit}>
+      <label for="proxy-input">
+        <span>Load URL by Proxy</span>
+        <input type="text" class="text-input" id="proxy-input"
+          required aria-required="true"
+          placeholder="https://"
+          pattern="^(https?://)?[^\\s]+$" />
+      </label>
+      <div class="form-info">
+        <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy"
+          target="_blank">
+          What's this?
+        </a>
+      </div>
+    </form>
   );
 }

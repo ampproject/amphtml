@@ -61,6 +61,9 @@ const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
 /** @private @const Matches amp_r parameters in query string. */
 const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
 
+/** @private @const Matches amp_kit parameters in query string. */
+const AMP_KIT_PARAMS_REGEX = /[?&]amp_kit[^&]*/;
+
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
 
@@ -455,6 +458,7 @@ function removeAmpJsParamsFromSearch(urlSearch) {
       .replace(AMP_JS_PARAMS_REGEX, '')
       .replace(AMP_GSA_PARAMS_REGEX, '')
       .replace(AMP_R_PARAMS_REGEX, '')
+      .replace(AMP_KIT_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';

@@ -30,7 +30,7 @@ exports.gitBranchPoint = function(fromMerge = false) {
   if (fromMerge) {
     return getStdout('git merge-base HEAD^1 HEAD^2').trim();
   } else {
-    return getStdout('git merge-base master HEAD').trim();
+    return getStdout('git merge-base master HEAD^').trim();
   }
 };
 
