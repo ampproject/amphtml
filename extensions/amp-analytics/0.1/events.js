@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
@@ -27,7 +28,6 @@ import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -1240,10 +1240,11 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   createReportReadyPromiseForEndOfFrame_() {
-    return new Promise(resolve => {
-      // TODO Only resolve when endOfFrame occurs. How to detect this?
-      resolve();
-    });
+    const deferred = new Deferred();
+    const root = this.root.getRoot();
+    root.addEventListener('unload', () => deferred.resolve());
+    root.addEventListener('pagehide', () => deferred.resolve());
+    return deferred.promise;
   }
 
   /**
