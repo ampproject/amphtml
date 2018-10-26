@@ -774,12 +774,12 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
         binding.contentHeightChanged();
         return vsync.mutatePromise();
       }).then(() => {
-        const args = setStyleStub.lastCall.args;
+        const {args} = setStyleStub.lastCall;
         expect(args[0]).to.equal('-webkit-overflow-scrolling');
         expect(args[1]).to.equal('auto');
         return vsync.mutatePromise();
       }).then(() => {
-        const args = setStyleStub.lastCall.args;
+        const {args} = setStyleStub.lastCall;
         expect(args[0]).to.equal('-webkit-overflow-scrolling');
         expect(args[1]).to.equal('touch');
       });
@@ -791,9 +791,8 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       const scroller = binding.scroller_;
       const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
       binding.contentHeightChanged();
-      const root = win.document.documentElement;
       return vsync.mutatePromise().then(() => {
-        const args = setStyleStub.lastCall.args;
+        const {args} = setStyleStub.lastCall;
         expect(args[1]).to.not.equal('auto');
       });
     });
