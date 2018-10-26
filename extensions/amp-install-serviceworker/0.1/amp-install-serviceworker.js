@@ -17,10 +17,12 @@
 import {Services} from '../../../src/services';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
 import {toggle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -296,10 +298,40 @@ function install(win, src) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
+    sendAmpScriptToSwOnFirstVisit(registration, win);
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
   });
+}
+
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ */
+function sendAmpScriptToSwOnFirstVisit(registration, win) {
+  const installingServiceWorker = registration.installing;
+  if (installingServiceWorker && 'performance' in win) {
+    installingServiceWorker.addEventListener('statechange', evt => {
+      const controllerSw = win.navigator.serviceWorker.controller;
+      if (evt.target.state !== 'activated' || !controllerSw) {
+        return;
+      }
+
+      // Fetch all AMP-scripts used on the page
+      const ampScriptsUsed = win.performance.getEntriesByType('resource')
+          .filter(item => item.initiatorType === 'script' &&
+            item.name.indexOf(urls.cdn) !== -1)
+          .map(script => script.name);
+      // using https://github.com/redux-utilities/flux-standard-action
+      controllerSw.postMessage(JSON.stringify(dict({
+        'type': 'FIRST_VISIT_CACHING',
+        'payload': ampScriptsUsed,
+      })));
+    });
+  }
 }
 
 

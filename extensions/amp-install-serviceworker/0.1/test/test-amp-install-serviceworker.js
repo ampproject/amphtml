@@ -109,6 +109,77 @@ describes.realWin('amp-install-serviceworker', {
         });
   });
 
+  it('should postMessage all AMP scripts used to the service worker', () => {
+    const install = doc.createElement('div');
+    container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
+    install.setAttribute('src', 'https://example.com/sw.js');
+    const implementation = new AmpInstallServiceWorker(install);
+    const AMP_SCRIPTS = [
+      'https://cdn.ampproject.org/rtv/001525381599226/v0.js',
+      'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js',
+    ];
+    const eventListener = (evtName, cb) => {
+      cb({
+        target: {
+          state: 'activated',
+        },
+      });
+    };
+    const fakeRegistration = {
+      installing: {
+        addEventListener: sandbox.spy(eventListener),
+      },
+    };
+    const p = Promise.resolve(fakeRegistration);
+    const postMessageStub = sandbox.stub();
+    implementation.win = {
+      complete: true,
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: () => {
+            return p;
+          },
+          controller: {
+            postMessage: postMessageStub,
+          },
+        },
+      },
+      performance: {
+        getEntriesByType: () => {
+          return AMP_SCRIPTS.concat('https://code.jquery.com/jquery-3.3.1.min.js').map(script => {
+            return {
+              initiatorType: 'script',
+              name: script,
+            };
+          });
+        },
+      },
+    };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
+    implementation.buildCallback();
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          return p.then(fakeRegistration => {
+            expect(fakeRegistration.installing.addEventListener)
+                .to.be.calledWith('statechange', sinon.match.func);
+            expect(postMessageStub).to.be.calledWith(JSON.stringify({
+              type: 'FIRST_VISIT_CACHING',
+              payload: AMP_SCRIPTS,
+            }));
+          });
+        });
+  });
+
   it('should be ok without service worker.', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
