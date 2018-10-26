@@ -2079,7 +2079,35 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
+# 4.7.7 The picture element
+# Only allowed in noscript tags which support img tags.
+tags: {
+  html_format: AMP
+  tag_name: "PICTURE"
+  mandatory_parent: "NOSCRIPT"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
 # 4.7.8 The source element
+tags: {
+  html_format: AMP
+  tag_name: "SOURCE"
+  spec_name: "picture > source"
+  mandatory_parent: "PICTURE"  # PICTURE is only allowed inside NOSCRIPT
+  attrs: { name: "media" }
+  attrs: { name: "sizes" }
+  attrs: {
+    name: "srcset"
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
 tags: {
   html_format: AMP
   html_format: AMP4ADS
