@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as chunkModule from '../../../../src/chunk';
 import {AmpEvents} from '../../../../src/amp-events';
 import {LinkReplacementCache} from '../link-rewriter/link-replacement-cache';
 import {LinkRewriter} from '../link-rewriter/link-rewriter';
@@ -37,6 +38,11 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
     env.sandbox.spy(rootDocument, 'addEventListener');
     env.sandbox.spy(rootDocument, 'querySelector');
 
+    // Chunk executes the provided task when the browser is Idle. We can
+    // execute the task straight away for the purpose of the test.
+    env.sandbox.stub(chunkModule, 'chunk').callsFake((node, task) => {
+      task();
+    });
     linkRewriterManager = new LinkRewriterManager(env.ampdoc);
 
     // Helper functions
@@ -409,6 +415,11 @@ describes.fakeWin('Link Rewriter', {amp: true}, env => {
   let createResolveResponseHelper, createLinkRewriterHelper;
 
   beforeEach(() => {
+    // Chunk executes the provided task when the browser is Idle. We can
+    // execute the task straight away for the purpose of the test.
+    env.sandbox.stub(chunkModule, 'chunk').callsFake((node, task) => {
+      task();
+    });
     rootDocument = env.ampdoc.getRootNode();
 
     createResolveResponseHelper = (syncData, asyncData) => {

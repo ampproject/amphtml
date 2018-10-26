@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {user} from '../../../../src/log';
-
+import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {Observable} from '../../../../src/observable';
 import {TwoStepsResponse} from './two-steps-response';
+import {user} from '../../../../src/log';
 
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
@@ -150,10 +150,15 @@ export class LinkRewriter {
    * @public
    */
   onDomUpdated() {
-    return this.scanLinksOnPage_().then(() => {
-      this.events.fire({
-        type: EVENTS.PAGE_SCANNED,
+    return new Promise(resolve => {
+      const task = (() => {
+        return this.scanLinksOnPage_().then(() => {
+          this.events.fire({type: EVENTS.PAGE_SCANNED});
+          resolve();
+        });
       });
+
+      chunk(this.rootNode_, task, ChunkPriority.LOW);
     });
   }
 
