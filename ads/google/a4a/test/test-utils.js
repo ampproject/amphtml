@@ -514,7 +514,7 @@ describe('Google A4A utils', () => {
       });
     });
 
-    it ('should include domLoading time', () => {
+    it('should include domLoading time', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const {doc} = fixture;

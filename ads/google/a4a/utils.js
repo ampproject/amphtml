@@ -302,7 +302,7 @@ export function googlePageParameters(a4a, startTime) {
           'loc': win.location.href == canonicalUrl ? null : win.location.href,
           'ref': referrer || null,
           'bdt': win.performance && win.performance.timing ?
-              startTime - win.performance.timing.domLoading : null,
+            startTime - win.performance.timing.domLoading : null,
         };
       });
 }
