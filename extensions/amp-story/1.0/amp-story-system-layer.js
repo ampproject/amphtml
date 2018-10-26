@@ -56,7 +56,7 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 
 /** @private @const {string} */
-const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
+const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
 const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
@@ -367,7 +367,7 @@ export class SystemLayer {
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
-      this.onPageAudioStateUpdate_(audio);
+      this.onPageHasAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
@@ -446,27 +446,33 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to has audio state updates, displays the audio controls if needed.
+   * Reacts to has audio state updates, determining if the story has a global
+   * audio track playing, or if any page has audio.
    * @param {boolean} hasAudio
    * @private
    */
   onStoryHasAudioStateUpdate_(hasAudio) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-has-audio', hasAudio);
     });
   }
 
   /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
-   * @param {boolean} pageAudio
+   * @param {boolean} pageHasAudio
    * @private
    */
-  onPageAudioStateUpdate_(pageAudio) {
+  onPageHasAudioStateUpdate_(pageHasAudio) {
+    pageHasAudio =
+        pageHasAudio || !!this.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
     this.vsync_.mutate(() => {
-      pageAudio ?
-        this.getShadowRoot().setAttribute(HAS_AUDIO_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(HAS_AUDIO_ATTRIBUTE);
+      pageHasAudio ?
+        this.getShadowRoot()
+            .setAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE);
     });
   }
   /**
