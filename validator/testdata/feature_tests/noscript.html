@@ -37,6 +37,14 @@
       <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
     </video>
   </noscript>
+  <!-- Valid: noscript with picture element -->
+  <noscript>
+    <picture>
+      <source type="image/webp" srcset="images/lemur.webp">
+      <source type="image/jpeg" srcset="images/lemur.jpg">
+      <img alt="Lemur sleeping" width=1200 height=800 src="images/lemur.jpg">
+    </picture>
+  </noscript>
   <!-- Invalid: audio's source must have src and type; controls are optional -->
   <noscript>
     <audio>
