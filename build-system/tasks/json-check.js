@@ -43,7 +43,7 @@ function checkCachesJson() {
           foundCaches.push(foundCache.id);
         }
         for (const cache of expectedCaches) {
-          if (foundCaches.indexOf(cache) == -1) {
+          if (!foundCaches.includes(cache)) {
             log(colors.red('Missing expected cache "'
                   + cache + '" in caches.json'));
             process.exitCode = 1;
