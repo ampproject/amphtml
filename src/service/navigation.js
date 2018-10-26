@@ -191,7 +191,7 @@ export class Navigation {
       options += 'noopener';
     }
 
-    const newWin = win.top.open(url, target, options);
+    const newWin = openWindowDialog(win, url, target, options);
     // For Chrome, since we cannot use noopener.
     if (newWin && !opener) {
       newWin.opener = null;
