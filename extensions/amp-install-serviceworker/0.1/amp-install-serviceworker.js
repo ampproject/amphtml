@@ -22,6 +22,7 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
 import {toggle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -322,7 +323,7 @@ function sendAmpScriptToSwOnFirstVisit(registration, win) {
       // Fetch all AMP-scripts used on the page
       const ampScriptsUsed = win.performance.getEntriesByType('resource')
           .filter(item => item.initiatorType === 'script' &&
-              /https:\/\/cdn.ampproject.org\//.test(item.name))
+            item.name.indexOf(urls.cdn) !== -1)
           .map(script => script.name);
       // using https://github.com/redux-utilities/flux-standard-action
       controllerSw.postMessage(JSON.stringify(dict({
