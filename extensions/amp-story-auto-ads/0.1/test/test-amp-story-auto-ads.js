@@ -71,7 +71,7 @@ describes.realWin('amp-story-auto-ads', {
     it('should fire "story-ad-insert" upon insertion', () => {
       autoAds.uniquePagesCount_ = 10;
       autoAds.adPagesCreated_ = 1;
-      sandbox.stub(autoAds, 'startNextPage_');
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');
@@ -83,7 +83,7 @@ describes.realWin('amp-story-auto-ads', {
     it('should fire "story-ad-discard" upon discarded ad', () => {
       autoAds.uniquePagesCount_ = 10;
       autoAds.adPagesCreated_ = 1;
-      sandbox.stub(autoAds, 'startNextPage_');
+      sandbox.stub(autoAds, 'startNextAdPage_');
       sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* discard */ 2);
       const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
       autoAds.handleActivePageChange_(3, 'fakePage');

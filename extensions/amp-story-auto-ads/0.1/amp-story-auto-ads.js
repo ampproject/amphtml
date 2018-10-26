@@ -30,8 +30,11 @@ import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @const */
-const MIN_INTERVAL = 4;
+/** @const {number} */
+const FIRST_AD_MIN = 7;
+
+/** @const {number} */
+const MIN_INTERVAL = 7;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -146,8 +149,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
-    /** @private {number} */
-    this.uniquePagesCount_ = 0;
+    /**
+     * We are counting pages on page-clicks. We initialize this to 1 because
+     * even though we have not yet seen a page click, we have already seen one
+     * page.
+     * @private {number}
+     */
+    this.uniquePagesCount_ = 1;
 
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = dict({});
@@ -181,6 +189,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {number|null} */
     this.idOfAdShowing_ = null;
+
+    /** @private {boolean} */
+    this.firstAdViewed_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -551,38 +562,66 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         [Vars.AD_INDEX]: adIndex,
       });
 
+      // Start loading next ad.
+      this.startNextAdPage_();
+
       // Keeping track of this here so that we can contain the logic for when
       // we exit the ad within this extension.
       this.idOfAdShowing_ = adIndex;
     }
 
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL) {
+    if (this.enoughContentPagesViewed_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
         this.analyticsEventWithCurrentAd_(Events.AD_INSERTED,
             {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
-        // start loading next ad
-        this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
         this.analyticsEventWithCurrentAd_(Events.AD_DISCARDED,
             {[Vars.AD_DISCARDED]: Date.now()});
-        this.startNextPage_();
+        this.startNextAdPage_(/* failure */ true);
       }
     }
   }
 
-
   /**
-   * start the process over
+   * Determine if user has seen enough pages to show an ad. We want a certain
+   * number of pages before the first ad, and then a separate interval
+   * thereafter.
+   * @return {boolean}
    * @private
    */
-  startNextPage_() {
-    this.uniquePagesCount_ = 0;
+  enoughContentPagesViewed_() {
+    if (this.firstAdViewed_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
+      return true;
+    }
+
+    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Start the process over.
+   * @private
+   * @param {boolean=} opt_failure If we are calling this due to failed ad.
+   */
+  startNextAdPage_(opt_failure) {
+    if (!this.firstAdViewed_) {
+      this.firstAdViewed_ = true;
+    }
+
+    if (!opt_failure) {
+      // Don't reset the count on a failed ad.
+      this.uniquePagesCount_ = 0;
+    }
+
     this.schedulePage_();
   }
 
