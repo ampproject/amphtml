@@ -50,5 +50,6 @@
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1,
   "ampdoc-closest": 0.01,
-  "linker-form": 1
+  "linker-form": 1,
+  "scroll-height-bounce": 0
 }
