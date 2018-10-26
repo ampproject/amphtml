@@ -804,11 +804,6 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
-
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
   const inabox = req.query['inabox'];
