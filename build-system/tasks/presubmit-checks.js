@@ -50,6 +50,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal class form',
     whitelist: [
       'build-system/amp4test.js',
+      'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -290,6 +291,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -312,6 +314,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
+      '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -351,6 +354,7 @@ const forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/recaptcha.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
@@ -836,12 +840,19 @@ const forbiddenTermsSrcInclusive = {
       'src/service/url-replacements-impl.js',
     ],
   },
+  '\\.setNonBoolean\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/storage-impl.js',
+    ],
+  },
   '(cdn|3p)\\.ampproject\\.': {
     message: 'The CDN domain should typically not be hardcoded in source ' +
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
+      'build-system/app-index/template.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',

@@ -159,7 +159,7 @@ const EXPERIMENTS = [
     id: 'ios-embed-sd-notransfer',
     name: 'Disables transfer mode for the new iOS embedded viewport model',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -174,8 +174,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
@@ -272,10 +272,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
-  },
-  {
     id: 'amp-live-list-sorting',
     name: 'Allows "newest last" insertion algorithm to be used',
     spec: 'https://github.com/ampproject/amphtml/issues/5396',
@@ -352,6 +348,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
   {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
     id: 'amp-consent-v2',
     name: 'Enables CMP support to amp-consent component',
     spec: 'https://github.com/ampproject/amphtml/issues/17742',
@@ -360,17 +361,44 @@ const EXPERIMENTS = [
     id: 'video-dock',
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/17161',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
   },
   {
     id: 'linker-form',
     name: 'Enables form support in linker',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/18068',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
   },
   {
     id: 'fie-metadata-extension',
     name: 'Use version supporting extension field in amp-ad-metadata.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
+  {
+    id: 'amp-script',
+    name: 'Enables <amp-script>.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
+  },
+  {
+    id: 'amp-list-resizable-children',
+    name: 'Experiment for allowing amp-list to resize when its children resize',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
 ];
 

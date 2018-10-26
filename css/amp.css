@@ -502,10 +502,10 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
 
 /**
  * The default amp-hidden changes visibility, which takes up space. In the case
- * where amp-list becomes a container via the auto-resize attribute, the loader
- * should be fully hidden and not take up space.
+ * where amp-list becomes a container via the resizable-children attribute, the
+ * loader should be fully hidden and not take up space.
  */
-amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
+amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
   display: none !important;
 }
 
@@ -610,6 +610,21 @@ amp-list[auto-resize] > .i-amphtml-loading-container.amp-hidden {
   visibility: visible;
 }
 
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button]{
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible,
+amp-list[load-more] > [load-more-button].amp-visible {
+  visibility: visible;
+}
 
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
