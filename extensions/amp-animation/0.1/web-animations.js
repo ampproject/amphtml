@@ -601,16 +601,17 @@ export class Builder {
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {boolean} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return this.useAnimationWorklet_ ?
+        return this.useAnimationWorklet_ && hasPositionObserver ?
           new AnimationWorkletRunner(this.win_, requests) :
           new WebAnimationRunner(requests);
       });
