@@ -1202,6 +1202,7 @@ export class Resources {
               dict({'height': measuredContentHeight}), /* cancelUnsent */true);
           this.contentHeight_ = measuredContentHeight;
           dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
+          this.viewport_.contentHeightChanged();
         }
       });
     }

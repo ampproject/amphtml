@@ -206,6 +206,11 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  contentHeightChanged() {
+    // Nothing to do here.
+  }
+
+  /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/getBoundingClientRect();
     if (this.useLayers_) {

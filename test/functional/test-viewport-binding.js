@@ -210,6 +210,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   let win;
   let binding;
+  let vsync;
   let child;
 
   beforeEach(() => {
@@ -225,6 +226,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentStateService(win);
     installVsyncService(win);
+    vsync = Services.vsyncFor(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
   });
@@ -436,6 +438,31 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     wrapperCss = win.getComputedStyle(binding.wrapper_);
     expect(wrapperCss.overflowX).to.equal('hidden');
     expect(wrapperCss.overflowY).to.equal('auto');
+  });
+
+  it('should refresh overscroll when content height changes', () => {
+    toggleExperiment(win, 'scroll-height-bounce', true);
+    const root = win.document.documentElement;
+    return vsync.mutatePromise().then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+      binding.contentHeightChanged();
+      return vsync.mutatePromise();
+    }).then(() => {
+      expect(root).to.not.have.class('i-amphtml-ios-overscroll');
+      return vsync.mutatePromise();
+    }).then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+    });
+  });
+
+  it('should NOT refresh overscroll w/o experiment', () => {
+    // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
+    toggleExperiment(win, 'scroll-height-bounce', false);
+    binding.contentHeightChanged();
+    const root = win.document.documentElement;
+    return vsync.mutatePromise().then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+    });
   });
 });
 
@@ -737,6 +764,37 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       scrollerCss = win.getComputedStyle(binding.scroller_);
       expect(scrollerCss.overflowX).to.equal('hidden');
       expect(scrollerCss.overflowY).to.equal('auto');
+    });
+
+    it('should refresh overscroll when content height changes', () => {
+      toggleExperiment(win, 'scroll-height-bounce', true);
+      const scroller = binding.scroller_;
+      const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
+      return vsync.mutatePromise().then(() => {
+        binding.contentHeightChanged();
+        return vsync.mutatePromise();
+      }).then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[0]).to.equal('-webkit-overflow-scrolling');
+        expect(args[1]).to.equal('auto');
+        return vsync.mutatePromise();
+      }).then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[0]).to.equal('-webkit-overflow-scrolling');
+        expect(args[1]).to.equal('touch');
+      });
+    });
+
+    it('should NOT refresh overscroll w/o experiment', () => {
+      // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
+      toggleExperiment(win, 'scroll-height-bounce', false);
+      const scroller = binding.scroller_;
+      const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
+      binding.contentHeightChanged();
+      return vsync.mutatePromise().then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[1]).to.not.equal('auto');
+      });
     });
   });
 });
