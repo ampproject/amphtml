@@ -405,6 +405,24 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   }
 
   /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      this.vsync_.mutate(() => {
+        setImportantStyles(this.scroller_, {
+          '-webkit-overflow-scrolling': 'auto',
+        });
+        this.vsync_.mutate(() => {
+          setImportantStyles(this.scroller_, {
+            '-webkit-overflow-scrolling': 'touch',
+          });
+        });
+      });
+    }
+  }
+
+  /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/getBoundingClientRect();
     if (this.useLayers_) {

@@ -749,6 +749,18 @@ const forbiddenTermsSrcInclusive = {
       'src/utils/bytes.js',
     ],
   },
+  'contentHeightChanged': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/inabox/inabox-viewport.js',
+      'src/service/resources-impl.js',
+      'src/service/viewport/viewport-binding-def.js',
+      'src/service/viewport/viewport-binding-ios-embed-sd.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
+    ],
+  },
   'preloadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
