@@ -27,7 +27,7 @@ const DEFAULT_LOCALE = 'en';
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
 
-export class ampDateDisplay extends AMP.BaseElement {
+export class AmpDateDisplay extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -88,14 +88,7 @@ export class ampDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
-    const epoch = this.getEpoch_();
-    const offset = this.offsetSeconds_ * 1000;
-    const date = new Date(epoch + offset);
-    const inUTC = this.displayIn_.toLowerCase() === 'utc';
-    const basicData = inUTC
-      ? this.getVariablesInUTC_(date, this.locale_)
-      : this.getVariablesInLocal_(date, this.locale_);
-    const data = this.enhanceBasicVariables_(basicData);
+    const data = this.getDataForTemplate_();
 
     this.templates_
         .findAndRenderTemplate(this.element, data)
@@ -105,6 +98,22 @@ export class ampDateDisplay extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * @return {Object}
+   * @private
+   */
+  getDataForTemplate_() {
+    const epoch = this.getEpoch_();
+    const offset = this.offsetSeconds_ * 1000;
+    const date = new Date(epoch + offset);
+    const inUTC = this.displayIn_.toLowerCase() === 'utc';
+    const basicData = inUTC
+      ? this.getVariablesInUTC_(date, this.locale_)
+      : this.getVariablesInLocal_(date, this.locale_);
+
+    return this.enhanceBasicVariables_(basicData);
   }
 
   /**
@@ -247,4 +256,6 @@ export class ampDateDisplay extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-date-display', ampDateDisplay);
+AMP.extension('amp-date-display', '0.1', AMP => {
+  AMP.registerElement('amp-date-display', AmpDateDisplay);
+});
