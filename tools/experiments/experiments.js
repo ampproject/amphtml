@@ -56,7 +56,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'contributing/release-schedule.md#amp-dev-channel',
+      'contributing/release-schedule.md#amp-dev-channel',
   },
   {
     id: 'alp',
@@ -104,7 +104,7 @@ const EXPERIMENTS = [
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-google-vrview-image/amp-google-vrview-image.md',
+      'amp-google-vrview-image/amp-google-vrview-image.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
@@ -165,7 +165,7 @@ const EXPERIMENTS = [
     id: 'ios-embed-sd-notransfer',
     name: 'Disables transfer mode for the new iOS embedded viewport model',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -181,13 +181,13 @@ const EXPERIMENTS = [
   {
     id: 'pump-early-frame',
     name: 'If applicable, let the browser paint the current frame before ' +
-        'executing the callback.',
+      'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
     id: 'version-locking',
     name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+      'as the main JS binary',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
   },
   {
@@ -315,7 +315,7 @@ const EXPERIMENTS = [
   {
     id: 'no-initial-intersection',
     name: 'Do not invoke context.observeIntersection callback with ' +
-        'initialintersection',
+      'initialintersection',
     spec: 'https://github.com/ampproject/amphtml/issues/8562',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
   },
@@ -386,7 +386,7 @@ const EXPERIMENTS = [
   {
     id: 'scroll-height-bounce',
     name: 'Bounces the scrolling when scroll height changes' +
-        ' (fix for #18861 and #8798)',
+      ' (fix for #18861 and #8798)',
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
@@ -401,13 +401,18 @@ const EXPERIMENTS = [
     name: 'Allows the use of the amp-video-iframe component.',
     spec: 'https://github.com/ampproject/amphtml/issues/16252',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  }, {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
   },
 ];
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
     dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
-        ' have a `cleanupIssue` field.');
+      ' have a `cleanupIssue` field.');
   });
 }
 
@@ -548,7 +553,7 @@ function toggleExperiment_(id, name, opt_on) {
 
       setCookie(window, 'AMP_CANARY',
           (on ? '1' : '0'), (on ? validUntil : 0), {
-            // Set explicit domain, so the cookie gets send to sub domains.
+          // Set explicit domain, so the cookie gets send to sub domains.
             domain: location.hostname,
             allowOnProxyOrigin: true,
           });

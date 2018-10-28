@@ -17,6 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {isExperimentOn} from '../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -59,6 +60,11 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    if (!isExperimentOn(this.getWin(), 'amp-date-display')) {
+      user.warn('Experiment `amp-date-display` is not turned on.');
+      return;
+    }
+
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
@@ -88,6 +94,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
+    /** @private {Object} */
     const data = this.getDataForTemplate_();
 
     this.templates_
@@ -207,6 +214,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /**
    * @param {!Object} data
+   * @return {Object}
    * @private
    */
   enhanceBasicVariables_(data) {
