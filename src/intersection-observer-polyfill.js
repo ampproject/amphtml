@@ -256,7 +256,10 @@ export class IntersectionObserverPolyfill {
         this.mutationObserver = new MutationObserver(
           this.handleSafariMutationObserverNotification.bind(this)
         );
-        this.mutationObserver.observe(this.window_.document);
+        this.mutationObserver.observe(this.window_.document, {
+          attributeFilter: ['class', 'style', 'hidden'],
+          subtree: true
+        });
       }
     }
   }
@@ -340,10 +343,13 @@ export class IntersectionObserverPolyfill {
     this.lastIframeRect_ = opt_iframe;
 
     const changes = [];
-
+    
+    // TODO: Intersection changes, not if they intersect. This will require
+    // Pulling out an 'doesIntersect', and do an alternate tick.
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-          this.observeEntries_[i], hostViewport, opt_iframe);
+        this.observeEntries_[i], hostViewport, opt_iframe);
+      console.log('yooo', this.observeEntries_[i], 'ayeee', change);
       if (change) {
         changes.push(change);
       }
@@ -363,7 +369,7 @@ export class IntersectionObserverPolyfill {
    * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
-   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
+   * @return {?IntersectionObserverEntry} A valid change entry or null   if ratio
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
@@ -408,7 +414,6 @@ export class IntersectionObserverPolyfill {
    */
   handleSafariMutationObserverNotification(mutationList) {
     console.log('hi', mutationList);
-
     this.tick(this.viewport_);
   }
 }
