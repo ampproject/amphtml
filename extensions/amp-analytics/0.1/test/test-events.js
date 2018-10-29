@@ -1484,12 +1484,14 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(handler).to.have.not.been.called;
 
         win.document.dispatchEvent(new Event('unload'));
-        setTimeout(0, () => {
-          expect(handler).to.be.calledOnce;
-          const event = handler.args[0][0];
-          expect(event.target).to.equal(target);
-          expect(event.type).to.equal('click');
-          expect(event.vars).to.deep.equal({});
+
+        return new Promise(resolve => {
+          setTimeout(() => {
+            expect(handler).to.be.calledOnce;
+            const event = handler.args[0][0];
+            expect(event.type).to.equal('visible');
+            resolve();
+          }, 0);
         });
       });
 
@@ -1500,12 +1502,13 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(handler).to.have.not.been.called;
 
         win.document.dispatchEvent(new Event('pagehide'));
-        setTimeout(0, () => {
-          expect(handler).to.be.calledOnce;
-          const event = handler.args[0][0];
-          expect(event.target).to.equal(target);
-          expect(event.type).to.equal('click');
-          expect(event.vars).to.deep.equal({});
+        return new Promise(resolve => {
+          setTimeout(() => {
+            expect(handler).to.be.calledOnce;
+            const event = handler.args[0][0];
+            expect(event.type).to.equal('visible');
+            resolve();
+          }, 0);
         });
       });
     });
