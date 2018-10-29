@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 749
+spec_file_revision: 751
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -981,6 +981,18 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: false
+          type: 'all'
+          type: 'print'
+          type: 'screen'
+          type: 'speech'
+          feature: 'width'
+          feature: 'height'
+          feature: 'aspect-ratio'
+          feature: 'orientation'
+          feature: 'resolution'
+        }
       }
       at_rule_spec: {
         name: 'supports'
