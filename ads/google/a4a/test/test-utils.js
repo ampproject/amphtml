@@ -523,7 +523,7 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
