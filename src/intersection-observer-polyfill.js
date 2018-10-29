@@ -187,7 +187,8 @@ export class IntersectionObserverApi {
  * The IntersectionObserver receives a callback function and an optional option
  * as params. Whenever the element intersection ratio cross a threshold value,
  * IntersectionObserverPolyfill will call the provided callback function with
- * the change entry.
+ * the change entry. Only Works with one document for now.
+ * TODO (@torch2424): Allow this to observe elements from multiple documents.
  * @visibleForTesting
  */
 export class IntersectionObserverPolyfill {
