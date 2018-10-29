@@ -445,6 +445,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getPageParameters(consentState, instances) {
     instances = instances || [this];
+    const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -452,7 +453,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
-      'psts': getPageviewStateTokensForAdRequest(instances),
+      'psts': tokens.length ? tokens : null,
     };
   }
 
