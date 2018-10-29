@@ -188,13 +188,13 @@ class AmpAddThis extends AMP.BaseElement {
         console.log('something wrong with addthis data');
       }
       if (addThisConfig
-        && addThisConfig.hasOwn('event')
+        && addThisConfig.hasOwnProperty('event')
         && addThisConfig.event === CONFIGURATION_EVENT) {
-        if (addThisConfig.hasOwn('config')
-          && addThisConfig.config.hasOwn('widgets')) {
+        if (addThisConfig.hasOwnProperty('config')
+          && addThisConfig.config.hasOwnProperty('widgets')) {
           for (const key in addThisConfig.config.widgets) {
             const iframeId = addThisConfig.config.widgets[key].widgetId;
-            if (addThisConfig.config.widgets[key].hasOwn('id')
+            if (addThisConfig.config.widgets[key].hasOwnProperty('id')
               && addThisConfig.config.widgets[key].id === 'shfs'
               && document.getElementById(iframeId)) {
               setStyles(document.getElementById(iframeId),{
