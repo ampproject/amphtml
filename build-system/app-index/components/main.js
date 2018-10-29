@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-unused-vars */
-
-import {Component, h, render} from 'preact';
-import {SettingsOpener} from './settings';
-
-render(<SettingsOpener />,
-    document.querySelector('.settings-opener-component-root'));
+// TODO(alanorozco): This bundle shall be used for experiment toggles.
