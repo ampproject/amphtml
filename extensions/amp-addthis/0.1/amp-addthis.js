@@ -42,9 +42,7 @@ import {
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
-import {
-  ActiveToolsMonitor,
-} from './addthis-utils/monitors/active-tools-monitor';
+import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
@@ -58,9 +56,9 @@ import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -174,6 +172,39 @@ class AmpAddThis extends AMP.BaseElement {
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
+
+    //add addition eventListener for iframe postMessage to handle floating tool
+    this.win.addEventListener('message', function(event) {
+      if (event.origin !== ORIGIN || !getData(event)) {
+        return;
+      }
+      let addThisConfig;
+      try {
+        addThisConfig = JSON.parse(event.data);
+      }
+      catch (e) {
+        console.log('something wrong with addthis data');
+      }
+      if (addThisConfig
+        && addThisConfig.hasOwnProperty('event')
+        && addThisConfig.event === CONFIGURATION_EVENT) {
+        if (addThisConfig.hasOwnProperty('config')
+          && addThisConfig.config.hasOwnProperty('widgets')) {
+          for (const key in addThisConfig.config.widgets) {
+            if (addThisConfig.config.widgets[key].hasOwnProperty('id')
+              && addThisConfig.config.widgets[key].id === 'shfs'
+              && document.getElementById(addThisConfig.config.widgets[key].widgetId)) {
+              setStyles(document.getElementById(addThisConfig.config.widgets[key].widgetId),{
+                width: '100%',
+                height: '100%',
+                position: 'fixed',
+                bottom: '0px',
+              });
+            }
+          }
+        }
+      }
+    });
   }
 
 
@@ -230,6 +261,7 @@ class AmpAddThis extends AMP.BaseElement {
           'frameborder': 0,
           'title': ALT_TEXT,
           'src': `${ORIGIN}/dc/amp-addthis.html`,
+          'id': this.widgetId_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
