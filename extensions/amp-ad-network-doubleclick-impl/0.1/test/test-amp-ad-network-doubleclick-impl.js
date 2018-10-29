@@ -562,10 +562,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('does not include psts param when there are no pageview tokens', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
-      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
       return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/);
         expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*abc(%2C[^&]+)*(&|$)/);
       });
     });
