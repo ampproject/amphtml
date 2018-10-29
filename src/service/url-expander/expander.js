@@ -252,14 +252,10 @@ export class Expander {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
-    } else if (hasOwn(bindingInfo, 'async')) {
-      // Prefer the async over the sync but it may not exist.
-      binding = bindingInfo.async;
     } else {
-      // Use sync in async resolution if async resolver does not exist.
-      binding = bindingInfo.sync;
+      // Prefer the async over the sync but it may not exist.
+      binding = bindingInfo.async || bindingInfo.sync;
     }
-
     return opt_sync ?
       this.evaluateBindingSync_(binding, name, opt_args, opt_collectVars) :
       this.evaluateBindingAsync_(binding, name, opt_args, opt_collectVars);

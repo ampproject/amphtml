@@ -167,6 +167,7 @@ describes.realWin('amp-ad-exit', {
   beforeEach(() => {
     sandbox = sinon.createSandbox({useFakeTimers: true});
     win = env.win;
+    toggleExperiment(win, 'url-replacement-v2', true);
     toggleExperiment(win, 'amp-ad-exit', true);
     addAdDiv();
     // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
@@ -184,6 +185,7 @@ describes.realWin('amp-ad-exit', {
     element = undefined;
     // Without the following, will break amp-analytics' test-vendor.js
     delete IFRAME_TRANSPORTS[TEST_3P_VENDOR];
+    toggleExperiment(win, 'url-replacement-v2', false);
   });
 
   it('should reject non-JSON children', () => {
@@ -443,8 +445,6 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace custom URL variables with vars', () => {
-    // TODO(ccordry): Remove this after url-replacement v1 deletion
-    toggleExperiment(win, 'url-replacement-v2', true);
     const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
@@ -471,7 +471,6 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon)
         .to.have.been.calledWith(
             'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
-    toggleExperiment(win, 'url-replacement-v2', false);
   });
 
   it('border protection', () => {

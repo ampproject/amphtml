@@ -15,9 +15,6 @@
  */
 
 
-/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
-let VideoAnalyticsDetailsDef; // alias for line length
-
 
 /** @interface */
 export class VideoServiceInterface {
