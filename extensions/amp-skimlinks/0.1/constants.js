@@ -30,10 +30,10 @@ export const NA_CLICK_TRACKING_URL =
 
 // Domains excluded from impressions & affiliation & NA click tracking.
 export const GLOBAL_DOMAIN_BLACKLIST = [
+  'facebook.com',
   'go.redirectingat.com',
   'go.skimresources.com',
-  'facebook.com',
   'instagram.com',
-  'youtube.com',
   'twitter.com',
+  'youtube.com',
 ];
