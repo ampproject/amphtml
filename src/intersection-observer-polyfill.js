@@ -238,20 +238,18 @@ export class IntersectionObserverPolyfill {
 
     /**
      * Mutation observer to fire off on visibility changes
-     * @private {Object|undefined}
+     * @private {?Object}
      */
-    this.mutationObserver_ = undefined;
-    /** @private {./service/viewport/viewport-impl.Viewport|undefined} */
-    this.viewport_ = undefined;
+    this.mutationObserver_ = null;
+    /** @private {?./service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
   }
 
   /**
    */
   disconnect() {
     this.observeEntries_.length = 0;
-    this.mutationObserver_.disconnect();
-    this.mutationObserver_ = undefined;
-    this.viewport_ = undefined;
+    this.disconnectMutationObserver_();
   }
 
   /**
@@ -313,7 +311,7 @@ export class IntersectionObserverPolyfill {
       if (this.observeEntries_[i].element === element) {
         this.observeEntries_.splice(i, 1);
         if (this.observeEntries_.length <= 0) {
-          this.disconnect();
+          this.disconnectMutationObserver_();
         }
         return;
       }
@@ -412,6 +410,18 @@ export class IntersectionObserverPolyfill {
   handleMutationObserverNotification_() {
     this.tick(this.viewport_.getRect());
   }
+
+  /**
+   * Clean up the mutation observer
+   * @private
+   */
+  disconnectMutationObserver_() {
+    if (this.mutationObserver_) {
+      this.mutationObserver_.disconnect();
+    }
+    this.mutationObserver_ = null;
+    this.viewport_ = null;
+  }
 }
 
 /**
@@ -426,11 +436,7 @@ export function intersectionRatio(smaller, larger) {
   const largerBoxArea = larger.width * larger.height;
 
   // Check for a divide by zero
-  if (largerBoxArea === 0) {
-    return 0;
-  } else {
-    return smallerBoxArea / largerBoxArea;
-  }
+  return largerBoxArea === 0 ? 0 : smallerBoxArea / largerBoxArea;
 }
 
 /**
