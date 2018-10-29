@@ -82,13 +82,24 @@ describes.realWin('inabox-host:messaging', {}, env => {
       })).to.be.false;
     });
 
-    it('should ignore message from untrusted iframe', () => {
+    it('should allow viewability message from untrusted iframe', () => {
       expect(host.processMessage({
         source: iframeUntrusted.contentWindow,
         origin: 'www.example.com',
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
           type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should ignore other messages from untrusted iframe', () => {
+      expect(host.processMessage({
+        source: iframeUntrusted.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
         }),
       })).to.be.false;
     });
@@ -398,8 +409,12 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return null if frame is not registered', () => {
       const iframeObj = createNestedIframeMocks(6,3);
-      const sourceMock = iframeObj.source;
-      expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
+      const frameMock = topWinMock.document.querySelectorAll()[0];
+      const expectedWin = sourceMock.parent.parent;
+      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
+      ).to.deep.equal(expectedWin);
+      expect(host.iframeMap_[sentinel].iframe).to.be.null;
     });
 
     it('should return null if frame is more than 10 levels deep', () => {
@@ -407,7 +422,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
+      host.getFrameElement_(sourceMock, sentinel);
+      expect(host.iframeMap_[sentinel].iframe).to.be.null;
     });
   });
 
@@ -457,6 +473,22 @@ describes.realWin('inabox-host:messaging', {}, env => {
       host.unregisterIframe(createNestedIframeMocks(1,1));
       expect(host.iframes_.length).to.equal(1);
       expect('sentinelA' in host.iframeMap_).to.be.true;
+    });
+
+    it('correctly unregisters stored invalid frames', () => {
+      const iframeObjA = createNestedIframeMocks(6,3);
+      const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
+      const iframeObjB = createNestedIframeMocks(6,6);
+      const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
+      host.getFrameElement_(iframeObjA.source, 'sentinelA');
+      host.getFrameElement_(iframeObjB.source, 'sentinelB');
+      expect('sentinelA' in host.iframeMap_).to.be.true;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
+      expect(host.iframeMap_['sentinelA'].iframe).to.be.null;
+      expect(host.iframeMap_['sentinelB'].iframe).to.be.null;
+      host.unregisterIframe(frameMockA);
+      expect('sentinelA' in host.iframeMap_).to.be.false;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
     });
   });
 });

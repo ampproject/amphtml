@@ -125,8 +125,17 @@ export class InaboxMessagingHost {
     const iframe =
         this.getFrameElement_(message.source, request['sentinel']);
     if (!iframe) {
-      dev().info(TAG, 'Ignored message from untrusted iframe:', message);
+      dev().info(TAG, 'Ignored message from unmeasurable iframe:', message);
       return false;
+    }
+
+    // if message comes from an unregistered frame, allow anyway if it's only
+    // getting viewability
+    if (!this.iframeMap_[request['sentinel']].iframe) {
+      if (request['type'] != MessageType.SEND_POSITIONS) {
+        dev().info(TAG, 'Ignored message from untrusted iframe:', message);
+        return false;
+      }
     }
 
     if (!this.msgObservable_.fire(request['type'], this,
@@ -271,7 +280,9 @@ export class InaboxMessagingHost {
         }
       }
     }
-    return null;
+    // at this point the message source is not valid; we store it anyway
+    this.iframeMap_[sentinel] = {iframe: null, measurableFrame};
+    return measurableFrame;
   }
 
   /**
@@ -332,7 +343,22 @@ export class InaboxMessagingHost {
     // Also remove it and all of its descendents from our sentinel cache.
     // TODO(jeffkaufman): save more info so we don't have to walk the dom here.
     for (const sentinel in this.iframeMap_) {
-      if (this.iframeMap_[sentinel].iframe == iframe) {
+      let mappedIframe = this.iframeMap_[sentinel].iframe;
+      // The frame that was passed to this function might be invalid (not
+      // registered in win[INABOX_IFRAMES]; as such if we come across mapping to
+      // an invalid iframe in iframeMap_, check if it's actually referring to
+      // the passed frame.
+      if (mappedIframe == null) {
+        const measurableWin =
+            this.iframeMap_[sentinel].measurableFrame.contentWindow;
+        for (let j = 0, tempWin = measurableWin;
+            j < 10; j++, tempWin = tempWin.parent) {
+          if (iframe.contentWindow == tempWin) {
+            mappedIframe = iframe;
+          }
+        }
+      }
+      if (mappedIframe == iframe) {
         if (this.iframeMap_[sentinel].observeUnregisterFn) {
           this.iframeMap_[sentinel].observeUnregisterFn();
         }
