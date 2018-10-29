@@ -861,7 +861,7 @@ class VideoEntry {
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
+   * @return {!Promise<!VideoAnalyticsDetailsDef>}
    */
   getAnalyticsDetails() {
     const {video} = this;

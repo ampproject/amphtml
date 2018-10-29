@@ -225,6 +225,7 @@ google.ima.AdEvent;
 google.ima.AdEvent.Type;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
 google.ima.settings;
@@ -544,6 +545,10 @@ data.item;
 data.geo;
 data.categories;
 
+// pressboard.js
+data.media;
+data.baseUrl;
+
 // pubguru.js
 data.height;
 data.publisher;
@@ -695,6 +700,13 @@ data.channel;
 data.publisher;
 data.dim;
 data.renderer;
+
+// zen.js
+var YandexZen;
+YandexZen.renderWidget;
+data.clid;
+data.successCalback;
+data.failCallback;
 
 // zergnet.js
 window.zergnetWidgetId;

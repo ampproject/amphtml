@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../third_party/react-dates/bundle';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
@@ -26,6 +25,13 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
+import {
+  closestByTag,
+  escapeCssSelectorIdent,
+  isRTL,
+  iterateCursor,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
@@ -33,12 +39,6 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {
-  escapeCssSelectorIdent,
-  isRTL,
-  iterateCursor,
-  scopedQuerySelector,
-} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -477,17 +477,14 @@ export class AmpDatePicker extends AMP.BaseElement {
           this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
       this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
-
       this.state_ = this.getInitialState_();
-      this.render(this.state_);
-      this.setupListeners_();
     });
   }
 
   /** @override */
   layoutCallback() {
+    const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
-    this.setupSrcAttributes_();
     this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
@@ -496,7 +493,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
     // to adjust expand the height to fit the element for static pickers.
-    return this.render(this.state_).then(() => {
+    return srcAttributesPromise.then(() => {
+      return this.render(this.state_);
+    }).then(() => {
       if (this.mode_ == DatePickerMode.STATIC) {
         this.measureElement(() => {
           const scrollHeight = this.container_./*OK*/scrollHeight;
@@ -783,7 +782,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return existingField;
     }
 
-    const form = this.element.closest('form');
+    const form = closestByTag(this.element, 'form');
     if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
