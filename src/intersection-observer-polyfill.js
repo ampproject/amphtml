@@ -294,7 +294,7 @@ export class IntersectionObserverPolyfill {
           this.handleMutationObserverNotification_.bind(this)
       );
       this.mutationObserver_.observe(element.ownerDocument, {
-        attributeFilter: ['class', 'style', 'hidden'],
+        attributes: true,
         subtree: true,
       });
     }
@@ -410,6 +410,7 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
+    console.log('mutation!');
     this.tick(this.viewport_.getRect());
   }
 }
