@@ -202,7 +202,8 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.signals().signal(CommonSignals.LOAD_START);
     return new Tracking(
         this.element,
-        this.skimOptions_
+        this.skimOptions_,
+        this.referrer_
     );
   }
 

@@ -66,7 +66,7 @@ const helpersFactory = env => {
       );
       this.stubCustomEventReporterBuilder();
 
-      return new Tracking(env, skimOptions);
+      return new Tracking(env, skimOptions, 'my-page-referrer');
     },
 
     getAnalyticsUrlVars(trackingService, eventName) {

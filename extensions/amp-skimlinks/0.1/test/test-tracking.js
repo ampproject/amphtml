@@ -161,7 +161,7 @@ describes.fakeWin(
             const expectedData = {
               pub: pubcode,
               pag: 'CANONICAL_URL',
-              pref: 'DOCUMENT_REFERRER',
+              pref: 'my-page-referrer',
               tz: 'TIMEZONE',
               uuid: 'page-impressions-id',
               guid: 'user-guid',
@@ -322,7 +322,7 @@ describes.fakeWin(
           const expectedData = {
             pubcode,
             referrer: 'CANONICAL_URL',
-            pref: 'DOCUMENT_REFERRER',
+            pref: 'my-page-referrer',
             url: anchor.href,
             xtz: 'TIMEZONE',
             uuid: 'page-impressions-id',

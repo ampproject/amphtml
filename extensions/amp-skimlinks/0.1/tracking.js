@@ -47,21 +47,22 @@ export class Tracking {
    * link impressions and non-affiliated clicks.
    * @param {!AmpElement} element
    * @param {!Object} skimOptions
+   * @param {string} referrer
    */
-  constructor(element, skimOptions) {
+  constructor(element, skimOptions, referrer) {
     /** @private {boolean} */
     this.tracking_ = skimOptions.tracking;
 
     /** @private {!Object} */
     this.trackingInfo_ = {
-      pubcode: skimOptions.pubcode,
-      // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
-      pageUrl: 'CANONICAL_URL',
-      referrer: 'DOCUMENT_REFERRER',
-      timezone: 'TIMEZONE',
-      pageImpressionId: generatePageImpressionId(),
       customTrackingId: skimOptions.customTrackingId,
       guid: null,
+      pageImpressionId: generatePageImpressionId(),
+      // https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md
+      pageUrl: 'CANONICAL_URL',
+      pubcode: skimOptions.pubcode,
+      referrer,
+      timezone: 'TIMEZONE',
     };
 
     /** @private {!Object} */
