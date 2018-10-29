@@ -70,11 +70,16 @@ describe('IntersectionObserverApi', () => {
     sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
       return mockViewport;
     });
+    sandbox.stub(Services, 'ampdoc').callsFake(() => {
+      return {
+        getRootNode: () => {return window.document},
+        win: window
+      };
+    });
     testEle = {
       isBuilt: () => {return true;},
       getOwner: () => {return null;},
       getLayoutBox: () => {return layoutRectLtwh(50, 100, 150, 200);},
-      ownerDocument: window.document,
       win: window,
     };
 
@@ -299,11 +304,16 @@ describe('IntersectionObserverPolyfill', () => {
           },
         };
       });
+      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+        return {
+          getRootNode: () => {return window.document},
+          win: window
+        };
+      });
 
       element = {
         isBuilt: () => {return true;},
         getOwner: () => {return null;},
-        ownerDocument: window.document,
       };
     });
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from './pass';
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
@@ -241,8 +242,12 @@ export class IntersectionObserverPolyfill {
      * @private {?Object}
      */
     this.mutationObserver_ = null;
+    
     /** @private {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
+
+    /** @const @private {?Pass} */
+    this.mutationPass_ = null;
   }
 
   /**
@@ -286,12 +291,18 @@ export class IntersectionObserverPolyfill {
 
 
     // Add a mutation observer to tick ourself
-    if (MutationObserver && !this.mutationObserver_) {
+    const ampdoc = Services.ampdoc(element);
+    if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
-      this.mutationObserver_ = new MutationObserver(
+      this.mutationPass_ = new Pass(ampdoc.win, () => {
+        if (this.viewport_) {
+          this.tick(this.viewport_.getRect());
+        }
+      });
+      this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
-      this.mutationObserver_.observe(element.ownerDocument, {
+      this.mutationObserver_.observe(ampdoc.getRootNode(), {
         attributes: true,
         subtree: true,
       });
@@ -408,7 +419,13 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
-    this.tick(this.viewport_.getRect());
+    if (this.mutationPass_.isPending()) {
+      return;
+    }
+
+    // Wait one animation frame so that other mutations may arrive.
+    this.mutationPass_.schedule(16);
+    return;
   }
 
   /**
@@ -421,6 +438,7 @@ export class IntersectionObserverPolyfill {
     }
     this.mutationObserver_ = null;
     this.viewport_ = null;
+    this.mutationPass_.cancel();
   }
 }
 
