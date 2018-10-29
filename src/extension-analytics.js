@@ -130,17 +130,23 @@ class CustomEventReporter {
  * CustomEventReporter instance.
  */
 export class CustomEventReporterBuilder {
-  /** @param {!AmpElement} parent */
-  constructor(parent) {
+  /**
+   * @param {!AmpElement} parent
+   * @param {?JsonObject} config
+   */
+  constructor(parent, config) {
 
     /** @private {!AmpElement} */
     this.parent_ = parent;
 
     /** @private {?JsonObject} */
-    this.config_ = /** @type {JsonObject} */ ({
-      'requests': {},
-      'triggers': {},
-    });
+    this.config_ = /** @type {JsonObject} */ (Object.assign(
+        dict({
+          'requests': {},
+          'triggers': {},
+        }),
+        config
+    ));
   }
 
   /**
