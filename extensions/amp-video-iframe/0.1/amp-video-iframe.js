@@ -41,10 +41,14 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {once} from '../../../src/utils/function';
 
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
+
+/** @private @const */
+const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
@@ -65,6 +69,15 @@ const ALLOWED_EVENTS = [
   VideoEvents.AD_START,
   VideoEvents.AD_END,
 ];
+
+
+/**
+ * @return {!RegExp}
+ * @private
+ */
+const getAnalyticsEventTypePrefixRegex = once(() =>
+  new RegExp(`^${ANALYTICS_EVENT_TYPE_PREFIX}`));
+
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVideoIframe extends AMP.BaseElement {
@@ -284,14 +297,12 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
-    const requiredEventTypePrefix = 'video-custom-';
-
     user().assertString(eventType, '`eventType` missing in analytics event');
 
     user().assert(
-        (new RegExp(`^${requiredEventTypePrefix}`)).test(eventType),
+        getAnalyticsEventTypePrefixRegex().test(eventType),
         'Invalid analytics `eventType`. Value must start with `%s`.',
-        requiredEventTypePrefix);
+        ANALYTICS_EVENT_TYPE_PREFIX);
 
     this.element.dispatchCustomEvent(
         VideoAnalyticsEvents.CUSTOM,
