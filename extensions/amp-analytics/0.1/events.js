@@ -1145,7 +1145,7 @@ export class VisibilityTracker extends EventTracker {
     let reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
     // special polyfill for eventType: 'hidden'
-    let createReadyReportPromiseFunc = null;
+    let createReportReadyPromiseFunc = null;
     if (eventType == 'hidden') {
       if (reportWhenSpec) {
         user().error(TAG,
@@ -1154,7 +1154,7 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = eventType;
     }
     if (reportWhenSpec) {
-      createReadyReportPromiseFunc =
+      createReportReadyPromiseFunc =
           this.createReportReadyPromise_.bind(this, reportWhenSpec);
     }
 
@@ -1165,7 +1165,7 @@ export class VisibilityTracker extends EventTracker {
       return visibilityManager.listenRoot(
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -1183,7 +1183,7 @@ export class VisibilityTracker extends EventTracker {
           element,
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector, element),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {

@@ -1206,7 +1206,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               /* readyPromise */ null,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1263,7 +1263,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               config.visibilitySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1294,7 +1294,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1338,7 +1338,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               matchEmptySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1361,13 +1361,13 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               /* readyPromise */ null,
-              /* createReadyReportPromiseFunc */ matchFunc,
+              /* createReportReadyPromiseFunc */ matchFunc,
               saveCallback)
           .returns(null)
           .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
       const unlistenReady = getAmpElementSpy.returnValues[0];
-      // NOTE: createReadyReportPromiseFunc is
+      // NOTE: createReportReadyPromiseFunc is
       // fully tested in test-visibility-manager
       return unlistenReady.then(() => {
         saveCallback.callback({totalVisibleTime: 10});
@@ -1464,7 +1464,7 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
-    describe('should create correct readyReportPromise', () => {
+    describe('should create correct reportReadyPromise', () => {
       it('with viewer hidden', () => {
         const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
           return {
