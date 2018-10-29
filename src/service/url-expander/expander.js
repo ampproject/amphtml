@@ -334,7 +334,8 @@ export class Expander {
         // even if opt_collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (typeof value === 'string' || typeof value === 'number') {
+      } else if (typeof value === 'string' || typeof value === 'number' ||
+          typeof value === 'boolean') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
         result = NOENCODE_WHITELIST[name] ? value.toString() :

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 01.22.33 */
+/** Version: 0.1.22.35 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2764,6 +2764,21 @@ function createCancelError(win, opt_message) {
   return activityPorts_10(win, opt_message);
 }
 
+
+/**
+ * A set of error utilities combined in a class to allow easy stubbing in tests.
+ */
+class ErrorUtils {
+  /**
+   * @param {!Error} error
+   */
+  static throwAsync(error) {
+    setTimeout(() => {
+      throw error;
+    });
+  }
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3412,16 +3427,19 @@ class DeferredAccountCreationResponse {
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
-   * @param {!PurchaseData} purchaseData
+   * @param {!Array<!PurchaseData>} purchaseDataList
    * @param {function():!Promise} completeHandler
    */
-  constructor(entitlements, userData, purchaseData, completeHandler) {
+  constructor(entitlements, userData, purchaseDataList, completeHandler) {
     /** @const {!Entitlements} */
     this.entitlements = entitlements;
     /** @const {!UserData} */
     this.userData = userData;
+    /** @const {!Array<!PurchaseData>} */
+    this.purchaseDataList = purchaseDataList;
+    // TODO(dvoytenko): deprecate.
     /** @const {!PurchaseData} */
-    this.purchaseData = purchaseData;
+    this.purchaseData = purchaseDataList[0];
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3433,7 +3451,7 @@ class DeferredAccountCreationResponse {
     return new DeferredAccountCreationResponse(
         this.entitlements,
         this.userData,
-        this.purchaseData,
+        this.purchaseDataList,
         this.completeHandler_);
   }
 
@@ -3444,6 +3462,8 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
+      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
   }
@@ -3993,7 +4013,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 01.22.33',
+    '_client': 'SwG 0.1.22.35',
   });
 }
 
@@ -4035,6 +4055,10 @@ const AnalyticsEvent = {
   UNKNOWN: 0,
   IMPRESSION_PAYWALL: 1,
   ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  EVENT_PAYMENT_FAILED: 2000,
 };
 
 class AnalyticsContext {
@@ -4066,6 +4090,9 @@ class AnalyticsContext {
 
     /** @private {?boolean} */
     this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
   }
 
   /**
@@ -4181,6 +4208,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {!Array<string>}
+   */
+  getLabel() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabel(value) {
+    this.label_ = value;
+  }
+
+  /**
    * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
    */
   toArray() {
@@ -4194,6 +4235,7 @@ class AnalyticsContext {
       this.utmMedium_,  // field 6 - utm_medium
       this.sku_,  // field 7 - sku
       this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
     ];
   }
 }
@@ -4267,6 +4309,14 @@ class AnalyticsRequest {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * The Flow goes like this:
+ * a. Start Payments
+ * b. Complete Payments
+ * c. Create Account
+ * d. Acknowledge Account
+ *
+ * In other words, Flow = Payments + Account Creation.
  */
 
 /**
@@ -4319,6 +4369,7 @@ class PayStartFlow {
       },
       'i': {
         'startTimeMs': Date.now(),
+        'googleTransactionId': this.analyticsService_.getTransactionId(),
       },
     }, {
       forceRedirect:
@@ -4349,9 +4400,15 @@ class PayCompleteFlow {
       }, reason => {
         if (isCancelError(reason)) {
           deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+        } else {
+          deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
         }
         throw reason;
       });
+    });
+    deps.activities().onRedirectError(() => {
+      deps.analytics().addLabels(['redirect']);
+      deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
     });
   }
 
@@ -4379,6 +4436,9 @@ class PayCompleteFlow {
 
     /** @private {?Promise} */
     this.readyPromise_ = null;
+
+    /** @private @const {*} */
+    this.analyticsService_ = deps.analytics();
   }
 
   /**
@@ -4387,6 +4447,15 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   start(response) {
+    if (!this.analyticsService_.getSku()) {
+      // This is a redirect response. Extract the SKU if possible.
+      this.analyticsService_.addLabels(['redirect']);
+      const sku = parseSkuFromPurchaseDataSafe(response.purchaseData);
+      if (sku) {
+        this.analyticsService_.setSku(sku);
+      }
+    }
+    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_PAYMENT_COMPLETE);
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
     const args = {
@@ -4425,6 +4494,7 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   complete() {
+    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
       this.activityIframeView_.message({'complete': true});
@@ -4432,6 +4502,8 @@ class PayCompleteFlow {
     return this.activityIframeView_.acceptResult().catch(() => {
       // Ignore errors.
     }).then(() => {
+      this.analyticsService_.logEvent(
+          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED);
       this.deps_.entitlementsManager().setToastShown(true);
     });
   }
@@ -4445,8 +4517,12 @@ class PayCompleteFlow {
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
-  return payPromise.then(data =>
-      parseSubscriptionResponse(deps, data, completeHandler));
+  return payPromise.then(data => {
+    if (typeof data == 'object' && data['googleTransactionId']) {
+      deps.analytics().setTransactionId(data['googleTransactionId']);
+    }
+    return parseSubscriptionResponse(deps, data, completeHandler);
+  });
 }
 
 
@@ -4530,6 +4606,16 @@ function parseEntitlements(deps, swgData) {
     return deps.entitlementsManager().parseEntitlements(swgData);
   }
   return null;
+}
+
+
+/**
+ * @param {!PurchaseData} purchaseData
+ * @return {?string}
+ */
+function parseSkuFromPurchaseDataSafe(purchaseData) {
+  const json = tryParseJson(purchaseData.raw);
+  return json && json['productId'] || null;
 }
 
 /**
@@ -4648,9 +4734,16 @@ class DeferredAccountFlow {
     const userData = new UserData(
         idToken,
         /** @type {!Object} */ (new JwtHelper().decode(idToken)));
-    const purchaseData = new PurchaseData(
-        data['purchaseData']['data'],
-        data['purchaseData']['signature']);
+    const purchaseDataList =
+        data['purchaseDataList'] ?
+        data['purchaseDataList'].map(pd =>
+            new PurchaseData(pd['data'], pd['signature'])) :
+        [
+          // TODO(dvoytenko): cleanup/deprecate.
+          new PurchaseData(
+              data['purchaseData']['data'],
+              data['purchaseData']['signature']),
+        ];
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
     // But this can be eventually implemented by the same iframe.
@@ -4660,13 +4753,13 @@ class DeferredAccountFlow {
     const response = new DeferredAccountCreationResponse(
         entitlements,
         userData,
-        purchaseData,
+        purchaseDataList,
         completeHandler);
 
     // Start the "sync" flow.
     creatingFlow.start(new SubscribeResponse(
         '',  // raw field doesn't matter in this case
-        purchaseData,
+        purchaseDataList[0],
         userData,
         entitlements,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
@@ -7427,7 +7520,7 @@ Constants.IFRAME_STYLE = `
     left: 0;
 }
 @media (min-width: 480px) {
-  .${Constants.IFRAME_STYLE_CLASS}{
+  .${Constants.IFRAME_STYLE_CLASS} {
     width: 480px !important;
     left: -240px !important;
     margin-left: calc(100vw - 100vw / 2) !important;
@@ -7460,7 +7553,7 @@ Constants.IFRAME_STYLE_CENTER = `
   left: -240px;
   letter-spacing: normal;
   margin-left: calc(100vw - 100vw / 2) !important;
-  max-height: 600px;
+  max-height: 90%;
   overflow: visible;
   position: absolute;
   top: 100%;
@@ -7468,6 +7561,11 @@ Constants.IFRAME_STYLE_CENTER = `
   width: 480px;
   z-index: ${MAX_Z_INDEX};
   -webkit-appearance: none;
+}
+@media (min-height: 667px) {
+  .${Constants.IFRAME_STYLE_CENTER_CLASS} {
+    max-height: 600px;
+  }
 }
 .${Constants.IFRAME_ACTIVE_CONTAINER_CLASS} {
   top: 50%;
@@ -7575,6 +7673,91 @@ Constants.BUTTON_STYLE = `
 }
 `;
 
+Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
+
+Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
+
+Constants.GPAY_OFFER_ICON_SVG =
+    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
+    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
+    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
+    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
+    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
+    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
+    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
+    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
+    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
+    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
+    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
+    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
+    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
+    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
+    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
+    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
+    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
+    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
+    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
+    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
+    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
+    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
+    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
+    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
+    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
+    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
+    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
+    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
+    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
+    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
+    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
+    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
+    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
+    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
+    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
+    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
+    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
+    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
+    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
+    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
+    "</polygon></g></g></g></g></g></svg>";
+
+Constants.GPAY_OFFER_ICON_STYLE = `
+.${Constants.GPAY_OFFER_ICON_CLASS} {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+}
+
+#ic_loyalty_24px use.hover {
+  fill: #FC853B;
+}
+`;
+
+Constants.GPAY_OFFER_DESCRIPTION_CLASS = 'gpay-offer-description';
+
+Constants.GPAY_OFFER_DESCRIPTION_STYLE = `
+@import url(//fonts.googleapis.com/css?family=Google+Sans:500);
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS} {
+  text-align: center;
+  font: 10px 'Google Sans';
+  margin-top: 2px;
+  margin-bottom: 0px;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.gpay-btn-clicked {
+  color: #3C4043;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.short {
+  min-width: 90px;
+  width: 160px;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.long {
+  min-width: 152px;
+  width: 240px;
+}
+`;
+
 /**
  * Class used for the new gpay button with card info (last 4 digits, card net).
  *
@@ -7610,6 +7793,7 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
     background-color: #3c4043;
   }
   `;
+
 
 /**
  * Trusted domain for secure context validation
@@ -7886,10 +8070,15 @@ class Graypane$1 {
 
   /**
    * Hides the graypane.
-   * @return {!Promise}
+   * @return {!Promise|undefined}
    */
   hide() {
     this.popupWindow_ = null;
+    if (!this.element_.parentElement) {
+      // Has already been removed or haven't been even added to DOM.
+      // This could be possible after redirect.
+      return;
+    }
     return transition$1(this.element_, {
       'opacity': 0,
     }, 300, 'ease-out').then(() => {
@@ -8005,13 +8194,17 @@ class PostMessageService {
  *
  * @enum {number}
  */
-// Next Id: 9
+// Next Id: 10
 const PostMessageEventType = {
   IS_READY_TO_PAY: 6,
   LOG_BUTTON_CLICK: 5,
   LOG_IS_READY_TO_PAY_API: 0,
   LOG_LOAD_PAYMENT_DATA_API: 1,
   LOG_RENDER_BUTTON: 2,
+  LOG_INITIALIZE_PAYMENTS_CLIENT: 9,
+  LOG_PAY_FRAME_REQUESTED: 15,
+  LOG_PAY_FRAME_LOADED: 16,
+  LOG_PAY_FRAME_LOADED_WITH_ALL_JS: 17,
   LOG_INLINE_PAYMENT_WIDGET_INITIALIZE: 4,
   LOG_INLINE_PAYMENT_WIDGET_SUBMIT: 3,
   LOG_INLINE_PAYMENT_WIDGET_DISPLAYED: 7,
@@ -8060,6 +8253,12 @@ let postMessageService = null;
 /** @type {?string} */
 let environment = null;
 
+/** @type {?string} */
+let googleTransactionId = null;
+
+/** @type {number} */
+let originTimeMs = Date.now();
+
 /** @type {?BuyFlowActivityMode} */
 let buyFlowActivityMode = null;
 
@@ -8073,30 +8272,52 @@ class PayFrameHelper {
   /**
    * Creates a hidden iframe for logging and appends it to the top level
    * document.
-   *
-   * @param {string} env
-   * @param {string} googleTransactionId
-   * @param {string|null=} merchantId
    */
-  static load(env, googleTransactionId, merchantId) {
+  static load() {
     if (iframe) {
       return;
     }
-    environment = env;
+    const initOptions =
+        /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
+    environment = initOptions.environment || Constants.Environment.PRODUCTION;
     iframe = document.createElement('iframe');
     // Pass in origin because document.referrer inside iframe is empty in
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin, Date.now(), googleTransactionId,
-            merchantId);
+            window.location.origin,
+            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
+      'clientLatencyStartMs': Date.now(),
+    });
     iframe.height = '0';
     iframe.width = '0';
     iframe.style.display = 'none';
     iframe.style.visibility = 'hidden';
     iframe.onload = function() {
+      PayFrameHelper.postMessage({
+        'eventType': PostMessageEventType.LOG_PAY_FRAME_LOADED_WITH_ALL_JS,
+        'clientLatencyStartMs': Date.now(),
+      });
       PayFrameHelper.iframeLoaded();
     };
+    // If the body is already loaded, just append the iframe. Otherwise, we wait
+    // until the DOM has loaded to append the iframe, otherwise document.body is
+    // null.
+    if (document.body) {
+      PayFrameHelper.initialize_();
+    } else {
+      document.addEventListener(
+          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+    }
+  }
+
+  /**
+   * Appends the iframe to the DOM and updates the post message service.
+   * @private
+   */
+  static initialize_() {
     document.body.appendChild(iframe);
     postMessageService = new PostMessageService(iframe.contentWindow);
   }
@@ -8160,6 +8381,8 @@ class PayFrameHelper {
     const postMessageData = Object.assign(
         {
           'buyFlowActivityMode': buyFlowActivityMode,
+          'googleTransactionId': googleTransactionId,
+          'originTimeMs': originTimeMs,
         },
         data);
     postMessageService.postMessage(
@@ -8167,13 +8390,30 @@ class PayFrameHelper {
   }
 
   /**
-   *
    * Sets the activity mode.
    *
    * @param {!BuyFlowActivityMode} mode
    */
   static setBuyFlowActivityMode(mode) {
     buyFlowActivityMode = mode;
+  }
+
+  /**
+   * Sets the google transaction id.
+   *
+   * @param {string} txnId
+   */
+  static setGoogleTransactionId(txnId) {
+    googleTransactionId = txnId;
+  }
+
+  /**
+   * Sets the originTimeMs. To be used only for tests.
+   *
+   * @param {number} originTimeMsTemp
+   */
+  static setOriginTimeMs(originTimeMsTemp) {
+    originTimeMs = originTimeMsTemp;
   }
 
   /**
@@ -8212,6 +8452,7 @@ class PayFrameHelper {
     buffer.forEach(function(data) {
       PayFrameHelper.postMessage(data);
     });
+    buffer.length = 0;
   }
 
   /**
@@ -8253,22 +8494,21 @@ class PayFrameHelper {
    * Returns the payframe URL based on the environment.
    *
    * @param {string} origin The origin that is opening the payframe.
-   * @param {number} initializeTimeMs The time the payframe was initialized.
-   * @param {string} googleTransactionId The transaction id for
-   * this payments client.
    * @param {string|null=} merchantId The merchant id.
    * @return {string}
    * @private
    */
-  static getIframeUrl_(
-      origin, initializeTimeMs, googleTransactionId, merchantId) {
+  static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
     const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
              '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&t=${initializeTimeMs}&gTxnId=%{googleTransactionId}&mid=%{merchantId}`;
+             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
+
+// Start loading pay frame early
+PayFrameHelper.load();
 
 /**
  * @license
@@ -8324,10 +8564,6 @@ function chromeSupportsPaymentRequest() {
     return true;
   }
 
-  if (typeof google != 'undefined' &&
-      null) {
-    return false;
-  }
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
   return androidPlatform != null && 'PaymentRequest' in window &&
@@ -8761,6 +8997,10 @@ class PaymentsWebActivityDelegate {
     // Only verified origins are allowed.
     this.callback_(port.acceptResult().then(
         (result) => {
+          // Origin must always match: popup, iframe or redirect.
+          if (result.origin != this.getOrigin_()) {
+            throw new Error('channel mismatch');
+          }
           const data = /** @type {!PaymentData} */ (result.data);
           if (data['redirectEncryptedCallbackData']) {
             PayFrameHelper.setBuyFlowActivityMode(
@@ -8773,6 +9013,10 @@ class PaymentsWebActivityDelegate {
                   delete clone['redirectEncryptedCallbackData'];
                   return Object.assign(clone, decrypedJson);
                 });
+          }
+          // Unencrypted data supplied: must be a verified and secure channel.
+          if (!result.originVerified || !result.secureChannel) {
+            throw new Error('channel mismatch');
           }
           return data;
         },
@@ -9680,10 +9924,8 @@ class PaymentsAsyncClient {
 
     /** @private @const {!PaymentsClientDelegateInterface} */
     this.webActivityDelegate_ = new PaymentsWebActivityDelegate(
-        this.environment_,
-        PaymentsAsyncClient.googleTransactionId_,
-        opt_useIframe,
-        opt_activities,
+        this.environment_, PaymentsAsyncClient.googleTransactionId_,
+        opt_useIframe, opt_activities,
         paymentOptions['i'] && paymentOptions['i']['redirectKey']);
 
     const paymentRequestSupported = chromeSupportsPaymentRequest();
@@ -9699,10 +9941,6 @@ class PaymentsAsyncClient {
     this.webActivityDelegate_.onResult(this.onResult_.bind(this));
     this.delegate_.onResult(this.onResult_.bind(this));
 
-    PayFrameHelper.load(
-        this.environment_, PaymentsAsyncClient.googleTransactionId_,
-        this.paymentOptions_.merchantInfo &&
-            this.paymentOptions_.merchantInfo.merchantId);
     // If web delegate is used anyway then this is overridden in the web
     // activity delegate when load payment data is called.
     if (chromeSupportsPaymentHandler()) {
@@ -9711,6 +9949,13 @@ class PaymentsAsyncClient {
     } else if (paymentRequestSupported) {
       PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.ANDROID_NATIVE);
     }
+
+    PayFrameHelper.setGoogleTransactionId(
+        PaymentsAsyncClient.googleTransactionId_);
+    PayFrameHelper.postMessage({
+      'eventType': PostMessageEventType.LOG_INITIALIZE_PAYMENTS_CLIENT,
+      'clientLatencyStartMs': Date.now(),
+    });
 
     window.addEventListener(
         'message', event => this.handleMessageEvent_(event));
@@ -10067,6 +10312,40 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
 
 /**
  * A comma-separated set of experiments.
@@ -10083,20 +10362,125 @@ let experimentMap = null;
 
 /**
  * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} unusedWin
+ * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
-function getExperiments(unusedWin) {
-  // TODO(dvoytenko): implement sticky and fractional experiments.
+function getExperiments(win) {
   if (!experimentMap) {
     experimentMap = {};
-    experimentsString.split(',').forEach(s => {
-      if (s) {
-        experimentMap[s] = true;
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString$1(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach(s => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
       }
     });
   }
   return experimentMap;
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+          'subscribe.google.com:e:' + experimentId + ':' +
+          fraction + (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT ? Selection.EXPERIMENT :
+      s == Selection.CONTROL ? Selection.CONTROL : null;
 }
 
 
@@ -10122,6 +10506,21 @@ function setExperiment(win, experimentId, on) {
   getExperiments(win)[experimentId] = on;
 }
 
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -10139,6 +10538,7 @@ function setExperiment(win, experimentId, on) {
  */
 
 const PAY_REQUEST_ID = 'swg-pay';
+const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
 
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
@@ -10247,7 +10647,7 @@ class PayClientBindingSwg {
   /** @override */
   start(paymentRequest, options) {
     const opener = this.activityPorts_.open(
-        PAY_REQUEST_ID,
+        GPAY_ACTIVITY_REQUEST$1,
         payUrl(),
         options.forceRedirect ? '_top' : '_blank',
         feArgs(paymentRequest),
@@ -10257,10 +10657,12 @@ class PayClientBindingSwg {
 
   /** @override */
   onResponse(callback) {
-    this.activityPorts_.onResult(PAY_REQUEST_ID, port => {
+    const responseCallback = port => {
       this.dialogManager_.popupClosed();
       callback(this.validatePayResponse_(port));
-    });
+    };
+    this.activityPorts_.onResult(GPAY_ACTIVITY_REQUEST$1, responseCallback);
+    this.activityPorts_.onResult(PAY_REQUEST_ID, responseCallback);
   }
 
   /**
@@ -11269,54 +11671,6 @@ function uuidFast() {
  * limitations under the License.
  */
 
-class TransactionId {
-  /**
-   * @param {*} deps
-   */
-  constructor(deps) {
-    /** @private @const {*} */
-    this.storage_ = deps.storage();
-  }
-
-  /**
-   * Returns the current transaction id
-   *  @return {!Promise<string>}
-   */
-  get() {
-    return this.storage_.get('transaction_id').then(id => {
-      if (!id) {
-        id = uuidFast();
-        this.storage_.set('transaction_id', id);
-      }
-      return id;
-    });
-  }
-
-  /**
-   * Resets the transaction id
-   * @return {!Promise}
-   */
-  reset() {
-    return this.storage_.remove('transaction_id');
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string>} */
 const iframeStyles = {
   display: 'none',
@@ -11357,10 +11711,7 @@ class AnalyticsService {
      */
     this.context_ = new AnalyticsContext();
 
-    /**
-     * @private @const {!TransactionId}
-     */
-    this.xid_ = new TransactionId(deps);
+    this.context_.setTransactionId(uuidFast());
 
     /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
     this.serviceReady_ = null;
@@ -11370,10 +11721,46 @@ class AnalyticsService {
   }
 
   /**
+   * @param {string} transactionId
+   */
+  setTransactionId(transactionId) {
+    this.context_.setTransactionId(transactionId);
+  }
+
+  /**
+   * @return {string}
+   */
+  getTransactionId() {
+    return /** @type {string} */ (this.context_.getTransactionId());
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.context_.getSku();
+  }
+
+  /**
    * @param {string} sku
    */
   setSku(sku) {
     this.context_.setSku(sku);
+  }
+
+  /**
+   * @param {!Array<string>} labels
+   */
+  addLabels(labels) {
+    if (labels && labels.length > 0) {
+      const newLabels = [].concat(this.context_.getLabel());
+      labels.forEach(label => {
+        if (newLabels.indexOf(label) == -1) {
+          newLabels.push(label);
+        }
+      });
+      this.context_.setLabel(newLabels);
+    }
   }
 
   /**
@@ -11400,7 +11787,7 @@ class AnalyticsService {
   }
 
   /**
-   * @return {!Promise}
+   * @private
    */
   setContext_() {
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -11417,9 +11804,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    return this.xid_.get().then(id => {
-      this.context_.setTransactionId(id);
-    });
+    this.addLabels(getOnExperiments(this.doc_.getWin()));
   }
 
   /**
@@ -11457,7 +11842,7 @@ class AnalyticsService {
    * @return {!AnalyticsRequest}
    */
   createLogRequest_(event) {
-    const /* {!AnalyticsRequest} */ request = new AnalyticsRequest();
+    const request = new AnalyticsRequest();
     request.setEvent(event);
     request.setContext(this.context_);
     return request;

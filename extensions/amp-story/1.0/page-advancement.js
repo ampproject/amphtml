@@ -114,8 +114,9 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
+   * @param {boolean=} unusedCanResume
    */
-  stop() {
+  stop(unusedCanResume) {
     this.isRunning_ = false;
   }
 
@@ -248,10 +249,10 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
     this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop();
+      advancementMode.stop(canResume);
     });
   }
 }
@@ -508,6 +509,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.delayMs_ = delayMs;
 
     /** @private {?number} */
+    this.remainingDelayMs_ = null;
+
+    /** @private {?number} */
     this.startTimeMs_ = null;
 
     /** @private {number|string|null} */
@@ -525,9 +529,17 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.startTimeMs_ = this.getCurrentTimestampMs_();
 
-    this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
+    if (this.remainingDelayMs_) {
+      this.startTimeMs_ =
+          this.getCurrentTimestampMs_() -
+              (this.delayMs_ - this.remainingDelayMs_);
+    } else {
+      this.startTimeMs_ = this.getCurrentTimestampMs_();
+    }
+
+    this.timeoutId_ = this.timer_.delay(
+        () => this.onAdvance(), this.remainingDelayMs_ || this.delayMs_);
 
     this.onProgressUpdate();
 
@@ -538,12 +550,18 @@ class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
 
     if (this.timeoutId_ !== null) {
       this.timer_.cancel(this.timeoutId_);
     }
+
+    // Store the remaining time if the advancement can be resume, ie: if it is
+    // paused.
+    this.remainingDelayMs_ = canResume ?
+      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_() :
+      null;
   }
 
   /** @override */

@@ -260,7 +260,8 @@ export class GlobalVariableSource extends VariableSource {
           /*OK*/' Cookie name, is required');
 
       if (getMode().runtime == 'inabox') {
-        return /** @type {!Promise<ResolverReturnDef>} */(Promise.resolve(null));
+        return /** @type {!Promise<ResolverReturnDef>} */(
+          Promise.resolve(null));
       }
 
       let consent = Promise.resolve();
@@ -500,7 +501,8 @@ export class GlobalVariableSource extends VariableSource {
     // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
-        return activity.getIncrementalEngagedTime(name, reset !== 'false');
+        return activity.getIncrementalEngagedTime(/** @type {string} */ (name),
+            reset !== 'false');
       });
     });
 

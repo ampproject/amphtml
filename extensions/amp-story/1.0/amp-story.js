@@ -330,6 +330,13 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
+    // buildCallback already runs in a mutate context. Calling another
+    // mutateElement explicitly will force the runtime to remeasure the
+    // amp-story element, fixing rendering bugs where the story is inactive
+    // (layoutCallback not called) when accessed from any viewer using
+    // prerendering, because of a height incorrectly set to 0.
+    this.mutateElement(() => {});
+
     const pageEl = this.element.querySelector('amp-story-page');
     pageEl && pageEl.setAttribute('active', '');
 
@@ -352,11 +359,6 @@ export class AmpStory extends AMP.BaseElement {
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
     this.element.removeAttribute('title');
-
-    // Disallow all actions in a (standalone) story.
-    // Components then add their own actions.
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.clearWhitelist();
   }
 
   /** @override */
@@ -448,9 +450,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_() {
+    this.updateAudioIcon_();
     const pageIds = this.pages_.map(page => page.element.id);
     this.element.appendChild(this.systemLayer_.build(pageIds));
-    this.updateAudioIcon_();
   }
 
   /** @private */
@@ -528,6 +530,14 @@ export class AmpStory extends AMP.BaseElement {
       const data = getDetail(e)['data'];
       this.storeService_.dispatch(action, data);
     });
+
+    // Actions whitelist could be initialized empty, or with some actions some
+    // other components registered.
+    this.storeService_.subscribe(
+        StateProperty.ACTIONS_WHITELIST, actionsWhitelist => {
+          const actions = Services.actionServiceForDoc(this.getAmpDoc());
+          actions.setWhitelist(actionsWhitelist);
+        }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
       this.onAdStateUpdate_(isAd);
@@ -693,8 +703,12 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
 
     const storyLayoutPromise = this.initializePages_()
-        .then(() => this.buildSystemLayer_())
         .then(() => {
+          this.buildSystemLayer_();
+
+          this.handleConsentExtension_();
+          this.initializeStoryAccess_();
+
           this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
             this.upgradeCtaAnchorTagsForTracking_(page, index);
@@ -721,9 +735,6 @@ export class AmpStory extends AMP.BaseElement {
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
-
-    this.handleConsentExtension_();
-    this.initializeStoryAccess_();
 
     return storyLayoutPromise;
   }
@@ -824,6 +835,18 @@ export class AmpStory extends AMP.BaseElement {
           accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(
           () => this.onAccessApplyAuthorizations_());
+
+      const firstPage = this.pages_[0].element;
+
+      // First amp-story-page can't be paywall protected.
+      // Removes the access attributes, and throws an error during development.
+      if (firstPage.hasAttribute('amp-access') ||
+          firstPage.hasAttribute('amp-access-hide')) {
+        firstPage.removeAttribute('amp-access');
+        firstPage.removeAttribute('amp-access-hide');
+        user().error(TAG, 'First amp-story-page cannot have amp-access ' +
+            'or amp-access-hide attributes');
+      }
     });
   }
 
@@ -1868,10 +1891,13 @@ export class AmpStory extends AMP.BaseElement {
   updateAudioIcon_() {
     const containsMediaElementWithAudio = !!this.element.querySelector(
         'amp-audio, amp-video:not([noaudio]), [background-audio]');
-    const hasStoryAudio = this.element.hasAttribute('background-audio');
+    const storyHasBackgroundAudio =
+        this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
-        containsMediaElementWithAudio || hasStoryAudio);
+        containsMediaElementWithAudio || storyHasBackgroundAudio);
+    this.storeService_.dispatch(
+        Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO, storyHasBackgroundAudio);
   }
 
   /**
@@ -1886,10 +1912,13 @@ export class AmpStory extends AMP.BaseElement {
     }
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
-    actions.addToWhitelist('AMP-SIDEBAR', 'open');
-    actions.addToWhitelist('AMP-SIDEBAR', 'close');
-    actions.addToWhitelist('AMP-SIDEBAR', 'toggle');
+
+    const actions = [
+      {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
+      {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
+      {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
+    ];
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
   /** @private */
