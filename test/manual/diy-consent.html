@@ -23,6 +23,13 @@ if (hashMatch) {
   ampWindow = ancestors[depth];
 }
 
+
+setTimeout(() => {
+  parent.postMessage({
+    type: 'consent-ui-ready',
+  }, '*');
+}, 500);
+
 document.querySelector('#a').onclick = function () {
 		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
 		parent.postMessage({

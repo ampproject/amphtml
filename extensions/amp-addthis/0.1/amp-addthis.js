@@ -57,10 +57,10 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -174,6 +174,40 @@ class AmpAddThis extends AMP.BaseElement {
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
+
+    //add addition eventListener for iframe postMessage to handle floating tool
+    this.win.addEventListener('message', function(event) {
+      if (event.origin !== ORIGIN || !getData(event)) {
+        return;
+      }
+      let addThisConfig;
+      try {
+        addThisConfig = JSON.parse(event.data);
+      }
+      catch (e) {
+        console.log('something wrong with addthis data');
+      }
+      if (addThisConfig
+        && addThisConfig.hasOwn('event')
+        && addThisConfig.event === CONFIGURATION_EVENT) {
+        if (addThisConfig.hasOwn('config')
+          && addThisConfig.config.hasOwn('widgets')) {
+          for (const key in addThisConfig.config.widgets) {
+            const iframeId = addThisConfig.config.widgets[key].widgetId;
+            if (addThisConfig.config.widgets[key].hasOwn('id')
+              && addThisConfig.config.widgets[key].id === 'shfs'
+              && document.getElementById(iframeId)) {
+              setStyles(document.getElementById(iframeId),{
+                width: '100%',
+                height: '100%',
+                position: 'fixed',
+                bottom: '0px',
+              });
+            }
+          }
+        }
+      }
+    });
   }
 
 
@@ -230,6 +264,7 @@ class AmpAddThis extends AMP.BaseElement {
           'frameborder': 0,
           'title': ALT_TEXT,
           'src': `${ORIGIN}/dc/amp-addthis.html`,
+          'id': this.widgetId_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);

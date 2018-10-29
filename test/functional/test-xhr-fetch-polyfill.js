@@ -15,9 +15,9 @@
  */
 
 
-import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
-
+import {Services} from '../../src/services';
+import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
 describes.sandboxed('fetch', {}, () => {
 
@@ -98,7 +98,12 @@ describes.sandboxed('fetch', {}, () => {
     });
 
     it('should allow FormData as body', () => {
-      const formData = new FormDataWrapper();
+      const fakeWin = null;
+      sandbox.stub(Services, 'platformFor').returns({
+        isIos() { return false; },
+      });
+
+      const formData = createFormDataWrapper(fakeWin);
       sandbox.stub(JSON, 'stringify');
       formData.append('name', 'John Miller');
       formData.append('age', 56);
