@@ -16,7 +16,10 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {VideoEvents, VideoAnalyticsEvents} from '../../../../src/video-interface';
+import {
+  VideoAnalyticsEvents,
+  VideoEvents,
+} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
