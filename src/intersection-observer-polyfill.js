@@ -286,7 +286,7 @@ export class IntersectionObserverPolyfill {
 
 
     // Add a mutation observer to tick ourself
-    if (!this.mutationObserver_) {
+    if (MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
       this.mutationObserver_ = new MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
