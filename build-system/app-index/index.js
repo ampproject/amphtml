@@ -22,6 +22,8 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const {join, normalize, sep} = require('path');
 const {renderTemplate} = require('./template');
 
+const pc = process;
+
 // JS Component
 const mainComponent = join(__dirname, '/components/main.js');
 
@@ -111,14 +113,15 @@ function serveIndex({root, mapBasepath}) {
         return;
       }
 
-      const bundle = await bundleMain();
       const css = (await fs.readFileAsync(mainCssFile)).toString();
+
+      const serveMode = pc.env.SERVE_MODE || 'default';
 
       const renderedHtml = renderTemplate({
         basepath: formatBasepath(basepath),
         fileSet,
         isMainPage,
-        bundle,
+        serveMode,
         css,
       });
 
