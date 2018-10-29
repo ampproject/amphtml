@@ -242,11 +242,11 @@ export class IntersectionObserverPolyfill {
      * @private {?Object}
      */
     this.mutationObserver_ = null;
-    
+
     /** @private {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @const @private {?Pass} */
+    /** @private {?Pass} */
     this.mutationPass_ = null;
   }
 
@@ -438,7 +438,10 @@ export class IntersectionObserverPolyfill {
     }
     this.mutationObserver_ = null;
     this.viewport_ = null;
-    this.mutationPass_.cancel();
+    if (this.mutationPass_) {
+      this.mutationPass_.cancel();
+    }
+    this.mutationPass_ = null;
   }
 }
 

@@ -72,8 +72,8 @@ describe('IntersectionObserverApi', () => {
     });
     sandbox.stub(Services, 'ampdoc').callsFake(() => {
       return {
-        getRootNode: () => {return window.document},
-        win: window
+        getRootNode: () => {return window.document;},
+        win: window,
       };
     });
     testEle = {
@@ -306,8 +306,8 @@ describe('IntersectionObserverPolyfill', () => {
       });
       sandbox.stub(Services, 'ampdoc').callsFake(() => {
         return {
-          getRootNode: () => {return window.document},
-          win: window
+          getRootNode: () => {return window.document;},
+          win: window,
         };
       });
 
