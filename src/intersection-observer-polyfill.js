@@ -194,10 +194,8 @@ export class IntersectionObserverPolyfill {
   /**
    * @param {function(!Array<!IntersectionObserverEntry>)} callback
    * @param {Object=} opt_option
-   * @param {Window} opt_window
-   * @param {!./service/viewport/viewport-impl.Viewport} opt_viewport
    */
-  constructor(callback, opt_option, opt_window, opt_viewport) {
+  constructor(callback, opt_option) {
     /** @private @const {function(!Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
@@ -237,37 +235,23 @@ export class IntersectionObserverPolyfill {
      */
     this.observeEntries_ = [];
 
-    // Fix for Safari not sending Intersection Observer events
-    /** @private {Window} */
-    this.window_ = undefined;
-    /** @private {./service/viewport/viewport-impl.Viewport} */
+    /** 
+     * Mutation observer to fire off on visibility changes
+     * @private {?Object} 
+     */
+    this.mutationObserver_ = undefined
+    ; 
+    /** @private @const {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = undefined;
-    /** @private @const {./platform-impl.Platform} */
-    this.platform_ = undefined;
-    /** @private {Object} */
-    this.mutationObserver_ = undefined; 
-    if (opt_window && opt_viewport) {
-      this.window_ = opt_window;
-      this.viewport_ = opt_viewport;
-      this.platform_ = Services.platformFor(this.window_);
-
-      if (this.platform_.isSafari()) {
-        // Add a mutation observer to tick ourself
-        this.mutationObserver = new MutationObserver(
-          this.handleSafariMutationObserverNotification.bind(this)
-        );
-        this.mutationObserver.observe(this.window_.document, {
-          attributeFilter: ['class', 'style', 'hidden'],
-          subtree: true
-        });
-      }
-    }
   }
 
   /**
    */
   disconnect() {
     this.observeEntries_.length = 0;
+    this.mutationObserver_.disconnect();
+    this.mutationObserver_ = undefined;
+    this.viewport_ = undefined;
   }
 
   /**
@@ -301,6 +285,19 @@ export class IntersectionObserverPolyfill {
         this.callback_([change]);
       }
     }
+    
+
+    // Add a mutation observer to tick ourself
+    if (!this.mutationObserver_) {
+      this.viewport_ = element.implementation_.getViewport();
+      this.mutationObserver_ = new MutationObserver(
+        this.handleMutationObserverNotification.bind(this)
+      );
+      this.mutationObserver_.observe(element.ownerDocument, {
+        attributeFilter: ['class', 'style', 'hidden'],
+        subtree: true
+      });
+    }
 
     // push new observed element
     this.observeEntries_.push(newState);
@@ -315,6 +312,9 @@ export class IntersectionObserverPolyfill {
     for (let i = 0; i < this.observeEntries_.length; i++) {
       if (this.observeEntries_[i].element === element) {
         this.observeEntries_.splice(i, 1);
+        if (this.observeEntries_.length <= 0) {
+          this.disconnect();
+        }
         return;
       }
     }
@@ -344,12 +344,9 @@ export class IntersectionObserverPolyfill {
 
     const changes = [];
     
-    // TODO: Intersection changes, not if they intersect. This will require
-    // Pulling out an 'doesIntersect', and do an alternate tick.
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
         this.observeEntries_[i], hostViewport, opt_iframe);
-      console.log('yooo', this.observeEntries_[i], 'ayeee', change);
       if (change) {
         changes.push(change);
       }
@@ -369,7 +366,7 @@ export class IntersectionObserverPolyfill {
    * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
-   * @return {?IntersectionObserverEntry} A valid change entry or null   if ratio
+   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
@@ -412,9 +409,8 @@ export class IntersectionObserverPolyfill {
    * Handle Safari Mutation Oberserver events
    * @param {!Array<Object>} mutationList
    */
-  handleSafariMutationObserverNotification(mutationList) {
-    console.log('hi', mutationList);
-    this.tick(this.viewport_);
+  handleMutationObserverNotification(mutationList) {
+    this.tick(this.viewport_.getRect());
   }
 }
 
@@ -425,7 +421,15 @@ export class IntersectionObserverPolyfill {
  * @return {number}
  */
 function intersectionRatio(smaller, larger) {
-  return (smaller.width * smaller.height) / (larger.width * larger.height);
+  const smallerBoxArea = smaller.width * smaller.height;
+  const largerBoxArea = larger.width * larger.height;
+
+  // Check for a divide by zero
+  if (largerBoxArea === 0) {
+    return 0;
+  } else {
+    return smallerBoxArea / largerBoxArea;
+  }
 }
 
 /**
