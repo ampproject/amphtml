@@ -32,6 +32,7 @@ import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
@@ -335,6 +336,9 @@ export class SubscriptionService {
           // Viewer authorization is redirected to use local platform instead.
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        }).catch(reason => {
+          this.platformStore_.reportPlatformFailure('local');
+          dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }
     });
@@ -495,10 +499,10 @@ export class SubscriptionService {
         dev().assert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
             SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-            {
-              action,
-              serviceId,
-            }
+            dict({
+              'action': action,
+              'serviceId': serviceId,
+            })
         );
         resolve(platform.executeAction(action));
       });

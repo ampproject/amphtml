@@ -22,11 +22,11 @@ import {
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {map} from '../../../src/utils/object';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -216,10 +216,10 @@ export class VisibilityManager {
    * Listens to the visibility events on the root as the whole and the given
    * visibility spec. The visibility tracking can be deferred until
    * `readyPromise` is resolved, if specified.
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @return {!UnlistenDef}
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
@@ -233,10 +233,10 @@ export class VisibilityManager {
    * visibility spec. The visibility tracking can be deferred until
    * `readyPromise` is resolved, if specified.
    * @param {!Element} element
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @return {!UnlistenDef}
    */
   listenElement(
@@ -249,10 +249,10 @@ export class VisibilityManager {
   /**
    * Create visibilityModel and listen to visible events.
    * @param {function():number} calcVisibility
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    */
@@ -312,10 +312,10 @@ export class VisibilityManager {
 
   /**
    * @param {!VisibilityModel} model
-   * @param {!Object<string, *>} spec
+   * @param {!JsonObject} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *>)} callback
+   * @param {function(!JsonObject)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    * @private
@@ -356,10 +356,10 @@ export class VisibilityManager {
               Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
-        Object.assign(state, {
+        Object.assign(state, dict({
           'intersectionRatio': intersectionRatio,
           'intersectionRect': JSON.stringify(intersectionRect),
-        });
+        }));
 
       } else {
         state['opacity'] = this.getRootMinOpacity();
@@ -368,12 +368,12 @@ export class VisibilityManager {
       model.maybeDispose();
 
       if (layoutBox) {
-        Object.assign(state, {
+        Object.assign(state, dict({
           'elementX': layoutBox.left,
           'elementY': layoutBox.top,
           'elementWidth': layoutBox.width,
           'elementHeight': layoutBox.height,
-        });
+        }));
       }
       callback(state);
     });

@@ -382,6 +382,8 @@ describes.realWin('Resource', {amp: true}, env => {
       element.setAttribute('placeholder', '');
       Object.defineProperty(element, 'parentElement', {
         value: doc.createElement('amp-iframe'),
+        configurable: true,
+        writable: true,
       });
       element.parentElement.__AMP__RESOURCE = {};
       elementMock.expects('isUpgraded').returns(true).atLeast(1);

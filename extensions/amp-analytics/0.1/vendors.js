@@ -60,6 +60,7 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
+import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
@@ -70,6 +71,7 @@ import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
 import {TREASUREDATA_CONFIG} from './vendors/treasuredata';
 import {WEBTREKK_CONFIG} from './vendors/webtrekk';
@@ -208,12 +210,14 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'parsely': PARSELY_CONFIG,
   'piStats': PISTATS_CONFIG,
   'piano': PIANO_CONFIG,
+  'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'rakam': RAKAM_CONFIG,
   'segment': SEGMENT_CONFIG,
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,
   'snowplow': SNOWPLOW_CONFIG,
+  'tealiumcollect': TEALIUMCOLLECT_CONFIG,
   'top100': TOP100_CONFIG,
   'topmailru': TOPMAILRU_CONFIG,
   'treasuredata': TREASUREDATA_CONFIG,

@@ -80,8 +80,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
-    options.optimizeParameters = true;
-    options.optimizeReturns = true;
     options.optimizeCalls = true;
     if (single_file_compilation) {
       options.renamePrefixNamespace = "_";
