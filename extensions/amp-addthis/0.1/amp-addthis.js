@@ -207,7 +207,7 @@ class AmpAddThis extends AMP.BaseElement {
           }
         }
       }
-    });git
+    });
   }
 
 
