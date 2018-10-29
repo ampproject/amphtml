@@ -44,10 +44,13 @@ const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/** @enum {number} */
+/**
+ * @enum {number} Priority reserved for extensions in anchor mutations.
+ * The higher the priority, the sooner it's invoked.
+ */
 export const Priority = {
+  LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
-  LINK_REWRITER_MANAGER: 3,
 };
 
 /**
