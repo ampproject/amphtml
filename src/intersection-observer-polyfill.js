@@ -410,7 +410,6 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
-    console.log('mutation!');
     this.tick(this.viewport_.getRect());
   }
 }
@@ -420,8 +419,9 @@ export class IntersectionObserverPolyfill {
  * @param {!./layout-rect.LayoutRectDef} smaller
  * @param {!./layout-rect.LayoutRectDef} larger
  * @return {number}
+ * @visibleForTesting
  */
-function intersectionRatio(smaller, larger) {
+export function intersectionRatio(smaller, larger) {
   const smallerBoxArea = smaller.width * smaller.height;
   const largerBoxArea = larger.width * larger.height;
 
