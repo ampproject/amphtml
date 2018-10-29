@@ -1476,6 +1476,38 @@ describes.realWin('Events', {amp: 1}, env => {
           expect(stub).to.be.calledOnce;
         });
       });
+
+      it('with endOfFrame trigger on unload', () => {
+        const config = {visibilitySpec: {reportWhen: 'endOfFrame'}};
+        let tracker = root.getTracker('visible', VisibilityTracker);
+        tracker.add(tracker.root, 'visible', config, handler);
+        expect(handler).to.have.not.been.called;
+
+        win.document.dispatchEvent(new Event('unload'));
+        setTimeout(0, () => {
+          expect(handler).to.be.calledOnce;
+          const event = handler.args[0][0];
+          expect(event.target).to.equal(target);
+          expect(event.type).to.equal('click');
+          expect(event.vars).to.deep.equal({});
+        });
+      });
+
+      it('with endOfFrame trigger on pagehide', () => {
+        const config = {visibilitySpec: {reportWhen: 'endOfFrame'}};
+        let tracker = root.getTracker('visible', VisibilityTracker);
+        tracker.add(tracker.root, 'visible', config, handler);
+        expect(handler).to.have.not.been.called;
+
+        win.document.dispatchEvent(new Event('pagehide'));
+        setTimeout(0, () => {
+          expect(handler).to.be.calledOnce;
+          const event = handler.args[0][0];
+          expect(event.target).to.equal(target);
+          expect(event.type).to.equal('click');
+          expect(event.vars).to.deep.equal({});
+        });
+      });
     });
   });
 });
