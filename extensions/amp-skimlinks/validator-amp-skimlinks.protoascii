@@ -30,17 +30,19 @@ tags: {  # <amp-skimlinks>
   tag_name: "AMP-SKIMLINKS"
   requires_extension: "amp-skimlinks"
   attrs: {
-    name: "publisher-code"
-    mandatory: true
+    name: "custom-tracking-id"
+    value_regex_casei: "^.{0,50}$"
+  }
+  attrs: {
+    name: "excluded-domains"
   }
   attrs: {
     name: "link-selector"
   }
   attrs: {
-    name: "custom-tracking-id"
-  }
-  attrs: {
-    name: "excluded-domains"
+    name: "publisher-code"
+    value_regex_casei: "^[0-9]+X[0-9]+$"
+    mandatory: true
   }
   attrs: {
     name: "tracking"

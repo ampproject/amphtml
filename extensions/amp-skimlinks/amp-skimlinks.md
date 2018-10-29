@@ -144,7 +144,7 @@ Example:
 
 The `custom-tracking-id` (also `called xcust`) is an optional parameter used to pass your own internal tracking id through Skimlinks' monetization system allowing you to segment your commission data in the way you want.
 
-`custom-tracking-id` should be <=50 characters and only contain upper and lowercase characters, numbers, underscores and pipes.
+`custom-tracking-id` should be <=50 characters.
 
 
 ## Validation
