@@ -242,20 +242,7 @@ export class Tracking {
     analyticsBuilder.track(NON_AFFILIATE_CLICK,
         NA_CLICK_TRACKING_URL);
 
-    const analytics = analyticsBuilder.build();
-    /*
-      Use {beacon: true} to send the request through sendBeacon()
-      https://www.ampproject.org/docs/analytics/deep_dive_analytics#how-data-gets-sent:-transport-attribute
-
-      Overwrite config manually since CustomEventReporterBuilder doesn't
-      support optional config.
-      TODO: add optional config param to .build() so we don't need to mutate
-      a private property from outside.
-    */
-    // Bracket because analytics.config_ is of type JsonObject.
-    analytics.config_['transport'] = dict({'beacon': true});
-
-    return analytics;
+    return analyticsBuilder.build();
   }
 
   /**

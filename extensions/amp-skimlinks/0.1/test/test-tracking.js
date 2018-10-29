@@ -92,11 +92,6 @@ describes.fakeWin(
             expect(impressionId1).to.not.equal(impressionId2);
           });
 
-          it('Should set the amp-analytics beacon flag to true', () => {
-            const tracking = helpers.createTrackingWithStubAnalytics();
-            expect(tracking.analytics_.config_.transport.beacon).to.be.true;
-          });
-
           it('Should setup the page-impressions analytics correctly', () => {
             helpers.createTrackingWithStubAnalytics();
             const trackStub = CustomEventReporterBuilder.prototype.track;
