@@ -336,6 +336,9 @@ export class SubscriptionService {
           // Viewer authorization is redirected to use local platform instead.
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        }).catch(reason => {
+          this.platformStore_.reportPlatformFailure('local');
+          dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }
     });
