@@ -1479,7 +1479,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       it('with endOfFrame trigger on unload', () => {
         const config = {visibilitySpec: {reportWhen: 'endOfFrame'}};
-        let tracker = root.getTracker('visible', VisibilityTracker);
+        const tracker = root.getTracker('visible', VisibilityTracker);
         tracker.add(tracker.root, 'visible', config, handler);
         expect(handler).to.have.not.been.called;
 
@@ -1495,7 +1495,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       it('with endOfFrame trigger on pagehide', () => {
         const config = {visibilitySpec: {reportWhen: 'endOfFrame'}};
-        let tracker = root.getTracker('visible', VisibilityTracker);
+        const tracker = root.getTracker('visible', VisibilityTracker);
         tracker.add(tracker.root, 'visible', config, handler);
         expect(handler).to.have.not.been.called;
 
