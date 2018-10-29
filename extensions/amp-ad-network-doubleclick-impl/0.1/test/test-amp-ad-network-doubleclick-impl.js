@@ -549,50 +549,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    it('handles the psts url param correctly', () => {
+    it('should include the psts param if there are pageview tokens', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
+      impl.experimentIds = ['12345678'];
+
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/);
+      });
+    });
+
+    it('should not include the psts param if there are no pageview tokens',
+      () => { const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
       impl.experimentIds = ['12345678'];
       return impl.getAdUrl().then(url => {
-        [
-          /^https:\/\/securepubads\.g\.doubleclick\.net\/gampad\/ads/,
-          /(\?|&)adk=\d+(&|$)/,
-          /(\?|&)gdfp_req=1(&|$)/,
-          /(\?|&)impl=ifr(&|$)/,
-          /(\?|&)sfv=\d+-\d+-\d+(&|$)/,
-          /(\?|&)sz=320x50(&|$)/,
-          /(\?|&)u_sd=[0-9]+(&|$)/,
-          /(\?|&)is_amp=3(&|$)/,
-          /(\?|&)amp_v=%24internalRuntimeVersion%24(&|$)/,
-          /(\?|&)d_imp=1(&|$)/,
-          /(\?|&)dt=[0-9]+(&|$)/,
-          /(\?|&)ifi=[0-9]+(&|$)/,
-          /(\?|&)adf=[0-9]+(&|$)/,
-          /(\?|&)c=[0-9]+(&|$)/,
-          /(\?|&)output=html(&|$)/,
-          /(\?|&)nhd=\d+(&|$)/,
-          /(\?|&)biw=[0-9]+(&|$)/,
-          /(\?|&)bih=[0-9]+(&|$)/,
-          /(\?|&)adx=-?[0-9]+(&|$)/,
-          /(\?|&)ady=-?[0-9]+(&|$)/,
-          /(\?|&)u_aw=[0-9]+(&|$)/,
-          /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
-          /(\?|&)u_w=[0-9]+(&|$)/,
-          /(\?|&)u_h=[0-9]+(&|$)/,
-          /(\?|&)u_tz=-?[0-9]+(&|$)/,
-          /(\?|&)u_his=[0-9]+(&|$)/,
-          /(\?|&)oid=2(&|$)/,
-          /(\?|&)isw=[0-9]+(&|$)/,
-          /(\?|&)ish=[0-9]+(&|$)/,
-          /(\?|&)eid=([^&]+%2C)*12345678(%2C[^&]+)*(&|$)/,
-          /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
-          /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
-          /(\?|&)dtd=[0-9]+(&|$)/,
-          /(\?|&)vis=[0-5]+(&|$)/,
-        ].forEach(regexp => expect(url).to.match(regexp));
+        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/);
       });
     });
 
