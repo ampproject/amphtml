@@ -29,7 +29,6 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {isDateInFuture} from '../addthis-utils/cuid';
 import {toArray} from '../../../../src/types';
-import {Services} from "../../../../src/services";
 
 describes.realWin('amp-addthis', {
   amp: {
@@ -376,20 +375,24 @@ describes.realWin('amp-addthis', {
   });
 
   it('gives id for iframe if floating tool loaded', () => {
-    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(({at}) => {
-      testIframe(at.querySelector('iframe'));
-      const iframe = at.querySelector('iframe');
-      expect(iframe.getAttribute('id')).to.equal(floatingWidgetId);
-    });
+    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
+        ({at}) => {
+          testIframe(at.querySelector('iframe'));
+          const iframe = at.querySelector('iframe');
+          expect(iframe.getAttribute('id')).to.equal(floatingWidgetId);
+        }
+    );
   });
 
   it('gives css style for iframe if floating tool loaded', () => {
-    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(({at}) => {
-      testIframe(at.querySelector('iframe'));
-      const iframe = at.querySelector('iframe');
-      setTimeout(() => {
-        expect(iframe.style.position).to.equal('fixed');
-      }, 5000);
-    });
+    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
+        ({at}) => {
+          testIframe(at.querySelector('iframe'));
+          const iframe = at.querySelector('iframe');
+          setTimeout(() => {
+            expect(iframe.style.position).to.equal('fixed');
+          }, 5000);
+        }
+    );
   });
 });

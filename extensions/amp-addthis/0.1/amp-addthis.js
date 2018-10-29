@@ -42,7 +42,9 @@ import {
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
-import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
+import {
+  ActiveToolsMonitor,
+} from './addthis-utils/monitors/active-tools-monitor';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
@@ -55,8 +57,8 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle, setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
@@ -186,15 +188,16 @@ class AmpAddThis extends AMP.BaseElement {
         console.log('something wrong with addthis data');
       }
       if (addThisConfig
-        && addThisConfig.hasOwnProperty('event')
+        && addThisConfig.hasOwn('event')
         && addThisConfig.event === CONFIGURATION_EVENT) {
-        if (addThisConfig.hasOwnProperty('config')
-          && addThisConfig.config.hasOwnProperty('widgets')) {
+        if (addThisConfig.hasOwn('config')
+          && addThisConfig.config.hasOwn('widgets')) {
           for (const key in addThisConfig.config.widgets) {
-            if (addThisConfig.config.widgets[key].hasOwnProperty('id')
+            const iframeId = addThisConfig.config.widgets[key].widgetId;
+            if (addThisConfig.config.widgets[key].hasOwn('id')
               && addThisConfig.config.widgets[key].id === 'shfs'
-              && document.getElementById(addThisConfig.config.widgets[key].widgetId)) {
-              setStyles(document.getElementById(addThisConfig.config.widgets[key].widgetId),{
+              && document.getElementById(iframeId)) {
+              setStyles(document.getElementById(iframeId),{
                 width: '100%',
                 height: '100%',
                 position: 'fixed',
@@ -204,7 +207,7 @@ class AmpAddThis extends AMP.BaseElement {
           }
         }
       }
-    });
+    });git
   }
 
 
