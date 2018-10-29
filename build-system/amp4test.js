@@ -52,6 +52,7 @@ app.use('/compose-doc', function(req, res) {
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
+  <title>AMP-TEST</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   ${metaTag}
   <script>
@@ -115,4 +116,3 @@ app.use('/request-bank/withdraw/:id', (req, res) => {
     bank[req.params.id] = callback;
   }
 });
-

@@ -440,23 +440,6 @@ export const VideoAnalyticsEvents = {
 
 
 /**
- * @typedef {{
- *   autoplay: boolean,
- *   currentTime: number,
- *   duration: number,
- *   height: number,
- *   id: string,
- *   playedRangesJson: string,
- *   playedTotal: number,
- *   muted: boolean,
- *   state: string,
- *   width: number
- * }}
- */
-export let VideoAnalyticsDetailsDef;
-
-
-/**
  * Helper union type to be used internally, so that the compiler treats
  * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
  *

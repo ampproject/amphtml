@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {TransportSerializers, batchSegmentDef} from './transport-serializer';
+
 import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {
@@ -24,6 +26,7 @@ import {
 import {createPixel} from '../../../src/pixel';
 import {dev, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -59,12 +62,23 @@ export class Transport {
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
+
+    /** @private {boolean} */
+    this.isInabox_ = getMode(win).runtime == 'inabox';
   }
 
   /**
-   * @param {string} request
+   * @param {string} url
+   * @param {!Array<!batchSegmentDef>} segments
    */
-  sendRequest(request) {
+  sendRequest(url, segments) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, segments);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+
     if (this.options_['iframe']) {
       if (!this.iframeTransport_) {
         dev().error(TAG_, 'iframe transport was inadvertently deleted');
@@ -117,7 +131,8 @@ export class Transport {
     }
 
     const type = element.getAttribute('type');
-    const ampAdResourceId = user().assertString(
+    // In inabox there is no amp-ad element.
+    const ampAdResourceId = this.isInabox_ ? '1' : user().assertString(
         getAmpAdResourceId(element, getTopWindow(win)),
         'No friendly amp-ad ancestor element was found ' +
         'for amp-analytics tag with iframe transport.');
@@ -143,9 +158,18 @@ export class Transport {
    * specific, whitelisted requests.
    * Note that this is unrelated to the cross-domain iframe use case above in
    * sendRequestUsingCrossDomainIframe()
-   * @param {string} request The request URL.
+   *
+   * @param {string} url
+   * @param {!batchSegmentDef} segment
    */
-  sendRequestUsingIframe(request) {
+  sendRequestUsingIframe(url, segment) {
+    const serializer = this.getSerializer_();
+    const request = serializer(url, [segment]);
+    if (!request) {
+      user().error(TAG_, 'Request not sent. Contents empty.');
+      return;
+    }
+
     assertHttpsUrl(request, 'amp-analytics request');
     user().assert(
         parseUrlDeprecated(request).origin !=
@@ -167,6 +191,13 @@ export class Transport {
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.src = request;
     this.win_.document.body.appendChild(iframe);
+  }
+
+  /**
+   * @return {function(string, !Array<!batchSegmentDef>):string}
+   */
+  getSerializer_() {
+    return TransportSerializers['default'];
   }
 
   /**

@@ -56,7 +56,7 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 
 /** @private @const {string} */
-const HAS_AUDIO_ATTRIBUTE = 'i-amphtml-story-audio-state';
+const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
 const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
@@ -71,7 +71,7 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {number} */
-const hideTimeout = 1500;
+const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -367,13 +367,18 @@ export class SystemLayer {
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
-      this.onPageAudioStateUpdate_(audio);
+      this.onPageHasAudioStateUpdate_(audio);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
         hasSidebar => {
           this.onHasSidebarStateUpdate_(hasSidebar);
         }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
   }
 
   /**
@@ -441,27 +446,33 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to has audio state updates, displays the audio controls if needed.
+   * Reacts to has audio state updates, determining if the story has a global
+   * audio track playing, or if any page has audio.
    * @param {boolean} hasAudio
    * @private
    */
   onStoryHasAudioStateUpdate_(hasAudio) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-has-audio', hasAudio);
     });
   }
 
   /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
-   * @param {boolean} pageAudio
+   * @param {boolean} pageHasAudio
    * @private
    */
-  onPageAudioStateUpdate_(pageAudio) {
+  onPageHasAudioStateUpdate_(pageHasAudio) {
+    pageHasAudio =
+        pageHasAudio || !!this.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
     this.vsync_.mutate(() => {
-      pageAudio ?
-        this.getShadowRoot().setAttribute(HAS_AUDIO_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(HAS_AUDIO_ATTRIBUTE);
+      pageHasAudio ?
+        this.getShadowRoot()
+            .setAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE);
     });
   }
   /**
@@ -478,21 +489,24 @@ export class SystemLayer {
   }
 
   /**
-   * Hides element after elapsed time.
+   * Hides audio message after elapsed time.
    * @private
    */
-  hideAfterTimeout_() {
+  hideAudioMessageAfterTimeout_() {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
-    this.timeoutId_ = this.timer_.delay(() => this.hideInteral_(), hideTimeout);
+    this.timeoutId_ =
+        this.timer_.delay(
+            () => this.hideAudioMessageInternal_(),
+            HIDE_AUDIO_MESSAGE_TIMEOUT_MS);
   }
 
   /**
-   * Hides message.
+   * Hides audio message.
    * @private
    */
-  hideInteral_() {
+  hideAudioMessageInternal_() {
     if (!this.isBuilt_) {
       return;
     }
@@ -515,6 +529,18 @@ export class SystemLayer {
       uiState === UIType.DESKTOP ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-hidden', !isVisible);
     });
   }
 
@@ -550,7 +576,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAfterTimeout_();
+      this.hideAudioMessageAfterTimeout_();
     });
   }
 
