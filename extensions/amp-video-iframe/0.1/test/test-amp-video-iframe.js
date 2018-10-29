@@ -16,7 +16,7 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
+import {VideoEvents, VideoAnalyticsEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
@@ -199,7 +199,7 @@ describes.realWin('amp-video-iframe', {
       const invalidEvents = 'tacos al pastor'.split(' ');
 
       invalidEvents.forEach(event => {
-        videoIframe.implementation_.onMessage_({event});
+        videoIframe.implementation_.onMessage_({data: {event}});
         expect(dispatch.withArgs(event)).to.not.have.been.called;
       });
     });
@@ -287,6 +287,66 @@ describes.realWin('amp-video-iframe', {
       expect(postMessage.withArgs(sinon.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
     });
+
+    [
+      {
+        accept: true,
+        sufix: 'without data',
+        eventType: 'video-custom-foo',
+      },
+      {
+        accept: true,
+        sufix: 'with data',
+        eventType: 'video-custom-foo',
+        vars: {
+          myVar: 'bar',
+        },
+      },
+      {
+        accept: false,
+        eventType: 'tacos al pastor',
+        sufix: 'with invalid event name',
+      },
+    ].forEach(({sufix, eventType, vars, accept}) => {
+      const verb = accept ? 'dispatch' : 'reject';
+
+      it(`should ${verb} custom analytics event ${sufix}`, function* () {
+        const videoIframe = createVideoIframe();
+        const dispatch = spyDispatch(videoIframe);
+
+        yield whenLoaded(videoIframe);
+
+        acceptMockedMessages(videoIframe);
+
+        const data = {
+          event: 'analytics',
+          analytics: {
+            'eventType': eventType,
+          },
+        };
+
+        const expectedVars = vars || {};
+
+        if (vars) {
+          Object.assign(data.analytics, {vars});
+        }
+
+        if (accept) {
+          videoIframe.implementation_.onMessage_({data});
+          expect(
+              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
+              expectedVars).to.have.been.calledOnce;
+        } else {
+          expect(() => {
+            videoIframe.implementation_.onMessage_({data});
+          }).to.throw();
+
+          expect(
+              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
+              expectedVars).to.not.have.been.called;
+        }
+      });
+    });
   });
 
   const implementedVideoInterfaceMethods = [
@@ -320,4 +380,6 @@ describes.realWin('amp-video-iframe', {
       });
     });
   });
+
+
 });

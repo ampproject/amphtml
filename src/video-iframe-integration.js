@@ -311,8 +311,10 @@ export class AmpVideoIntegration {
   postAnalyticsEvent(eventType, opt_vars) {
     this.postToParent_(dict({
       'event': 'analytics',
-      'eventType': eventType,
-      'vars': opt_vars,
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
     }));
   }
 

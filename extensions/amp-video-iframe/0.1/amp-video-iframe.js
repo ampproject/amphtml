@@ -282,7 +282,9 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (eventReceived == 'analytics') {
-      this.dispatchCustomAnalyticsEvent_(data['eventType'], data['vars']);
+      const spec = dev().assert(data['analytics']);
+
+      this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
     }
 
