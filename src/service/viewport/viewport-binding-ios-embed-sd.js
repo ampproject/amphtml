@@ -297,7 +297,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    return !isExperimentOn(this.win, 'ios-embed-sd-notransfer');
   }
 
   /** @override */
@@ -402,6 +402,24 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     return this.wrapper_./*OK*/scrollHeight
         + this.paddingTop_
         + this.getBorderTop();
+  }
+
+  /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      this.vsync_.mutate(() => {
+        setImportantStyles(this.scroller_, {
+          '-webkit-overflow-scrolling': 'auto',
+        });
+        this.vsync_.mutate(() => {
+          setImportantStyles(this.scroller_, {
+            '-webkit-overflow-scrolling': 'touch',
+          });
+        });
+      });
+    }
   }
 
   /** @override */

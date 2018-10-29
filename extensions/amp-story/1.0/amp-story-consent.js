@@ -222,9 +222,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
-      this.actions_.addToWhitelist('AMP-CONSENT', 'accept');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'prompt');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'reject');
+      const actions = [
+        {tagOrTarget: 'AMP-CONSENT', method: 'accept'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
+      ];
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
 
       this.setAcceptButtonFontColor_();
 

@@ -19,13 +19,11 @@
 /**
  * @enum {string}
  */
-exports.TYPES = {
+const TYPES = exports.TYPES = {
   AD: '_base_ad',
   MEDIA: '_base_media',
   MISC: '_base_misc',
 };
-
-const TYPES = {...exports.TYPES};
 
 exports.extensionBundles = [
   {name: 'amp-3d-gltf', version: '0.1', type: TYPES.MEDIA},
@@ -161,6 +159,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-inputmask', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-instagram',
     version: '0.1',
@@ -397,6 +396,19 @@ exports.aliasBundles = [
     latestVersion: '1.0',
     options: {hasCss: true},
     type: 'ads',
+  },
+];
+
+exports.altMainBundles = [
+  {
+    path: 'src/amp-shadow.js',
+    name: 'shadow-v0',
+    version: '0.1',
+  },
+  {
+    path: 'src/inabox/amp-inabox.js',
+    name: 'amp4ads-v0',
+    version: '0.1',
   },
 ];
 

@@ -17,27 +17,127 @@
 
 
 const BBPromise = require('bluebird');
+const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
+const {join, normalize, sep} = require('path');
+const {renderTemplate} = require('./template');
+
+// JS Component
+const mainComponent = join(__dirname, '/components/main.js');
+
+// CSS
+const mainCssFile = join(__dirname, '/main.css');
 
 
-// TODO(alanorozco): Use JSX once we're ready.
-const templateFile = 'build-system/app-index/template.html';
-
-
-function renderFileLink(base, location) {
-  return `<li><a href="${base}/${location}">${location}</a></li>`;
+function isMaliciousPath(path, rootPath) {
+  return (path + sep).substr(0, rootPath.length) !== rootPath;
 }
 
 
-function renderIndex(req, res) {
-  Promise.all([fs.readdirAsync('./examples/'), fs.readFileAsync(templateFile)])
-      .then(result => {
-        const files = result[0];
-        const template = result[1].toString();
+async function getListing(rootPath, basepath) {
+  const path = normalize(join(rootPath, basepath));
 
-        res.end(template.replace('<!-- examples -->',
-            files.map(file => renderFileLink('/examples', file)).join('')));
+  if (~path.indexOf('\0')) {
+    return null;
+  }
+
+  if (isMaliciousPath(path, rootPath)) {
+    return null;
+  }
+
+  try {
+    if ((await fs.statAsync(path)).isDirectory()) {
+      return fs.readdirAsync(path);
+    }
+  } catch (unusedE) {
+    /* empty catch for fallbacks */
+    return null;
+  }
+}
+
+
+let shouldCache = true;
+function setCacheStatus(cacheStatus) {
+  shouldCache = cacheStatus;
+}
+
+
+let mainBundleCache;
+async function bundleMain() {
+  if (shouldCache && mainBundleCache) {
+    return mainBundleCache;
+  }
+  const bundle = await bundler.bundleComponent(mainComponent);
+  if (shouldCache) {
+    mainBundleCache = bundle;
+  }
+  return bundle;
+}
+
+
+function isMainPageFromUrl(url) {
+  return url == '/';
+}
+
+
+/**
+ * Adds a trailing slash if missing.
+ * @param {string} basepath
+ * @return {string}
+ */
+function formatBasepath(basepath) {
+  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
+}
+
+
+function serveIndex({root, mapBasepath}) {
+  const mapBasepathOrPassthru = mapBasepath || (url => url);
+
+  return (req, res, next) => {
+    if (!root) {
+      res.status(500);
+      res.end('Misconfigured: missing `root`.');
+      return;
+    }
+
+    return (async() => {
+      const isMainPage = isMainPageFromUrl(req.url);
+      const basepath = mapBasepathOrPassthru(req.url);
+
+      const fileSet = await getListing(root, basepath);
+
+      if (fileSet == null) {
+        next();
+        return;
+      }
+
+      const bundle = await bundleMain();
+      const css = (await fs.readFileAsync(mainCssFile)).toString();
+
+      const renderedHtml = renderTemplate({
+        basepath: formatBasepath(basepath),
+        fileSet,
+        isMainPage,
+        bundle,
+        css,
       });
+
+      res.end(renderedHtml);
+
+      return renderedHtml; // for testing
+    })();
+  };
 }
 
-module.exports = renderIndex;
+// Promises to run before serving
+async function beforeServeTasks() {
+  if (shouldCache) {
+    await bundleMain();
+  }
+}
+
+module.exports = {
+  setCacheStatus,
+  serveIndex,
+  beforeServeTasks,
+};

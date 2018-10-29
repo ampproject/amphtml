@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-const root = document.createElement('div');
-const btn = document.createElement('button');
-const text = document.createTextNode('Insert Hello World!');
 
-root.className = "root";
-btn.appendChild(text);
-root.appendChild(btn);
-
-btn.addEventListener('click', () => {
-  const h1 = document.createElement('h1');
-  h1.textContent = 'Hello World!'
-  document.body.appendChild(h1);
-});
-
-document.body.appendChild(root);
+const selector = 'AssignmentExpression Identifier[name=IS_AMP_ALT]';
+module.exports = function(context) {
+  return {
+    [selector]: function(node) {
+      context.report({
+        node,
+        message: 'No Assignment to IS_AMP_ALT global property allowed',
+      });
+    }
+  };
+};

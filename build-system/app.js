@@ -23,12 +23,12 @@ const app = require('express')();
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
+const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
-const renderIndex = require('./app-index/index');
 const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
@@ -62,14 +62,37 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  app.get('/', renderIndex);
+  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
+      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
+    devDashboard.setCacheStatus(false);
+  }
 
-  // TODO(alanorozco): This doesn't quite work. Listing dirs is fine, but file
-  // links go to a /~ base path, which obviously 404's.
-  //
-  // app.use('/~', express.static('/'), serveIndex(`${__dirname}/../`));
+  app.get(['/', '/*'], devDashboard.serveIndex({
+    // Sitting on build-system/, so we go back one dir for the repo root.
+    root: path.join(__dirname, '../'),
+    mapBasepath(url) {
+      // Serve /examples/ on main page.
+      if (url == '/') {
+        return '/examples';
+      }
+      // Serve root on /~ as a fallback.
+      if (url == '/~') {
+        return '/';
+      }
+      // Serve basepath from URL otherwise.
+      return url;
+    },
+  }));
+
+  app.get('/serve_mode.json', (req, res) => {
+    res.json({serveMode: pc.env.SERVE_MODE || 'default'});
+  });
+
+  app.get('/proxy', (req, res) => {
+    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`proxy/s/${sufix}`);
+  });
 }
-
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -224,7 +247,14 @@ const upload = multer();
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);
 
-  const fileData = req.files['myFile'][0];
+  /** @type {!Array<!File>|undefined} */
+  const myFile = req.files['myFile'];
+
+  if (!myFile) {
+    res.json({message: 'No file data received'});
+    return;
+  }
+  const fileData = myFile[0];
   const contents = fileData.buffer.toString();
 
   res.json({message: contents});
@@ -1324,4 +1354,7 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = app;
+module.exports = {
+  middleware: app,
+  beforeServeTasks: devDashboard.beforeServeTasks,
+};
