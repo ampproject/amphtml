@@ -741,6 +741,14 @@ describes.realWin('SlideScroll', {
       });
     });
 
+    it('do not set `autoplay` status if `autoplay=0` specified', () => {
+      return getAmpSlideScroll(false, 3, true, true, 0).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const setupAutoplaySpy = sandbox.spy(impl, 'setupAutoplay_');
+        expect(setupAutoplaySpy).to.not.have.been.called;
+      });
+    });
+
     it('removes `autoplay` status after provided loops are made', () => {
       return getAmpSlideScroll(false, 3, true, true, 2).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;

@@ -17,6 +17,8 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';
+import {isFiniteNumber} from '../../../src/types';
+import {user} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {
 
@@ -55,17 +57,17 @@ export class BaseSlides extends BaseCarousel {
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
     const autoplayVal = this.element.getAttribute('autoplay');
-    if (autoplayVal != '') {
+    if (autoplayVal) {
       this.autoplayLoops_ = parseInt(autoplayVal, 10);
+      user().assert(isFiniteNumber(this.autoplayLoops_));
     }
-
     this.buildSlides();
 
     this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
 
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
-    if (this.shouldAutoplay_) {
+    if (this.shouldAutoplay_ && this.autoplayLoops_ != 0) {
       this.setupAutoplay_();
     }
 
@@ -160,7 +162,7 @@ export class BaseSlides extends BaseCarousel {
   * @private
   */
   autoplay_() {
-    if (!this.shouldAutoplay_) {
+    if (!this.shouldAutoplay_ || this.autoplayLoops_ == 0) {
       return;
     }
     this.clearAutoplay();
@@ -215,9 +217,11 @@ export class BaseSlides extends BaseCarousel {
     this.clearAutoplay();
     this.hasAutoplay_ = false;
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
-    this.element.removeAttribute('loop');
-    this.hasLoop_ = false;
-    this.shouldLoop = false;
+    if (this.element.hasAttribute('autoplay')) {
+      // Only remove if specified due to the `autoplay` attribute
+      this.element.removeAttribute('loop');
+      this.hasLoop_ = false;
+      this.shouldLoop = false;
+    }
   }
-
 }
