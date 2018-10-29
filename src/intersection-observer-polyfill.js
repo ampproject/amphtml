@@ -109,7 +109,7 @@ export class IntersectionObserverApi {
     /** @private {?function()} */
     this.unlistenOnDestroy_ = null;
 
-    /** @private @const {!./service/viewport/viewport-impl.Viewport} */
+    /** @private {!./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */
@@ -235,13 +235,12 @@ export class IntersectionObserverPolyfill {
      */
     this.observeEntries_ = [];
 
-    /** 
+    /**
      * Mutation observer to fire off on visibility changes
-     * @private {?Object} 
+     * @private {Object|undefined}
      */
-    this.mutationObserver_ = undefined
-    ; 
-    /** @private @const {?./service/viewport/viewport-impl.Viewport} */
+    this.mutationObserver_ = undefined;
+    /** @private {./service/viewport/viewport-impl.Viewport|undefined} */
     this.viewport_ = undefined;
   }
 
@@ -285,17 +284,17 @@ export class IntersectionObserverPolyfill {
         this.callback_([change]);
       }
     }
-    
+
 
     // Add a mutation observer to tick ourself
     if (!this.mutationObserver_) {
-      this.viewport_ = element.implementation_.getViewport();
+      this.viewport_ = Services.viewportForDoc(element);
       this.mutationObserver_ = new MutationObserver(
-        this.handleMutationObserverNotification.bind(this)
+          this.handleMutationObserverNotification_.bind(this)
       );
       this.mutationObserver_.observe(element.ownerDocument, {
         attributeFilter: ['class', 'style', 'hidden'],
-        subtree: true
+        subtree: true,
       });
     }
 
@@ -343,10 +342,10 @@ export class IntersectionObserverPolyfill {
     this.lastIframeRect_ = opt_iframe;
 
     const changes = [];
-    
+
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-        this.observeEntries_[i], hostViewport, opt_iframe);
+          this.observeEntries_[i], hostViewport, opt_iframe);
       if (change) {
         changes.push(change);
       }
@@ -406,10 +405,10 @@ export class IntersectionObserverPolyfill {
   }
 
   /**
-   * Handle Safari Mutation Oberserver events
-   * @param {!Array<Object>} mutationList
+   * Handle Mutation Oberserver events
+   * @private
    */
-  handleMutationObserverNotification(mutationList) {
+  handleMutationObserverNotification_() {
     this.tick(this.viewport_.getRect());
   }
 }

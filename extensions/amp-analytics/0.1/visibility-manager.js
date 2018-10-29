@@ -616,7 +616,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     // Polyfill.
     const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
         this.onIntersectionChanges_.bind(this),
-      {threshold: DEFAULT_THRESHOLD}
+        {threshold: DEFAULT_THRESHOLD}
     );
     const ticker = () => {
       intersectionObserverPolyfill.tick(this.viewport_.getRect());
