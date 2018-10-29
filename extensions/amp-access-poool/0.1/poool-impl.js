@@ -15,30 +15,23 @@
  */
 import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
-import {camelCaseToDash, dashToUnderline} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {loadScript} from '../../../3p/3p';
 
 const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
   'authorization':
-    'http://api.poool.fr/api/v2/amp/access?rid=READER_ID',
+    'http://localhost:8001/api/v2/amp/access?rid=READER_ID',
+  'iframe':
+    'https://poool-front.local:35565/amp.html'
+        + '?rid=READER_ID'
+        + '&c=CANONICAL_URL'
+        + '&o=AMPDOC_URL'
+        + '&r=DOCUMENT_REFERRER',
 };
 
 const AUTHORIZATION_TIMEOUT = 3000;
-
-const CONFIG = {
-  debug: false,
-  mode: 'custom',
-  forceWidget: null,
-  loginButtonEnabled: true,
-  signatureEnabled: true,
-  videoClient: 'vast',
-  customSegment: null,
-  cookiesEnabled: false,
-};
 
 /**
  * @typedef {{
@@ -74,6 +67,9 @@ export class PooolVendor {
     /** @private {string} */
     this.accessUrl_ = ACCESS_CONFIG['authorization'];
 
+    /** @private {string} */
+    this.iframeUrl_ = ACCESS_CONFIG['iframe'];
+
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
 
@@ -86,14 +82,23 @@ export class PooolVendor {
     /** @private {string} */
     this.bundleID_ = this.pooolConfig_['bundleID'] || '';
 
-    /** @private {string} */
-    this.pageType_ = this.pooolConfig_['pageType'] || '';
-
     /** @protected {string} */
     this.readerID_ = '';
 
     /** @private {string} */
     this.itemID_ = this.pooolConfig_['itemID'] || '';
+
+    /** @const {!Element} */
+    this.pooolContainer_ = document.getElementById('poool');
+
+    /** @const {!Element} */
+    this.iframe_ = document.createElement('iframe');
+    this.iframe_.setAttribute('id', 'poool-iframe');
+    this.iframe_.setAttribute('scrolling', 'no');
+    this.iframe_.setAttribute('frameborder', '0');
+    this.iframe_.setAttribute('width', '100%');
+    this.iframe_.setAttribute('height', '500px');
+    this.pooolContainer_.appendChild(this.iframe_);
 
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
 
@@ -125,7 +130,6 @@ export class PooolVendor {
    */
   checkMandatoryParams_() {
     user().assert(this.bundleID_, 'BundleID is incorrect or not provided.');
-    user().assert(this.pageType_, 'Page type is incorrect or not provided.');
     user().assert(this.itemID_, 'ItemID is not provided.');
   }
 
@@ -150,74 +154,24 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
-    this.getPooolSDK_(global, _poool => {
+    const urlPromise = this.accessSource_.buildUrl(this.iframeUrl_
+        + '&bi=' + this.pooolConfig_['bundleID']
+        + '&iid=' + this.pooolConfig_['itemID']
+        + '&ce=' + this.pooolConfig_['cookiesEnabled']
+        + '&d=' + this.pooolConfig_['debug']
+        + '&fw=' + this.pooolConfig_['forceWidget']
+        + '&cs=' + this.pooolConfig_['customSegment']
+    , false);
 
-      // Init poool
-      _poool('init', this.bundleID_);
-
-      // Get AMP reader id and assign it to poool config
-      this.accessSource_.getReaderId_().then(rid => {
-        this.readerID_ = rid;
-
-        // Set poool amp basic config
-        _poool(
-            'config',
-            {
-              mode: 'custom',
-              'amp_reader_id': this.readerID_,
-              'amp_item_id': this.itemID_,
-            },
-            true
-        );
-      });
-
-
-      // Set config
-      Object.entries(CONFIG).forEach(configEntry => {
-
-        const configKey = configEntry[0],
-            configDefaultValue = configEntry[1];
-
-        let configValue = this.pooolConfig_[configKey] || configDefaultValue;
-
-        if (configValue) {
-          if (typeof configDefaultValue === 'boolean') {
-            configValue = `${configValue}` === 'true';
-          }
-
-          _poool('config', dashToUnderline(camelCaseToDash(configKey)),
-              configValue);
-        }
-      });
-
-      // Unlock content after onRelease event
-      _poool('event', 'onrelease', this.giveAccessOnPooolRelease_.bind(this));
-
-      // Create hit
-      _poool('send', 'page-view', this.pageType_);
-
+    return urlPromise.then(url => {
+      this.iframe_.src = url;
     });
   }
 
-  /**
-   * @private
-   */
-  giveAccessOnPooolRelease_() {
-    const articleBody = document.getElementById('poool-access');
-    articleBody.setAttribute('amp-access-poool', '');
-  }
-
-  /**
-   * Produces the Poool SDK object for the passed in callback.
-   *
-   * @param {!Window} global
-   * @param {function(!Object)} cb
-   */
-  getPooolSDK_(global, cb) {
-    loadScript(global, 'https://assets.poool.fr/poool.min.js', function() {
-      cb(global.poool);
-    });
-  }
+  // giveAccessOnPooolRelease_() {
+  //   const articleBody = document.getElementById('poool-access');
+  //   articleBody.setAttribute('amp-access-poool', '');
+  // }
 
   /**
    * @return {!Promise}
