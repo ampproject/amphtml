@@ -26,11 +26,9 @@
  * </code>
  */
 
-import {Action, getStoreService} from './amp-story-store-service';
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import {user} from '../../../src/log';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -76,15 +74,6 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
 };
 
 /**
- * Selectors for clickable elements
- * @enum {string}
- */
-const Selectors = {
-  // Only grab anchor tags that have href.
-  ANCHOR_TAGS: 'a[href]',
-};
-
-/**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
@@ -94,9 +83,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     /** @private {boolean} */
     this.prerenderAllowed_ = false;
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
   }
 
   /** @override */
@@ -112,7 +98,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.prepareTooltipForClickableEls_();
   }
 
   /** @override */
@@ -177,33 +162,5 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       }
     }
     setStyles(element, assertDoesNotContainDisplay(styles));
-  }
-
-  /**
-   * Finds elements that could trigger a tooltip and builds them so that they
-   * trigger a tooltip when clicked.
-   */
-  prepareTooltipForClickableEls_() {
-    const clickableEls =
-      scopedQuerySelectorAll(this.element, Selectors.ANCHOR_TAGS);
-
-    Array.prototype.forEach.call(clickableEls, el => {
-      switch (el.tagName.toLowerCase()) {
-        case 'a':
-          const href = user().assert(el.getAttribute('href'), 'Anchor tags' +
-            'must contain a url.');
-
-          el.removeAttribute('href');
-          el.setAttribute('i-amphtml-data-amp-story-tooltip-href', href);
-          el.addEventListener('click', event => {
-            event.stopPropagation();
-            this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, {
-              isActive: true,
-              element: el,
-            });
-          });
-          break;
-      }
-    });
   }
 }

@@ -7,10 +7,15 @@ import {
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, childElement} from '../../../src/dom';
+import {
+  addAttributesToElement,
+  childElement,
+  removeElement,
+} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setImportantStyles} from '../../../src/style';
 
 /**
@@ -40,15 +45,28 @@ const MIN_VERTICAL_SPACE = 56;
 const EDGE_PADDING = 8;
 
 /**
+ * List of selectors that can trigger a tooltip.
+ * @enum {string}
+ */
+export const TOOLTIP_TRIGGERABLE_SELECTORS = ['a[href]'];
+
+/**
  * Tooltip element triggered by clickable elements in the amp-story-grid-layer.
  */
 export class AmpStoryTooltip {
   /**
    * @param {!Window} win
+   * @param {!Element} storyEl
    */
-  constructor(win) {
+  constructor(win, storyEl) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /**
+     * amp-story element.
+     * @private {?Element}
+     */
+    this.story_ = storyEl;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -76,45 +94,58 @@ export class AmpStoryTooltip {
      * element twice.
      * @private {?Element} */
     this.builtElem_ = null;
+
+    this.storeService_.subscribe(StateProperty.TOOLTIP_ELEMENT, elem => {
+      if (!elem) {
+        return;
+      }
+
+      if (!this.isBuilt_) {
+        this.story_.appendChild(this.build_());
+      }
+
+      if (elem != this.builtElem_) {
+        this.builtElem_ = elem;
+        this.attachTooltipToEl_(elem);
+      }
+      this.onTooltipStateUpdate_(true);
+    });
   }
 
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    */
-  build() {
-    if (this.isBuilt_) {
-      return;
-    }
-
+  build_() {
     this.isBuilt_ = true;
 
     this.shadowRoot_ = this.win_.document.createElement('div');
 
     this.tooltipOverlayEl_ = this.buildTemplate_(this.win_.document);
-
     createShadowRootWithStyle(this.shadowRoot_, this.tooltipOverlayEl_, CSS);
-
     this.tooltipOverlayEl_
         .addEventListener('click', event => this.onOutsideClickableEls_(event));
-
-    this.storeService_.subscribe(StateProperty.TOOLTIP_STATE, isActive => {
-      this.onTooltipStateUpdate_(isActive);
-    });
 
     this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
       this.onUIStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.TOOLTIP_ELEMENT, elem => {
-      if (this.storeService_.get(StateProperty.TOOLTIP_STATE) &&
-        elem != this.builtElem_) {
-
-        this.builtElem_ = elem;
-        this.attachTooltipToEl_(elem);
-      }
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+      // Hide active tooltip when page switch is triggered by keyboard or
+      // desktop buttons.
+      this.closeTooltip_();
     });
 
     return this.shadowRoot_;
+  }
+
+  /**
+   * Hides the tooltip layer.
+   */
+  closeTooltip_() {
+    this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, null);
+    // Hide active tooltip when page switch is triggered by keyboard or
+    // desktop buttons.
+    this.onTooltipStateUpdate_(false);
   }
 
   /**
@@ -147,18 +178,16 @@ export class AmpStoryTooltip {
    * @param {!Element} clickedEl
    */
   attachTooltipToEl_(clickedEl) {
-    const href = clickedEl.getAttribute('i-amphtml-data-amp-story-tooltip-href');
-    const iconSrc = clickedEl.getAttribute('icon');
+    const {href} = parseUrlDeprecated(clickedEl.getAttribute('href'));
     const domainName = getSourceOriginForElement(clickedEl, href);
 
     this.resources_.mutateElement(this.tooltip_, () => {
-      addAttributesToElement(this.tooltip_, {'href': href});
+      const tooltipText = clickedEl.getAttribute('tooltipText') || domainName;
+      this.appendTextToTooltip_(tooltipText);
 
-      this.appendTextToTooltip_(domainName);
-
-      if (iconSrc) {
-        this.appendIconToTooltip_(iconSrc);
-      }
+      const iconAttr = clickedEl.getAttribute('tooltipIcon');
+      const iconSrc = iconAttr ? parseUrlDeprecated(iconAttr).href : '';
+      this.appendIconToTooltip_(iconSrc);
 
       this.positionTooltip_(clickedEl);
     });
@@ -170,8 +199,7 @@ export class AmpStoryTooltip {
    * @param {string} domainName
    */
   appendTextToTooltip_(domainName) {
-    const existingTooltipText =
-    childElement(this.tooltip_,
+    const existingTooltipText = childElement(this.tooltip_,
         el => el.classList.contains('i-amphtml-tooltip-text'));
 
     if (existingTooltipText) {
@@ -194,6 +222,13 @@ export class AmpStoryTooltip {
     const existingTooltipIcon =
         childElement(this.tooltip_,
             el => el.classList.contains('i-amphtml-story-tooltip-icon'));
+
+    if (!iconSrc) {
+      if (existingTooltipIcon) {
+        removeElement(existingTooltipIcon);
+      }
+      return;
+    }
 
     if (existingTooltipIcon) {
       addAttributesToElement(existingTooltipIcon.firstElementChild,
@@ -221,7 +256,7 @@ export class AmpStoryTooltip {
     const clickedRect = clickedEl.getBoundingClientRect();
 
     // Reset tooltip arrow positioning.
-    this.tooltipArrow_.removeAttribute('on-top');
+    this.tooltipArrow_.classList.remove('i-amphtml-tooltip-arrow-on-top');
 
     // Vertical positioning.
     let top;
@@ -231,7 +266,7 @@ export class AmpStoryTooltip {
     } else if (this.win_.innerHeight - clickedRect.bottom >
         MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element.
       top = clickedRect.bottom + EDGE_PADDING;
-      this.tooltipArrow_.setAttribute('on-top', '');
+      this.tooltipArrow_.classList.add('i-amphtml-tooltip-arrow-on-top');
     } else { // Element takes whole vertical space. Place tooltip on the middle.
       top = this.win_.innerHeight / 2;
     }
@@ -276,16 +311,18 @@ export class AmpStoryTooltip {
         html`
         <section class="i-amphtml-story-tooltip-layer i-amphtml-hidden">
           <div class="i-amphtml-tooltip-background"></div>
-          <div class="i-amphtml-story-tooltip-layer-nav-button-container"
-              left-button>
-            <button class="i-amphtml-story-tooltip-layer-nav-button" left-button
-                role="button" ref="buttonLeft">
+          <div class="i-amphtml-story-tooltip-layer-nav-button-container
+              i-amphtml-story-tooltip-nav-button-left">
+            <button role="button" ref="buttonLeft"
+                class="i-amphtml-story-tooltip-layer-nav-button
+                i-amphtml-story-tooltip-nav-button-left">
             </button>
           </div>
-          <div class="i-amphtml-story-tooltip-layer-nav-button-container"
-              right-button>
-            <button class="i-amphtml-story-tooltip-layer-nav-button"
-                right-button role="button" ref="buttonRight">
+          <div class="i-amphtml-story-tooltip-layer-nav-button-container
+              i-amphtml-story-tooltip-nav-button-right">
+            <button role="button" ref="buttonRight"
+                class="i-amphtml-story-tooltip-layer-nav-button
+                    i-amphtml-story-tooltip-nav-button-right">
             </button>
           </div>
           <a class="i-amphtml-story-tooltip" target="_top" ref="tooltip">
@@ -320,12 +357,5 @@ export class AmpStoryTooltip {
     event.preventDefault();
     dispatch(this.win_, this.shadowRoot_, direction, undefined,
         {bubbles: true});
-  }
-
-  /**
-   * Hides the tooltip layer.
-   */
-  closeTooltip_() {
-    this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, false);
   }
 }

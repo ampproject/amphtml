@@ -82,7 +82,6 @@ export const UIType = {
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    tooltipElement: ?Element,
- *    tooltipState: boolean,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -124,7 +123,6 @@ export const StateProperty = {
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   TOOLTIP_ELEMENT: 'tooltipElement',
-  TOOLTIP_STATE: 'tooltipState',
   UI_STATE: 'uiState',
 
   // App data.
@@ -269,9 +267,8 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_TOOLTIP:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
-            [StateProperty.PAUSED_STATE]: !!data.isActive,
-            [StateProperty.TOOLTIP_STATE]: !!data.isActive,
-            [StateProperty.TOOLTIP_ELEMENT]: data.element,
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.TOOLTIP_ELEMENT]: data,
           }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
@@ -404,7 +401,6 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.TOOLTIP_ELEMENT]: null,
-      [StateProperty.TOOLTIP_STATE]: false,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.

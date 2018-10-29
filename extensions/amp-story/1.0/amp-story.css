@@ -270,6 +270,18 @@ amp-story-grid-layer {
   z-index: 2 !important;
 }
 
+/**
+ * Make sure grid layer does not act as a click shield on elements underneath
+ * it.
+ */
+amp-story-grid-layer {
+  pointer-events: none !important;
+}
+
+amp-story-grid-layer > * {
+  pointer-events: auto !important;
+}
+
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;

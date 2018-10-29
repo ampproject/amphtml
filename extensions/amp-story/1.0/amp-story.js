@@ -221,7 +221,7 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
     /** @private @const {!ClickLayer} */
-    this.tooltip_ = new AmpStoryTooltip(this.win);
+    new AmpStoryTooltip(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -491,12 +491,6 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      if (this.storeService_.get(StateProperty.TOOLTIP_STATE)) {
-        // Hide active tooltip when page switch is triggered by keyboard or
-        // desktop buttons.
-        this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, false);
-      }
-
       this.switchTo_(getDetail(e)['targetPageId']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -739,9 +733,7 @@ export class AmpStory extends AMP.BaseElement {
           if (infoDialog) {
             infoDialog.build();
           }
-        })
-        // TODO(enriqe): only build when story contains clickable elements.
-        .then(() => this.element.appendChild(this.tooltip_.build()));
+        });
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
