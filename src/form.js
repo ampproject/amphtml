@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag} from './dom';
+import {
+  ancestorElementsByTag,
+  iterateCursor,
+} from './dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -37,29 +40,76 @@ export function setFormForElement(element, form) {
 
 /**
  * Returns form data in the passed-in form as an object.
+ * Includes focused submit buttons.
  * @param {!HTMLFormElement} form
  * @return {!JsonObject}
  */
 export function getFormAsObject(form) {
+  const {
+    elements,
+    ownerDocument,
+  } = form;
   const data = /** @type {!JsonObject} */ ({});
-  const inputs = form.elements;
-  const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+  const submittableTagsRegex = /^(?:input|select|textarea|button)$/i;
   const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
   const checkableType = /^(?:checkbox|radio)$/i;
-  for (let i = 0; i < inputs.length; i++) {
-    const input = inputs[i];
-    if (!input.name || isDisabled(input) ||
-        !submittableTagsRegex.test(input.tagName) ||
-        unsubmittableTypesRegex.test(input.type) ||
-        (checkableType.test(input.type) && !input.checked)) {
+  for (let i = 0; i < elements.length; i++) {
+    const input = elements[i];
+    const {
+      checked,
+      name,
+      multiple,
+      options,
+      tagName,
+      type,
+      value,
+    } = input;
+    if (!name || isDisabled(input) ||
+        !submittableTagsRegex.test(tagName) ||
+        unsubmittableTypesRegex.test(type) ||
+        (checkableType.test(type) && !checked)) {
       continue;
     }
 
-    if (data[input.name] === undefined) {
-      data[input.name] = [];
+    if (data[name] === undefined) {
+      data[name] = [];
     }
-    data[input.name].push(input.value);
+
+    if (multiple) {
+      iterateCursor(options, option => {
+        if (option.selected) {
+          data[name].push(option.value);
+        }
+      });
+      continue;
+    }
+
+    // In a form, the button's value is only submitted if the button itself was
+    // used to submit the form. We can detect that using the document focus.
+    // Browsers vary on the conditions that focus the form submit button.
+    // Generally, the button is only focused if the user triggers the button
+    // itself. If a script calls `button.click` or `form.submit` the button
+    // will not be focused. If the user presses enter inside a field, the button
+    // will not be focused.
+    if ((type == 'submit' || tagName == 'BUTTON')
+        && input != ownerDocument.activeElement) {
+      continue;
+    }
+
+    data[name].push(value);
   }
+
+  // Wait until the end to remove the empty values, since
+  // we don't know when evaluating any one input whether
+  // there will be or have already been inputs with the same names.
+  // e.g. We want to remove empty <select multiple name=x> but
+  // there could also be an <input name=x>. At the end we know if an empty name
+  // can be deleted.
+  Object.keys(data).forEach(key => {
+    if (data[key].length == 0) {
+      delete data[key];
+    }
+  });
 
   return data;
 }

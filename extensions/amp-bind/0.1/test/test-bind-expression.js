@@ -267,12 +267,12 @@ describe('BindExpression', () => {
 
     it('custom Array#sort()', () => {
       expect(evaluate('[11, 1, 2].sort()')).to.deep.equal([1, 11, 2]);
-      expect(evaluate('[11, 1, 2].sort((x, y) => x > y)'))
+      expect(evaluate('[11, 1, 2].sort((x, y) => x - y)'))
           .to.deep.equal([1, 2, 11]);
 
       const a = [11, 1, 2];
       expect(evaluate('a.sort()', {a})).to.deep.equal([1, 11, 2]);
-      expect(evaluate('a.sort((x, y) => x > y)', {a}))
+      expect(evaluate('a.sort((x, y) => x - y)', {a}))
           .to.deep.equal([1, 2, 11]);
 
       // Sort should be out-of-place i.e. does not sort the caller.

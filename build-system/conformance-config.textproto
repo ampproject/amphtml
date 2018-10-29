@@ -17,6 +17,13 @@ requirement: {
   whitelist: 'src/layout.js'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use closestBySelector, closestByTag etc in src/dom.js'
+  value: 'Element.prototype.closest'
+  whitelist: 'src/dom.js'
+}
+
 # CSSStyleDeclaration
 
 requirement: {
@@ -214,6 +221,7 @@ requirement: {
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/zen.js'
   whitelist: 'src/json.js' # Where jsonParse itself is implemented.
 }
 

@@ -193,5 +193,14 @@
       <template type="amp-mustache">Verify in inlined template</template>
     </div>
   </form>
+  <!-- Valid: form with verify-xhr and input with no-verify-->
+  <form method="post" action-xhr="https://example.com/subscribe" verify-xhr="https://example.com/verify" target="_blank">
+    <input name="do-not-verify" no-verify>
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: mask attr without the amp-inputmask extension -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input mask="L0L_0L0" type="tel">
+  </form>
 </body>
 </html>

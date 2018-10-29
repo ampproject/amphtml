@@ -80,19 +80,22 @@ export class AmpMustache extends AMP.BaseTemplate {
     container.appendChild(content);
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    mustacheParse(this.template_, /* tags */ undefined);
+  }
+
+  /** @override */
+  setHtml(html) {
+    return this.serializeHtml_(html);
   }
 
   /** @override */
   render(data) {
-    let html = data;
-    if (!this.viewerCanRenderTemplates()) {
-      let mustacheData = data;
-      if (typeof data === 'object') {
-        mustacheData = Object.assign({}, data, this.nestedTemplates_);
-      }
-      html = mustacheRender(this.template_, mustacheData);
+    let mustacheData = data;
+    if (typeof data === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
+    const html = mustacheRender(this.template_, mustacheData,
+        /* partials */ undefined);
     return this.serializeHtml_(html);
   }
 

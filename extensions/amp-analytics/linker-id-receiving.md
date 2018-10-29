@@ -1,6 +1,6 @@
 ### Linker ID Receiving
 #### Overview
-This document illustrates in detail how the linker param is constructed, so that analytics vendors or publishers implementing their own soulutions are able to ingest this parameter on the destination page.
+This document illustrates in detail how the linker param is constructed, so that analytics vendors or publishers implementing their own solutions are able to ingest this parameter on the destination page.
 
 #### Format
 The linker param will be formatted in the following structure:
