@@ -27,7 +27,6 @@ import {EVENTS as linkRewriterEvents} from './link-rewriter/constants';
 import {LinkRewriterManager} from './link-rewriter/link-rewriter-manager';
 import {Waypoint} from './waypoint';
 import {getAmpSkimlinksOptions} from './skim-options';
-import {getBoundFunction} from './utils';
 
 export class AmpSkimlinks extends AMP.BaseElement {
   /**
@@ -167,7 +166,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     const linkRewriter = this.linkRewriterService_.registerLinkRewriter(
         SKIMLINKS_REWRITER_ID,
-        getBoundFunction(this.affiliateLinkResolver_, 'resolveUnknownAnchors'),
+        anchorList => {
+          return this.affiliateLinkResolver_.resolveUnknownAnchors(anchorList);
+        },
         options
     );
 

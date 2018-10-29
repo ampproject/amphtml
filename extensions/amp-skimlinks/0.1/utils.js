@@ -15,18 +15,6 @@
  */
 
 import {parseUrlDeprecated} from '../../../src/url';
-import {user} from '../../../src/log';
-/**
- * Get function from an object attached with the object as its context
- * @param {*} context
- * @param {string} functionName
- */
-export function getBoundFunction(context, functionName) {
-  const validFunction = context[functionName] && context[functionName].bind;
-  user().assert(validFunction,
-      `Function '${functionName}' not found in given context.`);
-  return context[functionName].bind(context);
-}
 
 /**
  * Generate random id of 32 chars.

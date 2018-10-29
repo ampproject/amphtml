@@ -48,7 +48,7 @@ export class LinkRewriter {
   /**
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} id
-   * @param {function(Array<HTMLElement>):!TwoStepsResponse} resolveUnknownLinks
+   * @param {function(!Array<!HTMLElement>):!TwoStepsResponse} resolveUnknownLinks
    * @param {?{linkSelector: string}=} options
    */
   constructor(rootNode, id, resolveUnknownLinks, options) {

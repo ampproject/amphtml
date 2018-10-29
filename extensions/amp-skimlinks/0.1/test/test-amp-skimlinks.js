@@ -16,7 +16,6 @@
 
 import * as DocumentReady from '../../../../src/document-ready';
 import * as SkimOptionsModule from '../skim-options';
-import * as Utils from '../utils';
 import * as chunkModule from '../../../../src/chunk';
 import {Deferred} from '../../../../src/utils/promise';
 import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
@@ -111,7 +110,7 @@ describes.fakeWin(
         });
 
         describe('initSkimlinksLinkRewriter_', () => {
-          let resolveFunction, linkRewriter;
+          let linkRewriter;
 
           beforeEach(() => {
             ampSkimlinks.skimOptions_ = {
@@ -127,10 +126,6 @@ describes.fakeWin(
             ampSkimlinks.trackingService_ = {
               sendNaClickTracking: env.sandbox.stub(),
             };
-            resolveFunction = env.sandbox.stub();
-            env.sandbox.stub(Utils, 'getBoundFunction')
-                .returns(resolveFunction);
-
             env.sandbox.stub(ampSkimlinks, 'onClick_');
             env.sandbox.stub(ampSkimlinks, 'onPageScanned_');
             // Chunk executes the provided task when the browser is Idle. We can
@@ -149,7 +144,7 @@ describes.fakeWin(
             ampSkimlinks.linkRewriterService_.registerLinkRewriter.args[0];
 
             expect(args[0]).to.equal(SKIMLINKS_REWRITER_ID);
-            expect(args[1]).to.equal(resolveFunction);
+            expect(args[1]).to.be.a('function');
             expect(args[2].linkSelector).to.equal(
                 ampSkimlinks.skimOptions_.linkSelector
             );
