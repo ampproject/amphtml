@@ -198,27 +198,25 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {boolean=} isV2 Flag to ignore capture of args.
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
    */
-  getExpr(opt_bindings, isV2, opt_whiteList) {
+  getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
     const all = Object.assign({}, this.replacements_, opt_bindings);
-    return this.buildExpr_(Object.keys(all), isV2, opt_whiteList);
+    return this.buildExpr_(Object.keys(all), opt_whiteList);
   }
 
   /**
    * @param {!Array<string>} keys
-   * @param {boolean=} isV2 flag to ignore capture of args
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, isV2, opt_whiteList) {
+  buildExpr_(keys, opt_whiteList) {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
@@ -254,11 +252,7 @@ export class VariableSource {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
-    let regexStr = '\\$?(' + all + ')';
-    // ignore the capturing of arguments in new parser
-    if (!isV2) {
-      regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
-    }
+    const regexStr = '\\$?(' + all + ')';
     return new RegExp(regexStr, 'g');
   }
 

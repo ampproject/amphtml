@@ -271,9 +271,6 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-worker.js',
-      // TODO(calebcordry) remove this once experiment is launched
-      'extensions/amp-analytics/0.1/variables.js->' +
-          'src/service/url-replacements-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
           'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
