@@ -340,9 +340,11 @@ describes.realWin('amp-video-iframe', {
               dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
               expectedVars).to.have.been.calledOnce;
         } else {
-          expect(() => {
-            videoIframe.implementation_.onMessage_({data});
-          }).to.throw();
+          allowConsoleError(() => {
+            expect(() => {
+              videoIframe.implementation_.onMessage_({data});
+            }).to.throw();
+          });
 
           expect(
               dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
