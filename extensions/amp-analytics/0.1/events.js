@@ -1162,7 +1162,6 @@ export class VisibilityTracker extends EventTracker {
     } else {
       user().assert(reportWhenSpec == 'none',
           'reportWhen value %s not supported', reportWhenSpec);
-      return Promise.resolve();
     }
 
     // Root selectors are delegated to analytics roots.
