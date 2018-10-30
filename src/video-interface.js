@@ -438,7 +438,7 @@ export const VideoAnalyticsEvents = {
   SECONDS_PLAYED: 'video-seconds-played',
 
   /**
-   * video-custom
+   * video-hosted-custom
    *
    * Indicates that a custom event incoming from a 3p frame is to be logged.
    * @property {!VideoAnalyticsDetailsDef} details
