@@ -94,6 +94,7 @@
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
       <option>topmailru</option>
@@ -1092,6 +1093,41 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
+
+<!-- TEA Analytics Example
+    Ensure you replace app_id with your appId.
+    Ensure you replace channel with correct value.
+ -->
+<amp-analytics type="teaanalytics" id="teaanalytics">
+  <script type="application/json">
+    {
+      "vars": {        
+        "app_id": "APP_ID",
+        "channel": "example.com",
+        "debug": 0
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "pageview",
+          "extraUrlParams": {
+          }
+        },
+        "clickBtn": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "extraUrlParams": {
+            "event": "click_btn",
+            "event.params.from":"button",
+            "event.params.btn_title": "${title}"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End TEA Analytics example -->
 
 <!-- Tealium Collect example -->
 <amp-analytics type="tealiumcollect" id="tealiumcollect">
