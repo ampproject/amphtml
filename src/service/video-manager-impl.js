@@ -444,6 +444,15 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
+    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      const data = getData(e);
+      const eventType = data['eventType'];
+      const vars = data['vars'];
+      this.logCustomAnalytics_(
+          dev().assertString(eventType, '`eventType` missing'),
+          vars);
+    });
+
     video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
 
@@ -461,6 +470,20 @@ class VideoEntry {
     });
 
     this.listenForAutoplayDelegation_();
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars
+   */
+  logCustomAnalytics_(eventType, vars) {
+    const prefixedVars = {};
+
+    Object.keys(vars).forEach(key => {
+      prefixedVars[`custom_${key}`] = vars[key];
+    });
+
+    analyticsEvent(this, eventType, prefixedVars);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
@@ -1212,18 +1235,18 @@ function isLandscape(win) {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents|string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
-  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-    entry.getAnalyticsDetails();
 
-  detailsPromise.then(details => {
-    video.element.dispatchCustomEvent(
-        eventType, details);
+  entry.getAnalyticsDetails().then(details => {
+    if (opt_vars) {
+      Object.assign(details, opt_vars);
+    }
+    video.element.dispatchCustomEvent(eventType, details);
   });
 }
 

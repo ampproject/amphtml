@@ -173,7 +173,7 @@
     <script type="application/json">
       {
         "requests": {
-          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}"
+          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}&myVar=${custom_myVar}"
         },
         "transport": {
           "beacon": false,
@@ -222,6 +222,14 @@
             "selector": "#my-video",
             "vars": {
               "eventType": "video-ended"
+            }
+          },
+          "myVideoCustom": {
+            "on": "video-custom-foo",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-custom"
             }
           }
         }
