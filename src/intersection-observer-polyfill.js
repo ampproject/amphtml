@@ -239,7 +239,7 @@ export class IntersectionObserverPolyfill {
 
     /**
      * Mutation observer to fire off on visibility changes
-     * @private {?Object}
+     * @private {?MutationObserver}
      */
     this.mutationObserver_ = null;
 
