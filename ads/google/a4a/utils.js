@@ -101,16 +101,17 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /**
- * Returns the value of navigation start using the performance API or 0 if not
- * supported by the browser.
+ * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
  * performance API.
  * @param {!Window} win
+ * @param {string} timingEvent The name of the timing event, e.g.
+ *     'navigationStart' or 'domContentLoadEventStart'.
  * @return {number}
  */
-function getNavStart(win) {
+function getNavigationTiming(win, timingEvent) {
   return (win['performance'] && win['performance']['timing'] &&
-      win['performance']['timing']['navigationStart']) || 0;
+      win['performance']['timing'][timingEvent]) || 0;
 }
 
 /**
@@ -254,6 +255,7 @@ export function googlePageParameters(a4a, startTime) {
         dev().expectedError('AMP-A4A', 'Referrer timeout!');
         return '';
       });
+  const domLoading = getNavigationTiming(win, 'domLoading');
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'), referrerPromise])
       .then(promiseResults => {
@@ -301,6 +303,7 @@ export function googlePageParameters(a4a, startTime) {
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == canonicalUrl ? null : win.location.href,
           'ref': referrer || null,
+          'bdt': domLoading ? startTime - domLoading : null,
         };
       });
 }
@@ -584,7 +587,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
-  const navStart = getNavStart(win);
+  const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = {
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
