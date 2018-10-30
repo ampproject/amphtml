@@ -33,13 +33,17 @@ export function withDatePickerCommon(WrappedComponent) {
   const moment = requireExternal('moment');
 
   /**
-   * @param {string} max
-   * @return {!moment}
+   * If `max` is null, the default minimum date is the current date.
+   * If `max` is a Moment date and earlier than the current date, then
+   * there is no default minimum date. If `max` is later than the current date,
+   * then the default minimum date is the current date.
+   * @param {?moment} max
+   * @return {?moment}
    */
   function getDefaultMinDate(max) {
     const today = moment();
     if (max) {
-      return !isInclusivelyAfterDay(today, moment(max)) ? today : '';
+      return !isInclusivelyAfterDay(today, max) ? today : null;
     } else {
       return today;
     }
@@ -52,8 +56,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
-    const maxInclusive = max && moment(max);
-    const minInclusive = min ? moment(min) : getDefaultMinDate(max);
+    const maxInclusive = max ? moment(max) : null;
+    const minInclusive = min ? moment(min) : getDefaultMinDate(maxInclusive);
     if (!maxInclusive && !minInclusive) {
       return false;
     } else if (!minInclusive) {
