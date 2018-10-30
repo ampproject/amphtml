@@ -122,15 +122,14 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    const iframe =
+    const adFrame =
         this.getFrameElement_(message.source, request['sentinel']);
-    if (!iframe) {
+    if (!adFrame) {
       dev().info(TAG, 'Ignored message from untrusted iframe:', message);
       return false;
     }
 
-    const allowedTypes =
-        this.iframeMap_[request['sentinel']].iframe.dataset['ampAllowed'];
+    const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
     // having no whitelist is legacy behavior so assume all types are allowed
     if (allowedTypes &&
         !allowedTypes.split(/ *, */).includes(request['type'])) {
@@ -139,7 +138,7 @@ export class InaboxMessagingHost {
     }
 
     if (!this.msgObservable_.fire(request['type'], this,
-        [iframe, request, message.source, message.origin])) {
+        [adFrame.measurableFrame, request, message.source, message.origin])) {
       dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
@@ -255,12 +254,12 @@ export class InaboxMessagingHost {
    *
    * @param {?Window} source
    * @param {string} sentinel
-   * @return {?HTMLIFrameElement}
+   * @return {?AdFrameDef}
    * @private
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel].measurableFrame;
+      return this.iframeMap_[sentinel];
     }
     const measurableFrame = this.getMeasureableFrame(source);
     if (!measurableFrame) {
@@ -273,7 +272,7 @@ export class InaboxMessagingHost {
         j < 10; j++, tempWin = tempWin.parent) {
         if (iframe.contentWindow == tempWin) {
           this.iframeMap_[sentinel] = {iframe, measurableFrame};
-          return measurableFrame;
+          return this.iframeMap_[sentinel];
         }
         if (tempWin == window.top) {
           break;

@@ -411,8 +411,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock.parent.parent;
       host = new InaboxMessagingHost(win, [frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const measurableFrame =
+          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return correct frame when all frames friendly', () => {
@@ -421,8 +422,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(win, [frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const measurableFrame =
+          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return correct frame when many frames registered', () => {
@@ -434,8 +436,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(
           win, [frameMockWrong1, frameMockWrong2, frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const measurableFrame =
+          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return cached frame', () => {
@@ -446,8 +449,9 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const creativeIframeMock = {};
       host.iframeMap_[sentinel] = {
         'iframe': creativeIframeMock, 'measurableFrame': creativeIframeMock};
-      expect(host.getFrameElement_(creativeWinMock, sentinel)
-      ).to.equal(creativeIframeMock);
+      const measurableFrame =
+          host.getFrameElement_(creativeWinMock, sentinel).measurableFrame;
+      expect(measurableFrame).to.equal(creativeIframeMock);
     });
 
     it('should return null if frame is not registered', () => {
