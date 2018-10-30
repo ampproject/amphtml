@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+export const AMP_SKIMLINKS_VERSION = '1.0.0';
 export const XCUST_ATTRIBUTE_NAME = 'data-skimlinks-custom-tracking-id';
 export const AFFILIATION_API = 'https://go.skimresources.com';
-export const PLATFORM_NAME = 'amp';
+export const PLATFORM_NAME = 'amp@' + AMP_SKIMLINKS_VERSION;
 export const SKIMLINKS_REWRITER_ID = 'amp-skimlinks';
 
 export const DOMAIN_RESOLVER_API_URL = 'https://r.skimresources.com/api';

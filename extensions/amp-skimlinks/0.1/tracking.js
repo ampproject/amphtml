@@ -115,7 +115,7 @@ export class Tracking {
       'guid': guid,
       'uuid': pageImpressionId,
       'tz': timezone,
-      'platform': PLATFORM_NAME,
+      'jv': PLATFORM_NAME,
     });
 
     const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
@@ -158,7 +158,7 @@ export class Tracking {
       'xtz': timezone,
       'uuid': pageImpressionId,
       'product': '1',
-      'platform': PLATFORM_NAME,
+      'jv': PLATFORM_NAME,
     });
 
     // Sends POST request. Second param is the object used to interpolate

@@ -163,7 +163,7 @@ describes.fakeWin(
               slc: 0,
               jsl: 0, // Always 0 for AMP.
               t: 1,
-              platform: PLATFORM_NAME,
+              jv: PLATFORM_NAME,
             };
             trackingService = setupTrackingService(null, {
               pageImpressionId: expectedData.uuid,
@@ -243,7 +243,7 @@ describes.fakeWin(
               dl: {},
               hae: 0,
               typ: 'l',
-              platform: PLATFORM_NAME,
+              jv: PLATFORM_NAME,
             };
             trackingService = setupTrackingService(null, {
               pageImpressionId: expectedData.uuid,
@@ -323,7 +323,7 @@ describes.fakeWin(
             uuid: 'page-impressions-id',
             site: 'false',
             product: '1',
-            platform: PLATFORM_NAME,
+            jv: PLATFORM_NAME,
           };
 
           const trackingService = setupTrackingService(null, {

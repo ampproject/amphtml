@@ -77,7 +77,7 @@ export class Waypoint {
       'xuuid': pageImpressionId,
       'xtz': this.timezone_,
       'xs': '1', // Always use source_app=1 (skimlinks)
-      'platform': PLATFORM_NAME,
+      'jv': PLATFORM_NAME,
     });
     if (xcust) {
       queryParams['xcust'] = xcust;
