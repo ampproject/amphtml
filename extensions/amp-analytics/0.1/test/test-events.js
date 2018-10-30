@@ -1471,7 +1471,7 @@ describes.realWin('Events', {amp: 1}, env => {
             isVisible: () => {return false;},
           };
         });
-        const promise = tracker.createReportReadyPromise_('hidden');
+        const promise = tracker.createReportReadyPromiseForHidden_();
         return promise.then(() => {
           expect(stub).to.be.calledOnce;
         });
