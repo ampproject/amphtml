@@ -181,10 +181,10 @@ describe('refresh', () => {
         x: 0,
         y: 0,
       });
-      
+
       sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
         return {
-          getRect: getRect
+          getRect,
         };
       });
       sandbox.stub(Services, 'ampdoc').callsFake(() => {
