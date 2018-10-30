@@ -58,31 +58,33 @@ export const UIType = {
 
 /**
  * @typedef {{
- *    caninsertautomaticad: boolean,
- *    canshowbookend: boolean,
- *    canshownavigationoverlayhint: boolean,
- *    canshowpreviouspagehelp: boolean,
- *    canshowsharinguis: boolean,
- *    canshowsystemlayerbuttons: boolean,
- *    accessstate: boolean,
- *    adstate: boolean,
- *    bookendstate: boolean,
- *    desktopstate: boolean,
- *    hassidebarstate: boolean,
- *    infodialogstate: boolean,
- *    landscapestate: boolean,
- *    mutedstate: boolean,
- *    pageaudiostate: boolean,
- *    pausedstate: boolean,
- *    rtlstate: boolean,
- *    sharemenustate: boolean,
- *    sidebarstate: boolean,
- *    storyaudiostate: boolean,
- *    supportedbrowserstate: boolean,
- *    uistate: !UIType,
- *    consentid: ?string,
- *    currentpageid: string,
- *    currentpageindex: number,
+ *    canInsertAutomaticAd: boolean,
+ *    canShowBookend: boolean,
+ *    canShowNavigationOverlayHint: boolean,
+ *    canShowPreviousPageHelp: boolean,
+ *    canShowSharingUis: boolean,
+ *    canShowSystemLayerButtons: boolean,
+ *    accessState: boolean,
+ *    adState: boolean,
+ *    bookendState: boolean,
+ *    desktopState: boolean,
+ *    hasSidebarState: boolean,
+ *    infoDialogState: boolean,
+ *    landscapeState: boolean,
+ *    mutedState: boolean,
+ *    pageAudioState: boolean,
+ *    pausedState: boolean,
+ *    rtlState: boolean,
+ *    shareMenuState: boolean,
+ *    sidebarState: boolean,
+ *    storyAudioState: boolean,
+ *    supportedBrowserState: boolean,
+ *    systemUiIsVisibleState: boolean,
+ *    uiState: !UIType,
+ *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
+ *    consentId: ?string,
+ *    currentPageId: string,
+ *    currentPageIndex: number,
  * }}
  */
 export let State;
@@ -91,57 +93,71 @@ export let State;
 /** @private @const @enum {string} */
 export const StateProperty = {
   // Embed options.
-  CAN_INSERT_AUTOMATIC_AD: 'caninsertautomaticad',
-  CAN_SHOW_BOOKEND: 'canshowbookend',
-  CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
-  CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
-  CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
-  CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
+  CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
+  CAN_SHOW_BOOKEND: 'canShowBookend',
+  CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
+  CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
+  CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
+  CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
 
   // App States.
-  ACCESS_STATE: 'accessstate', // amp-access paywall.
-  AD_STATE: 'adstate',
-  BOOKEND_STATE: 'bookendstate',
-  DESKTOP_STATE: 'desktopstate',
-  HAS_SIDEBAR_STATE: 'hassidebarstate',
-  INFO_DIALOG_STATE: 'infodialogstate',
-  LANDSCAPE_STATE: 'landscapestate',
-  MUTED_STATE: 'mutedstate',
-  PAGE_HAS_AUDIO_STATE: 'pageaudiostate',
-  PAUSED_STATE: 'pausedstate',
-  RTL_STATE: 'rtlstate',
-  SHARE_MENU_STATE: 'sharemenustate',
-  SIDEBAR_STATE: 'sidebarstate',
-  SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
-  STORY_HAS_AUDIO_STATE: 'storyaudiostate',
-  UI_STATE: 'uistate',
+  ACCESS_STATE: 'accessState', // amp-access paywall.
+  AD_STATE: 'adState',
+  BOOKEND_STATE: 'bookendState',
+  DESKTOP_STATE: 'desktopState',
+  HAS_SIDEBAR_STATE: 'hasSidebarState',
+  INFO_DIALOG_STATE: 'infoDialogState',
+  LANDSCAPE_STATE: 'landscapeState',
+  MUTED_STATE: 'mutedState',
+  PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAUSED_STATE: 'pausedState',
+  RTL_STATE: 'rtlState',
+  SHARE_MENU_STATE: 'shareMenuState',
+  SIDEBAR_STATE: 'sidebarState',
+  SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
+  STORY_HAS_AUDIO_STATE: 'storyAudioState',
+  SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
+  UI_STATE: 'uiState',
 
   // App data.
-  CONSENT_ID: 'consentid',
-  CURRENT_PAGE_ID: 'currentpageid',
-  CURRENT_PAGE_INDEX: 'currentpageindex',
+  ACTIONS_WHITELIST: 'actionsWhitelist',
+  CONSENT_ID: 'consentId',
+  CURRENT_PAGE_ID: 'currentPageId',
+  CURRENT_PAGE_INDEX: 'currentPageIndex',
 };
 
 
 /** @private @const @enum {string} */
 export const Action = {
-  CHANGE_PAGE: 'setcurrentpageid',
-  SET_CONSENT_ID: 'setconsentid',
-  TOGGLE_ACCESS: 'toggleaccess',
-  TOGGLE_AD: 'togglead',
-  TOGGLE_BOOKEND: 'togglebookend',
-  TOGGLE_INFO_DIALOG: 'toggleinfodialog',
-  TOGGLE_LANDSCAPE: 'togglelandscape',
-  TOGGLE_MUTED: 'togglemuted',
-  TOGGLE_PAGE_HAS_AUDIO: 'togglepagehasaudio',
-  TOGGLE_PAUSED: 'togglepaused',
-  TOGGLE_RTL: 'togglertl',
-  TOGGLE_SHARE_MENU: 'togglesharemenu',
-  TOGGLE_SIDEBAR: 'togglesidebar',
-  TOGGLE_HAS_SIDEBAR: 'togglehassidebar',
-  TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
-  TOGGLE_STORY_HAS_AUDIO: 'togglestoryhasaudio',
-  TOGGLE_UI: 'toggleui',
+  ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  CHANGE_PAGE: 'setCurrentPageId',
+  SET_CONSENT_ID: 'setConsentId',
+  TOGGLE_ACCESS: 'toggleAccess',
+  TOGGLE_AD: 'toggleAd',
+  TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
+  TOGGLE_LANDSCAPE: 'toggleLandscape',
+  TOGGLE_MUTED: 'toggleMuted',
+  TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAUSED: 'togglePaused',
+  TOGGLE_RTL: 'toggleRtl',
+  TOGGLE_SHARE_MENU: 'toggleShareMenu',
+  TOGGLE_SIDEBAR: 'toggleSidebar',
+  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
+  TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
+  TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
+  TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
+  TOGGLE_UI: 'toggleUi',
+};
+
+
+/**
+ * Functions to compare a data structure from the previous to the new state and
+ * detect a mutation, when a simple equality test would not work.
+ * @private @const {!Object<string, !function(*, *):boolean>}
+ */
+const stateComparisonFunctions = {
+  [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
 };
 
 
@@ -154,6 +170,11 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_TO_ACTIONS_WHITELIST:
+      const newActionsWhitelist =
+          [].concat(state[StateProperty.ACTIONS_WHITELIST], data);
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist}));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -229,6 +250,9 @@ const actions = (state, action, data) => {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.SHARE_MENU_STATE]: !!data,
           }));
+    case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -316,8 +340,12 @@ export class AmpStoryStoreService {
     const oldState = Object.assign({}, this.state_);
     this.state_ = actions(this.state_, action, data);
 
+    let comparisonFn;
     Object.keys(this.listeners_).forEach(key => {
-      if (oldState[key] !== this.state_[key]) {
+      comparisonFn = stateComparisonFunctions[key];
+      if (comparisonFn ?
+        comparisonFn(oldState[key], this.state_[key]) :
+        oldState[key] !== this.state_[key]) {
         this.listeners_[key].fire(this.state_[key]);
       }
     });
@@ -342,6 +370,7 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
@@ -352,8 +381,11 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
-      [StateProperty.HAS_SIDEBAR_STATE]: false,
+      [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
+      // amp-story only allows actions on a case-by-case basis to preserve UX
+      // behaviors. By default, no actions are allowed.
+      [StateProperty.ACTIONS_WHITELIST]: [],
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,

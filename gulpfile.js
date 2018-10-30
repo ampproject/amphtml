@@ -65,10 +65,18 @@ const adVendors = [];
 
 const {green, red, cyan} = colors;
 
+// Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
-const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
+const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
+const minifiedAdsTarget = 'dist/amp4ads-v0.js';
+// TODO(#18934, erwinm): temporary fix.
+//const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
 const minified3pTarget = 'dist.3p/current-min/f.js';
+
+// Unminified targets to which AMP_CONFIG must be written.
 const unminifiedRuntimeTarget = 'dist/amp.js';
+const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
+const unminifiedAdsTarget = 'dist/amp-inabox.js';
 const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
@@ -365,6 +373,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           include3pDirectories: true,
           includePolyfills: false,
         }),
+    compileJs('./3p/', 'recaptcha.js',
+        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
+          minifiedName: 'recaptcha.js',
+          checkTypes: opt_checkTypes,
+          watch,
+          minify: shouldMinify,
+          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+          externs: [],
+          include3pDirectories: true,
+          includePolyfills: true,
+        }),
     compileJs('./src/', 'amp.js', './dist', {
       toName: 'amp.js',
       minifiedName: 'v0.js',
@@ -390,6 +409,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         }),
   ];
 
+  // TODO(#18934, erwinm): temporarily commented out to unblock master builds.
+  // theres a race condition between the read to amp.js here, and on the
+  // main v0.js compile above.
+  /**
   if (!argv.single_pass) {
     promises.push(
         compileJs('./src/', 'amp.js', './dist', {
@@ -403,7 +426,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
           wrapper: wrappers.mainBinary,
         }));
-  }
+  }*/
 
   // We don't rerun type check for the shadow entry point for now.
   if (!opt_checkTypes) {
@@ -481,7 +504,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify),
         thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html',shouldMinify)
+            '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
+        thirdPartyBootstrap(
+            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify)
+
     );
 
     if (watch) {
@@ -492,6 +518,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       $$.watch('3p/frame.max.html', function() {
         thirdPartyBootstrap(
             '3p/frame.max.html', 'frame.html', shouldMinify);
+      });
+      $$.watch('3p/recaptcha.max.html', function() {
+        thirdPartyBootstrap(
+            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify);
       });
     }
 
@@ -955,9 +985,18 @@ function dist() {
         return copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minifiedRuntimeTarget).then(() => {
+          return Promise.all([
+            enableLocalTesting(minifiedRuntimeTarget),
+            enableLocalTesting(minifiedAdsTarget),
+            enableLocalTesting(minifiedShadowRuntimeTarget),
+          ]).then(() => {
             if (!argv.single_pass) {
-              return enableLocalTesting(minifiedRuntimeEsmTarget);
+              // TODO(#18934, erwinm): temporary fix.
+              //return enableLocalTesting(minifiedRuntimeEsmTarget)
+              return enableLocalTesting(minifiedShadowRuntimeTarget)
+                  .then(() => {
+                    return enableLocalTesting(minifiedAdsTarget);
+                  });
             }
           });
         }
@@ -1288,8 +1327,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               return enableLocalTesting(unminifiedRuntimeTarget);
             } else if (destFilename === 'amp-esm.js') {
               return enableLocalTesting(unminifiedRuntimeEsmTarget);
+            } else if (destFilename === 'amp4ads-v0.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else if (destFilename === 'integration.js') {
               return enableLocalTesting(unminified3pTarget);
+            } else if (destFilename === 'amp-shadow.js') {
+              return enableLocalTesting(unminifiedShadowRuntimeTarget);
+            } else if (destFilename === 'amp-inabox.js') {
+              return enableLocalTesting(unminifiedAdsTarget);
             } else {
               return Promise.resolve();
             }
@@ -1688,6 +1733,7 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         extensions_from: '  Watches and builds only the extensions from the ' +
             'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
+        disable_dev_dashboard_cache: 'Disables the dev dashboard cache',
       },
     });
 gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {

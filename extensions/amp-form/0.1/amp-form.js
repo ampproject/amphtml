@@ -175,10 +175,6 @@ export class AmpForm {
     }
     this.form_.classList.add('i-amphtml-form');
 
-    const submitButtons = this.form_.querySelectorAll('[type="submit"]');
-    /** @const @private {!Array<!Element>} */
-    this.submitButtons_ = toArray(submitButtons);
-
     /** @private {!FormState} */
     this.state_ = FormState.INITIAL;
 
@@ -199,6 +195,7 @@ export class AmpForm {
     this.actions_.installActionHandler(
         this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
+    this.installInputMasking_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -254,7 +251,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = createFormDataWrapper(this.form_);
+      body = createFormDataWrapper(this.win_, this.form_);
       if (opt_fieldBlacklist) {
         opt_fieldBlacklist.forEach(name => {
           body.delete(name);
@@ -369,6 +366,15 @@ export class AmpForm {
     });
   }
 
+  /** @private */
+  installInputMasking_() {
+    Services.inputmaskServiceForDocOrNull(this.form_).then(inputmaskService => {
+      if (inputmaskService) {
+        inputmaskService.install();
+      }
+    });
+  }
+
   /**
    * Triggers 'amp-form-submit' event in 'amp-analytics' and
    * generates variables for form fields to be accessible in analytics
@@ -378,7 +384,7 @@ export class AmpForm {
    */
   triggerFormSubmitInAnalytics_(eventType) {
     this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = {};
+    const formDataForAnalytics = dict({});
     const formObject = this.getFormAsObject_();
 
     for (const k in formObject) {
@@ -876,7 +882,7 @@ export class AmpForm {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
@@ -903,13 +909,6 @@ export class AmpForm {
     this.form_.classList.add(`amp-form-${newState}`);
     this.cleanupRenderedTemplate_(previousState);
     this.state_ = newState;
-    this.submitButtons_.forEach(button => {
-      if (newState == FormState.SUBMITTING) {
-        button.setAttribute('disabled', '');
-      } else {
-        button.removeAttribute('disabled');
-      }
-    });
   }
 
   /**

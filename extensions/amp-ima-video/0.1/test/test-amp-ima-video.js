@@ -36,6 +36,20 @@ describes.realWin('amp-ima-video', {
     doc = win.document;
   });
 
+  function getVideoPlayerMock() {
+    return {
+      load: function() {},
+      addEventListener: function() {},
+      removeEventListener: function() {},
+      play: function() {},
+      pause: function() {},
+      muted: false,
+      played: {
+        length: 0,
+      },
+    };
+  }
+
   it('adds ad container', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -83,11 +97,9 @@ describes.realWin('amp-ima-video', {
       },
       removeEventListener() {},
     };
-    const removeEventListenerSpy = sandbox.spy(
-        bigPlayDivMock, 'removeEventListener');
     const adDisplayContainerMock = {initialize() {}};
     const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
-    const videoPlayerMock = {load() {}};
+    const videoPlayerMock = getVideoPlayerMock();
     const loadSpy = sandbox.spy(videoPlayerMock, 'load');
     const mockAdsLoader = {requestAds() {}};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
@@ -98,13 +110,11 @@ describes.realWin('amp-ima-video', {
     imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
     imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
 
-    imaVideoObj.onClick();
+    imaVideoObj.onBigPlayClick();
 
     expect(imaVideoObj.getPropertiesForTesting().playbackStarted).to.be.true;
     expect(imaVideoObj.getPropertiesForTesting().uiTicker)
         .to.exist;
-    expect(removeEventListenerSpy).to.be.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
     expect(bigPlayDivMock.style.display).to.eql('none');
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
@@ -365,9 +375,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.removeEventListener = function() {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const removeEventListenerSpy =
         sandbox.spy(videoMock, 'removeEventListener');
     //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
@@ -398,9 +406,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.removeEventListener = function() {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const removeEventListenerSpy =
         sandbox.spy(videoMock, 'removeEventListener');
     //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
@@ -450,9 +456,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.addEventListener = function() {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
     //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
@@ -479,9 +483,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.addEventListener = function() {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
     //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
@@ -492,9 +494,87 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
     expect(addEventListenerSpy).to.have.been.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('ended');
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(playVideoSpy).to.have.been.called;
+  });
+
+  it('shows bigPlayDiv with content complete, ' +
+    'when content resume is called', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.setContentCompleteForTesting(true);
+
+    imaVideoObj.onContentResumeRequested();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(
+        imaVideoProperties.interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(imaVideoProperties.bigPlayDiv.style.display)
+        .to.be.equal('table-cell');
+  });
+
+  it('shows bigPlayDiv with allAdsCompleted, and content ended', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    imaVideoObj.setAllAdsCompletedForTesting(true);
+
+    imaVideoObj.onContentEnded();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.bigPlayDiv.style.display)
+        .to.be.equal('table-cell');
+  });
+
+  it('does not show bigPlayDiv when content is resumed, ' +
+    'and not content complete', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+
+    imaVideoObj.onBigPlayClick();
+    imaVideoObj.onContentResumeRequested();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(
+        imaVideoProperties.interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(imaVideoProperties.bigPlayDiv.style.display).to.be.equal('none');
   });
 
   it('updates UI', () => {
@@ -633,8 +713,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const playSpy = sandbox.spy(videoMock, 'play');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
 
@@ -660,8 +739,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
@@ -688,8 +766,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.muted = false;
+    const videoMock = getVideoPlayerMock();
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     const adsManagerMock = {};
     adsManagerMock.setVolume = () => {};
@@ -716,8 +793,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.muted = false;
+    const videoMock = getVideoPlayerMock();
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     const adsManagerMock = {};
     adsManagerMock.setVolume = () => {};
@@ -746,9 +822,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.pause = function() {};
-    videoMock.removeEventListener = function() {};
+    const videoMock = getVideoPlayerMock();
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     const removeEventListenerSpy =
       sandbox.spy(videoMock, 'removeEventListener');

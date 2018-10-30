@@ -107,11 +107,41 @@ ExtensionPayload.prototype.i;
  */
 var JsonValue;
 
+/**
+ * @constructor
+ * @dict
+ */
+function VideoAnalyticsDetailsDef() {};
+/** @type {boolean} */
+VideoAnalyticsDetailsDef.prototype.autoplay;
+/** @type {number} */
+VideoAnalyticsDetailsDef.prototype.currentTime;
+/** @type {number} */
+VideoAnalyticsDetailsDef.prototype.duration;
+/** @type {number} */
+VideoAnalyticsDetailsDef.prototype.height;
+/** @type {string} */
+VideoAnalyticsDetailsDef.prototype.id;
+/** @type {string} */
+VideoAnalyticsDetailsDef.prototype.playedRangesJson;
+/** @type {number} */
+VideoAnalyticsDetailsDef.prototype.playedTotal;
+/** @type {boolean} */
+VideoAnalyticsDetailsDef.prototype.muted;
+/** @type {string} */
+VideoAnalyticsDetailsDef.prototype.state;
+/** @type {number} */
+VideoAnalyticsDetailsDef.prototype.width;
+
+
 // Node.js global
 var process = {};
 process.env;
 process.env.NODE_ENV;
 process.env.SERVE_MODE;
+
+/** @type {boolean|undefined} */
+window.IS_AMP_ALT;
 
 // Exposed to ads.
 window.context = {};
@@ -166,7 +196,7 @@ window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream
+window.AMP.attachShadowDocAsStream;
 
 
 /** @constructor */
