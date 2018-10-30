@@ -188,7 +188,6 @@ export class IntersectionObserverApi {
  * as params. Whenever the element intersection ratio cross a threshold value,
  * IntersectionObserverPolyfill will call the provided callback function with
  * the change entry. Only Works with one document for now.
- * TODO (@torch2424): Allow this to observe elements from multiple documents.
  * @visibleForTesting
  */
 export class IntersectionObserverPolyfill {
@@ -287,15 +286,17 @@ export class IntersectionObserverPolyfill {
 
 
     // Add a mutation observer to tick ourself
+    // TODO (@torch2424): Allow this to observe elements,
+    // from multiple documents.
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
-      this.mutationObserver_.observe(ampdoc.getRootNode(), {
+      this.mutationObserver_.observe(ampdoc.win.document, {
         attributes: true,
-        attributeList: ['hidden'],
+        attributeFilter: ['hidden'],
         subtree: true,
       });
     }
