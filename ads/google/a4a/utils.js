@@ -303,7 +303,7 @@ export function googlePageParameters(a4a, startTime) {
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == canonicalUrl ? null : win.location.href,
           'ref': referrer || null,
-          'bdt': domLoading > 0 ? startTime - domLoading : null,
+          'bdt': domLoading ? startTime - domLoading : null,
         };
       });
 }
