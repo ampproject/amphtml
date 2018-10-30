@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from './pass';
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
@@ -243,6 +244,9 @@ export class IntersectionObserverPolyfill {
 
     /** @private {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
+
+    /** @private {?Pass} */
+    this.mutationPass_ = null;
   }
 
   /**
@@ -291,6 +295,11 @@ export class IntersectionObserverPolyfill {
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
+      this.mutationPass_ = new Pass(ampdoc.win, () => {
+        if (this.viewport_) {
+          this.tick(this.viewport_.getRect());
+        }
+      });
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
@@ -332,7 +341,6 @@ export class IntersectionObserverPolyfill {
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
    */
   tick(hostViewport, opt_iframe) {
-
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
       hostViewport =
@@ -412,9 +420,13 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
-    if (this.viewport_) {
-      this.tick(this.viewport_.getRect());
+    if (this.mutationPass_.isPending()) {
+      return;
     }
+
+    // Wait one animation frame so that other mutations may arrive.
+    this.mutationPass_.schedule(16);
+    return;
   }
 
   /**
@@ -427,6 +439,10 @@ export class IntersectionObserverPolyfill {
     }
     this.mutationObserver_ = null;
     this.viewport_ = null;
+    if (this.mutationPass_) {
+      this.mutationPass_.cancel();
+    }
+    this.mutationPass_ = null;
   }
 }
 
