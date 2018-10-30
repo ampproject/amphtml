@@ -56,11 +56,12 @@ import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -180,29 +181,19 @@ class AmpAddThis extends AMP.BaseElement {
       if (event.origin !== ORIGIN || !getData(event)) {
         return;
       }
-      let addThisConfig;
-      try {
-        addThisConfig = JSON.parse(event.data);
-      }
-      catch (e) {
-        console.log('something wrong with addthis data');
-      }
+      const addThisConfig = tryParseJson(getData(event));
       if (addThisConfig
-        && addThisConfig.hasOwnProperty('event')
-        && addThisConfig.event === CONFIGURATION_EVENT) {
-        if (addThisConfig.hasOwnProperty('config')
-          && addThisConfig.config.hasOwnProperty('widgets')) {
-          for (const key in addThisConfig.config.widgets) {
-            const iframeId = addThisConfig.config.widgets[key].widgetId;
-            if (addThisConfig.config.widgets[key].hasOwnProperty('id')
-              && addThisConfig.config.widgets[key].id === 'shfs'
-              && document.getElementById(iframeId)) {
-              setStyles(document.getElementById(iframeId),{
-                width: '100%',
-                height: '100%',
-                position: 'fixed',
-                bottom: '0px',
-              });
+        && hasOwn(addThisConfig,'event')
+        && addThisConfig['event'] === CONFIGURATION_EVENT) {
+        if (hasOwn(addThisConfig, 'config')
+          && hasOwn(addThisConfig['config'], 'widgets')) {
+          for (const key in addThisConfig['config']['widgets']) {
+            if (hasOwn(addThisConfig['config']['widgets'][key],'id')
+              && addThisConfig['config']['widgets'][key]['id'] === 'shfs'
+              && document.getElementById(key)) {
+              const style = 'width:100%;height:100%;position:fixed;bottom:0px';
+              document.getElementById(key)
+                  .setAttribute('style', style);
             }
           }
         }
