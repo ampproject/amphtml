@@ -72,6 +72,7 @@ export class FocusHandler {
       return;
     }
     this.messaging_.sendRequest(
-        e.type, {'focusTargetRect': e.target.getBoundingClientRect()}, false);
+        e.type,
+        {'focusTargetRect': e.target./*OK*/getBoundingClientRect()}, false);
   }
 }
