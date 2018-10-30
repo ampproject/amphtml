@@ -53,8 +53,6 @@ export const ACTION_TYPE = {
   ACCEPT: 'accept',
   REJECT: 'reject',
   DISMISS: 'dismiss',
-  ENTER_FULLSCREEN: 'enter_fullscreen',
-  EXIT_FULLSCREEN: 'exit_fullscreen',
 };
 
 
@@ -185,8 +183,6 @@ export class AmpConsent extends AMP.BaseElement {
         () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
-    this.registerAction('dismiss',
-        () => this.handleAction_(ACTION_TYPE.ENTER_FULLSCREEN));
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
@@ -286,20 +282,21 @@ export class AmpConsent extends AMP.BaseElement {
           '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
-    const uiToHide = this.consentUI_[this.currentDisplayInstance_];
-
-    this.vsync_.mutate(() => {
-      uiToHide.hide();
-    });
-
-    const displayInstance = /** @type {string} */ (
-      this.currentDisplayInstance_);
-    if (this.dialogResolver_[displayInstance]) {
-      this.dialogResolver_[displayInstance]();
-      this.dialogResolver_[displayInstance] = null;
-    }
-    this.consentUIPendingMap_[displayInstance] = false;
-    this.currentDisplayInstance_ = null;
+    this.consentUI_[this.currentDisplayInstance_].hide();
+    
+    // TODO: Remove this
+    // Need to wait for a promise that the old display is hidden before showing
+    // The next
+    setTimeout(() => {
+      const displayInstance = /** @type {string} */ (
+        this.currentDisplayInstance_);
+      if (this.dialogResolver_[displayInstance]) {
+        this.dialogResolver_[displayInstance]();
+        this.dialogResolver_[displayInstance] = null;
+      }
+      this.consentUIPendingMap_[displayInstance] = false;
+      this.currentDisplayInstance_ = null;
+    }, 3000);
   }
 
   /**
@@ -321,22 +318,6 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
-
-    if (action == ACTION_TYPE.ENTER_FULLSCREEN) {
-      this.vsync_.mutate(() => {
-        this.consentUI_[this.currentDisplayInstance_].enterFullscreen();
-      });
-      return;
-    }
-
-    if (action == ACTION_TYPE.EXIT_FULLSCREEN) {
-      this.vsync_.mutate(() => {
-        this.consentUI_[this.currentDisplayInstance_].exitFullscreen();
-      });
-      return;
-    }
-
-
 
     if (action == ACTION_TYPE.ACCEPT) {
       //accept

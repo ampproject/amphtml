@@ -30,6 +30,7 @@ amp-consent {
     * Raise it up to our desired height (-30px),
     * Raise it up by any padding applied to the element (- calc(100% - 100vh))
    */
+  transition: transform 0.5s;
   transform: translate3d(0px, calc(100vh - 30px - calc(100% - 100vh)), 0px);
 }
 
@@ -54,7 +55,6 @@ amp-consent.loading {
 }
 
 amp-consent.consent-iframe-active {
-  transition: transform 0.5s;
   transform: translate3d(0px, 70vh, 0px);
 }
 

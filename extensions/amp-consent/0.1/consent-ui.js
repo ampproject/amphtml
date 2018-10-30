@@ -67,6 +67,9 @@ export class ConsentUI {
     /** @private {!Window} */
     this.win_ = baseInstance.win;
 
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = baseInstance.getVsync();
+
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
@@ -171,25 +174,30 @@ export class ConsentUI {
       // Nothing to hide from;
       return;
     }
-    if (!this.isPostPrompt_) {
-      const {classList} = this.parent_;
-      classList.remove('amp-active');
-      classList.add('amp-hidden');
-    }
-    // Need to remove from fixed layer and add it back to update element's top
-    this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
-    toggle(this.ui_, false);
+
     if (this.isCreatedIframe_) {
       this.resetIframe_();
     }
 
-    this.isVisible_ = false;
+    // TODO: Remove this
+    // Need to hide this element, once the other one is shown
+    setTimeout(() => {
+      if (!this.isPostPrompt_) {
+        const {classList} = this.parent_;
+        classList.remove('amp-active');
+        classList.add('amp-hidden');
+      }
+      // Need to remove from fixed layer and add it back to update element's top
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
+      toggle(this.ui_, false);
+      this.isVisible_ = false;
+    }, 1000);
   }
 
   /**
    * Enter the fullscreen state for the UI
    */
-  enterFullscreen() {
+  enterFullscreen_() {
     if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
@@ -203,7 +211,7 @@ export class ConsentUI {
   /**
    * Enter the fullscreen state for the UI
    */
-  exitFullscreen() {
+  exitFullscreen_() {
     if (!this.ui_ || !this.isVisible_ || !this.isFullscreen_) {
       return;
     }
@@ -214,8 +222,6 @@ export class ConsentUI {
 
     this.isFullscreen_ = false;
 
-    // Set a timeout to remove the fullscreen exit class
-    // This timeout should match our CSS animation speed.
     const removeExitFullscreen = () => {
       if (this.isFullscreen_ === false) {
         classList.remove('i-amphtml-consent-ui-fullscreen-exit');
@@ -284,8 +290,10 @@ export class ConsentUI {
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
     classList.remove('loading');
-    classList.add('i-amphtml-consent-ui-in');
-    classList.add('consent-iframe-active');
+    this.vsync_.mutate(() => {
+      classList.add('i-amphtml-consent-ui-in');
+      classList.add('consent-iframe-active');
+    });
   }
 
   /**
@@ -309,6 +317,17 @@ export class ConsentUI {
    * {
    *   type: 'consent-ui-ready'
    * }
+   *
+   * Enter Fullscreen
+   * {
+   *   type: 'consent-ui-enter-fullscreen'
+   * }
+   *
+   * Exit Fullscreen
+   * {
+   *   type: 'consent-ui-exit-fullscreen'
+   * }
+   *
    * @param {!Event} event
    */
   handleIframeMessages_(event) {
@@ -318,12 +337,26 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data) {
+    if (!data || data['type'].includes('consent-ui') === false) {
       return;
     }
 
     if (data['type'] == 'consent-ui-ready') {
       this.iframeReady_.resolve();
+    }
+
+    if (data['type'] === 'consent-ui-enter-fullscreen') {
+      this.vsync_.mutate(() => {
+        this.enterFullscreen_();
+      });
+      return;
+    }
+
+    if (data['type'] === 'consent-ui-exit-fullscreen') {
+      this.vsync_.mutate(() => {
+        this.exitFullscreen_();
+      });
+      return;
     }
   }
 }
