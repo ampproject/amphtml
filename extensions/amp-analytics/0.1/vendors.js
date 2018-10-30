@@ -34,6 +34,7 @@ import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
+import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
 import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel';
 import {GEMIUS_CONFIG} from './vendors/gemius';
@@ -180,6 +181,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'comscore': COMSCORE_CONFIG,
   'cxense': CXENSE_CONFIG,
   'dynatrace': DYNATRACE_CONFIG,
+  'epica': EPICA_CONFIG,
   'euleriananalytics': EULERIANANALYTICS_CONFIG,
   'facebookpixel': FACEBOOKPIXEL_CONFIG,
   'gemius': GEMIUS_CONFIG,
