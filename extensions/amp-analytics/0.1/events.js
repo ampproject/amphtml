@@ -1153,9 +1153,17 @@ export class VisibilityTracker extends EventTracker {
       }
       reportWhenSpec = eventType;
     }
-    if (reportWhenSpec) {
+    if (reportWhenSpec == 'hidden') {
       createReportReadyPromiseFunc =
-          this.createReportReadyPromise_.bind(this, reportWhenSpec);
+          this.createReportReadyPromiseForHidden_.bind(this, reportWhenSpec);
+    } else if (reportWhenSpec == 'endOfFrame') {
+      createReportReadyPromiseFunc =
+          this.createReportReadyPromiseForEndOfFrame_.bind(
+              this, reportWhenSpec);
+    } else {
+      user().assert(reportWhenSpec == 'none',
+          'reportWhen value %s not supported', reportWhenSpec);
+      return Promise.resolve();
     }
 
     // Root selectors are delegated to analytics roots.
@@ -1194,24 +1202,6 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * @param {string} reportWhenSpec
-   * @return {!Promise}
-   * @private
-   */
-  createReportReadyPromise_(reportWhenSpec) {
-    switch (reportWhenSpec) {
-      case 'hidden':
-        return this.createReportReadyPromiseForHidden_();
-      case 'endOfFrame':
-        return this.createReportReadyPromiseForEndOfFrame_();
-      default:
-        user().assert(reportWhenSpec == 'none',
-            'reportWhen value %s not supported', reportWhenSpec);
-        return Promise.resolve();
-    }
-  }
-
-  /**
    * Returns a Promise indicating that we're ready to report the analytics,
    * in the case of reportWhen: hidden
    * @return {!Promise}
@@ -1242,8 +1232,15 @@ export class VisibilityTracker extends EventTracker {
   createReportReadyPromiseForEndOfFrame_() {
     const deferred = new Deferred();
     const root = this.root.getRoot();
-    root.addEventListener('unload', () => deferred.resolve());
-    root.addEventListener('pagehide', () => deferred.resolve());
+    let unloadListener, pageHideListener;
+    root.addEventListener('unload', unloadListener = () => {
+      root.removeEventListener('unload', unloadListener);
+      deferred.resolve();
+    });
+    root.addEventListener('pagehide', pageHideListener = () => {
+      root.removeEventListener('pagehide', pageHideListener);
+      deferred.resolve();
+    });
     return deferred.promise;
   }
 
