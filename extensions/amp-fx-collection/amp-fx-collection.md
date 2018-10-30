@@ -42,9 +42,6 @@ limitations under the License.
 The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently, the `parallax` and `fade-in` effects are supported.
-More effects such as `fly-in` are planned to be supported soon.
-
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
 
 
@@ -156,7 +153,7 @@ In the below example, the animation is fully dependent on scroll and the `<div>`
   </div>
 ```
 
-### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top (experimental)
+### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top
 
 The `fly-in` effects allow an element's position to be translated by a specified amount once it is in the viewport.
 
