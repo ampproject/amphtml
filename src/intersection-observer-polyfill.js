@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Pass} from './pass';
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
