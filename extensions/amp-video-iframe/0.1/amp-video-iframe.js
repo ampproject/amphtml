@@ -16,6 +16,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
+  VideoAnalyticsEvents,
   VideoEvents,
 } from '../../../src/video-interface';
 import {
@@ -26,7 +27,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
@@ -40,9 +41,14 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {once} from '../../../src/utils/function';
+
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
+
+/** @private @const */
+const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
@@ -63,6 +69,15 @@ const ALLOWED_EVENTS = [
   VideoEvents.AD_START,
   VideoEvents.AD_END,
 ];
+
+
+/**
+ * @return {!RegExp}
+ * @private
+ */
+const getAnalyticsEventTypePrefixRegex = once(() =>
+  new RegExp(`^${ANALYTICS_EVENT_TYPE_PREFIX}`));
+
 
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVideoIframe extends AMP.BaseElement {
@@ -247,7 +262,7 @@ class AmpVideoIframe extends AMP.BaseElement {
         this.postIntersection_(messageId);
         return;
       }
-      dev().assert(false, `Unknown method '${methodReceived}`);
+      user().assert(false, 'Unknown method `%s`.', methodReceived);
       return;
     }
 
@@ -266,10 +281,34 @@ class AmpVideoIframe extends AMP.BaseElement {
       return;
     }
 
+    if (eventReceived == 'analytics') {
+      const spec = dev().assert(data['analytics']);
+
+      this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
+      return;
+    }
+
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
       this.element.dispatchCustomEvent(eventReceived);
       return;
     }
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>=} vars
+   */
+  dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
+    user().assertString(eventType, '`eventType` missing in analytics event');
+
+    user().assert(
+        getAnalyticsEventTypePrefixRegex().test(eventType),
+        'Invalid analytics `eventType`. Value must start with `%s`.',
+        ANALYTICS_EVENT_TYPE_PREFIX);
+
+    this.element.dispatchCustomEvent(
+        VideoAnalyticsEvents.CUSTOM,
+        {eventType, vars});
   }
 
   /**
