@@ -245,9 +245,6 @@ export class IntersectionObserverPolyfill {
 
     /** @private {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
-
-    /** @private {?Pass} */
-    this.mutationPass_ = null;
   }
 
   /**
@@ -294,16 +291,12 @@ export class IntersectionObserverPolyfill {
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
-      this.mutationPass_ = new Pass(ampdoc.win, () => {
-        if (this.viewport_) {
-          this.tick(this.viewport_.getRect());
-        }
-      });
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
       this.mutationObserver_.observe(ampdoc.getRootNode(), {
         attributes: true,
+        attributeList: ['hidden'],
         subtree: true,
       });
     }
@@ -419,13 +412,9 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
-    if (this.mutationPass_.isPending()) {
-      return;
+    if (this.viewport_) {
+      this.tick(this.viewport_.getRect());
     }
-
-    // Wait one animation frame so that other mutations may arrive.
-    this.mutationPass_.schedule(16);
-    return;
   }
 
   /**
@@ -438,10 +427,6 @@ export class IntersectionObserverPolyfill {
     }
     this.mutationObserver_ = null;
     this.viewport_ = null;
-    if (this.mutationPass_) {
-      this.mutationPass_.cancel();
-    }
-    this.mutationPass_ = null;
   }
 }
 
