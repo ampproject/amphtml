@@ -501,9 +501,6 @@ export class Viewport {
    * @param {!Element} parent
    */
   scrollIntoViewInternal_(element, parent) {
-    if (Services.platformFor(this.ampdoc.win).isIe()) {
-      tryFocus(element);
-    }
     const elementTop = this.binding_.getLayoutRect(element).top;
 
     const newScrollTopPromise = this.useLayers_ ?
