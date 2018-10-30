@@ -411,8 +411,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock.parent.parent;
       host = new InaboxMessagingHost(win, [frameMock]);
-      const measurableFrame =
-          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
       expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
@@ -422,8 +421,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(win, [frameMock]);
-      const measurableFrame =
-          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
       expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
@@ -436,8 +434,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(
           win, [frameMockWrong1, frameMockWrong2, frameMock]);
-      const measurableFrame =
-          host.getFrameElement_(sourceMock, sentinel).measurableFrame;
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
       expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
@@ -449,8 +446,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const creativeIframeMock = {};
       host.iframeMap_[sentinel] = {
         'iframe': creativeIframeMock, 'measurableFrame': creativeIframeMock};
-      const measurableFrame =
-          host.getFrameElement_(creativeWinMock, sentinel).measurableFrame;
+      const {measurableFrame} =
+          host.getFrameElement_(creativeWinMock, sentinel);
       expect(measurableFrame).to.equal(creativeIframeMock);
     });
 
