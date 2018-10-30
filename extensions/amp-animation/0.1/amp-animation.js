@@ -291,7 +291,7 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    this.hasPositionObserver_ = invocation.caller &&
+    this.hasPositionObserver_ = !!invocation.caller &&
       invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
     return this.createRunnerIfNeeded_().then(() => {
       this.pause_();
