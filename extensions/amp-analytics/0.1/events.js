@@ -1155,11 +1155,10 @@ export class VisibilityTracker extends EventTracker {
     }
     if (reportWhenSpec == 'hidden') {
       createReportReadyPromiseFunc =
-          this.createReportReadyPromiseForHidden_.bind(this, reportWhenSpec);
+          this.createReportReadyPromiseForHidden_.bind(this);
     } else if (reportWhenSpec == 'endOfFrame') {
       createReportReadyPromiseFunc =
-          this.createReportReadyPromiseForEndOfFrame_.bind(
-              this, reportWhenSpec);
+          this.createReportReadyPromiseForEndOfFrame_.bind(this);
     } else {
       user().assert(reportWhenSpec == 'none',
           'reportWhen value %s not supported', reportWhenSpec);
