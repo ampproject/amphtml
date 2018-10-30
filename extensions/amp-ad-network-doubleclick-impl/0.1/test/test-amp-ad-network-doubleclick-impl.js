@@ -545,6 +545,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
+          /(\?|&)bdt=[1-9][0-9]*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
       });
     });
