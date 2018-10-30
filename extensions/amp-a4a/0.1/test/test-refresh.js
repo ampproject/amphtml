@@ -182,6 +182,18 @@ describe('refresh', () => {
         y: 0,
       });
 
+      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getRect,
+        };
+      });
+      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+        return {
+          getRootNode: () => {return window.document;},
+          win: window,
+        };
+      });
+
       mockA4a.element.setAttribute(DATA_MANAGER_ID_NAME, '0');
       mockA4a.element.viewportCallback = () => {};
       mockA4a.element.getLayoutBox = getRect;
