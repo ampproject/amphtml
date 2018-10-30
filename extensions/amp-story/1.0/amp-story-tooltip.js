@@ -1,3 +1,19 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
   Action,
   StateProperty,
@@ -17,22 +33,6 @@ import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setImportantStyles} from '../../../src/style';
-
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
  * Minimum vertical space needed to position tooltip.
@@ -253,7 +253,7 @@ export class AmpStoryTooltip {
    * @param {!Element} clickedEl
    */
   positionTooltip_(clickedEl) {
-    const clickedRect = clickedEl.getBoundingClientRect();
+    const clickedRect = clickedEl./*REVIEW*/getBoundingClientRect();
 
     // Reset tooltip arrow positioning.
     this.tooltipArrow_.classList.remove('i-amphtml-tooltip-arrow-on-top');
@@ -263,20 +263,20 @@ export class AmpStoryTooltip {
     // Tooltip fits above clicked element.
     if (clickedRect.top > MIN_VERTICAL_SPACE) {
       top = clickedRect.top - MIN_VERTICAL_SPACE;
-    } else if (this.win_.innerHeight - clickedRect.bottom >
+    } else if (this.win_./*REVIEW*/innerHeight - clickedRect.bottom >
         MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element.
       top = clickedRect.bottom + EDGE_PADDING;
       this.tooltipArrow_.classList.add('i-amphtml-tooltip-arrow-on-top');
     } else { // Element takes whole vertical space. Place tooltip on the middle.
-      top = this.win_.innerHeight / 2;
+      top = this.win_./*REVIEW*/innerHeight / 2;
     }
 
     // Horizontal positioning.
     let left;
     const elCenter = (clickedRect.width / 2) + clickedRect.left;
-    left = elCenter - (this.tooltip_.offsetWidth / 2);
-    const maxLeft =
-      (this.win_.innerWidth - this.tooltip_.offsetWidth - EDGE_PADDING);
+    left = elCenter - (this.tooltip_./*REVIEW*/offsetWidth / 2);
+    const maxLeft = (this.win_./*REVIEW*/innerWidth -
+      this.tooltip_./*REVIEW*/offsetWidth - EDGE_PADDING);
 
     // Make sure tooltip is not out of screen.
     left = Math.min(left, maxLeft);
@@ -284,7 +284,7 @@ export class AmpStoryTooltip {
 
     // Position tooltip arrow horizontally depending on clicked element's center
     // in relation to the screen width.
-    let arrowLeftOffset = elCenter / this.win_.innerWidth * 100;
+    let arrowLeftOffset = elCenter / this.win_./*REVIEW*/innerWidth * 100;
     arrowLeftOffset = Math.min(arrowLeftOffset, 80);
     arrowLeftOffset = Math.max(arrowLeftOffset, 0);
 
@@ -310,7 +310,6 @@ export class AmpStoryTooltip {
     const tooltipOverlay =
         html`
         <section class="i-amphtml-story-tooltip-layer i-amphtml-hidden">
-          <div class="i-amphtml-tooltip-background"></div>
           <div class="i-amphtml-story-tooltip-layer-nav-button-container
               i-amphtml-story-tooltip-nav-button-left">
             <button role="button" ref="buttonLeft"

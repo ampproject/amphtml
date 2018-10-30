@@ -1,6 +1,3 @@
-import {Services} from '../../../../../src/services';
-import {getSourceOrigin} from '../../../../../src/url';
-
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
