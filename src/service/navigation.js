@@ -20,6 +20,7 @@ import {
   escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
+  tryFocus,
 } from '../dom';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
@@ -457,6 +458,19 @@ export class Navigation {
         const targetAttr = (target.getAttribute('target') || '').toLowerCase();
         if (targetAttr != '_top' && targetAttr != '_blank') {
           target.setAttribute('target', '_blank');
+        }
+        return; // bail early.
+      }
+
+      // Accessibility fix for IE browser
+      if (Services.platformFor(this.ampdoc.win).isIe()) {
+        const internalTargetElmId = tgtLoc.hash.substring(1);
+        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
+        if (internalElm) {
+          if (!(/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName))) {
+            internalElm.tabIndex = -1;
+          }
+          tryFocus(internalElm);
         }
       }
       return;
