@@ -27,7 +27,7 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
-import {closestBySelector, isIframed} from '../../dom';
+import {closestBySelector, isIframed, tryFocus} from '../../dom';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -502,7 +502,7 @@ export class Viewport {
    */
   scrollIntoViewInternal_(element, parent) {
     if (Services.platformFor(this.ampdoc.win).isIe()) {
-      element.focus();
+      tryFocus(element);
     }
     const elementTop = this.binding_.getLayoutRect(element).top;
 
