@@ -33,13 +33,17 @@ export function withDatePickerCommon(WrappedComponent) {
   const moment = requireExternal('moment');
 
   /**
-   * @param {!moment} max
-   * @return {!moment}
+   * If `max` is null, the default minimum date is the current date.
+   * If `max` is a Moment date and earlier than the current date, then
+   * there is no default minimum date. If `max` is later than the current date,
+   * then the default minimum date is the current date.
+   * @param {?moment} max
+   * @return {?moment}
    */
   function getDefaultMinDate(max) {
     const today = moment();
     if (max) {
-      return !isInclusivelyAfterDay(today, moment(max)) ? today : '';
+      return !isInclusivelyAfterDay(today, max) ? today : null;
     } else {
       return today;
     }
@@ -52,8 +56,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
-    const maxInclusive = max && moment(max);
-    const minInclusive = min && moment(min);
+    const maxInclusive = max ? moment(max) : null;
+    const minInclusive = min ? moment(min) : getDefaultMinDate(maxInclusive);
     if (!maxInclusive && !minInclusive) {
       return false;
     } else if (!minInclusive) {
@@ -63,6 +67,18 @@ export function withDatePickerCommon(WrappedComponent) {
     } else {
       return !date.isBetween(minInclusive, maxInclusive);
     }
+  }
+
+  /**
+   * @param {!./dates-list.DatesList} list
+   * @param {!moment} day
+   * @return {boolean}
+   */
+  function datesListContains(list, day) {
+    if (!list) {
+      return false;
+    }
+    return list.contains(day);
   }
 
   const defaultProps = map({
@@ -81,12 +97,16 @@ export function withDatePickerCommon(WrappedComponent) {
     constructor(props) {
       super(props);
 
-      /** @private @const */
-      this.min_ = this.props.min || getDefaultMinDate(this.props.max);
+      const {
+        blocked,
+        highlighted,
+        min,
+        max,
+      } = props;
 
-      this.isDayBlocked = this.isDayBlocked.bind(this);
-      this.isDayHighlighted = this.isDayHighlighted.bind(this);
-      this.isOutsideRange = this.isOutsideRange.bind(this);
+      this.isDayBlocked = datesListContains.bind(null, blocked);
+      this.isDayHighlighted = datesListContains.bind(null, highlighted);
+      this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
 
     /** @override */
@@ -96,28 +116,25 @@ export function withDatePickerCommon(WrappedComponent) {
       }
     }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isDayBlocked(day) {
-      return this.props.blocked.contains(day);
-    }
+    /** @override */
+    componentWillReceiveProps(nextProps) {
+      const {
+        max,
+        min,
+        blocked,
+        highlighted,
+      } = nextProps;
+      if (min != this.props.min || max != this.props.max) {
+        this.isOutsideRange = isOutsideRange.bind(null, min, max);
+      }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isDayHighlighted(day) {
-      return this.props.highlighted.contains(day);
-    }
+      if (blocked != this.props.blocked) {
+        this.isDayBlocked = datesListContains.bind(null, blocked);
+      }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isOutsideRange(day) {
-      return isOutsideRange(this.min_, this.props.max, day);
+      if (highlighted != this.props.highlighted) {
+        this.isDayHighlighted = datesListContains.bind(null, highlighted);
+      }
     }
 
     /** @override */

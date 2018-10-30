@@ -103,8 +103,6 @@ const TAG = 'amp-date-picker';
 const DATE_SEPARATOR = ' ';
 
 const attributesToForward = [
-  'max',
-  'min',
   'month-format',
   'number-of-months',
   'minimum-nights',
@@ -482,6 +480,23 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    const newState = map();
+
+    const min = mutations['min'];
+    if (min !== undefined) {
+      newState['min'] = min;
+    }
+
+    const max = mutations['max'];
+    if (max !== undefined) {
+      newState['max'] = max;
+    }
+
+    this.setState_(newState);
+  }
+
+  /** @override */
   layoutCallback() {
     const srcAttributesPromise = this.setupSrcAttributes_();
     this.setupTemplates_();
@@ -743,6 +758,9 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.endDateField_.value = this.getFormattedDate_(endDate);
     }
 
+    const max = element.getAttribute('max') || '';
+    const min = element.getAttribute('min') || '';
+
     return map({
       date,
       endDate,
@@ -750,6 +768,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       focusedInput: this.ReactDatesConstants_.START_DATE,
       isFocused: false,
       isOpen: this.mode_ == DatePickerMode.STATIC,
+      max,
+      min,
       startDate,
     });
   }
@@ -1676,6 +1696,8 @@ export class AmpDatePicker extends AMP.BaseElement {
         // in the month.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
+              min: props.min,
+              max: props.max,
               date: props.date,
               startDate: props.startDate,
               endDate: props.endDate,

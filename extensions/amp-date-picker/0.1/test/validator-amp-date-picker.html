@@ -112,6 +112,9 @@
   <amp-date-picker mode="overlay" touch-keyboard-editable input-selector="#a4">
     <input id="a4">
   </amp-date-picker>
+  <!-- Valid: amp-date-picker with max and min binding -->
+  <amp-date-picker [min]="min" [max]="max" layout="fixed-height" height="360">
+  </amp-date-picker>
 
   <!-- Invalid: single amp-date-picker with start-input-selector -->
   <amp-date-picker type="single" mode="static" start-input-selector="#x3" layout="fixed-height" height="360">
