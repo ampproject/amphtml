@@ -53,6 +53,6 @@
   "inabox-rov": 1,
   "ampdoc-closest": 0.01,
   "linker-form": 1,
-  "scroll-height-bounce": 1,
+  "scroll-height-bounce": 0,
   "hidden-mutation-observer": 1
 }
