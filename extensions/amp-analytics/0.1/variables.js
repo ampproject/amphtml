@@ -19,9 +19,6 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-// TODO(calebcordry) remove this once experiment is launched
-// also remove from dep-check-config whitelist;
-import {isExperimentOn} from '../../../src/experiments';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
@@ -162,9 +159,7 @@ export class VariableService {
    * @return {!Object} contains all registered macros
    */
   getMacros() {
-    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        'url-replacement-v2');
-    return isV2ExpansionOn ? this.macros_ : {};
+    return this.macros_;
   }
 
   /**
