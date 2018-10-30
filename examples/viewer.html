@@ -242,7 +242,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate',
+        cap: 'a2a,focus-events,foo,keyboard,swipe,viewerRenderTemplate',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -406,7 +406,6 @@
       log(this.id + ': Viewer.prototype.processRequest_', name);
       switch(name) {
         case 'documentLoaded':
-          return this.documentReady_();
         case 'focusin':
           log('Focusin event', data)
           return Promise.resolve();

@@ -16,7 +16,6 @@
 
 import {FocusHandler} from '../focus-handler';
 import {Messaging} from '../messaging/messaging';
-import {Services} from '../../../../src/services';
 
 const data = {
   bottom: 0,
@@ -28,7 +27,6 @@ const data = {
   x: 100,
   y: 100,
 };
-
 function fakeFocusEvent(type) {
   return {
     type,
@@ -36,7 +34,6 @@ function fakeFocusEvent(type) {
       getBoundingClientRect: () => {
         return data;
       },
-      nodeType: 1,
     },
   };
 }
@@ -66,14 +63,20 @@ describes.fakeWin('FocusHandler', {}, env => {
     let win;
     let focusHandler;
     let messaging;
+    let listeners;
     let messages;
 
     beforeEach(() => {
+      listeners = [];
       messages = [];
       win = env.win;
-      env.sandbox.stub(Services, 'viewportForDoc').returns({
-        getClientRectAsync: () => Promise.resolve(data),
-      });
+      win.document.addEventListener = function(eventType, handler, options) {
+        listeners.push({
+          type: eventType,
+          handler,
+          options,
+        });
+      };
       const port =
         new WindowPortEmulator(this.messageHandlers_, 'origin doesnt matter');
       messaging = new Messaging(win, port);
@@ -84,19 +87,15 @@ describes.fakeWin('FocusHandler', {}, env => {
       focusHandler = null;
     });
 
-    it('should not forward unsupported supported events', () => {
-      focusHandler.handleEvent_(fakeFocusEvent('notasupportedevent')).then(
-          () => {
-            expect(messages).to.have.length(0);
-          });
+    it('should only forward supported events', () => {
+      focusHandler.handleEvent_(fakeFocusEvent('notasupportedevent'));
+      expect(messages).to.have.length(0);
+
+      focusHandler.handleEvent_(fakeFocusEvent('focusin'));
+      expect(messages).to.have.length(1);
+      expect(messages[0].data.name).to.equal('focusin');
+      expect(messages[0].data.data.focusTargetRect).to.equal(data);
     });
 
-    it('should forward supported events', () => {
-      focusHandler.handleEvent_(fakeFocusEvent('focusin')).then(() => {
-        expect(messages).to.have.length(1);
-        expect(messages[0].data.name).to.equal('focusin');
-        expect(messages[0].data.data.focusTargetRect).to.equal(data);
-      });
-    });
   });
 });

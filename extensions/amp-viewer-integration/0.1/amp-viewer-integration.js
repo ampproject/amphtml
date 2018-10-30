@@ -200,7 +200,7 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('keyboard')) {
       this.initKeyboardHandler_(messaging);
     }
-    if (viewer.hasCapability('focus-rect')) {
+    if (viewer.hasCapability('focus-events')) {
       this.initFocusHandler_(messaging);
     }
     if (this.highlightHandler_ != null) {
