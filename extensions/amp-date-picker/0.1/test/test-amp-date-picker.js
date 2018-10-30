@@ -239,7 +239,8 @@ describes.realWin('amp-date-picker', {
     });
 
     describe('src templates', () => {
-      it('should parse RRULE and date templates', () => {
+      it('should parse RRULE and date templates', function() {
+        this.timeout(4000);
         const template = createDateTemplate('{{val}}', {
           dates: '2018-01-01',
           id: 'srcTemplate',

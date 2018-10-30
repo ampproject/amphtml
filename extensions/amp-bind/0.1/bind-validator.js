@@ -222,6 +222,10 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-DATE-PICKER': {
+      'max': null,
+      'min': null,
+    },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,
       'title': null,

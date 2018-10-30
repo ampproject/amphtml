@@ -285,6 +285,19 @@
 <button on="tap: trp.clear">Clear</button>
 <amp-date-picker id="trp" type="range" layout="fixed-height" height="360"></amp-date-picker>
 
+<h2>amp-bind</h2>
+<h3>min</h3>
+<amp-state id="min"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="min">2018-10-10</span></div>
+<label>min: <input on="change:AMP.setState({min: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" min="2018-10-10" [min]="min"></amp-date-picker>
+
+<h3>max</h3>
+<amp-state id="max"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="max">2018-10-10</span></div>
+<label>max: <input on="change:AMP.setState({max: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" max="2018-10-10" [max]="max"></amp-date-picker>
+
 <div class="spacer"></div>
 </body>
 </html>
