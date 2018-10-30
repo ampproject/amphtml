@@ -477,13 +477,13 @@ class VideoEntry {
    * @param {!Object<string, string>} vars
    */
   logCustomAnalytics_(eventType, vars) {
-    const preffixedVars = {};
+    const prefixedVars = {};
 
     Object.keys(vars).forEach(key => {
-      preffixedVars[`custom_${key}`] = vars[key];
+      prefixedVars[`custom_${key}`] = vars[key];
     });
 
-    analyticsEvent(this, eventType, preffixedVars);
+    analyticsEvent(this, eventType, prefixedVars);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
