@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-viz-vega-0.1.css';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -78,7 +79,7 @@ export class AmpVizVega extends AMP.BaseElement {
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
-    this.vega_ = this.win.vg;
+    this.vega_ = /** @type {!VegaObject} */ (this.win.vg);
     this.inlineData_ = this.getInlineData_();
     this.src_ = this.element.getAttribute('src');
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
@@ -194,27 +195,28 @@ export class AmpVizVega extends AMP.BaseElement {
         if (error) {
           reject(error);
         }
-        resolve(chartFactory);
+        resolve(/** @type {!VegaChartFactory} */ (chartFactory));
       });
     });
 
-    return parsePromise.then(chartFactory => {
-      return Services.vsyncFor(this.win).mutatePromise(() => {
-        dom.removeChildren(dev().assertElement(this.container_));
-        this.chart_ = chartFactory({el: this.container_});
-        if (!this.useDataWidth_) {
-          const w = this.measuredWidth_ - this.getDataPadding_('width');
-          this.chart_.width(w);
-        }
-        if (!this.useDataHeight_) {
-          const h = this.measuredHeight_ - this.getDataPadding_('height');
-          this.chart_.height(h);
-        }
+    return parsePromise.then(/** @param {!VegaChartFactory} chartFactory */
+        chartFactory => {
+          return Services.vsyncFor(this.win).mutatePromise(() => {
+            dom.removeChildren(dev().assertElement(this.container_));
+            this.chart_ = chartFactory(dict({'el': this.container_}));
+            if (!this.useDataWidth_) {
+              const w = this.measuredWidth_ - this.getDataPadding_('width');
+              this.chart_.width(w);
+            }
+            if (!this.useDataHeight_) {
+              const h = this.measuredHeight_ - this.getDataPadding_('height');
+              this.chart_.height(h);
+            }
 
-        this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
-        this.chart_.update();
-      });
-    });
+            this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
+            this.chart_.update();
+          });
+        });
   }
 
   /**

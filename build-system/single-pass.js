@@ -43,6 +43,8 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
+const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
@@ -213,9 +215,12 @@ exports.getBundleFlags = function(g) {
       if (isMain || isAltMainBundle(name)) {
         jsFilesToWrap.push(name);
       } else {
+        const configEntry = getExtensionBundleConfig(originalName);
+        const marker = configEntry && Array.isArray(configEntry.postPrepend) ?
+          SPLIT_MARKER : '';
         flagsArray.push('--module_wrapper', name + ':' +
-           massageWrapper(wrappers.extension(
-               info.name, info.loadPriority, bundleDeps)));
+          massageWrapper(wrappers.extension(
+              info.name, info.loadPriority, bundleDeps, marker)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');
@@ -490,7 +495,7 @@ exports.singlePassCompile = function(entryModule, options) {
       }),
       move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
-  }).then(wrapMainBinaries).catch(e => {
+  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
@@ -511,13 +516,51 @@ function wrapMainBinaries() {
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = fs.readFileSync('dist/v0.js');
+  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
   jsFilesToWrap.forEach(x => {
     const path = `dist/${x}.js`;
     const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
     const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
     fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
         `${fs.readFileSync(path).toString()}${suffix}`);
+  });
+}
+
+/**
+ * Appends the listed file to the built js binary.
+ * TODO(erwinm, #18811): This operation is needed but straight out breaks
+ * source maps.
+ */
+function postProcessConcat() {
+  const extensions = extensionBundles.filter(
+      x => Array.isArray(x.postPrepend));
+  extensions.forEach(extension => {
+    const isAltMainBundle = altMainBundles.some(x => {
+      return x.name === extension.name;
+    });
+    // We assume its in v0 unless its an alternative main binary.
+    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+
+    function createFullPath(version) {
+      return `${srcTargetDir}${extension.name}-${version}.js`;
+    }
+
+    let targets = [];
+    if (Array.isArray(extension.version)) {
+      targets = extension.version.map(createFullPath);
+    } else {
+      targets.push(createFullPath(extension.version));
+    }
+    targets.forEach(path => {
+      const prependContent = extension.postPrepend.map(x => {
+        return ';' + fs.readFileSync(x, 'utf8').toString();
+      }).join('');
+      const content = fs.readFileSync(path, 'utf8').toString()
+          .split(SPLIT_MARKER);
+      const prefix = content[0];
+      const suffix = content[1];
+      fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
+    });
   });
 }
 

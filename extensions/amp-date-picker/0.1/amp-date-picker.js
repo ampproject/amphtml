@@ -39,7 +39,7 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 
@@ -216,11 +216,19 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.react_.options.syncComponentUpdates = false;
     }
 
-    /** @private @const */
+    /**
+     * @private
+     * @const
+     */
     this.reactRender_ = requireExternal('react-dom').render;
 
-    /** @private @const */
-    this.ReactDatesConstants_ = requireExternal('react-dates/constants');
+    /**
+     * @private
+     * @const
+     * @dict
+     */
+    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates/constants'));
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -318,7 +326,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS, RESIZE_BUG_CSS);
 
     /** @private */
-    this.renderedTemplates_ = map();
+    this.renderedTemplates_ = dict();
 
     const deferred = new Deferred();
 
@@ -337,10 +345,10 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private */
     this.locale_ = DEFAULT_LOCALE;
 
-    /** @private {?Object} */
+    /** @private {?JsonObject} */
     this.props_ = null;
 
-    /** @private {?Object} */
+    /** @private {?JsonObject} */
     this.state_ = null;
 
     /** @private @const */
@@ -481,7 +489,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const newState = map();
+    const newState = dict();
 
     const min = mutations['min'];
     if (min !== undefined) {
@@ -548,34 +556,56 @@ export class AmpDatePicker extends AMP.BaseElement {
     sm.addTransition(STATIC, STATIC, noop);
 
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
-      this.setState_({isOpen: true, isFocused: false, focused: false})
-          .then(() => {
-            this.triggerEvent_(DatePickerEvent.ACTIVATE);
-          });
+      this.setState_(dict({
+        'isOpen': true,
+        'isFocused': false,
+        'focused': false,
+      })).then(() => {
+        this.triggerEvent_(DatePickerEvent.ACTIVATE);
+      });
     });
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
-      this.setState_({isOpen: true, isFocused: true, focused: true});
+      this.setState_(dict({
+        'isOpen': true,
+        'isFocused': true,
+        'focused': true,
+      }));
     });
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
 
 
     sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
-      this.setState_({isOpen: true, isFocused: true, focused: true});
+      this.setState_(dict({
+        'isOpen': true,
+        'isFocused': true,
+        'focused': true,
+      }));
     });
     sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
       this.updateDateFieldFocus_(null);
-      this.setState_({isOpen: false, isFocused: false, focused: false});
+      this.setState_(dict({
+        'isOpen': false,
+        'isFocused': false,
+        'focused': false,
+      }));
     });
     sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_INPUT, noop);
 
 
     sm.addTransition(OVERLAY_OPEN_PICKER, OVERLAY_OPEN_PICKER, noop);
     sm.addTransition(OVERLAY_OPEN_PICKER, OVERLAY_OPEN_INPUT, () => {
-      this.setState_({isFocused: false, focused: false});
+      this.setState_(dict({
+        'isFocused': false,
+        'focused': false,
+      }));
     });
     sm.addTransition(OVERLAY_OPEN_PICKER, OVERLAY_CLOSED, () => {
       this.updateDateFieldFocus_(null);
-      this.setState_({isOpen: false, isFocused: false, focused: false});
+      this.setState_(dict({
+        'isOpen': false,
+        'isFocused': false,
+        'focused': false,
+      }));
     });
 
     return sm;
@@ -625,7 +655,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {moment} date
    */
   handleSetDate_(date) {
-    this.setState_({date});
+    this.setState_(dict({'date': date}));
     this.updateDateField_(this.dateField_, date);
     this.element.setAttribute('date', this.getFormattedDate_(date));
     this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
@@ -648,16 +678,16 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {?moment} endDate
    */
   handleSetDates_(startDate, endDate) {
-    const state = {};
+    const state = dict();
 
     if (startDate) {
-      state.startDate = startDate;
+      state['startDate'] = startDate;
       this.element.setAttribute(
           'start-date', this.getFormattedDate_(startDate));
       this.updateDateField_(this.startDateField_, startDate);
     }
     if (endDate) {
-      state.endDate = endDate;
+      state['endDate'] = endDate;
       this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
       this.updateDateField_(this.endDateField_, endDate);
     }
@@ -717,15 +747,15 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.element.removeAttribute('start-date');
     this.element.removeAttribute('end-date');
 
-    this.setState_({
-      date: null,
-      startDate: null,
-      endDate: null,
-      focusedInput: this.ReactDatesConstants_.START_DATE,
-    });
+    this.setState_(dict({
+      'date': null,
+      'startDate': null,
+      'endDate': null,
+      'focusedInput': this.ReactDatesConstants_['START_DATE'],
+    }));
     this.triggerEvent_(DatePickerEvent.SELECT, null);
 
-    if (this.props_.reopenPickerOnClearDate) {
+    if (this.props_['reopenPickerOnClearDate']) {
       this.updateDateFieldFocus_(this.startDateField_, true);
       this.triggerEvent_(DatePickerEvent.ACTIVATE);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);
@@ -736,6 +766,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Get the initial value for properties that change during the lifetime of
    * the AMP element.
+   * @return {!JsonObject}
    */
   getInitialState_() {
     const {element} = this;
@@ -761,26 +792,27 @@ export class AmpDatePicker extends AMP.BaseElement {
     const max = element.getAttribute('max') || '';
     const min = element.getAttribute('min') || '';
 
-    return map({
-      date,
-      endDate,
-      focused: this.mode_ == DatePickerMode.STATIC,
-      focusedInput: this.ReactDatesConstants_.START_DATE,
-      isFocused: false,
-      isOpen: this.mode_ == DatePickerMode.STATIC,
-      max,
-      min,
-      startDate,
+    return dict({
+      'date': date,
+      'endDate': endDate,
+      'focused': this.mode_ == DatePickerMode.STATIC,
+      'focusedInput': this.ReactDatesConstants_['START_DATE'],
+      'isFocused': false,
+      'isOpen': this.mode_ == DatePickerMode.STATIC,
+      'max': max,
+      'min': min,
+      'startDate': startDate,
     });
   }
 
   /**
    * Merge the supplied state object with the existing state and re-render the
    * React tree.
-   * @param {!Object} newState
+   * @param {!JsonObject} newState
    */
   setState_(newState) {
-    return this.render(Object.assign(this.state_, newState));
+    return this.render(/** @type {!JsonObject} */ (
+      Object.assign(/** @type {!Object} */ (this.state_), newState)));
   }
 
   /**
@@ -910,10 +942,14 @@ export class AmpDatePicker extends AMP.BaseElement {
     if (this.isDateField_(target)) {
       if (target == this.startDateField_) {
         this.updateDateFieldFocus_(this.startDateField_);
-        this.setState_({focusedInput: this.ReactDatesConstants_.START_DATE});
+        this.setState_(dict({
+          'focusedInput': this.ReactDatesConstants_['START_DATE'],
+        }));
       } else if (target == this.endDateField_) {
         this.updateDateFieldFocus_(this.endDateField_);
-        this.setState_({focusedInput: this.ReactDatesConstants_.END_DATE});
+        this.setState_(dict({
+          'focusedInput': this.ReactDatesConstants_['END_DATE'],
+        }));
       } else if (target == this.dateField_) {
         this.updateDateFieldFocus_(this.dateField_);
       }
@@ -943,7 +979,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const isValid = (moment &&
         moment.isValid() &&
         moment.year() > MIN_PICKER_YEAR);
-    this.setState_({[property]: isValid ? moment : null});
+    this.setState_(dict({[property]: isValid ? moment : null}));
   }
 
   /**
@@ -1090,7 +1126,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Fetch the JSON from the URL specified in the src attribute.
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @return {!Promise<!JsonObject|!Array<!JsonObject>>}
    * @private
    */
   fetchSrc_() {
@@ -1101,7 +1137,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Create an array of objects mapping dates to templates.
-   * @param {!JsonObject|!Array<JsonObject>} srcJson
+   * @param {!JsonObject|!Array<!JsonObject>} srcJson
    * @return {?{srcTemplates: !Array<!DateTemplateMapDef>, srcDefaultTemplate: ?Element}}
    * @private
    */
@@ -1135,7 +1171,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   clearRenderedTemplates_() {
-    this.renderedTemplates_ = map();
+    this.renderedTemplates_ = dict();
   }
 
   /**
@@ -1179,7 +1215,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Get the initial values for properties whose values do not change during
    * the lifetime of the AMP element. Convert the kebab-case html attributes to
    * camelCase React props.
-   * @return {!Object} Initialized props for the react component.
+   * @return {!JsonObject} Initialized props for the react component.
    * @private
    */
   getProps_() {
@@ -1211,8 +1247,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {!DatesChangeDetailsDef} param
    */
   onDatesChange({startDate, endDate}) {
-    const isFinalSelection = (!this.props_.keepOpenOnDateSelect &&
-        this.state_.focusedInput != this.ReactDatesConstants_.END_DATE);
+    const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
+        this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
     let containsBlocked = false;
 
@@ -1230,11 +1266,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const selectData = this.getSelectData_(startDate, endDate);
     this.triggerEvent_(DatePickerEvent.SELECT, selectData);
-    this.setState_({
-      startDate,
-      endDate,
-      isFocused: this.mode_ == DatePickerMode.STATIC || !isFinalSelection,
-    });
+    this.setState_(dict({
+      'startDate': startDate,
+      'endDate': endDate,
+      'isFocused': this.mode_ == DatePickerMode.STATIC || !isFinalSelection,
+    }));
     this.updateDateField_(this.startDateField_, startDate);
     this.element.setAttribute('start-date', this.getFormattedDate_(startDate));
     this.updateDateField_(this.endDateField_, endDate);
@@ -1254,11 +1290,11 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   onDateChange(date) {
     this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
-    this.setState_({date});
+    this.setState_(dict({'date': date}));
     this.updateDateField_(this.dateField_, date);
     this.element.setAttribute('date', this.getFormattedDate_(date));
 
-    if (!this.props_.keepOpenOnDateSelect) {
+    if (!this.props_['keepOpenOnDateSelect']) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
     }
   }
@@ -1268,18 +1304,19 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {?string} focusedInput The currently focused input.
    */
   onFocusChange(focusedInput) {
-    const {START_DATE, END_DATE} = this.ReactDatesConstants_;
+    const START_DATE = this.ReactDatesConstants_['START_DATE'];
+    const END_DATE = this.ReactDatesConstants_['END_DATE'];
     const focusedField =
       (focusedInput === START_DATE ? this.startDateField_ :
         (focusedInput === END_DATE ? this.endDateField_ : this.dateField_));
-    this.updateDateFieldFocus_(focusedField, this.state_.isOpen);
+    this.updateDateFieldFocus_(focusedField, this.state_['isOpen']);
 
-    this.setState_({
-      focusedInput: !focusedInput ?
-        this.ReactDatesConstants_.START_DATE :
+    this.setState_(dict({
+      'focusedInput': !focusedInput ?
+        this.ReactDatesConstants_['START_DATE'] :
         focusedInput,
-      focused: this.mode_ == DatePickerMode.STATIC,
-    });
+      'focused': this.mode_ == DatePickerMode.STATIC,
+    }));
   }
 
   /**
@@ -1679,12 +1716,13 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Render the configured date picker component.
-   * @param {?Object=} opt_additionalProps
+   * @param {?JsonObject=} opt_additionalProps
    * @return {!Promise}
    */
   render(opt_additionalProps) {
-    const props = Object.assign({}, this.props_, opt_additionalProps);
-    const shouldBeOpen = props.isOpen || this.mode_ == DatePickerMode.STATIC;
+    const props = /** @type {!JsonObject} */ (
+      Object.assign({}, this.props_, opt_additionalProps));
+    const shouldBeOpen = props['isOpen'] || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
     return this.mutateElement(() => {
@@ -1695,26 +1733,26 @@ export class AmpDatePicker extends AMP.BaseElement {
         // the picker expands 1 behind where it should for the number of weeks
         // in the month.
         this.reactRender_(
-            this.react_.createElement(Picker, Object.assign({}, {
-              min: props.min,
-              max: props.max,
-              date: props.date,
-              startDate: props.startDate,
-              endDate: props.endDate,
-              isRTL: this.isRTL_,
-              onDateChange: this.onDateChange,
-              onDatesChange: this.onDatesChange,
-              onFocusChange: this.onFocusChange,
-              onMount: this.onMount,
-              renderDay: this.renderDay,
-              blocked: this.blocked_,
-              highlighted: this.highlighted_,
-              firstDayOfWeek: this.firstDayOfWeek_,
-              daySize: this.daySize_,
-              weekDayFormat: this.weekDayFormat_,
-              isFocused: props.isFocused, // should automatically focus
-              focused: props.focused,
-            }, props)),
+            this.react_.createElement(Picker, Object.assign({}, dict({
+              'min': props['min'],
+              'max': props['max'],
+              'date': props['date'],
+              'startDate': props['startDate'],
+              'endDate': props['endDate'],
+              'isRTL': this.isRTL_,
+              'onDateChange': this.onDateChange,
+              'onDatesChange': this.onDatesChange,
+              'onFocusChange': this.onFocusChange,
+              'onMount': this.onMount,
+              'renderDay': this.renderDay,
+              'blocked': this.blocked_,
+              'highlighted': this.highlighted_,
+              'firstDayOfWeek': this.firstDayOfWeek_,
+              'daySize': this.daySize_,
+              'weekDayFormat': this.weekDayFormat_,
+              'isFocused': props['isFocused'], // should automatically focus
+              'focused': props['focused'],
+            }), props)),
             this.container_);
       } else {
         this.reactRender_(null, this.container_);
