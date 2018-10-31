@@ -45,7 +45,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 const TAG = 'amp-powr-player';
 
 
-/** @private @const {Object} */
+/** @private @const {!Object.<string,string>} */
 const PLAYER_EVENT_MAP = {
   'ready': VideoEvents.LOAD,
   'playing': VideoEvents.PLAYING,
