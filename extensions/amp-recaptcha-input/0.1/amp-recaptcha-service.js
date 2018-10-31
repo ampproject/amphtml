@@ -19,14 +19,28 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import {Deferred} from '../../../src/utils/promise';
+import ampToolboxCacheUrl from
+  '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
+
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getIframe} from '../../../src/3p-frame';
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {
+  getDevelopmentBootstrapBaseUrl,
+} from '../../../src/3p-frame';
+import {getMode} from '../../../src/mode';
+import {
+  getService,
+  registerServiceBuilder,
+} from '../../../src/service';
+import {
+  isProxyOrigin,
+} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 /**
  * @fileoverview
@@ -46,9 +60,6 @@ import {removeElement} from '../../../src/dom';
  *   Response to 'amp-recaptcha-action'. Error
  *   From attempting to get a token from action.
  */
-
-/** @const {string} */
-const MESSAGE_TAG = 'amp-recaptcha-';
 
 export class AmpRecaptchaService {
 
@@ -85,13 +96,13 @@ export class AmpRecaptchaService {
   /**
    * Function to register as a dependant of the AmpRecaptcha serivce.
    * Used to create/destroy recaptcha boostrap iframe.
-   * @param {!Element} element
+   * @param {string} sitekey
    * @return {Promise}
    */
-  register(element) {
+  register(sitekey) {
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.initialize_(element);
+      this.iframeLoadPromise_ = this.initialize_(sitekey);
     }
     return this.iframeLoadPromise_;
   }
@@ -141,7 +152,7 @@ export class AmpRecaptchaService {
       // Send the message
       postMessage(
           dev().assertElement(this.iframe_),
-          MESSAGE_TAG + 'action',
+          'amp-recaptcha-action',
           message,
           '*',
           true);
@@ -151,30 +162,30 @@ export class AmpRecaptchaService {
 
   /**
    * Function to create our recaptcha boostrap iframe.
-   * @param {!Element} element
+   * Should be assigned to this.iframeLoadPromise_
+   * @param {string} sitekey
    * @private
    */
-  initialize_(element) {
+  initialize_(sitekey) {
+    return this.createRecaptchaFrame_(sitekey).then(iframe => {
+      this.iframe_ = iframe;
 
-    /* the third parameter 'recaptcha' ties it to the 3p/recaptcha.js */
-    this.iframe_ = getIframe(this.win_, element, 'recaptcha');
+      this.unlisteners_ = [
+        this.listenIframe_(
+            'amp-recaptcha-ready', () => this.recaptchaApiReady_.resolve()
+        ),
+        this.listenIframe_(
+            'amp-recaptcha-token', this.tokenMessageHandler_.bind(this)
+        ),
+        this.listenIframe_(
+            'amp-recaptcha-error', this.errorMessageHandler_.bind(this)
+        ),
+      ];
+      this.executeMap_ = {};
 
-    this.unlisteners_ = [
-      this.listenIframe_(
-          MESSAGE_TAG + 'ready', this.recaptchaApiReady_.resolve
-      ),
-      this.listenIframe_(
-          MESSAGE_TAG + 'token', this.tokenMessageHandler_.bind(this)
-      ),
-      this.listenIframe_(
-          MESSAGE_TAG + 'error', this.errorMessageHandler_.bind(this)
-      ),
-    ];
-    this.executeMap_ = {};
-
-    this.iframe_.classList.add('i-amphtml-recaptcha-iframe');
-    this.body_.appendChild(this.iframe_);
-    this.iframeLoadPromise_ = loadPromise(this.iframe_);
+      this.body_.appendChild(this.iframe_);
+      return loadPromise(this.iframe_);
+    });
   }
 
   /**
@@ -191,6 +202,78 @@ export class AmpRecaptchaService {
       this.unlisteners_ = [];
       this.executeMap_ = {};
     }
+  }
+
+  /**
+   * Function to create our bootstrap iframe.
+   *
+   * @param {string} sitekey
+   * @return {!Promise<!Element>}
+   * @private
+   */
+  createRecaptchaFrame_(sitekey) {
+
+    const iframe = this.win_.document.createElement('iframe');
+
+    return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+      iframe.src = recaptchaFrameSrc;
+      iframe.setAttribute('scrolling', 'no');
+      iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
+      iframe.setAttribute('name', JSON.stringify(dict({
+        'sitekey': sitekey,
+        'sentinel': 'amp-recaptcha',
+      })));
+      iframe.classList.add('i-amphtml-recaptcha-iframe');
+      setStyle(iframe, 'border', 'none');
+      /** @this {!Element} */
+      iframe.onload = function() {
+        // Chrome does not reflect the iframe readystate.
+        this.readyState = 'complete';
+      };
+
+      return iframe;
+    });
+  }
+
+  /**
+   * Function to get our recaptcha iframe src
+   *
+   * This should take the current URL,
+   * either in canonical (www.example.com),
+   * or in cache (www-example-com.cdn.ampproject.org),
+   * and get the curls subdomain (www-example-com)
+   * To then create the iframe src:
+   * https://www-example-com.recaptcha.my.cdn/rtv/recaptcha.html
+   *
+   * @return {!Promise<string>}
+   * @private
+   */
+  getRecaptchaFrameSrc_() {
+    if (getMode().localDev || getMode().test) {
+      return tryResolve(() => {
+        return getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha');
+      });
+    }
+
+    // Need to have the curls subdomain match the original document url.
+    // This is verified by the recaptcha frame to
+    // verify the origin on its messages
+    let curlsSubdomainPromise = undefined;
+    if (isProxyOrigin(this.win_.location.href)) {
+      curlsSubdomainPromise = tryResolve(() => {
+        return this.win_.location.hostname.split('.')[0];
+      });
+    } else {
+      curlsSubdomainPromise =
+        ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href);
+    }
+
+    return curlsSubdomainPromise.then(curlsSubdomain => {
+      const recaptchaFrameSrc = 'https://' + curlsSubdomain +
+        `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+        'recaptcha.html';
+      return recaptchaFrameSrc;
+    });
   }
 
   /**

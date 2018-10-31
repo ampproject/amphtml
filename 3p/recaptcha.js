@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
-import {loadScript, validateData} from './3p';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {IframeMessagingClient} from './iframe-messaging-client';
+import {dev, initLogConstructor, setReportError, user} from '../src/log';
+import {dict} from '../src/utils/object';
+import {loadScript} from './3p';
+import {parseJson} from '../src/json';
 
 /**
  * @fileoverview
@@ -41,28 +47,105 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
+/** {?IframeMessaginClient} **/
+let iframeMessagingClient = null;
+
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * Initialize 3p frame.
  */
-export function recaptcha(global, data) {
+function init() {
+  initLogConstructor();
+  setReportError(console.error.bind(console));
+}
 
-  validateData(data, ['sitekey', 'action']);
+// Immediately call init
+init();
 
-  const {sitekey} = data;
+/**
+ * Main function called by the recaptcha bootstrap frame
+ */
+window.initRecaptcha = function() {
+
+  /**
+   *  Get the data from our name attribute
+   * sitekey {string} - reCAPTCHA sitekey used to identify the site
+   * sentinel {string} - string used to psuedo-confirm that we are
+   *    receiving messages from the recaptcha frame
+   */
+  let dataObject;
+  try {
+    dataObject = parseJson(window.name);
+  } catch (e) {
+    dev().error(TAG + ' Could not parse the window name.');
+    return;
+  }
+
+  // Get our sitekey from the iframe name attribute
+  dev().assert(
+      dataObject.sitekey,
+      'The sitekey is required for the <amp-recaptcha-input> iframe'
+  );
+  const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
-  loadScript(global, recaptchaApiUrl, function() {
-    const {grecaptcha} = global;
+  loadScript(window, recaptchaApiUrl, function() {
+    const {grecaptcha} = window;
 
     grecaptcha.ready(function() {
-      // TODO(@torch2424) Send Ready Event, and listen to actions
+      initializeIframeMessagingClient(window, grecaptcha, dataObject);
+      iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-ready');
     });
   }, function() {
-    global.context.report3pError(
-        TAG + ' Failed to load recaptcha api script'
-    );
     dev().error(TAG + ' Failed to load recaptcha api script');
+  });
+};
+
+/**
+ * Function to initialize our IframeMessagingClient
+ * @param {Window} window
+ * @param {*} grecaptcha
+ * @param {Object} dataObject
+ */
+function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
+  iframeMessagingClient = new IframeMessagingClient(window);
+  iframeMessagingClient.setSentinel(dataObject.sentinel);
+  iframeMessagingClient.registerCallback(
+      'amp-recaptcha-action',
+      actionTypeHandler.bind(this, grecaptcha)
+  );
+}
+
+/**
+ * Function to handle executing actions using the grecaptcha Object,
+ * and sending the token back to the parent amp-recaptcha component
+ *
+ * Data Object will have the following fields
+ * sitekey {string} - reCAPTCHA sitekey used to identify the site
+ * action {string} - action to be dispatched with grecaptcha.execute
+ * id {number} - id given to us by a counter in the recaptcha service
+ *
+ * @param {*} grecaptcha
+ * @param {Object} data
+ */
+function actionTypeHandler(grecaptcha, data) {
+  // TODO: @torch2424: Verify message origin
+  // TODO: @torch2424: Verify sitekey is the same as original
+  const executePromise = grecaptcha.execute(data.sitekey, {
+    action: data.action,
+  });
+
+  // .then() promise pollyfilled by recaptcha api script
+  executePromise./*OK*/then(function(token) {
+    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-token', dict({
+      'id': data.id,
+      'token': token,
+    }));
+  }, function(err) {
+    user().error(TAG, '%s', err.message);
+    iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-error', dict({
+      'id': data.id,
+      'error': err.message,
+    }));
   });
 }
 

@@ -1007,6 +1007,45 @@ describes.sandboxed('DOM', {}, env => {
     expect(spans[0].innerHTML).to.equal('123');
     expect(spans[1].innerHTML).to.equal('456<em>789</em>');
   });
+
+  describe('domOrderComparator', () => {
+    it('should sort elements by dom order', () => {
+      //
+      // <div id='elem1'>
+      //   <div id='elem2'>
+      //      <div id='elem3'>
+      //   <div id='elem4'>
+      //
+      const elem1 = document.createElement('div');
+      const elem2 = document.createElement('div');
+      const elem3 = document.createElement('div');
+      const elem4 = document.createElement('div');
+
+      elem1.appendChild(elem2);
+      elem2.appendChild(elem3);
+      elem1.appendChild(elem4);
+
+      expect(dom.domOrderComparator(elem1, elem1)).to.equal(0);
+      expect(dom.domOrderComparator(elem1, elem2)).to.equal(-1);
+      expect(dom.domOrderComparator(elem1, elem3)).to.equal(-1);
+      expect(dom.domOrderComparator(elem1, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem2, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem2, elem2)).to.equal(0);
+      expect(dom.domOrderComparator(elem2, elem3)).to.equal(-1);
+      expect(dom.domOrderComparator(elem2, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem3, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem3, elem2)).to.equal(1);
+      expect(dom.domOrderComparator(elem3, elem3)).to.equal(0);
+      expect(dom.domOrderComparator(elem3, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem4, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem2)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem3)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem4)).to.equal(0);
+    });
+  });
 });
 
 describes.realWin('DOM', {
