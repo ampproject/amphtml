@@ -88,10 +88,7 @@ export function requestForBatchFetch(ampdoc, element, replacement, refresh) {
     if (replacement == UrlReplacementPolicy.OPT_IN) {
       const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
       if (invalid.length > 0) {
-        throw user().createError('URL variable substitutions in CORS ' +
-            'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
-            `Please add data-amp-replace="${invalid.join(' ')}" to the ` +
-           `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
+        throw user().createError('URL variable substitutions in CORS fetches from dynamic URLs (e.g. via amp-bind) require opt-in. Please add data-amp-replace="%s<%s', invalid.join(' '),element.tagName);
       }
     }
     const fetchOpt = {};

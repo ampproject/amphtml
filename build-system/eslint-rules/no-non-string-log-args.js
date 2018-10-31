@@ -159,7 +159,7 @@ module.exports = function(context) {
 };
 
 function getVarArgs(context, args) {
-  return args.map(arg => {
+  return ',' + args.map(arg => {
     return context.getTokens(arg).map(token => {
       console.log(token.value);
       return token.value;
