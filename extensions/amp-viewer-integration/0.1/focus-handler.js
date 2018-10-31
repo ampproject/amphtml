@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 
 /**
@@ -73,6 +74,8 @@ export class FocusHandler {
     }
     this.messaging_.sendRequest(
         e.type,
-        {'focusTargetRect': e.target./*OK*/getBoundingClientRect()}, false);
+        dict({'focusTargetRect': e.target./*OK*/getBoundingClientRect()}),
+        false
+    );
   }
 }
