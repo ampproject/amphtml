@@ -443,7 +443,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
@@ -455,7 +455,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.reject());
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       const promise = subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
