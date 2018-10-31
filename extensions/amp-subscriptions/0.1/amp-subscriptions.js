@@ -336,6 +336,9 @@ export class SubscriptionService {
           // Viewer authorization is redirected to use local platform instead.
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        }).catch(reason => {
+          this.platformStore_.reportPlatformFailure('local');
+          dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }
     });
@@ -372,6 +375,19 @@ export class SubscriptionService {
   }
 
   /**
+   * Renders and opens the dialog using the cached entitlements.
+   */
+  renderDialogForSelectedPlatform() {
+    this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      this.selectAndActivatePlatform_(false /** sendAnalyticsEvents */);
+    });
+  }
+
+  /**
    * Unblock document based on grant state and selected platform
    * @param {boolean=} doPlatformSelection
    * @private
@@ -387,8 +403,12 @@ export class SubscriptionService {
     }
   }
 
-  /** @private */
-  selectAndActivatePlatform_() {
+  /**
+   * @param {boolean=} sendAnalyticsEvents
+   * @return {!Promise}
+   * @private
+   */
+  selectAndActivatePlatform_(sendAnalyticsEvents = true) {
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
       this.platformStore_.selectPlatform(),
@@ -400,6 +420,11 @@ export class SubscriptionService {
           selectedPlatform.getServiceId());
 
       selectedPlatform.activate(selectedEntitlement);
+
+      if (sendAnalyticsEvents === false) {
+        return;
+      }
+
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId());

@@ -450,9 +450,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_() {
+    this.updateAudioIcon_();
     const pageIds = this.pages_.map(page => page.element.id);
     this.element.appendChild(this.systemLayer_.build(pageIds));
-    this.updateAudioIcon_();
   }
 
   /** @private */
@@ -1891,10 +1891,13 @@ export class AmpStory extends AMP.BaseElement {
   updateAudioIcon_() {
     const containsMediaElementWithAudio = !!this.element.querySelector(
         'amp-audio, amp-video:not([noaudio]), [background-audio]');
-    const hasStoryAudio = this.element.hasAttribute('background-audio');
+    const storyHasBackgroundAudio =
+        this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO,
-        containsMediaElementWithAudio || hasStoryAudio);
+        containsMediaElementWithAudio || storyHasBackgroundAudio);
+    this.storeService_.dispatch(
+        Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO, storyHasBackgroundAudio);
   }
 
   /**
