@@ -77,7 +77,8 @@ export const UIType = {
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
- *    storyAudioState: boolean,
+ *    storyHasAudioState: boolean,
+ *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
@@ -115,7 +116,10 @@ export const StateProperty = {
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
-  STORY_HAS_AUDIO_STATE: 'storyAudioState',
+  // Any page has audio, or amp-story has a `background-audio` attribute.
+  STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
+  // amp-story has a `background-audio` attribute.
+  STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
 
@@ -146,6 +150,7 @@ export const Action = {
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
+  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
 };
@@ -212,6 +217,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_STORY_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.STORY_HAS_AUDIO_STATE]: !!data}));
+    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
+      return /** @type {!State} */ (Object.assign({}, state,
+          {[StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data}));
     case Action.TOGGLE_LANDSCAPE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
@@ -381,6 +389,7 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX

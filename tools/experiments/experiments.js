@@ -261,12 +261,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
   },
   {
-    id: 'url-replacement-v2',
-    name: 'new parsing engine for url variables',
-    spec: 'https://github.com/ampproject/amphtml/issues/12119',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -348,6 +342,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
   },
   {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
     id: 'amp-consent-v2',
     name: 'Enables CMP support to amp-consent component',
     spec: 'https://github.com/ampproject/amphtml/issues/17742',
@@ -394,6 +393,13 @@ const EXPERIMENTS = [
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
 ];
 
