@@ -220,7 +220,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
-    /** @private @const {!ClickLayer} */
+    /** Instantiates the tooltip in case its needed. */
     new AmpStoryTooltip(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */

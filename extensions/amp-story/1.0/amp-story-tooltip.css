@@ -31,10 +31,12 @@
   width: 100% !important;
   height: 100% !important;
   background-color: black !important;
-  opacity: 0.3 !important
+  opacity: 0.3 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-.i-amphtml-story-tooltip-layer.i-amphtml-hidden {
+.i-amphtml-story-tooltip-layer.i-amphtml-hidden,
+.i-amphtml-story-tooltip-layer.i-amphtml-hidden::before {
   opacity: 0 !important;
   pointer-events: none !important;
 }

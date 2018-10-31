@@ -432,12 +432,14 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Event} event 'click' event
    */
   maybePerformNavigation_(event) {
+    const target = dev().assertElement(event.target);
+
     if (this.isAmpStoryPageDescendant_(event) &&
-      matches(event.target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
-      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, event.target);
+      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
       return;
     }
 
