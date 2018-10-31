@@ -139,10 +139,17 @@ module.exports = function(context) {
             let argFixer = new ArgFixer(tokens).parse();
             const tokensInExpr = context.getTokens(node);
             const lastArgToken = tokensInExpr[tokensInExpr.length - 2];
+            const nodesToPreserve = node.arguments.slice(metadata.startPos + 1);
+            let origVarArgs = '';
+            if (nodesToPreserve.length) {
+              origVarArgs = getVarArgs(context, nodesToPreserve);
+            }
+            let argsReplacement = argFixer.getSanitizedArg() + origVarArgs + ', ' +
+                argFixer.getRefsAsArgumentsString();
+            console.log(argsReplacement)
             return fixer.replaceTextRange(
                 [argToEval.start, lastArgToken.end],
-                argFixer.getSanitizedArg() + ', ' +
-                argFixer.getRefsAsArgumentsString()
+                argsReplacement
             );
           }
         });
@@ -150,6 +157,15 @@ module.exports = function(context) {
     },
   };
 };
+
+function getVarArgs(context, args) {
+  return args.map(arg => {
+    return context.getTokens(arg).map(token => {
+      console.log(token.value);
+      return token.value;
+    }).join('');
+  }).join(',');
+}
 
 class ArgFixer {
   constructor(tokens) {
