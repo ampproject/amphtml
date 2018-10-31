@@ -1,14 +1,5 @@
 # Building an AMP Extension
 
-## A word on contributing
-
-We suggest opening an "Intent to Implement" GitHub issue for your
-extension as early as you can, so we can advise on next steps or provide
-early feedback on the implementation or naming. See [CONTRIBUTING.md
-for more details](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
-
-## Getting started
-
 AMP can be extended to allow more functionality and components through
 building open source extensions (aka custom elements). For example, AMP
 provides `amp-carousel`, `amp-sidebar` and `amp-access` as
@@ -16,10 +7,42 @@ extensions. If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
 rating viewer, you'd do this by building an extension.
 
+- [A word on contributing](#a-word-on-contributing)
+- [Naming](#naming)
+- [Directory structure](#directory-structure)
+- [Extend AMP.BaseElement](#extend-ampbaseelement)
+- [Element styling](#element-styling)
+- [Register element with AMP](#register-element-with-amp)
+- [Actions and events](#actions-and-events)
+- [Sub-elements ownership](#sub-elements-ownership)
+- [Allowing proper validations](#allowing-proper-validations)
+- [Performance considerations](#performance-considerations)
+- [Layouts supported in your element](#layouts-supported-in-your-element)
+- [Experiments](#experiments)
+- [Documenting your element](#documenting-your-element)
+- [Example of using your extension](#example-of-using-your-extension)
+- [Updating build configs](#updating-build-configs)
+- [Versioning](#versioning)
+- [Unit tests](#unit-tests)
+- [Type checking](#type-checking)
+- [Example PRs](#example-prs)
+
+# Checklist for creating an experiment
+
+-[] Create your directory structure.
+-[] Create an experiment.
+-[] Check previous PRs of past experiments to model your extension after, if applicable.
+
+## A word on contributing
+
+We suggest that you open an "Intent to Implement" GitHub issue for your
+extension as early as you can, so that we can advise you on next steps or provide early feedback on the implementation or naming. For details, see [CONTRIBUTING.md
+for more details](../CONTRIBUTING.md#phase-concept-design).
+
 ## Naming
 
 All AMP extensions (and built-in elements) have their tag names prefixed
-with `amp-`. Make sure to choose a proper clear name for your
+with `amp-`. Make sure to choose an accurate and clear name for your
 extension. For example, video players are also suffixed with `-player`
 (e.g. amp-brid-player).
 
@@ -28,20 +51,22 @@ extension. For example, video players are also suffixed with `-player`
 You create your extension's files inside the `extensions/` directory.
 The directory structure is below:
 
--   extensions/amp-my-element/
-    -   0.1/
-        -   test/
-            -   **test-amp-my-element.js** (Unit test suite for your element)
-            -   More test JS files (Optional)
-        -   **amp-my-element.js** (Contains your element's implementation)
-        -   **amp-my-element.css** (Optional)
-        -   More JS files (Optional)
-        -   validator-amp-my-element.protoascii (Validator rules)
-    -   **amp-my-element.md** (Main usage documentation for your element)
-    -   More documentation in .md files (Optional)
+```text
+/extensions/amp-my-element/
+├── 0.1/
+|   ├── test/
+|   |   ├── test-amp-my-element.js       # Element's unit test suite (req'd)
+|   |   └── More test JS files (optional)
+|   ├── amp-my-element.js                # Element's implementation (req'd)
+|   ├── amp-my-element.css               # Custom CSS (optional)
+|   └── More JS files (optional)
+├── validator-amp-my-element.protoascii  # Validator rules (req'd)
+├── amp-my-element.md                    # Element's main documentation (req'd)
+└── More documentation in .md files (optional)
+└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) (req'd)
 
-In most cases you'll only create the bolded files. If your element does
-not need custom CSS you don't need to create the CSS file.
+```
+In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
 
 ## Extend AMP.BaseElement
 
@@ -253,9 +278,13 @@ Element styles are loaded when the element script itself is included in
 an AMP doc. You tell AMP which CSS belongs to this element when
 registering the element (see below).
 
-Class names prefixed with `-amp-` are considered private and
-publishers are not allowed to use to customize (enforced by AMP
-validator).
+Class names prefixed with `i-amphtml` are considered private. Publishers
+are not allowed to use them for customization (enforced by AMP validator).
+
+Class names prefixed with  `amp-` are public css classes that can be customized
+by publishers. All such classes should be documented in the component-specific
+`.md` file. All CSS classes in component stylesheets should be prefixed with
+either `i-amphtml-` or `amp-`.
 
 ## Register element with AMP
 
@@ -266,16 +295,6 @@ tell AMP which class to use for this tag name and which CSS to load.
 ```javascript
 AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 ```
-
-## Element usage documentation and tests
-
-Make sure to write pretty comprehensive unit tests for your element.
-Also don't forget to write an .md file documenting how to use this
-element along with its attributes requirements and examples.
-
-An extra step that you can do is to write a small AMP doc inside
-examples/ directory to provide easy examples for users to preview and
-for developers to manually test and visually inspect your element.
 
 ## Actions and events
 
@@ -442,7 +461,7 @@ image directly from instagram media endpoint.
 
 ```javascript
 class AmpInstagram extends AMP.BaseElement {
-  // ...  
+  // ...
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('div');
@@ -527,7 +546,7 @@ embedded when `unlayoutCallback` is called.
 unlayoutCallback() {
   if (this.iframe_) {
     removeElement(this.iframe_);
-    this.iframe_ = null;    
+    this.iframe_ = null;
     this.iframePromise_ = null;
     setStyles(this.placeholderWrapper_, {
       'display': '',
@@ -542,7 +561,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, deferMutate and changeSize
+### vsync, mutateElement, and changeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and
@@ -619,7 +638,7 @@ required if the validator hasn't been updated yet to allow your newly
 created extension, otherwise people using it in production will
 invalidate all their AMP documents.
 
-You can add your extension as an experiment in the
+Add your extension as an experiment in the
 `amphtml/tools/experiments` file by adding a record for your extension
 in EXPERIMENTS variable.
 
@@ -628,7 +647,7 @@ in EXPERIMENTS variable.
 const EXPERIMENTS = [
   // ...
   {
-    id: 'amp-my-element',  
+    id: 'amp-my-element',
     name: 'AMP My Element',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-my-element/amp-my-element.md',
@@ -665,7 +684,7 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {  
+  buildCallback() {
     if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
       user.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
@@ -687,19 +706,34 @@ Class AmpMyElement extends AMP.BaseElement {
 AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 ```
 
-### Enable experiment
+### Enabling and removing your experiment
 
 Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
 enable your experiment.
 
-If test on localhost, use the command `AMP.toggleExperiment(id,
-true/false)` to enable.
+If you are testing on your localhost, use the command `AMP.toggleExperiment(id,
+true/false)` to enable the experiment.
+
+File a github issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
+
+## Documenting your element
+
+Create a .md file that serves as the main documentation for your element. This document should include:
+
+- Summary table
+- Overview
+- How to use it including code snippets and images
+- Examples
+- Attributes to specify (optional and required)
+- Validation
+
+For samples of element documentation, see: [amp-list](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-carousel](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md)
 
 ## Example of using your extension
 
-This is optional but it greatly helps users to understand and demo how
-your element works and provides an easy start-point for them to
+This greatly helps users to understand and demonstrate how
+your element works, and provides an easy start-point for them to
 experiment with it. This is basically where you actually build an AMP
 HTML document and use your element in it by creating a file in the
 `examples/` directory, usually with the `my-element.amp.html` file
@@ -713,14 +747,16 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to gulpfile.js to tell it about your extension, its files and
-its examples.
+changes to bundles.config.js to tell it about your extension, its files and
+its examples. You will need to add an entry in the "extensionBundles" array.
 
 ```javascript
+exports.extensionBundles = [
 ...
-declareExtension('amp-kaltura-player', '0.1', /* hasCss */ false);
-declareExtension('amp-carousel', '0.1', /* hasCss */ true);
+  {name: 'amp-kaltura-player', version: '0.1'},
+  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
 ...
+];
 ```
 
 ## Versioning
@@ -782,3 +818,5 @@ $ gulp check-types
   - [amp-sidebar](https://github.com/ampproject/amphtml/commit/99634b18310129f4260e4172cb2750ae7b8ffbf0)
   - [amp-image-lightbox](https://github.com/ampproject/amphtml/commit/e6006f9ca516ae5d7d79267976d3df39cc1f9636)
   - [amp-accordion](https://github.com/ampproject/amphtml/commit/1aae4eee37ec80c6ea9b822fb43ecce73feb7df6)
+- Implementing a video player.
+  - [amp-jwplayer](https://github.com/ampproject/amphtml/commit/4acdd9f1d70a8a374cb886d3a4778476d13e7daf#diff-f650f38f7840dc8148bacd88733be338)

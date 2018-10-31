@@ -29,8 +29,8 @@
  * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
  * @param {!Object=} opt_state
  * @visibleForTesting
+ * TODO(alanorozco): Figure out a longer-term solution
  */
-// TODO(alanorozco): Figure out a longer-term solution
 export function restrictedVsync(win, task, opt_state) {
   win.requestAnimationFrame(() => {
     if (task.measure) {

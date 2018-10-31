@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {FilterType} from './filters/filter';
+import {
+  IFRAME_TRANSPORTS,
+} from '../../amp-analytics/0.1/iframe-transport-vendors';
 import {user} from '../../../src/log';
+
+/**
+ * @typedef {{
+ *   startTimingEvent: (string|undefined)
+ * }}
+ */
+export let AmpAdExitConfigOptions;
 
 /**
  * @typedef {{
  *   targets: !Object<string, !NavigationTargetConfig>,
  *   filters: (!Object<string, !FilterConfig>|undefined),
- *   transport: (!Object<TransportMode, boolean>|undefined)
+ *   transport: (!Object<TransportMode, boolean>|undefined),
+ *   options: (!AmpAdExitConfigOptions|undefined)
  * }}
  */
 export let AmpAdExitConfig;
@@ -53,7 +63,8 @@ export let VariablesDef;
 /**
  * @typedef {{
  *   type: !FilterType,
- *   delay: number
+ *   delay: number,
+ *   startTimingEvent: (string|undefined)
  * }}
  */
 export let ClickDelayConfig;
@@ -69,6 +80,14 @@ export let ClickDelayConfig;
  * }}
  */
 export let ClickLocationConfig;
+
+/**
+ * @typedef {{
+ *   type: !FilterType,
+ *   selector: string
+ * }}
+ */
+export let InactiveElementConfig;
 
 /** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
@@ -101,6 +120,10 @@ export function assertConfig(config) {
   return /** @type {!AmpAdExitConfig} */ (config);
 }
 
+/**
+ * Asserts a transport.
+ * @param {!Object} transport
+ */
 function assertTransport(transport) {
   for (const t in transport) {
     user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
@@ -109,18 +132,30 @@ function assertTransport(transport) {
   }
 }
 
+/**
+ * Asserts an array of filters.
+ * @param {*} filters
+ */
 function assertFilters(filters) {
+  const validFilters = [
+    FilterType.CLICK_DELAY,
+    FilterType.CLICK_LOCATION,
+    FilterType.INACTIVE_ELEMENT,
+  ];
   for (const name in filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
-    user().assert(
-        filters[name].type == FilterType.CLICK_DELAY ||
-        filters[name].type == FilterType.CLICK_LOCATION,
-        'Only ClickDelayFilter and ClickLocationDelay are currently ' +
-        'supported.');
+    user().assert(validFilters.indexOf(filters[name].type) != -1,
+        'Supported filters: ' + validFilters.join(', '));
   }
 }
 
+/**
+ * Asserts targets and its config
+ *
+ * @param {!Object} targets
+ * @param {*} config
+ */
 function assertTargets(targets, config) {
   user().assert(typeof targets == 'object', '\'targets\' must be an object');
   for (const target in targets) {
@@ -128,6 +163,13 @@ function assertTargets(targets, config) {
   }
 }
 
+/**
+ * Asserts target
+ *
+ * @param {string} name
+ * @param {!Object} target
+ * @param {*} config
+ */
 function assertTarget(name, target, config) {
   user().assert(
       typeof target.finalUrl == 'string',
@@ -155,10 +197,7 @@ function assertTarget(name, target, config) {
  * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
-  user().assert(ANALYTICS_CONFIG &&
-      ANALYTICS_CONFIG[vendor] &&
-      ANALYTICS_CONFIG[vendor]['transport'] &&
-      ANALYTICS_CONFIG[vendor]['transport']['iframe'],
-  'Unknown vendor: ' + vendor);
-  return ANALYTICS_CONFIG[vendor]['transport']['iframe'];
+  return user().assertString(IFRAME_TRANSPORTS[vendor],
+      `Unknown or invalid vendor ${vendor}, ` +
+      'note that vendor must use transport: iframe');
 }

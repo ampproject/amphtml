@@ -15,6 +15,7 @@
  */
 
 import {AccessClientAdapter} from '../amp-access-client';
+import {AccessIframeAdapter} from '../amp-access-iframe';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
@@ -52,6 +53,7 @@ describes.fakeWin('AccessSource', {
 
   afterEach(() => {
     toggleExperiment(win, 'amp-access-server', false);
+    toggleExperiment(win, 'amp-access-iframe', false);
   });
 
   function expectSourceType(ampdoc, config, type, adapter) {
@@ -82,11 +84,20 @@ describes.fakeWin('AccessSource', {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
+      'iframeSrc': 'https://acme.com/i',
+      'defaultResponse': {},
     };
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
 
     config['type'] = 'client';
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
+
+    allowConsoleError(() => {
+      config['type'] = 'iframe';
+      expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
+      toggleExperiment(win, 'amp-access-iframe', true);
+      expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
+    });
 
     config['type'] = 'server';
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
@@ -268,35 +279,6 @@ describes.fakeWin('AccessSource adapter context', {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
         /* useAuthData */ true).then(url => {
       expect(url).to.equal('?rid=reader1&type=');
-    });
-  });
-
-  it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
-    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
-      expect(url).to.equal('?at=');
-    });
-  });
-
-  it('should resolve URL with ACCESS_TOKEN, enabled, but null', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(() => null);
-    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
-      expect(url).to.equal('?at=');
-    });
-  });
-
-  it('should resolve URL with ACCESS_TOKEN, enabled, but null promise', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(
-        () => Promise.resolve(null));
-    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
-      expect(url).to.equal('?at=');
-    });
-  });
-
-  it('should resolve URL with ACCESS_TOKEN, enabled, not null', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(
-        () => Promise.resolve('access_token'));
-    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
-      expect(url).to.equal('?at=access_token');
     });
   });
 

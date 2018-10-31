@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
+import {VideoUtils} from '../../src/utils/video';
 import {
-  clearSupportsAutoplayCacheForTesting,
   installVideoManagerForDoc,
-  supportsAutoplay,
 } from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
@@ -95,7 +93,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       videoManager.register(impl);
 
       const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
+      sandbox.stub(entry, 'userInteracted').returns(true);
       entry.isVisible_ = true;
       entry.loaded_ = true;
 
@@ -142,8 +140,8 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 
       const entry = videoManager.getEntryForVideo_(impl);
 
-      const supportsAutoplayStub =
-          sandbox.stub(entry, 'boundSupportsAutoplay_');
+      const supportsAutoplayStub = sandbox.stub(entry, 'supportsAutoplay_');
+
       supportsAutoplayStub.returns(Promise.reject());
 
       entry.isVisible_ = true;
@@ -172,7 +170,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       impl.play();
 
       const entry = videoManager.getEntryForVideo_(impl);
-      entry.userInteractedWithAutoPlay_ = true;
+      sandbox.stub(entry, 'userInteracted').returns(true);
       entry.isVisible_ = false;
 
       impl.pause();
@@ -190,8 +188,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       const entry = videoManager.getEntryForVideo_(impl);
       entry.isVisible_ = false;
 
-      const userInteracted = videoManager.userInteractedWithAutoPlay(impl);
-      expect(userInteracted).to.be.false;
+      expect(videoManager.userInteracted(impl)).to.be.false;
     });
 
 
@@ -217,39 +214,35 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     });
 
 
-    it(`no autoplay - should be paused if the
-        user pressed pause after playing`, () => {
+    it('no autoplay - should pause if user presses pause after playing', () => {
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
 
-          videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
-          entry.isVisible_ = false;
-
-          impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            impl.pause();
-            listenOncePromise(video, VideoEvents.PAUSE).then(() => {
-              const curState = videoManager.getPlayingState(impl);
-              expect(curState).to.equal(PlayingStates.PAUSED);
-            });
-          });
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        impl.pause();
+        listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates.PAUSED);
         });
+      });
+    });
 
-    it(`no autoplay - should be playing manual
-        whenever video is playing`, () => {
+    it('no autoplay - should be playing manual whenever playing', () => {
+      videoManager.register(impl);
+      const entry = videoManager.getEntryForVideo_(impl);
+      entry.isVisible_ = false;
 
-          videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
-          entry.isVisible_ = false;
-
-          impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-            const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-          });
-        });
+      impl.play();
+      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+        const curState = videoManager.getPlayingState(impl);
+        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+      });
+    });
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       klass = createFakeVideoPlayerClass(env.win);
       video = env.createAmpElement('amp-test-fake-videoplayer', klass);
       impl = video.implementation_;
@@ -264,7 +257,10 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
   });
 });
 
-describe.configure().ifNewChrome().run('Supports Autoplay', () => {
+
+describe.configure().ifNewChrome().run('Autoplay support', () => {
+  const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
+
   let sandbox;
 
   let win;
@@ -275,6 +271,50 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
   let createElementSpy;
   let setAttributeSpy;
   let playStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox;
+
+    video = {
+      setAttribute() {},
+      style: {
+        position: null,
+        top: null,
+        width: null,
+        height: null,
+        opacity: null,
+      },
+      muted: null,
+      playsinline: null,
+      webkitPlaysinline: null,
+      paused: false,
+      play() {},
+    };
+
+    const doc = {
+      createElement() {
+        return video;
+      },
+    };
+
+    win = {
+      document: doc,
+    };
+
+    isLite = false;
+
+    createElementSpy = sandbox.spy(doc, 'createElement');
+    setAttributeSpy = sandbox.spy(video, 'setAttribute');
+    playStub = sandbox.stub(video, 'play');
+
+    VideoUtils.resetIsAutoplaySupported();
+  });
+
+  afterEach(() => {
+    VideoUtils.resetIsAutoplaySupported();
+
+    sandbox.restore();
+  });
 
   it('should create an invisible test video element', () => {
     return supportsAutoplay(win, isLite).then(() => {
@@ -329,12 +369,10 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
 
   it('should suppress errors if detection play call rejects a promise', () => {
     const p = Promise.reject('play() can only be initiated by a user gesture.');
-    const promiseCatchSpy = sandbox.spy(p, 'catch');
     playStub.returns(p);
     video.paused = true;
     expect(supportsAutoplay(win, isLite)).not.to.throw;
     return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(promiseCatchSpy.called).to.be.true;
       expect(supportsAutoplay).to.be.false;
       expect(playStub.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -348,59 +386,8 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
     });
   });
 
-  it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(win, isLite);
-    const secondResultRef = supportsAutoplay(win, isLite);
-    expect(firstResultRef).to.equal(secondResultRef);
-
-    clearSupportsAutoplayCacheForTesting();
-
-    const thirdResultRef = supportsAutoplay(win, isLite);
-    expect(thirdResultRef).to.not.equal(firstResultRef);
-    expect(thirdResultRef).to.not.equal(secondResultRef);
-  });
-
-  beforeEach(() => {
-    clearSupportsAutoplayCacheForTesting();
-    sandbox = sinon.sandbox.create();
-
-    video = {
-      setAttribute() {},
-      style: {
-        position: null,
-        top: null,
-        width: null,
-        height: null,
-        opacity: null,
-      },
-      muted: null,
-      playsinline: null,
-      webkitPlaysinline: null,
-      paused: false,
-      play() {},
-    };
-
-    const doc = {
-      createElement() {
-        return video;
-      },
-    };
-
-    win = {
-      document: doc,
-    };
-
-    isLite = false;
-
-    createElementSpy = sandbox.spy(doc, 'createElement');
-    setAttributeSpy = sandbox.spy(video, 'setAttribute');
-    playStub = sandbox.stub(video, 'play');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 });
+
 
 function createFakeVideoPlayerClass(win) {
   /**

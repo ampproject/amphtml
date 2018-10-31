@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   DEFAULT_THRESHOLD,
   IntersectionObserverApi,
   IntersectionObserverPolyfill,
   getIntersectionChangeEntry,
   getThresholdSlot,
+  intersectionRatio,
 } from '../../src/intersection-observer-polyfill';
+import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 describe('IntersectionObserverApi', () => {
@@ -32,6 +33,20 @@ describe('IntersectionObserverApi', () => {
   let baseElement;
   let ioApi;
   let tickSpy;
+
+  const mockViewport = {
+    getRect: () => {
+      return layoutRectLtwh(50, 100, 150, 200);
+    },
+    onScroll: () => {
+      onScrollSpy();
+      return () => {};
+    },
+    onChanged: () => {
+      onChangeSpy();
+      return () => {};
+    },
+  };
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-intersection.html';
@@ -48,10 +63,19 @@ describe('IntersectionObserverApi', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
+    sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+      return mockViewport;
+    });
+    sandbox.stub(Services, 'ampdoc').callsFake(() => {
+      return {
+        getRootNode: () => {return window.document;},
+        win: window,
+      };
+    });
     testEle = {
       isBuilt: () => {return true;},
       getOwner: () => {return null;},
@@ -69,19 +93,7 @@ describe('IntersectionObserverApi', () => {
         };
       },
       getViewport: () => {
-        return {
-          getRect: () => {
-            return layoutRectLtwh(50, 100, 150, 200);
-          },
-          onScroll: () => {
-            onScrollSpy();
-            return () => {};
-          },
-          onChanged: () => {
-            onChangeSpy();
-            return () => {};
-          },
-        };
+        return mockViewport;
       },
       isInViewport: () => {return false;},
     };
@@ -147,7 +159,7 @@ describe('IntersectionObserverApi', () => {
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
@@ -193,7 +205,7 @@ describe('getIntersectionChangeEntry', () => {
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
@@ -225,12 +237,10 @@ describe('IntersectionObserverPolyfill', () => {
           threshold: Infinity,
         });
       };
-      expect(io1).to.throw(
-          'Threshold should be a ' +
-          'finite number or an array of finite numbers');
-      expect(io2).to.throw(
-          'Threshold should be a ' +
-          'finite number or an array of finite numbers');
+      allowConsoleError(() => { expect(io1).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
+      allowConsoleError(() => { expect(io2).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
     });
 
     it('will be sorted', () => {
@@ -251,10 +261,10 @@ describe('IntersectionObserverPolyfill', () => {
           threshold: [0, 1.1],
         });
       };
-      expect(io1).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
-      expect(io2).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
+      allowConsoleError(() => {
+        expect(io1).to.throw('Threshold should be in the range from "[0, 1]"');
+        expect(io2).to.throw('Threshold should be in the range from "[0, 1]"');
+      });
     });
 
     it('getThresholdSlot function', () => {
@@ -286,6 +296,21 @@ describe('IntersectionObserverPolyfill', () => {
     beforeEach(() => {
       callbackSpy = sandbox.spy();
       io = new IntersectionObserverPolyfill(callbackSpy);
+
+      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getRect: () => {
+            return layoutRectLtwh(50, 100, 150, 200);
+          },
+        };
+      });
+      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+        return {
+          getRootNode: () => {return window.document;},
+          win: window,
+        };
+      });
+
       element = {
         isBuilt: () => {return true;},
         getOwner: () => {return null;},
@@ -310,29 +335,29 @@ describe('IntersectionObserverPolyfill', () => {
       // 2nd tick with 0.1 does fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 3rd tick with 0.9 doesn't fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.not.be.called;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 4rd tick with 1 does fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 5th tick with 1 doesn't fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 6th tick with 0.9 does fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 7th tick with 0.1 doesn't fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
       expect(callbackSpy).to.not.be.called;
       // 8th tick with 0 does fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.be.calledOnce;
-      callbackSpy.reset();
+      callbackSpy.resetHistory();
       // 9th tick with 0 doesn't fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
       expect(callbackSpy).to.not.be.called;
@@ -352,7 +377,49 @@ describe('IntersectionObserverPolyfill', () => {
       expect(callbackSpy).to.be.calledOnce;
     });
 
+    describe('mutation observer', () => {
+      it('should create a mutation observer,' +
+        ' on initial observer', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+      });
 
+      it('should not create a mutation observer,' +
+        ' if one already exists', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        const mutationObserver = io.mutationObserver_;
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        expect(io.mutationObserver_).to.be.equal(mutationObserver);
+      });
+
+      it('should remove mutation observer,' +
+        ' on disconnect', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        io.disconnect();
+        expect(io.mutationObserver_).to.not.be.ok;
+      });
+    });
 
     describe('w/o container should get IntersectionChangeEntry when', () => {
       it('completely in viewport', () => {
@@ -686,5 +753,35 @@ describe('IntersectionObserverPolyfill', () => {
         }]);
       });
     });
+  });
+});
+
+describe('intersectionRatio', () => {
+
+  let smallRectMock;
+  let largeRectMock;
+  beforeEach(() => {
+    smallRectMock = {
+      width: 100,
+      height: 100,
+    };
+    largeRectMock = {
+      width: 200,
+      height: 200,
+    };
+  });
+
+  it('should return a valid ratio', () => {
+    const ratio = intersectionRatio(smallRectMock, largeRectMock);
+    expect(ratio).to.be.equal(0.25);
+  });
+
+  it('should not return NaN', () => {
+    const notVisibleMock = {
+      width: 0,
+      height: 0,
+    };
+    const ratio = intersectionRatio(notVisibleMock, notVisibleMock);
+    expect(ratio).to.not.be.equal(NaN);
   });
 });

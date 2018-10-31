@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   adplugg,
 } from '../../../ads/adplugg';
@@ -31,7 +30,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
   beforeEach(() => {
 
     // Set up our test sandbox.
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       // Simulate the iframe that adplugg will be called inside.
       win = iframe.win;
@@ -133,7 +132,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
       expect(AdPluggOnSpy).to.be.calledTwice;
 
       // Call the queued function that registers the event listeners
-      const args = AdPluggOnSpy.getCall(0).args;
+      const {args} = AdPluggOnSpy.getCall(0);
 
       // Assert that the renderStart listener was registered
       expect(args[1]).to.equal('adplugg:renderStart');
@@ -183,7 +182,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
       expect(AdPluggOnSpy).to.be.calledTwice;
 
       // Call the queued function that registers the event listeners
-      const args = AdPluggOnSpy.getCall(1).args;
+      const {args} = AdPluggOnSpy.getCall(1);
 
       // Assert that the noContentAvailable listener was registered
       expect(args[1]).to.equal('adplugg:noContentAvailable');

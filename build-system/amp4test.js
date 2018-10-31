@@ -25,7 +25,7 @@ app.use('/compose-doc', function(req, res) {
   const frameHtml = process.env.SERVE_MODE == 'compiled'
     ? 'dist.3p/current-min/frame.html'
     : 'dist.3p/current/frame.max.html';
-  const extensions = req.query.extensions;
+  const {extensions} = req.query;
   let extensionScripts = '';
   if (!!extensions) {
     extensionScripts = extensions.split(',').map(function(extension) {
@@ -35,7 +35,7 @@ app.use('/compose-doc', function(req, res) {
     }).join('\n');
   }
 
-  const experiments = req.query.experiments;
+  const {experiments} = req.query;
   let metaTag = '';
   let experimentString = '';
   if (experiments) {
@@ -43,6 +43,8 @@ app.use('/compose-doc', function(req, res) {
       experiments + '">';
     experimentString = '"' + experiments.split(',').join('","') + '"';
   }
+  const {css} = req.query;
+  const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
   res.send(`
 <!doctype html>
@@ -50,10 +52,13 @@ app.use('/compose-doc', function(req, res) {
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
+  <title>AMP-TEST</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   ${metaTag}
   <script>
-    window.AMP_CONFIG = window.AMP_CONFIG || {};
+    window.AMP_CONFIG = window.AMP_CONFIG || {
+      "localDev": true
+    };
     window.AMP_CONFIG['allow-doc-opt-in'] =
     (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
   </script>
@@ -61,7 +66,7 @@ app.use('/compose-doc', function(req, res) {
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
   <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
   ${extensionScripts}
-  <style amp-custom>${req.query.css}</style>
+  ${cssTag}
 </head>
 <body>
 ${req.query.body}
@@ -111,4 +116,3 @@ app.use('/request-bank/withdraw/:id', (req, res) => {
     bank[req.params.id] = callback;
   }
 });
-

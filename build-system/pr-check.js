@@ -27,11 +27,11 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execOrDie = require('./exec').execOrDie;
-const getStderr = require('./exec').getStderr;
-const getStdout = require('./exec').getStdout;
+const config = require('./config');
+const minimatch = require('minimatch');
 const path = require('path');
+const {execOrDie, exec, getStderr, getStdout} = require('./exec');
+const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -50,6 +50,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
+ * @param {DOMHighResTimeStamp} startTime
  * @return {number}
  */
 function stopTimer(functionName, startTime) {
@@ -65,11 +66,13 @@ function stopTimer(functionName, startTime) {
 /**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
+ * @return {<Object>} Process info.
  */
 function timedExec(cmd) {
   const startTime = startTimer(cmd);
-  exec(cmd);
+  const p = exec(cmd);
   stopTimer(cmd, startTime);
+  return p;
 }
 
 /**
@@ -89,10 +92,8 @@ function timedExecOrDie(cmd) {
  * @return {!Array<string>}
  */
 function filesInPr() {
-  const files =
-      getStdout('git diff --name-only master...HEAD').trim().split('\n');
-  const changeSummary =
-      getStdout('git -c color.ui=always diff --stat master...HEAD');
+  const files = gitDiffNameOnlyMaster();
+  const changeSummary = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
@@ -124,6 +125,9 @@ function isBuildSystemFile(filePath) {
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
       !isFlagConfig(filePath) &&
+      // Exclude the dev dashboard from build-system, since we want it to
+      // trigger the devDashboard check
+      !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
       !isVisualDiffFile(filePath))
@@ -186,9 +190,32 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.rb' ||
-          filename == 'visual-tests.js' ||
+  return (filename == 'visual-diff.js' ||
+          filename == 'visual-tests' ||
           filePath.startsWith('examples/visual-tests/'));
+}
+
+/**
+ * Determines if the given file is a unit test.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isUnitTest(filePath) {
+  return config.unitTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
+}
+
+/**
+ * Determines if the given file is,
+ * a file concerning the dev dashboard
+ * Concerning the dev dashboard
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isDevDashboardFile(filePath) {
+  return (filePath === 'build-system/app.js' ||
+  filePath.startsWith('build-system/app-index/'));
 }
 
 /**
@@ -197,7 +224,9 @@ function isVisualDiffFile(filePath) {
  * @return {boolean}
  */
 function isIntegrationTest(filePath) {
-  return filePath.includes('test/integration/');
+  return config.integrationTestPaths.some(pattern => {
+    return minimatch(filePath, pattern);
+  });
 }
 
 /**
@@ -215,7 +244,7 @@ function isFlagConfig(filePath) {
  * Determines the targets that will be executed by the main method of
  * this script. The order within this function matters.
  * @param {!Array<string>} filePaths
- * @returns {!Set<string>}
+ * @return {!Set<string>}
  */
 function determineBuildTargets(filePaths) {
   if (filePaths.length == 0) {
@@ -224,6 +253,8 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR_WEBUI',
       'VALIDATOR',
       'RUNTIME',
+      'UNIT_TEST',
+      'DEV_DASHBOARD',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -242,6 +273,10 @@ function determineBuildTargets(filePaths) {
       targetSet.add('DOCS');
     } else if (isFlagConfig(p)) {
       targetSet.add('FLAG_CONFIG');
+    } else if (isUnitTest(p)) {
+      targetSet.add('UNIT_TEST');
+    } else if (isDevDashboardFile(p)) {
+      targetSet.add('DEV_DASHBOARD');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -253,10 +288,27 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+function startSauceConnect() {
+  process.env['SAUCE_USERNAME'] = 'amphtml';
+  process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
+      'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
+  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
+  execOrDie(startScCmd);
+}
+
+function stopSauceConnect() {
+  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
+  execOrDie(stopScCmd);
+}
 
 const command = {
   testBuildSystem: function() {
     timedExecOrDie('gulp ava');
+    timedExecOrDie('node node_modules/jest/bin/jest.js');
   },
   testDocumentLinks: function() {
     timedExecOrDie('gulp check-links');
@@ -268,6 +320,7 @@ const command = {
     timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
+    timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
@@ -276,27 +329,46 @@ const command = {
   buildRuntime: function() {
     timedExecOrDie('gulp build');
   },
-  buildRuntimeMinified: function() {
-    timedExecOrDie('gulp dist --fortesting');
+  buildRuntimeMinified: function(extensions) {
+    let cmd = 'gulp dist --fortesting';
+    if (!extensions) {
+      cmd = cmd + ' --noextensions';
+    }
+    timedExecOrDie(cmd);
+  },
+  runBundleSizeCheck: function(storeBundleSize = false) {
+    let cmd = 'gulp bundle-size';
+    if (storeBundleSize) {
+      cmd += ' --store';
+    }
+    timedExecOrDie(cmd);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild --headless';
+    let cmd = 'gulp test --unit --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
-    // Unit tests with Travis' default chromium
-    timedExecOrDie(cmd);
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+    // Unit tests with Travis' default chromium in coverage mode.
+    timedExecOrDie(cmd + ' --headless --coverage');
+    if (process.env.TRAVIS) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
       timedExecOrDie(cmd);
+      stopSauceConnect();
     }
   },
-  runIntegrationTests: function(compiled) {
+  runUnitTestsOnLocalChanges: function() {
+    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
+  runDevDashboardTests: function() {
+    timedExecOrDie('gulp test --dev_dashboard --nobuild');
+  },
+  runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
@@ -305,12 +377,24 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
-      cmd += ' --saucelabs';
+    if (process.env.TRAVIS) {
+      if (coverage) {
+        timedExecOrDie(cmd + ' --headless --coverage');
+      } else {
+        startSauceConnect();
+        timedExecOrDie(cmd + ' --saucelabs');
+        stopSauceConnect();
+      }
     } else {
-      cmd += ' --headless';
+      timedExecOrDie(cmd + ' --headless');
     }
-    timedExecOrDie(cmd);
+  },
+  runSinglePassCompiledIntegrationTests: function() {
+    timedExecOrDie('rm -R dist');
+    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp test --integration --nobuild --headless '
+        + '--compiled --single_pass');
+    timedExecOrDie('rm -R dist');
   },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
@@ -322,13 +406,17 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --headless';
+    let cmd = 'gulp visual-diff --nobuild';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    timedExec(cmd);
+    const {status} = timedExec(cmd);
+    if (status != 0) {
+      console.error(fileLogPrefix, colors.red('ERROR:'),
+          'Found errors while running', colors.cyan(cmd));
+    }
   },
   verifyVisualDiffTests: function() {
     if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
@@ -339,7 +427,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExec('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --verify_status');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
@@ -350,11 +438,15 @@ const command = {
   buildValidator: function() {
     timedExecOrDie('gulp validator');
   },
+  updatePackages: function() {
+    timedExecOrDie('gulp update-packages');
+  },
 };
 
 function runAllCommands() {
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
@@ -363,16 +455,24 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
-    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+    command.runDevDashboardTests();
+    command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
+    command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
   }
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     command.cleanBuild();
-    command.buildRuntimeMinified();
+    command.buildRuntimeMinified(/* extensions */ true);
+    // Disable bundle-size check on release branch builds.
+    if (process.env['TRAVIS_BRANCH'] === 'master') {
+      command.runBundleSizeCheck(/* storeBundleSize */ true);
+    }
     command.runPresubmitTests();
-    command.runIntegrationTests(/* compiled */ true);
+    command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
+    command.runSinglePassCompiledIntegrationTests();
   }
 }
 
@@ -388,14 +488,16 @@ function runAllCommandsLocally() {
   if (!argv.nobuild) {
     command.cleanBuild();
     command.buildRuntime();
+    command.buildRuntimeMinified(/* extensions */ false);
+    command.runBundleSizeCheck();
   }
 
   // These tests need a build.
   command.runPresubmitTests();
   command.runVisualDiffTests();
   command.runUnitTests();
-  command.runIntegrationTests(/* compiled */ false);
-  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
+  command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
+  command.verifyVisualDiffTests();
 
   // Validator tests.
   command.buildValidatorWebUI();
@@ -429,8 +531,8 @@ function runYarnIntegrityCheck() {
  * Makes sure that yarn.lock was properly updated.
  */
 function runYarnLockfileCheck() {
-  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
-  if (yarnLockfileCheck.includes('yarn.lock')) {
+  const localChanges = gitDiffColor();
+  if (localChanges.includes('yarn.lock')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
         'This PR did not properly update', colors.cyan('yarn.lock') + '.');
     console.error(fileLogPrefix, colors.yellow('NOTE:'),
@@ -438,55 +540,18 @@ function runYarnLockfileCheck() {
         ', run', colors.cyan('gulp update-packages') +
         ', and push a new commit containing the changes.');
     console.error(fileLogPrefix, 'Expected changes:');
-    console.log(yarnLockfileCheck);
+    console.log(localChanges);
     process.exit(1);
   }
 }
 
 /**
- * Returns true if this is a PR build for a greenkeeper branch.
- */
-function isGreenkeeperPrBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a greenkeeper branch.
- */
-function isGreenkeeperPushBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
- * Returns true if this is a push build for a lockfile update on a greenkeeper
- * branch.
- */
-function isGreenkeeperLockfilePushBuild() {
-  return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
-          'chore(package): update lockfile'));
-}
-
-/**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
- * @returns {number}
+ * @return {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
-
-  // Eliminate unnecessary testing on greenkeeper branches by running tests only
-  // on the push build that contains the lockfile update.
-  if (isGreenkeeperPrBuild() ||
-      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
-    console.log(fileLogPrefix,
-        'Skipping unnecessary testing on greenkeeper branches. ' +
-        'Tests will only be run for the push build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck();
@@ -494,6 +559,7 @@ function main() {
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
+    process.env['LOCAL_PR_CHECK'] = true;
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -505,8 +571,7 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
-  if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
     console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
@@ -515,12 +580,14 @@ function main() {
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
-  // Exit early if flag-config files are mixed with non-flag-config files.
-  if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
+  // Exit early if flag-config files are mixed with runtime files.
+  if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files');
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
@@ -535,6 +602,7 @@ function main() {
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
+    command.updatePackages();
     if (buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
@@ -543,45 +611,72 @@ function main() {
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
     }
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      command.runDevDashboardTests();
+    }
     if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('INTEGRATION_TEST')) {
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildCss();
       command.runJsonCheck();
       command.runDepAndTypeChecks();
-      // Run unit tests only if the PR contains runtime changes.
-      if (buildTargets.has('RUNTIME')) {
+      // Run unit tests only if the PR contains runtime or build-system changes.
+      if (buildTargets.has('RUNTIME') ||
+          buildTargets.has('BUILD_SYSTEM')) {
+        // Before running all tests, run tests modified by the PR. (Fail early.)
+        command.runUnitTestsOnLocalChanges();
         command.runUnitTests();
+      } else if (buildTargets.has('UNIT_TEST')) {
+        // PR contains only test changes. Run just the modified unit tests.
+        command.runUnitTestsOnLocalChanges();
       }
     }
   }
 
   if (process.env.BUILD_SHARD == 'integration_tests') {
+    command.updatePackages();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-    }
-    command.runPresubmitTests();
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME')) {
-      command.runIntegrationTests(/* compiled */ false);
-    }
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
-      command.verifyVisualDiffTests();
+      if (buildTargets.has('RUNTIME')) {
+        command.buildRuntimeMinified(/* extensions */ false);
+        command.runBundleSizeCheck();
+      }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');
+    }
+    command.runPresubmitTests();
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
+      command.runIntegrationTests(/* compiled */ false, /* coverage */ false);
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.verifyVisualDiffTests();
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }
     if (buildTargets.has('VALIDATOR')) {
       command.buildValidator();
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
+      command.runSinglePassCompiledIntegrationTests();
     }
   }
 

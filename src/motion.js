@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Services} from './services';
 
 /** @const {function()} */
@@ -82,7 +83,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
 export function continueMotion(contextNode, startX, startY, veloX, veloY,
   callback, opt_vsync) {
   return new Motion(contextNode, startX, startY, veloX, veloY,
-      callback, opt_vsync).start_();
+      callback, opt_vsync).start();
 }
 
 
@@ -133,30 +134,23 @@ export class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
-    /** @private {time} */
-    this.startTime_ = Date.now();
-
-    /** @private {time} */
-    this.lastTime_ = this.startTime_;
-
-    /** @private {!Function} */
-    this.resolve_;
-
-    /** @private {!Function} */
-    this.reject_;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.promise_ = deferred.promise;
+
+    /** @private {!Function} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {!Function} */
+    this.reject_ = deferred.reject;
 
     /** @private {boolean} */
     this.continuing_ = false;
   }
 
-  /** @private */
-  start_() {
+  /** */
+  start() {
     this.continuing_ = true;
     if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
             Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
@@ -225,7 +219,6 @@ export class Motion {
       return false;
     }
 
-    this.lastTime_ = Date.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -248,7 +241,6 @@ export class Motion {
       return;
     }
     this.continuing_ = false;
-    this.lastTime_ = Date.now();
     this.fireMove_();
     if (success) {
       this.resolve_();

@@ -33,13 +33,17 @@ export function withDatePickerCommon(WrappedComponent) {
   const moment = requireExternal('moment');
 
   /**
-   * @param {!moment} max
-   * @return {!moment}
+   * If `max` is null, the default minimum date is the current date.
+   * If `max` is a Moment date and earlier than the current date, then
+   * there is no default minimum date. If `max` is later than the current date,
+   * then the default minimum date is the current date.
+   * @param {?moment} max
+   * @return {?moment}
    */
   function getDefaultMinDate(max) {
     const today = moment();
     if (max) {
-      return !isInclusivelyAfterDay(today, moment(max)) ? today : '';
+      return !isInclusivelyAfterDay(today, max) ? today : null;
     } else {
       return today;
     }
@@ -52,8 +56,8 @@ export function withDatePickerCommon(WrappedComponent) {
    * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
-    const maxInclusive = max && moment(max);
-    const minInclusive = min && moment(min);
+    const maxInclusive = max ? moment(max) : null;
+    const minInclusive = min ? moment(min) : getDefaultMinDate(maxInclusive);
     if (!maxInclusive && !minInclusive) {
       return false;
     } else if (!minInclusive) {
@@ -65,77 +69,91 @@ export function withDatePickerCommon(WrappedComponent) {
     }
   }
 
+  /**
+   * @param {!./dates-list.DatesList} list
+   * @param {!moment} day
+   * @return {boolean}
+   */
+  function datesListContains(list, day) {
+    if (!list) {
+      return false;
+    }
+    return list.contains(day);
+  }
+
   const defaultProps = map({
     blocked: null,
     highlighted: null,
     initialVisibleMonth: '',
     max: '',
     min: '',
-    registerAction: null,
-    src: '',
   });
 
   class Component extends React.Component {
+    /**
+     * Creates an instance of Component.
+     * @param {!Object} props
+     */
     constructor(props) {
       super(props);
 
-      const {min, max, blocked, highlighted} = this.props;
-
-      this.state = {
+      const {
         blocked,
         highlighted,
+        min,
         max,
-        min: min || getDefaultMinDate(max),
-      };
+      } = props;
 
-      this.isDayBlocked = this.isDayBlocked.bind(this);
-      this.isDayHighlighted = this.isDayHighlighted.bind(this);
-      this.isOutsideRange = this.isOutsideRange.bind(this);
+      this.isDayBlocked = datesListContains.bind(null, blocked);
+      this.isDayHighlighted = datesListContains.bind(null, highlighted);
+      this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
 
     /** @override */
     componentDidMount() {
-      if (this.props.emitUpdate) {
-        this.props.emitUpdate();
+      if (this.props.onMount) {
+        this.props.onMount();
       }
     }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isDayBlocked(day) {
-      return this.state.blocked.contains(day);
-    }
+    /** @override */
+    componentWillReceiveProps(nextProps) {
+      const {
+        max,
+        min,
+        blocked,
+        highlighted,
+      } = nextProps;
+      if (min != this.props.min || max != this.props.max) {
+        this.isOutsideRange = isOutsideRange.bind(null, min, max);
+      }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isDayHighlighted(day) {
-      return this.state.highlighted.contains(day);
-    }
+      if (blocked != this.props.blocked) {
+        this.isDayBlocked = datesListContains.bind(null, blocked);
+      }
 
-    /**
-     * @param {!moment} day
-     * @return {boolean}
-     */
-    isOutsideRange(day) {
-      return isOutsideRange(this.state.min, this.state.max, day);
+      if (highlighted != this.props.highlighted) {
+        this.isDayHighlighted = datesListContains.bind(null, highlighted);
+      }
     }
 
     /** @override */
     render() {
       const props = omit(this.props, Object.keys(defaultProps));
+      const {
+        date,
+        daySize,
+        endDate,
+        initialVisibleMonth,
+        startDate,
+      } = props;
 
-      if (this.props.initialVisibleMonth) {
-        props.initialVisibleMonth =
-            () => moment(this.props.initialVisibleMonth);
-      }
+      const initialDate =
+          initialVisibleMonth || date || startDate || endDate || undefined;
+      props.initialVisibleMonth = () => moment(initialDate);
 
       return React.createElement(WrappedComponent, Object.assign({}, props, {
-        daySize: Number(props.daySize),
-        registerAction: this.props.registerAction,
+        daySize: Number(daySize),
         isDayBlocked: this.isDayBlocked,
         isDayHighlighted: this.isDayHighlighted,
         isOutsideRange: this.isOutsideRange,

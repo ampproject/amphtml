@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-
 import {
   getMode,
   getRtvVersionForTesting,
   resetRtvVersionForTesting,
 } from '../../src/mode';
-import {parseUrl} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url';
 
 describe('getMode', () => {
   function getWin(url) {
     const win = {
-      location: parseUrl(url),
+      location: parseUrlDeprecated(url),
     };
     return win;
   }
@@ -78,7 +77,7 @@ describe('getRtvVersion', () => {
       AMP_CONFIG: {
         v: '12345',
       },
-      location: parseUrl('https://acme.org/doc1'),
+      location: parseUrlDeprecated('https://acme.org/doc1'),
     };
     expect(getRtvVersionForTesting(win, true))
         .to.equal('$internalRuntimeVersion$');

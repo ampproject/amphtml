@@ -20,7 +20,8 @@
  */
 
 import {InaboxMessagingHost} from './inabox-messaging-host';
-import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../../src/log';
+import {getData} from '../../src/event-helper';
 import {reportError} from '../../src/error';
 
 /** @const {string} */
@@ -31,13 +32,17 @@ const AMP_INABOX_INITIALIZED = 'ampInaboxInitialized';
 const PENDING_MESSAGES = 'ampInaboxPendingMessages';
 /** @const {string} */
 const INABOX_IFRAMES = 'ampInaboxIframes';
+/** @const {string} */
+const INABOX_UNREGISTER_IFRAME = 'inaboxUnregisterIframe';
 
 /**
  * Class for initializing host script and consuming queued messages.
  * @visibleForTesting
  */
 export class InaboxHost {
-  /** @param win {!Window}  */
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
     // Prevent double initialization
     if (win[AMP_INABOX_INITIALIZED]) {
@@ -56,16 +61,31 @@ export class InaboxHost {
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
-
+    win.AMP = win.AMP || {};
+    if (win.AMP[INABOX_UNREGISTER_IFRAME]) {
+      // It's already defined; log a debug message and assume the existing
+      // implmentation is good.
+      dev().info(TAG, `win.AMP[${INABOX_UNREGISTER_IFRAME}] already defined}`);
+    } else {
+      win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
+    }
     const queuedMsgs = win[PENDING_MESSAGES];
+    const processMessageFn = /** @type function(Event)*/(evt => {
+      try {
+        host.processMessage(evt);
+      } catch (err) {
+        dev().error(TAG, 'Error processing inabox message', evt, err);
+      }
+    });
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
         queuedMsgs.forEach(message => {
-          try {
-            host.processMessage(message);
-          } catch (err) {
-            dev().error(TAG, 'Error processing inabox message', message, err);
+          // Pending messages are added by external scripts.
+          // Validate their data types to avoid client errors.
+          if (!validateMessage(message)) {
+            return;
           }
+          processMessageFn(message);
         });
       } else {
         dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
@@ -74,8 +94,25 @@ export class InaboxHost {
     // Empty and ensure that future messages are no longer stored in the array.
     win[PENDING_MESSAGES] = [];
     win[PENDING_MESSAGES]['push'] = () => {};
-    win.addEventListener('message', host.processMessage.bind(host));
+    win.addEventListener('message', processMessageFn.bind(host));
   }
+}
+
+/**
+ * Validates a message event and print errors if it does not contain expected
+ * fields.
+ *
+ * @param {!Event} message
+ * @return {boolean} if the message is valid or not
+ */
+function validateMessage(message) {
+  const valid = !!(message.source && message.source.postMessage);
+  if (!valid) {
+    user().error(TAG,
+        'Missing message.source. message.data='
+        + JSON.stringify(getData(message)));
+  }
+  return valid;
 }
 
 new InaboxHost(self);

@@ -62,7 +62,9 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
   });
 
   it('should respect media queries', () => {
-    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(() => {
+      return new Promise(res => setTimeout(res, 1));
+    }).then(function() {
       const smallScreen = fixture.doc.getElementById('img3');
       const largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className)
@@ -90,4 +92,31 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
       expect(ampImage.querySelectorAll('img').length).to.equal(1);
     });
   });
+
+  const body = `
+  <amp-img id="img0" srcset="/examples/img/hero@1x.jpg 641w,
+                   /examples/img/hero@2x.jpg 1282w"
+    width=641 height=480 layout=responsive></amp-img>
+  `;
+
+  describes.integration('Internet Explorer edge cases', {
+    body,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    // IE doesn't support the srcset attribute, so if the developer
+    // provides a srcset but no src to amp-img, it should set the src
+    // attribute to the first entry in srcset.
+    it.configure().ifIe()
+        .run('should guarantee src if srcset is not supported', () => {
+          const ampImg = win.document.getElementById('img0');
+          const img = ampImg.querySelector('img');
+          expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
+        });
+  });
 });
+

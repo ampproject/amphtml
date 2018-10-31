@@ -16,6 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -31,14 +32,20 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  getVendorJsPropertyName,
+  setStyles,
+} from '../../../src/style';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
-import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
 
@@ -79,18 +86,196 @@ const SERVICE_PROPS = {
 
 /**
  */
-export class WebAnimationRunner {
+export class AnimationRunner {
 
   /**
    * @param {!Array<!InternalWebAnimationRequestDef>} requests
    */
   constructor(requests) {
-    /** @const @private */
+    /** @const @protected */
     this.requests_ = requests;
+  }
 
-    /** @private {?Array<!Animation>} */
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} unusedHandler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(unusedHandler) {
+  }
+
+  /**
+  * Initializes the players but does not change the state.
+   */
+  init() {
+  }
+
+  /**
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+  }
+
+  /**
+   */
+  pause() {
+  }
+
+  /**
+   */
+  resume() {
+  }
+
+  /**
+   */
+  reverse() {
+  }
+
+  /**
+   * @param {time} unusedTime
+   */
+  seekTo(unusedTime) {
+  }
+
+  /**
+   * Seeks to a relative position within the animation timeline given a
+   * percentage (0 to 1 number).
+   * @param {number} unusedPercent between 0 and 1
+   */
+  seekToPercent(unusedPercent) {
+  }
+
+  /**
+   */
+  finish() {
+  }
+
+  /**
+   */
+  cancel() {
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} unusedPlayState
+   * @private
+   */
+  setPlayState_(unusedPlayState) {
+  }
+}
+
+/**
+ */
+export class AnimationWorkletRunner extends AnimationRunner {
+
+  /**
+   * @param {!Window} win
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   */
+  constructor(win, requests) {
+    super(requests);
+
+    /** @const @private */
+    this.win_ = win;
+
+    /** @protected {?Array<!WorkletAnimation>} */
+    this.players_ = [];
+  }
+
+  /**
+   * @return {string}
+   */
+  createCodeBlob_() {
+
+    return `
+    registerAnimator('anim${++animIdCounter}', class {
+      animate(currentTime, effect) {
+        // TODO: Do some work with \`viewport-margins\` here.
+        if (currentTime == NaN) {
+          return;
+        }
+        effect.localTime = currentTime;
+      }
+    });
+    `;
+  }
+
+  /**
+  * @override
+  * Initializes the players but does not change the state.
+   */
+  init() {
+    this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
+      }
+      // TODO(nainar): This switches all animations to AnimationWorklet.
+      // Limit only to Scroll based animations for now.
+      CSS.animationWorklet.addModule(
+          URL.createObjectURL(new Blob([this.createCodeBlob_()],
+              {type: 'text/javascript'}))).then(() => {
+        const scrollSource =
+          Services.viewportForDoc(this.win_.document).getScrollingElement();
+        const scrollTimeline = new this.win_.ScrollTimeline({
+          scrollSource,
+          orientation: 'block',
+          timeRange: request.timing.duration,
+        });
+        const keyframeEffect = new KeyframeEffect(request.target,
+            request.keyframes, request.timing);
+        const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
+            [keyframeEffect],
+            scrollTimeline);
+        player.play();
+        this.players_.push(player);
+      });
+    });
+  }
+
+  /**
+   * @override
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+  }
+
+  /**
+   * @override
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+}
+
+/**
+ */
+export class WebAnimationRunner extends AnimationRunner {
+
+  /**
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   */
+  constructor(requests) {
+    super(requests);
+
+    /** @protected {?Array<!Animation>} */
     this.players_ = null;
-
 
     /** @private {number} */
     this.runningCount_ = 0;
@@ -103,6 +288,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @return {!WebAnimationPlayState}
    */
   getPlayState() {
@@ -110,6 +296,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {function(!WebAnimationPlayState)} handler
    * @return {!UnlistenDef}
    */
@@ -118,6 +305,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players but does not change the state.
    */
   init() {
@@ -125,12 +313,11 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        for (const k in request.vars) {
-          request.target.style.setProperty(k, String(request.vars[k]));
-        }
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
       }
-
-      const player = request.target.animate(request.keyframes, request.timing);
+      const player = request.target.animate(
+          request.keyframes, request.timing);
       player.pause();
       return player;
     });
@@ -146,6 +333,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -157,39 +345,51 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   pause() {
     dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
-      player.pause();
+      if (player.playState == WebAnimationPlayState.RUNNING) {
+        player.pause();
+      }
     });
   }
 
   /**
+   * @override
    */
   resume() {
     dev().assert(this.players_);
-    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+    const oldRunnerPlayState = this.playState_;
+    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
-    this.runningCount_ = this.players_.length;
+    this.runningCount_ = 0;
     this.players_.forEach(player => {
-      player.play();
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
+        player.play();
+        this.runningCount_++;
+      }
     });
   }
 
   /**
+   * @override
    */
   reverse() {
     dev().assert(this.players_);
+    // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach(player => {
       player.reverse();
     });
   }
 
   /**
+   * @override
    * @param {time} time
    */
   seekTo(time) {
@@ -202,6 +402,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number).
    * @param {number} percent between 0 and 1
@@ -214,6 +415,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   finish() {
     if (!this.players_) {
@@ -228,6 +430,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   cancel() {
     if (!this.players_) {
@@ -240,6 +443,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {!WebAnimationPlayState} playState
    * @private
    */
@@ -257,7 +461,7 @@ export class WebAnimationRunner {
   getTotalDuration_() {
     let maxTotalDuration = 0;
     for (let i = 0; i < this.requests_.length; i++) {
-      const timing = this.requests_[i].timing;
+      const {timing} = this.requests_[i];
 
       user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
       'timeline, we can not seek to a relative position within an infinite ' +
@@ -299,7 +503,8 @@ class Scanner {
       return false;
     }
 
-    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|!WebCompAnimationDef|!WebKeyframeAnimationDef)
+    // WebAnimationDef: (!WebMultiAnimationDef|!WebSpecAnimationDef|
+    //                   !WebCompAnimationDef|!WebKeyframeAnimationDef)
     if (spec.animations) {
       this.onMultiAnimation(/** @type {!WebMultiAnimationDef} */ (spec));
     } else if (spec.switch) {
@@ -368,6 +573,9 @@ export class Builder {
    */
   constructor(win, rootNode, baseUrl, vsync, resources) {
     /** @const @private */
+    this.win_ = win;
+
+    /** @const @private */
     this.css_ = new CssContextImpl(win, rootNode, baseUrl);
 
     /** @const @private */
@@ -381,22 +589,31 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
+
+    /** @private {boolean} */
+    this.useAnimationWorklet_ =
+      Services.platformFor(this.win_).isChrome() &&
+      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+      'animationWorklet' in CSS;
   }
 
   /**
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {boolean} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return new WebAnimationRunner(requests);
+        return this.useAnimationWorklet_ && hasPositionObserver ?
+          new AnimationWorkletRunner(this.win_, requests) :
+          new WebAnimationRunner(requests);
       });
     });
   }
@@ -406,6 +623,7 @@ export class Builder {
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @param {?WebAnimationDef|undefined} args
    * @param {?Element} target
+   * @param {?number} index
    * @param {?Object<string, *>} vars
    * @param {?WebAnimationTimingDef} timing
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
@@ -573,10 +791,12 @@ export class MeasureScanner extends Scanner {
       return impl.getAnimationSpec();
     });
     this.with_(spec, () => {
-      const target = this.target_;
-      const index = this.index_;
-      const vars = this.vars_;
-      const timing = this.timing_;
+      const {
+        target_: target,
+        index_: index,
+        vars_: vars,
+        timing_: timing,
+      } = this;
       const promise = otherSpecPromise.then(otherSpec => {
         if (!otherSpec) {
           return;
@@ -626,7 +846,7 @@ export class MeasureScanner extends Scanner {
       // whitelisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
-      const object = /** {!Object<string, *>} */ (specKeyframes);
+      const object = /** @type {!Object<string, *>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = {};
       for (const prop in object) {
@@ -655,7 +875,7 @@ export class MeasureScanner extends Scanner {
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
       // https://github.com/web-animations/web-animations-js/issues/14
-      const array = /** {!Array<!Object<string, *>>} */ (specKeyframes);
+      const array = /** @type {!Array<!Object<string, *>>} */ (specKeyframes);
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
@@ -711,10 +931,12 @@ export class MeasureScanner extends Scanner {
    */
   with_(spec, callback) {
     // Save context.
-    const prevTarget = this.target_;
-    const prevIndex = this.index_;
-    const prevVars = this.vars_;
-    const prevTiming = this.timing_;
+    const {
+      target_: prevTarget,
+      index_: prevIndex,
+      vars_: prevVars,
+      timing_: prevTiming,
+    } = this;
 
     // Push new context and perform calculations.
     const targets =
@@ -923,7 +1145,7 @@ export class MeasureScanner extends Scanner {
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
     user().assert(
-        value != null && (value >= 0 || value < 0 && opt_allowNegative),
+        value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
         '"%s" is invalid: %s', field, newValue);
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
@@ -1055,8 +1277,7 @@ class CssContextImpl {
    * @protected
    */
   withTarget(target, index, callback) {
-    const prev = this.currentTarget_;
-    const prevIndex = this.currentIndex_;
+    const {currentTarget_: prev, currentIndex_: prevIndex} = this;
     this.currentTarget_ = target;
     this.currentIndex_ = index;
     const result = callback(target);

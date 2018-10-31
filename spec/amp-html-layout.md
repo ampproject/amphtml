@@ -106,7 +106,7 @@ Supported values for the `layout` attribute:
     </tr>
     <tr>
       <td><code>fill</code></td>
-      <td>The element takes the space available to it&mdash;both width and height. In other words, the layout and size of a <code>fill</code> element matches its parent.</td>
+      <td>The element takes the space available to it&mdash;both width and height. In other words, the layout and size of a <code>fill</code> element matches its parent. For an element to fill its parent container, specify the "fill" layout, and ensure the parent container specifies <code>position:relative</code> or <code>position:absolute</code>. </td>
     </tr>
     <tr>
       <td><code>fixed</code></td>
@@ -121,12 +121,16 @@ Supported values for the `layout` attribute:
       <td>The element and other elements in its parent with layout type <code>flex-item</code> take the parent container's remaining space when the parent is a flexible container (i.e., <code>display: flex</code>). The <code>width</code> and <code>height</code> attributes are not required.</td>
     </tr>
     <tr>
+      <td><code>intrinsic</code></td>
+      <td>The element takes the space available to it and resizes its height automatically to the aspect ratio given by the <code>width</code> and <code>height</code> attributes <em>until</em> it reaches the element's natural size or reaches a CSS constraint (e.g., max-width). The width and height attributes must be present. This layout works very well for most AMP elements, including <code>amp-img</code>, <code>amp-carousel</code>, etc. The available space depends on the parent element and can also be customized using <code>max-width</code> CSS. This layout differs from <code>responsive</code> by having an intrinsic height and width. This is most apparent inside a floated element where a <code>responsive</code> layout will render 0x0 and an <code>intrinsic</code> layout will inflate to the smaller of its natural size or any CSS constraint.</td>
+    </tr>
+    <tr>
       <td><code>nodisplay</code></td>
       <td>The element isn't displayed, and takes up zero space on the screen as if its display style was <code>none</code>. This layout can be applied to every AMP element.  It’s assumed that the element can display itself on user action (e.g., <code>amp-lightbox</code>). The <code>width</code> and <code>height</code> attributes are not required.</td>
     </tr>
     <tr>
       <td><code>responsive</code></td>
-      <td>The element takes the space available to it and resizes its height automatically to the aspect ratio given by the <code>width</code> and <code>height</code> attributes. This layout works very well for most AMP elements, including <code>amp-img</code>, <code>amp-video</code>, etc.  The available space depends on the parent element and can also be customized using <code>max-width</code> CSS. The <code>width</code> and <code>height</code> attributes must be present.</td>
+      <td>The element takes the space available to it and resizes its height automatically to the aspect ratio given by the <code>width</code> and <code>height</code> attributes. This layout works very well for most AMP elements, including <code>amp-img</code>, <code>amp-video</code>, etc.  The available space depends on the parent element and can also be customized using <code>max-width</code> CSS. The <code>width</code> and <code>height</code> attributes must be present.<p><strong>Note</strong>: Elements with <code>"layout=responsive"</code> have no intrinsic size. The size of the element is determined from its container element. To ensure your AMP element displays, you must specify a width and height for the  containing element. Do not specify <code>"display:table"</code> on the containing element as this overrides the display of the AMP element, rendering the AMP element invisible.</p></td>
     </tr>
   </tbody>
 </table>
@@ -175,7 +179,7 @@ In the following example, the height of the image will default to 80% of the wid
 
 ### `media`
 
-All AMP elements support the `media` attribute. The value of `media` is a media query. If the query does not match, the element is not rendered at all and its resources and potentially its child resources will not be fetched. If the browser window changes size or orientation, the media queries are re-evaluated and elements are hidden and shown based on the new results.
+Most AMP elements support the `media` attribute. The value of `media` is a media query. If the query does not match, the element is not rendered at all and its resources and potentially its child resources will not be fetched. If the browser window changes size or orientation, the media queries are re-evaluated and elements are hidden and shown based on the new results.
 
 **Example**: Using the `media` attribute
 
@@ -271,6 +275,13 @@ The following table describes the acceptable parameters, CSS classes, and styles
       <td>No</td>
       <td>Yes, based on parent container.</td>
       <td><code>block</code></td>
+    </tr>
+    <tr>
+      <td><code>intrinsic</code></td>
+      <td>Yes</td>
+      <td>Yes, based on parent container and aspect ratio of <code>width:height</code>.</td>
+      <td>Yes, <code>i-amphtml-sizer</code>.</td>
+      <td><code>block</code> (behaves like a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element" rel="nofollow">replaced element</a>)</td>
     </tr>
     <tr>
       <td><code>nodisplay</code></td>

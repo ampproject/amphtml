@@ -17,6 +17,7 @@
 import * as adHelper from '../../../../src/ad-helper';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-ad-ui handler', {
@@ -51,6 +52,21 @@ describes.realWin('amp-ad-ui handler', {
       expect(attemptCollapseSpy).to.not.be.called;
     });
 
+    it('should collapse ad amp-layout container if there is one', () => {
+      adElement = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-ad-container-id': 'test',
+      });
+      const container = createElementWithAttributes(env.win.document,
+          'amp-layout', {'id': 'test'});
+      container.appendChild(adElement);
+      env.win.document.body.appendChild(container);
+      adImpl = new BaseElement(adElement);
+      uiHandler = new AmpAdUIHandler(adImpl);
+      const adAttemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      uiHandler.applyNoContentUI();
+      expect(adAttemptCollapseSpy).to.not.be.called;
+    });
+
     it('should try to collapse element first', () => {
       sandbox.stub(adImpl, 'getFallback').callsFake(() => {
         return true;
@@ -78,7 +94,7 @@ describes.realWin('amp-ad-ui handler', {
           () => {
             return Promise.reject();
           });
-      sandbox.stub(uiHandler.baseInstance_, 'deferMutate').callsFake(
+      sandbox.stub(uiHandler.baseInstance_, 'mutateElement').callsFake(
           callback => {
             callback();
             resolve();
@@ -101,7 +117,7 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
         return Promise.reject();
       });
-      sandbox.stub(adImpl, 'deferMutate').callsFake(callback => {
+      sandbox.stub(adImpl, 'mutateElement').callsFake(callback => {
         callback();
         resolve();
       });

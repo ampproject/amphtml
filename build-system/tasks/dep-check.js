@@ -16,13 +16,11 @@
 'use strict';
 
 
-const babel = require('babelify');
+const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const depCheckConfig = require('../dep-check-config');
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
@@ -30,12 +28,14 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -57,6 +57,7 @@ let GlobsDef;
 
 /**
  * @constructor @final @struct
+ * @param {!RuleConfigDef} config
  */
 function Rule(config) {
   /** @private @const {!RuleConfigDef} */
@@ -174,8 +175,13 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel.configure({}));
+  const bundler = browserify(entryModule, {debug: true})
+      .transform(babelify, {
+        compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
+      });
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -213,7 +219,7 @@ function getEntryModule(extensionFolder) {
  * with nested dependencies. We flatten it so all we have are individual
  * modules and their imports as well as making the entries unique.
  *
- * @param {!ModuleDef} entryModule
+ * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
@@ -223,7 +229,7 @@ function flattenGraph(entryPoints) {
   // Now make the graph have unique entries
   return flatten(entryPoints)
       .reduce((acc, cur) => {
-        const name = cur.name;
+        const {name} = cur;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
               // Get rid of the absolute path for minimatch'ing
@@ -288,7 +294,7 @@ function toArrayOrDefault(value, defaultValue) {
 /**
  * Flatten array of arrays.
  *
- * @type {!Array<!Array>}
+ * @param {!Array<!Array>} arr
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
@@ -297,5 +303,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['update-packages', 'css'],
+    maybeUpdatePackages.concat(['css']),
     depCheck);

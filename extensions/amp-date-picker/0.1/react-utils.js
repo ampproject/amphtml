@@ -30,12 +30,12 @@ function createDeferred_() {
      */
     constructor(props) {
       super(props);
-      this.state = {value: ''};
+      this.state = {value: this.props.initial};
     }
 
     /** @override */
     shouldComponentUpdate() {
-      return !this.state.value;
+      return this.state.value == this.props.initial;
     }
 
     /** @override */
@@ -49,8 +49,13 @@ function createDeferred_() {
     }
   }
 
+  Deferred.defaultProps = {
+    initial: '',
+  };
+
   return Deferred;
 }
+
 
 /** @private {?function(new:React.Component, !Object)} */
 let Deferred_ = null;

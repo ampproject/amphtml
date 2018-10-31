@@ -19,8 +19,8 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Monitors the position of an element within the viewport as a user scrolls, and dispatches <code>enter</code>, <code>exit</code> and <code>scroll</code> events that can be used with
-    other components, such as <code>&lt;amp-animation>.</code>
+    <td>Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
+    other AMP components.</code>
     </td>
   </tr>
   <tr>
@@ -44,20 +44,22 @@ limitations under the License.
 
 [TOC]
 
-## What is amp-position-observer?
-`amp-position-observer` is a functional component that monitors the position of an
-element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**)
-which can be used to trigger actions (**Only Low Trust Actions**) on other components.
+## Overview
 
+The `amp-position-observer` component monitors the position of an
+element within the viewport as a user scrolls, and dispatches
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation).
+
+{% call callout('Note', type='note') %}
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
+{% endcall %}
 
 ## What can I do with amp-position-observer?
 
-Currently [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+Currently, [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
-to trigger their actions such as starting an animation, seeking to a position
-within the animation, pausing a video, etc.
+to trigger their actions (e.g., starting an animation, seeking to a position
+within the animation, pausing a video, etc.).
 
 ### Scroll-bound animations
 The `amp-animation` component exposes a `seekTo` action that can be tied to the `scroll` event
@@ -188,10 +190,10 @@ as clock becomes less than 50% visible.
 
 ## Attributes
 
-#### target-id (optional)
+##### target (optional)
 Specifies the ID of the element to observe. If **not specified**, the **parent** of `<amp-position-observer>` is used as the target.
 
-#### intersection-ratios (optional)
+##### intersection-ratios (optional)
 
 Defines how much of the target should be visible in the viewport before `<amp-position-observer>` triggers any of its events. The value is a number between 0 and 1 (default is 0).
 
@@ -203,7 +205,7 @@ You can specify different ratios for top vs. bottom by providing two values (`<t
 - `intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
 
 
-#### viewport-margins (optional)
+##### viewport-margins (optional)
 
 A `px` or `vh` value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed `px`. Defaults to 0.
 
@@ -212,6 +214,10 @@ You can specify different values for top vs. bottom by providing two values (`<t
 - `viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
 - `viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
 - `viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+
+##### once (optional)
+
+Only triggers the `enter` and `exit` events once. The `scroll` event will also only perform one iteration.
 
 ## Validation
 

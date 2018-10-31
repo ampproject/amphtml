@@ -16,49 +16,91 @@
 
 import {dev} from '../log';
 
-/** @typedef {{
-      payload: *,
-      access: number,
-    }} */
-export let Cacheable;
-
 /** @const {string} */
 const TAG = 'lru-cache';
 
-export class LRUCache {
-  /** @param {number} capacity */
+/**
+ * @template T
+ */
+export class LruCache {
+  /**
+   * @param {number} capacity
+   */
   constructor(capacity) {
-    /** @private {number} */
+    /** @private @const {number} */
     this.capacity_ = capacity;
 
-    /** @private {!Object<(number|string), !Cacheable>} */
-    this.cache_ = {};
+    /** @private {number} */
+    this.size_ = 0;
+
+    /**
+     * An incrementing counter to define the last access.
+     * @private {number}
+     */
+    this.access_ = 0;
+
+    /** @private {!Object<(number|string), {payload: T, access: number}>} */
+    this.cache_ = Object.create(null);
   }
 
   /**
-   * @param {number|string} id
-   * @return {*} The cached payload.
+   * Returns whether key is cached.
+   *
+   * @param {number|string} key
+   * @return {boolean}
    */
-  get(id) {
-    if (this.cache_[id]) {
-      this.cache_[id].access = Date.now();
-      return this.cache_[id].payload;
+  has(key) {
+    return !!this.cache_[key];
+  }
+
+  /**
+   * @param {number|string} key
+   * @return {T} The cached payload.
+   */
+  get(key) {
+    const cacheable = this.cache_[key];
+    if (cacheable) {
+      cacheable.access = ++this.access_;
+      return cacheable.payload;
     }
     return undefined;
   }
 
   /**
-   * @param {number|string} id
-   * @param {*} payload The payload to cache.
+   * @param {number|string} key
+   * @param {T} payload The payload to cache.
    */
-  put(id, payload) {
-    this.cache_[id] = {payload, access: Date.now()};
-    const cacheKeys = /**@type {!Array<number>}*/ (Object.keys(this.cache_));
-    if (cacheKeys.length > this.capacity_) {
-      dev().warn(TAG, 'Trimming template cache');
-      // Evict oldest entry to ensure memory usage is minimized.
-      cacheKeys.sort((a, b) => this.cache_[b].access - this.cache_[a].access);
-      delete this.cache_[cacheKeys[cacheKeys.length - 1]];
+  put(key, payload) {
+    if (!this.has(key)) {
+      this.size_++;
+    }
+    this.cache_[key] = {payload, access: this.access_};
+    this.evict_();
+  }
+
+  /**
+   * Evicts the oldest cache entry, if we've exceeded capacity.
+   */
+  evict_() {
+    if (this.size_ <= this.capacity_) {
+      return;
+    }
+
+    dev().warn(TAG, 'Trimming LRU cache');
+    const cache = this.cache_;
+    let oldest = this.access_ + 1;
+    let oldestKey;
+    for (const key in cache) {
+      const {access} = cache[key];
+      if (access < oldest) {
+        oldest = access;
+        oldestKey = key;
+      }
+    }
+
+    if (oldestKey !== undefined) {
+      delete cache[oldestKey];
+      this.size_--;
     }
   }
 }

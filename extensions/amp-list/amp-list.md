@@ -43,7 +43,7 @@ using a supplied template.</td>
 The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 You can specify a template in one of two ways:
@@ -93,7 +93,15 @@ Here is the JSON file that we used:
  ]
 }
 ```
+Here is how we styled the content fetched:
 
+```css
+    amp-list div[role="list"] {
+      display: grid;
+      grid-gap: 0.5em;
+    } 
+```
+    
 ## Behavior
 
 The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from
@@ -162,6 +170,19 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 </amp-list>
 ```
 
+### Refreshing data
+
+The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes.
+
+```html
+<button on="tap:myList.refresh">Refresh List</button>
+<amp-list id="myList" src="https://foo.com/list.json">
+  <template type="amp-mustache">
+    <div>{{title}}</div>
+  </template>
+</amp-list>
+```
+
 ## Attributes
 
 ##### src (required)
@@ -170,8 +191,10 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
+
+The `src` attribute may be omitted if the `[src]` attribute exists. This is useful when rendering content as a result of a user gesture instead of on page load when working with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ##### credentials (optional)
 
@@ -180,7 +203,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Supported values: `omit`, `include`
 * Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 Here's an example that specifies including credentials to display personalized content in a list:
 
@@ -212,13 +235,31 @@ When `items="items"` is specified (which, is the default) the response must be a
 
 #### max-items (optional)
 
-An integer value spcifying the maximum length of the items array to be rendered.
-The `items` array will be trucated to `max-items` entries if the returned value exceeds `max-items`.
+An integer value specifying the maximum length of the items array to be rendered.
+The `items` array will be truncated to `max-items` entries if the returned value exceeds `max-items`.
 
 #### single-item (optional)
 
 Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
+
+#### reset-on-refresh (optional)
+
+Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
+
+By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
+
+#### binding (optional)
+
+For pages using `amp-list` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
+
+We recommend using `binding="no"` or `binding="refresh"` for faster performance.
+
+- `binding="no"`: Never block render **(fastest)**.
+- `binding="refresh"`: Don't block render on initial load **(faster)**.
+- `binding="always"`: Always block render **(slow)**.
+
+If `binding` attribute is not provided, default is `always`.
 
 ##### common attributes
 

@@ -28,11 +28,14 @@ import {
   AnimationManager,
   hasAnimations,
 } from './animation';
+import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
+import {Services} from '../../../src/services';
+import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
   closestBySelector,
   matches,
@@ -40,9 +43,11 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -81,7 +86,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private {?Element} */
+    /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
     /** @private @const {!Promise} */
@@ -92,35 +97,38 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    let mediaPoolResolveFn, mediaPoolRejectFn;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      mediaPoolResolveFn = resolve;
-      mediaPoolRejectFn = reject;
-    });
+    this.mediaPoolPromise_ = deferred.promise;
 
     /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+    this.mediaPoolResolveFn_ = deferred.resolve;
 
     /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
+    this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private @const {boolean} Only prerender the first story page. */
-    this.prerenderAllowed_ = matches(this.element,
-        'amp-story-page:first-of-type');
+    /** @private {boolean} */
+    this.prerenderAllowed_ = false;
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /**
+     * Whether the user agent matches a bot.  This is used to prevent resource
+     * optimizations that make the document less useful at crawl time, e.g.
+     * removing sources from videos.
+     * @private @const {boolean}
+     */
+    this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
   }
 
 
-  /*
-   * @return {?./animation.AnimationManager}
+  /**
    * @private
    */
   maybeCreateAnimationManager_() {
@@ -136,8 +144,17 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /** @override */
+  firstAttachedCallback() {
+    // Only prerender the first story page.
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
+  }
+
+
+  /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
+    this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -148,6 +165,22 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+  }
+
+
+  /**
+   * Delegates video autoplay so the video manager does not follow the
+   * autoplay attribute that may have been set by a publisher, which could
+   * play videos from an inactive page.
+   */
+  delegateVideoAutoplay() {
+    const videos = this.element.querySelectorAll('amp-video');
+    if (videos.length < 1) {
+      return;
+    }
+    toArray(videos).forEach(el => {
+      VideoServiceSync.delegateAutoplay(/** @type {!AmpElement} */ (el));
+    });
   }
 
 
@@ -337,8 +370,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.pause(
-          /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      if (this.isBotUserAgent_) {
+        mediaEl.pause();
+      } else {
+        return mediaPool.pause(
+            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+      }
     });
   }
 
@@ -350,7 +387,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.play();
+      } else {
+        return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -362,7 +403,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -373,7 +418,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = true;
+        mediaEl.setAttribute('muted', '');
+      } else {
+        return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -384,7 +434,12 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        mediaEl.muted = false;
+        mediaEl.removeAttribute('muted');
+      } else {
+        return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -396,7 +451,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      if (this.isBotUserAgent_) {
+        // No-op.
+      } else {
+        return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+      }
     });
   }
 
@@ -461,7 +520,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setDistance(distance) {
     // TODO(ccordry) refactor this when pages are managed
     if (this.isAd()) {
-      distance = Math.min(distance, 1);
+      distance = Math.min(distance, 2);
     }
 
     this.element.setAttribute('distance', distance);
@@ -486,10 +545,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} progress The progress from 0.0 to 1.0.
    */
   emitProgress_(progress) {
-    const payload = {
-      pageId: this.element.id,
-      progress,
-    };
+    const payload = dict({
+      'pageId': this.element.id,
+      'progress': progress,
+    });
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.PAGE_PROGRESS, payload,
         eventInit);
@@ -594,8 +653,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   next(opt_isAutomaticAdvance) {
     const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
-    if (pageId === null) {
-      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
+    if (!pageId) {
       return;
     }
 
@@ -607,7 +665,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {number} direction The direction in which navigation needs to takes place.
    */
   navigateOnTap(direction) {
-    const payload = {direction};
+    const payload = dict({'direction': direction});
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
         eventInit);
@@ -619,7 +677,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId) {
-    const payload = {targetPageId};
+    const payload = dict({'targetPageId': targetPageId});
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
@@ -636,7 +694,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     getLogEntries(this.element).then(logEntries => {
       dispatchCustom(this.win, this.element,
-          EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+          EventType.DEV_LOG_ENTRIES_AVAILABLE,
+          // ? is OK because all consumers are internal.
+          /** @type {?} */ (logEntries), {bubbles: true});
     });
   }
 
@@ -710,5 +770,3 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
-
-AMP.registerElement('amp-story-page', AmpStoryPage);

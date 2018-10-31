@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 
 /**
  * This interface is intended to be implemented by Subscription platforms to
@@ -27,20 +25,64 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 export class SubscriptionPlatform {
 
   /**
-   * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
+   * Returns the service Id.
+   * @return {string}
    */
-  getEntitlements() {
-  }
-}
+  getServiceId() {}
 
+  /**
+   * Requests entitlement for a subscription platform.
+   * @return {!Promise<?./entitlement.Entitlement>}
+   */
+  getEntitlements() {}
 
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+  /**
+   * Activates the subscription platform and hands over the control for
+   * rendering.
+   * @param {!./entitlement.Entitlement} unusedEntitlement
+   */
+  activate(unusedEntitlement) {}
+
+  /**
+   * Returns if pingback is enabled for this platform.
+   * @return {boolean}
+   */
+  isPingbackEnabled() {}
+
+  /**
+   * Performs the pingback to the subscription platform.
+   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
+   * @return {!Promise|undefined}
+   */
+  pingback(unusedSelectedPlatform) {}
+
+  /**
+   * Tells if the platform supports a score factor
+   * @param {string} unusedFactor
+   * @return {number}
+   */
+  getSupportedScoreFactor(unusedFactor) {}
+
+  /**
+   * Executes action for the local platform.
+   * @param {string} unusedAction
+   * @return {!Promise<boolean>}
+   */
+  executeAction(unusedAction) {}
+
+  /**
+   * Returns the base score configured for the platform.
+   * @return {number}
+   */
+  getBaseScore() {}
+
+  /**
+   * Decorate the DomNode according to your platform
+   * @param {!Element} unusedElement
+   * @param {string} unusedAction
+   * @param {?JsonObject} unusedOptions
+   */
+  decorateUI(unusedElement, unusedAction, unusedOptions) {}
 }
 
 /**

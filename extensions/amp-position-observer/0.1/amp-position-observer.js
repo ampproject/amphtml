@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
-import {
-  Layout,
-  assertLength,
-  getLengthNumeral,
-  getLengthUnits,
-  parseLength,
-} from '../../../src/layout';
+import {ActionTrust} from '../../../src/action-constants';
 import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
@@ -31,8 +24,15 @@ import {
   layoutRectsRelativePos,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -94,11 +94,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {number} */
     this.scrollProgress_ = 0;
-  }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    /** @private {boolean} */
+    this.runOnce_ = false;
+
+    /** @private {boolean} */
+    this.firstIterationComplete_ = false;
   }
 
   /** @override */
@@ -108,6 +109,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // we become visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.init_.bind(this));
+
+    this.runOnce_ = this.element.hasAttribute('once');
   }
 
   /**
@@ -131,7 +134,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerEnter_() {
     const name = 'enter';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -141,7 +144,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   triggerExit_() {
     const name = 'exit';
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -156,7 +159,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerScroll_() {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        {percent: this.scrollProgress_});
+        dict({'percent': this.scrollProgress_}));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
   }
 
@@ -167,6 +170,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   positionChanged_(entry) {
+
+    if (this.runOnce_ && this.firstIterationComplete_) {
+      return;
+    }
+
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
 
@@ -181,7 +189,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     // Adjust viewport based on exclusion margins
     const adjViewportRect = this.applyMargins_(entry.viewportRect);
-    const positionRect = entry.positionRect;
+    const {positionRect} = entry;
 
     // Relative position of the element to the adjusted viewport.
     let relPos;
@@ -198,6 +206,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
+      this.firstIterationComplete_ = true;
     }
 
     if (!wasVisible && this.isVisible_) {
@@ -275,8 +284,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   parseAttributes_() {
-    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>"
-    // e.g, "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
+    // Ratio is either "<top-bottom:{0,1}>" or "<top:{0,1}> <bottom:{0,1}>" e.g,
+    // "0.5 1": use 50% visibility at top and 100% at the bottom of viewport.
     const ratios = this.element.getAttribute('intersection-ratios');
     if (ratios) {
       const topBottom = ratios.trim().split(' ');
@@ -287,8 +296,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       }
     }
 
-    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}> <bottom:{px,vh}>"
-    // e.g, "100px 10vh": exclude 100px from top and 10vh from bottom of viewport.
+    // Margin is either "<top-bottom:{px,vh}>" or "<top:{px,vh}>
+    // <bottom:{px,vh}>" e.g, "100px 10vh": exclude 100px from top and 10vh from
+    // bottom of viewport.
     const margins = this.element.getAttribute('viewport-margins');
     if (margins) {
       const topBottom = margins.trim().split(' ');
@@ -304,7 +314,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /**
    * Finds the container scene. Either parent of the component or specified by
-   * `target-id` attribute.
+   * `target` attribute.
    * @return {!Element} scene element.
    * @private
    */

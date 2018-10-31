@@ -73,6 +73,11 @@ moment.prototype.startOf = function(unit) {};
 moment.prototype.add = function(amount, unit) {};
 
 /**
+ * @return {number}
+ */
+moment.prototype.year = function() {};
+
+/**
  * @struct
  * @constructor
  */
@@ -86,3 +91,6 @@ moment.Locale.longDateFormat = function (format) {};
 
 /** @return {moment.Locale} */
 moment.prototype.localeData = function () {};
+
+/** @return {!moment} */
+moment.prototype.duration = function () {};

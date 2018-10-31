@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
@@ -27,6 +26,9 @@ import {
 import {
   ViewportBindingDef,
 } from '../../src/service/viewport/viewport-binding-def';
+import {
+  ViewportBindingIosEmbedShadowRoot_,
+} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
@@ -44,6 +46,7 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
+import {toggleExperiment} from '../../src/experiments';
 
 
 const NOOP = () => {};
@@ -153,6 +156,11 @@ describes.fakeWin('Viewport', {}, env => {
       }
       task.mutate(state);
     });
+  }
+
+  function stubVsyncMeasure() {
+    sandbox.stub(viewport.vsync_, 'measurePromise').callsFake(cb =>
+      Promise.resolve(cb()));
   }
 
   describe('top-level classes', () => {
@@ -797,30 +805,80 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport./*OK*/scrollTop_).to.be.null;
   });
 
-  it('should change scrollTop for scrollIntoView and respect padding', () => {
+  it('scrolls with scrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
+
+    // scrollIntoView traverses up the DOM tree, so it needs the node to
+    // be attached.
+    document.body.appendChild(element);
+
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element)
-        .returns({top: 111}).once();
-    bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
-    viewport.scrollIntoView(element);
+
+    bindingMock.expects('getScrollingElement')
+        .returns(document.body)
+        .atLeast(1);
+
+    const top = 111;
+
+    bindingMock.expects('getLayoutRect')
+        .withArgs(element)
+        .returns({top})
+        .once();
+
+    bindingMock.expects('setScrollTop')
+        .withArgs(top - /* padding */ 19)
+        .once();
+
+    stubVsyncMeasure();
+
+    yield viewport.scrollIntoView(element);
+
     bindingMock.verify();
   });
 
-  it('should change scrollTop for animateScrollIntoView and respect ' +
-    'padding', () => {
+  it('scrolls with animateScrollIntoView respecting padding', function* () {
     const element = document.createElement('div');
+
+    // animateScrollIntoView traverses up the DOM tree, so it needs the node to
+    // be attached.
+    document.body.appendChild(element);
+
     const bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element)
-        .returns({top: 111}).once();
-    bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
+
+    bindingMock.expects('getScrollingElement')
+        .returns(document.body)
+        .atLeast(1);
+
+    const top = 111;
+
+    bindingMock.expects('getLayoutRect')
+        .withArgs(element)
+        .returns({top})
+        .once();
+
+    const interpolateScrollIntoView =
+        sandbox.stub(viewport, 'interpolateScrollIntoView_');
+
+    stubVsyncMeasure();
+
     const duration = 1000;
-    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
-      bindingMock.verify();
-    });
+
+    const animatePromise = viewport.animateScrollIntoView(element, duration);
+
     clock.tick(duration);
+
     runVsync();
-    return promise;
+
+    yield animatePromise;
+
+    bindingMock.verify();
+
+    expect(interpolateScrollIntoView.withArgs(
+        /* parent       */ sinon.match.any,
+        /* curScrollTop */ sinon.match.any,
+        /* newScrollTop */ (top - /* padding */ 19),
+        /* duration     */ sinon.match.any,
+        /* curve        */ sinon.match.any)).to.be.calledOnce;
   });
 
   it('should not change scrollTop for animateScrollIntoView', () => {
@@ -855,8 +913,8 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.expects('getRootClientRectAsync')
         .returns(Promise.resolve(null));
     const el = document.createElement('div');
-    el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
-    sandbox.stub(viewport.vsync_, 'measurePromise').callsFake(cb => cb());
+    el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);
+    stubVsyncMeasure();
     return viewport.getClientRectAsync(el).then(res => {
       expect(res).to.deep.equal(layoutRectLtwh(1, 2, 3, 4));
     });
@@ -867,8 +925,8 @@ describes.fakeWin('Viewport', {}, env => {
     bindingMock.expects('getRootClientRectAsync')
         .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5))).twice();
     const el = document.createElement('div');
-    el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
-    sandbox.stub(viewport.vsync_, 'measurePromise').callsFake(cb => cb());
+    el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);
+    stubVsyncMeasure();
     return viewport.getClientRectAsync(el).then(res => {
       expect(res).to.deep.equal(layoutRectLtwh(6, 7, 3, 4));
     });
@@ -890,6 +948,14 @@ describes.fakeWin('Viewport', {}, env => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('getContentHeight').withArgs().returns(117).once();
     expect(viewport.getContentHeight()).to.equal(117);
+    bindingMock.verify();
+  });
+
+  it('should delegate contentHeightChanged', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('contentHeightChanged').once();
+    viewport.contentHeightChanged();
+    bindingMock.verify();
   });
 
   it('should scroll to target position when the viewer sets scrollTop', () => {
@@ -1154,7 +1220,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
@@ -1199,6 +1265,7 @@ describe('Viewport META', () => {
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
         location: {},
+        Promise: window.Promise,
       };
       installTimerService(windowApi);
       installVsyncService(windowApi);
@@ -1340,6 +1407,7 @@ describe('createViewport', () => {
       ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
       installViewerServiceForDoc(ampDoc);
       viewer = Services.viewerForDoc(ampDoc);
+      win.getComputedStyle = () => ({});
     });
 
     it('should bind to "natural" when not iframed', () => {
@@ -1394,6 +1462,57 @@ describe('createViewport', () => {
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
           .be.instanceof(ViewportBindingNatural_);
+    });
+
+    it('should bind to "iOS embed SD" when the experiment is on', () => {
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 11);
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
+    });
+
+    it('should bind to "iOS embed SD" in future Safari', () => {
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 12);
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
+    });
+
+    it('should NOT bind to "iOS embed SD" in Safari 10', () => {
+      // This is due to some scrolling and SD bugs.
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => 10);
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
+    });
+
+    it('should only bind to "iOS embed SD" when SD is supported', () => {
+      // Reset SD support.
+      Object.defineProperty(win.Element.prototype, 'attachShadow', {
+        value: null,
+      });
+      toggleExperiment(win, 'ios-embed-sd', true);
+      win.parent = {};
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      installViewportServiceForDoc(ampDoc);
+      const viewport = Services.viewportForDoc(ampDoc);
+      expect(viewport.binding_).to
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
     });
   });
 });

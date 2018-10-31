@@ -15,15 +15,14 @@
  */
 
 const colors = require('ansi-colors');
-const exec = require('./exec').exec;
-const execAsync = require('./exec').execAsync;
 const log = require('fancy-log');
+const {execScriptAsync, exec} = require('./exec');
 
-const green = colors.green;
-const cyan = colors.cyan;
+const {green, cyan} = colors;
 
 const killCmd =
-    (process.platform == 'win32') ? 'taskkill /pid' : 'kill -KILL';
+    (process.platform == 'win32') ? 'taskkill /f /pid' : 'kill -KILL';
+const killSuffix = (process.platform == 'win32') ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
@@ -48,7 +47,7 @@ exports.createCtrlcHandler = function(command) {
     trap 'ctrlcHandler' INT
     read _ # Waits until the process is terminated
   `;
-  return execAsync(
+  return execScriptAsync(
       listenerCmd, {'stdio': [null, process.stdout, process.stderr]}).pid;
 };
 
@@ -58,6 +57,6 @@ exports.createCtrlcHandler = function(command) {
  * @param {string} handlerProcess
  */
 exports.exitCtrlcHandler = function(handlerProcess) {
-  const exitCmd = killCmd + ' ' + handlerProcess;
+  const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;
   exec(exitCmd);
 };

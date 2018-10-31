@@ -6,5 +6,11 @@
     "require": false,
     "process": false,
     "exports": false
+  },
+  "rules": {
+    "amphtml-internal/no-array-destructuring": 0,
+    "amphtml-internal/no-for-of-statement": 0,
+    "amphtml-internal/no-has-own-property-method": 0,
+    "require-jsdoc": 0
   }
 }

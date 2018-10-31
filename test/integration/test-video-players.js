@@ -92,12 +92,23 @@ describe.skip('amp-ima-video', () => {
   }, 'amp-ima-video');
 });
 
-describe.configure().skipIos().run('amp-brid-player', () => {
+//TODO(cvializ, #14833): unskip after brid player is fixed
+describe.skip('amp-brid-player', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-brid-player');
     video.setAttribute('data-partner', '264');
     video.setAttribute('data-player', '4144');
     video.setAttribute('data-video', '13663');
+    return video;
+  });
+});
+
+describe.skip('amp-brightcove', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-brightcove');
+    video.setAttribute('data-account-id', '1290862519001');
+    video.setAttribute('data-player-id', 'SyIOV8yWM');
+    video.setAttribute('data-video-id', 'amp-test-video');
     return video;
   });
 });

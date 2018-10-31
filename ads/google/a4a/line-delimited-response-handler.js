@@ -20,12 +20,16 @@ import {tryParseJson} from '../../../src/json';
   * Handles an XHR response by calling lineCallback for each line delineation.
   * Uses streaming where possible otherwise falls back to text.
   * @param {!Window} win
-  * @param {!../../../src/service/xhr-impl.FetchResponse} response
+  * @param {!Response} response
   * @param {function(string, boolean)} lineCallback
   * @private
   */
 export function lineDelimitedStreamer(win, response, lineCallback) {
   let line = '';
+  /**
+   * @param {string} text
+   * @param {boolean} done
+   */
   function streamer(text, done) {
     const regex = /([^\n]*)(\n)?/g;
     let match;
@@ -72,10 +76,14 @@ export function metaJsonCreativeGrouper(callback) {
   let first;
   return function(line, done) {
     if (first) {
-      callback(
-          unescapeLineDelimitedHtml_(line),
-          /** @type {!Object<string, *>} */(tryParseJson(first) || {}),
-          done);
+      const metadata =
+      /** @type {!Object<string, *>} */(tryParseJson(first) || {});
+      const lowerCasedMetadata =
+          Object.keys(metadata).reduce((newObj, key) => {
+            newObj[key.toLowerCase()] = metadata[key];
+            return newObj;
+          }, {});
+      callback(unescapeLineDelimitedHtml_(line), lowerCasedMetadata, done);
       first = null;
     } else {
       first = line;

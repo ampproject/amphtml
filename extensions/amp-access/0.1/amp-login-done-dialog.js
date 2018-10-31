@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {assertAbsoluteHttpOrHttpsUrl, parseQueryString} from '../../../src/url';
+import {
+  assertAbsoluteHttpOrHttpsUrl,
+  parseQueryString,
+  tryDecodeUriComponent,
+} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
 
 
@@ -57,7 +61,12 @@ export class LoginDoneDialog {
 
     if (query['url']) {
       // Source URL is specified. Try to redirect back.
-      this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(query['url']));
+      let url = query['url'];
+      // Protect against double-encoding.
+      if (/^https?\%/i.test(url)) {
+        url = tryDecodeUriComponent(url);
+      }
+      this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(url));
       return Promise.resolve();
     }
 
@@ -89,8 +98,7 @@ export class LoginDoneDialog {
    */
   buildStyles_() {
     const query = parseQueryString(this.win.location.search);
-    const doc = this.win.document;
-    const nav = this.win.navigator;
+    const {document: doc, navigator: nav} = this.win;
     const langSet = [query['hl'], nav.language, nav.userLanguage, 'en-US'];
     for (let i = 0; i < langSet.length; i++) {
       const lang = langSet[i];
@@ -141,7 +149,7 @@ export class LoginDoneDialog {
     const response = this.win.location.hash;
     let unlisten = () => {};
     return new Promise((resolve, reject) => {
-      const opener = this.win.opener;
+      const {opener} = this.win;
       if (!opener) {
         reject(new Error('Opener not available'));
         return;

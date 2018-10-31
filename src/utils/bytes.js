@@ -94,6 +94,7 @@ export function bytesToUInt32(bytes) {
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
+ * @param {!Window} win
  * @param {number} length
  * @return {?Uint8Array}
  */

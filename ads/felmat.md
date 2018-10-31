@@ -30,12 +30,12 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.felmat.net/service/inquiry
+For configuration details and to generate your tags, please contact https://www.felmat.net/service/inquiry.
 
 Supported parameters:
 
-- data-host
-- data-fmt
-- data-fmk
-- data-fmp
+- `data-host`
+- `data-fmt`
+- `data-fmk`
+- `data-fmp`
 

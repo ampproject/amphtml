@@ -16,7 +16,7 @@ limitations under the License.
 
 # LockerDome
 
-[LockerDome](https://lockerdome.com)
+
 
 ## Example
 
@@ -29,5 +29,8 @@ limitations under the License.
 
 ## Configuration
 
-Required parameters:
+For details on the configuration semantics, please contact [LockerDome](https://lockerdome.com).
+
+### Required parameters
+
 - `data-slot`

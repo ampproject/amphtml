@@ -7,7 +7,7 @@
   <style amp4ads-boilerplate>body{visibility:hidden}</style>
   <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
   <style amp-custom>
-#ad {
+.ad {
   border: 1px solid black;
   width: 280px;
   height: 230px;
@@ -33,8 +33,17 @@ h1 {
   background: #0f9d58;
   float: left;
 }
+
+amp-carousel .content {
+  width: 80%;
+  height: 80%;
+  margin: 10% 10%;
+  text-align: center;
+}
+.content pre { display: inline; }
     </style>
   <script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 </head>
 <body>
 <amp-ad-exit id="exit-api" layout="nodisplay">
@@ -78,7 +87,7 @@ h1 {
 }
 </script>
 </amp-ad-exit>
-<div id="ad">
+<div class="ad">
   <h1 on="tap:exit-api.exit(target='target1')" role="button" tabindex="1">amp-ad-exit example</h1>
   <div class="product" id="product1" on="tap:exit-api.exit(target='target1', _elem='Product 1')" role="button" tabindex="1">
     <p>product 1</p>
@@ -87,6 +96,17 @@ h1 {
     <p>product 2</p>
   </div>
   <p><a href="https://www.google.com/" on="tap:exit-api.exit(target='target1', _elem='anchor')">&lt;A&gt; tags don't work well (try middle-clicking)</a>
+</div>
+
+<div class="ad" on="tap:exit-api.exit(target='target1')" role="button" tabindex="1">
+  <amp-carousel height="230" layout="fixed-height" type="slides">
+    <div class="content">amp-carousel example</div>
+    <div class="content">The exit event is on the parent &lt;div&gt;</div>
+    <div class="content">
+      But the buttons don't trigger an exit because of a default InactiveElement
+      filter that matches their <pre>amp-carousel-button</pre> class.
+    </div>
+  </amp-carousel>
 </div>
 </body>
 </html>

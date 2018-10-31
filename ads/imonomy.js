@@ -15,7 +15,7 @@
  */
 
 import {doubleclick} from '../ads/google/doubleclick';
-import {getSourceUrl} from '../src/url';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
@@ -32,7 +32,7 @@ const imonomyData = ['pid', 'subId', 'timeout'];
 export function imonomy(global, data) {
   if (!('slot' in data)) {
     global.CasaleArgs = data;
-    writeScript(global, '//srv.imonmy.com/indexJTag.js');
+    writeScript(global, `//tag.imonomy.com/${data.pid}/indexJTag.js`);
   } else { //DFP ad request call
     let calledDoubleclick = false;
     data.timeout = isNaN(data.timeout) ? DEFAULT_TIMEOUT : data.timeout;
@@ -59,17 +59,21 @@ export function imonomy(global, data) {
       ampError: EVENT_ERROR,
     };
 
-    loadScript(global, '//srv.imonomy.com/amp/amp.js', () => {
-      global.context.renderStart();
-    }, () => {
-      global.context.noContentAvailable();
-    });
+    loadScript(
+        global, `//tag.imonomy.com/amp/${data.pid}/amp.js`, () => {
+          global.context.renderStart();
+        }, () => {
+          global.context.noContentAvailable();
+        });
   }
 }
 
+/**
+ * @param {*} data
+ */
 function prepareData(data) {
   for (const attr in data) {
-    if (data.hasOwnProperty(attr) && imonomyData.indexOf(attr) >= 0) {
+    if (hasOwn(data, attr) && imonomyData.indexOf(attr) >= 0) {
       delete data[attr];
     }
   }
@@ -77,55 +81,59 @@ function prepareData(data) {
   data.targeting['IMONOMY_AMP'] = '1';
 }
 
+/**
+ * @param {*} data
+ * @param {number} code
+ */
 function reportStats(data, code) {
   try {
     if (code == EVENT_BADTAG) { return; }
     const xhttp = new XMLHttpRequest();
     xhttp.withCredentials = true;
-    xhttp.open('GET', getTrackingUrl(data), true);
-    xhttp.setRequestHeader('Content-Type', 'text/plain');
-    xhttp.send();
-  } catch (e) {}
-}
-
-function getTrackingUrl(data) {
-
-  let unitFormat = '';
-  const subId = data.subId,
-      pid = data.pid,
-      trackId = 'AMP',
-      pageLocation = getSourceUrl(global.context.location.href),
-      notFirst = true,
-      cid = '',
-      abLabel = '',
-      rand = Math.random();
-  if (!isNaN(data.width) && !isNaN(data.height)) {
-    unitFormat = `${data.width}x${data.height}`;
-  }
-  const uid = '',
-      isLocked = false,
-      isTrackable = false,
-      isClient = false,
-      tier = 0;
-  const baseUrl = '//srv.imonomy.com/internal/reporter';
-  let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&`;
-  unitCodeUrl = unitCodeUrl + `format=${unitFormat}&ai=`;
-  unitCodeUrl = unitCodeUrl + `${trackId}&ctxu=${pageLocation}&fb=${notFirst}&`;
-  unitCodeUrl = unitCodeUrl + `cid=${cid} &ab=${abLabel}&cbs=${rand}`;
-  if (uid) {
-    unitCodeUrl = unitCodeUrl + `&uid=${uid}`;
-  }
-  if (isLocked) {
-    unitCodeUrl = unitCodeUrl + `&is_locked=${isLocked}`;
-  }
-  if (isTrackable) {
-    unitCodeUrl = unitCodeUrl + `&istrk=${isTrackable}`;
-  }
-  if (isClient) {
-    unitCodeUrl = unitCodeUrl + `&is_client=${isClient}`;
-    if (tier) {
-      unitCodeUrl = unitCodeUrl + `&tier=${tier}`;
+    let unitFormat = '';
+    let pageLocation = '';
+    if (typeof window.context.location.href !== 'undefined') {
+      pageLocation = encodeURIComponent(window.context.location.href);
     }
-  }
-  return unitCodeUrl;
+    const {subId, pid} = data,
+        trackId = 'AMP',
+        notFirst = true,
+        cid = '',
+        abLabel = '',
+        rand = Math.random();
+    if (!isNaN(data.width) && !isNaN(data.height)) {
+      unitFormat = `${data.width}x${data.height}`;
+    }
+    const uid = '',
+        isLocked = false,
+        isTrackable = false,
+        isClient = false,
+        tier = 0;
+    const baseUrl = '//srv.imonomy.com/internal/reporter';
+    let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&`;
+    unitCodeUrl = unitCodeUrl + `format=${unitFormat}&ai=`;
+    unitCodeUrl = unitCodeUrl + `${trackId}&ctxu=${pageLocation}&`;
+    unitCodeUrl = unitCodeUrl + `fb=${notFirst}&`;
+    unitCodeUrl = unitCodeUrl + `cid=${cid} &ab=${abLabel}&cbs=${rand}`;
+    if (uid) {
+      unitCodeUrl = unitCodeUrl + `&uid=${uid}`;
+    }
+    if (isLocked) {
+      unitCodeUrl = unitCodeUrl + `&is_locked=${isLocked}`;
+    }
+    if (isTrackable) {
+      unitCodeUrl = unitCodeUrl + `&istrk=${isTrackable}`;
+    }
+    if (isClient) {
+      unitCodeUrl = unitCodeUrl + `&is_client=${isClient}`;
+      if (tier) {
+        unitCodeUrl = unitCodeUrl + `&tier=${tier}`;
+      }
+    }
+
+    xhttp.open('GET', unitCodeUrl, true);
+    xhttp.setRequestHeader('Content-Type', 'application/json');
+    xhttp.send();
+
+  } catch (e) {}
 }
