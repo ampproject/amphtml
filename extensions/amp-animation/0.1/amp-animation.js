@@ -154,19 +154,6 @@ export class AmpAnimation extends AMP.BaseElement {
       });
     }
 
-    // See if page has a PositionObserver in it associated with this animation.
-    const positionObservers =
-    this.element.ownerDocument.querySelectorAll('amp-position-observer');
-    positionObservers.forEach(observer => {
-      const onAttr = observer.getAttribute('on');
-      // We are only concerned with positionObservers that are associated with
-      // this animation and are controlling it using the seekTo event.
-      if (onAttr.indexOf(this.element.id) !== -1 &&
-        onAttr.indexOf('seekTo') !== -1) {
-        this.hasPositionObserver_ = true;
-      }
-    });
-
     // Actions.
     this.registerAction('start',
         this.startAction_.bind(this), ActionTrust.LOW);
@@ -304,6 +291,8 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
+    this.hasPositionObserver_ = !!invocation.caller &&
+      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
     return this.createRunnerIfNeeded_().then(() => {
       this.pause_();
       this.pausedByAction_ = true;
