@@ -1307,12 +1307,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  // TODO(#16916): Make this test work with synchronous throws.
-  it.skip('should collect unwhitelisted vars', () => {
+  it('should collect unwhitelisted vars', () => {
     const win = getFakeWindow();
+    win.location =
+      parseUrlDeprecated('https://example.com/base?foo=bar&bar=abc&gclid=123');
     const element = document.createElement('amp-foo');
     element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
-    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM');
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     const unwhitelisted = urlReplacements.collectUnwhitelistedVarsSync(element);
     expect(unwhitelisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
