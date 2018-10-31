@@ -1049,7 +1049,9 @@ export class UrlReplacements {
     const url = element.getAttribute('src');
     const vars = Object.create(null);
     this.expandStringSync(url, /* opt_bindings */ undefined, vars);
-    const varNames = Object.keys(vars);
+    const varNames = Object.keys(vars)
+        // Strip arguments from collect_vars to match whitelist api.
+        .map(key => key.substring(0, key.indexOf('(')));
 
     const whitelist = this.getWhitelistForElement_(element);
     if (whitelist) {
