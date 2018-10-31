@@ -45,6 +45,17 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 const TAG = 'amp-powr-player';
 
 
+/** @private @const {Object} */
+const PLAYER_EVENT_MAP = {
+  'ready': VideoEvents.LOAD,
+  'playing': VideoEvents.PLAYING,
+  'pause': VideoEvents.PAUSE,
+  'ended': VideoEvents.ENDED,
+  'ads-ad-started': VideoEvents.AD_START,
+  'ads-ad-ended': VideoEvents.AD_END,
+};
+
+
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpPowrPlayer extends AMP.BaseElement {
 
@@ -62,7 +73,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     this.muted_ = false;
 
     /** @private {?boolean}  */
-    this.hasAmpSupport_ = false;
+    this.frameHasAmpSupport_ = false;
 
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
@@ -190,14 +201,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
       this.playing_ = false;
     }
 
-    if (redispatch(element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'ended': VideoEvents.ENDED,
-      'ads-ad-started': VideoEvents.AD_START,
-      'ads-ad-ended': VideoEvents.AD_END,
-    })) {
+    if (redispatch(element, eventType, PLAYER_EVENT_MAP)) {
       return;
     }
 
@@ -218,7 +222,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
    * @private
    */
   onReady_(data) {
-    this.hasAmpSupport_ = true;
+    this.frameHasAmpSupport_ = true;
 
     Services.timerFor(this.win)
         .cancel(this.readyTimeout_);
@@ -260,11 +264,21 @@ class AmpPowrPlayer extends AMP.BaseElement {
         '<amp-powr-player> %s',
         el);
 
-    const src = 'https://player.powr.com/iframe.html?' +
-      `account=${encodeURIComponent(account)}&` +
-      `player=${encodeURIComponent(this.playerId_)}` +
-      (video ? '&video=' + encodeURIComponent(video) : '') +
-      (terms ? '&terms=' + encodeURIComponent(terms) : '');
+    const srcPrefix = 'https://player.powr.com/iframe.html';
+
+    const srcParams = dict({
+      'account': account,
+      'player': this.playerId_,
+    });
+
+    if (video) {
+      srcParams['video'] = video;
+    }
+    if (terms) {
+      srcParams['terms'] = terms;
+    }
+
+    const src = addParamsToUrl(srcPrefix, srcParams);
 
     const customReferrer = el.getAttribute('data-referrer');
 
@@ -297,14 +311,14 @@ class AmpPowrPlayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow &&
-      this.hasAmpSupport_ && this.playing_) {
+      this.frameHasAmpSupport_ && this.playing_) {
       this.pause();
     }
   }
 
   /** @override */
   unlayoutOnPause() {
-    if (!this.hasAmpSupport_) {
+    if (!this.frameHasAmpSupport_) {
       return true;
     }
     return false;
