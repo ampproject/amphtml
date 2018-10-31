@@ -1231,17 +1231,33 @@ export class VisibilityTracker extends EventTracker {
     const deferred = new Deferred();
     const root = this.root.getRoot();
     let unloadListener, pageHideListener;
-    // Fired when document is being unloaded
+
+    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
+    // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
+    // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
+    // short the difference between them is:
+    // * unload is fired when document is being unloaded. Does not fire on
+    //   Safari.
+    // * pagehide is fired when traversing away from a session history item.
+    // Usually, if one is fired, the other is too, with pagehide being fired
+    // first. An exception is that in Safari (desktop and mobile), pagehide is
+    // fired when navigating to another page, but unload is not.
+    // On mobile Chrome, and mobile Firefox, neither of these will fire if the
+    // user presses the home button, uses the OS task switcher to switch to
+    // a different app, answers an incoming call, etc.
+
     root.addEventListener('unload', unloadListener = () => {
       root.removeEventListener('unload', unloadListener);
       deferred.resolve();
     });
-    // Note: currently not supported on Opera Mini, nor IE<=10.
-    // Indicates traversing away from a session history item
-    // Safari on iOS will also fire it when switching tabs or switching to
-    // another app. Chrome does not fire it in this case.
+
+    // Note: pagehide is currently not supported on Opera Mini, nor IE<=10.
+    // Documentation conflicts as to whether Safari on iOS will also fire it
+    // when switching tabs or switching to another app. Chrome does not fire it
+    // in this case.
     // Good, but several years old, analysis at:
     // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
+    // Especially note the event table on this page.
     root.addEventListener('pagehide', pageHideListener = () => {
       root.removeEventListener('pagehide', pageHideListener);
       deferred.resolve();
