@@ -144,6 +144,13 @@ export class CustomEventReporterBuilder {
   }
 
   /**
+   * @param {!JsonObject} transportConfig
+   */
+  setTransportConfig(transportConfig) {
+    this.config_['transport'] = transportConfig;
+  }
+
+  /**
    * The #track() method takes in a unique custom-event name, and the
    * corresponding request url (or an array of request urls). One can call
    * #track() multiple times with different eventType name (order doesn't
