@@ -17,6 +17,7 @@ import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {listenFor} from '../../../src/iframe-helper';
 
 const TAG = 'amp-access-poool';
 
@@ -98,7 +99,6 @@ export class PooolVendor {
     this.iframe_.setAttribute('frameborder', '0');
     this.iframe_.setAttribute('width', '100%');
     this.iframe_.setAttribute('height', '500px');
-    this.pooolContainer_.appendChild(this.iframe_);
 
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
 
@@ -165,7 +165,22 @@ export class PooolVendor {
 
     return urlPromise.then(url => {
       this.iframe_.src = url;
+      listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
+      this.pooolContainer_.appendChild(this.iframe_);
     });
+  }
+
+  /**
+   * @private
+   */
+  onRelease_() {
+    const articlePreview = document.getElementById('poool-access-preview');
+    const articleContent = document.getElementById('poool-access-content');
+    articlePreview.setAttribute('amp-access-hide', '');
+    articleContent.setAttribute('amp-access-poool', '');
+    // console.log('adapter : ', this.accessSource_.adapter_);
+    // setTimeout(() => {this.accessSource_.runAuthorization();}, 3000);
+    // this.authorize();
   }
 
   // giveAccessOnPooolRelease_() {
