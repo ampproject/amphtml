@@ -35,7 +35,8 @@ export class DatesList {
   constructor(dates) {
 
     /** @private @const */
-    this.ReactDates_ = requireExternal('react-dates');
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates'));
 
     /** @private @const */
     this.moment_ = requireExternal('moment');
@@ -69,7 +70,7 @@ export class DatesList {
    * @private
    */
   matchesDate_(date) {
-    return this.dates_.some(d => this.ReactDates_.isSameDay(d, date));
+    return this.dates_.some(d => this.ReactDates_['isSameDay'](d, date));
   }
 
   /**
@@ -82,7 +83,7 @@ export class DatesList {
     const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
     return this.rrulestrs_.some(rrule => {
       const rruleDay = this.moment_(rrule.before(nextDate));
-      return this.ReactDates_.isSameDay(rruleDay, date);
+      return this.ReactDates_['isSameDay'](rruleDay, date);
     });
   }
 
@@ -109,7 +110,7 @@ export class DatesList {
 /**
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
- * @return {?Object}
+ * @return {?JsonObject}
  */
 function tryParseRrulestr(str) {
   try {
