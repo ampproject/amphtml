@@ -1151,17 +1151,17 @@ export class VisibilityTracker extends EventTracker {
         user().error(TAG,
             'ReportWhen should not be defined when eventType is "hidden"');
       }
-      reportWhenSpec = eventType;
+      reportWhenSpec = 'documentHidden';
     }
-    if (reportWhenSpec == 'hidden') {
+    if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc =
-          this.createReportReadyPromiseForHidden_.bind(this);
-    } else if (reportWhenSpec == 'endOfFrame') {
+          this.createReportReadyPromiseForDocumentHidden_.bind(this);
+    } else if (reportWhenSpec == 'documentExit') {
       createReportReadyPromiseFunc =
-          this.createReportReadyPromiseForEndOfFrame_.bind(this);
-    } else if (reportWhenSpec) {
-      user().assert(reportWhenSpec == 'none',
-          'reportWhen value %s not supported', reportWhenSpec);
+          this.createReportReadyPromiseForDocumentExit_.bind(this);
+    } else {
+      user().assert(!reportWhenSpec, 'reportWhen value %s not supported',
+          reportWhenSpec);
     }
 
     // Root selectors are delegated to analytics roots.
@@ -1201,11 +1201,11 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * Returns a Promise indicating that we're ready to report the analytics,
-   * in the case of reportWhen: hidden
+   * in the case of reportWhen: documentHidden
    * @return {!Promise}
    * @private
    */
-  createReportReadyPromiseForHidden_() {
+  createReportReadyPromiseForDocumentHidden_() {
     const viewer = this.root.getViewer();
 
     if (!viewer.isVisible()) {
@@ -1223,18 +1223,25 @@ export class VisibilityTracker extends EventTracker {
 
   /**
    * Returns a Promise indicating that we're ready to report the analytics,
-   * in the case of reportWhen: endOfFrame
+   * in the case of reportWhen: documentExit
    * @return {!Promise}
    * @private
    */
-  createReportReadyPromiseForEndOfFrame_() {
+  createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
     const root = this.root.getRoot();
     let unloadListener, pageHideListener;
+    // Fired when document is being unloaded
     root.addEventListener('unload', unloadListener = () => {
       root.removeEventListener('unload', unloadListener);
       deferred.resolve();
     });
+    // Note: currently not supported on Opera Mini, nor IE<=10.
+    // Indicates traversing away from a session history item
+    // Safari on iOS will also fire it when switching tabs or switching to
+    // another app. Chrome does not fire it in this case.
+    // Good, but several years old, analysis at:
+    // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
     root.addEventListener('pagehide', pageHideListener = () => {
       root.removeEventListener('pagehide', pageHideListener);
       deferred.resolve();
