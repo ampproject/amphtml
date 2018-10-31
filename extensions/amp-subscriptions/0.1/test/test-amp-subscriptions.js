@@ -569,8 +569,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       rejecter();
       // Wait for sendMessageAwaitResponse() to be rejected.
       yield sendMessageAwaitResponsePromise;
-      // reportPlatformFailure() triggers the fallback entitlement.
-      expect(platformStore.reportPlatformFailure).calledWith('local');
+      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
+      expect(platformStore.reportPlatformFailureAndFallback)
+          .calledWith('local');
     });
   });
 
