@@ -497,10 +497,12 @@ export class PlatformStore {
   }
 
   /**
-   * Records a platform failure and logs error if all platforms have failed.
+   * Records a platform failure
+   * logs error if all platforms have failed
+   * uses fallback if there is one.
    * @param {string} serviceId
    */
-  reportPlatformFailure(serviceId) {
+  reportPlatformFailureAndFallback(serviceId) {
     if (serviceId === this.getLocalPlatform().getServiceId()
       && this.fallbackEntitlement_) {
       this.resolveEntitlement(this.getLocalPlatform().getServiceId(),

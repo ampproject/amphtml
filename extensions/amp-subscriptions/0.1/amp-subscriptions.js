@@ -247,7 +247,7 @@ export class SubscriptionService {
         return entitlement;
       }).catch(reason => {
         const serviceId = subscriptionPlatform.getServiceId();
-        this.platformStore_.reportPlatformFailure(serviceId);
+        this.platformStore_.reportPlatformFailureAndFallback(serviceId);
         throw user().createError(
             `fetch entitlements failed for ${serviceId}`, reason
         );
