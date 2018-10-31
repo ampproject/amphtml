@@ -65,7 +65,6 @@
   padding: 0 !important;
   border: 0 !important;
   background-color: transparent !important;
-
   transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
@@ -96,24 +95,20 @@
 }
 
 .i-amphtml-story-tooltip {
-  transition: opacity 0.225s linear !important;
-  transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-
   max-width: 248px !important;
   height: 40px !important;
+  border-radius: 6px !important;
+  padding: 8px !important;
+  position: absolute !important;
+  box-sizing: border-box !important;
   text-decoration: none !important;
-
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-
-  border-radius: 6px !important;
-  position: absolute !important;
   background: white !important;
-  padding: 8px !important;
-  box-sizing: border-box !important;
-
   box-shadow: 0 4px 16px 0 rgba(0,0,0,0.24) !important;
+  transition: opacity 0.225s linear !important;
+  transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-tooltip-text {
@@ -122,12 +117,11 @@
   white-space: nowrap !important;
   max-width: 172px !important;
   margin: 0px 10px !important;
-
   font-family: 'Roboto', sans-serif !important;
   font-size: 14px !important;
   color: #3C4043 !important;
   letter-spacing: 0 !important;
-  line-height: 14px !important;
+  line-height: 20px !important;
 }
 
 .i-amphtml-story-tooltip-icon {
