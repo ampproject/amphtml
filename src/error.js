@@ -499,6 +499,16 @@ export function getErrorReportData(message, filename, line, col, error,
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
+
+  const singlePassType = getMode().singlePassType;
+  if (singlePassType) {
+    if (singlePassType === 'sp') {
+      data['spt'] = 'sp';
+    } else if (singlePassType === 'mp') {
+      data['spt'] = 'mp';
+    }
+  }
+
   data['rt'] = runtime;
 
   // Add our a4a id if we are inabox
