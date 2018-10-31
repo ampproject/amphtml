@@ -337,7 +337,7 @@ export class SubscriptionService {
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
         }).catch(reason => {
-          this.platformStore_.reportPlatformFailure('local');
+          this.platformStore_.reportPlatformFailureAndFallback('local');
           dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }

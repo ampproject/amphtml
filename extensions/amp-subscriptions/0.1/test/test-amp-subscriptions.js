@@ -565,12 +565,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       yield subscriptionService.initialize_();
       // Local platform store not created until initialization.
       const platformStore = subscriptionService.platformStore_;
-      sandbox.stub(platformStore, 'reportPlatformFailure');
+      sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
       rejecter();
       // Wait for sendMessageAwaitResponse() to be rejected.
       yield sendMessageAwaitResponsePromise;
-      // reportPlatformFailure() triggers the fallback entitlement.
-      expect(platformStore.reportPlatformFailure).calledWith('local');
+      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
+      expect(platformStore.reportPlatformFailureAndFallback)
+          .calledWith('local');
     });
   });
 
