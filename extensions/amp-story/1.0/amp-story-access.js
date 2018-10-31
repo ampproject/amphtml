@@ -128,7 +128,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.ACCESS_STATE, isAccess => {
+    this.storeService_.subscribe(StateProperty.PAYWALL_STATE, isAccess => {
       this.onAccessStateChange_(isAccess);
     });
 
@@ -179,7 +179,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     // Closes the menu if click happened outside of the main container.
     if (!closest(el, el => el === this.containerEl_, this.element)) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+      this.storeService_.dispatch(Action.TOGGLE_PAYWALL, false);
     }
   }
 
