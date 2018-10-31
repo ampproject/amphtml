@@ -231,6 +231,22 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     binding.connect();
   });
 
+  it('should NOT setup body min-height w/o experiment', () => {
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal('0px');
+  });
+
+  it('should setup body min-height wwith experiment', () => {
+    toggleExperiment(win, 'scroll-height-minheight', true);
+    try {
+      binding = new ViewportBindingIosEmbedWrapper_(win);
+    } catch (e) {
+      // Ignore a double-init errors.
+    }
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
+  });
+
   it('should NOT require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.true;
   });
@@ -503,6 +519,22 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       vsync = Services.vsyncFor(win);
       binding = new ViewportBindingIosEmbedShadowRoot_(win);
       binding.connect();
+    });
+
+    it('should NOT setup body min-height w/o experiment', () => {
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal('0px');
+    });
+
+    it('should setup body min-height wwith experiment', () => {
+      toggleExperiment(win, 'scroll-height-minheight', true);
+      try {
+        new ViewportBindingIosEmbedShadowRoot_(win);
+      } catch (e) {
+        // Ignore a double-init errors.
+      }
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
     });
 
     it('should NOT require fixed layer transferring', () => {
