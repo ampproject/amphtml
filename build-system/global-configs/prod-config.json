@@ -36,7 +36,7 @@
   "amp-sidebar toolbar": 1,
   "amp-consent": 1,
   "amp-story-hold-to-pause": 0,
-  "amp-story-responsive-units": 1,
+  "amp-story-responsive-units": 0,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
@@ -53,6 +53,6 @@
   "inabox-rov": 1,
   "ampdoc-closest": 0.01,
   "linker-form": 1,
-  "scroll-height-bounce": 1,
+  "scroll-height-bounce": 0,
   "hidden-mutation-observer": 1
 }
