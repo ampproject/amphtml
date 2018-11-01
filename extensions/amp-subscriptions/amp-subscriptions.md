@@ -357,17 +357,23 @@ The first dialog with matching `subscriptions-display` is shown.
 
 ## Expressions
 
-The `subscriptions-display` uses expressions for actions and dialogs.
+The `subscriptions-display` attribute uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
-
-The expression is executed against the json representation of the entitlement object.
-
-For instance, to show a "subscribe" action to non-subscribers:
+Values in the `data` object of an Entitlements response can be used to build expressions.  In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
 
 ```
-<button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
+<section>
+  <button subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</button>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn">
+    <div>My Account</div>
+    <div>Sign out</div>
+  </div>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn AND NOT data.isSubscriber">
+    <a href='...'>Upgrade your account</a>
+  </div>
+</section>
 ```
+
 
 ## Analytics
 
@@ -418,4 +424,3 @@ Following are the events and the conditions when the events are triggered.
 ## Available vendor services
 
 - [amp-subscriptions-google](../amp-subscriptions-google/amp-subscriptions-google.md)
-
