@@ -420,6 +420,7 @@ The element visibility trigger can be configured for any AMP element or a docume
 Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
+If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
 ##### Error trigger (In experiment)
@@ -441,10 +442,11 @@ NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/1089
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
   - `waitFor`: This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
+  - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
   - `continuousTimeMin` and `continuousTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger fires when the element is not visible. If both bounds are set to 100, the trigger fires when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. The default values for `visiblePercentageMin` and `visiblePercentageMax` are  0 and 100, respectively.
-  - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`.
+  - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
 
 ```javascript
 visibilitySpec: {
@@ -505,6 +507,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
     "selector": "#ad1",
     "visibilitySpec": {
       "waitFor": "ini-load",
+      "reportWhen": "documentExit",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200
