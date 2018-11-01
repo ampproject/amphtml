@@ -34,6 +34,7 @@ import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
+import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
 import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel';
 import {GEMIUS_CONFIG} from './vendors/gemius';
@@ -71,6 +72,7 @@ import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
 import {TREASUREDATA_CONFIG} from './vendors/treasuredata';
@@ -180,6 +182,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'comscore': COMSCORE_CONFIG,
   'cxense': CXENSE_CONFIG,
   'dynatrace': DYNATRACE_CONFIG,
+  'epica': EPICA_CONFIG,
   'euleriananalytics': EULERIANANALYTICS_CONFIG,
   'facebookpixel': FACEBOOKPIXEL_CONFIG,
   'gemius': GEMIUS_CONFIG,
@@ -217,6 +220,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,
   'snowplow': SNOWPLOW_CONFIG,
+  'teaanalytics': TEAANALYTICS_CONFIG,
   'tealiumcollect': TEALIUMCOLLECT_CONFIG,
   'top100': TOP100_CONFIG,
   'topmailru': TOPMAILRU_CONFIG,
