@@ -268,13 +268,7 @@ amp-story-grid-layer {
   bottom: 0 !important;
   left: 0 !important;
   z-index: 2 !important;
-}
-
-/**
- * Make sure grid layer does not act as a click shield on elements underneath
- * it.
- */
-amp-story-grid-layer {
+  /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
 }
 
