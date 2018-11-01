@@ -1197,6 +1197,7 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
       const els = [internalElement, shadowLayer, overlay];
+      const boxNeedsSizing = this.boxNeedsSizing_(width, height);
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
         setImportantStyles(el, {
@@ -1204,7 +1205,7 @@ export class VideoDocking {
           'transition-duration': `${transitionDurationMs}ms`,
           'transition-timing-function': transitionTiming,
         });
-        if (this.boxNeedsSizing_(width, height)) {
+        if (boxNeedsSizing) {
           // Setting explicit dimensions is needed to match the video's aspect
           // ratio. However, we only do this once to prevent jank in subsequent
           // frames.
