@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.34 */
+/** Version: 0.1.22.35 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2764,6 +2764,21 @@ function createCancelError(win, opt_message) {
   return activityPorts_10(win, opt_message);
 }
 
+
+/**
+ * A set of error utilities combined in a class to allow easy stubbing in tests.
+ */
+class ErrorUtils {
+  /**
+   * @param {!Error} error
+   */
+  static throwAsync(error) {
+    setTimeout(() => {
+      throw error;
+    });
+  }
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3998,7 +4013,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.34',
+    '_client': 'SwG 0.1.22.35',
   });
 }
 
@@ -4043,6 +4058,7 @@ const AnalyticsEvent = {
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
   ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  EVENT_PAYMENT_FAILED: 2000,
 };
 
 class AnalyticsContext {
@@ -4384,9 +4400,15 @@ class PayCompleteFlow {
       }, reason => {
         if (isCancelError(reason)) {
           deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+        } else {
+          deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
         }
         throw reason;
       });
+    });
+    deps.activities().onRedirectError(() => {
+      deps.analytics().addLabels(['redirect']);
+      deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
     });
   }
 
@@ -4425,6 +4447,14 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   start(response) {
+    if (!this.analyticsService_.getSku()) {
+      // This is a redirect response. Extract the SKU if possible.
+      this.analyticsService_.addLabels(['redirect']);
+      const sku = parseSkuFromPurchaseDataSafe(response.purchaseData);
+      if (sku) {
+        this.analyticsService_.setSku(sku);
+      }
+    }
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_PAYMENT_COMPLETE);
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
@@ -4576,6 +4606,16 @@ function parseEntitlements(deps, swgData) {
     return deps.entitlementsManager().parseEntitlements(swgData);
   }
   return null;
+}
+
+
+/**
+ * @param {!PurchaseData} purchaseData
+ * @return {?string}
+ */
+function parseSkuFromPurchaseDataSafe(purchaseData) {
+  const json = tryParseJson(purchaseData.raw);
+  return json && json['productId'] || null;
 }
 
 /**
@@ -7633,6 +7673,91 @@ Constants.BUTTON_STYLE = `
 }
 `;
 
+Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
+
+Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
+
+Constants.GPAY_OFFER_ICON_SVG =
+    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
+    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
+    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
+    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
+    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
+    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
+    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
+    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
+    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
+    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
+    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
+    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
+    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
+    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
+    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
+    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
+    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
+    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
+    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
+    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
+    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
+    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
+    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
+    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
+    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
+    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
+    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
+    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
+    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
+    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
+    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
+    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
+    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
+    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
+    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
+    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
+    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
+    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
+    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
+    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
+    "</polygon></g></g></g></g></g></svg>";
+
+Constants.GPAY_OFFER_ICON_STYLE = `
+.${Constants.GPAY_OFFER_ICON_CLASS} {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+}
+
+#ic_loyalty_24px use.hover {
+  fill: #FC853B;
+}
+`;
+
+Constants.GPAY_OFFER_DESCRIPTION_CLASS = 'gpay-offer-description';
+
+Constants.GPAY_OFFER_DESCRIPTION_STYLE = `
+@import url(//fonts.googleapis.com/css?family=Google+Sans:500);
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS} {
+  text-align: center;
+  font: 10px 'Google Sans';
+  margin-top: 2px;
+  margin-bottom: 0px;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.gpay-btn-clicked {
+  color: #3C4043;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.short {
+  min-width: 90px;
+  width: 160px;
+}
+
+.${Constants.GPAY_OFFER_DESCRIPTION_CLASS}.long {
+  min-width: 152px;
+  width: 240px;
+}
+`;
+
 /**
  * Class used for the new gpay button with card info (last 4 digits, card net).
  *
@@ -7668,6 +7793,7 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
     background-color: #3c4043;
   }
   `;
+
 
 /**
  * Trusted domain for secure context validation
@@ -7944,10 +8070,15 @@ class Graypane$1 {
 
   /**
    * Hides the graypane.
-   * @return {!Promise}
+   * @return {!Promise|undefined}
    */
   hide() {
     this.popupWindow_ = null;
+    if (!this.element_.parentElement) {
+      // Has already been removed or haven't been even added to DOM.
+      // This could be possible after redirect.
+      return;
+    }
     return transition$1(this.element_, {
       'opacity': 0,
     }, 300, 'ease-out').then(() => {
@@ -8433,10 +8564,6 @@ function chromeSupportsPaymentRequest() {
     return true;
   }
 
-  if (typeof google != 'undefined' &&
-      null) {
-    return false;
-  }
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
   return androidPlatform != null && 'PaymentRequest' in window &&
@@ -10185,6 +10312,40 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
 
 /**
  * A comma-separated set of experiments.
@@ -10201,20 +10362,125 @@ let experimentMap = null;
 
 /**
  * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} unusedWin
+ * @param {!Window} win
  * @return {!Object<string, boolean>}
  */
-function getExperiments(unusedWin) {
-  // TODO(dvoytenko): implement sticky and fractional experiments.
+function getExperiments(win) {
   if (!experimentMap) {
     experimentMap = {};
-    experimentsString.split(',').forEach(s => {
-      if (s) {
-        experimentMap[s] = true;
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString$1(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach(s => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
       }
     });
   }
   return experimentMap;
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+          'subscribe.google.com:e:' + experimentId + ':' +
+          fraction + (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT ? Selection.EXPERIMENT :
+      s == Selection.CONTROL ? Selection.CONTROL : null;
 }
 
 
@@ -11469,10 +11735,32 @@ class AnalyticsService {
   }
 
   /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.context_.getSku();
+  }
+
+  /**
    * @param {string} sku
    */
   setSku(sku) {
     this.context_.setSku(sku);
+  }
+
+  /**
+   * @param {!Array<string>} labels
+   */
+  addLabels(labels) {
+    if (labels && labels.length > 0) {
+      const newLabels = [].concat(this.context_.getLabel());
+      labels.forEach(label => {
+        if (newLabels.indexOf(label) == -1) {
+          newLabels.push(label);
+        }
+      });
+      this.context_.setLabel(newLabels);
+    }
   }
 
   /**
@@ -11516,7 +11804,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    this.context_.setLabel(getOnExperiments(this.doc_.getWin()));
+    this.addLabels(getOnExperiments(this.doc_.getWin()));
   }
 
   /**
@@ -11554,7 +11842,7 @@ class AnalyticsService {
    * @return {!AnalyticsRequest}
    */
   createLogRequest_(event) {
-    const /* {!AnalyticsRequest} */ request = new AnalyticsRequest();
+    const request = new AnalyticsRequest();
     request.setEvent(event);
     request.setContext(this.context_);
     return request;

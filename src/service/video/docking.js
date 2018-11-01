@@ -483,7 +483,8 @@ export class VideoDocking {
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
-        `${urls.cdn}/experiments.html`);
+        '%s/experiments.html',
+        urls.cdn);
 
     this.install_();
 
@@ -1026,7 +1027,7 @@ export class VideoDocking {
     if (step >= REVERT_TO_INLINE_RATIO &&
         this.currentlyDocked_ &&
         !this.currentlyDocked_.triggeredDock) {
-      this.trigger_(video, Actions.DOCK);
+      this.trigger_(Actions.DOCK);
       this.currentlyDocked_.triggeredDock = true;
     }
 
@@ -1042,16 +1043,20 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!Actions} action
    * @private
    */
-  trigger_(video, action) {
+  trigger_(action) {
+    const element = this.isDockedToSlot_() ?
+      this.getSlot_() :
+      this.getDockedVideo_().element;
+
     const trust = ActionTrust.LOW;
     const event = createCustomEvent(this.ampdoc_.win,
         /** @type {string} */ (action), /* detail */ dict({}));
     const actions = Services.actionServiceForDoc(this.ampdoc_);
-    actions.trigger(video.element, action, event, trust);
+
+    actions.trigger(dev().assertElement(element), action, event, trust);
   }
 
   /**
@@ -1192,6 +1197,7 @@ export class VideoDocking {
       toggle(shadowLayer, true);
       toggle(overlay, true);
       const els = [internalElement, shadowLayer, overlay];
+      const boxNeedsSizing = this.boxNeedsSizing_(width, height);
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
         setImportantStyles(el, {
@@ -1199,7 +1205,7 @@ export class VideoDocking {
           'transition-duration': `${transitionDurationMs}ms`,
           'transition-timing-function': transitionTiming,
         });
-        if (this.boxNeedsSizing_(width, height)) {
+        if (boxNeedsSizing) {
           // Setting explicit dimensions is needed to match the video's aspect
           // ratio. However, we only do this once to prevent jank in subsequent
           // frames.
@@ -1754,7 +1760,7 @@ export class VideoDocking {
     // TODO(alanorozco): animate dismissal
     const internalElement = getInternalVideoElementFor(video.element);
 
-    this.trigger_(video, Actions.UNDOCK);
+    this.trigger_(Actions.UNDOCK);
 
     video.mutateElement(() => {
       this.hideControls_();
