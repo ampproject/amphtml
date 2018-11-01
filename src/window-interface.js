@@ -65,4 +65,31 @@ export class WindowInterface {
   static getUserLanguage(win) {
     return win.navigator.userLanguage || win.navigator.language;
   }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {!Function}
+   */
+  static getSendBeacon(win) {
+    return win.navigator.sendBeacon;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {!XMLHttpRequest}
+   */
+  static getXMLHttpRequest(win) {
+    return win.XMLHttpRequest;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {!Image}
+   */
+  static getImage(win) {
+    return win.Image;
+  }
 }
