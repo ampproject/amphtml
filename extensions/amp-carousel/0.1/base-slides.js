@@ -215,13 +215,13 @@ export class BaseSlides extends BaseCarousel {
   */
   removeAutoplay() {
     this.clearAutoplay();
-    this.hasAutoplay_ = false;
-    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
-    if (this.element.hasAttribute('autoplay')) {
+    if (this.shouldAutoplay_ && this.element.hasAttribute('loop')) {
       // Only remove if specified due to the `autoplay` attribute
       this.element.removeAttribute('loop');
       this.hasLoop_ = false;
       this.shouldLoop = false;
     }
+    this.hasAutoplay_ = false;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
   }
 }
