@@ -50,7 +50,9 @@ function getUrl(url) {
  * @return {bool}
  */
 amp.validator.isAmpCacheUrl = function(url) {
-  return (url.toLowerCase().indexOf('cdn.ampproject.org') !== -1);
+  return (
+      url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 ||
+      url.toLowerCase().indexOf('amp.cloudflare.com') !== -1);
 };
 
 /**
@@ -82,7 +84,7 @@ amp.validator.validateInBrowser = function(doc) {
  * @export
  */
 amp.validator.validateUrlAndLog = function(
-  url, opt_doc, opt_errorCategoryFilter) {
+    url, opt_doc, opt_errorCategoryFilter) {
   if (amp.validator.isAmpCacheUrl(url)) {
     console.error(
         'Attempting to validate an AMP Cache URL. Please use' +
