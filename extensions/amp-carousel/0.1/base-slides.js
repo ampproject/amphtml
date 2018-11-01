@@ -33,6 +33,9 @@ export class BaseSlides extends BaseCarousel {
     this.hasLoop_ = false;
 
     /** @private {boolean} */
+    this.loopAdded_ = false;
+
+    /** @private {boolean} */
     this.hasAutoplay_ = false;
 
     /** @private {number} */
@@ -152,6 +155,7 @@ export class BaseSlides extends BaseCarousel {
     // is looping. (to be able to advance past the last item)
     if (!this.hasLoop_) {
       this.element.setAttribute('loop', '');
+      this.loopAdded_ = true;
       this.hasLoop_ = true;
       this.shouldLoop = true;
     }
@@ -215,9 +219,10 @@ export class BaseSlides extends BaseCarousel {
   */
   removeAutoplay() {
     this.clearAutoplay();
-    if (this.shouldAutoplay_ && this.element.hasAttribute('loop')) {
+    if (this.loopAdded_) {
       // Only remove if specified due to the `autoplay` attribute
       this.element.removeAttribute('loop');
+      this.loopAdded_ = false;
       this.hasLoop_ = false;
       this.shouldLoop = false;
     }
