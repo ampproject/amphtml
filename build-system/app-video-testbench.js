@@ -60,7 +60,10 @@ const requiredAttrs = {
     'data-playerid': '26e2e3c1049c4e70ae08a242638b5c40',
     'data-playerversion': 'v4',
   },
-  'amp-video-iframe': {'src': '/examples/amp-video-iframe/frame.html'},
+  'amp-video-iframe': {
+    'src': '/examples/amp-video-iframe/frame.html',
+    'poster': 'https://placekitten.com/g/1600/900',
+  },
   'amp-vimeo': {'data-videoid': '27246366'},
   'amp-viqeo-player': {
     'data-profileid': '184',

@@ -449,7 +449,7 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
-  describe('reportPlatformFailure_', () => {
+  describe('reportPlatformFailureAndFallback', () => {
     let errorSpy;
     beforeEach(() => {
       errorSpy = sandbox.spy(user(), 'warn');
@@ -459,9 +459,9 @@ describes.realWin('Platform store', {}, () => {
       const platform = new SubscriptionPlatform();
       sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
       sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
-      platformStore.reportPlatformFailure('service1');
+      platformStore.reportPlatformFailureAndFallback('service1');
       expect(errorSpy).to.not.be.called;
-      platformStore.reportPlatformFailure('local');
+      platformStore.reportPlatformFailureAndFallback('local');
       expect(errorSpy).to.be.calledOnce;
       expect(platformStore.entitlements_['local'].json())
           .to.deep.equal(fallbackEntitlement.json());
@@ -479,7 +479,7 @@ describes.realWin('Platform store', {}, () => {
           .callsFake(() => 10);
       platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
       platformStore.resolvePlatform('local', platform);
-      platformStore.reportPlatformFailure('local');
+      platformStore.reportPlatformFailureAndFallback('local');
       platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
       return platformStore.selectPlatform().then(platform => {
         expect(platformStore.entitlements_['local']).deep.equals(
@@ -502,7 +502,7 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
       platformStore.resolvePlatform('local', platform);
       fallbackEntitlement.grantReason = GrantReason.METERING;
-      platformStore.reportPlatformFailure('local');
+      platformStore.reportPlatformFailureAndFallback('local');
       platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
       return platformStore.selectPlatform().then(platform => {
         expect(platformStore.entitlements_['local']).deep.equals(

@@ -20,9 +20,9 @@ const BBPromise = require('bluebird');
 const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {join, normalize, sep} = require('path');
+const {renderTemplate} = require('./template');
 
-// HTML Templates
-const templateFile = join(__dirname, '/template.html');
+const pc = process;
 
 // JS Component
 const mainComponent = join(__dirname, '/components/main.js');
@@ -113,22 +113,17 @@ function serveIndex({root, mapBasepath}) {
         return;
       }
 
-      const bundle = await bundleMain();
-      const template = (await fs.readFileAsync(templateFile)).toString();
       const css = (await fs.readFileAsync(mainCssFile)).toString();
 
-      const initialState = {
+      const serveMode = pc.env.SERVE_MODE || 'default';
+
+      const renderedHtml = renderTemplate({
         basepath: formatBasepath(basepath),
         fileSet,
         isMainPage,
-        selectModePrefix: '/',
-      };
-
-      const renderedHtml = template
-          .replace('<!-- bundle -->', bundle)
-          .replace('<!-- main_style -->', css)
-          .replace('<!-- initial_state -->',
-              `window.AMP_PREACT_STATE = ${JSON.stringify(initialState)};`);
+        serveMode,
+        css,
+      });
 
       res.end(renderedHtml);
 
