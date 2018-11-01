@@ -401,6 +401,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
+  {
+    id: 'scroll-height-minheight',
+    name: 'Forces min-height on body (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
 ];
 
 if (getMode().localDev) {

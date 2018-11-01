@@ -57,6 +57,9 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      wrapper.classList.add('i-amphtml-body-minheight');
+    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
