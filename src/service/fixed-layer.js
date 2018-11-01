@@ -433,11 +433,18 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be opaque (not 100%
-          // transparent) - that's a lot of work for no benefit. Additionally,
-          // transparent elements used for "service" needs and thus best kept
-          // in the original tree. The visibility, however, is not considered
-          // because `visibility` CSS is inherited.
+          // Transferability requires an element to be:
+          // 1. Greater than 0% opacity. That's a lot of work for no benefit.
+          //    Additionally, transparent elements used for "service" needs and
+          //    thus best kept in the original tree. The visibility, however,
+          //    is not considered because `visibility` CSS is inherited.
+          // 2. Height < 300. This avoids transferring large sections of UI,
+          //    e.g. publisher-customized amp-consent UI (#17995).
+          // 3. Has `top` or `bottom` CSS set. This ensures we only transfer
+          //    fixed elements that are _not_ auto-positioned to avoid jumping
+          //    position after transferring to the fixed layer (due to loss of
+          //    parent positioning context). We could calculate this offset, but
+          //    we don't (yet).
           let isTransferrable = false;
           if (isFixed) {
             if (forceTransfer === true) {
