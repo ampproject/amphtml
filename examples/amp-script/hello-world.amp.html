@@ -18,6 +18,7 @@
   <script async custom-template="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
-  <amp-script layout=container src="/examples/amp-script/hello-world.js"><div class="root"><button>prompt</button><button>prompt</button><button>prompt</button><button>prompt</button></div></amp-script>
+  <!-- TOOD(choumx): Post-inverted-hydration, this is causing duplicate buttons on page load. Investigate why. -->
+  <amp-script layout=container src="/examples/amp-script/hello-world.js"><div class="root"><button>Insert Hello World!</button><button>Insert amp-img</button><button>Insert &lt;script&gt;</button><button>Insert &lt;img&gt;</button></div></amp-script>
 </body>
 </html>
