@@ -105,7 +105,7 @@ class CustomEventReporter {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
   trigger(eventType, opt_vars) {
     dev().assert(this.config_['triggers'][eventType],
@@ -141,6 +141,13 @@ export class CustomEventReporterBuilder {
       'requests': {},
       'triggers': {},
     });
+  }
+
+  /**
+   * @param {!JsonObject} transportConfig
+   */
+  setTransportConfig(transportConfig) {
+    this.config_['transport'] = transportConfig;
   }
 
   /**
