@@ -64,6 +64,9 @@ export default class GltfViewer {
     /** @private */
     this.setSize_ = this.setupSize_();
 
+    /** @private */
+    this.model_ = new THREE.Group();
+
     this.setupRenderer_();
     this.setupControls_();
     this.setupLight_();
@@ -74,7 +77,44 @@ export default class GltfViewer {
       'setSize': this.setSize_,
       'toggleAmpPlay': this.toggleAmpPlay_.bind(this),
       'toggleAmpViewport': this.toggleAmpViewport_.bind(this),
+      'setModelRotation': this.setModelRotation_.bind(this),
     };
+  }
+
+  /**
+   * @param {JsonObject} args
+   * @private
+   */
+  setModelRotation_(args) {
+    const xAngle = 'x' in args
+      ? this.getModelRotationOnAxis_(args, 'x')
+      : this.model_.rotation.x;
+
+    const yAngle = 'y' in args
+      ? this.getModelRotationOnAxis_(args, 'y')
+      : this.model_.rotation.y;
+
+    const zAngle = 'z' in args
+      ? this.getModelRotationOnAxis_(args, 'z')
+      : this.model_.rotation.z;
+
+    this.model_.rotation.set(xAngle, yAngle, zAngle);
+    this.animationLoop_.needsUpdate = true;
+  }
+
+  /**
+   * @param {JsonObject} args
+   * @param {string} axisName
+   * @return {number}
+   * @private
+   */
+  getModelRotationOnAxis_(args, axisName) {
+    const {
+      [axisName]: value,
+      [axisName + 'Min']: min = 0,
+      [axisName + 'Max']: max = Math.PI * 2,
+    } = args;
+    return value * max + (1 - value) * min;
   }
 
   /** @private */
@@ -207,8 +247,10 @@ export default class GltfViewer {
           gltfData.scene.children
               .slice()
               .forEach(child => {
-                this.scene_.add(child);
+                this.model_.add(child);
               });
+
+          this.scene_.add(this.model_);
 
           this.animationLoop_.needsUpdate = true;
           this.handlers_.onload();
