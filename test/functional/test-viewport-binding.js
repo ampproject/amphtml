@@ -218,6 +218,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.height = '100px';
     win = env.win;
     win.document.documentElement.className = 'top i-amphtml-singledoc';
+    toggleExperiment(win, 'scroll-height-minheight', false);
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
