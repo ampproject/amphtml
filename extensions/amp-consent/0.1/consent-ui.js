@@ -31,6 +31,17 @@ import {toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 
+// Classes for consent UI
+const consentUiClasses = {
+  fullscreen: 'i-amphtml-consent-ui-fullscreen',
+  fullscreenExit: 'i-amphtml-consent-ui-fullscreen-exit',
+  iframeActive: 'consent-iframe-active',
+  uiIn: 'i-amphtml-consent-ui-in',
+  loading: 'loading',
+  fill: 'i-amphtml-consent-fill',
+  placeholder: 'i-amphtml-consent-placeholder'
+};
+
 export class ConsentUI {
 
   /**
@@ -97,7 +108,7 @@ export class ConsentUI {
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
       return;
-    }
+    const consentUi}
     const promptUI = config['promptUI'];
     const promptUISrc = config['promptUISrc'];
     if (promptUI) {
@@ -206,28 +217,9 @@ export class ConsentUI {
     }
 
     const {classList} = this.parent_;
-    classList.add('i-amphtml-consent-ui-fullscreen');
+    classList.add(consentUiClasses.fullscreen);
 
     this.isFullscreen_ = true;
-  }
-
-  /**
-   * Enter the fullscreen state for the UI
-   */
-  exitFullscreen_() {
-    if (!this.ui_ || !this.isVisible_ || !this.isFullscreen_) {
-      return;
-    }
-
-    const {classList} = this.parent_;
-    classList.add('i-amphtml-consent-ui-fullscreen-exit');
-    classList.remove('i-amphtml-consent-ui-fullscreen');
-
-    this.isFullscreen_ = false;
-
-    this.getTransformTransitionEndPromise_().then(() => {
-      classList.remove('i-amphtml-consent-ui-fullscreen-exit');
-    });
   }
 
   /**
@@ -240,7 +232,7 @@ export class ConsentUI {
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     iframe.setAttribute('sandbox', 'allow-scripts');
     const {classList} = iframe;
-    classList.add('i-amphtml-consent-fill');
+    classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
     return iframe;
   }
@@ -254,8 +246,8 @@ export class ConsentUI {
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
     const {classList} = placeholder;
-    classList.add('i-amphtml-consent-fill');
-    classList.add('i-amphtml-consent-placeholder');
+    classList.add(consentUiClasses.fill);
+    classList.add(consentUiClasses.placeholder);
     return placeholder;
   }
 
@@ -272,7 +264,7 @@ export class ConsentUI {
       insertAfterOrAtStart(this.parent_,
           dev().assertElement(this.placeholder_), null);
     }
-    classList.add('loading');
+    classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
@@ -290,8 +282,8 @@ export class ConsentUI {
     toggle(dev().assertElement(this.ui_), true);
     classList.remove('loading');
     this.vsync_.mutate(() => {
-      classList.add('i-amphtml-consent-ui-in');
-      classList.add('consent-iframe-active');
+      classList.add(consentUiClasses.uiIn);
+      classList.add(consentUiClasses.iframeActive);
     });
   }
 
@@ -300,18 +292,36 @@ export class ConsentUI {
    * Remove event listener
    * Reset UI state
    * Takes in a function to call after our transition has ended
-   * @param {Function} clallback
+   * @param {Function} callback
    */
   resetIframe_(callback) {
     const {classList} = this.parent_;
-    classList.remove('i-amphtml-consent-ui-in');
-    classList.remove('consent-iframe-active');
-    this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
 
-    this.getTransformTransitionEndPromise_().then(() => {
-      removeElement(dev().assertElement(this.ui_));
-      callback();
-    });
+    // Remove the iframe active to go back to our 30px height
+    classList.remove('consent-iframe-active');
+
+    if (this.isFullscreen_) {
+      this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
+
+      classList.add(consentUiClasses.fullscreenExit);
+      classList.remove(consentUiClasses.fullscreen);
+
+      this.isFullscreen_ = false;
+
+      this.getTransformTransitionEndPromise_().then(() => {
+        classList.remove(consentUiClasses.fullscreenExit);
+        classList.remove(consentUiClasses.uiIn);
+        removeElement(dev().assertElement(this.ui_));
+        callback();
+      });
+    } else {
+      this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
+      classList.remove(consentUiClasses.uiIn);
+      this.getTransformTransitionEndPromise_().then(() => {
+        removeElement(dev().assertElement(this.ui_));
+        callback();
+      });
+    }
   }
 
   /**
@@ -326,11 +336,6 @@ export class ConsentUI {
    * Enter Fullscreen
    * {
    *   type: 'consent-ui-enter-fullscreen'
-   * }
-   *
-   * Exit Fullscreen
-   * {
-   *   type: 'consent-ui-exit-fullscreen'
    * }
    *
    * @param {!Event} event
@@ -356,13 +361,6 @@ export class ConsentUI {
       });
       return;
     }
-
-    if (data['type'] === 'consent-ui-exit-fullscreen') {
-      this.vsync_.mutate(() => {
-        this.exitFullscreen_();
-      });
-      return;
-    }
   }
 
   /**
@@ -373,7 +371,7 @@ export class ConsentUI {
   getTransformTransitionEndPromise_() {
     const transitionEndDeferred = new Deferred();
     const transitionEndHandler = event => {
-      if (this.isFullscreen_ === false && event.propertyName === 'transform') {
+      if (event.propertyName === 'transform') {
         transitionEndDeferred.resolve();
         this.parent_.removeEventListener('transitionend', transitionEndHandler);
       }

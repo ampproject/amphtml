@@ -177,12 +177,12 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept',
-        () => this.handleAction_(ACTION_TYPE.ACCEPT));
+    this.registerAction('accept',  
+      this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
     this.registerAction('reject',
-        () => this.handleAction_(ACTION_TYPE.REJECT));
+        this.handleAction_.bind(this, ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
-        () => this.handleAction_(ACTION_TYPE.DISMISS));
+        this.handleAction_.bind(this, ACTION_TYPE.DISMISS));
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
@@ -264,7 +264,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.vsync_.mutate(() => {
       this.currentDisplayInstance_ = instanceId;
-      this.consentUI_[this.currentDisplayInstance_].show();
+      this.getCurrentConsentUi_().show();
     });
 
     const deferred = new Deferred();
@@ -276,13 +276,13 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    if (!this.currentDisplayInstance_ ||
-        !this.consentUI_[this.currentDisplayInstance_]) {
+    const consentUi = this.getCurrentConsentUi_();
+    if (!consentUi) {
       dev().error(TAG,
           '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
-    this.consentUI_[this.currentDisplayInstance_].hide().then(() => {
+    consentUi.hide().then(() => {
       const displayInstance = /** @type {string} */ (
         this.currentDisplayInstance_);
       if (this.dialogResolver_[displayInstance]) {
@@ -640,6 +640,17 @@ export class AmpConsent extends AMP.BaseElement {
       const attribute = assertValues[i];
       dev().assert(config[attribute], 'CMP config must specify %s', attribute);
     }
+  }
+
+  /**
+   * Function to return our current consent UI
+   * @return {?ConsentUI}
+   */
+  getCurrentConsentUi_() {
+    if (!this.currentDisplayInstance_) {  
+      return;
+    }
+    return this.consentUI_[this.currentDisplayInstance_];
   }
 
   /**

@@ -30,8 +30,8 @@ amp-consent {
     * Raise it up to our desired height (-30px),
     * Raise it up by any padding applied to the element (- calc(100% - 100vh))
    */
-  transition: transform .5s;
-  transform: translate3d(0px, calc(100vh - 30px - calc(100% - 100vh)), 0px);
+  transition: transform .5s !important;
+  transform: translate3d(0px, calc(100vh - 30px - calc(100% - 100vh)), 0px) !important;
 }
 
 amp-consent[i-amphtml-notbuilt] > * {
@@ -55,7 +55,7 @@ amp-consent.loading {
 }
 
 amp-consent.consent-iframe-active {
-  transform: translate3d(0px, 70vh, 0px);
+  transform: translate3d(0px, 70vh, 0px) !important;
 }
 
 .i-amphtml-consent-placeholder {
@@ -76,11 +76,11 @@ amp-consent.consent-iframe-active {
 
 amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
   height: 100vh;
-  transform: translate3d(0px, 0px, 0px);
+  transform: translate3d(0px, 0px, 0px) !important;
 }
 
 amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill, 
-amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen-exit > .i-amphtml-consent-fill {
+amp-consent.i-amphtml-consent-ui-fullscreen-exit > .i-amphtml-consent-fill {
   height: 100vh;
 }
 
