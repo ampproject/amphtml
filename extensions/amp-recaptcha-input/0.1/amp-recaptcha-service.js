@@ -313,14 +313,18 @@ export class AmpRecaptchaService {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installRecaptchaServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'amp-recaptcha', AmpRecaptchaService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'amp-recaptcha',
+      AmpRecaptchaService
+  );
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!AmpRecaptchaService}
  */
-export function recaptchaServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'amp-recaptcha');
+export function recaptchaServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-recaptcha');
 }
 
