@@ -177,8 +177,8 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept',  
-      this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
+    this.registerAction('accept',
+        this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
     this.registerAction('reject',
         this.handleAction_.bind(this, ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
@@ -313,7 +313,7 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
-    
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -647,8 +647,8 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {?ConsentUI}
    */
   getCurrentConsentUi_() {
-    if (!this.currentDisplayInstance_) {  
-      return;
+    if (!this.currentDisplayInstance_) {
+      return null;
     }
     return this.consentUI_[this.currentDisplayInstance_];
   }
@@ -682,7 +682,7 @@ export class AmpConsent extends AMP.BaseElement {
             // 1. Race condition on consent state change between schedule to
             //    display and display. Add one more check before display
             // 2. Should not schedule display with DISMISSED UNKNOWN state
-            this.scheduleDisplay_(instanceId);
+            return this.scheduleDisplay_(instanceId);
           }
         });
   }

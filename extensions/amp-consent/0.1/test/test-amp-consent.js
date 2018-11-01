@@ -581,9 +581,11 @@ describes.realWin('amp-consent', {
 
     describe('postPromptUI', () => {
       let postPromptUI;
+
       beforeEach(() => {
         postPromptUI = doc.getElementById('test');
       });
+
       it('handle postPromptUI', function* () {
         storageValue = {
           'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
@@ -602,6 +604,7 @@ describes.realWin('amp-consent', {
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
         expect(postPromptUI).to.not.have.display('none');
         ampConsent.scheduleDisplay_('ABC');
+        yield macroTask();
         expect(postPromptUI).to.have.display('none');
       });
 

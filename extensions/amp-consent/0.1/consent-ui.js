@@ -39,7 +39,7 @@ const consentUiClasses = {
   uiIn: 'i-amphtml-consent-ui-in',
   loading: 'loading',
   fill: 'i-amphtml-consent-fill',
-  placeholder: 'i-amphtml-consent-placeholder'
+  placeholder: 'i-amphtml-consent-placeholder',
 };
 
 export class ConsentUI {
@@ -108,7 +108,7 @@ export class ConsentUI {
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
       return;
-    const consentUi}
+    }
     const promptUI = config['promptUI'];
     const promptUISrc = config['promptUISrc'];
     if (promptUI) {
@@ -182,19 +182,20 @@ export class ConsentUI {
    * @return {!Promise}
    */
   hide() {
+    const resetIframeDeferred = new Deferred();
+
     if (!this.ui_) {
       // Nothing to hide from;
-      return;
+      resetIframeDeferred.resolve();
+      return resetIframeDeferred.promise;
     }
 
-    const resetIframeDeferred = new Deferred();
-    
     if (this.isCreatedIframe_) {
       this.resetIframe_(resetIframeDeferred.resolve);
     } else {
       resetIframeDeferred.resolve();
     }
-    
+
     return resetIframeDeferred.promise.then(() => {
       if (!this.isPostPrompt_) {
         const {classList} = this.parent_;
@@ -203,7 +204,9 @@ export class ConsentUI {
       }
       // Need to remove from fixed layer and add it back to update element's top
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
-      toggle(this.ui_, false);
+      if (this.ui_) {
+        toggle(this.ui_, false);
+      }
       this.isVisible_ = false;
     });
   }
@@ -347,7 +350,7 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data || data['type'].includes('consent-ui') === false) {
+    if (!data || !data['type']) {
       return;
     }
 
