@@ -256,8 +256,8 @@ export class AmpRecaptchaService {
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    const isProxyOrigin = Services.viewerForDoc(this.ampdoc_)
-        .isProxyOrigin();
+    const isProxyOrigin = Services.urlForDoc(this.ampdoc_)
+        .isProxyOrigin(this.win_.location.href);
     if (isProxyOrigin) {
       curlsSubdomainPromise = tryResolve(() => {
         return this.win_.location.hostname.split('.')[0];
