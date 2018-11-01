@@ -282,12 +282,7 @@ export class AmpConsent extends AMP.BaseElement {
           '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
-    this.consentUI_[this.currentDisplayInstance_].hide();
-    
-    // TODO: Remove this
-    // Need to wait for a promise that the old display is hidden before showing
-    // The next
-    setTimeout(() => {
+    this.consentUI_[this.currentDisplayInstance_].hide().then(() => {
       const displayInstance = /** @type {string} */ (
         this.currentDisplayInstance_);
       if (this.dialogResolver_[displayInstance]) {
@@ -296,7 +291,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.consentUIPendingMap_[displayInstance] = false;
       this.currentDisplayInstance_ = null;
-    }, 3000);
+    });
   }
 
   /**
@@ -318,7 +313,7 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
-
+    
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(

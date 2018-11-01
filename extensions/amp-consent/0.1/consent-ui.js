@@ -168,6 +168,7 @@ export class ConsentUI {
 
   /**
    * Hide the UI
+   * @return {!Promise}
    */
   hide() {
     if (!this.ui_) {
@@ -175,13 +176,15 @@ export class ConsentUI {
       return;
     }
 
+    const resetIframeDeferred = new Deferred();
+    
     if (this.isCreatedIframe_) {
-      this.resetIframe_();
+      this.resetIframe_(resetIframeDeferred.resolve);
+    } else {
+      resetIframeDeferred.resolve();
     }
-
-    // TODO: Remove this
-    // Need to hide this element, once the other one is shown
-    setTimeout(() => {
+    
+    return resetIframeDeferred.promise.then(() => {
       if (!this.isPostPrompt_) {
         const {classList} = this.parent_;
         classList.remove('amp-active');
@@ -191,7 +194,7 @@ export class ConsentUI {
       this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(this.ui_, false);
       this.isVisible_ = false;
-    }, 1000);
+    });
   }
 
   /**
@@ -222,13 +225,9 @@ export class ConsentUI {
 
     this.isFullscreen_ = false;
 
-    const removeExitFullscreen = () => {
-      if (this.isFullscreen_ === false) {
-        classList.remove('i-amphtml-consent-ui-fullscreen-exit');
-      }
-      this.parent_.removeEventListener('transitionend', removeExitFullscreen);
-    };
-    this.parent_.addEventListener('transitionend', removeExitFullscreen);
+    this.getTransformTransitionEndPromise_().then(() => {
+      classList.remove('i-amphtml-consent-ui-fullscreen-exit');
+    });
   }
 
   /**
@@ -300,13 +299,19 @@ export class ConsentUI {
    * Remove the iframe from doc
    * Remove event listener
    * Reset UI state
+   * Takes in a function to call after our transition has ended
+   * @param {Function} clallback
    */
-  resetIframe_() {
+  resetIframe_(callback) {
     const {classList} = this.parent_;
     classList.remove('i-amphtml-consent-ui-in');
     classList.remove('consent-iframe-active');
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
-    removeElement(dev().assertElement(this.ui_));
+
+    this.getTransformTransitionEndPromise_().then(() => {
+      removeElement(dev().assertElement(this.ui_));
+      callback();
+    });
   }
 
   /**
@@ -358,5 +363,22 @@ export class ConsentUI {
       });
       return;
     }
+  }
+
+  /**
+   * Return a promise for our transform transition end
+   * @private
+   * @return {!Promise}
+   */
+  getTransformTransitionEndPromise_() {
+    const transitionEndDeferred = new Deferred();
+    const transitionEndHandler = event => {
+      if (this.isFullscreen_ === false && event.propertyName === 'transform') {
+        transitionEndDeferred.resolve();
+        this.parent_.removeEventListener('transitionend', transitionEndHandler);
+      }
+    };
+    this.parent_.addEventListener('transitionend', transitionEndHandler);
+    return transitionEndDeferred.promise;
   }
 }
