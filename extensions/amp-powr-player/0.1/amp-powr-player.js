@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,9 +81,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
 
-    /** @private {?number} */
-    this.readyTimeout_ = null;
-
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
@@ -119,15 +116,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
-
-    // Warn if the player does not have video interface support
-    this.readyTimeout_ = Services.timerFor(window).delay(() => {
-      user().warn(TAG,
-          'Did not receive ready callback from player %s.' +
-        ' Ensure it has the iframe plugin.', this.playerId_);
-    }, 3000);
-
-    this.playerReadyResolver_(this.iframe_);
   }
 
   /** @override */
@@ -224,13 +212,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
   onReady_(data) {
     this.frameHasAmpSupport_ = true;
 
-    Services.timerFor(this.win)
-        .cancel(this.readyTimeout_);
-
     const {element} = this;
 
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
+
+    this.playerReadyResolver_(this.iframe_);
 
     dev().info(TAG,
         'Player %s ready. ' +
