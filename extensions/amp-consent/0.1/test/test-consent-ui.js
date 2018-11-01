@@ -57,8 +57,8 @@ describes.realWin('consent-ui', {
       },
       getVsync: () => {
         return {
-          mutate: (callback) => {callback()}
-        }
+          mutate: callback => {callback();},
+        };
       },
       scheduleLayout: () => {},
     };
