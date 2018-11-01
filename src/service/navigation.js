@@ -462,7 +462,12 @@ export class Navigation {
         return; // bail early.
       }
 
-      // Accessibility fix for IE browser
+      // Accessibility fix for IE browser.
+      // Issue: anchor navigation in IE changes visual focus of the browser
+      // and shifts to the element being linked to,
+      // where the input focus stays where it was.
+      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+      // @see https://github.com/ampproject/amphtml/issues/18671
       if (Services.platformFor(this.ampdoc.win).isIe()) {
         const internalTargetElmId = tgtLoc.hash.substring(1);
         const internalElm = this.ampdoc.getElementById(internalTargetElmId);
