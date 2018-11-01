@@ -43,7 +43,10 @@ describes.realWin('amp-powr-player', {
       bc.setAttribute('layout', 'responsive');
     }
     doc.body.appendChild(bc);
-    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
+    return bc.build().then(() => {
+      bc.implementation_.playerReadyResolver_(bc.implementation_.iframe_);
+      return bc.layoutCallback();
+    }).then(() => bc);
   }
 
   function fakePostMessage(bc, info) {
