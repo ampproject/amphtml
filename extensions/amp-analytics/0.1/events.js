@@ -1144,15 +1144,21 @@ export class VisibilityTracker extends EventTracker {
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
-    // special polyfill for eventType: 'hidden'
     let createReportReadyPromiseFunc = null;
     if (eventType == 'hidden') {
       if (reportWhenSpec) {
         user().error(TAG,
             'ReportWhen should not be defined when eventType is "hidden"');
       }
+      // special polyfill for eventType: 'hidden'
       reportWhenSpec = 'documentHidden';
     }
+
+    if (reportWhenSpec) {
+      user().assert(!visibilitySpec['repeat'],
+          'reportWhen and repeat are mutually exclusive.');
+    }
+
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc =
           this.createReportReadyPromiseForDocumentHidden_.bind(this);
@@ -1160,7 +1166,7 @@ export class VisibilityTracker extends EventTracker {
       createReportReadyPromiseFunc =
           this.createReportReadyPromiseForDocumentExit_.bind(this);
     } else {
-      user().assert(!reportWhenSpec, 'reportWhen value %s not supported',
+      user().assert(!reportWhenSpec, 'reportWhen value "%s" not supported.',
           reportWhenSpec);
     }
 
