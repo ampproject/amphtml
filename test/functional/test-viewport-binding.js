@@ -218,6 +218,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.height = '100px';
     win = env.win;
     win.document.documentElement.className = 'top i-amphtml-singledoc';
+    toggleExperiment(win, 'scroll-height-minheight', false);
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -229,6 +230,22 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     vsync = Services.vsyncFor(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
+  });
+
+  it('should NOT setup body min-height w/o experiment', () => {
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal('0px');
+  });
+
+  it('should setup body min-height wwith experiment', () => {
+    toggleExperiment(win, 'scroll-height-minheight', true);
+    try {
+      binding = new ViewportBindingIosEmbedWrapper_(win);
+    } catch (e) {
+      // Ignore a double-init errors.
+    }
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -481,6 +498,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       iframe.style.width = '100px';
       iframe.style.height = '100px';
       win = env.win;
+      toggleExperiment(win, 'scroll-height-minheight', false);
       win.document.documentElement.className = 'top i-amphtml-singledoc';
       child = win.document.createElement('div');
       child.style.width = '200px';
@@ -503,6 +521,22 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       vsync = Services.vsyncFor(win);
       binding = new ViewportBindingIosEmbedShadowRoot_(win);
       binding.connect();
+    });
+
+    it('should NOT setup body min-height w/o experiment', () => {
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal('0px');
+    });
+
+    it('should setup body min-height wwith experiment', () => {
+      toggleExperiment(win, 'scroll-height-minheight', true);
+      try {
+        new ViewportBindingIosEmbedShadowRoot_(win);
+      } catch (e) {
+        // Ignore a double-init errors.
+      }
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
     });
 
     it('should NOT require fixed layer transferring', () => {
