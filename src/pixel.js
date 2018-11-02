@@ -30,7 +30,7 @@ const TAG = 'pixel';
  */
 export function createPixel(win, src, referrerPolicy) {
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
-    user().error(TAG, 'Unsupported referrerPolicy: ' + referrerPolicy);
+    user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
 
   return referrerPolicy === 'no-referrer'

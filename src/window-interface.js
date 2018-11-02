@@ -69,7 +69,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {!Function}
+   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean}
    */
   static getSendBeacon(win) {
     return win.navigator.sendBeacon;
@@ -78,7 +78,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {!XMLHttpRequest}
+   * @return {function(new:XMLHttpRequest)}
    */
   static getXMLHttpRequest(win) {
     return win.XMLHttpRequest;
@@ -87,7 +87,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {!Image}
+   * @return {function(new:Image)}
    */
   static getImage(win) {
     return win.Image;
