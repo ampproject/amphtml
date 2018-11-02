@@ -95,9 +95,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.isFullscreen_ = false;
 
-    /** @private {number} */
-    this.currentHeight_ = 0;
-
     /** @private {Element} */
     this.iframe_ = null;
 
@@ -361,11 +358,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   setFullHeight_() {
-    this.currentHeight_ = this.element./*OK*/offsetHeight;
-    this.element.classList.add('i-amphtml-expanded');
-    this.attemptChangeHeight(0).catch(() => {
-      /* ignore failures */
-    });
+    setStyle(this.iframe_, 'position', 'fixed');
   }
 
   /**
@@ -373,10 +366,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   setInlineHeight_() {
-    this.element.classList.remove('i-amphtml-expanded');
-    this.attemptChangeHeight(this.currentHeight_).catch(() => {
-      /* ignore failures */
-    });
+    setStyle(this.iframe_, 'position', 'absolute');
   }
 
   /**
