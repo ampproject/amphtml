@@ -23,6 +23,7 @@ import ampToolboxCacheUrl from
   '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -30,12 +31,9 @@ import {
 } from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
-  getService,
-  registerServiceBuilder,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {
-  isProxyOrigin,
-} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -64,15 +62,15 @@ import {urls} from '../../../src/config';
 export class AmpRecaptchaService {
 
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @const @private {!Window} */
-    this.win_ = window;
-
-    /** @const @private {!Element} */
-    this.body_ = this.win_.document.body;
+    this.win_ = this.ampdoc_.win;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -183,7 +181,7 @@ export class AmpRecaptchaService {
       ];
       this.executeMap_ = {};
 
-      this.body_.appendChild(this.iframe_);
+      this.win_.document.body.appendChild(this.iframe_);
       return loadPromise(this.iframe_);
     });
   }
@@ -212,7 +210,6 @@ export class AmpRecaptchaService {
    * @private
    */
   createRecaptchaFrame_(sitekey) {
-
     const iframe = this.win_.document.createElement('iframe');
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
@@ -259,7 +256,9 @@ export class AmpRecaptchaService {
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    if (isProxyOrigin(this.win_.location.href)) {
+    const isProxyOrigin = Services.urlForDoc(this.ampdoc_)
+        .isProxyOrigin(this.win_.location.href);
+    if (isProxyOrigin) {
       curlsSubdomainPromise = tryResolve(() => {
         return this.win_.location.hostname.split('.')[0];
       });
@@ -311,17 +310,21 @@ export class AmpRecaptchaService {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installRecaptchaService(win) {
-  registerServiceBuilder(win, 'amp-recaptcha', AmpRecaptchaService);
+export function installRecaptchaServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'amp-recaptcha',
+      AmpRecaptchaService
+  );
 }
 
 /**
- * @param {!Window} win
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!AmpRecaptchaService}
  */
-export function recaptchaServiceFor(win) {
-  return getService(win, 'amp-recaptcha');
+export function recaptchaServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-recaptcha');
 }
 
