@@ -23,6 +23,7 @@ import {hasOwn} from '../../../src/utils/object';
 import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
 import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics';
 import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics';
+import {AMPLITUDE_CONFIG} from './vendors/amplitude';
 import {ATINTERNET_CONFIG} from './vendors/atinternet';
 import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics';
 import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
@@ -174,6 +175,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'adobeanalytics_nativeConfig': ADOBEANALYTICS_NATIVECONFIG_CONFIG,
   'afsanalytics': AFSANALYTICS_CONFIG,
   'alexametrics': ALEXAMETRICS_CONFIG,
+  'amplitude': AMPLITUDE_CONFIG,
   'atinternet': ATINTERNET_CONFIG,
   'baiduanalytics': BAIDUANALYTICS_CONFIG,
   'bg': BG_CONFIG,
