@@ -52,20 +52,6 @@ import {requireExternal} from '../../../src/module';
  */
 let DateTemplateMapDef;
 
-/**
- * @typedef {{
- *   startDate: ?moment,
- *   endDate: ?moment
- * }}
- */
-let DatesChangeDetailsDef;
-
-/**
- * @typedef {{
- *   date: ?moment
- * }}
- */
-let DateChangeDetailsDef;
 
 /** @dict @extends {JsonObject} */
 class BindDateDetails {
