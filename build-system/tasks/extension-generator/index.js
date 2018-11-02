@@ -202,7 +202,7 @@ export class ${className} extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.container_ = this.win.document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
