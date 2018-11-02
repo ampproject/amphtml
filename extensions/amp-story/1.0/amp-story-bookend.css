@@ -325,12 +325,12 @@
   white-space: nowrap !important;
 }
 
-.i-amphtml-story-share-widget {
+.i-amphtml-story-bookend  .i-amphtml-story-share-widget {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 
-.i-amphtml-story-share-list {
+.i-amphtml-story-bookend  .i-amphtml-story-share-list {
   padding-left: 16px !important;
   padding-right: 16px !important;
 }
