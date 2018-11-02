@@ -327,7 +327,7 @@ function sendAmpScriptToSwOnFirstVisit(registration, win) {
           .map(script => script.name);
       // using https://github.com/redux-utilities/flux-standard-action
       controllerSw.postMessage(JSON.stringify(dict({
-        'type': 'FIRST_VISIT_CACHING',
+        'type': 'AMP__FIRST-VISIT-CACHING',
         'payload': ampScriptsUsed,
       })));
     });
