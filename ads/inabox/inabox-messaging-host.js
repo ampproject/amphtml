@@ -132,8 +132,7 @@ export class InaboxMessagingHost {
     const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
     // escape the type before including it in the regex
     const type = request['type'].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const hasAllowedTypeRegex =
-        new RegExp(`(^|,)\\s*${type}\\s*($|,)`);
+    const hasAllowedTypeRegex = new RegExp(`(^|,)\\s*${type}\\s*($|,)`);
     // having no whitelist is legacy behavior so assume all types are allowed
     if (allowedTypes && !hasAllowedTypeRegex.test(allowedTypes)) {
       dev().info(TAG, 'Ignored non-whitelisted message type:', message);
