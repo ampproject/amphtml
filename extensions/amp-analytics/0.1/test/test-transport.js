@@ -15,11 +15,14 @@
  */
 
 import * as lolex from 'lolex';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '../../../../testing/test-helper';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
-import {mockWindowInterface} from '../../../../testing/test-helper';
 
 describes.realWin('amp-analytics.transport', {
   amp: false,
@@ -32,7 +35,7 @@ describes.realWin('amp-analytics.transport', {
   let openXhrStub;
   let sendXhrStub;
   let sendBeaconStub;
-  let imagePixel;
+  let imagePixelVerifier;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -41,7 +44,6 @@ describes.realWin('amp-analytics.transport', {
     openXhrStub = sandbox.stub();
     sendXhrStub = sandbox.stub();
     sendBeaconStub = sandbox.stub();
-    imagePixel = {};
   });
 
   it('prefers beacon over xhrpost and image', () => {
@@ -408,8 +410,7 @@ describes.realWin('amp-analytics.transport', {
     wi.getXMLHttpRequest.returns(xhr ? FakeXMLHttpRequest : undefined);
     sendBeaconStub.returns(beacon);
 
-    const FakeImage = () => imagePixel;
-    wi.getImage.returns(FakeImage);
+    imagePixelVerifier = new ImagePixelVerifier(wi);
   }
 
   function sendRequest(win, request, options) {
@@ -435,11 +436,10 @@ describes.realWin('amp-analytics.transport', {
   }
 
   function expectImagePixel(url, referrerPolicy) {
-    expect(imagePixel.src).to.equal(url);
-    expect(imagePixel.referrerPolicy).to.equal(referrerPolicy);
+    imagePixelVerifier.verifyRequest(url, referrerPolicy);
   }
 
   function expectNoImagePixel() {
-    expect(imagePixel.src).to.be.undefined;
+    expect(imagePixelVerifier.hasRequestSent()).to.be.false;
   }
 });
