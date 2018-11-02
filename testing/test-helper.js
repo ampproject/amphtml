@@ -204,4 +204,11 @@ export class ImagePixelVerifier {
     const pixel = this.imagePixels_.shift();
     expect(pixel.src).to.match(regex);
   }
+
+  getLastRequestUrl() {
+    if (!this.hasRequestSent()) {
+      return null;
+    }
+    return this.imagePixels_[this.imagePixels_.length - 1].src;
+  }
 }
