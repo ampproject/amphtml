@@ -126,7 +126,7 @@ export class AmpRecaptchaService {
    * @param {number} resourceId
    * @param {string} sitekey
    * @param {string} action
-   * @return {Promise}
+   * @return {!Promise<string>}
    */
   execute(resourceId, sitekey, action) {
     if (!this.iframe_) {

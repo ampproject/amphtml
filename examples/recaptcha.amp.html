@@ -37,6 +37,35 @@
         form.amp-form-submit-success.hide-inputs > input {
           display: none;
         }
+
+        @keyframes donut-spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .donut {
+          display: inline-block;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-left-color: #7983ff;
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
+          animation: donut-spin 1.2s linear infinite;
+        }
+
+        .loading-spinner {
+          display: none;
+          text-align: center;
+          margin: 5px;
+        }
+
+        form.amp-form-submitting > .loading-spinner {
+          display: block;
+        }
       </style>
       <script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js"></script>
       <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
@@ -74,6 +103,11 @@
           <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
           </amp-recaptcha-input>
         </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
       </form>
       <h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
       <form method="get"
@@ -91,6 +125,11 @@
           <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
           </amp-recaptcha-input>
         </fieldset>
+
+        <div class="loading-spinner">
+          <div class="donut">
+          </div>
+        </div>
 
         <div submit-success>
           <template type="amp-mustache">

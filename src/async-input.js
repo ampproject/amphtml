@@ -23,7 +23,7 @@
  * some other action. For examples, this can be used
  * by reCAPTCHA to request tokens for the form.
  */
-import { BaseElement } from './base-element';
+import {BaseElement} from './base-element';
 
 export class AsyncInput extends BaseElement {
 
@@ -36,7 +36,7 @@ export class AsyncInput extends BaseElement {
   /**
    * Called to get the asynchronous value of an
    * AsyncInput field.
-   * @return {!Promise}
+   * @return {!Promise<string>}
    */
   getValue() {
     return Promise.resolve();

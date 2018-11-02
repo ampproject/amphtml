@@ -26,7 +26,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     win.customElements.define('amp-test-input-element',
-      createAmpElementForTesting(win, 'amp-test-input-element', AsyncInput));
+        createAmpElementForTesting(win, 'amp-test-input-element', AsyncInput));
     customElement = doc.createElement('amp-test-input-element');
     element = new AsyncInput(customElement);
   });
@@ -43,7 +43,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should have the i-amphtml-async-input class', () => {
-    const hasAsyncInputClass = 
+    const hasAsyncInputClass =
       customElement.classList.contains('i-amphtml-async-input');
     expect(hasAsyncInputClass).to.be.ok;
   });

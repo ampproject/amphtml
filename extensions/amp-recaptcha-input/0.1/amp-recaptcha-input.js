@@ -117,7 +117,7 @@ export class AmpRecaptchaInput extends AsyncInput {
   /**
    * Function to return the recaptcha token.
    * Will be an override of AMP.AsyncInput
-   * @return {Promise<string>}
+   * @return {!Promise<string>}
    */
   getValue() {
 

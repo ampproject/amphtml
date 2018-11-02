@@ -408,7 +408,7 @@ export class AmpForm {
       return;
     }
     // `submit` has the same trust level as the AMP Action that caused it.
-    this.submit_(invocation.trust);
+    this.submit_(invocation.trust, null);
   }
 
   /**
@@ -461,20 +461,23 @@ export class AmpForm {
       event.preventDefault();
       return;
     }
+
     if (this.xhrAction_ || this.method_ == 'POST') {
       event.preventDefault();
     }
+
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH);
+    this.submit_(ActionTrust.HIGH, event);
   }
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
    * @param {ActionTrust} trust
+   * @param {?Event} event
    * @private
    */
-  submit_(trust) {
-    // TODO @torch2424
+  submit_(trust, event) {
+    // TODO(torch2424) remove this todo. Used to navigate code :p
     try {
       const event = {
         form: this.form_,
@@ -485,29 +488,42 @@ export class AmpForm {
       dev().error(TAG, `Form submit service failed: ${e}`);
     }
 
+    // Get our special fields
+    const varSubsFields = this.getVarSubsFields_();
+    const asyncInputs = toArray(
+        this.form_.querySelectorAll('.i-amphtml-async-input')
+    );
+
     // Do any assertions we may need to do
     // For NonXhrGET
+    // took out all the code in handleNonXhrGet_
+    // because alot was assertions we want to fail on before getting var subs
     if (!this.xhrAction_ && this.method_ == 'GET') {
       this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
       this.assertNoSensitiveFields_();
-      
-      // NOTE: @torch2424
-      // sync nonxhr get
-      // this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+
+      // If we have no async inputs, we can just submit synchronously
+      if (asyncInputs.length <= 0) {
+
+        for (let i = 0; i < varSubsFields.length; i++) {
+          this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+        }
+
+        this.handleNonXhrGet_();
+        return;
+      } else if (event) {
+        event.preventDefault();
+      }
     }
-    
+
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
-    // Get any Async fields
-    const varSubsFields = this.getVarSubsFields_();
-    const asyncInputs = toArray(this.form_.querySelectorAll('.i-amphtml-async-input'));
-    
     // Promises to run before submitting the form
     const presubmitPromises = [];
-    presubmitPromises.push(this.doVarSubs_(varSubFields));
+    presubmitPromises.push(this.doVarSubs_(varSubsFields));
     if (asyncInputs.length > 0) {
-      asyncInput.forEach(asyncInput => {
+      asyncInputs.forEach(asyncInput => {
         presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
       });
     }
@@ -518,11 +534,7 @@ export class AmpForm {
       } else if (this.method_ == 'POST') {
         this.handleNonXhrPost_();
       } else if (this.method_ == 'GET') {
-        // took out all the code in handleNonXhrGet_
-        // because alot was assertions we want to fail on before getting var subs
-        this.triggerFormSubmitInAnalytics_('amp-form-submit');
-        this.form_.submit();
-        this.setState_(FormState.INITIAL);
+        this.handleNonXhrGet_();
       }
     });
   }
@@ -687,6 +699,10 @@ export class AmpForm {
    */
   getValueForAsyncInput_(asyncInput) {
     // TODO @torch2424
+    return new Promise(resolve => {
+      setTimeout(() => resolve(), 3000);
+    });
+    // return Promise.resolve();
   }
 
 
@@ -806,6 +822,15 @@ export class AmpForm {
         'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
         this.form_);
+  }
+
+  /**
+   * Triggers Submit Analytics, and Form Element submit
+   */
+  handleNonXhrGet_() {
+    this.triggerFormSubmitInAnalytics_('amp-form-submit');
+    this.form_.submit();
+    this.setState_(FormState.INITIAL);
   }
 
   /**
