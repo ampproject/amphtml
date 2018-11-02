@@ -88,33 +88,5 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 ## Actions
 `amp-delight-player` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.
 
-## Events
-`amp-delight-player` emits the following events:
-
-* **playing** The player begins playing.
-* **pause** The player is paused.
-* **load** The player's iframe is loaded and player is ready.
-* **ended** The video has ended.
-* **muted** The player is muted.
-* **unmuted** The player is unmuted.
-* **timeupdate** The event is triggered regularly when the player is playing.
-
-These events can be used through the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on) and are compatible with `amp-analytics`.
-
-For example, the following listens to both `playing` and `pause` and displays different divs depending on the event.
-
-```html
-<amp-delight-player
-    ... 
-    on="
-        playing:play-div.show, pause-div.hide;
-        pause:pause-div.show, play-div.hide;
-    ">
-</amp-delight-player>
-
-<div id="play-div"> ... </div>
-<div id="pause-div"> ... </div>
-```
-
 ## Validation
 See [amp-delight-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/validator-amp-delight-player.protoascii) in the AMP validator specification.

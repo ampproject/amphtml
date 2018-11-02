@@ -31,7 +31,6 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
@@ -65,7 +64,6 @@ const DelightEvent = {
   PONG: 'x-dl8-pong',
   EXPANDED: 'x-dl8-iframe-enter-fullscreen',
   MINIMIZED: 'x-dl8-iframe-exit-fullscreen',
-  REDIRECT: 'x-dl8-iframe-redirect',
   SCREEN_CHANGE: 'x-dl8-iframe-screen-change',
   WINDOW_ORIENTATIONCHANGE: 'x-dl8-iframe-window-orientationchange',
   WINDOW_DEVICEORIENTATION: 'x-dl8-iframe-window-deviceorientation',
@@ -96,6 +94,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isFullscreen_ = false;
+
+    /** @private {number} */
+    this.currentHeight_ = 0;
 
     /** @private {Element} */
     this.iframe_ = null;
@@ -155,7 +156,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const src = this.baseURL_ + '/player/' + this.contentID_ + '?amp=1';
+    const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
 
     iframe.setAttribute('allow', 'vr');
@@ -198,10 +199,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
-    const src = this.baseURL_ + '/poster/' + this.contentID_;
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
     placeholder.setAttribute('placeholder', '');
 
-    setStyle(placeholder, 'background-image', 'url(' + src + ')');
+    setStyle(placeholder, 'background-image', `url(${src})`);
 
     this.placeholderEl_ = placeholder;
 
@@ -252,23 +253,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
     const {element} = this;
 
     switch (data['type']) {
-      case DelightEvent.REDIRECT: {
-        let pathname = data['pathname'];
-        let host = data['host'];
-        const search = data['search'];
-        const protocol = data['protocol'];
-        const hash = data['hash'];
-        const hasQueryParams = search.length > 1;
-        host = host.replace('/', '');
-        if (startsWith(pathname, '/')) {
-          pathname = pathname.substring(1);
-        }
-        window.location = `${protocol}//${host}/${pathname}
-        ${search}
-        ${hasQueryParams ? '&' : '?'}dl8-start-from-cors-fallback=true
-        ${hash}`;
-        break;
-      }
       case DelightEvent.PING: {
         const guid = data['guid'];
         if (guid) {
@@ -377,8 +361,11 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @private
    */
   setFullHeight_() {
+    this.currentHeight_ = this.element./*OK*/offsetHeight;
     this.element.classList.add('i-amphtml-expanded');
-    document.body.classList.add('x-dl8-fullscreen');
+    this.attemptChangeHeight(0).catch(() => {
+      /* ignore failures */
+    });
   }
 
   /**
@@ -387,7 +374,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   setInlineHeight_() {
     this.element.classList.remove('i-amphtml-expanded');
-    document.body.classList.remove('x-dl8-fullscreen');
+    this.attemptChangeHeight(this.currentHeight_).catch(() => {
+      /* ignore failures */
+    });
   }
 
   /**

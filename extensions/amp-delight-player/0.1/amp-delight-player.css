@@ -24,6 +24,7 @@ amp-delight-player [placeholder] {
 
 amp-delight-player [placeholder].i-amphtml-faded {
   opacity: 0;
+  pointer-events: none;
 }
 
 amp-delight-player.i-amphtml-expanded {
