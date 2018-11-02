@@ -386,6 +386,17 @@ describe('getErrorReportData', () => {
           undefined, e);
       expect(data['spt']).to.be.undefined;
     });
+
+    it('does nothing for unknown single pass type', () => {
+      window.AMP_CONFIG = {
+        spt: 'lol',
+      };
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data).to.not.have.all.keys('spt');
+    });
   });
 
   it('reportError marks binary type', () => {
