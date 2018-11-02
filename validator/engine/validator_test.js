@@ -1166,7 +1166,7 @@ describe('ValidatorRulesMakeSense', () => {
     }
     // attr_specs within each tag_spec within rules.
     for (const attrSpecId of tagSpec.attrs) {
-      if (attrSpecId < 0) continue;
+      if (attrSpecId < 0) { continue; }
       const attrSpec = rules.attrs[attrSpecId];
       attrRuleShouldMakeSense(attrSpec, tagSpec, rules);
     }
