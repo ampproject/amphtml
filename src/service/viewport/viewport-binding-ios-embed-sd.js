@@ -109,6 +109,9 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const doc = this.win.document;
     const {documentElement} = doc;
     documentElement.classList.add('i-amphtml-ios-embed-sd');
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      documentElement.classList.add('i-amphtml-body-minheight');
+    }
 
     const scroller = htmlFor(doc)`
       <div id="i-amphtml-scroller">

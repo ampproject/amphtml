@@ -177,6 +177,10 @@ export class AmpStoryHint {
           this.onSystemUiIsVisibleStateUpdate_(isVisible);
         });
 
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isOpen => {
+      this.onBookendStateUpdate_(isOpen);
+    });
+
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
@@ -287,6 +291,17 @@ export class AmpStoryHint {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (!isVisible) {
+      this.hideAllNavigationHint();
+    }
+  }
+
+  /**
+   * Reacts to bookend state updates.
+   * @param {boolean} isOpen
+   * @private
+   */
+  onBookendStateUpdate_(isOpen) {
+    if (isOpen) {
       this.hideAllNavigationHint();
     }
   }
