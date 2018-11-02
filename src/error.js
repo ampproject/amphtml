@@ -501,11 +501,8 @@ export function getErrorReportData(message, filename, line, col, error,
   }
 
   const singlePassType = getMode().singlePassType;
-  if (singlePassType) {
-    if (singlePassType === 'sp') {
-      data['spt'] = 'sp';
-    } else if (singlePassType === 'mp') {
-      data['spt'] = 'mp';
+  if (['sp', 'mp', 'esm'].includes(singlePassType)) {
+      data['spt'] = singlePassType;
     }
   }
 
