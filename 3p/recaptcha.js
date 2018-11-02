@@ -110,7 +110,7 @@ window.initRecaptcha = function() {
  * Function to initialize our IframeMessagingClient
  * @param {Window} win
  * @param {*} grecaptcha
- * @param {Object} dataObject
+ * @param {JsonObject} dataObject
  */
 function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
   iframeMessagingClient = new IframeMessagingClient(win);
