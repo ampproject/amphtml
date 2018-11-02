@@ -194,10 +194,10 @@ export class AnimationWorkletRunner extends AnimationRunner {
     /** @private {number} */
     this.bottomRatio_ = positionObserverParameters['bottom-ratio'];
 
-    /** @private {string} */
+    /** @private {number} */
     this.topMargin_ = positionObserverParameters['top-margin'];
 
-    /** @private {string} */
+    /** @private {number} */
     this.bottomMargin_ =
       positionObserverParameters['bottom-margin'];
   }

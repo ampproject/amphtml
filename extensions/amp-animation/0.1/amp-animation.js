@@ -293,8 +293,8 @@ export class AmpAnimation extends AMP.BaseElement {
     this.triggered_ = true;
     this.hasPositionObserver_ = !!invocation.caller &&
       invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
-    const positionObserverArgs =
-      invocation.event.additionalWorkletAnimationData;
+    const positionObserverArgs = (invocation && invocation.event) ?
+      invocation.event.additionalWorkletAnimationData : null;
     return this.createRunnerIfNeeded_(null, positionObserverArgs).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
@@ -416,7 +416,8 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   createRunnerIfNeeded_(opt_args, opt_positionObserverArgs) {
     if (!this.runnerPromise_) {
-      this.runnerPromise_ = this.createRunner_(opt_args, opt_positionObserverArgs).then(runner => {
+      this.runnerPromise_ = this.createRunner_(
+          opt_args, opt_positionObserverArgs).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
