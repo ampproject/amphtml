@@ -69,10 +69,13 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean}
+   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
    */
   static getSendBeacon(win) {
-    return win.navigator.sendBeacon;
+    if (!win.navigator.sendBeacon) {
+      return undefined;
+    }
+    return win.navigator.sendBeacon.bind(win.navigator);
   }
 
   /**
