@@ -261,9 +261,7 @@ amp-story-cta-layer {
 
 /** Grid level */
 amp-story-grid-layer {
-  box-sizing: border-box !important;
   display: grid !important;
-  height: 100% !important;
   position: absolute !important;
   top: 0 !important;
   right: 0 !important;

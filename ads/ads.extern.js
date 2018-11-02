@@ -114,9 +114,18 @@ THREE.Vector3.prototype.distanceToSquared
 THREE.Vector3.prototype.length
 THREE.Vector3.prototype.fromArray
 
+THREE.Euler = class {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;}};
+
+THREE.Euler.prototype.set;
+
 THREE.Object3D = class {
   constructor() {
     this.position = new THREE.Vector3();
+    this.rotation = new THREE.Euler();
     this.children = [];}};
 
 THREE.Object3D.prototype.applyMatrix
