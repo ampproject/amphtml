@@ -222,10 +222,6 @@ export class AmpRecaptchaService {
       iframe.setAttribute('name', JSON.stringify(dict({
         'sitekey': sitekey,
         'sentinel': 'amp-recaptcha',
-        'mode': {
-          'localDev': getMode().localDev,
-          'test': getMode().test,
-        },
       })));
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');

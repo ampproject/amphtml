@@ -23,6 +23,7 @@ import ampToolboxCacheUrl from
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
+import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 
@@ -53,9 +54,6 @@ const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
-/** {?ModeDef} **/
-let mode = null;
-
 /**
  * Initialize 3p frame.
  */
@@ -72,6 +70,8 @@ init();
  */
 window.initRecaptcha = function() {
 
+  const win = window;
+  
   /**
    *  Get the data from our name attribute
    * sitekey {string} - reCAPTCHA sitekey used to identify the site
@@ -80,18 +80,11 @@ window.initRecaptcha = function() {
    */
   let dataObject;
   try {
-    dataObject = parseJson(window.name);
+    dataObject = parseJson(win.name);
   } catch (e) {
     dev().error(TAG + ' Could not parse the window name.');
     return;
   }
-
-  // Get our mode from the iframe name attribture
-  dev().assert(
-      dataObject.mode,
-      'The mode is required for the <amp-recaptcha-input> iframe'
-  );
-  mode = dataObject.mode;
 
   // Get our sitekey from the iframe name attribute
   dev().assert(
@@ -101,11 +94,11 @@ window.initRecaptcha = function() {
   const {sitekey} = dataObject;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
-  loadScript(window, recaptchaApiUrl, function() {
-    const {grecaptcha} = window;
+  loadScript(win, recaptchaApiUrl, function() {
+    const {grecaptcha} = win;
 
     grecaptcha.ready(function() {
-      initializeIframeMessagingClient(window, grecaptcha, dataObject);
+      initializeIframeMessagingClient(win, grecaptcha, dataObject);
       iframeMessagingClient./*OK*/sendMessage('amp-recaptcha-ready');
     });
   }, function() {
@@ -115,16 +108,16 @@ window.initRecaptcha = function() {
 
 /**
  * Function to initialize our IframeMessagingClient
- * @param {Window} window
+ * @param {Window} win
  * @param {*} grecaptcha
  * @param {Object} dataObject
  */
-function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
-  iframeMessagingClient = new IframeMessagingClient(window);
+function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
+  iframeMessagingClient = new IframeMessagingClient(win);
   iframeMessagingClient.setSentinel(dataObject.sentinel);
   iframeMessagingClient.registerCallback(
       'amp-recaptcha-action',
-      actionTypeHandler.bind(this, window, grecaptcha)
+      actionTypeHandler.bind(this, win, grecaptcha)
   );
 }
 
@@ -137,12 +130,12 @@ function initializeIframeMessagingClient(window, grecaptcha, dataObject) {
  * action {string} - action to be dispatched with grecaptcha.execute
  * id {number} - id given to us by a counter in the recaptcha service
  *
- * @param {Window} window
+ * @param {Window} win
  * @param {*} grecaptcha
  * @param {Object} data
  */
-function actionTypeHandler(window, grecaptcha, data) {
-  doesOriginDomainMatchIframeSrc(window, data).then(() => {
+function actionTypeHandler(win, grecaptcha, data) {
+  doesOriginDomainMatchIframeSrc(win, data).then(() => {
     // TODO: @torch2424: Verify sitekey is the same as original
     const executePromise = grecaptcha.execute(data.sitekey, {
       action: data.action,
@@ -169,31 +162,60 @@ function actionTypeHandler(window, grecaptcha, data) {
 /**
  * Function to verify our origin domain from the
  * parent window.
- * @param {Window} window
+ * @param {Window} win
  * @param {Object} data
  * @return {!Promise}
  */
-function doesOriginDomainMatchIframeSrc(window, data) {
-  if (mode.localDev || mode.test) {
-    return Promise.resolve();
-  }
+function doesOriginDomainMatchIframeSrc(win, data) {
 
   if (!data.origin) {
     return Promise.reject(
-        new Error('Could not retreive the origin domain')
+      new Error('Could not retreive the origin domain')
+    );
+  }
+
+  const originLocation = parseUrlDeprecated(data.origin);
+
+  if (originLocation.hostname.includes('localhost') &&
+    win.location.hostname.includes('localhost')) {
+    return Promise.resolve();
+  }
+
+  if (isProxyOrigin(data.origin)) {
+    const curlsSubdomain = originLocation.hostname.split('.')[0];
+    if (compareCurlsSubdomain(win, curlsSubdomain)) {
+      return Promise.resolve();
+    }
+
+    return Promise.reject(
+      new Error('Origin domain does not match Iframe src: ' + data.origin)
     );
   }
 
   return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
-      .then(curlsSubdomain => {
-        const iframeSrcCurlsSubdomain = window.location.hostname.split('.')[0];
-        if (curlsSubdomain === iframeSrcCurlsSubdomain) {
+    .then(curlsSubdomain => {
+        if (compareCurlsSubdomain(win, curlsSubdomain)) {
           return Promise.resolve();
         }
 
         return Promise.reject(
-            new Error('Origin domain does not match Iframe src')
+            new Error('Origin domain does not match Iframe src: ' + data.origin)
         );
       });
+}
+
+/**
+ * Function to compare curls subdomains with the passed string
+ * and window
+ * @param {Window} win
+ * @param {string} curlsSubdomain
+ * @return {!Boolean}
+ */
+function compareCurlsSubdomain(win, curlsSubdomain) {
+  const iframeSrcCurlsSubdomain = win.location.hostname.split('.')[0];
+  if (curlsSubdomain === iframeSrcCurlsSubdomain) {
+    return true;
+  }
+  return false;
 }
 
