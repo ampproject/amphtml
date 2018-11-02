@@ -67,6 +67,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?Pass} */
     this.restartPass_ = null;
+
+    /** @private {boolean} */
+    this.hasPositionObserver_ = false;
   }
 
   /** @override */
@@ -288,6 +291,8 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
+    this.hasPositionObserver_ = !!invocation.caller &&
+      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
     return this.createRunnerIfNeeded_().then(() => {
       this.pause_();
       this.pausedByAction_ = true;
@@ -468,7 +473,7 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, args);
+      return builder.createRunner(configJson, this.hasPositionObserver_, args);
     });
   }
 

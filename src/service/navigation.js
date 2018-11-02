@@ -20,6 +20,7 @@ import {
   escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
+  tryFocus,
 } from '../dom';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
@@ -191,7 +192,7 @@ export class Navigation {
       options += 'noopener';
     }
 
-    const newWin = win.top.open(url, target, options);
+    const newWin = openWindowDialog(win, url, target, options);
     // For Chrome, since we cannot use noopener.
     if (newWin && !opener) {
       newWin.opener = null;
@@ -457,6 +458,24 @@ export class Navigation {
         const targetAttr = (target.getAttribute('target') || '').toLowerCase();
         if (targetAttr != '_top' && targetAttr != '_blank') {
           target.setAttribute('target', '_blank');
+        }
+        return; // bail early.
+      }
+
+      // Accessibility fix for IE browser.
+      // Issue: anchor navigation in IE changes visual focus of the browser
+      // and shifts to the element being linked to,
+      // where the input focus stays where it was.
+      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+      // @see https://github.com/ampproject/amphtml/issues/18671
+      if (Services.platformFor(this.ampdoc.win).isIe()) {
+        const internalTargetElmId = tgtLoc.hash.substring(1);
+        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
+        if (internalElm) {
+          if (!(/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName))) {
+            internalElm.tabIndex = -1;
+          }
+          tryFocus(internalElm);
         }
       }
       return;
