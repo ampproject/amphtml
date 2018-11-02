@@ -367,8 +367,30 @@ describe('getErrorReportData', () => {
       expect(data['spt']).to.equal('mp');
     });
 
+    it('reports esm', () => {
+      window.AMP_CONFIG = {
+        spt: 'esm',
+      };
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data['spt']).to.equal('esm');
+    });
+
     it('does nothing for undeclared single pass type', () => {
       window.AMP_CONFIG = {};
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data).to.not.have.all.keys('spt');
+    });
+
+    it('does nothing for unknown single pass type', () => {
+      window.AMP_CONFIG = {
+        spt: 'lol',
+      };
       const e = new Error('XYZ');
       e.fromAssert = true;
       const data = getErrorReportData(undefined, undefined, undefined,
