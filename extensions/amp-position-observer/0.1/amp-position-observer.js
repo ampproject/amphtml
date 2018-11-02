@@ -160,7 +160,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
         dict({'percent': this.scrollProgress_}));
-    event.additionalWorkletAnimationData = {
+    event.additionalViewportData = {
       'top-ratio': this.topRatio_,
       'bottom-ratio': this.bottomRatio_,
       'top-margin': this.resolvedTopMargin_,

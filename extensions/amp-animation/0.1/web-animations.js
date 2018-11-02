@@ -177,9 +177,9 @@ export class AnimationWorkletRunner extends AnimationRunner {
   /**
    * @param {!Window} win
    * @param {!Array<!InternalWebAnimationRequestDef>} requests
-   * @param {?Object=} positionObserverParameters
+   * @param {?Object=} viewportData
    */
-  constructor(win, requests, positionObserverParameters) {
+  constructor(win, requests, viewportData) {
     super(requests);
 
     /** @const @private */
@@ -189,17 +189,17 @@ export class AnimationWorkletRunner extends AnimationRunner {
     this.players_ = [];
 
     /** @private {number} */
-    this.topRatio_ = positionObserverParameters['top-ratio'];
+    this.topRatio_ = viewportData['top-ratio'];
 
     /** @private {number} */
-    this.bottomRatio_ = positionObserverParameters['bottom-ratio'];
+    this.bottomRatio_ = viewportData['bottom-ratio'];
 
     /** @private {number} */
-    this.topMargin_ = positionObserverParameters['top-margin'];
+    this.topMargin_ = viewportData['top-margin'];
 
     /** @private {number} */
     this.bottomMargin_ =
-      positionObserverParameters['bottom-margin'];
+      viewportData['bottom-margin'];
   }
 
   /**
@@ -252,7 +252,11 @@ export class AnimationWorkletRunner extends AnimationRunner {
             request.keyframes, request.timing);
         const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
             [keyframeEffect],
-            scrollTimeline);
+            scrollTimeline, {
+              'time-range': request.timing.duration,
+              'start-offset': adjustedViewportRect['top'],
+              'end-offset': adjustedViewportRect['bottom'],
+            });
         player.play();
         this.players_.push(player);
       });
@@ -640,11 +644,11 @@ export class Builder {
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
-   * @param {?Object=} opt_positionObserverArgs
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!WebAnimationRunner>}
    */
   createRunner(spec, hasPositionObserver = false, opt_args,
-    opt_positionObserverArgs = null) {
+    opt_viewportData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
@@ -652,7 +656,7 @@ export class Builder {
       return Promise.all(this.loaders_).then(() => {
         return this.useAnimationWorklet_ && hasPositionObserver ?
           new AnimationWorkletRunner(this.win_, requests,
-              opt_positionObserverArgs) :
+              opt_viewportData) :
           new WebAnimationRunner(requests);
       });
     });
