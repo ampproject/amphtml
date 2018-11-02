@@ -20,7 +20,6 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
   },
   'vars': {
     'eventValue': '0',
-    'documentLocation': 'SOURCE_URL',
     'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
     'dataSource': 'AMP',
     'anonymizeIP': 'aip',
@@ -38,7 +37,7 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
          'sr=${screenWidth}x${screenHeight}&' +
          'cid=${clientId}&' +
          'tid=${trackingId}&' +
-         'dl=${documentLocation}&' +
+         'dl=${sourceUrl}&' +
          'dr=${externalReferrer}&' +
          'sd=${screenColorDepth}&' +
          'ul=${browserLanguage}&' +
