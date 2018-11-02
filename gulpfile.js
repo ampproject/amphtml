@@ -1005,6 +1005,8 @@ function dist() {
       }).then(() => {
         return createModuleCompatibleES5Bundle('amp4ads-v0.js');
       }).then(() => {
+        return createModuleCompatibleES5Bundle('shadow-v0.js');
+      }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
