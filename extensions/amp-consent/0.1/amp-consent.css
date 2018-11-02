@@ -23,6 +23,7 @@ amp-consent {
   background: rgba(255, 255, 255, .7);
   z-index: 1000;
   width: 100%;
+  z-index: 2147483645;
 }
 
 amp-consent[i-amphtml-notbuilt] > * {
@@ -73,4 +74,23 @@ amp-consent.consent-iframe-active {
 
 .i-amphtml-consent-ui-in {
   animation: i-amphtml-consent-ui-in 0.5s linear;
+}
+
+@keyframes i-amphtml-consent-ui-mask {
+  0% {opacity: 0.0;}
+  100% {opacity: 0.2;}
+}
+
+.i-amphtml-consent-ui-mask {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  opacity: 0.2;
+  animation: i-amphtml-consent-ui-mask 0.5s ease-in;
+  /* Prevent someone from making this a full-sceen image */
+  background-image: none !important;
+  background-color: #000;
+  z-index: 2147483644;
 }

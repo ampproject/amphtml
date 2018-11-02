@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
 } from '../../../src/url';
@@ -52,8 +53,14 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
+    /** @private {?Element} */
+    this.maskElement_ = null;
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
+
+    /** @private {!!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_); 
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -237,6 +244,8 @@ export class ConsentUI {
     classList.remove('loading');
     classList.add('i-amphtml-consent-ui-in');
     classList.add('consent-iframe-active');
+    
+    this.showMaskElement_();
   }
 
   /**
@@ -250,7 +259,36 @@ export class ConsentUI {
     classList.remove('consent-iframe-active');
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     removeElement(dev().assertElement(this.ui_));
+
+    this.hideMaskElement_();
   }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  showMaskElement_() {
+    if (!this.maskElement) {
+      const mask = this.win_.document.createElement('div');
+      mask.classList.add('i-amphtml-consent-ui-mask');
+      this.parent_.ownerDocument.body.appendChild(mask);
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+    this.viewport_.enterOverlayMode(); 
+  }
+
+  /**
+   * Shows the mask element
+   * @private
+   */
+  hideMaskElement_() {
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
+    }
+    this.viewport_.leaveOverlayMode();
+  }
+
 
   /**
    * Listen to iframe messages and handle events.
