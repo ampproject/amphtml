@@ -71,7 +71,7 @@ init();
 window.initRecaptcha = function() {
 
   const win = window;
-  
+
   /**
    *  Get the data from our name attribute
    * sitekey {string} - reCAPTCHA sitekey used to identify the site
@@ -170,7 +170,7 @@ function doesOriginDomainMatchIframeSrc(win, data) {
 
   if (!data.origin) {
     return Promise.reject(
-      new Error('Could not retreive the origin domain')
+        new Error('Could not retreive the origin domain')
     );
   }
 
@@ -188,12 +188,12 @@ function doesOriginDomainMatchIframeSrc(win, data) {
     }
 
     return Promise.reject(
-      new Error('Origin domain does not match Iframe src: ' + data.origin)
+        new Error('Origin domain does not match Iframe src: ' + data.origin)
     );
   }
 
   return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
-    .then(curlsSubdomain => {
+      .then(curlsSubdomain => {
         if (compareCurlsSubdomain(win, curlsSubdomain)) {
           return Promise.resolve();
         }
@@ -209,7 +209,7 @@ function doesOriginDomainMatchIframeSrc(win, data) {
  * and window
  * @param {Window} win
  * @param {string} curlsSubdomain
- * @return {!Boolean}
+ * @return {boolean}
  */
 function compareCurlsSubdomain(win, curlsSubdomain) {
   const iframeSrcCurlsSubdomain = win.location.hostname.split('.')[0];
