@@ -767,7 +767,7 @@ export class DeferredEvent {
     this.detail = null;
 
     /** @type {?Object} */
-    this.additionalViewportData = null;
+    this.additionalViewportData;
 
     cloneWithoutFunctions(event, this);
   }
