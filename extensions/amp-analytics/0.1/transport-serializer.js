@@ -32,13 +32,14 @@ export let BatchSegmentDef;
 
 /**
  * @typedef {{
- *   url: (string),
+ *   url: string,
  *   payload: (string|undefined),
  * }}
  */
 export let RequestDef;
 
 /**
+ * The interface for all TransportSerializer to implement.
  * @interface
  */
 export class TransportSerializerDef {
@@ -61,8 +62,7 @@ export class TransportSerializerDef {
 }
 
 /**
- * The default serializer. All new serializer should consider
- * extend this.
+ * The default serializer.
  *
  * @implements {TransportSerializerDef}
  */
@@ -75,11 +75,10 @@ class DefaultTransportSerializer {
         url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
         payload: JSON.stringify(segment.extraUrlParams),
       };
-    } else {
-      return {
-        url: defaultSerializer(baseUrl, [segment]),
-      };
     }
+    return {
+      url: defaultSerializer(baseUrl, [segment]),
+    };
   }
 
   /** @override */
@@ -90,11 +89,10 @@ class DefaultTransportSerializer {
         payload: JSON.stringify(
             segments.map(segment => segment.extraUrlParams)),
       };
-    } else {
-      return {
-        url: defaultSerializer(baseUrl, segments),
-      };
     }
+    return {
+      url: defaultSerializer(baseUrl, segments),
+    };
   }
 }
 
@@ -102,7 +100,7 @@ class DefaultTransportSerializer {
  * Please register your serializer below.
  * Please keep the object in alphabetic order.
  *
- * @const {Object<string, DefaultTransportSerializer>}
+ * @const {Object<string, TransportSerializerDef>}
  */
 export const TransportSerializers = {
   'default': new DefaultTransportSerializer(),
