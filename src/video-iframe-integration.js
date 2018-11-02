@@ -304,6 +304,21 @@ export class AmpVideoIntegration {
   }
 
   /**
+   * Posts a custom analytics event.
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars
+   */
+  postAnalyticsEvent(eventType, opt_vars) {
+    this.postToParent_(dict({
+      'event': 'analytics',
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
+    }));
+  }
+
+  /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
    * @private
@@ -347,7 +362,14 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => onMessage(tryParseJson(getData(e))));
+  listen(win, 'message', e => {
+    const message = tryParseJson(getData(e));
+    if (!message) {
+      // only process valid JSON.
+      return;
+    }
+    onMessage(message);
+  });
 }
 
 /**

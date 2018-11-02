@@ -2,7 +2,7 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "lts/*"
+  - "8"
 python:
   - "2.7"
 notifications:
@@ -54,5 +54,6 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - sauce_connect
   pip: true
   bundler: true

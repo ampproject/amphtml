@@ -429,8 +429,7 @@ export class BaseElement {
    */
   renderOutsideViewport() {
     // Inabox allow layout independent of viewport location.
-    return getMode(this.win).runtime == 'inabox' &&
-        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
+    return getMode(this.win).runtime == 'inabox' || 3;
   }
 
   /**

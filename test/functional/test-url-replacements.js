@@ -164,7 +164,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getElementById: () => {},
         cookie: '',
       },
-      Math: window.Math,
+      Math: {
+        random: () => 0.1234,
+      },
       services: {
         'viewport': {obj: {}},
         'cid': {
@@ -1305,12 +1307,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  // TODO(#16916): Make this test work with synchronous throws.
-  it.skip('should collect unwhitelisted vars', () => {
+  it('should collect unwhitelisted vars', () => {
     const win = getFakeWindow();
+    win.location =
+      parseUrlDeprecated('https://example.com/base?foo=bar&bar=abc&gclid=123');
     const element = document.createElement('amp-foo');
     element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
-    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM');
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     const unwhitelisted = urlReplacements.collectUnwhitelistedVarsSync(element);
     expect(unwhitelisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
@@ -1646,19 +1649,21 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'https://example2.com/link?out=QUERY_PARAM(foo)');
     });
 
-    it('should replace CID', () => {
+    it('should replace whitelisted fields', () => {
       a.href = 'https://canonical.com/link?' +
-          'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
-      a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
+          'out=QUERY_PARAM(foo)' +
+          '&c=PAGE_VIEW_IDCLIENT_ID(abc)NAV_TIMING(navigationStart)';
+      a.setAttribute(
+          'data-amp-replace', 'QUERY_PARAM CLIENT_ID PAGE_VIEW_ID NAV_TIMING');
       // No replacement without previous async replacement
       urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal(
-          'https://canonical.com/link?out=bar&c=');
+          'https://canonical.com/link?out=bar&c=1234100');
       // Get a cid, then proceed.
       return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
-            'https://canonical.com/link?out=bar&c=test-cid(abc)');
+            'https://canonical.com/link?out=bar&c=1234test-cid(abc)100');
       });
     });
 

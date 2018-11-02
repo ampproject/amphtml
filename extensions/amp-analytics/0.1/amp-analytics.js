@@ -36,7 +36,7 @@ import {
 import {Services} from '../../../src/services';
 import {Transport} from './transport';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
@@ -273,7 +273,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (hasOwn(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
-            {}, trigger, undefined, true);
+            dict({}), trigger, undefined, true);
         const TAG = this.getName_();
         if (!trigger) {
           this.user().error(TAG, 'Trigger should be an object: ', k);
@@ -351,6 +351,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   addTriggerNoInline_(config) {
+    if (!this.analyticsGroup_) {
+      // No need to handle trigger for component that has already been detached
+      // from DOM
+      return;
+    }
     try {
       this.analyticsGroup_.addTrigger(
           config, this.handleEvent_.bind(this, config));
@@ -465,7 +470,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.element, request, this.preconnect,
+              this.getAmpDoc(), request, this.preconnect,
               this.transport_,
               this.isSandbox_);
         }
@@ -490,7 +495,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * method generates requests and sends them out.
    *
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
   handleEvent_(trigger, event) {
@@ -507,7 +512,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {string} requestName The requestName to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
   handleRequestForEvent_(requestName, trigger, event) {
@@ -539,7 +544,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
@@ -554,7 +559,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * Expand and post message to parent window if applicable.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @private
    */
   expandAndPostMessage_(trigger, event) {
@@ -564,8 +569,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
-    expandPostMessage(
-        this, msg, this.config_['extraUrlParams'], trigger, expansionOptions)
+    expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
+        trigger, expansionOptions)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host
@@ -596,7 +601,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
-      const expansionOptions = this.expansionOptions_({}, trigger);
+      const expansionOptions = this.expansionOptions_(dict({}), trigger);
       return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
           .then(key => this.cryptoService_.uniform(key))
           .then(digest => digest * 100 < threshold);
@@ -609,7 +614,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Checks if request for a trigger is enabled.
    * @param {!JsonObject} trigger The config to use to determine if trigger is
    * enabled.
-   * @param {!Object} event Object with details about the event.
+   * @param {!JsonObject|!./events.AnalyticsEvent} event Object with details about the event.
    * @return {!Promise<boolean>} Whether trigger must be called.
    * @private
    */
@@ -679,14 +684,14 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object<string, Object<string, string|Array<string>>>} source1
-   * @param {!Object<string, Object<string, string|Array<string>>>} source2
+   * @param {!JsonObject|!./events.AnalyticsEvent} source1
+   * @param {!JsonObject} source2
    * @param {number=} opt_iterations
    * @param {boolean=} opt_noEncode
    * @return {!ExpansionOptions}
    */
   expansionOptions_(source1, source2, opt_iterations, opt_noEncode) {
-    const vars = map();
+    const vars = dict();
     mergeObjects(this.config_['vars'], vars);
     mergeObjects(source2['vars'], vars);
     mergeObjects(source1['vars'], vars);

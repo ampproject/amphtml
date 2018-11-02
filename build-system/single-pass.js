@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const ClosureCompiler = require('google-closure-compiler').compiler;
@@ -22,6 +22,7 @@ const colors = require('ansi-colors');
 const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
@@ -29,7 +30,7 @@ const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const tempy = require('tempy');
 const through = require('through2');
-const {extensionBundles, TYPES} = require('../bundles.config');
+const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -42,27 +43,35 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
+const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
-let extensions = extensionBundles.filter(unsupportedExtensions).map(ext => {
-  const path = buildFullPathFromConfig(ext);
-  if (Array.isArray(path)) {
-    path.forEach((p, index) => {
-      extensionsInfo[p] = Object.create(ext);
-      extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+let extensions = extensionBundles.concat(altMainBundles)
+    .filter(unsupportedExtensions).map(ext => {
+      const path = buildFullPathFromConfig(ext);
+      if (Array.isArray(path)) {
+        path.forEach((p, index) => {
+          extensionsInfo[p] = Object.create(ext);
+          extensionsInfo[p].filename = ext.name + '-' + ext.version[index];
+        });
+      } else {
+        extensionsInfo[path] = Object.create(ext);
+        if (isAltMainBundle(ext.name) && ext.path) {
+          extensionsInfo[path].filename = ext.name;
+        } else {
+          extensionsInfo[path].filename = ext.name + '-' + ext.version;
+        }
+      }
+      return path;
     });
-  } else {
-    extensionsInfo[path] = Object.create(ext);
-    extensionsInfo[path].filename = ext.name + '-' + ext.version;
-  }
-  return path;
-});
 // Flatten nested arrays to support multiple versions
 extensions = [].concat.apply([], extensions);
 
+const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
@@ -82,11 +91,16 @@ exports.getFlags = function(config) {
     language_in: 'ES6',
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
+    module_resolution: 'NODE',
     externs: config.externs,
     define: config.define,
     // Turn off warning for "Unknown @define" since we use define to pass
     // args such as FORTESTING to our runner.
     jscomp_off: ['unknownDefines'],
+    // checkVars: Demote "variable foo is undeclared" errors.
+    // moduleLoad: Demote "module not found" errors to ignore missing files
+    //     in type declarations in the swg.js bundle.
+    jscomp_warning: ['checkVars', 'moduleLoad'],
     jscomp_error: [
       'checkTypes',
       'accessControls',
@@ -163,7 +177,8 @@ exports.getBundleFlags = function(g) {
     } else {
       // TODO(@cramforce): Remove special case.
       if (!/_base/.test(bundle.name)) {
-        throw new Error('Unexpected missing extension info ' + bundle.name);
+        throw new Error('Unexpected missing extension info ' + bundle.name +
+            ',' + JSON.stringify(bundle));
       }
       name = bundle.name;
       info = {
@@ -179,7 +194,7 @@ exports.getBundleFlags = function(g) {
         cmd += `:${configEntry.type}`;
         bundleDeps.push('_base_i', configEntry.type);
       } else {
-        // All lower tier bundles depend on v0.js
+        // All lower tier bundles depend on _base_i
         if (TYPES_VALUES.includes(name)) {
           cmd += ':_base_i';
           bundleDeps.push('_base_i');
@@ -194,13 +209,18 @@ exports.getBundleFlags = function(g) {
         return (w.replace('<%= contents %>', '%s')
         /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
       }
-      if (isMain) {
-        flagsArray.push('--module_wrapper', name + ':' +
-            massageWrapper(wrappers.mainBinary));
+      // We need to post wrap the main bundles. We can't wrap v0.js either
+      // since it would have the wrapper already when we read it and prepend
+      // it.
+      if (isMain || isAltMainBundle(name)) {
+        jsFilesToWrap.push(name);
       } else {
+        const configEntry = getExtensionBundleConfig(originalName);
+        const marker = configEntry && Array.isArray(configEntry.postPrepend) ?
+          SPLIT_MARKER : '';
         flagsArray.push('--module_wrapper', name + ':' +
-           massageWrapper(wrappers.extension(
-               info.name, info.loadPriority, bundleDeps)));
+          massageWrapper(wrappers.extension(
+              info.name, info.loadPriority, bundleDeps, marker)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');
@@ -260,7 +280,6 @@ exports.getGraph = function(entryModules, config) {
   // The second stage are transforms that closure compiler supports
   // directly and which we don't want to apply during deps finding.
       .transform(babelify, {
-        babelrc: false,
         compact: false,
         plugins: [
           require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
@@ -380,7 +399,9 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  console/*OK*/.log(colors.green(`temp directory ${graph.tmp}`));
+  if (!process.env.TRAVIS) {
+    log('Writing transforms to', colors.cyan(graph.tmp));
+  }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
     // Don't transform node_module files for now and just copy it.
@@ -389,7 +410,6 @@ function transformPathsToTempDir(graph, config) {
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
-        babelrc: false,
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
@@ -428,14 +448,33 @@ function buildFullPathFromConfig(ext) {
     return `extensions/${ext.name}/${version}/${ext.name}.js`;
   }
 
+  // Allow alternate bundles to declare their own source location path.
+  if (isAltMainBundle(ext.name) && ext.path) {
+    return ext.path;
+  }
+
   if (Array.isArray(ext.version)) {
     return ext.version.map(ver => getPath(ver));
   }
+
   return getPath(ext.version);
 }
 
 function unsupportedExtensions(name) {
   return name;
+}
+
+/**
+ * Predicate to identify if a given extension name is an alternate main bundle
+ * like amp-shadow, amp-inabox etc.
+ *
+ * @param {string} name
+ * @return {boolean}
+ */
+function isAltMainBundle(name) {
+  return altMainBundles.some(altMainBundle => {
+    return altMainBundle.name === name;
+  });
 }
 
 exports.singlePassCompile = function(entryModule, options) {
@@ -449,15 +488,82 @@ exports.singlePassCompile = function(entryModule, options) {
     // Move things into place as AMP expects them.
     fs.ensureDirSync(`${singlePassDest}/v0`);
     return Promise.all([
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`),
+      // Move all files that need to live in /v0/. ex. _base files
+      // all extensions.
+      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
+        return move('dist/v0/amp4ads*', 'dist');
+      }),
       move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
-  }, e => {
+  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
   });
 };
+
+/**
+ * Wrap AMPs main binaries with the compiler wrappers. We are not able to
+ * use closures wrapper mechanism for this since theres some concatenation
+ * we need to do to build the alternative binaries such as shadow-v0 and
+ * amp4ads-v0.
+ * TODO(#18811, erwinm): this breaks source maps and we need a way to fix this.
+ * magic-string might be part of the solution here so explore that (pre or post
+ * process)
+ */
+function wrapMainBinaries() {
+  const pair = wrappers.mainBinary.split('<%= contents %>');
+  const prefix = pair[0];
+  const suffix = pair[1];
+  // Cache the v0 file so we can prepend it to alternative binaries.
+  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
+  jsFilesToWrap.forEach(x => {
+    const path = `dist/${x}.js`;
+    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
+    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
+    fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
+        `${fs.readFileSync(path).toString()}${suffix}`);
+  });
+}
+
+/**
+ * Appends the listed file to the built js binary.
+ * TODO(erwinm, #18811): This operation is needed but straight out breaks
+ * source maps.
+ */
+function postProcessConcat() {
+  const extensions = extensionBundles.filter(
+      x => Array.isArray(x.postPrepend));
+  extensions.forEach(extension => {
+    const isAltMainBundle = altMainBundles.some(x => {
+      return x.name === extension.name;
+    });
+    // We assume its in v0 unless its an alternative main binary.
+    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+
+    function createFullPath(version) {
+      return `${srcTargetDir}${extension.name}-${version}.js`;
+    }
+
+    let targets = [];
+    if (Array.isArray(extension.version)) {
+      targets = extension.version.map(createFullPath);
+    } else {
+      targets.push(createFullPath(extension.version));
+    }
+    targets.forEach(path => {
+      const prependContent = extension.postPrepend.map(x => {
+        return ';' + fs.readFileSync(x, 'utf8').toString();
+      }).join('');
+      const content = fs.readFileSync(path, 'utf8').toString()
+          .split(SPLIT_MARKER);
+      const prefix = content[0];
+      const suffix = content[1];
+      fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
+    });
+  });
+}
+
 
 function compile(flagsArray) {
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));

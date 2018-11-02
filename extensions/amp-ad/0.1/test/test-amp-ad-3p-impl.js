@@ -569,7 +569,7 @@ describes.realWin('amp-ad-3p-impl', {
           // Right margin is 9px from containerContainer and 25px from
           // container.
           expect(element.style.marginLeft).to.be.equal('');
-          expect(element.style.marginRight).to.be.equal('-49px');
+          expect(element.style.marginRight).to.be.equal('-34px');
         });
       });
     });

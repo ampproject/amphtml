@@ -909,3 +909,32 @@ export function isFullscreenElement(element) {
 export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
 }
+
+const PRECEDING_OR_CONTAINS =
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
+
+/**
+ * A sorting comparator that sorts elements in DOM tree order.
+ * A first sibling is sorted to be before its nextSibling.
+ * A parent node is sorted to be before a child.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
+ *
+ * @param {!Element} element1
+ * @param {!Element} element2
+ * @return {number}
+ */
+export function domOrderComparator(element1, element2) {
+  if (element1 === element2) {
+    return 0;
+  }
+
+  const pos = element1.compareDocumentPosition(element2);
+
+  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
+  if (pos & PRECEDING_OR_CONTAINS) {
+    return 1;
+  }
+
+  // if fe2 is following or contained by fe1, then fe1 is before fe2
+  return -1;
+}

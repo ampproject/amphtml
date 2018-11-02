@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from '../pass';
 import {Services} from '../services';
 import {
   computedStyle,
@@ -26,7 +27,9 @@ import {
   toggle,
 } from '../style';
 import {dev, user} from '../log';
+import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 
@@ -80,6 +83,14 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @const @private {!Pass} */
+    this.updatePass_ = new Pass(ampdoc.win, () => {
+      this.update();
+    });
+
+    /** @private {?MutationObserver} */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -105,6 +116,8 @@ export class FixedLayer {
       return;
     }
 
+
+
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
@@ -124,8 +137,12 @@ export class FixedLayer {
 
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
-    // Sort in document order.
+    // Sort tracked elements in document order.
     this.sortInDomOrder_();
+
+    if (this.elements_.length > 0) {
+      this.observeHiddenMutations();
+    }
 
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
@@ -135,6 +152,70 @@ export class FixedLayer {
     }
 
     this.update();
+  }
+
+  /**
+   * Begin observing changes to the hidden attribute.
+   * @visibleForTesting
+   */
+  observeHiddenMutations() {
+    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
+      return;
+    }
+    const mo = this.initMutationObserver_();
+    mo.observe(this.ampdoc.getRootNode(), {
+      attributes: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * Stop observing changes to the hidden attribute. Does not destroy the
+   * mutation observer.
+   */
+  unobserveHiddenMutations_() {
+    this.clearMutationObserver_();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.disconnect();
+    }
+  }
+
+  /**
+   * Clears the mutation observer and its pass queue.
+   */
+  clearMutationObserver_() {
+    this.updatePass_.cancel();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.takeRecords();
+    }
+  }
+
+  /**
+   * @return {!MutationObserver}
+   */
+  initMutationObserver_() {
+    if (this.mutationObserver_) {
+      return this.mutationObserver_;
+    }
+
+    const mo = new this.ampdoc.win.MutationObserver(mutations => {
+      if (this.updatePass_.isPending()) {
+        return;
+      }
+
+      for (let i = 0; i < mutations.length; i++) {
+        const mutation = mutations[i];
+        if (mutation.attributeName === 'hidden') {
+          // Wait one animation frame so that other mutations may arrive.
+          this.updatePass_.schedule(16);
+          return;
+        }
+      }
+    });
+
+    return this.mutationObserver_ = mo;
   }
 
   /**
@@ -199,18 +280,17 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    const {win} = this.ampdoc;
-    if (!element./*OK*/offsetParent &&
-        computedStyle(win, element).display === 'none') {
-      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
-          element.tagName);
-    }
     this.setupElement_(
         element,
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+
+    // If this is the first element, we need to start the mutation observer.
+    // This'll only be created once.
+    this.observeHiddenMutations();
+
     return this.update();
   }
 
@@ -229,6 +309,9 @@ export class FixedLayer {
           }
         }
       });
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
     }
   }
 
@@ -269,6 +352,9 @@ export class FixedLayer {
     if (this.elements_.length == 0) {
       return Promise.resolve();
     }
+
+    // Clear out the mutation observer's queue since we're doing the work now.
+    this.clearMutationObserver_();
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
@@ -347,11 +433,18 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be opaque (not 100%
-          // transparent) - that's a lot of work for no benefit. Additionally,
-          // transparent elements used for "service" needs and thus best kept
-          // in the original tree. The visibility, however, is not considered
-          // because `visibility` CSS is inherited.
+          // Transferability requires an element to be:
+          // 1. Greater than 0% opacity. That's a lot of work for no benefit.
+          //    Additionally, transparent elements used for "service" needs and
+          //    thus best kept in the original tree. The visibility, however,
+          //    is not considered because `visibility` CSS is inherited.
+          // 2. Height < 300. This avoids transferring large sections of UI,
+          //    e.g. publisher-customized amp-consent UI (#17995).
+          // 3. Has `top` or `bottom` CSS set. This ensures we only transfer
+          //    fixed elements that are _not_ auto-positioned to avoid jumping
+          //    position after transferring to the fixed layer (due to loss of
+          //    parent positioning context). We could calculate this offset, but
+          //    we don't (yet).
           let isTransferrable = false;
           if (isFixed) {
             if (forceTransfer === true) {
@@ -548,16 +641,12 @@ export class FixedLayer {
     return removed;
   }
 
-  /** @private */
+  /**
+   * @private
+   */
   sortInDomOrder_() {
-    this.elements_.sort(function(fe1, fe2) {
-      // 8 | 2 = 0x0A
-      // 2 - preceeding
-      // 8 - contains
-      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
-        return 1;
-      }
-      return -1;
+    this.elements_.sort((fe1, fe2) => {
+      return domOrderComparator(fe1.element, fe2.element);
     });
   }
 
@@ -639,18 +728,23 @@ export class FixedLayer {
   discoverSelectors_(rules, foundSelectors, stickySelectors) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
+      if (rule.type == /* CSSMediaRule */ 4 ||
+          rule.type == /* CSSSupportsRule */ 12) {
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        continue;
+      }
+
       if (rule.type == /* CSSStyleRule */ 1) {
-        if (rule.selectorText != '*' && rule.style.position) {
-          if (rule.style.position == 'fixed') {
-            foundSelectors.push(rule.selectorText);
-          } else if (endsWith(rule.style.position, 'sticky')) {
-            stickySelectors.push(rule.selectorText);
-          }
+        const {selectorText} = rule;
+        const {position} = rule.style;
+        if (selectorText === '*' || !position) {
+          continue;
         }
-      } else if (rule.type == /* CSSMediaRule */ 4) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
-      } else if (rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        if (position === 'fixed') {
+          foundSelectors.push(selectorText);
+        } else if (endsWith(position, 'sticky')) {
+          stickySelectors.push(selectorText);
+        }
       }
     }
   }
@@ -837,19 +931,12 @@ class TransferLayerBody {
    */
   matches_(element, selector) {
     try {
-      const matcher = element.matches ||
-          element.webkitMatchesSelector ||
-          element.mozMatchesSelector ||
-          element.msMatchesSelector ||
-          element.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(element, selector);
-      }
+      return matches(element, selector);
     } catch (e) {
       // Fail silently.
       dev().error(TAG, 'Failed to test query match:', e);
+      return false;
     }
-    return false;
   }
 }
 
