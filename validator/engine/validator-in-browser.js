@@ -45,9 +45,9 @@ function getUrl(url) {
 }
 
 /**
- * Checks if the given URL is an AMP Cache URL.
+ * Checks if the given URL is an AMP cache URL.
  * @param {string} url
- * @return {bool}
+ * @return {boolean}
  */
 amp.validator.isAmpCacheUrl = function(url) {
   return (
@@ -87,7 +87,7 @@ amp.validator.validateUrlAndLog = function(
     url, opt_doc, opt_errorCategoryFilter) {
   if (amp.validator.isAmpCacheUrl(url)) {
     console.error(
-        'Attempting to validate an AMP Cache URL. Please use' +
+        'Attempting to validate an AMP cache URL. Please use ' +
         '#development=1 on the origin URL instead.');
     return;
   }
