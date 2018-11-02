@@ -309,6 +309,8 @@ The premium content is marked up using `subscriptions-section="content"` attribu
 </section>
 ```
 
+*Important*: Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content is the first viewport be allowed to render regardless of subscription state.
+
 The fallback content is marked up using `subscriptions-section="content-not-granted"` attribute. For instance:
 
 ```
