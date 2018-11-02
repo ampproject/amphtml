@@ -55,8 +55,7 @@ export class Expander {
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true, opt_whiteList);
+    const expr = this.variableSource_.getExpr(opt_bindings, opt_whiteList);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
@@ -334,7 +333,8 @@ export class Expander {
         // even if opt_collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (typeof value === 'string' || typeof value === 'number') {
+      } else if (typeof value === 'string' || typeof value === 'number' ||
+          typeof value === 'boolean') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
         result = NOENCODE_WHITELIST[name] ? value.toString() :

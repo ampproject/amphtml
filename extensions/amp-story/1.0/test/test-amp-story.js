@@ -385,7 +385,7 @@ describes.realWin('amp-story', {
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({clearWhitelist: () => {}, trigger: () => {}});
+          .returns({setWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -423,7 +423,7 @@ describes.realWin('amp-story', {
 
     it('should play the story after the consent is resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({clearWhitelist: () => {}, trigger: () => {}});
+          .returns({setWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -463,13 +463,13 @@ describes.realWin('amp-story', {
             expect(setStateStub.getCall(0))
                 .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
             expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
+                .to.have.been.calledWithExactly(PageState.PLAYING);
           });
     });
 
     it('should play the story if the consent was already resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
-          .returns({clearWhitelist: () => {}, trigger: () => {}});
+          .returns({setWhitelist: () => {}, trigger: () => {}});
 
       // Prevents amp-story-consent element from running code that is irrelevant
       // to this test.
@@ -503,7 +503,7 @@ describes.realWin('amp-story', {
             expect(setStateStub.getCall(0))
                 .to.have.been.calledWithExactly(PageState.NOT_ACTIVE);
             expect(setStateStub.getCall(1))
-                .to.have.been.calledWithExactly(PageState.ACTIVE);
+                .to.have.been.calledWithExactly(PageState.PLAYING);
           });
     });
   });
@@ -650,8 +650,6 @@ describes.realWin('amp-story', {
       const executeSpy = sandbox.spy();
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
-            addToWhitelist: () => {},
-            clearWhitelist: () => {},
             execute: executeSpy,
           });
 
@@ -672,8 +670,6 @@ describes.realWin('amp-story', {
 
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {},
-            addToWhitelist: () => {},
-            clearWhitelist: () => {},
             execute: () => {sidebar.setAttribute('open', '');}});
 
       story.buildCallback();

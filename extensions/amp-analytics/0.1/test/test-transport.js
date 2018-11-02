@@ -16,6 +16,7 @@
 
 import * as lolex from 'lolex';
 import {Transport} from '../transport';
+import {getMode} from '../../../../src/mode';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -41,7 +42,7 @@ describes.realWin('amp-analytics.transport', {
   }
 
   function sendRequest(win, request, options) {
-    new Transport(win, options).sendRequest(request);
+    new Transport(win, options).sendRequest(request, []);
   }
 
   function assertCallCounts(
@@ -132,7 +133,7 @@ describes.realWin('amp-analytics.transport', {
     const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
 
     function sendRequestUsingIframe(win, url) {
-      new Transport(win).sendRequestUsingIframe(url);
+      new Transport(win).sendRequestUsingIframe(url, {});
     }
 
     it('should create and delete an iframe', () => {
@@ -217,6 +218,34 @@ describes.realWin('amp-analytics.transport', {
       expect(transport.iframeTransport_).to.be.null;
     });
 
+    it('initialize iframe transport when used with inabox', () => {
+      win.AMP_MODE = win.AMP_MODE || {};
+      win.AMP_MODE.runtime = 'inabox';
+      expect(getMode(win).runtime).to.equal('inabox');
+
+      const transport = new Transport(win, {
+        iframe: '//test',
+      });
+
+      const frame = doc.createElement('iframe');
+      doc.body.appendChild(frame);
+      frame.contentWindow.document.write(
+          '<amp-analytics type="bg"></amp-analytics>');
+      frame.contentWindow.__AMP_TOP = win;
+      const ampAnalyticsEl =
+          frame.contentWindow.document.querySelector('amp-analytics');
+
+      const preconnectSpy = sandbox.spy();
+      transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
+        preload: preconnectSpy,
+      });
+      expect(transport.iframeTransport_).to.be.ok;
+      expect(preconnectSpy).to.be.called;
+
+      transport.deleteIframeTransport();
+      expect(transport.iframeTransport_).to.be.null;
+    });
+
     it('send via iframe transport', () => {
       setupStubs(true, true);
       const transport = new Transport(win, {
@@ -227,7 +256,7 @@ describes.realWin('amp-analytics.transport', {
       transport.iframeTransport_ = {
         sendRequest: iframeTransportSendRequestSpy,
       };
-      transport.sendRequest('test test');
+      transport.sendRequest('test test', []);
       assertCallCounts(0, 0, 0);
       expect(iframeTransportSendRequestSpy).to.be.calledWith('test test');
     });

@@ -36,6 +36,8 @@
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "amp-consent": 1,
+  "amp-story-hold-to-pause": 1,
+  "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
@@ -48,6 +50,9 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "inabox-rov": 1,
-  "layers": 1,
-  "linker-form": 1
+  "layers": 0,
+  "linker-form": 1,
+  "scroll-height-bounce": 0,
+  "scroll-height-minheight": 0,
+  "hidden-mutation-observer": 1
 }

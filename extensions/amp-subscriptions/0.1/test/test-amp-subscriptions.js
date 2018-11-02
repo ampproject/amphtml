@@ -443,7 +443,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
@@ -455,7 +455,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.reject());
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       const promise = subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
@@ -499,17 +499,21 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('viewer authorization', () => {
     let fetchEntitlementsStub;
+    let sendMessageAwaitResponsePromise;
+
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
+      sendMessageAwaitResponsePromise = Promise.resolve();
       sandbox.stub(subscriptionService.viewer_, 'sendMessageAwaitResponse')
-          .callsFake(() => Promise.resolve());
+          .callsFake(() => sendMessageAwaitResponsePromise);
       fetchEntitlementsStub = sandbox.stub(subscriptionService,
           'fetchEntitlements_');
     });
+
     it('should put LocalSubscriptionPlatform in platformstore, '
         + 'if viewer does not have auth capability', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
@@ -548,6 +552,26 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.initialize_().then(() => {
         expect(fetchEntitlementsStub).to.be.called;
       });
+    });
+
+    it('should fallback if viewer provides auth but fails', function*() {
+      // Make sendMessageAwaitResponse() return a pending promise so we have
+      // a chance to stub the platform store.
+      let rejecter;
+      sendMessageAwaitResponsePromise = new Promise((unusedResolve, reject) => {
+        rejecter = reject;
+      });
+      subscriptionService.start();
+      yield subscriptionService.initialize_();
+      // Local platform store not created until initialization.
+      const platformStore = subscriptionService.platformStore_;
+      sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
+      rejecter();
+      // Wait for sendMessageAwaitResponse() to be rejected.
+      yield sendMessageAwaitResponsePromise;
+      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
+      expect(platformStore.reportPlatformFailureAndFallback)
+          .calledWith('local');
     });
   });
 

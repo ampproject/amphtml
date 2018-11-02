@@ -88,7 +88,7 @@ export const adConfig = {
   },
 
   'a9': {
-    prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+    prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
   },
 
   'accesstrade': {
@@ -767,6 +767,10 @@ export const adConfig = {
   },
 
   'realclick': {
+    renderStartImplemented: true,
+  },
+
+  'recomad': {
     renderStartImplemented: true,
   },
 

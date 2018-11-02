@@ -17,6 +17,13 @@ requirement: {
   whitelist: 'src/layout.js'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use closestBySelector, closestByTag etc in src/dom.js'
+  value: 'Element.prototype.closest'
+  whitelist: 'src/dom.js'
+}
+
 # CSSStyleDeclaration
 
 requirement: {
