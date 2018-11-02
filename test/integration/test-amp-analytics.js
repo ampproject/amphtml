@@ -29,13 +29,20 @@ describe.configure()
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-has-referrer')}"
+            "endpoint": "${depositRequestUrl('amp-analytics')}"
           },
           "triggers": {
             "pageview": {
               "on": "visible",
-              "request": "endpoint"
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
             }
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}"
           }
         }
         </script>
@@ -45,7 +52,7 @@ describe.configure()
       }, env => {
         it('should keep referrer if no referrerpolicy specified', () => {
           return withdrawRequest(env.win,
-              'analytics-has-referrer').then(request => {
+              'analytics-has-referrer?a=2&b=AMP-TEST').then(request => {
             expect(request.headers.referer).to.be.ok;
           });
         });
