@@ -20,7 +20,6 @@
  * recaptcha tokens
  */
 
-import {AsyncInput} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
@@ -35,7 +34,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-export class AmpRecaptchaInput extends AsyncInput {
+export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -117,7 +116,7 @@ export class AmpRecaptchaInput extends AsyncInput {
   /**
    * Function to return the recaptcha token.
    * Will be an override of AMP.AsyncInput
-   * @return {!Promise<string>}
+   * @return {Promise<string>}
    */
   getValue() {
 
