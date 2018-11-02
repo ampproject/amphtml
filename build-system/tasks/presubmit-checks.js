@@ -875,6 +875,7 @@ const forbiddenTermsSrcInclusive = {
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
       'build-system/app-video-testbench.js',
