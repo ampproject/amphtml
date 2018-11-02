@@ -50,10 +50,11 @@ describe.configure()
     `,
         extensions: ['amp-analytics'],
       }, env => {
-        it('should keep referrer if no referrerpolicy specified', () => {
+        it('should send ping', () => {
           return withdrawRequest(env.win,
               'analytics-has-referrer?a=2&b=AMP-TEST').then(request => {
-            expect(request.headers.referer).to.be.ok;
+            expect(request.headers.referer,
+                'should keep referrer if no referrerpolicy specified').to.be.ok;
           });
         });
       });
