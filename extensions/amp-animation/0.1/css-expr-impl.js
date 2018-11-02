@@ -61,7 +61,7 @@ import * as ast from './css-expr-ast';
 
         options: {
             ranges: boolean           (optional: true ==> token location info will include a .range[] member)
-            flex: boolean             (optional: true ==> flex-like lexing behaviour where the rules are tested exhaustively to find the longest match)
+            flex: boolean             (optional: true ==> flex-like lexing behavior where the rules are tested exhaustively to find the longest match)
             backtrack_lexer: boolean  (optional: true ==> lexer regexes are tested in order and for each matching regex the action code is invoked; the lexer terminates the scan when a token is returned by the action code)
         },
 
@@ -193,7 +193,7 @@ case 45:
         const args = $$[$0-2];
         args.push($$[$0]);
         this.$ = args;
-      
+
 break;
 case 46:
 this.$ = new ast.CssUrlNode($$[$0-1].slice(1, -1));
