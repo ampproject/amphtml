@@ -178,3 +178,37 @@ export function createPointerEvent(type, x, y) {
   }];
   return event;
 }
+
+export class ImagePixelVerifier {
+  constructor(windowInterface) {
+    this.imagePixels_ = [];
+    const FakeImage = () => {
+      const pixel = {};
+      this.imagePixels_.push(pixel);
+      return pixel;
+    };
+    windowInterface.getImage.returns(FakeImage);
+  }
+
+  hasRequestSent() {
+    return this.imagePixels_.length > 0;
+  }
+
+  verifyRequest(url, referrerPolicy) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.equal(url);
+    expect(pixel.referrerPolicy).to.equal(referrerPolicy);
+  }
+
+  verifyRequestMatch(regex) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.match(regex);
+  }
+
+  getLastRequestUrl() {
+    if (!this.hasRequestSent()) {
+      return null;
+    }
+    return this.imagePixels_[this.imagePixels_.length - 1].src;
+  }
+}
