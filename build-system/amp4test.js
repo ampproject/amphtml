@@ -88,7 +88,7 @@ const bank = {};
 app.use('/request-bank/deposit/', (req, res) => {
   // req.url is relative to the path specified in app.use
   const key = req.url;
-  console.log('d:' + key);
+  console.log('SERVER-LOG [DEPOSIT]: ', key);
   if (typeof bank[key] === 'function') {
     bank[key](req);
   } else {
@@ -105,7 +105,7 @@ app.use('/request-bank/deposit/', (req, res) => {
 app.use('/request-bank/withdraw/', (req, res) => {
   // req.url is relative to the path specified in app.use
   const key = req.url;
-  console.log('w:' + key);
+  console.log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
