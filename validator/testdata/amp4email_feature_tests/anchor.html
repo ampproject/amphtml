@@ -28,8 +28,8 @@ Copyright 2015 The AMP HTML Authors. All Rights Reserved.
   <!-- URLs must be absolute. -->
   <a href="somelink.com">disallowed</a>
 
-  <!-- The protocol can only be https or mailto. -->
-  <a href="http://somelink.com">disallowed</a>
+  <!-- The protocol can only be http, https or mailto. -->
+  <a href="ftp://somelink.com">disallowed</a>
 
   <!-- href of anchor is not bindable. -->
   <a [href]="evil">disallowed</a>
@@ -106,6 +106,7 @@ Copyright 2015 The AMP HTML Authors. All Rights Reserved.
   <a href={{#foo}}></a>
 
   <!-- These are allowed. -->
+  <a href="http://www.somelink.com">http allowed</a>
   <a href="https://www.somelink.com">https allowed</a>
   <a href="mailto:user@example.com">mailto allowed</a>
 </body>

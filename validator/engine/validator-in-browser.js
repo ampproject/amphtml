@@ -58,7 +58,7 @@ amp.validator.isAmpCacheUrl = function(url) {
 /**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
  * the DOM. This method is exported so it can be unittested.
- * @param {!Document} opt_doc
+ * @param {!Document=} opt_doc
  * @return {!amp.validator.ValidationResult}
  */
 amp.validator.validateInBrowser = function(opt_doc) {

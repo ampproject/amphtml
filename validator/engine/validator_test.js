@@ -619,9 +619,10 @@ describe('CssLength', () => {
 /**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
+ * @param {!amp.validator.TagSpec} tagSpec
  * @param {!amp.validator.ValidatorRules} rules
  */
-function attrRuleShouldMakeSense(attrSpec, rules) {
+function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   // name
   it('attr_spec name defined', () => {
     expect(attrSpec.name).toBeDefined();
@@ -646,8 +647,9 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       }
     });
     // If protocol is http then allow_relative should not be false
-    // except for `data-` attributes.
-    if (!attrSpec.name.startsWith('data-')) {
+    // except for `data-` attributes and email spec.
+    if (!attrSpec.name.startsWith('data-') &&
+        !tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
       for (const protocol of attrSpec.valueUrl.protocol) {
         if ((protocol === 'http') &&
             (attrSpec.valueUrl.allowRelative !== null)) {
@@ -1162,6 +1164,12 @@ describe('ValidatorRulesMakeSense', () => {
         }
       });
     }
+    // attr_specs within each tag_spec within rules.
+    for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) { continue; }
+      const attrSpec = rules.attrs[attrSpecId];
+      attrRuleShouldMakeSense(attrSpec, tagSpec, rules);
+    }
   }
 
   // satisfies needs to match up with requires and excludes
@@ -1184,11 +1192,6 @@ describe('ValidatorRulesMakeSense', () => {
     expect(subtractDiff(allSatisfies, allRequiresAndExcludes)).toEqual([]);
     expect(subtractDiff(allRequiresAndExcludes, allSatisfies)).toEqual([]);
   });
-
-  // attr_specs within rules.
-  for (const attrSpec of rules.attrs) {
-    attrRuleShouldMakeSense(attrSpec, rules);
-  }
 
   // Verify that for every error code in our enum, we have exactly one format
   // and specificity value in the rules.
