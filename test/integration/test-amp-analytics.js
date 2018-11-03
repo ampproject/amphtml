@@ -52,7 +52,7 @@ describe.configure()
       }, env => {
         it('should send ping', () => {
           return withdrawRequest(env.win,
-              'analytics-has-referrer?a=2&b=AMP-TEST').then(request => {
+              'amp-analytics?a=2&b=AMP-TEST').then(request => {
             expect(request.headers.referer,
                 'should keep referrer if no referrerpolicy specified').to.be.ok;
           });
