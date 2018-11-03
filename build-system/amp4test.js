@@ -113,6 +113,7 @@ app.use('/request-bank/withdraw/', (req, res) => {
   const callback = function(result) {
     res.json({
       headers: result.headers,
+      body: result.body,
     });
     delete bank[key];
   };

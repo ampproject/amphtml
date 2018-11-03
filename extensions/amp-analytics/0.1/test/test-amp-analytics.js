@@ -20,6 +20,10 @@ import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '../../../../testing/test-helper';
 import {LayoutPriority} from '../../../../src/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '../../../../src/services';
@@ -43,7 +47,6 @@ describes.realWin('amp-analytics', {
   },
 }, function(env) {
   let win, doc, sandbox;
-  let sendRequestSpy;
   let configWithCredentials;
   let uidService;
   let crypto;
@@ -51,6 +54,7 @@ describes.realWin('amp-analytics', {
   let ins;
   let viewer;
   let jsonRequestConfigs = {};
+  let requestVerifier;
 
   const jsonMockResponses = {
     '//invalidConfig': '{"transport": {"iframe": "fake.com"}}',
@@ -120,7 +124,9 @@ describes.realWin('amp-analytics', {
     viewer = win.services.viewer.obj;
     ins = instrumentationServiceForDocForTesting(ampdoc);
     installUserNotificationManagerForTesting(ampdoc);
-    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
+
+    const wi = mockWindowInterface(sandbox);
+    requestVerifier = new ImagePixelVerifier(wi);
     return Services.userNotificationManagerForDoc(ampdoc).then(manager => {
       uidService = manager;
     });
@@ -155,14 +161,14 @@ describes.realWin('amp-analytics', {
     expect(analytics.element).to.not.have.display('none');
     return analytics.layoutCallback().then(() => {
       expect(analytics.element).to.have.display('none');
-      if (sendRequestSpy.callCount) {
+      if (requestVerifier.hasRequestSent()) {
         return;
       }
       return new Promise(resolve => {
         const start = Date.now();
         const interval = setInterval(() => {
           const time = Date.now();
-          if (sendRequestSpy.callCount ||
+          if (requestVerifier.hasRequestSent() ||
               (opt_max && (time - start) > opt_max)) {
             clearInterval(interval);
             resolve();
@@ -174,24 +180,15 @@ describes.realWin('amp-analytics', {
 
   function waitForNoSendRequest(analytics) {
     return waitForSendRequest(analytics, 100).then(() => {
-      expect(sendRequestSpy).to.not.be.called;
+      expect(requestVerifier.hasRequestSent()).to.be.false;
     });
-  }
-
-  function verifyRequest(request) {
-    expect(sendRequestSpy).to.be.calledWith(sinon.match.any, request);
-  }
-
-  function verifyRequestMatch(regex) {
-    expect(sendRequestSpy)
-        .to.be.calledWith(sinon.match.any, sinon.match(regex));
   }
 
   describe('send hit', () => {
     it('sends a basic hit', function() {
       const analytics = getAnalyticsTag(trivialConfig);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar');
+        requestVerifier.verifyRequest('https://example.com/bar');
       });
     });
 
@@ -310,7 +307,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar&f1&baz');
+        requestVerifier.verifyRequest('https://example.com/bar&f1&baz');
       });
     });
 
@@ -323,7 +320,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar&c1&baz');
+        requestVerifier.verifyRequest('https://example.com/bar&c1&baz');
       });
     });
 
@@ -338,7 +335,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar&b1');
+        requestVerifier.verifyRequest('https://example.com/bar&b1');
       });
     });
 
@@ -358,7 +355,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('/bar&/bar&/bar&&baz&baz&baz');
+        requestVerifier.verifyRequest('/bar&/bar&/bar&&baz&baz&baz');
       });
     });
 
@@ -374,8 +371,8 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar&b1');
-        verifyRequest('b1');
+        requestVerifier.verifyRequest('https://example.com/bar&b1');
+        requestVerifier.verifyRequest('b1');
       });
     });
 
@@ -388,7 +385,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar&ids=HTML_ATTR(div,id)');
+        requestVerifier.verifyRequest('https://example.com/bar&ids=HTML_ATTR(div,id)');
       });
     });
 
@@ -399,7 +396,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequestMatch(/^https:\/\/example.com\/cid=[a-zA-Z\-]+/);
+        requestVerifier.verifyRequestMatch(/^https:\/\/example.com\/cid=[a-zA-Z\-]+/);
       });
     });
 
@@ -421,8 +418,8 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest(/https:\/\/e.com\/start=[0-9]+&duration=0/);
-        verifyRequest('https://e.com/totalVisibleTime=0');
+        requestVerifier.verifyRequest(/https:\/\/e.com\/start=[0-9]+&duration=0/);
+        requestVerifier.verifyRequest('https://e.com/totalVisibleTime=0');
       });
     });
 
@@ -449,7 +446,7 @@ describes.realWin('amp-analytics', {
         'config': 'https://foo/TITLE',
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/magic');
+        requestVerifier.verifyRequest('https://example.com/magic');
       });
     });
 
@@ -466,8 +463,8 @@ describes.realWin('amp-analytics', {
         ],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('/test1=1');
-        verifyRequest('/test2=2');
+        requestVerifier.verifyRequest('/test1=1');
+        requestVerifier.verifyRequest('/test2=2');
       });
     });
 
@@ -489,7 +486,7 @@ describes.realWin('amp-analytics', {
         }],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test1=x&test2=test2');
+        requestVerifier.verifyRequest('https://example.com/test1=x&test2=test2');
       });
     });
 
@@ -505,7 +502,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'pageview'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test1=x&test2=test2');
+        requestVerifier.verifyRequest('https://example.com/test1=x&test2=test2');
       });
     });
 
@@ -517,7 +514,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'pageview'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequestMatch(/https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/);
+        requestVerifier.verifyRequestMatch(/https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/);
       });
     });
 
@@ -527,7 +524,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/Test%20Title');
+        requestVerifier.verifyRequest('https://example.com/Test%20Title');
       });
     });
 
@@ -550,7 +547,7 @@ describes.realWin('amp-analytics', {
         }],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test1=trigger1&test2=config2');
+        requestVerifier.verifyRequest('https://example.com/test1=trigger1&test2=config2');
       });
     });
 
@@ -586,7 +583,7 @@ describes.realWin('amp-analytics', {
         'triggers': [{'on': 'visible', 'request': 'pageview'}],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test1=Test%20Title&test2=428');
+        requestVerifier.verifyRequest('https://example.com/test1=Test%20Title&test2=428');
       });
     });
 
@@ -611,7 +608,7 @@ describes.realWin('amp-analytics', {
         }],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2');
+        requestVerifier.verifyRequest('https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2');
       });
     });
 
@@ -631,7 +628,7 @@ describes.realWin('amp-analytics', {
         }],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
+        requestVerifier.verifyRequest('https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
       });
     });
 
@@ -650,7 +647,7 @@ describes.realWin('amp-analytics', {
         }],
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequestMatch(/https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/);
+        requestVerifier.verifyRequestMatch(/https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/);
       });
     });
 
@@ -677,7 +674,7 @@ describes.realWin('amp-analytics', {
           });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/test1=_query_param_foo_');
+        requestVerifier.verifyRequest('https://example.com/test1=_query_param_foo_');
       });
     });
   });
@@ -764,7 +761,7 @@ describes.realWin('amp-analytics', {
       win['foo'] = {'bar': () => false};
       const analytics = getAnalyticsTag(trivialConfig);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar');
+        requestVerifier.verifyRequest('https://example.com/bar');
       });
     });
 
@@ -777,7 +774,7 @@ describes.realWin('amp-analytics', {
     it('works for vendor config when optout is not defined', function() {
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/bar');
+        requestVerifier.verifyRequest('https://example.com/bar');
       });
     });
   });
@@ -797,7 +794,7 @@ describes.realWin('amp-analytics', {
     it('are sent', () => {
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/helloworld?a=b&s.evar0=0&s.evar1=helloworld&foofoo=baz');
+        requestVerifier.verifyRequest('https://example.com/helloworld?a=b&s.evar0=0&s.evar1=helloworld&foofoo=baz');
       });
     });
 
@@ -805,7 +802,7 @@ describes.realWin('amp-analytics', {
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld');
+        requestVerifier.verifyRequest('https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld');
       });
     });
 
@@ -814,7 +811,7 @@ describes.realWin('amp-analytics', {
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld&c=d&v=e');
+        requestVerifier.verifyRequest('https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld&c=d&v=e');
       });
     });
 
@@ -823,7 +820,7 @@ describes.realWin('amp-analytics', {
           'https://${host}/${path}?${extraUrlParams}&a=b';
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/helloworld?s.evar0=0&s.evar1=helloworld&foofoo=baz&a=b');
+        requestVerifier.verifyRequest('https://example.com/helloworld?s.evar0=0&s.evar1=helloworld&foofoo=baz&a=b');
       });
     });
 
@@ -831,7 +828,7 @@ describes.realWin('amp-analytics', {
       config.extraUrlParams = {'foo': ['0']};
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/helloworld?a=b&foo=0');
+        requestVerifier.verifyRequest('https://example.com/helloworld?a=b&foo=0');
       });
     });
   });
@@ -860,7 +857,7 @@ describes.realWin('amp-analytics', {
 
       sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -877,7 +874,7 @@ describes.realWin('amp-analytics', {
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -892,7 +889,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(getConfig(100));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -919,7 +916,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(incompleteConfig);
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -928,7 +925,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(getConfig(Infinity));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -937,7 +934,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(getConfig(NaN));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -946,7 +943,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
   });
@@ -972,7 +969,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(getConfig());
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -983,7 +980,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(config);
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -996,7 +993,7 @@ describes.realWin('amp-analytics', {
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -1108,7 +1105,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag(config);
 
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -1122,7 +1119,7 @@ describes.realWin('amp-analytics', {
       sandbox.stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
 
@@ -1200,7 +1197,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest('https://example.com/local');
+        requestVerifier.verifyRequest('https://example.com/local');
       });
     });
 
@@ -1219,7 +1216,7 @@ describes.realWin('amp-analytics', {
       return analytics.layoutCallback().then(() => {
         throw new Error('Must never be here');
       }, () => {
-        expect(sendRequestSpy).to.have.not.been.called;
+        expect(requestVerifier.hasRequestSent()).to.be.false;
       });
     });
 
@@ -1307,7 +1304,7 @@ describes.realWin('amp-analytics', {
         'sandbox': 'true',
       });
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest(
+        requestVerifier.verifyRequest(
             'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
             'CLIENT_ID(analytics-abc)=test2');
       });
@@ -1323,7 +1320,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest(
+        requestVerifier.verifyRequest(
             'https://example.com/cid=CLIENT_ID(analytics-abc)');
       });
     });
@@ -1337,7 +1334,7 @@ describes.realWin('amp-analytics', {
       }, true);
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequestMatch(/^https:\/\/example.com\/random=0.[0-9]/);
+        requestVerifier.verifyRequestMatch(/^https:\/\/example.com\/random=0.[0-9]/);
       });
     });
 
@@ -1351,7 +1348,7 @@ describes.realWin('amp-analytics', {
       }, true);
 
       return waitForSendRequest(analytics).then(() => {
-        verifyRequestMatch(
+        requestVerifier.verifyRequestMatch(
             /https:\/\/example\.com\/cid=CLIENT_ID\(analytics-abc\)random=0\.[0-9]+/);
       });
     });
@@ -1373,7 +1370,7 @@ describes.realWin('amp-analytics', {
         'sandbox': 'true',
       }, true);
       return waitForSendRequest(analytics).then(() => {
-        verifyRequest(
+        requestVerifier.verifyRequest(
             'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
           '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
           '&url=about%3Asrcdoc');
@@ -1410,7 +1407,7 @@ describes.realWin('amp-analytics', {
           .withArgs('0').returns(Promise.resolve(0.005))
           .withArgs('CLIENT_ID').returns(Promise.resolve(0.5));
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy).to.be.calledOnce;
+        requestVerifier.verifyRequest('/test1=1');
       });
     });
   });

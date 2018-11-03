@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {WindowInterface} from '../src/window-interface';
 import {createElementWithAttributes} from '../src/dom';
 import {dict} from '../src/utils/object';
 import {user} from '../src/log';
@@ -29,7 +30,7 @@ const TAG = 'pixel';
  */
 export function createPixel(win, src, referrerPolicy) {
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
-    user().error(TAG, 'Unsupported referrerPolicy: ' + referrerPolicy);
+    user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
 
   return referrerPolicy === 'no-referrer'
@@ -66,7 +67,8 @@ function createNoReferrerPixel(win, src) {
  * @return {!Image}
  */
 function createImagePixel(win, src, noReferrer = false) {
-  const image = new win.Image();
+  const Image = WindowInterface.getImage(win);
+  const image = new Image();
   if (noReferrer) {
     image.referrerPolicy = 'no-referrer';
   }

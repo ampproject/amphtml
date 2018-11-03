@@ -19,17 +19,17 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
-describe.configure()
-    .skipIfPropertiesObfuscated().run('amp-analytics', function() {
-      this.timeout(15000);
+describe.configure().skipIfPropertiesObfuscated().run('amp' +
+    '-analytics', function() {
+  this.timeout(15000);
 
-      describes.integration('amp-analytics integration test', {
-        body:
-    `<amp-analytics>
+  describes.integration('amp-analytics basic request', {
+    body:
+      `<amp-analytics>
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('amp-analytics')}"
+            "endpoint": "${depositRequestUrl('analytics-basic')}"
           },
           "triggers": {
             "pageview": {
@@ -46,47 +46,176 @@ describe.configure()
           }
         }
         </script>
-    </amp-analytics>
-    `,
-        extensions: ['amp-analytics'],
-      }, env => {
-        it('should send ping', () => {
-          return withdrawRequest(env.win,
-              'amp-analytics?a=2&b=AMP-TEST').then(request => {
-            expect(request.headers.referer,
-                'should keep referrer if no referrerpolicy specified').to.be.ok;
-          });
-        });
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    it('should send request', () => {
+      return withdrawRequest(
+          env.win, 'analytics-basic?a=2&b=AMP-TEST').then(request => {
+        expect(request.headers.referer,
+            'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
+    });
+  });
 
-      describes.integration('amp-analytics integration test', {
-        body:
-    `<amp-analytics>
+  describes.integration('amp-analytics batch', {
+    body:
+      `<amp-analytics>
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-no-referrer')}"
+            "endpoint": {
+              "baseUrl": "${depositRequestUrl('analytics-batch')}",
+              "batchInterval": 1
+            }
+          },
+          "triggers": {
+            "pageview1": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            },
+            "pageview2": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            }
+          },
+          "transport": {
+            "beacon": false,
+            "xhrpost": true
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    it('should send request in batch', () => {
+      return withdrawRequest(env.win,
+          'analytics-batch?a=1&b=AMP-TEST&a=1&b=AMP-TEST');
+    });
+  });
+
+  describes.integration('amp-analytics useBody', {
+    body:
+      `<amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${depositRequestUrl('analytics-useBody')}"
           },
           "triggers": {
             "pageview": {
               "on": "visible",
-              "request": "endpoint"
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
             }
           },
           "transport": {
-            "referrerPolicy": "no-referrer"
+            "beacon": false,
+            "xhrpost": true,
+            "useBody": true
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}"
           }
         }
         </script>
-    </amp-analytics>
-    `,
-        extensions: ['amp-analytics'],
-      }, env => {
-        it('should remove referrer if referrerpolicy=no-referrer', () => {
-          return withdrawRequest(env.win, 'analytics-no-referrer')
-              .then(request => {
-                expect(request.headers.referer).to.not.be.ok;
-              });
-        });
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    it('should send request use POST body payload', () => {
+      return withdrawRequest(
+          env.win, 'analytics-useBody').then(request => {
+        expect(request.body).to.equal('{"a":2,"b":"AMP-TEST"}');
       });
     });
+  });
+
+  describes.integration('amp-analytics batch useBody', {
+    body:
+      `<amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": {
+              "baseUrl": "${depositRequestUrl('analytics-batch-useBody')}",
+              "batchInterval": 1
+            }
+          },
+          "triggers": {
+            "pageview1": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            },
+            "pageview2": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            }
+          },
+          "transport": {
+            "beacon": false,
+            "xhrpost": true,
+            "useBody": true
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    it('should send batch request use POST body payload', () => {
+      return withdrawRequest(
+          env.win, 'analytics-batch-useBody').then(request => {
+        expect(request.body).to
+            .equal('[{"a":1,"b":"AMP-TEST"},{"a":1,"b":"AMP-TEST"}]');
+      });
+    });
+  });
+
+  describes.integration('amp-analytics referrerPolicy', {
+    body:
+      `<amp-analytics>
+          <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "${depositRequestUrl('analytics-no-referrer')}"
+            },
+            "triggers": {
+              "pageview": {
+                "on": "visible",
+                "request": "endpoint"
+              }
+            },
+            "transport": {
+              "referrerPolicy": "no-referrer"
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, env => {
+    it('should remove referrer if referrerpolicy=no-referrer', () => {
+      return withdrawRequest(env.win, 'analytics-no-referrer')
+          .then(request => {
+            expect(request.headers.referer).to.not.be.ok;
+          });
+    });
+  });
+});
