@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, defaultSerializer} from './transport-serializer';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
@@ -69,7 +69,7 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
 
-    /** @private {!Array<!Promise<!batchSegmentDef>>} */
+    /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
@@ -211,7 +211,8 @@ export class RequestHandler {
               'iframePing is only available on page view requests.');
           this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
-          this.transport_.sendRequest(baseUrl, batchSegments);
+          this.transport_.sendRequest(
+              baseUrl, batchSegments, !!this.batchInterval_);
         }
       });
     });

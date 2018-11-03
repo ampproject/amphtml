@@ -65,4 +65,34 @@ export class WindowInterface {
   static getUserLanguage(win) {
     return win.navigator.userLanguage || win.navigator.language;
   }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
+   */
+  static getSendBeacon(win) {
+    if (!win.navigator.sendBeacon) {
+      return undefined;
+    }
+    return win.navigator.sendBeacon.bind(win.navigator);
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {function(new:XMLHttpRequest)}
+   */
+  static getXMLHttpRequest(win) {
+    return win.XMLHttpRequest;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
+   * @return {function(new:Image)}
+   */
+  static getImage(win) {
+    return win.Image;
+  }
 }
