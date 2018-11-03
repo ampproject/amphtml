@@ -59,8 +59,8 @@ export class ConsentUI {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
 
-    /** @private {!!../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc_); 
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!Element} */
     this.parent_ = baseInstance.element;
@@ -90,7 +90,7 @@ export class ConsentUI {
           this.ampdoc_.getElementById(opt_postPromptUI);
       if (!postPromptUI) {
         user().error(TAG, 'postPromptUI element with ' +
-          `id=${opt_postPromptUI} not found`);
+          'id=%s not found', opt_postPromptUI);
       }
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
@@ -103,7 +103,7 @@ export class ConsentUI {
       const promptElement = this.ampdoc_.getElementById(promptUI);
       if (!promptElement || !this.parent_.contains(promptElement)) {
         user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
+          'promptUI id %s not found', promptUI);
       }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
@@ -244,7 +244,7 @@ export class ConsentUI {
     classList.remove('loading');
     classList.add('i-amphtml-consent-ui-in');
     classList.add('consent-iframe-active');
-    
+
     this.showMaskElement_();
   }
 
@@ -268,14 +268,14 @@ export class ConsentUI {
    * @private
    */
   showMaskElement_() {
-    if (!this.maskElement) {
+    if (!this.maskElement_) {
       const mask = this.win_.document.createElement('div');
       mask.classList.add('i-amphtml-consent-ui-mask');
       this.parent_.ownerDocument.body.appendChild(mask);
       this.maskElement_ = mask;
     }
     toggle(this.maskElement_, /* display */true);
-    this.viewport_.enterOverlayMode(); 
+    this.viewport_.enterOverlayMode();
   }
 
   /**

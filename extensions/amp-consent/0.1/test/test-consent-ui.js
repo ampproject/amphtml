@@ -19,6 +19,7 @@ import {
 } from '../consent-ui';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('consent-ui', {
@@ -55,6 +56,7 @@ describes.realWin('consent-ui', {
       };
       },
       scheduleLayout: () => {},
+      mutateElement: callback => {callback();},
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
@@ -116,5 +118,29 @@ describes.realWin('consent-ui', {
       expect(elementByTag(parent, 'iframe')).to.be.null;
     });
 
+    it('append/hide/show mask', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+      // Mock out load Iframe_
+      consentUI.loadIframe_ = () => {
+        return Promise.resolve();
+      };
+      expect(consentUI.maskElement_).to.be.null;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_).to.not.be.null;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+      consentUI.show();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.not.be.ok;
+      consentUI.hide();
+      yield macroTask();
+      expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
+    });
   });
 });
