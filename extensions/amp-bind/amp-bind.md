@@ -383,7 +383,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
