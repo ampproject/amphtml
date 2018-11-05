@@ -16,6 +16,7 @@
 
 import {Pass} from '../pass';
 import {Services} from '../services';
+import {closest, domOrderComparator, matches} from '../dom';
 import {
   computedStyle,
   getStyle,
@@ -26,7 +27,6 @@ import {
   setStyles,
   toggle,
 } from '../style';
-import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
@@ -39,6 +39,8 @@ const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 /**
  * Passed to closest to determine if the fixed element is a lightbox, or a
  * descendant of one. If so, FixedLayer ignores the element. #19149
+ *
+ * @param {!Element} el
  */
 function lightboxOrDescendant(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
