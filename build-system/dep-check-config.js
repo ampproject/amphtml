@@ -295,6 +295,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/linker-manager.js->' +
           'src/service/navigation.js',
+      'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
+        'src/service/navigation.js',
       'extensions/amp-list/0.1/amp-list.js->' +
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
