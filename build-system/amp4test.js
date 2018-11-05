@@ -85,11 +85,14 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/:id', (req, res) => {
-  if (typeof bank[req.params.id] === 'function') {
-    bank[req.params.id](req);
+app.use('/request-bank/deposit/', (req, res) => {
+  // req.url is relative to the path specified in app.use
+  const key = req.url;
+  console.log('SERVER-LOG [DEPOSIT]: ', key);
+  if (typeof bank[key] === 'function') {
+    bank[key](req);
   } else {
-    bank[req.params.id] = req;
+    bank[key] = req;
   }
   res.end();
 });
@@ -99,20 +102,24 @@ app.use('/request-bank/deposit/:id', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/:id', (req, res) => {
-  const result = bank[req.params.id];
+app.use('/request-bank/withdraw/', (req, res) => {
+  // req.url is relative to the path specified in app.use
+  const key = req.url;
+  console.log('SERVER-LOG [WITHDRAW]: ' + key);
+  const result = bank[key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }
   const callback = function(result) {
     res.json({
       headers: result.headers,
+      body: result.body,
     });
-    delete bank[req.params.id];
+    delete bank[key];
   };
   if (result) {
     callback(result);
   } else {
-    bank[req.params.id] = callback;
+    bank[key] = callback;
   }
 });

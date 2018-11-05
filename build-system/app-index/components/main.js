@@ -14,19 +14,4 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-unused-vars */
-
-import {Component, h, render} from 'preact';
-import {ProxyForm} from './proxy-form';
-import {SettingsOpener} from './settings';
-
-
-const proxyFormRootOptional =
-    document.querySelector('.proxy-form-component-root');
-
-if (proxyFormRootOptional) {
-  render(<ProxyForm /> , proxyFormRootOptional);
-}
-
-render(<SettingsOpener />,
-    document.querySelector('.settings-opener-component-root'));
+// TODO(alanorozco): This bundle shall be used for experiment toggles.
