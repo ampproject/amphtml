@@ -46,8 +46,12 @@ const VALID_TARGETS = ['_top', '_blank'];
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/** @enum {number} */
+/**
+ * @enum {number} Priority reserved for extensions in anchor mutations.
+ * The higher the priority, the sooner it's invoked.
+ */
 export const Priority = {
+  LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
 };
 
@@ -301,6 +305,7 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
