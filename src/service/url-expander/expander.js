@@ -18,6 +18,16 @@ import {hasOwn} from '../../utils/object';
 import {rethrowAsync, user} from '../../log';
 import {tryResolve} from '../../utils/promise';
 
+/**
+ * @typedef {{
+ *   opt_bindings: (Object<string, *>|undefined),
+ *   opt_collectVars: (Object|undefined),
+ *   opt_sync: (boolean|undefined),
+ *   opt_whiteList: (Object<string, boolean>|undefined)
+ * }}
+ */
+export let ExpansionOptionsDef;
+
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';
 
@@ -37,6 +47,9 @@ export class Expander {
    */
   constructor(variableSource) {
     this.variableSource_ = variableSource;
+
+    /* @private {?ExpansionOptionsDef} */
+    this.options_ = null;
   }
 
 
@@ -52,6 +65,13 @@ export class Expander {
    * @return {!Promise<string>|string}
    */
   expand(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
+    this.options_ = {
+      opt_bindings,
+      opt_collectVars,
+      opt_sync,
+      opt_whiteList,
+    };
+
     if (!url.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
@@ -62,8 +82,7 @@ export class Expander {
     if (!matches.length) {
       return opt_sync ? url : Promise.resolve(url);
     }
-    return this.parseUrlRecursively_(url, matches, opt_bindings,
-        opt_collectVars, opt_sync);
+    return this.parseUrlRecursively_(url, matches);
   }
 
 
@@ -95,13 +114,11 @@ export class Expander {
    * @param {string} url
    * @param {!Array<Object<string, string|number>>} matches Array of objects
    *   representing matching keywords.
-   * @param {!Object<string, *>=} opt_bindings Additional one-off bindings.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
-   * @param {boolean=} opt_sync
    * @return {!Promise<string>|string}
    */
-  parseUrlRecursively_(url, matches, opt_bindings, opt_collectVars, opt_sync) {
+  parseUrlRecursively_(url, matches) {
+    const {opt_bindings, opt_sync} = this.options_;
+
     const stack = [];
     let urlIndex = 0;
     let matchIndex = 0;
@@ -149,8 +166,7 @@ export class Expander {
             if (builder.length) {
               results.push(builder);
             }
-            results.push(this.evaluateBinding_(binding,
-                /* opt_args */ undefined, opt_collectVars, opt_sync));
+            results.push(this.evaluateBinding_(binding));
           }
 
           builder = '';
@@ -195,8 +211,7 @@ export class Expander {
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
           results.push(nextArg);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, /* opt_args */ results,
-              opt_collectVars, opt_sync);
+          const value = this.evaluateBinding_(binding, /* opt_args */ results);
           return value;
         }
 
@@ -233,11 +248,9 @@ export class Expander {
    * @param {Object<string, *>} bindingInfo An object containing the name of macro
    *   and value to be resolved.
    * @param {Array=} opt_args Arguments passed to the macro.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
-   * @param {*=} opt_sync Whether the binding should be resolved synchronously.
    */
-  evaluateBinding_(bindingInfo, opt_args, opt_collectVars, opt_sync) {
+  evaluateBinding_(bindingInfo, opt_args) {
+    const {opt_sync} = this.options_;
     const {name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
@@ -256,8 +269,8 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
     return opt_sync ?
-      this.evaluateBindingSync_(binding, name, opt_args, opt_collectVars) :
-      this.evaluateBindingAsync_(binding, name, opt_args, opt_collectVars);
+      this.evaluateBindingSync_(binding, name, opt_args) :
+      this.evaluateBindingAsync_(binding, name, opt_args);
   }
 
 
@@ -266,11 +279,9 @@ export class Expander {
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
    * @return {!Promise<string>} Resolved value.
    */
-  evaluateBindingAsync_(binding, name, opt_args, opt_collectVars) {
+  evaluateBindingAsync_(binding, name, opt_args) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -284,7 +295,7 @@ export class Expander {
         value = Promise.resolve(binding);
       }
       return value.then(val => {
-        this.maybeCollectVars_(name, val, opt_collectVars, opt_args);
+        this.maybeCollectVars_(name, val, opt_args);
 
         let result;
 
@@ -297,7 +308,7 @@ export class Expander {
         return result;
       }).catch(e => {
         rethrowAsync(e);
-        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
+        this.maybeCollectVars_(name, '', opt_args);
         return Promise.resolve('');
       });
 
@@ -305,7 +316,7 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
+      this.maybeCollectVars_(name, '', opt_args);
       return Promise.resolve('');
     }
   }
@@ -316,11 +327,9 @@ export class Expander {
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
    * @return {string} Resolved value.
    */
-  evaluateBindingSync_(binding, name, opt_args, opt_collectVars) {
+  evaluateBindingSync_(binding, name, opt_args) {
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
@@ -336,12 +345,12 @@ export class Expander {
       } else if (typeof value === 'string' || typeof value === 'number' ||
           typeof value === 'boolean') {
         // Normal case.
-        this.maybeCollectVars_(name, value, opt_collectVars, opt_args);
+        this.maybeCollectVars_(name, value, opt_args);
         result = NOENCODE_WHITELIST[name] ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
       } else {
         // Most likely a broken binding gets us here.
-        this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
+        this.maybeCollectVars_(name, '', opt_args);
         result = '';
       }
 
@@ -351,7 +360,7 @@ export class Expander {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      this.maybeCollectVars_(name, '', opt_collectVars, opt_args);
+      this.maybeCollectVars_(name, '', opt_args);
       return '';
     }
   }
@@ -360,11 +369,10 @@ export class Expander {
    * Collect vars if given the optional object. Handles formatting of kv pairs.
    * @param {string} name Name of the macro.
    * @param {*} value Raw macro resolution value.
-   * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
-   *   variable resolutions.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    */
-  maybeCollectVars_(name, value, opt_collectVars, opt_args) {
+  maybeCollectVars_(name, value, opt_args) {
+    const {opt_collectVars} = this.options_;
     if (!opt_collectVars) {
       return;
     }
