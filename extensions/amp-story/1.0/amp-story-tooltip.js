@@ -23,9 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -42,16 +40,19 @@ export const TOOLTIP_TRIGGERABLE_SELECTORS = ['a[href]'];
 
 /**
  * Minimum vertical space needed to position tooltip.
+ * @const {number}
  */
 const MIN_VERTICAL_SPACE = 56;
 
 /**
  * Padding between tooltip and edges of screen.
+ * @const {number}
  */
 const EDGE_PADDING = 8;
 
 /**
  * Blank icon when no data-tooltip-icon src is specified.
+ * @const {string}
  */
 const DEFAULT_ICON_SRC =
   'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
@@ -207,26 +208,24 @@ export class AmpStoryTooltip {
   attachTooltipToEl_(clickedEl) {
     const {href} = parseUrlDeprecated(clickedEl.getAttribute('href'));
 
-    const domainName = getSourceOriginForElement(clickedEl, href);
-    const tooltipText =
-      clickedEl.getAttribute('data-tooltip-text') || domainName;
-    this.appendTextToTooltip_(tooltipText);
+    const tooltipText = clickedEl.getAttribute('data-tooltip-text') ||
+      getSourceOriginForElement(clickedEl, href);
+    this.updateTooltipText_(tooltipText);
 
     const iconAttr = clickedEl.getAttribute('data-tooltip-icon');
     const iconSrc = iconAttr ? parseUrlDeprecated(iconAttr).href :
       DEFAULT_ICON_SRC;
-    this.appendIconToTooltip_(iconSrc);
+    this.updateTooltipIcon_(iconSrc);
 
     this.positionTooltip_(clickedEl);
   }
 
   /**
-   * Checks for existing text content and modifies it or appends a new text node
-   * if building tooltip for the first time.
+   * Updates tooltip text content.
    * @param {string} tooltipText
    * @private
    */
-  appendTextToTooltip_(tooltipText) {
+  updateTooltipText_(tooltipText) {
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
 
@@ -234,12 +233,12 @@ export class AmpStoryTooltip {
   }
 
   /**
-   * Checks for existing icon source and modifies it or appends a new tooltip
-   * icon node if building tooltip for the first time.
+   * Updates tooltip icon. If no icon src is declared, it sets a default src and
+   * hides it.
    * @param {string} iconSrc
    * @private
    */
-  appendIconToTooltip_(iconSrc) {
+  updateTooltipIcon_(iconSrc) {
     const existingTooltipIcon =
       this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
 
@@ -259,52 +258,81 @@ export class AmpStoryTooltip {
    * @private
    */
   positionTooltip_(clickedEl) {
-    let arrowOnTop = false;
-    const state = {};
+    const state = {arrowOnTop: false};
 
     this.resources_.measureMutateElement(this.storyEl_,
         /** measure */
         () => {
-          const clickedRect = clickedEl./*OK*/getBoundingClientRect();
-          const storyHeight = this.storyEl_./*OK*/offsetHeight;
+          const storyPage =
+              this.storyEl_.querySelector('amp-story-page[active]');
+          const clickedElRect = clickedEl./*OK*/getBoundingClientRect();
+          const pageRect = storyPage./*OK*/getBoundingClientRect();
 
-          // Vertical positioning.
-          if (clickedRect.top > MIN_VERTICAL_SPACE) { // Tooltip fits above clicked element.
-            state.tooltipTop = clickedRect.top - MIN_VERTICAL_SPACE;
-          } else if (storyHeight - clickedRect.bottom > MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element. Place arrow on top of the tooltip.
-            state.tooltipTop = clickedRect.bottom + EDGE_PADDING * 2;
-            arrowOnTop = true;
-          } else { // Element takes whole vertical space. Place tooltip on the middle.
-            state.tooltipTop = storyHeight / 2;
-          }
-
-          const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
-          const storyWidth = this.storyEl_./*OK*/offsetWidth;
-
-          // Horizontal positioning.
-          const elCenter = (clickedRect.width / 2) + clickedRect.left;
-          state.tooltipLeft = elCenter - (tooltipWidth / 2);
-          const maxHorizontal = (storyWidth - tooltipWidth - EDGE_PADDING);
-          // Make sure tooltip is not out of screen.
-          state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontal);
-          state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
-          // Position tooltip arrow horizontally depending on clicked
-          // element's center in relation to the screen width.
-          state.arrowLeftOffset = elCenter / storyWidth * 100;
-          state.arrowLeftOffset = Math.min(state.arrowLeftOffset, 80);
-          state.arrowLeftOffset = Math.max(state.arrowLeftOffset, 0);
+          this.verticalPositioning_(clickedElRect, pageRect, state);
+          this.horizontalPositioning_(clickedElRect, pageRect, state);
         },
         /** mutate */
         () => {
           // Arrow on top or bottom of tooltip.
           this.tooltip_.classList.toggle('i-amphtml-tooltip-arrow-on-top',
-              arrowOnTop);
+              state.arrowOnTop);
 
           setImportantStyles(dev().assertElement(this.tooltipArrow_),
-              {left: `calc(${state.arrowLeftOffset}%)`});
+              {left: `${state.arrowLeftOffset}px`});
           setImportantStyles(dev().assertElement(this.tooltip_),
               {top: `${state.tooltipTop}px`, left: `${state.tooltipLeft}px`});
         });
+  }
+
+  /**
+   * In charge of deciding where to position the tooltip depending on the
+   * clicked element's position and size, and available space in the page. Also
+   * places the tooltip's arrow on top when the tooltip is below an element.
+   * @param {!ClientRect} clickedElRect
+   * @param {!ClientRect} pageRect
+   * @param {!Object} state
+   */
+  verticalPositioning_(clickedElRect, pageRect, state) {
+    const clickedElTopOffset = clickedElRect.top - pageRect.top;
+    const clickedElBottomOffset = clickedElRect.bottom - pageRect.top;
+
+    if (clickedElTopOffset > MIN_VERTICAL_SPACE) { // Tooltip fits above clicked element.
+      state.tooltipTop = clickedElRect.top - MIN_VERTICAL_SPACE;
+    } else if (pageRect.height - clickedElBottomOffset >
+        MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element. Place arrow on top of the tooltip.
+      state.tooltipTop = clickedElRect.bottom + EDGE_PADDING * 2;
+      state.arrowOnTop = true;
+    } else { // Element takes whole vertical space. Place tooltip on the middle.
+      state.tooltipTop = pageRect.height / 2;
+    }
+  }
+
+  /**
+   * In charge of positioning the tooltip and the tooltip's arrow horizontally.
+   * @param {!ClientRect} clickedElRect
+   * @param {!ClientRect} pageRect
+   * @param {!Object} state
+   */
+  horizontalPositioning_(clickedElRect, pageRect, state) {
+    const clickedElLeftOffset = clickedElRect.left - pageRect.left;
+    const elCenterLeft = clickedElRect.width / 2 + clickedElLeftOffset;
+    const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
+    state.tooltipLeft = elCenterLeft - (tooltipWidth / 2);
+    const maxHorizontalLeft = pageRect.width - tooltipWidth - EDGE_PADDING;
+
+    // Make sure tooltip is not out of the page.
+    state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
+    state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
+
+    const tooltipArrow =
+        this.tooltip_.querySelector('.i-amphtml-story-tooltip-arrow');
+    state.arrowLeftOffset = Math.abs(elCenterLeft - state.tooltipLeft -
+        tooltipArrow./*OK*/offsetWidth / 2);
+    // Make sure tooltip arrow is not out of the tooltip.
+    state.arrowLeftOffset =
+      Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
+
+    state.tooltipLeft += pageRect.left;
   }
 
   /**

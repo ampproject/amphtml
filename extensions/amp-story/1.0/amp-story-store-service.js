@@ -269,6 +269,7 @@ const actions = (state, action, data) => {
           {}, state, {
             [StateProperty.PAUSED_STATE]: !!data,
             [StateProperty.TOOLTIP_ELEMENT]: data,
+            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: !data,
           }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
