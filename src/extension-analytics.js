@@ -99,7 +99,7 @@ class CustomEventReporter {
     }
 
     this.parent_.signals().whenSignal(CommonSignals.LOAD_START).then(() => {
-      insertAnalyticsElement(this.parent_, config, false);
+      insertAnalyticsElement(this.parent_, config, true);
     });
   }
 
