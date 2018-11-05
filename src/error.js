@@ -500,7 +500,7 @@ export function getErrorReportData(message, filename, line, col, error,
     runtime = getMode().runtime;
   }
 
-  const singlePassType = getMode().singlePassType;
+  const {singlePassType} = getMode();
   if (['sp', 'mp', 'esm'].includes(singlePassType)) {
     data['spt'] = singlePassType;
   }
