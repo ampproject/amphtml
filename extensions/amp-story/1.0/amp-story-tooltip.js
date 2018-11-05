@@ -324,10 +324,8 @@ export class AmpStoryTooltip {
     state.tooltipLeft = Math.min(state.tooltipLeft, maxHorizontalLeft);
     state.tooltipLeft = Math.max(EDGE_PADDING, state.tooltipLeft);
 
-    const tooltipArrow =
-        this.tooltip_.querySelector('.i-amphtml-story-tooltip-arrow');
     state.arrowLeftOffset = Math.abs(elCenterLeft - state.tooltipLeft -
-        tooltipArrow./*OK*/offsetWidth / 2);
+        this.tooltipArrow_./*OK*/offsetWidth / 2);
     // Make sure tooltip arrow is not out of the tooltip.
     state.arrowLeftOffset =
       Math.min(state.arrowLeftOffset, tooltipWidth - EDGE_PADDING * 3);
