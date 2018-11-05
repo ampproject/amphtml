@@ -282,7 +282,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(child.textContent).to.equal('test');
 
     // Top-level classes moved to the wrapper element.
-    expect(win.document.documentElement).to.not.have.class('top');
+    expect(win.document.documentElement).to.have.class('top');
     expect(binding.wrapper_).to.have.class('top');
   });
 
