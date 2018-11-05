@@ -15,8 +15,11 @@
  */
 
 export const GEMIUS_CONFIG = /** @type {!JsonObject} */ ({
+  'vars': {
+    'dnt': '0',
+  },
   'requests': {
-    'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}',
+    'base': 'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}&nc=${dnt}',
     'pageview': '${base}&et=view&hsrc=1',
     'event': '${base}&et=action&hsrc=3',
   },
