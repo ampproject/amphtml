@@ -21,8 +21,7 @@ import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isFiniteNumber} from '../../../src/types';
-import {isObject} from '../../../src/types';
+import {isFiniteNumber, isObject} from '../../../src/types';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
@@ -98,7 +97,11 @@ export class ConsentPolicyManager {
    */
   registerConsentPolicyInstance(policyId, config) {
     if (this.instances_[policyId]) {
-      dev().error(TAG, `policy ${policyId} already registered`);
+      // Note <amp-next-page> could wait for the same consent policy.
+      // Return without thowing error.
+      // TODO: Make sure multiple consentPolicyManager services is installed
+      // for every <amp-next-page>
+      return;
     }
 
     const waitFor = Object.keys(config['waitFor'] || {});

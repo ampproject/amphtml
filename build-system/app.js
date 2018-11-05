@@ -23,6 +23,7 @@ const app = require('express')();
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
+const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -30,8 +31,10 @@ const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
+const countries = require('../examples/countries.json');
+const runVideoTestBench = require('./app-video-testbench');
 
-app.use(bodyParser.json());
+app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -45,18 +48,71 @@ app.use((req, res, next) => {
   next();
 });
 
+function isValidServeMode(serveMode) {
+  return ['default', 'compiled', 'cdn'].includes(serveMode);
+}
+
+function setServeMode(serveMode) {
+  pc.env.SERVE_MODE = serveMode;
+}
+
 app.get('/serve_mode=:mode', (req, res) => {
   const newMode = req.params.mode;
-  let info;
-  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn') {
-    pc.env.SERVE_MODE = newMode;
-    info = '<h2>Serve mode changed to ' + newMode + '</h2>';
-    res.send(info);
+  if (isValidServeMode(newMode)) {
+    setServeMode(newMode);
+    res.send(`<h2>Serve mode changed to ${newMode}</h2>`);
   } else {
-    info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
+    const info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
     res.status(400).send(info);
   }
 });
+
+if (!global.AMP_TESTING) {
+  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
+      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
+    devDashboard.setCacheStatus(false);
+  }
+
+  app.get(['/', '/*'], devDashboard.serveIndex({
+    // Sitting on build-system/, so we go back one dir for the repo root.
+    root: path.join(__dirname, '../'),
+    mapBasepath(url) {
+      // Serve /examples/ on main page.
+      if (url == '/') {
+        return '/examples';
+      }
+      // Serve root on /~ as a fallback.
+      if (url == '/~') {
+        return '/';
+      }
+      // Serve basepath from URL otherwise.
+      return url;
+    },
+  }));
+
+  app.get('/serve_mode.json', (req, res) => {
+    res.json({serveMode: pc.env.SERVE_MODE || 'default'});
+  });
+
+  app.get('/serve_mode_change', (req, res) => {
+    const sourceOrigin = req.query['__amp_source_origin'];
+    if (sourceOrigin) {
+      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+    }
+    const {mode} = req.query;
+    if (isValidServeMode(mode)) {
+      setServeMode(mode);
+      res.json({ok: true});
+      return;
+    }
+    res.status(400).json({ok: false});
+  });
+
+  app.get('/proxy', (req, res) => {
+    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`proxy/s/${sufix}`);
+  });
+}
 
 // Deprecate usage of .min.html/.max.html
 app.get([
@@ -115,7 +171,7 @@ app.use('/api/dont-show', (req, res) => {
 
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
+  res.end(req.body);
 });
 
 app.use('/analytics/:type', (req, res) => {
@@ -211,7 +267,14 @@ const upload = multer();
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   assertCors(req, res, ['POST']);
 
-  const fileData = req.files['myFile'][0];
+  /** @type {!Array<!File>|undefined} */
+  const myFile = req.files['myFile'];
+
+  if (!myFile) {
+    res.json({message: 'No file data received'});
+    return;
+  }
+  const fileData = myFile[0];
   const contents = fileData.buffer.toString();
 
   res.json({message: contents});
@@ -735,6 +798,11 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
   setTimeout(next, sleep);
 });
 
+/**
+ * Video testbench endpoint
+ */
+app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
+
 app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
@@ -913,7 +981,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
 });
 
 app.use('/subscription/pingback', (req, res) => {
-  assertCors(req, res, ['GET']);
+  assertCors(req, res, ['POST']);
   res.json({
     done: true,
   });
@@ -1096,6 +1164,28 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
+ * Autosuggest endpoint
+ */
+app.get('/search/countries', function(req, res) {
+  let filtered = [];
+  if (req.query.hasOwnProperty('q')) {
+    const query = req.query.q.toLowerCase();
+
+    filtered = countries.items
+        .filter(country => country.name.toLowerCase().startsWith(query));
+  }
+
+  const results = {
+    'items': [
+      {
+        'results': filtered,
+      },
+    ],
+  };
+  res.send(results);
+});
+
+/**
  * @param {string} mode
  * @param {string} file
  * @param {string=} hostName
@@ -1119,7 +1209,7 @@ function replaceUrls(mode, file, hostName, inabox, storyV1) {
         hostName + '/dist/amp-shadow.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
-        hostName + '/dist/amp-inabox-lite.js');
+        hostName + '/dist/amp-inabox.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
@@ -1284,4 +1374,7 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = app;
+module.exports = {
+  middleware: app,
+  beforeServeTasks: devDashboard.beforeServeTasks,
+};

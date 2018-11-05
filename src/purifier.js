@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as DOMPurify from 'dompurify/dist/purify.cjs';
 import {
   checkCorsUrl,
   getSourceUrl,
@@ -23,11 +22,20 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict} from './utils/object';
-import {filterSplice} from './utils/array';
 import {parseSrcset} from './srcset';
+import {remove} from './utils/array';
 import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
+import purify from 'dompurify/dist/purify.es';
+
+/**
+ * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
+ */
+let DomPurifyDef;
+
+/** @private @const {!DomPurifyDef} */
+const DomPurify = purify(self);
 
 /** @private @const {string} */
 const TAG = 'purifier';
@@ -216,21 +224,41 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-/** @const {!Object} */
-const PURIFY_CONFIG = {
+/** @const {!JsonObject} */
+const PURIFY_CONFIG = dict({
   'USE_PROFILES': {
     'html': true,
     'svg': true,
     'svgFilters': true,
   },
-};
+});
+
+/**
+ * Monotonically increasing counter used for keying nodes.
+ * @private {number}
+ */
+let KEY_COUNTER = 0;
 
 /**
  * Returns a <body> element containing the sanitized, serialized `dirty`.
  * @param {string} dirty
+ * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty) {
+export function purifyHtml(dirty, diffing = false) {
+  const config = purifyConfig();
+  addPurifyHooks(DomPurify, diffing);
+  const body = DomPurify.sanitize(dirty, config);
+  DomPurify.removeAllHooks();
+  return body;
+}
+
+/**
+ * Returns DOMPurify config for normal, escaped templates.
+ * Do not use for unescaped templates.
+ * @return {!JsonObject}
+ */
+export function purifyConfig() {
   const config = Object.assign({}, PURIFY_CONFIG, {
     'ADD_ATTR': WHITELISTED_ATTRS,
     'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
@@ -239,7 +267,15 @@ export function purifyHtml(dirty) {
     // Avoid need for serializing to/from string by returning Node directly.
     'RETURN_DOM': true,
   });
+  return /** @type {!JsonObject} */ (config);
+}
 
+/**
+ * Adds AMP hooks to given DOMPurify object.
+ * @param {!DomPurifyDef} purifier
+ * @param {boolean} diffing
+ */
+export function addPurifyHooks(purifier, diffing) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -247,6 +283,15 @@ export function purifyHtml(dirty) {
   // Reference to DOMPurify's `allowedAttributes` whitelist.
   let allowedAttributes;
   const allowedAttributesChanges = [];
+
+  // Disables DOM diffing for a given node and allows it to be replaced.
+  const disableDiffingFor = node => {
+    const key = 'i-amphtml-key';
+    if (diffing && !node.hasAttribute(key)) {
+      // set-dom uses node attribute keys for opting out of diffing.
+      node.setAttribute(key, KEY_COUNTER++);
+    }
+  };
 
   /**
    * @param {!Node} node
@@ -260,6 +305,8 @@ export function purifyHtml(dirty) {
     // calculation is not possible).
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
+      // AMP elements don't support arbitrary mutation, so don't DOM diff them.
+      disableDiffingFor(node);
     }
     // Set `target` attribute for <a> tags if necessary.
     if (tagName === 'a') {
@@ -355,6 +402,10 @@ export function purifyHtml(dirty) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
+      // Don't DOM diff nodes with bindings because amp-bind scans newly
+      // rendered elements and discards _all_ old elements _before_ diffing, so
+      // preserving some old elements would cause loss of functionality.
+      disableDiffingFor(node);
     }
 
     if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
@@ -386,25 +437,22 @@ export function purifyHtml(dirty) {
 
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.
-    filterSplice(this.removed, r => {
+    remove(this.removed, r => {
       if (r.from === node && r.attribute) {
         const {name, value} = r.attribute;
         if (name.toLowerCase() === 'on') {
           node.setAttribute('on', value);
-          return false; // Delete from `removed` array once processed.
+          return true; // Delete from `removed` array once processed.
         }
       }
-      return true;
+      return false;
     });
   };
 
-  DOMPurify.addHook('uponSanitizeElement', uponSanitizeElement);
-  DOMPurify.addHook('afterSanitizeElements', afterSanitizeElements);
-  DOMPurify.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
-  DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
-  const body = DOMPurify.sanitize(dirty, config);
-  DOMPurify.removeAllHooks();
-  return body;
+  purifier.addHook('uponSanitizeElement', uponSanitizeElement);
+  purifier.addHook('afterSanitizeElements', afterSanitizeElements);
+  purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
+  purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
 }
 
 /**
@@ -419,7 +467,7 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
 
-  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+  DomPurify.addHook('uponSanitizeElement', (node, data) => {
     const {tagName} = data;
     allowedTags = data.allowedTags;
     if (tagName === 'template') {
@@ -429,7 +477,7 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
       }
     }
   });
-  DOMPurify.addHook('afterSanitizeElements', unusedNode => {
+  DomPurify.addHook('afterSanitizeElements', unusedNode => {
     // DOMPurify doesn't have an required-attribute tag whitelist API and
     // `allowedTags` has a per-invocation scope, so we need to remove
     // required-attribute tags after sanitizing each element.
@@ -439,12 +487,12 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // reparented to the head. So to support nested templates, we need
   // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
   // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
-  const fragment = DOMPurify.sanitize(html, {
+  const fragment = DomPurify.sanitize(html, {
     'ALLOWED_TAGS': TRIPLE_MUSTACHE_WHITELISTED_TAGS,
     'FORCE_BODY': true,
     'RETURN_DOM_FRAGMENT': true,
   });
-  DOMPurify.removeAllHooks();
+  DomPurify.removeAllHooks();
   // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
   // namespaces for all elements and attributes.
   const div = doc.createElement('div');

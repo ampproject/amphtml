@@ -16,9 +16,12 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -26,7 +29,8 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {setStyle} from '../../../src/style';
+import {removeElement} from '../../../src/dom';
+import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -135,6 +139,7 @@ export class NextPageService {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
+    this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
@@ -179,6 +184,14 @@ export class NextPageService {
       for (let i = 0; i < elements.length; i++) {
         elements[i].classList.add('i-amphtml-next-page-hidden');
       }
+    }
+
+    // Drop any amp-analytics tags from the child doc. We want to reuse the
+    // parent config instead.
+    const analytics = doc.querySelectorAll('amp-analytics');
+    for (let i = 0; i < analytics.length; i++) {
+      const item = analytics[i];
+      removeElement(item);
     }
 
     const amp =
@@ -256,7 +269,7 @@ export class NextPageService {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit.el, 'display', 'none');
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {
@@ -447,7 +460,10 @@ export class NextPageService {
   triggerAnalyticsEvent_(eventType, toURL, fromURL) {
     fromURL = fromURL || '';
 
-    const vars = {toURL, fromURL};
+    const vars = dict({
+      'toURL': toURL,
+      'fromURL': fromURL,
+    });
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }

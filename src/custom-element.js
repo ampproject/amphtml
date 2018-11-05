@@ -32,7 +32,9 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
-import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
+import {
+  getIntersectionChangeEntry,
+} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
@@ -716,19 +718,23 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
+      this.signals_.signal(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
      * Called when the element is first connected to the DOM. Calls
      * {@link firstAttachedCallback} if this is the first attachment.
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected.  Chrome and Safari can trigger connectedCallback even when
+     * the node is disconnected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+     * connectedCallback will later be called when the disconnected root is
+     * connected to the document tree.
+     *
      * @final @this {!Element}
      */
     connectedCallback() {
-      // Chrome and Safari can trigger connectedCallback even when the node is
-      // disconnected. See #12849, https://crbug.com/821195, and
-      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
-      // connectedCallback will later be called when the disconnected root is
-      // connected to the document tree.
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -863,23 +869,44 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Called when the element is disconnected from the DOM.
+     *
      * @final @this {!Element}
      */
     disconnectedCallback() {
-      if (this.isInTemplate_) {
-        return;
-      }
-      if (!this.isConnected_ || dom.isConnectedNode(this)) {
-        return;
-      }
-      this.isConnected_ = false;
-      this.getResources().remove(this);
-      this.implementation_.detachedCallback();
+      this.disconnect(/* pretendDisconnected */ false);
     }
 
     /** The Custom Elements V0 sibling to `disconnectedCallback`. */
     detachedCallback() {
       this.disconnectedCallback();
+    }
+
+    /**
+     * Called when an element is disconnected from DOM, or when an ampDoc is
+     * being disconnected (the element itself may still be connected to ampDoc).
+     *
+     * This callback is guarded by checks to see if the element is still
+     * connected. See #12849, https://crbug.com/821195, and
+     * https://bugs.webkit.org/show_bug.cgi?id=180940.
+     * If the element is still connected to the document, you'll need to pass
+     * opt_pretendDisconnected.
+     *
+     * @param {boolean} pretendDisconnected Forces disconnection regardless
+     *     of DOM isConnected.
+     */
+    disconnect(pretendDisconnected) {
+      if (this.isInTemplate_ || !this.isConnected_) {
+        return;
+      }
+      if (!pretendDisconnected && dom.isConnectedNode(this)) {
+        return;
+      }
+      this.isConnected_ = false;
+      this.getResources().remove(this);
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        this.getLayers().remove(this);
+      }
+      this.implementation_.detachedCallback();
     }
 
     /**
@@ -1237,6 +1264,7 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.reset(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
@@ -1400,15 +1428,6 @@ function createBaseCustomElementClass(win) {
     getRealChildren() {
       return dom.childElements(this, element =>
         !isInternalOrServiceNode(element));
-    }
-
-    /**
-     * Must be executed in the mutate context. Removes `display:none` from the
-     * element set via `layout=nodisplay`.
-     * @param {boolean} displayOn
-     */
-    toggleLayoutDisplay(displayOn) {
-      this.classList.toggle('i-amphtml-display', displayOn);
     }
 
     /**

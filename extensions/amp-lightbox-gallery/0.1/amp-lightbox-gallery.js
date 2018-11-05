@@ -26,7 +26,7 @@ import {
   VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -46,15 +46,14 @@ import {
   translate,
 } from '../../../src/transition';
 import {dev, user} from '../../../src/log';
-import {getData, listen} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
+import {getData, isLoaded, listen} from '../../../src/event-helper';
 import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
-import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {px, setStyles} from '../../../src/style';
+import {px, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-import {toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -465,7 +464,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
-    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', {});
+    triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled', dict({}));
     let isInStandardMode, isInOverflowMode, descriptionOverflows;
     const measureOverflowState = () => {
       isInStandardMode = this.descriptionBox_.classList
@@ -635,7 +634,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.hideControls_();
       }
     }
-    triggerAnalyticsEvent(this.element, 'controlsToggled', {});
+    triggerAnalyticsEvent(this.element, 'controlsToggled', dict({}));
   }
 
   /**
@@ -774,7 +773,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         toggle(this.element, true);
         setStyles(this.element, {
           opacity: 0,
-          display: '',
         });
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
@@ -800,7 +798,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }).then(() => this.openLightboxForElement_(element))
         .then(() => {
           this.showControls_();
-          triggerAnalyticsEvent(this.element, 'lightboxOpened', {});
+          triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
         });
   }
 
@@ -976,12 +974,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
                 }), MOTION_DURATION_RATIO, ENTER_CURVE_);
               },
               () => {
-                setStyles(dev().assertElement(this.carousel_), {
+                const carousel = dev().assertElement(this.carousel_);
+                toggle(carousel, true);
+                setStyles(carousel, {
                   opacity: 0,
-                  display: '',
                 });
                 sourceElement.classList.add('i-amphtml-ghost');
-                this.element.ownerDocument.body.appendChild(transLayer);
+                this.getAmpDoc().getBody().appendChild(transLayer);
               });
         }).then(() => {
           return anim.start(duration).thenAlways(() => {
@@ -990,7 +989,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               setStyles(dev().assertElement(this.carousel_), {opacity: ''});
               sourceElement.classList.remove('i-amphtml-ghost');
               if (transLayer) {
-                this.element.ownerDocument.body.removeChild(transLayer);
+                this.getAmpDoc().getBody().removeChild(transLayer);
               }
             });
           });
@@ -1129,7 +1128,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
           const transitionMutate = () => {
             sourceElement.classList.add('i-amphtml-ghost');
-            this.element.ownerDocument.body.appendChild(transLayer);
+            this.getAmpDoc().getBody().appendChild(transLayer);
             setStyles(dev().assertElement(this.carousel_), {
               opacity: 0,
             });
@@ -1149,7 +1148,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               });
               toggle(dev().assertElement(this.carousel_), false);
               toggle(this.element, false);
-              this.element.ownerDocument.body.removeChild(transLayer);
+              this.getAmpDoc().getBody().removeChild(transLayer);
             });
           });
         });
@@ -1270,19 +1269,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.isActive_) {
       return;
     }
-    const {keyCode} = event;
-    switch (keyCode) {
-      case KeyCodes.ESCAPE:
+    const {key} = event;
+    switch (key) {
+      case Keys.ESCAPE:
         this.close_();
         break;
-      case KeyCodes.LEFT_ARROW:
+      case Keys.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case KeyCodes.RIGHT_ARROW:
+      case Keys.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:
-        // Keycode not registered. Do nothing.
+        // Key not registered. Do nothing.
     }
   }
 
@@ -1315,7 +1314,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       toggle(dev().assertElement(this.carousel_), false);
       toggle(dev().assertElement(this.descriptionBox_), false);
     });
-    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', {});
+    triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
   }
 
   /**

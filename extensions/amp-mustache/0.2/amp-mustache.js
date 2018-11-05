@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
@@ -60,7 +61,7 @@ export class AmpMustache extends AMP.BaseTemplate {
 
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    mustacheParse(this.template_, /* tags */ undefined);
   }
 
   /**
@@ -87,17 +88,30 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
+  setHtml(html) {
+    return this.purifyAndSetHtml_(html);
+  }
+
+  /** @override */
   render(data) {
-    let html = data;
-    if (!this.viewerCanRenderTemplates()) {
-      let mustacheData = data;
-      // Also render any nested templates.
-      if (typeof data === 'object') {
-        mustacheData = Object.assign({}, data, this.nestedTemplates_);
-      }
-      html = mustacheRender(this.template_, mustacheData);
+    let mustacheData = data;
+    // Also render any nested templates.
+    if (typeof data === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
-    const body = purifyHtml(html);
+    const html = mustacheRender(this.template_, mustacheData,
+        /* partials */ undefined);
+    return this.purifyAndSetHtml_(html);
+  }
+
+  /**
+   *
+   * @param {string} html
+   * @private
+   */
+  purifyAndSetHtml_(html) {
+    const diffing = isExperimentOn(self, 'amp-list-diffing');
+    const body = purifyHtml(html, diffing);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');

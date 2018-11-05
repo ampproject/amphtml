@@ -21,13 +21,14 @@ import {
 } from '../../video-interface';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
+  installPositionObserverServiceForDoc,
 } from '../position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from '../position-observer/position-observer-worker';
 import {Services} from '../../services';
 import {closestBySelector, isRTL, removeElement} from '../../dom';
-import {createCustomEvent} from '../../event-helper';
+import {createCustomEvent, listen, listenOnce} from '../../event-helper';
 // Source for this constant is css/video-docking.css:
 import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../log';
@@ -35,16 +36,20 @@ import {dict} from '../../utils/object';
 import {getInternalVideoElementFor} from '../../utils/video';
 import {getServiceForDoc} from '../../service';
 import {htmlFor, htmlRefs} from '../../static-template';
-import {
-  installPositionObserverServiceForDoc,
-} from '../position-observer/position-observer-impl';
 import {installStylesForDoc} from '../../style-installer';
+import {isExperimentOn} from '../../experiments';
 import {isFiniteNumber} from '../../types';
-import {listen, listenOnce} from '../../event-helper';
 import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';
-import {px, resetStyles, setImportantStyles, translate} from '../../style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  toggle,
+  translate,
+} from '../../style';
+import {urls} from '../../config';
 
 
 /** @private @const {number} */
@@ -146,8 +151,8 @@ const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
  * @private
  */
 function swap(a, b) {
-  a.setAttribute('hidden', '');
-  b.removeAttribute('hidden');
+  toggle(a, false);
+  toggle(b, true);
 }
 
 
@@ -476,6 +481,11 @@ export class VideoDocking {
 
   /** @param {!../../video-interface.VideoOrBaseElementDef} video */
   register(video) {
+    user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
+        '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
+        '%s/experiments.html',
+        urls.cdn);
+
     this.install_();
 
     const {element} = video;
@@ -549,7 +559,7 @@ export class VideoDocking {
       } = this.getControls_();
       const overlay = this.getOverlay_();
 
-      container.removeAttribute('hidden');
+      toggle(container, true);
       container.classList.add('amp-video-docked-controls-shown');
       overlay.classList.add('amp-video-docked-controls-bg');
 
@@ -1017,7 +1027,7 @@ export class VideoDocking {
     if (step >= REVERT_TO_INLINE_RATIO &&
         this.currentlyDocked_ &&
         !this.currentlyDocked_.triggeredDock) {
-      this.trigger_(video, Actions.DOCK);
+      this.trigger_(Actions.DOCK);
       this.currentlyDocked_.triggeredDock = true;
     }
 
@@ -1033,16 +1043,20 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {!Actions} action
    * @private
    */
-  trigger_(video, action) {
+  trigger_(action) {
+    const element = this.isDockedToSlot_() ?
+      this.getSlot_() :
+      this.getDockedVideo_().element;
+
     const trust = ActionTrust.LOW;
     const event = createCustomEvent(this.ampdoc_.win,
         /** @type {string} */ (action), /* detail */ dict({}));
     const actions = Services.actionServiceForDoc(this.ampdoc_);
-    actions.trigger(video.element, action, event, trust);
+
+    actions.trigger(dev().assertElement(element), action, event, trust);
   }
 
   /**
@@ -1180,9 +1194,10 @@ export class VideoDocking {
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
-      shadowLayer.removeAttribute('hidden');
-      overlay.removeAttribute('hidden');
+      toggle(shadowLayer, true);
+      toggle(overlay, true);
       const els = [internalElement, shadowLayer, overlay];
+      const boxNeedsSizing = this.boxNeedsSizing_(width, height);
       for (let i = 0; i < els.length; i++) {
         const el = els[i];
         setImportantStyles(el, {
@@ -1190,7 +1205,7 @@ export class VideoDocking {
           'transition-duration': `${transitionDurationMs}ms`,
           'transition-timing-function': transitionTiming,
         });
-        if (this.boxNeedsSizing_(width, height)) {
+        if (boxNeedsSizing) {
           // Setting explicit dimensions is needed to match the video's aspect
           // ratio. However, we only do this once to prevent jank in subsequent
           // frames.
@@ -1745,7 +1760,7 @@ export class VideoDocking {
     // TODO(alanorozco): animate dismissal
     const internalElement = getInternalVideoElementFor(video.element);
 
-    this.trigger_(video, Actions.UNDOCK);
+    this.trigger_(Actions.UNDOCK);
 
     video.mutateElement(() => {
       this.hideControls_();
@@ -1758,8 +1773,8 @@ export class VideoDocking {
       const almostDismissed = 'amp-video-docked-almost-dismissed';
       internalElement.classList.remove(almostDismissed);
       overlay.classList.remove(almostDismissed);
-      shadowLayer.setAttribute('hidden', '');
-      overlay.setAttribute('hidden', '');
+      toggle(shadowLayer, false);
+      toggle(overlay, false);
       const els = [internalElement, shadowLayer, overlay];
       for (let i = 0; i < els.length; i++) {
         resetStyles(els[i], [

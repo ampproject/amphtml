@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {getResourceTiming} from '../resource-timing';
 import {installVariableService} from '../variables';
-import {serializeResourceTiming} from '../resource-timing';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.
@@ -79,7 +79,7 @@ export function newPerformanceResourceTiming(
   };
 }
 
-describes.fakeWin('resourceTiming', {amp: true}, env => {
+describes.realWin('resourceTiming', {amp: true}, env => {
   let win;
 
   /**
@@ -91,7 +91,7 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
   const runSerializeTest = function(
     fakeEntries, resourceTimingSpec, expectedResult) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return serializeResourceTiming(win, resourceTimingSpec)
+    return getResourceTiming(win, resourceTimingSpec, Date.now())
         .then(result => {
           expect(result).to.equal(expectedResult);
         });
@@ -99,13 +99,12 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    win.performance = window.performance;
     installVariableService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
     const fakeWin = {};
-    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
+    return getResourceTiming(fakeWin, newResourceTimingSpec(), Date.now())
         .then(result => {
           expect(result).to.equal('');
         });
@@ -114,7 +113,19 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
   it('should return empty when resource timing is not supported', () => {
     // Performance API (fakeWin.performance) doesn't support resource timing.
     const fakeWin = {performance: {}};
-    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
+    return getResourceTiming(fakeWin, newResourceTimingSpec(), Date.now())
+        .then(result => {
+          expect(result).to.equal('');
+        });
+  });
+
+  it('should return empty when start time has passed 1s', () => {
+    const entry = newPerformanceResourceTiming(
+        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+        false);
+    const spec = newResourceTimingSpec();
+    sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
+    return getResourceTiming(win, spec, Date.now() - 60 * 1000)
         .then(result => {
           expect(result).to.equal('');
         });
@@ -394,12 +405,12 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return serializeResourceTiming(win, spec).then(result => {
+    return getResourceTiming(win, spec, Date.now()).then(result => {
       expect(result).to.equal('link.100.400');
       expect(spec['responseAfter']).to.equal(600);
 
       // Check resource timings a second time.
-      return serializeResourceTiming(win, spec);
+      return getResourceTiming(win, spec, Date.now());
     }).then(result => {
       expect(result).to.equal('script.200.500');
       expect(spec['responseAfter']).to.equal(800);
@@ -439,5 +450,4 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     spec['done'] = true;
     return runSerializeTest([entry], spec, '');
   });
-
 });

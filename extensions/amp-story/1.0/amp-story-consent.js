@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty, getStoreService} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
@@ -27,10 +31,13 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createShadowRootWithStyle} from './utils';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
@@ -215,9 +222,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
-      this.actions_.addToWhitelist('AMP-CONSENT', 'accept');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'prompt');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'reject');
+      const actions = [
+        {tagOrTarget: 'AMP-CONSENT', method: 'accept'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
+      ];
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
 
       this.setAcceptButtonFontColor_();
 

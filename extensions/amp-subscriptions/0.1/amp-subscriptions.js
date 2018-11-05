@@ -19,7 +19,10 @@ import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
-import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
+import {
+  PageConfig,
+  PageConfigResolver,
+} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
@@ -29,11 +32,11 @@ import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -187,6 +190,11 @@ export class SubscriptionService {
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
           subscriptionPlatform.getServiceId()
       );
+      // Deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
+          subscriptionPlatform.getServiceId()
+      );
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -239,7 +247,7 @@ export class SubscriptionService {
         return entitlement;
       }).catch(reason => {
         const serviceId = subscriptionPlatform.getServiceId();
-        this.platformStore_.reportPlatformFailure(serviceId);
+        this.platformStore_.reportPlatformFailureAndFallback(serviceId);
         throw user().createError(
             `fetch entitlements failed for ${serviceId}`, reason
         );
@@ -328,6 +336,9 @@ export class SubscriptionService {
           // Viewer authorization is redirected to use local platform instead.
           this.platformStore_.resolveEntitlement('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
+        }).catch(reason => {
+          this.platformStore_.reportPlatformFailureAndFallback('local');
+          dev().error(TAG, 'Viewer auth failed:', reason);
         });
       }
     });
@@ -364,6 +375,19 @@ export class SubscriptionService {
   }
 
   /**
+   * Renders and opens the dialog using the cached entitlements.
+   */
+  renderDialogForSelectedPlatform() {
+    this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      this.selectAndActivatePlatform_(false /** sendAnalyticsEvents */);
+    });
+  }
+
+  /**
    * Unblock document based on grant state and selected platform
    * @param {boolean=} doPlatformSelection
    * @private
@@ -379,8 +403,12 @@ export class SubscriptionService {
     }
   }
 
-  /** @private */
-  selectAndActivatePlatform_() {
+  /**
+   * @param {boolean=} sendAnalyticsEvents
+   * @return {!Promise}
+   * @private
+   */
+  selectAndActivatePlatform_(sendAnalyticsEvents = true) {
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
       this.platformStore_.selectPlatform(),
@@ -392,8 +420,17 @@ export class SubscriptionService {
           selectedPlatform.getServiceId());
 
       selectedPlatform.activate(selectedEntitlement);
+
+      if (sendAnalyticsEvents === false) {
+        return;
+      }
+
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          selectedPlatform.getServiceId());
+      // Deprecated events are fire for backwards compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
           selectedPlatform.getServiceId());
       if (selectedEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
@@ -453,6 +490,11 @@ export class SubscriptionService {
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
           subscriptionPlatform.getServiceId()
       );
+      // deprecated event fired for backward compatibility
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+          subscriptionPlatform.getServiceId()
+      );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
@@ -479,10 +521,10 @@ export class SubscriptionService {
         dev().assert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
             SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-            {
-              action,
-              serviceId,
-            }
+            dict({
+              'action': action,
+              'serviceId': serviceId,
+            })
         );
         resolve(platform.executeAction(action));
       });

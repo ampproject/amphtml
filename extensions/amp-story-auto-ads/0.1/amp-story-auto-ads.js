@@ -17,19 +17,24 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeEventDef, StateChangeType} from '../../amp-story/1.0/navigation-state';
+import {
+  StateChangeEventDef,
+  StateChangeType,
+} from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
-import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @const */
-const MIN_INTERVAL = 4;
+/** @const {number} */
+const FIRST_AD_MIN = 7;
+
+/** @const {number} */
+const MIN_INTERVAL = 7;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -48,6 +53,9 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const */
 const LOADING_ATTR = 'i-amphtml-loading';
+
+/** @const {string} */
+const NEXT_PAGE_NO_AD = 'next-page-no-ad';
 
 /** @const */
 const DATA_ATTR = {
@@ -144,8 +152,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
-    /** @private {number} */
-    this.uniquePagesCount_ = 0;
+    /**
+     * We are counting pages on page-clicks. We initialize this to 1 because
+     * even though we have not yet seen a page click, we have already seen one
+     * page.
+     * @private {number}
+     */
+    this.uniquePagesCount_ = 1;
 
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = dict({});
@@ -179,6 +192,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {number|null} */
     this.idOfAdShowing_ = null;
+
+    /** @private {boolean} */
+    this.firstAdViewed_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -549,38 +565,66 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         [Vars.AD_INDEX]: adIndex,
       });
 
+      // Start loading next ad.
+      this.startNextAdPage_();
+
       // Keeping track of this here so that we can contain the logic for when
       // we exit the ad within this extension.
       this.idOfAdShowing_ = adIndex;
     }
 
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL) {
+    if (this.enoughContentPagesViewed_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
         this.analyticsEventWithCurrentAd_(Events.AD_INSERTED,
             {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
-        // start loading next ad
-        this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
         this.analyticsEventWithCurrentAd_(Events.AD_DISCARDED,
             {[Vars.AD_DISCARDED]: Date.now()});
-        this.startNextPage_();
+        this.startNextAdPage_(/* failure */ true);
       }
     }
   }
 
-
   /**
-   * start the process over
+   * Determine if user has seen enough pages to show an ad. We want a certain
+   * number of pages before the first ad, and then a separate interval
+   * thereafter.
+   * @return {boolean}
    * @private
    */
-  startNextPage_() {
-    this.uniquePagesCount_ = 0;
+  enoughContentPagesViewed_() {
+    if (this.firstAdViewed_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
+      return true;
+    }
+
+    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Start the process over.
+   * @private
+   * @param {boolean=} opt_failure If we are calling this due to failed ad.
+   */
+  startNextAdPage_(opt_failure) {
+    if (!this.firstAdViewed_) {
+      this.firstAdViewed_ = true;
+    }
+
+    if (!opt_failure) {
+      // Don't reset the count on a failed ad.
+      this.uniquePagesCount_ = 0;
+    }
+
     this.schedulePage_();
   }
 
@@ -616,10 +660,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    if (!this.isCurrentAdLoaded_ || pageBeforeAd.isAd() ||
-        pageAfterAd.isAd()) {
-      // if we are going to cause two consecutive ads or ad is still
-      // loading we will try again on next user interaction
+    // There are three checks here that we check before inserting an ad. If
+    // any of these fail we will try again on next page navigation.
+    if (!this.isCurrentAdLoaded_ // 1. Ad must be loaded.
+        // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
+        || this.nextPageNoAd_(pageBeforeAd)
+        // 3. We will not show two ads in a row.
+        || pageBeforeAd.isAd() || pageAfterAd.isAd()) {
       return AD_STATE.PENDING;
     }
 
@@ -658,6 +705,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
 
+  /**
+   * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
+   * from showing as the next page.
+   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @return {boolean}
+   * @private
+   */
+  nextPageNoAd_(page) {
+    return page.element.hasAttribute(NEXT_PAGE_NO_AD);
+  }
 
   /**
    * Call an analytics event with the last created Ad.

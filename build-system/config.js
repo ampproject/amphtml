@@ -94,6 +94,10 @@ const integrationTestPaths = [
   'extensions/**/test/integration/**/*.js',
 ];
 
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
+];
+
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
@@ -109,6 +113,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  devDashboardTestPaths,
   lintGlobs,
   jsonGlobs: [
     '**/*.json',
@@ -125,13 +130,14 @@ module.exports = {
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!out/**/*.*',
+    '!validator/validator.pb.go',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
-    '!build-system/tasks/visual-diff-wrapper.snippet.js',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!third_party/**/*.*',
@@ -139,9 +145,10 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/*.js',
+    '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!firebase/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };
