@@ -242,6 +242,15 @@ export class Tracking {
     analyticsBuilder.track(NON_AFFILIATE_CLICK,
         NA_CLICK_TRACKING_URL);
 
+    analyticsBuilder.setTransportConfig(dict({
+      'beacon': true,
+      'image': true,
+      // Tracking API supports CORS with wildcard in Access-Control-Origin
+      // which is not compatible with the credentials flag set to true when
+      // using xhrpost.
+      'xhrpost': false,
+    }));
+
     return analyticsBuilder.build();
   }
 
