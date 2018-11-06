@@ -386,7 +386,7 @@ tags: {
       properties: { name: "width" mandatory: true value: "device-width" }
       properties: { name: "height" }
       properties: { name: "initial-scale" }
-      properties: { name: "minimum-scale" mandatory: true value_double: 1.0 }
+      properties: { name: "minimum-scale" }
       properties: { name: "maximum-scale" }
       properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
