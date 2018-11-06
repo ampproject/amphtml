@@ -125,7 +125,7 @@ export class Expander {
     let ignoringChars = false;
     let nextArgShouldBeRaw = false;
 
-    const evaluateNextLevel = () => {
+    const evaluateNextLevel = depth => {
       let builder = '';
       const results = [];
 
@@ -159,12 +159,12 @@ export class Expander {
             if (builder.trim().length) {
               results.push(builder);
             }
-            results.push(evaluateNextLevel());
+            results.push(evaluateNextLevel(depth + 1));
           } else {
             if (builder.length) {
               results.push(builder);
             }
-            results.push(this.evaluateBinding_(binding));
+            results.push(this.evaluateBinding_(binding, depth));
           }
 
           builder = '';
@@ -209,7 +209,8 @@ export class Expander {
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
           results.push(nextArg);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, /* opt_args */ results);
+          const value = this.evaluateBinding_(binding, depth - 1,
+              /* opt_args */ results);
           return value;
         }
 
@@ -236,7 +237,7 @@ export class Expander {
           });
     };
 
-    return evaluateNextLevel();
+    return evaluateNextLevel(/* depth */ 0);
   }
 
 
@@ -245,9 +246,10 @@ export class Expander {
    * binding to use and if syncronous or asyncronous version should be called.
    * @param {Object<string, *>} bindingInfo An object containing the name of macro
    *   and value to be resolved.
+   * @param {number} depth How far down the macro callstack.
    * @param {Array=} opt_args Arguments passed to the macro.
    */
-  evaluateBinding_(bindingInfo, opt_args) {
+  evaluateBinding_(bindingInfo, depth, opt_args) {
     const {name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
@@ -266,8 +268,8 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
     return this.sync_ ?
-      this.evaluateBindingSync_(binding, name, opt_args) :
-      this.evaluateBindingAsync_(binding, name, opt_args);
+      this.evaluateBindingSync_(binding, name, depth, opt_args) :
+      this.evaluateBindingAsync_(binding, name, depth, opt_args);
   }
 
 
@@ -275,10 +277,11 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
+   * @param {number} depth How far down the macro callstack.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {!Promise<string>} Resolved value.
    */
-  evaluateBindingAsync_(binding, name, opt_args) {
+  evaluateBindingAsync_(binding, name, depth, opt_args) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -298,7 +301,7 @@ export class Expander {
 
         if (val == null) {
           result = '';
-        } else if (this.noEncode_ || NOENCODE_WHITELIST[name]) {
+        } else if (depth !== 0 || this.noEncode_ || NOENCODE_WHITELIST[name]) {
           result = val;
         } else {
           result = encodeURIComponent(val);
@@ -324,10 +327,11 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
+   * @param {number} depth How far down the macro callstack.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {string} Resolved value.
    */
-  evaluateBindingSync_(binding, name, opt_args) {
+  evaluateBindingSync_(binding, name, depth, opt_args) {
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
@@ -344,7 +348,10 @@ export class Expander {
           typeof value === 'boolean') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
-        result = NOENCODE_WHITELIST[name] ? value.toString() :
+
+        const shouldNotEncode = depth !== 0 || this.noEncode_ ||
+            NOENCODE_WHITELIST[name];
+        result = shouldNotEncode ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
       } else {
         // Most likely a broken binding gets us here.
