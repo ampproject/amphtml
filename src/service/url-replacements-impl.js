@@ -885,7 +885,7 @@ export class UrlReplacements {
         /* opt_collectVars */ undefined,
         /* opt_sync */ opt_sync,
         /* opt_whitelist */ whitelist)
-        ./*OK*/expand(element[ORIGINAL_VALUE_PROPERTY] || element.value,);
+        ./*OK*/expand(element[ORIGINAL_VALUE_PROPERTY] || element.value);
 
     if (opt_sync) {
       return element.value = result;

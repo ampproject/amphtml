@@ -25,7 +25,6 @@ describes.realWin('Expander', {
   },
 }, env => {
 
-  let expander;
   let variableSource;
 
   beforeEach(() => {
