@@ -18,16 +18,6 @@ import {hasOwn} from '../../utils/object';
 import {rethrowAsync, user} from '../../log';
 import {tryResolve} from '../../utils/promise';
 
-/**
- * @typedef {{
- *   bindings: (Object<string, *>|undefined),
- *   collectVars: (Object|undefined),
- *   sync: (boolean|undefined),
- *   whiteList: (Object<string, boolean>|undefined)
- * }}
- */
-export let ExpansionOptionsDef;
-
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';
 
@@ -43,7 +33,7 @@ export class Expander {
 
   /**
    * Link this instance of parser to the calling UrlReplacment
-   * @param {!../variable-source.VariableSource|null} variableSource the keywords to replace
+   * @param {?../variable-source.VariableSource} variableSource the keywords to replace
    * @param {!Object<string, *>=} opt_bindings additional one-off bindings
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
@@ -53,15 +43,22 @@ export class Expander {
    */
   constructor(variableSource, opt_bindings, opt_collectVars, opt_sync,
     opt_whiteList) {
+
+    /** @const {?../variable-source.VariableSource} */
     this.variableSource_ = variableSource;
 
-    /* @private {ExpansionOptionsDef} */
-    this.options_ = {
-      bindings: opt_bindings,
-      collectVars: opt_collectVars,
-      sync: opt_sync,
-      whiteList: opt_whiteList,
-    };
+    /**@const {!Object<string, *>|undefined} */
+    this.bindings_ = opt_bindings;
+
+    // TODO(ccordry): Remove this output object passed into constructor.
+    /**@const {!Object<string, *>|undefined} */
+    this.collectVars_ = opt_collectVars;
+
+    /**@const {boolean|undefined} */
+    this.sync_ = opt_sync;
+
+    /**@const {!Object<string, boolean>|undefined} */
+    this.whiteList_ = opt_whiteList;
   }
 
 
@@ -71,16 +68,15 @@ export class Expander {
    * @return {!Promise<string>|string}
    */
   expand(url) {
-    const {bindings, sync, whiteList} = this.options_;
     if (!url.length) {
-      return sync ? url : Promise.resolve(url);
+      return this.sync_ ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(bindings, whiteList);
+    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
-      return sync ? url : Promise.resolve(url);
+      return this.sync_ ? url : Promise.resolve(url);
     }
     return this.parseUrlRecursively_(url, matches);
   }
@@ -117,8 +113,6 @@ export class Expander {
    * @return {!Promise<string>|string}
    */
   parseUrlRecursively_(url, matches) {
-    const {bindings, sync} = this.options_;
-
     const stack = [];
     let urlIndex = 0;
     let matchIndex = 0;
@@ -135,13 +129,13 @@ export class Expander {
         if (match && urlIndex === match.start) {
           let binding;
           // find out where this keyword is coming from
-          if (bindings && hasOwn(bindings, match.name)) {
+          if (this.bindings_ && hasOwn(this.bindings_, match.name)) {
             // the optional bindings
             binding = {
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
-              prioritized: bindings[match.name],
+              prioritized: this.bindings_[match.name],
             };
           } else {
             // or the global source
@@ -226,7 +220,7 @@ export class Expander {
         }
       }
 
-      if (sync) {
+      if (this.sync_) {
         return results.join('');
       }
 
@@ -250,17 +244,16 @@ export class Expander {
    * @param {Array=} opt_args Arguments passed to the macro.
    */
   evaluateBinding_(bindingInfo, opt_args) {
-    const {sync} = this.options_;
     const {name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (sync && hasOwn(bindingInfo, 'sync')) {
+    } else if (this.sync_ && hasOwn(bindingInfo, 'sync')) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
-    } else if (sync) {
+    } else if (this.sync_) {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
@@ -268,7 +261,7 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
-    return sync ?
+    return this.sync_ ?
       this.evaluateBindingSync_(binding, name, opt_args) :
       this.evaluateBindingAsync_(binding, name, opt_args);
   }
@@ -372,8 +365,7 @@ export class Expander {
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    */
   maybeCollectVars_(name, value, opt_args) {
-    const {collectVars} = this.options_;
-    if (!collectVars) {
+    if (!this.collectVars_) {
       return;
     }
 
@@ -382,6 +374,6 @@ export class Expander {
       const rawArgs = opt_args.filter(arg => arg !== '').join(',');
       args = `(${rawArgs})`;
     }
-    collectVars[`${name}${args}`] = value || '';
+    this.collectVars_[`${name}${args}`] = value || '';
   }
 }
