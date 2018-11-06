@@ -20,10 +20,10 @@ import {tryResolve} from '../../utils/promise';
 
 /**
  * @typedef {{
- *   opt_bindings: (Object<string, *>|undefined),
- *   opt_collectVars: (Object|undefined),
- *   opt_sync: (boolean|undefined),
- *   opt_whiteList: (Object<string, boolean>|undefined)
+ *   bindings: (Object<string, *>|undefined),
+ *   collectVars: (Object|undefined),
+ *   sync: (boolean|undefined),
+ *   whiteList: (Object<string, boolean>|undefined)
  * }}
  */
 export let ExpansionOptionsDef;
@@ -44,43 +44,43 @@ export class Expander {
   /**
    * Link this instance of parser to the calling UrlReplacment
    * @param {!../variable-source.VariableSource|null} variableSource the keywords to replace
-   */
-  constructor(variableSource) {
-    this.variableSource_ = variableSource;
-
-    /* @private {?ExpansionOptionsDef} */
-    this.options_ = null;
-  }
-
-
-  /**
-   * take the template url and return a promise of its evaluated value
-   * @param {string} url url to be substituted
    * @param {!Object<string, *>=} opt_bindings additional one-off bindings
    * @param {!Object<string, *>=} opt_collectVars Object passed in to collect
    *   variable resolutions.
    * @param {boolean=} opt_sync If the method should resolve syncronously.
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   */
+  constructor(variableSource, opt_bindings, opt_collectVars, opt_sync,
+    opt_whiteList) {
+    this.variableSource_ = variableSource;
+
+    /* @private {ExpansionOptionsDef} */
+    this.options_ = {
+      bindings: opt_bindings,
+      collectVars: opt_collectVars,
+      sync: opt_sync,
+      whiteList: opt_whiteList,
+    };
+  }
+
+
+  /**
+   * take the template url and return a promise of its evaluated value
+   * @param {string} url url to be substituted
    * @return {!Promise<string>|string}
    */
-  expand(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    this.options_ = {
-      opt_bindings,
-      opt_collectVars,
-      opt_sync,
-      opt_whiteList,
-    };
-
+  expand(url) {
+    const {bindings, sync, whiteList} = this.options_;
     if (!url.length) {
-      return opt_sync ? url : Promise.resolve(url);
+      return sync ? url : Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(opt_bindings, opt_whiteList);
+    const expr = this.variableSource_.getExpr(bindings, whiteList);
 
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
-      return opt_sync ? url : Promise.resolve(url);
+      return sync ? url : Promise.resolve(url);
     }
     return this.parseUrlRecursively_(url, matches);
   }
@@ -117,7 +117,7 @@ export class Expander {
    * @return {!Promise<string>|string}
    */
   parseUrlRecursively_(url, matches) {
-    const {opt_bindings, opt_sync} = this.options_;
+    const {bindings, sync} = this.options_;
 
     const stack = [];
     let urlIndex = 0;
@@ -135,13 +135,13 @@ export class Expander {
         if (match && urlIndex === match.start) {
           let binding;
           // find out where this keyword is coming from
-          if (opt_bindings && hasOwn(opt_bindings, match.name)) {
+          if (bindings && hasOwn(bindings, match.name)) {
             // the optional bindings
             binding = {
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
-              prioritized: opt_bindings[match.name],
+              prioritized: bindings[match.name],
             };
           } else {
             // or the global source
@@ -226,7 +226,7 @@ export class Expander {
         }
       }
 
-      if (opt_sync) {
+      if (sync) {
         return results.join('');
       }
 
@@ -250,17 +250,17 @@ export class Expander {
    * @param {Array=} opt_args Arguments passed to the macro.
    */
   evaluateBinding_(bindingInfo, opt_args) {
-    const {opt_sync} = this.options_;
+    const {sync} = this.options_;
     const {name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
-      // If a binding is passed in through opt_bindings it always takes
+      // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (opt_sync && hasOwn(bindingInfo, 'sync')) {
+    } else if (sync && hasOwn(bindingInfo, 'sync')) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
-    } else if (opt_sync) {
+    } else if (sync) {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
@@ -268,7 +268,7 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
-    return opt_sync ?
+    return sync ?
       this.evaluateBindingSync_(binding, name, opt_args) :
       this.evaluateBindingAsync_(binding, name, opt_args);
   }
@@ -339,7 +339,7 @@ export class Expander {
       if (value && value.then) {
         // If binding is passed in as opt_binding we try to resolve it and it
         // may return a promise. NOTE: We do not collect this discarded value,
-        // even if opt_collectVars exists.
+        // even if collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
       } else if (typeof value === 'string' || typeof value === 'number' ||
@@ -372,8 +372,8 @@ export class Expander {
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    */
   maybeCollectVars_(name, value, opt_args) {
-    const {opt_collectVars} = this.options_;
-    if (!opt_collectVars) {
+    const {collectVars} = this.options_;
+    if (!collectVars) {
       return;
     }
 
@@ -382,6 +382,6 @@ export class Expander {
       const rawArgs = opt_args.filter(arg => arg !== '').join(',');
       args = `(${rawArgs})`;
     }
-    opt_collectVars[`${name}${args}`] = value || '';
+    collectVars[`${name}${args}`] = value || '';
   }
 }
