@@ -72,7 +72,7 @@ describes.realWin('amp-byside-content', {
   it('renders', () => {
     return getElement({
       'data-webcare-id': 'D6604AE5D0',
-	  'data-label': 'amp-simple',
+      'data-label': 'amp-simple',
     }).then(elem => {
       testIframe(elem);
     });
@@ -165,8 +165,7 @@ describes.realWin('amp-byside-content', {
     const attributes = {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'placeholder-label',
-      'sandbox': sandbox,
-	  };
+    };
 
     return getElement(attributes, false).then(elem => {
       const iframe = elem.querySelector('iframe');
@@ -176,13 +175,10 @@ describes.realWin('amp-byside-content', {
   });
 
   it('sets scrollable atribute in iframe', () => {
-    const sandbox = 'allow-scripts allow-same-origin allow-popups';
     const attributes = {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'placeholder-label',
-      'sandbox': sandbox,
-	  'resizable': true,
-	  };
+    };
 
     return getElement(attributes, false).then(elem => {
       const iframe = elem.querySelector('iframe');
