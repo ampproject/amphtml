@@ -23,7 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {addAttributesToElement} from '../../../src/dom';
+import {addAttributesToElement, closest} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -128,7 +128,7 @@ export class AmpStoryTooltip {
     createShadowRootWithStyle(this.shadowRoot_, this.tooltipOverlayEl_, CSS);
 
     this.tooltipOverlayEl_
-        .addEventListener('click', event => this.onOutsideClickableEls_(event));
+        .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
     this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
       this.onUIStateUpdate_(isDesktop);
@@ -216,6 +216,8 @@ export class AmpStoryTooltip {
     const iconSrc = iconAttr ? parseUrlDeprecated(iconAttr).href :
       DEFAULT_ICON_SRC;
     this.updateTooltipIcon_(iconSrc);
+
+    addAttributesToElement(this.tooltip_, dict({'href': href}));
 
     this.positionTooltip_(clickedEl);
   }
@@ -334,13 +336,15 @@ export class AmpStoryTooltip {
   }
 
   /**
-   * Handles click outside of clickable elements.
+   * Handles click outside the tooltip.
    * @param {!Event} event
    * @private
    */
-  onOutsideClickableEls_(event) {
-    event.stopPropagation();
-    this.closeTooltip_();
+  onOutsideTooltipClick_(event) {
+    if (!closest(event.target, el => el == this.tooltip_)) {
+      event.stopPropagation();
+      this.closeTooltip_();
+    }
   }
 
   /**
@@ -368,7 +372,7 @@ export class AmpStoryTooltip {
                     i-amphtml-story-tooltip-nav-button-right">
             </button>
           </div>
-          <a class="i-amphtml-story-tooltip" target="_top" ref="tooltip">
+          <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
             <div class="i-amphtml-story-tooltip-icon"><img ref="icon"></div>
             <p class="i-amphtml-tooltip-text" ref="text"></p>
             <div class="i-amphtml-tooltip-launch-icon"></div>
