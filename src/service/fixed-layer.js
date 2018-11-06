@@ -16,6 +16,7 @@
 
 import {Pass} from '../pass';
 import {Services} from '../services';
+import {closest, domOrderComparator, matches} from '../dom';
 import {
   computedStyle,
   getStyle,
@@ -27,7 +28,6 @@ import {
   toggle,
 } from '../style';
 import {dev, user} from '../log';
-import {domOrderComparator, matches} from '../dom';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 
@@ -36,6 +36,15 @@ const TAG = 'FixedLayer';
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
+/**
+ * Passed to closest to determine if the fixed element is a lightbox, or a
+ * descendant of one. If so, FixedLayer ignores the element. #19149
+ *
+ * @param {!Element} el
+ */
+function lightboxOrDescendant(el) {
+  return el.tagName.indexOf('LIGHTBOX') !== -1;
+}
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
@@ -533,7 +542,7 @@ export class FixedLayer {
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           fixedSelector);
       for (let j = 0; j < elements.length; j++) {
-        if (j > 10) {
+        if (this.elements_.length > 10) {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
@@ -581,6 +590,11 @@ export class FixedLayer {
   setupElement_(element, selector, position, opt_forceTransfer) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
+
+    // TODO(jridgewell, #19149): This should be an official API.
+    if (closest(element, lightboxOrDescendant)) {
+      return;
+    }
 
     let fe = null;
     for (let i = 0; i < this.elements_.length; i++) {
