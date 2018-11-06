@@ -805,8 +805,25 @@
                 </div>
                 <div class="ticket-code-container content-centered-container">
                     <div class=ticket-code-container-int>
-                        <amp-img alt=Ticket class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout=fill id=ticket-image layout=fill src=https://sandbox--dot--amp--actions--io--fandango-appspot-com.cdn.ampproject.org/i/s/sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/ticket-background@2x.png></amp-img>
-                        <div [hidden]=flowState.hasQRCodeReader class=ticket-confirmation-container hidden>
+
+
+
+
+                        <!-- Image not firing Visibility :( -->
+                        <amp-img alt=Ticket 
+                            class="i-amphtml-layout-fill i-amphtml-layout-size-defined" 
+                            i-amphtml-layout=fill 
+                            id=ticket-image 
+                            layout=fill 
+                            src=https://sandbox--dot--amp--actions--io--fandango-appspot-com.cdn.ampproject.org/i/s/sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/ticket-background@2x.png></amp-img>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                            <div [hidden]=flowState.hasQRCodeReader class=ticket-confirmation-container hidden>
                             <div class=ticket-number-container>
                                 <span [text]="(cart.totalTickets + &#39; ticket&#39; + (cart.totalTickets == 1 ? &#39;&#39; : &#39;s&#39;))" class="ticket-number-text bold uppercase">0 Tickets</span>
                             </div>

@@ -295,8 +295,9 @@ export class IntersectionObserverPolyfill {
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
+      this.vsync_ = Services.vsyncFor(ampdoc.win);
       this.mutationPass_ = new Pass(ampdoc.win, () => {
-        console.log('src/intersection-observer-polyfill yoooo mutation pass!')
+        console.log('src/intersection-observer-polyfill Got to the mutation pass! Here is the viewport', this.viewport_);
         if (this.viewport_) {
           this.tick(this.viewport_.getRect());
         }
@@ -356,12 +357,16 @@ export class IntersectionObserverPolyfill {
     const changes = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
+
       const change = this.getValidIntersectionChangeEntry_(
           this.observeEntries_[i], hostViewport, opt_iframe);
       if (change) {
         changes.push(change);
       }
     }
+
+    console.log('Got ticked! Here are my changes,', changes, this.observeEntries_);
+    console.trace();
 
     if (changes.length) {
       this.callback_(changes);
@@ -421,13 +426,23 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
-    console.log('src/intersection-observer-polyfill yoooo mutation handler!')
+    console.log('src/intersection-observer-polyfill Got to the mutation observer notification!!');
     if (this.mutationPass_.isPending()) {
       return;
     }
 
     // Wait one animation frame so that other mutations may arrive.
-    this.mutationPass_.schedule(16);
+    //this.mutationPass_.schedule(16);
+    console.log('calling vsync...');
+    console.trace();
+    this.vsync_.mutate(() => {
+      console.log('Vsync Mutated');
+      this.vsync_.mutate(() => {
+        console.log('Vsync Mutated again!');
+        this.tick(this.viewport_.getRect());
+      });
+    });
+    
     return;
   }
 
