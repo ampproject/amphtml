@@ -206,15 +206,49 @@ export class AnimationWorkletRunner extends AnimationRunner {
    * @return {string}
    */
   createCodeBlob_() {
-
+    //TODO(nainar): This code should be moved into a self-
+    // contained file.
+    // See issue: https://github.com/ampproject/amphtml/issues/19155
     return `
     registerAnimator('anim${++animIdCounter}', class {
+      constructor(options = {
+        'time-range': 0,
+        'start-offset': 0,
+        'end-offset': 0,
+        'top-ratio': 0,
+        'bottom-ratio': 0,
+        'element-height': 0,
+      }) {
+        this.timeRange = options['time-range'];
+        this.startOffset = options['start-offset'];
+        this.endOffset = options['end-offset'];
+        this.topRatio = options['top-ratio'];
+        this.bottomRatio = options['bottom-ratio'];
+        this.height = options['element-height'];
+        this.prevPos = 0;
+      }
       animate(currentTime, effect) {
         if (currentTime == NaN) {
           return;
         }
-        // TODO: Do some work with \`intersection-ratios\` here.
-        effect.localTime = currentTime;
+        const currentScrollPos =
+        ((currentTime / this.timeRange) *
+        (this.endOffset - this.startOffset)) +
+        this.startOffset;
+        const scrollingUpwards = this.prevPos < currentScrollPos;
+        if (scrollingUpwards) {
+          if ((currentScrollPos - this.bottomRatio * this.height) <=
+          this.endOffset) {
+            effect.localTime = currentTime;
+            this.prevPos = currentScrollPos;
+          }
+        } else {
+          if ((currentScrollPos - this.topRatio * this.height) <=
+          this.startOffset) {
+            effect.localTime = currentTime;
+            this.prevPos = currentScrollPos;
+          }
+        }
       }
     });
     `;
@@ -238,6 +272,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
               {type: 'text/javascript'}))).then(() => {
         const scrollSource =
           Services.viewportForDoc(this.win_.document).getScrollingElement();
+        const elementRect = request.target./*OK*/getBoundingClientRect();
         const viewportRect =
           Services.viewportForDoc(this.win_.document).getRect();
         const adjustedViewportRect = this.applyMargins_(viewportRect);
@@ -256,6 +291,9 @@ export class AnimationWorkletRunner extends AnimationRunner {
               'time-range': request.timing.duration,
               'start-offset': adjustedViewportRect['top'],
               'end-offset': adjustedViewportRect['bottom'],
+              'top-ratio': this.topRatio_,
+              'bottom-ratio': this.bottomRatio_,
+              'element-height': elementRect.height,
             });
         player.play();
         this.players_.push(player);
