@@ -799,7 +799,8 @@ export class UrlReplacements {
           opt_bindings,
           /* opt_collectVars */ undefined,
           /* opt_sync */ undefined,
-          opt_whiteList)./*OK*/expand(source));
+          opt_whiteList,
+          /* opt_noEncode */ true)./*OK*/expand(source));
   }
 
   /**

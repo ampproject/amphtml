@@ -43,7 +43,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     },
   }, env => {
     it('should expand the TITLE macro', () => {
-      return withdrawRequest(env.win, 'hello-world&title=AMP-TEST&qp=123')
+      return withdrawRequest(env.win, 'hello-world&title=AMP%20TEST&qp=123')
           .then(request => {
             expect(request.headers.host).to.be.ok;
           });
