@@ -1748,7 +1748,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
 
-    it.only('should not encode values returned by expandStringAsync', () => {
+    it('should not encode values returned by expandStringAsync', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
       return urlReplacements.expandStringAsync(
