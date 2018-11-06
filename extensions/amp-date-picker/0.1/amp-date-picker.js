@@ -52,20 +52,6 @@ import {requireExternal} from '../../../src/module';
  */
 let DateTemplateMapDef;
 
-/**
- * @typedef {{
- *   startDate: ?moment,
- *   endDate: ?moment
- * }}
- */
-let DatesChangeDetailsDef;
-
-/**
- * @typedef {{
- *   date: ?moment
- * }}
- */
-let DateChangeDetailsDef;
 
 /** @dict @extends {JsonObject} */
 class BindDateDetails {
@@ -1244,9 +1230,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Respond to user interactions that change a DateRangePicker's dates.
-   * @param {!DatesChangeDetailsDef} param
+   * @param {!JsonObject} param
    */
-  onDatesChange({startDate, endDate}) {
+  onDatesChange(param) {
+    const startDate = param['startDate'];
+    const endDate = param['endDate'];
     const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
         this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
