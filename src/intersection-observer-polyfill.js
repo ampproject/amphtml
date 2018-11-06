@@ -297,7 +297,6 @@ export class IntersectionObserverPolyfill {
       this.viewport_ = Services.viewportForDoc(element);
       this.mutationPass_ = new Pass(ampdoc.win, () => {
         console.log('src/intersection-observer-polyfill Got to the mutation pass! Here is the viewport', this.viewport_);
-        debugger;
         if (this.viewport_) {
           this.tick(this.viewport_.getRect());
         }
@@ -357,7 +356,6 @@ export class IntersectionObserverPolyfill {
     const changes = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
-
       const change = this.getValidIntersectionChangeEntry_(
           this.observeEntries_[i], hostViewport, opt_iframe);
       if (change) {
@@ -399,6 +397,10 @@ export class IntersectionObserverPolyfill {
     const owner = element.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 
+    debugger;
+
+    console.log('getValidIntersectionChangeEntry!', state, elementRect, owner, ownerRect);
+
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
     const intersectionRect =
@@ -431,8 +433,10 @@ export class IntersectionObserverPolyfill {
       return;
     }
 
+    console.log('Hello!');
+
     // Wait one animation frame so that other mutations may arrive.
-    this.mutationPass_.schedule(50);    
+    this.mutationPass_.schedule(16);    
     return;
   }
 
