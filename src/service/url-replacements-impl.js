@@ -764,9 +764,6 @@ export class UrlReplacements {
 
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
-
-    /** @type {!Expander} */
-    this.expander_ = new Expander(this.variableSource_);
   }
 
 
@@ -783,8 +780,8 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-      this.expander_./*OK*/expand(source, opt_bindings, opt_collectVars,
-          /* opt_sync */ true, opt_whiteList));
+      new Expander(this.variableSource_, opt_bindings, opt_collectVars,
+          /* opt_sync */ true, opt_whiteList)./*OK*/expand(source));
   }
 
   /**
@@ -797,10 +794,12 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandStringAsync(source, opt_bindings, opt_whiteList) {
-    return /** @type {!Promise<string>} */ (this.expander_./*OK*/expand(
-        source, opt_bindings,
-        /* opt_collectVars */ undefined,
-        /* opt_sync */ undefined, opt_whiteList));
+    return /** @type {!Promise<string>} */ (
+      new Expander(this.variableSource_,
+          opt_bindings,
+          /* opt_collectVars */ undefined,
+          /* opt_sync */ undefined,
+          opt_whiteList)./*OK*/expand(source));
   }
 
   /**
@@ -816,9 +815,11 @@ export class UrlReplacements {
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
     return this.ensureProtocolMatches_(url, /** @type {string} */ (
-      this.expander_./*OK*/expand(
-          url, opt_bindings, opt_collectVars, /* opt_sync */ true,
-          opt_whiteList)));
+      new Expander(this.variableSource_,
+          opt_bindings,
+          opt_collectVars,
+          /* opt_sync */ true,
+          opt_whiteList)./*OK*/expand(url)));
   }
 
   /**
@@ -833,9 +834,12 @@ export class UrlReplacements {
    */
   expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-      this.expander_./*OK*/expand(url, opt_bindings, undefined, undefined,
-          opt_whiteList).then(
-          replacement => this.ensureProtocolMatches_(url, replacement)));
+      new Expander(this.variableSource_,
+          opt_bindings,
+          /* opt_collectVars */ undefined,
+          /* opt_sync */ undefined,
+          opt_whiteList)./*OK*/expand(url)
+          .then(replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -876,12 +880,12 @@ export class UrlReplacements {
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
       element[ORIGINAL_VALUE_PROPERTY] = element.value;
     }
-    const result = this.expander_./*OK*/expand(
-        element[ORIGINAL_VALUE_PROPERTY] || element.value,
+    const result = new Expander(this.variableSource_,
         /* opt_bindings */ undefined,
         /* opt_collectVars */ undefined,
         /* opt_sync */ opt_sync,
-        /* opt_whitelist */ whitelist);
+        /* opt_whitelist */ whitelist)
+        ./*OK*/expand(element[ORIGINAL_VALUE_PROPERTY] || element.value);
 
     if (opt_sync) {
       return element.value = result;
@@ -1035,7 +1039,8 @@ export class UrlReplacements {
    */
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);
-    return this.expander_./*OK*/expand(url, opt_bindings, vars)
+    return new Expander(this.variableSource_, opt_bindings, vars)
+        ./*OK*/expand(url)
         .then(() => vars);
   }
 
