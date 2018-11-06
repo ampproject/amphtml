@@ -953,11 +953,11 @@ export class BaseElement {
    * Runs the specified mutation on the element and ensures that remeasures and
    * layouts are performed for the affected elements.
    *
-   * This method should be called whenever significant mutations are done
+   * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. All the mutation work should be done in the mutator callback
-   * which is called in the "mutation" vsync phase. Optionally, the top-most
-   * affected element can be specified.
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
    *
    * @param {function()} mutator
    * @param {Element=} opt_element
@@ -971,6 +971,12 @@ export class BaseElement {
    * Runs the specified measure, then runs the mutation on the element and
    * ensures that remeasures and layouts are performed for the affected
    * elements.
+   *
+   * This method should be called whenever a measure and significant mutations
+   * are done on the DOM that could affect layout of elements inside this
+   * subtree or its siblings. The top-most affected element should be specified
+   * as the first argument to this method and all the mutation work should be
+   * done in the mutator callback which is called in the "mutation" vsync phase.
    *
    * @param {?function()} measurer
    * @param {function()} mutator
