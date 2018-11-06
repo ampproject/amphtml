@@ -217,7 +217,8 @@ export class AmpStoryTooltip {
       DEFAULT_ICON_SRC;
     this.updateTooltipIcon_(iconSrc);
 
-    addAttributesToElement(this.tooltip_, dict({'href': href}));
+    addAttributesToElement(dev().assertElement(this.tooltip_),
+        dict({'href': href}));
 
     this.positionTooltip_(clickedEl);
   }
@@ -341,7 +342,8 @@ export class AmpStoryTooltip {
    * @private
    */
   onOutsideTooltipClick_(event) {
-    if (!closest(event.target, el => el == this.tooltip_)) {
+    if (!closest(dev().assertElement(event.target),
+        el => el == this.tooltip_)) {
       event.stopPropagation();
       this.closeTooltip_();
     }
