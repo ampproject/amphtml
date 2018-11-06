@@ -41,8 +41,6 @@ feature_tests/link_meta_values.html:30:2 The attribute 'rel' in tag 'link rel=' 
 feature_tests/link_meta_values.html:36:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
 |    <meta name=viewport content=invalid>
 >>   ^~~~~~~~~
-feature_tests/link_meta_values.html:37:2 The property 'minimum-scale' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
->>   ^~~~~~~~~
 feature_tests/link_meta_values.html:37:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <link rel="unknown" href="foo">
 |
