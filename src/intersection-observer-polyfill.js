@@ -296,6 +296,7 @@ export class IntersectionObserverPolyfill {
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
       this.mutationPass_ = new Pass(ampdoc.win, () => {
+        console.log('src/intersection-observer-polyfill yoooo mutation pass!')
         if (this.viewport_) {
           this.tick(this.viewport_.getRect());
         }
@@ -420,6 +421,7 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
+    console.log('src/intersection-observer-polyfill yoooo mutation handler!')
     if (this.mutationPass_.isPending()) {
       return;
     }

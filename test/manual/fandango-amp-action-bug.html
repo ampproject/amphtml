@@ -1,0 +1,1310 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>My AMP Page</title>
+  <link rel="canonical" href="self.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js"></script>
+  <script async custom-element="amp-payment-google-inline" src="https://cdn.ampproject.org/v0/amp-payment-google-inline-0.1.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <style amp-custom>
+#pan-zoom>amp-selector [option][selected],:focus,g[selected]{outline:0}.disabled,.disabled-seat,.unavailable{pointer-events:none}:root{--light-blue:rgb(74,167,246);--light-grey:rgb(215, 215, 215);--lightest-grey:rgb(235, 235, 235);--orange-theme:rgb(255, 115, 0);--blue-theme:rgb(8,90,164);--dark-grey:rgb(51, 62, 71);--medium-grey:rgb(94,100,105);--medium-blue:rgb(52,120,193);--scrim-grey:rgba(0,0,0,0.5);--red-error:rgba(218, 51, 38, 1);--positive-green:rgba(25, 150, 33, 1);--inside-container-light-text:rgb(98,107,114)}.lightest-grey-background{background-color:var(--lightest-grey)}html{-webkit-tap-highlight-color:transparent}.padding-15-lat-container{padding:0 15px}.margin-top-60{margin-top:60px}.movie-title{font-size:16px}body{color:var(--dark-grey);font-family:proxima-nova,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",HelveticaNeue,arial,sans-serif}.btn,.showtime-btn,body{font-size:.8125rem}body,h1,h2,h3,h4,h5,h6{margin:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.pop-container-text,.pop-container-text-with-image{margin-top:16px;margin-bottom:-15px}*,:after,:before{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}h1{padding:10px 20px;font-size:16px;text-align:center}.webHandheld #headerFandangoBranded{display:block}header div{position:relative}#age-policy-popup,#convenience-fee-popup,#movie-details-popup,.centered-popup,.reserved-seating-popup,.special-seat-popup{background:var(--scrim-grey)}.popup-container{background:#fff;align-items:center;border-radius:4px;justify-content:center;font-size:16px}.pop-container-text-with-image{margin-left:58px}.pop-container-text-with-image .popup-text-container{margin-left:0;margin-top:23px}.pop-container-text-with-image .popup-title{margin-right:26px}.popup-container-image{margin-top:16px;float:left;margin-left:14px}.popup-container-buttons{text-align:right}.popup-container button{text-transform:uppercase;font-size:14px;font-weight:700;color:var(--medium-blue);border-color:transparent;background-color:transparent}#age-policy-popup .popup-container,#companion-popup .popup-container,#convenience-fee-popup .popup-container,#movie-details-popup .popup-container,#reserved-seating-popup .popup-container,#wheelchair-popup .popup-container{margin:10px;position:relative;padding:1px;left:0;right:0}#companion-popup .popup-container,#reserved-seating-popup .popup-container,#transaction-error-popup .popup-container,#wheelchair-popup .popup-container{margin:40px}#age-policy-popup .title-bar{background-color:#fff;text-align:center;height:52px;font-size:18px;font-weight:700;padding-top:17px;color:#000}#age-policy-popup .content-container{padding:20px;color:#000}#age-policy-popup .content-container br,#age-policy-popup .content-container br:after{content:' '}.lightbox h1{color:#fff}.close-popup{width:24px;height:24px;position:absolute;top:15px;right:15px}.grey-line{height:1px;background-color:var(--light-grey);left:20px;position:absolute;right:20px}.popup-text-container{margin-left:18px;margin-right:18px;margin-bottom:28px}.popup-text-container span:not(.display-inline){margin-bottom:4px;display:block;color:var(--medium-grey);font-size:14px}.popup-first-div{margin-top:30px}.content-centered-container{width:100%;text-align:center}.popup-text-container span.movie-details-title{font-size:16px;font-weight:700;color:var(--dark-grey);margin-bottom:8px}.popup-title{margin-top:16px;font-size:16px;font-weight:700}.popup-title-margin{margin-left:18px}.popup-title .horizontal-line-container{margin-top:13px;margin-bottom:36px}.seats-legend-container{width:100%}.seats-legend-container div{width:14px;height:14px;display:inline-block;border-radius:3px;vertical-align:bottom;color:var(--inside-container-light-text);margin:0 4px}.lightblue-background{background-color:var(--light-blue)}.grey-background{background-color:var(--light-grey)}.orange-background,.selected{background-color:var(--orange-theme)}.accessible,.blue-background{background-color:var(--blue-theme)}.container,.content{background:#fff;border-radius:5px}#movie-details-popup-table-container{text-align:center;width:100%;padding-left:20px;padding-right:20px;margin-bottom:30px}#movie-details-popup-table-container td{font-weight:400;color:var(--medium-grey);font-size:12px}#auditorium-span{margin-top:20px;margin-bottom:20px}.seat{fill:var(--light-blue)}.unavailable{fill:var(--light-grey)}.seat-banner{margin:auto;width:70%}.special-seat{fill:#fff}g[selected] .companion-image,g[selected] .wheelchair-image{visibility:hidden}rect.seat.unavailable{fill:var(--light-grey);pointer-events:none}rect.seat{fill:var(--light-blue)}.seat-selector-page .seat.selected,rect[selected].seat,svg text{fill:var(--orange-theme)}.container{margin:0;display:flex;flex-direction:column}#svg-placeholder{height:100%}#availabilityList{display:block;margin:0 30px}.list-container{position:relative}#pan-zoom{display:initial}#pan-zoom>amp-selector{left:0;right:0;margin:auto}.disabled-seat{cursor:default}.content{flex-grow:1;display:flex;flex-direction:column}a,a:visited{text-decoration:none;color:rgba(52,120,193,.92)}.bottom-fixed-button-container{position:fixed;padding:0 8px 8px;font-weight:700;text-align:center;margin-left:0;margin-right:0;margin-bottom:0;background-color:#fff;cursor:pointer;color:#fff;bottom:0;text-transform:uppercase;width:100%;border:none;height:56px;font-size:15px;left:0;right:0;z-index:1;box-shadow:0 0 20px 15px #fff}button.next-button:enabled{background:var(--orange-theme)}button.next-button span.ticket-number{position:fixed;left:25px;border:1px solid;bottom:18px;border-radius:4px;font-weight:400;width:28px;height:28px;padding-top:4px;opacity:.85}button.next-button span.total-price{position:fixed;right:25px;bottom:23px;font-weight:400;opacity:.85}button.choose-seat-button,button.next-button{border-radius:6px;font-weight:700;text-align:center;cursor:pointer;color:#fff;text-transform:uppercase;width:calc(100% - 16px);border:2px solid #fff;height:48px;font-size:14px;z-index:1;position:absolute;left:8px;right:8px;bottom:8px;background:var(--light-grey)}button.next-button:hover:enabled{background:var(--orange-theme)}.disabled{opacity:.5;cursor:default}.hidden{display:none}svg.center{display:block;margin:0 auto;width:50%;height:auto}.showtime-infos-container{width:100%;background:linear-gradient(to right,#ed6d2d,var(--orange-theme),#e65f31);padding:15px 15px 45px;font-size:14px;z-index:100}.padding-bottom-15px{padding-bottom:15px}.showtime-infos-container span.showtime-infos-text{color:#fff;display:block;margin-bottom:2px;margin-top:2px}.showtime-infos-container span#show-title{font-weight:700;text-transform:uppercase;color:#fff;margin-bottom:3px;margin-right:20px}#show-title-container{padding-right:26px}.clickable{cursor:pointer}.info-icon{margin-top:-7px;position:absolute;right:12px}#content-container{background-color:#fff;border-radius:4px}@media (orientation:portrait){.list-container{min-height:calc(100vh - 60px - 45px - 15px - 45px - 14px - 3px - 14px - 3px - 3px - 14px - 3px - 3px - 56px - 40px);left:50%;transform:translateX(-50%);min-width:100vw}}@media (orientation:landscape){.list-container{min-height:calc(100vw - 60px - 45px - 15px - 45px - 14px - 3px - 14px - 3px - 3px - 14px - 3px - 3px - 56px - 40px);min-width:100vh;left:50%;transform:translateX(-50%)}}.real-content{position:relative;margin-bottom:75px;min-height:100%;width:100%}#svg-placeholder{display:block;margin:0 auto}#content-shadow{height:55px;background-color:#fff;border-radius:4px 4px 0 0;margin-left:11px;margin-right:11px;margin-top:-35px;right:11px;box-shadow:0 -2px 3px 1px rgba(0,0,0,.24)}.content-no-margin{left:0;right:0}.content-margin{margin-left:10px;margin-right:10px}#white-background{position:fixed;background-color:#fff;overflow:hidden;z-index:-1;top:0;right:0;left:0;bottom:0}.amp-pan-zoom-button{position:fixed;right:12px;width:40px;height:40px;bottom:-23px;z-index:1;border-color:Transparent;margin:8px;padding:0;border-width:0;box-shadow:0 2px 4px 0 rgba(0,0,0,.25);background-color:#fff;border-radius:3px}.amp-pan-zoom-in-icon{background-image:url("data:image/svg+xml,%3Csvg width=\'40px\' height=\'40px\' viewBox=\'0 0 40 40\' version=\'1.1\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:xlink=\'http://www.w3.org/1999/xlink\'%3E%3C!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch --%3E%3Ctitle%3Eic_zoom_in_black_24px%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cdefs%3E%3C/defs%3E%3Cg id=\'v5\' stroke=\'none\' stroke-width=\'1\' fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg id=\'Seat-Map\' transform=\'translate(-309.000000, -530.000000)\'%3E%3Cg id=\'ic_zoom_in_black_24px\' transform=\'translate(309.000000, 530.000000)\'%3E%3Crect id=\'Rectangle-3\' fill=\'%23FFFFFF\' x=\'0\' y=\'0\' width=\'40\' height=\'40\' rx=\'3\'%3E%3C/rect%3E%3Cpath d=\'M24.0833333,22.3333333 L23.1616667,22.3333333 L22.835,22.0183333 C23.9783333,20.6883333 24.6666667,18.9616667 24.6666667,17.0833333 C24.6666667,12.895 21.2716667,9.5 17.0833333,9.5 C12.895,9.5 9.5,12.895 9.5,17.0833333 C9.5,21.2716667 12.895,24.6666667 17.0833333,24.6666667 C18.9616667,24.6666667 20.6883333,23.9783333 22.0183333,22.835 L22.3333333,23.1616667 L22.3333333,24.0833333 L28.1666667,29.905 L29.905,28.1666667 L24.0833333,22.3333333 Z M17.0833333,22.3333333 C14.1783333,22.3333333 11.8333333,19.9883333 11.8333333,17.0833333 C11.8333333,14.1783333 14.1783333,11.8333333 17.0833333,11.8333333 C19.9883333,11.8333333 22.3333333,14.1783333 22.3333333,17.0833333 C22.3333333,19.9883333 19.9883333,22.3333333 17.0833333,22.3333333 Z\' id=\'Shape\' fill=\'%23999EA3\' fill-rule=\'nonzero\'%3E%3C/path%3E%3Cpolygon id=\'Shape\' points=\'6 6 34 6 34 34 6 34\'%3E%3C/polygon%3E%3Cpolygon id=\'Shape\' fill=\'%23999EA3\' fill-rule=\'nonzero\' points=\'20 17.6666667 17.6666667 17.6666667 17.6666667 20 16.5 20 16.5 17.6666667 14.1666667 17.6666667 14.1666667 16.5 16.5 16.5 16.5 14.1666667 17.6666667 14.1666667 17.6666667 16.5 20 16.5\'%3E%3C/polygon%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}.amp-pan-zoom-out-icon{background-image:url("data:image/svg+xml,%3Csvg width=\'40px\' height=\'40px\' viewBox=\'0 0 40 40\' version=\'1.1\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:xlink=\'http://www.w3.org/1999/xlink\'%3E%3C!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch --%3E%3Ctitle%3Eic_zoom_out_black_24px%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cdefs%3E%3C/defs%3E%3Cg id=\'v5\' stroke=\'none\' stroke-width=\'1\' fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg id=\'Zoomed-Selection\' transform=\'translate(-309.000000, -530.000000)\'%3E%3Cg id=\'ic_zoom_out_black_24px\' transform=\'translate(309.000000, 530.000000)\'%3E%3Crect id=\'Rectangle-3\' fill=\'%23FFFFFF\' x=\'0\' y=\'0\' width=\'40\' height=\'40\' rx=\'3\'%3E%3C/rect%3E%3Cpolygon id=\'Shape\' points=\'6 6 34 6 34 34 6 34\'%3E%3C/polygon%3E%3Cpath d=\'M24.0833333,22.3333333 L23.1616667,22.3333333 L22.835,22.0183333 C23.9783333,20.6883333 24.6666667,18.9616667 24.6666667,17.0833333 C24.6666667,12.895 21.2716667,9.5 17.0833333,9.5 C12.895,9.5 9.5,12.895 9.5,17.0833333 C9.5,21.2716667 12.895,24.6666667 17.0833333,24.6666667 C18.9616667,24.6666667 20.6883333,23.9783333 22.0183333,22.835 L22.3333333,23.1616667 L22.3333333,24.0833333 L28.1666667,29.905 L29.905,28.1666667 L24.0833333,22.3333333 Z M17.0833333,22.3333333 C14.1783333,22.3333333 11.8333333,19.9883333 11.8333333,17.0833333 C11.8333333,14.1783333 14.1783333,11.8333333 17.0833333,11.8333333 C19.9883333,11.8333333 22.3333333,14.1783333 22.3333333,17.0833333 C22.3333333,19.9883333 19.9883333,22.3333333 17.0833333,22.3333333 Z M14.1666667,16.5 L20,16.5 L20,17.6666667 L14.1666667,17.6666667 L14.1666667,16.5 Z\' id=\'Shape\' fill=\'%23999EA3\' fill-rule=\'nonzero\'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}.page.content-title{margin-top:-28px}.content-title{text-transform:uppercase;text-align:center;font-weight:700;font-size:16px;margin-left:auto;margin-right:auto;max-width:70%;z-index:100;color:var(--dark-grey)}#screen-label-container{margin-left:11px;margin-top:-55px;margin-right:11px;padding-top:30px}.tickets-selector-container-ext .ticket-type{display:inline-block;width:50%;height:100%}.tickets-selector-container-ext>div{padding:0 10px}.tickets-selector-container-int{font-size:16px;margin-bottom:5px;display:flex;justify-content:space-between}.tickets-selector-container-ext .ticket-type .ticket-type-title{text-transform:capitalize;font-size:18px}.tickets-selector-container-ext .ticket-type .ticket-type-title,.tickets-selector-container-ext .tickets-selector span{color:var(--dark-grey);font-weight:700;margin-bottom:-7px}.tickets-selector-container-ext .ticket-type .ticket-type-price{color:var(--medium-grey)}.scrollable-container-ext{padding:0 20px;position:relative}.tickets-selector-container-ext .tickets-selector{display:inline-block;min-width:110px;vertical-align:bottom;margin:auto 0;text-align:right;width:48%}.tickets-selector-container-ext .tickets-selector button:disabled{border-color:var(--light-grey)}.tickets-selector-container-ext .tickets-selector button:disabled div{background-color:var(--light-grey)}.tickets-selector-container-ext .tickets-selector .ticket-number-container{display:inline-table;vertical-align:middle;width:30%;text-align:center;min-width:30px;max-width:100px}.tickets-selector-container-ext .tickets-selector .ticket-number-container span{vertical-align:middle;font-size:18px;color:var(--dark-grey)}.tickets-selector-container-ext .policy-anchor-container{margin-top:25px;color:var(--medium-blue)}.plus-minus-button-container{width:29px;height:29px;border:2px solid var(--medium-blue);border-radius:22px;background-color:#fff}.plus-minus-button-container .horizontal-line{width:16px;height:2px;background-color:var(--medium-blue);position:absolute;margin-left:-2px}.plus-minus-button-container .vertical-line{height:16px;width:2px;background-color:var(--medium-blue);position:absolute;margin-top:-7px;margin-left:5px}#gpay-widget-container{margin-bottom:20px}#gpay-widget-container #checkoutForm{width:100%;max-width:600px;margin:auto}.full-width-container{position:absolute;left:0;right:0;text-align:center;display:table}.fandango-vip-button{vertical-align:middle;height:40px;background-color:var(--light-grey);text-decoration:none;color:var(--dark-grey);font-size:14px;font-weight:700}.orange-text{color:var(--orange-theme)}.sign-in-button,.welcome-fandango-vip{display:none}.amp-action-identity-available .welcome-fandango-vip,.amp-action-identity-unavailable .sign-in-button{display:inline-block}.review-table{color:var(--dark-grey);font-size:14px;margin-top:35px}.align-right{text-align:right}.review-table #total-line{font-weight:700;height:50px}.review-container{position:relative}.review-container .showtime-details-container{margin-bottom:30px}.text-blue-theme{color:var(--medium-blue)}.bold{font-weight:700}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.display-inline{display:inline}.display-inline-block{display:inline-block}.confirmation-nb-container,.movie-image-info-container{color:#fff;font-size:16px}.movie-image-info-container{position:relative;overflow:hidden}.movie-cover-container amp-img{width:87px;height:130px;border:1px solid var(--light-grey);left:17px;top:38px;border-radius:3px}.movie-background-container{position:absolute;left:-1px;top:0;height:100%;width:101%;overflow:hidden;z-index:0}.movie-info-container{color:#fff;z-index:1;width:100%;text-align:center;padding-top:14px;position:relative}.movie-info-container span{display:block}.movie-info-container span.movie-title{margin-bottom:3px;font-size:16px;font-weight:700;font-style:normal;font-stretch:normal;line-height:1.25}.movie-info-container span.movie-details{line-height:1.43;font-size:16px}.movie-cover-container{display:inline-table;height:100%}.movie-background-container amp-img img{transform:translate(0,-50%);margin-top:50%}.confirmation-nb-container{text-align:center;display:table;width:100%;position:relative;bottom:0;margin:12px 0}.confirmation-title-text-button-container{text-align:center;padding-bottom:15px;padding-left:5px;padding-right:5px;margin-top:15px;position:relative;border-radius:8px}.confirmation-title-text-button-container .content-text{padding:0 10px;font-size:16px;line-height:1.25}.confirmation-title-text-button-container amp-img.top-left-icon{position:absolute;left:15px;top:15px}.grey-delimiter{margin-top:25px;margin-bottom:25px;height:1px;background-color:var(--light-grey)}#purchase-confirmation-container{font-size:14px;padding-top:34px}.fandango-advantages-table{text-align:center}.fandango-advantages-table td{width:25%}.fandango-advantages-table p{margin-top:4px}.confirmation-title-text-button-container .button-container{text-align:center}.confirmation-title-text-button-container .button-container button{background-color:var(--orange-theme);border:none;border-radius:4px;color:#fff;font-size:14px}.confirmation-title-text-button-container #join-button-container button{height:40px;min-width:120px;padding:0 30px}.confirmation-title-text-button-container #view-points-button-container button{height:40px;width:202px}.confirmation-title-text-button-container #download-button-container{display:inline-table}.confirmation-title-text-button-container #download-button-container amp-img{vertical-align:middle;margin:-10px 0}#join-fandango-vip-container{border:1px solid var(--orange-theme)}.ticket-code-container{padding:10px 0 0}.qr-confirmation-container{height:100%}.qr-confirmation-container .ticket-number-container{width:100%;color:#171c20;text-transform:uppercase;font-size:16px;font-weight:700;height:37px;position:absolute;left:0;right:0;bottom:0;display:table}.qr-confirmation-container .ticket-number-container span{display:table-cell;vertical-align:middle}.ticket-code-container-int{position:relative;max-width:320px;margin:auto;text-align:center;height:186px}.qr-container-background{width:180px;margin:auto;position:relative;display:table;height:100%;background-color:#fff}.showtime-details-container{text-align:justify}.showtime-details-container p:not(.content-title):not(.movie-title){margin-bottom:8px;font-size:14px}.showtime-details-container span:not(.display-inline){display:block;margin-bottom:3px}.light-bordered-container{border:1px solid var(--light-grey);border-radius:8px}svg text{font-weight:700;text-transform:uppercase;font-size:13px}.tap-to-close-container{position:absolute;background-color:transparent;width:100%;height:100%;z-index:0}#congratulation-tickets-container{background:linear-gradient(to right,#ed6d2d,var(--orange-theme),#e65f31);height:36px;text-align:center;display:inline-table;width:100%;font-size:16px;color:#fff;font-stretch:normal;line-height:1.5;position:absolute;top:0;z-index:100;padding-top:4px}#congratulation-tickets-container span{vertical-align:middle;display:table-cell}.email-block-container .email-span,.loader,.ticket-confirmation-container .confirmation-number span{display:block}#download-app-container p{font-size:16px;text-align:center;color:var(--dark-grey);text-transform:capitalize}.email-block-container{padding-top:20px}.email-block-container span{font-size:16px;line-height:1.25}.ticket-confirmation-container{background-color:#fff;position:relative;height:100%;width:275px;margin:auto;color:var(--dark-grey)}.ticket-confirmation-container .ticket-number-container{padding-top:22px}.black-scrim{width:100%;position:absolute;background-color:var(--scrim-grey);z-index:1;height:100%}.loader,.loader:after{border-radius:50%;width:36px;height:36px}.loader{position:absolute;top:calc(50% - 18px);left:calc(50% - 18px);transform:translateX(-50%) translateY(-50%);transform-origin:50% 50%;white-space:nowrap;border-top:4px solid #FFE6D0;border-right:4px solid #FFE6D0;border-bottom:4px solid #FFE6D0;border-left:4px solid #FF7300;-webkit-transform:translateZ(0);-ms-transform:translateZ(0);transform:translateZ(0);-webkit-animation:load8 1.1s infinite linear;animation:load8 1.1s infinite linear}@media (orientation:landscape){.list-container .loader{top:0}}@-webkit-keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes load8{0%{-webkit-transform:rotate(0);transform:rotate(0)}100%{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}.centered{top:50%;left:50%;margin:-20px 0 0 -20px;right:0;position:absolute}.opaque{opacity:.5;filter:alpha(opacity=50)}.table-display-container{height:90%;width:100%;display:table}.table-cell-middle-container{display:table-cell;vertical-align:middle;height:100%}#loading-spinner-container{background-color:rgba(0,0,0,.7);width:100%;height:100%;position:absolute;display:flex;align-items:center;justify-content:center}#choose-seats-button{padding-bottom:15px;padding-right:10px}.popup-text-container-no-title{padding-top:25px}.theatre-message-container{padding-top:12px}.theatre-message-container .theatre-message-title{margin-bottom:4px}.amenities-container span,.theatre-message-container .theatre-message-text,.theatre-message-container .theatre-message-title{font-size:12px;color:var(--medium-grey)}.button-ticket-selector{vertical-align:middle;display:inline-table;cursor:pointer}#loyalty-program-container{min-height:65px;display:table;width:100%;font-size:14px;position:relative;color:var(--inside-container-light-text);border-top:1px var(--lightest-grey) solid;border-bottom:1px var(--lightest-grey) solid;margin:35px 0;font-weight:600;padding:12px 0}#loyalty-program-container div>span{display:block}#loyalty-program-container svg{position:absolute;top:calc(50% - 12px);right:-7px}.program-title-with-valid-code{font-size:12px;font-weight:400;color:#999;margin-bottom:5px}.warning-message-valid-code{margin-top:10px;font-weight:400;font-size:12px}#loyalty-nb{caret-color:var(--orange-theme)}#loyalty-nb-page{background-color:#fff;padding:17px}#loyalty-nb-page form input{width:100%;height:40px;box-shadow:none;border-left:0;border-right:0;font-size:16px;border-top:0;margin-bottom:9px;color:#626b72}#loyalty-nb-page form input:focus{border-bottom:1px solid var(--orange-theme)}.loyalty-nb-indication-text{font-size:12px}.loyalty-text-invisible{color:#fff;visibility:hidden}.loyalty-text-visible{color:#999ea3;visibility:visible}.border-valid{border-bottom:1px solid #999ea3}.border-error{border-bottom:1px solid var(--red-error)}.loyalty-text-error{color:var(--red-error)}#email-opt-in-container{font-size:10px;padding:0 4px;margin-bottom:25px}#email-opt-in-container .container{display:block;position:relative;padding-left:24px;margin-bottom:12px;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}#email-opt-in-container .container input{display:none}#email-opt-in-container .checkmark{position:absolute;top:calc(50% - 8px);left:0;height:16px;width:16px;background-color:#fff;border-radius:2px;border:2px solid var(--light-grey)}#email-opt-in-container .container input:checked~.checkmark{background-color:var(--medium-blue);border:none}#email-opt-in-container .checkmark:after{content:"";position:absolute;display:none}#email-opt-in-container .container input:checked~.checkmark:after{display:block}#email-opt-in-container .container .checkmark:after{left:6px;top:3px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);transform:rotate(45deg)}.full-page-background{position:fixed;top:0;background-color:rgba(0,0,0,.7);bottom:0;left:0;right:0;z-index:9999}.discount-price-text{color:var(--positive-green)}amp-lightbox>div{height:100%}#ticket-info-amp-list{width:100%;position:unset;height:1px;min-height:100px}#ticket-info-amp-list>div>div:not(.loader){margin:0 20px;padding-bottom:75px}.amenities-container,.policy-anchor-container,.theatre-message-container,.tickets-selector-container-int{padding:0 10px}.table-container{display:table;width:100%}.table-container .table-row{display:table-row}.table-container .table-cell{display:table-cell}.review-table .table-row>div:first-of-type{width:40%;text-transform:capitalize}.review-table .table-cell{width:20%;vertical-align:middle;height:25px}.purchase-details-list{position:unset}#purchase-confirmation-container .policy-container{height:71px;margin-top:25px;background-color:var(--lightest-grey)}#purchase-confirmation-container .policy-container p{vertical-align:middle;display:table-cell}#purchase-confirmation-container .policy-container p span{display:block}.policy-container span{display:block;color:rgba(52,120,193,.92);font-size:12px}.policy-container{height:105px;width:calc(100% + 60px);margin-left:-30px;color:var(--blue-theme);display:table}.policy-container .table-cell-middle-container{vertical-align:top}#purchase-confirmation-container .policy-container .table-cell-middle-container{vertical-align:middle}.fallback-message-list{margin:20px 10px 0}.loyalty-input-icon{position:absolute;top:38px;right:20px}#delete-loyalty-number-icon{top:45px}.promo-page-buttons{border-radius:3px;font-weight:700;text-align:center;cursor:pointer;text-transform:uppercase;width:100%;height:35px;font-size:14px;border:none;margin-bottom:10px}#apply-promo-button{color:#fff;margin-top:15px}.promo-page-buttons:disabled{background:var(--light-grey)}#apply-promo-button:enabled{background:var(--orange-theme)}#cancel-promo-button{color:var(--blue-theme);background:#fff}#loyalty-complete{position:fixed;top:0;left:0}.display-contents{display:contents}#photo-id-disclaimer-container{text-align:justify;margin:25px 2px;line-height:1.57}#amp-member-name{margin-bottom:3px}
+  </style>
+  <title [text]=getScreenName()>Fandango</title>
+    <link href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/showtime/ rel=canonical>
+    <script id=amp-viewer-assistance on="signedIn:AMP.setState({signedIn: true}), login-form.submit" type=application/json>
+        { "actionsOnGoogle": { "projectId": "amp-actions-io-fandango" } }
+    </script>
+</head>
+<body>
+  <header class=webHandheld>
+  </header>
+
+
+  <div id=ref-to-top-container></div>
+  
+
+  <div [hidden]="flowState.currentState != flowState.states.TICKETS_PAYMENT">
+        <div class=showtime-infos-container>
+            <svg class="info-icon clickable" height=30 width=30>
+                <g>
+                    <image height=30 on=tap:movie-details-popup role=button tabindex=0 width=30 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/information-outline.svg></image>
+                </g>
+            </svg>
+            <div id=show-title-container><span id=show-title>Night School (2017)</span></div>
+            <span class=showtime-infos-text id=show-time-date-cinema>9:30 AM, November 7 • AmcApi Test - AMC02 - 38 </span>
+            <span class=showtime-infos-text id=show-additional-info>
+        Standard
+    </span>
+        </div>
+
+
+
+
+
+
+        <div class=real-content>
+            <div id=content-shadow></div>
+            <div class=content-margin id=content-container>
+
+
+
+
+                <!--
+
+
+
+                <div [hidden]="flowState.currentSubState != flowState.subStates.CHOOSE_SEATS">
+                    <div class="seat-selector-page container">
+                        <div class=content id=screen-label-container>
+                            <svg class=center version=1.1 viewbox="0 0 190 57" xmlns=http://www.w3.org/2000/svg xmlns:xlink=http://www.w3.org/1999/xlink>
+
+                                <title>Screen Simple</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <lineargradient id=linearGradient-1 x1=50% x2=50% y1=0% y2=50%>
+                                        <stop offset=0% stop-color=#C1CEDC></stop>
+                                        <stop offset=100% stop-color=#FFFFFF></stop>
+                                    </lineargradient>
+                                </defs>
+                                <g fill=none fill-rule=evenodd id=v3 stroke=none stroke-width=1>
+                                    <g id=Seat-Map transform="translate(-85.000000, -231.000000)">
+                                        <g id=Screen-Simple transform="translate(85.000000, 231.000000)">
+                                            <path d="M31.7551734,15.2 L158.244827,15.2 C166.024533,15.2 173.098307,19.7113609 176.379249,26.765385 L190,56.05 L0,56.05 L13.6207512,26.765385 C16.9016926,19.7113609 23.9754669,15.2 31.7551734,15.2 Z" fill=url(#linearGradient-1) id=Rectangle-9 style="mix-blend-mode: darken;"></path>
+                                            <path d="M4.45728816,6.27066702 C33.1038525,2.09022234 63.2259999,-3.81708076e-16 94.8237305,0 C126.420289,9.54234784e-17 156.522357,2.09006724 185.129935,6.27020171 L185.129935,6.27020573 C186.599568,6.48494828 187.690848,7.74272325 187.696159,9.22795318 C187.725793,17.516403 187.74061,21.5179938 187.74061,21.2327257 C187.74061,20.9979977 147.752584,15.2735625 94.9502718,15.3561879 C59.7487301,15.4112715 28.7140885,17.3701174 1.84634693,21.2327257 L1.89052158,9.22817945 C1.8959864,7.74286039 2.9875267,6.48515195 4.45728816,6.27066702 Z" fill=#C0C3C5 id=screen></path>
+                                            <path d="M76.3877442,11.6663504 C78.4284352,11.6663504 79.4316798,10.6175037 79.4316798,9.22664175 C79.4316798,6.38791529 75.0652853,7.19735135 75.0652853,6.00029802 C75.0652853,5.54427771 75.4529026,5.2478645 76.1369331,5.2478645 C76.9121676,5.2478645 77.7330042,5.51007618 78.3486316,6.08010158 L79.2492717,4.87164774 C78.4968382,4.17621676 77.4935935,3.81140051 76.2851397,3.81140051 C74.4952599,3.81140051 73.4008112,4.86024723 73.4008112,6.12570361 C73.4008112,8.98723109 77.7786062,8.06378995 77.7786062,9.38624886 C77.7786062,9.83086867 77.3567874,10.2298864 76.4561473,10.2298864 C75.4073006,10.2298864 74.5750635,9.75106512 74.0392396,9.19244023 L73.15,10.4578966 C73.868232,11.1761286 74.9170787,11.6663504 76.3877442,11.6663504 Z M84.2084926,11.6663504 C85.8729668,11.6663504 86.84201,10.7429093 87.3778338,9.79666715 L85.9869719,9.12403718 C85.6677577,9.73966461 84.9837272,10.2298864 84.2084926,10.2298864 C82.8176307,10.2298864 81.814386,9.16963921 81.814386,7.73317522 C81.814386,6.29671123 82.8176307,5.23646399 84.2084926,5.23646399 C84.9837272,5.23646399 85.6677577,5.72668583 85.9869719,6.34231326 L87.3778338,5.65828279 C86.84201,4.70064012 85.8729668,3.8 84.2084926,3.8 C81.9169906,3.8 80.1499118,5.3846706 80.1499118,7.73317522 C80.1499118,10.0702793 81.9169906,11.6663504 84.2084926,11.6663504 Z M94.5145518,11.5295443 L92.6448685,11.5295443 L91.151402,8.82762398 L89.9657491,8.82762398 L89.9657491,11.5295443 L88.346877,11.5295443 L88.346877,3.92540559 L91.9038355,3.92540559 C93.4885061,3.92540559 94.4689497,4.9628518 94.4689497,6.37651478 C94.4689497,7.7103742 93.6139117,8.44000671 92.7930751,8.63381534 L94.5145518,11.5295443 Z M91.6758253,7.40256049 C92.3142538,7.40256049 92.8044756,7.01494322 92.8044756,6.36511427 C92.8044756,5.73808634 92.3142538,5.35046907 91.6758253,5.35046907 L89.9657491,5.35046907 L89.9657491,7.40256049 L91.6758253,7.40256049 Z M101.058443,11.5295443 L101.058443,10.1044809 L97.2962757,10.1044809 L97.2962757,8.37160366 L100.97864,8.37160366 L100.97864,6.94654018 L97.2962757,6.94654018 L97.2962757,5.35046907 L101.058443,5.35046907 L101.058443,3.92540559 L95.6774036,3.92540559 L95.6774036,11.5295443 L101.058443,11.5295443 Z M107.704939,11.5295443 L107.704939,10.1044809 L103.942772,10.1044809 L103.942772,8.37160366 L107.625136,8.37160366 L107.625136,6.94654018 L103.942772,6.94654018 L103.942772,5.35046907 L107.704939,5.35046907 L107.704939,3.92540559 L102.3239,3.92540559 L102.3239,11.5295443 L107.704939,11.5295443 Z M115.776499,11.5295443 L115.776499,3.92540559 L114.157627,3.92540559 L114.157627,8.70221839 L110.63487,3.92540559 L108.970396,3.92540559 L108.970396,11.5295443 L110.589268,11.5295443 L110.589268,6.57032342 L114.214629,11.5295443 L115.776499,11.5295443 Z" fill=#FFFFFF id=screen></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class=list-container>
+                            <amp-list class="i-amphtml-layout-fill i-amphtml-layout-size-defined" data-amp-replace=CLIENT_ID i-amphtml-layout=fill id=availabilityList items=. layout=fill noloading reset-on-refresh single-item src="https://sandbox-dot-amp-actions-io-fandango.appspot.com/seat-bookings/3zW8bv4Q/8/KKbfknsKNT6zHgr?clientId=CLIENT_ID(a)">
+                              <div placeholder> I was a very large seat map placeholder </div>
+                              <div fallback>An error happened. Please try again.</div>
+<template type=amp-mustache>
+                                    <amp-pan-zoom disable-double-tap id=pan-zoom layout=fill reset-on-resize>
+                                        <amp-selector [disabled]="userState.cart.seats.length &gt;= flowState.limitTicketsReservedSeating" multiple on="select:AMP.setState({
+                          userState: {
+                            cart: {
+                              seats: event.selectedOptions
+                            },
+                            loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}
+                          }
+                    })">
+                                            <svg class=seat-map-svg preserveaspectratio="xMidYMin slice" viewbox="0 0 {{width}} {{height}}">
+                                                {{#seats}} {{#wheelchair }}
+                                                <rect class=special-seat height={{height}} rx={{rx}} ry={{ry}} width={{width}} x={{x}} y={{y}}></rect>
+                                                <g option={{id}}>
+                                                    <rect fill=white height={{height}} width={{width}} x={{x}} y={{y}}></rect>
+                                                    <image height={{height}} on="tap:AMP.setState({
+                            userState: {
+                              loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}
+                            },
+                            cart: null
+                          })" role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Wheelchair_Orange.svg y={{y}}>
+                                                    </image>
+                                                    {{#available }}
+                                                    <image [class]="userState.cart.seats.length == flowState.limitTicketsReservedSeating ? &#39;disabled-seat&#39; : &#39;wheelchair-image&#39;" class=wheelchair-image height={{height}} on="tap:{{type}}-popup, AMP.setState({
+                              lastSelectedSeat: &#39;{{id}}&#39;,
+                              userState: {
+                                loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}
+                              }
+                            })" role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Wheelchair.svg y={{y}}>
+                                                    </image>
+                                                    {{/available }}
+                                                </g>
+                                                {{^available}}
+                                                <image height={{height}} role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Wheelchair_Grey.svg y={{y}}>
+                                                </image>
+                                                {{/available }} {{/wheelchair}} {{#companion }}
+                                                <rect class=special-seat height={{height}} rx={{rx}} ry={{ry}} width={{width}} x={{x}} y={{y}}></rect>
+                                                <g option={{id}}>
+                                                    <rect fill=white height={{height}} width={{width}} x={{x}} y={{y}}></rect>
+                                                    <image height={{height}} role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Companion_Orange.svg y={{y}}>
+                                                    </image>
+                                                    {{#available }}
+                                                    <image [class]="userState.cart.seats.length == flowState.limitTicketsReservedSeating ? &#39;disabled-seat&#39; : &#39;companion-image&#39;" class=companion-image height={{height}} on=tap:{{type}}-popup role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Companion.svg y={{y}}>
+                                                    </image>
+                                                    {{/available }}
+                                                </g>
+                                                {{^available}}
+                                                <image height={{height}} option={{id}} role=button tabindex=0 width={{width}} x={{x}} xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Companion_Grey.svg y={{y}}>
+                                                </image>
+                                                {{/available }} {{/companion}} {{#standard }} {{#available }}
+                                                <rect class=seat height={{height}} option={{id}} role=button rx={{rx}} ry={{ry}} tabindex=0 width={{width}} x={{x}} y={{y}}>
+                                                </rect>
+                                                {{/available }} {{^available}}
+                                                <rect class="seat unavailable" height={{height}} role=button rx={{rx}} ry={{ry}} tabindex=0 width={{width}} x={{x}} y={{y}}>
+                                                </rect>
+                                                {{/available }} {{/standard }} {{/seats}}
+                                            </svg>
+                                        </amp-selector>
+                                    </amp-pan-zoom>
+                                </template>
+                            </amp-list>
+
+                            </div>
+                    </div>
+
+                    <amp-lightbox [open]=hasUserSelectedMaximumReservedTickets() class="reserved-seating-popup i-amphtml-layout-nodisplay" hidden=hidden i-amphtml-layout=nodisplay id=reserved-seating-popup layout=nodisplay scrollable>
+                        <div class=table-display-container>
+                            <div class=table-cell-middle-container>
+                                <div class="popup-container lightbox">
+                                    <div class=pop-container-text>
+                                        <div class="popup-title popup-title-margin">
+                                            Maximum of 9 Seats
+                                        </div>
+                                        <div class="popup-text-container popup-first-div">
+                                            <span>
+                                You can request up to 9 reserved seats for order.
+                            </span>
+                                        </div>
+                                        <div class="popup-text-container popup-container-buttons">
+                                            <button on=tap:reserved-seating-popup.close>
+                                                Ok
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </amp-lightbox>
+
+                    <amp-lightbox class="special-seat-popup i-amphtml-layout-nodisplay" hidden=hidden i-amphtml-layout=nodisplay id=wheelchair-popup layout=nodisplay scrollable>
+                        <div class=table-display-container>
+                            <div class=table-cell-middle-container>
+                                <div class="popup-container lightbox">
+                                    <amp-img class="popup-container-image i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=27.5 i-amphtml-layout=fixed noloading src=https://sandbox--dot--amp--actions--io--fandango-appspot-com.cdn.ampproject.org/i/s/sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Wheelchair.svg style=width:27.5px;height:27.5px; width=27.5>
+                                    </amp-img>
+                                    <div class=pop-container-text-with-image>
+                                        <div class=popup-title>
+                                            You picked a wheelchair space
+                                        </div>
+                                        <div class="popup-text-container popup-first-div">
+                                            <span>
+                                This is a space for your wheelchair, not a seat.
+                            </span>
+                                        </div>
+                                        <div class="popup-text-container popup-container-buttons">
+                                            <button on="tap:wheelchair-popup.close, AMP.setState({userState: {cart: {seats: copyAndSplice(userState.cart.seats, userState.cart.seats.indexOf(), 1)}, loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}}, cart: null})">
+                                                Cancel
+                                            </button>
+                                            <button on=tap:wheelchair-popup.close>
+                                                Ok
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </amp-lightbox>
+
+                    <amp-lightbox class="special-seat-popup i-amphtml-layout-nodisplay" hidden=hidden i-amphtml-layout=nodisplay id=companion-popup layout=nodisplay scrollable>
+                        <div class=table-display-container>
+                            <div class=table-cell-middle-container>
+                                <div class="popup-container lightbox">
+                                    <amp-img class="popup-container-image i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=27.5 i-amphtml-layout=fixed noloading src=https://sandbox--dot--amp--actions--io--fandango-appspot-com.cdn.ampproject.org/i/s/sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/Accessible_Companion.svg style=width:27.5px;height:27.5px; width=27.5>
+                                    </amp-img>
+                                    <div class=pop-container-text-with-image>
+                                        <div class=popup-title>
+                                            You picked a companion seat
+                                        </div>
+                                        <div class="popup-text-container popup-first-div">
+                                            <span>
+                                This seat is designed for a companion to a disabled person who is occupying the adjacent wheelchair space. If you are neither disabled nor a companion to a disabled guest, you will have to surrender your seat upon request.
+                            </span>
+                                        </div>
+                                        <div class="popup-text-container popup-container-buttons">
+                                            <button on="tap:companion-popup.close, AMP.setState({userState: {cart: {seats: copyAndSplice(userState.cart.seats, userState.cart.seats.indexOf(), 1)}, loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}}, cart: null})">
+                                                Cancel seat
+                                            </button>
+                                            <button on=tap:companion-popup.close>
+                                                Ok
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </amp-lightbox>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div [hidden]="flowState.currentSubState != flowState.subStates.CHOOSE_TICKETS" hidden>
+                    <div class=container>
+                        <p class="page content-title">
+                            <span [text]="(cart.totalTickets ? cart.totalTickets : 0) + &#39; of &#39; + userState.cart.seats.length + &#39; ticket&#39; + (userState.cart.seats.length == 1 ? &#39;&#39; : &#39;s&#39;) + &#39; chosen&#39;">
+            0 of 2 tickets chosen
+        </span>
+                        </p>
+                        <div class="scrollable-container-ext tickets-selector-container-ext">
+                            <amp-list [src]=ticketInfo class="i-amphtml-layout-fill i-amphtml-layout-size-defined" data-amp-replace="CLIENT_ID PAGE_VIEW_ID" i-amphtml-layout=fill id=ticket-info-amp-list items=. layout=fill noloading single-item src="https://sandbox-dot-amp-actions-io-fandango.appspot.com/ticket-info/3zW8bv4Q?clientId=CLIENT_ID(a)&amp;pvid=PAGE_VIEW_ID">
+                                <div placeholder>
+                                    <div class=loader></div>
+                                </div>
+                                <div class=fallback-message-list fallback>Something went wrong, please try again later.</div>
+                                <template type=amp-mustache>
+                                    <amp-lightbox id=age-policy-popup layout=nodisplay scrollable>
+                                        <div class=tap-to-close-container on=tap:age-policy-popup.close role=button tabindex=0></div>
+                                        <div class=table-display-container>
+                                            <div class=table-cell-middle-container>
+                                                <div class="popup-container lightbox" tabindex=0>
+                                                    <svg class="close-popup clickable" height=24 width=24>
+                                                        <g>
+                                                            <image class=clickable height=24 on=tap:age-policy-popup.close role=button tabindex=0 width=24 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/close.svg></image>
+                                                        </g>
+                                                    </svg>
+                                                    <div class="popup-text-container popup-first-div">
+                                                        <p>
+                                                            <span class=movie-details-title>{{agePolicy.header}}</span>
+                                                        </p>
+                                                    </div>
+                                                    <div class=popup-text-container>
+                                                        <p>
+                                                            <span>{{{agePolicy.policyTextDecoded}}}</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </amp-lightbox> {{#seatingInfo.tickets}}
+                                    <div class=tickets-selector-container-int>
+                                        <div class=ticket-type>
+                                            <p class=ticket-type-title>{{description}}</p>
+                                            <p class=ticket-type-price>${{price}}</p>
+                                        </div>
+                                        <div class=tickets-selector>
+
+                                            <svg [hidden]="cart[&#39;{{code}}&#39;] &gt; 0" class=button-ticket-selector height=35 width=35>
+                                                <g>
+                                                    <image height=35 role=button tabindex=0 width=35 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/minus-circle-outline-disabled.svg></image>
+                                                </g>
+                                            </svg>
+                                            <svg [hidden]=!cart[&#39;{{code}}&#39;] class=button-ticket-selector height=35 hidden width=35>
+                                                <g>
+                                                    <image height=35 on="tap:AMP.setState({
+                                            cart:{
+                                                &#39;{{code}}&#39;: (cart[&#39;{{code}}&#39;] ? cart[&#39;{{code}}&#39;] - 1 : 0),
+                                                totalTickets: cart.totalTickets - 1,
+                                                totalPrice: cart.totalPrice - {{price}},
+                                                totalFee: cart.totalFee - {{fee}}
+                                                },
+                                            userState: {loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}}
+                                            })" role=button tabindex=0 width=35 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/minus-circle-outline-enabled.svg></image>
+                                                </g>
+
+                                            </svg>
+
+                                            <div class=ticket-number-container>
+                                                <span [text]="cart[&#39;{{code}}&#39;] != null ? cart[&#39;{{code}}&#39;] : 0">0</span>
+                                            </div>
+
+                                            <svg [hidden]="!(canReservedSeatUserSelectTickets() || canGAUserSelectTickets())" class=button-ticket-selector height=35 hidden width=35>
+                                                <g>
+                                                    <image class=button-ticket-selector height=35 role=button tabindex=0 width=35 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/plus-circle-outline-disabled.svg></image>
+                                                </g>
+                                            </svg>
+
+                                            <svg [hidden]="(canReservedSeatUserSelectTickets() || canGAUserSelectTickets())" class=button-ticket-selector height=35 width=35>
+                                                <g>
+                                                    <image height=35 on="tap:AMP.setState({
+                                            cart:{
+                                                &#39;{{code}}&#39;: (cart[&#39;{{code}}&#39;] ? cart[&#39;{{code}}&#39;] + 1 : 1),
+                                                totalTickets: cart.totalTickets + 1,
+                                                totalPrice: cart.totalPrice + {{price}},
+                                                totalFee: cart.totalFee + {{fee}}
+                                                },
+                                            userState: {loyalty: {error: false, valid: false, errorMessage: &#39;&#39;, advantages: {exhibitorFeeWaivedTotal: 0, discountTotal: 0}}}
+                                            })" role=button tabindex=0 width=35 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/plus-circle-outline-enabled.svg></image>
+                                                </g>
+                                            </svg>
+
+                                        </div>
+                                    </div> {{/seatingInfo.tickets}} {{^seatingInfo.tickets}} Something went wrong. Click <a on=tap:ticketInfo.refresh>here</a> to refresh the page. {{/seatingInfo.tickets}}
+                                    <div class=policy-anchor-container>
+                                        <span class=clickable on=tap:age-policy-popup role=button tabindex=0>{{agePolicy.header}}</span>
+                                    </div>
+                                    <div class=amenities-container>
+                                        <div class=grey-delimiter></div>
+                                        <span>
+                            Reserved seating •
+                            Recliner Seats
+                    </span>
+                                    </div>
+                                </template>
+                            </amp-list>
+                        </div>
+                    </div>
+                    <form action-xhr=https://sandbox-dot-amp-actions-io-fandango.appspot.com/create-reservation hidden id=createReservationForm method=post on="submit-success: loading-spinner-container.close, AMP.setState({processingReservation: false, userState: {reservationId: event.response.reservationId}});
+          submit-error: loading-spinner-container.close, AMP.setState({processingReservation: false, orderError:event.response.errorCode}), transaction-error-popup.open" target=_top>
+                        <input name=showtime-id type=hidden value=3zW8bv4Q>
+                        <input [value]=userState.cart.seats name=seats-ids type=hidden>
+                        <input [value]=userState.reservationId name=reservation-id type=hidden>
+
+                        <amp-list [src]=ticketInfo class="i-amphtml-layout-fill i-amphtml-layout-size-defined" hidden i-amphtml-layout=fill items=. layout=fill single-item>
+                            <template type=amp-mustache>
+                                <input name=area-code type=hidden value={{seatingInfo.area}}> {{#seatingInfo.tickets}}
+                                <input name=ticket-types type=hidden value={{code}}>
+                                <input name=ticket-price-{{code}} type=hidden value={{price}}>
+                                <input name=ticket-fee-{{code}} type=hidden value={{fee}}>
+                                <input name=ticket-description-{{code}} type=hidden value={{description}}>
+                                <input [value]=cart[&#39;{{code}}&#39;] name=ticket-count-{{code}} type=hidden> {{/seatingInfo.tickets}}
+                            </template>
+                        </amp-list>
+                        <input data-amp-replace=CLIENT_ID name=clientId type=hidden value=CLIENT_ID(a)>
+                    </form>
+                </div>
+                <div [hidden]="flowState.currentSubState != flowState.subStates.COMPLETE_PURCHASE" hidden>
+                    <amp-lightbox class=i-amphtml-layout-nodisplay hidden=hidden i-amphtml-layout=nodisplay id=loading-spinner-container layout=nodisplay scrollable>
+                        <div class=loader></div>
+                    </amp-lightbox>
+                    <div class=container>
+                        <p class="page content-title">
+                            Payment method
+                        </p>
+                        <div class="scrollable-container-ext payment-selector-container-ext">
+                            <div id=gpay-widget-container>
+                                <form action-xhr=https://sandbox-dot-amp-actions-io-fandango.appspot.com/checkout-complete id=checkoutForm method=post on="submit-success: loading-spinner-container.close, amp-viewer-assistance.orderCompleted(order=event.response.order), AMP.pushState({processingPayment:false, paymentData:event.response, flowState: {currentState: flowState.states.CONFIRMATION, currentSubState: flowState.subStates.PURCHASE_CONFIRMATION}});
+                submit-error: loading-spinner-container.close, AMP.pushState({processingPayment:false, orderError:event.response.errorCode}), transaction-error-popup.open" target=_top>
+                                    <amp-payment-google-inline class=i-amphtml-layout-container data-payment-data-input-id=payment-data data-payment-token-input-id=payment-token i-amphtml-layout=container id=google-pay is-test-mode=false on="paymentReadyStatusChanged: AMP.setState({isPaymentReady: event, processingPayment: false})">
+                                        <script type=application/json>
+                                            { "apiVersion": 1, "merchantId": "04449571270937508586", "allowedPaymentMethods": ["CARD", "TOKENIZED_CARD"], "paymentMethodTokenizationParameters": { "tokenizationType": "PAYMENT_GATEWAY", "parameters": { "gateway": "braintree", "braintree:merchantId": "m8gf9hfwp8sj93cr", "braintree:authorizationFingerprint": "production_zdhvfghk_m8gf9hfwp8sj93cr", "braintree:apiVersion": "v1", "braintree:sdkVersion": "3.32.1", "braintree:metadata": "{\"source\":\"client\",\"integration\":\"custom\",\"sessionId\":\"\",\"version\":\"google-amp\",\"platform\":\"web\"}", "braintree:clientKey": "production_zdhvfghk_m8gf9hfwp8sj93cr" } }, "cardRequirements": { "allowedCardNetworks": ["AMEX", "DISCOVER", "VISA", "MASTERCARD"], "billingAddressRequired": true }, "emailRequired": true, "phoneNumberRequired": true, "billingAddressRequired": true, "transactionInfo": { "currencyCode": "USD", "totalPriceStatus": "NOT_CURRENTLY_KNOWN" } }
+                                        </script>
+                                    </amp-payment-google-inline>
+                                    <input id=payment-token name=payment-token type=hidden>
+                                    <input id=payment-data name=payment-data type=hidden>
+                                    <input id=movie-title name=movie-title type=hidden value="Night School (2017)">
+                                    <input id=movie-description name=movie-description type=hidden value="Adults pursue their high school diplomas and their work is fraught with daily challenges.">
+                                    <input [value]="userState.loyalty.valid ? userState.loyalty.number : &#39;&#39;" name=loyalty-number type=hidden>
+
+                                    <input name=showtime-id type=hidden value=3zW8bv4Q>
+                                    <input [value]=userState.cart.seats name=seats-ids type=hidden>
+                                    <input [value]=userState.reservationId name=reservation-id type=hidden>
+
+                                    <amp-list [src]=ticketInfo class="i-amphtml-layout-fill i-amphtml-layout-size-defined" hidden i-amphtml-layout=fill items=. layout=fill single-item>
+                                        <template type=amp-mustache>
+                                            <input name=area-code type=hidden value={{seatingInfo.area}}> {{#seatingInfo.tickets}}
+                                            <input name=ticket-types type=hidden value={{code}}>
+                                            <input name=ticket-price-{{code}} type=hidden value={{price}}>
+                                            <input name=ticket-fee-{{code}} type=hidden value={{fee}}>
+                                            <input name=ticket-description-{{code}} type=hidden value={{description}}>
+                                            <input [value]=cart[&#39;{{code}}&#39;] name=ticket-count-{{code}} type=hidden> {{/seatingInfo.tickets}}
+                                        </template>
+                                    </amp-list>
+                                    <input data-amp-replace=CLIENT_ID name=clientId type=hidden value=CLIENT_ID(a)>
+
+                                    <div id=email-opt-in-container>
+                                        <label class=container>
+                                            <p>Sign me up for Fandango movie updates &amp; special offers.</p>
+                                            <input checked class=checkbox id=email-opt-in name=email-opt-in on="change:AMP.setState({emailOptIn: event.value})" type=checkbox>
+                                            <span class=checkmark></span>
+                                        </label>
+                                        <span>By completing the purchase, you agree to <a href=https://www.fandango.com/policies/privacy-policy target=_blank> Privacy Policy </a> and <a href=https://www.fandango.com/policies/terms-and-policies target=_blank> Terms </a>.</span>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div [hidden]=!processingLoyaltyNumber class=full-page-background>
+                                <div class=loader></div>
+                            </div>
+                            <amp-lightbox class=i-amphtml-layout-nodisplay hidden=hidden i-amphtml-layout=nodisplay id=loyalty-nb-page layout=nodisplay scrollable>
+                                <form action-xhr=https://sandbox-dot-amp-actions-io-fandango.appspot.com/check-loyalty-number id=loyalty-nb-form method=post on="submit: AMP.setState({processingLoyaltyNumber: true});
+                      submit-success: AMP.setState({processingLoyaltyNumber: false, userState: {loyalty: {error: !event.response.loyaltyAdvantages.loyaltyApplied, valid: event.response.loyaltyAdvantages.loyaltyApplied, advantages: event.response.loyaltyAdvantages}}}), loyalty-nb-page.close;
+                      submit-error: AMP.setState({processingLoyaltyNumber: false, userState: {loyalty: {error: true, valid: false, advantages: event.response.loyaltyAdvantages}}})" target=_top>
+                                    <span [class]="userState.loyalty.number != &#39;&#39; ? &#39;loyalty-text-visible&#39; : &#39;loyalty-text-invisible&#39;" class="loyalty-text-invisible loyalty-nb-indication-text ">
+                    Enter AMC Stubs Number
+                </span>
+                                    <input [class]="(userState.loyalty.error) ? &#39;border-error&#39; : &#39;border-valid&#39;" id=loyalty-nb name=loyalty-nb on="input-debounced: AMP.setState({userState: {loyalty: {number: event.value, error: false, valid: false, advantages: null}}})" pattern=\d* placeholder="Enter your AMC Stubs number" step=any type=number>
+
+                                    <div [class]="(userState.loyalty.error) ? &#39;loyalty-text-error&#39; : &#39;loyalty-text-invisible&#39;" [text]="(userState.loyalty.advantages.warningMessage != null &amp;&amp; userState.loyalty.advantages.warningMessage != &#39;&#39;) ? userState.loyalty.advantages.warningMessage : &#39;An error has happened. Please try again later.&#39;" class="loyalty-text-invisible loyalty-nb-indication-text">
+                                    </div>
+                                    <input [value]="(!flowState.hasSeatMap) + &#39;&#39;" id=is-ga-showtime name=is-ga-showtime type=hidden>
+                                    <input name=showtime-id type=hidden value=3zW8bv4Q>
+                                    <input [value]=userState.cart.seats name=seats-ids type=hidden>
+                                    <input [value]=userState.reservationId name=reservation-id type=hidden>
+
+                                    <amp-list [src]=ticketInfo class="i-amphtml-layout-fill i-amphtml-layout-size-defined" hidden i-amphtml-layout=fill items=. layout=fill single-item>
+                                        <template type=amp-mustache>
+                                            <input name=area-code type=hidden value={{seatingInfo.area}}> {{#seatingInfo.tickets}}
+                                            <input name=ticket-types type=hidden value={{code}}>
+                                            <input name=ticket-price-{{code}} type=hidden value={{price}}>
+                                            <input name=ticket-fee-{{code}} type=hidden value={{fee}}>
+                                            <input name=ticket-description-{{code}} type=hidden value={{description}}>
+                                            <input [value]=cart[&#39;{{code}}&#39;] name=ticket-count-{{code}} type=hidden> {{/seatingInfo.tickets}}
+                                        </template>
+                                    </amp-list>
+                                    <input data-amp-replace=CLIENT_ID name=clientId type=hidden value=CLIENT_ID(a)>
+                                </form>
+                                <button [disabled]="userState.loyalty.number == &#39;&#39; || processingLoyaltyNumber == true" class=promo-page-buttons id=apply-promo-button on="tap: loyalty-nb-form.submit">
+
+                                    Apply
+                                </button>
+                                <button class=promo-page-buttons id=cancel-promo-button on="tap: loyalty-nb-page.close">
+                                    Cancel
+                                </button>
+                            </amp-lightbox>
+                            <div id=loyalty-program-container on="tap:AMP.setState({userState: {loyalty: {error: false, advantages: {warningMessage: &#39;&#39;}}}}), loyalty-nb-page" role=button tabindex=0>
+                                <div class=table-cell-middle-container>
+                                    <div [hidden]="userState.loyalty.number != &#39;&#39; &amp;&amp; userState.loyalty.valid == true">
+                                        <span>Use AMC Stubs</span>
+                                    </div>
+                                    <div [hidden]="userState.loyalty.number == &#39;&#39; || userState.loyalty.valid == false" hidden>
+                                        <span class=program-title-with-valid-code>AMC Stubs Number</span>
+                                        <span [text]=userState.loyalty.number>Loyalty number</span>
+                                        <span [hidden]="!userState.loyalty.advantages.warningMessage || userState.loyalty.advantages.warningMessage == &#39;&#39;" [text]=userState.loyalty.advantages.warningMessage class=warning-message-valid-code>Warning message</span>
+                                    </div>
+                                    <svg class=clickable height=24 width=24>
+                                        <g>
+                                            <image height=24 width=24 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/right-light-grey.svg></image>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <amp-layout [hidden]="userState.loyalty.valid == false" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" height=1 hidden i-amphtml-layout=fixed id=loyalty-complete layout=fixed style=width:1px;height:1px; width=1>
+                                <span></span>
+                            </amp-layout>
+                            <div class=review-container>
+                                <div class=showtime-details-container>
+                                    <p class=content-title>
+                                        Review
+                                    </p>
+                                    <p class="bold movie-title">Night School (2017)</p>
+                                    <span>Not Rated, 1 hr 25 min </span>
+                                    <span>Standard</span>
+                                    <p class=bold>Wednesday, November 7 at 9:30 AM</p>
+                                    <span class=display-inline>
+                </span>
+                                    <p class=bold>AmcApi Test - AMC02 - 38</p>
+                                    <span>111 address</span>
+                                    <span>Beverly Hills, CA 90210</span>
+                                    <span>Auditorium 8</span>
+                                    <span [hidden]=!flowState.hasSeatMap>
+                    Seats
+                    <span [text]="sort(userState.cart.seats).join(&#39;, &#39;)" class=display-inline>0</span>
+                                    </span>
+                                    <br>
+                                    <span>
+                        Reserved seating •
+                        Recliner Seats
+                </span>
+                                </div>
+                                <div class=review-container>
+                                    <p class=content-title>
+                                        Purchase details
+                                    </p>
+                                    <amp-list [src]=ticketInfo class="purchase-details-list i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout=fill items=. layout=fill single-item>
+                                        <template type=amp-mustache>
+                                            <div class="table-container review-table">
+                                                {{#seatingInfo.tickets}}
+                                                <div [hidden]=!cart[&#39;{{code}}&#39;] class=table-row>
+                                                    <div class="table-cell ticket-type-column">
+                                                        <span>
+                                        {{description}}
+                                    </span>
+                                                    </div>
+                                                    <div class=table-cell>
+                                                        <span [text]="cart[&#39;{{code}}&#39;] + &#39;x&#39;">
+                                        1x
+                                    </span>
+                                                    </div>
+                                                    <div class=table-cell>
+                                                        <span [text]="&#39;$&#39; + ({{price}}).toFixed(2) + &#39;=&#39;">
+                                        $00.00=
+                                    </span>
+                                                    </div>
+                                                    <div class="table-cell align-right">
+                                                        <span [text]="&#39;$&#39; + (cart[&#39;{{code}}&#39;] * {{price}}).toFixed(2)">
+                                        $00.00
+                                    </span>
+                                                    </div>
+                                                </div>
+                                                {{/seatingInfo.tickets}}
+                                                <div class=table-row>
+                                                    <div class="table-cell ticket-type-column clickable text-blue-theme">
+                                                        <span on=tap:convenience-fee-popup role=button tabindex=0>
+                                        Convenience Fee
+                                    </span>
+                                                    </div>
+                                                    <div class=table-cell></div>
+                                                    <div class=table-cell></div>
+                                                    <div class="table-cell align-right">
+                                                        <span [text]="&#39;$&#39; + (cart[&#39;totalFee&#39;]).toFixed(2)"></span>
+                                                    </div>
+                                                </div>
+
+                                                <div [hidden]=!userState.loyalty.valid class=display-contents>
+
+                                                    <div [hidden]=userState.loyalty.advantages.isAMCDiscounts class=display-contents>
+                                                        <div [hidden]="userState.loyalty.advantages.exhibitorFeeWaivedTotal == &#39;.00&#39;" class="table-row discount-price-text">
+                                                            <div class="table-cell ticket-type-column">
+                                                                <span>
+                                                            AMC Stubs Program
+                                                        </span>
+                                                            </div>
+                                                            <div class=table-cell></div>
+                                                            <div class=table-cell></div>
+                                                            <div class="table-cell align-right">
+                                                                <span [text]="&#39;-$&#39; + abs((userState.loyalty.advantages.exhibitorFeeWaivedTotal + userState.loyalty.advantages.discountTotal)).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div [hidden]=!userState.loyalty.advantages.isAMCDiscounts class=display-contents hidden>
+
+                                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[0]] class="table-row discount-price-text">
+                                                            <div class="table-cell ticket-type-column">
+                                                                <span [text]=loyaltyConsts.AMCProgramNames[0]>
+                                                AMC Stubs Program
+                                            </span>
+                                                            </div>
+                                                            <div class=table-cell></div>
+                                                            <div class=table-cell></div>
+                                                            <div class="table-cell align-right">
+                                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[0]]).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[1]] class="table-row discount-price-text">
+                                                            <div class="table-cell ticket-type-column">
+                                                                <span [text]=loyaltyConsts.AMCProgramNames[1]>
+                                                AMC Stubs Program
+                                            </span>
+                                                            </div>
+                                                            <div class=table-cell></div>
+                                                            <div class=table-cell></div>
+                                                            <div class="table-cell align-right">
+                                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[1]]).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[2]] class="table-row discount-price-text">
+                                                            <div class="table-cell ticket-type-column">
+                                                                <span [text]=loyaltyConsts.AMCProgramNames[2]>
+                                                AMC Stubs Program
+                                            </span>
+                                                            </div>
+                                                            <div class=table-cell></div>
+                                                            <div class=table-cell></div>
+                                                            <div class="table-cell align-right">
+                                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[2]]).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[3]] class="table-row discount-price-text">
+                                                            <div class="table-cell ticket-type-column">
+                                                                <span [text]=loyaltyConsts.AMCProgramNames[3]>
+                                                AMC Stubs Program
+                                            </span>
+                                                            </div>
+                                                            <div class=table-cell></div>
+                                                            <div class=table-cell></div>
+                                                            <div class="table-cell align-right">
+                                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[3]]).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class=table-row>
+                                                    <div class=table-cell id=total-line>
+                                                        <span>Total</span>
+                                                    </div>
+                                                    <div class=table-cell></div>
+                                                    <div class=table-cell></div>
+                                                    <div class="table-cell align-right">
+                                                        <span [text]="&#39;$&#39; + (cart[&#39;totalPrice&#39;] + cart[&#39;totalFee&#39;] + userState.loyalty.advantages.exhibitorFeeWaivedTotal + userState.loyalty.advantages.discountTotal).toFixed(2)"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="content-centered-container policy-container">
+                                                <div class=table-cell-middle-container>
+                                                    <span>
+                                <a href=https://www.fandango.com/policies/privacy-policy target=_blank>Your Privacy Rights - Privacy Policy</a>
+                                </span>
+                                                    <span>
+                                    <a href=https://www.fandango.com/policies/terms-and-policies target=_blank>Terms and Policies</a> | <a href=https://www.fandango.com/policies/movie-ticket-policy target=_blank>Movie Ticket Policy</a> |
+                                    <a [hidden]="flowState.currentState != flowState.states.TICKETS_PAYMENT" href=https://fandango.az1.qualtrics.com/jfe/form/SV_8dJhuqLLgXL44vP target=_blank> Feedback </a>
+                                    <a [hidden]="flowState.currentState == flowState.states.TICKETS_PAYMENT" href=https://fandango.az1.qualtrics.com/jfe/form/SV_6KFTD3RqwZIptNb target=_blank> Feedback </a>
+                                </span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </amp-list>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+-->
+
+
+
+
+
+
+
+
+
+        <div [hidden]="flowState.currentState == flowState.states.CONFIRMATION" class=bottom-fixed-button-container>
+            <button [hidden]="!isChooseSeat() || userState.cart.seats.length &gt; 0" class=choose-seat-button disabled>Choose seats above</button>
+            <button [hidden]="(!isChooseSeat() || userState.cart.seats.length &lt;=0)" class="tqp next-button" hidden on="tap:AMP.pushState({flowState: {currentSubState: flowState.currentSubState+1}}), ref-to-top-container.scrollTo(duration=1), login-form.submit">
+                <span [hidden]="flowState.hasSeatMap &amp;&amp; !userState.cart.seats.length" [text]="flowState.hasSeatMap ? userState.cart.seats.length : (cart.totalTickets || 0)" class=ticket-number hidden>0</span> Next
+            </button>
+            <button [disabled]="(flowState.hasSeatMap &amp;&amp; cart.totalTickets != userState.cart.seats.length) || (!flowState.hasSeatMap &amp;&amp; cart.totalTickets &lt;= 0)" [hidden]=!isChooseTickets() class="payment next-button" disabled hidden on="tap:AMP.pushState({flowState: {currentSubState: flowState.currentSubState+1}, processingReservation: true}), ref-to-top-container.scrollTo(duration=1), loading-spinner-container, createReservationForm.submit">
+                <span [hidden]="flowState.hasSeatMap &amp;&amp; !userState.cart.seats.length" [text]="flowState.hasSeatMap ? userState.cart.seats.length : (cart.totalTickets || 0)" class=ticket-number hidden>0</span> Next
+            </button>
+            <button [disabled]="!isPaymentReady || processingPayment || processingReservation" [hidden]=!isCompletePurchase() class="next-button submit-payment" hidden id=complete-purchase-button on="tap:AMP.setState({processingPayment: true}), checkoutForm.submit, ref-to-top-container.scrollTo(duration=1), loading-spinner-container">
+                <span [hidden]="flowState.hasSeatMap &amp;&amp; !userState.cart.seats.length" [text]="flowState.hasSeatMap ? userState.cart.seats.length : (cart.totalTickets || 0)" class=ticket-number hidden>0</span> Complete purchase
+                <span [hidden]="flowState.currentSubState != flowState.subStates.CHOOSE_TICKETS" [text]="&#39;$&#39; + (cart.totalPrice ? (abs(cart.totalPrice)).toFixed(2) : &#39;0.00&#39;)" class=total-price hidden>$0.00</span>
+                <span [hidden]="flowState.currentSubState != flowState.subStates.COMPLETE_PURCHASE" [text]="&#39;$&#39; + (cart[&#39;totalPrice&#39;] + cart[&#39;totalFee&#39;] + userState.loyalty.advantages.exhibitorFeeWaivedTotal + userState.loyalty.advantages.discountTotal).toFixed(2)" class=total-price hidden>$0.00</span> </button>
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+        <amp-lightbox class=i-amphtml-layout-nodisplay hidden=hidden i-amphtml-layout=nodisplay id=movie-details-popup layout=nodisplay scrollable>
+            <div class=tap-to-close-container on=tap:movie-details-popup.close role=button tabindex=0></div>
+            <div class=table-display-container>
+                <div class=table-cell-middle-container>
+                    <div class="popup-container lightbox" tabindex=0>
+                        <svg class="close-popup clickable" height=24 width=24>
+                            <g>
+                                <image class=clickable height=24 on=tap:movie-details-popup.close role=button tabindex=0 width=24 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/close.svg></image>
+                            </g>
+                        </svg>
+                        <div class="popup-text-container popup-first-div">
+                            <p>
+                                <span class=movie-details-title>
+                        Night School (2017)
+                    </span>
+                                <span>Not Rated, 1 hr 25 min </span>
+                            </p>
+                        </div>
+                        <div class=popup-text-container>
+                            <p>
+                                <span class=movie-details-title>AmcApi Test - AMC02 - 38</span>
+                                <span>111 address</span>
+                                <span>Beverly Hills, CA 90210</span>
+                            </p>
+                        </div>
+                        <div class=popup-text-container>
+                            <p>
+                                <span id=auditorium-span>
+                        Auditorium 8
+                    </span>
+                            </p>
+                        </div>
+                        <div class=popup-text-container>
+                            <p>
+                                <span>
+                            Reserved seating •
+                            Recliner Seats
+                    </span>
+                            </p>
+                        </div>
+                        <div [hidden]="flowState.currentSubState != flowState.subStates.CHOOSE_SEATS" id=movie-details-popup-table-container>
+
+                            <table class=seats-legend-container>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class=lightblue-background></div>Available</td>
+                                        <td>
+                                            <div class=grey-background></div>Taken</td>
+                                        <td>
+                                            <div class=orange-background></div>Selected</td>
+                                        <td>
+                                            <div class=blue-background></div>Accessible</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </amp-lightbox>
+    </div>
+
+
+
+
+
+
+
+
+
+<h1>Click Button below to test</h1>
+
+<button on="tap:AMP.setState({'hide-confirmation': false})">Show Confirmation</button>
+
+
+
+
+
+
+
+    <div [hidden]="hide-confirmation != false" hidden>
+        <div id=purchase-confirmation-container>
+            <div class="bold uppercase" id=congratulation-tickets-container>
+                <span>Congrats, you&#39;ve got tickets!</span>
+            </div>
+            <div class=movie-image-info-container>
+                <div class=movie-info-container>
+                    <span class="bold uppercase movie-title">Night School (2017)</span>
+                    <span class=movie-details>9:30 AM Wednesday, November 7</span>
+                </div>
+                <div class=movie-background-container>
+                    <div class=black-scrim></div>
+                    <amp-img alt="Movie background" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=1.6 i-amphtml-layout=responsive layout=responsive src=https://images-fandango-com.cdn.ampproject.org/i/s/images.fandango.com/images/MasterRepository/fandango/202796/NightSchool2017.jpg width=1>
+                        <i-amphtml-sizer style=display:block;padding-top:160.0000%;></i-amphtml-sizer>
+                    </amp-img>
+                </div>
+                <div class="ticket-code-container content-centered-container">
+                    <div class=ticket-code-container-int>
+                        <amp-img alt=Ticket class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout=fill id=ticket-image layout=fill src=https://sandbox--dot--amp--actions--io--fandango-appspot-com.cdn.ampproject.org/i/s/sandbox-dot-amp-actions-io-fandango.appspot.com/assets/images/ticket-background@2x.png></amp-img>
+                        <div [hidden]=flowState.hasQRCodeReader class=ticket-confirmation-container hidden>
+                            <div class=ticket-number-container>
+                                <span [text]="(cart.totalTickets + &#39; ticket&#39; + (cart.totalTickets == 1 ? &#39;&#39; : &#39;s&#39;))" class="ticket-number-text bold uppercase">0 Tickets</span>
+                            </div>
+                            <p>
+                                Bring your confirmation # to the theater to pick up your tickets.
+                            </p>
+                            <p class=confirmation-number>
+                                <span><amp-layout class=i-amphtml-layout-container i-amphtml-layout=container id=ticket-confirmation-code>Confirmation Number: </amp-layout></span>
+                                <span [text]=paymentData.confirmationNumber class="bold uppercase">
+        			CONFIRMATION CODE
+        		</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class=confirmation-nb-container>
+                        <span [hidden]="!userState.loyalty.advantages.memberName || !userState.loyalty.valid" class=display-inline-block id=amp-member-name>
+                    <span class=bold>AMC Stubs A-List: </span>
+                        <span [text]=userState.loyalty.advantages.memberName> Member Name</span>
+                        </span>
+                        <span [hidden]=!flowState.hasQRCodeReader class=display-inline-block>
+                    <amp-layout class="display-inline i-amphtml-layout-container" i-amphtml-layout=container id=ticket-confirmation-code><span class=bold>Confirmation Number: </span></amp-layout>
+                        <span [text]=paymentData.confirmationNumber class=uppercase> TICKET CODE</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class=padding-15-lat-container>
+                <div class="email-block-container content-centered-container">
+                    <span> We also sent your ticket<span [text]="(cart.totalTickets == 1 ? &#39;&#39; : &#39;s&#39;)">s</span> to </span>
+                    <span [text]="paymentData.name + &#39; / &#39; + paymentData.email" class=email-span> / </span>
+                </div>
+                <div [hidden]="!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[1]] || !userState.loyalty.valid" id=photo-id-disclaimer-container>
+                    <b>Don&#39;t forget your photo ID.</b> AMC will ask to see a valid driver&#39;s license or photo ID whenever you use your AMC Stubs A-List at the theaters.
+                </div>
+
+                <div class=confirmation-title-text-button-container id=join-fandango-vip-container>
+                    <amp-layout [hidden]=signedIn class=i-amphtml-layout-container i-amphtml-layout=container id=vip-not-signed-in>
+                        <form action-xhr=https://sandbox-dot-amp-actions-io-fandango.appspot.com/login-status id=login-form method=post on="submit-success: AMP.setState({signedIn:event.response.signedIn});
+                        submit-error:AMP.setState({signedIn:false})" target=_top>
+                            <input data-amp-replace=IDENTITY_TOKEN id=access_token name=access_token type=hidden value=IDENTITY_TOKEN>
+                            <input [value]=emailOptIn id=optIn name=optIn type=hidden>
+                            <input [value]=signedIn id=signedIn name=signedIn on=change:login-form.submit type=hidden>
+                            <input data-amp-replace=CLIENT_ID name=clientId type=hidden value=CLIENT_ID(a)> </form>
+                        <div>
+                            <p class=content-text>Refund or exchange up until showtime.</p>
+                            <p class=content-title>Fandango <span class=orange-text>VIP</span> Exclusive</p>
+                            <div class=button-container id=join-button-container>
+                                <button class="bold uppercase" on="tap:amp-viewer-assistance.signIn(), AMP.setState({loginButton: true})">One tap to join</button>
+                            </div>
+                        </div>
+                    </amp-layout>
+                    <amp-layout [hidden]=!signedIn class=i-amphtml-layout-container i-amphtml-layout=container id=vip-signed-in>
+                        <div>
+                            <p class=content-title>Fandango <span class=orange-text>VIP</span></p>
+                            <p [hidden]=loginButton class=content-text>
+                                Welcome back Fandango VIP! If your plans change, you can refund or exchange your tickets up until showtime.
+                            </p>
+                            <amp-layout class=i-amphtml-layout-container i-amphtml-layout=container id=vip-signup-complete>
+                                <p [hidden]=!loginButton class=content-text>
+                                    You&#39;re now a Fandango VIP! If your plans change, you can refund or exchange your tickets up until showtime.
+                                </p>
+                            </amp-layout>
+                        </div>
+                    </amp-layout>
+                </div>
+                <div class=showtime-details-container>
+                    <p class=content-title>
+                        Showtime Details
+                    </p>
+                    <p class="bold movie-title">Night School (2017)</p>
+                    <span>Not Rated, 1 hr 25 min </span>
+                    <span>Standard</span>
+                    <p class=bold>Wednesday, November 7 at 9:30 AM</p>
+                    <span class=display-inline>
+            </span>
+                    <p class=bold>AmcApi Test - AMC02 - 38</p>
+                    <span>111 address</span>
+                    <span>Beverly Hills, CA 90210</span>
+                    <span>Auditorium 8</span>
+                    <span [hidden]=!flowState.hasSeatMap>
+                Seats
+                <span [text]="sort(userState.cart.seats).join(&#39;, &#39;)" class=display-inline>0</span>
+                    </span>
+                    <br>
+                    <span>
+                    Reserved seating •
+                    Recliner Seats
+            </span>
+                </div>
+                <div class=review-container>
+                    <p class=content-title>
+                        Purchase Details
+                    </p>
+                    <amp-list [src]=ticketInfo class="purchase-details-list i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout=fill items=. layout=fill single-item>
+                        <template type=amp-mustache>
+                            <div class="table-container review-table">
+                                {{#seatingInfo.tickets}}
+                                <div [hidden]=!cart[&#39;{{code}}&#39;] class=table-row>
+                                    <div class="table-cell ticket-type-column">
+                                        <span>
+                                    {{description}}
+                                </span>
+                                    </div>
+                                    <div class=table-cell>
+                                        <span [text]="cart[&#39;{{code}}&#39;] + &#39;x&#39;">
+                                    1x
+                                </span>
+                                    </div>
+                                    <div class=table-cell>
+                                        <span [text]="&#39;$&#39; + ({{price}}).toFixed(2) + &#39;=&#39;">
+                                    $00.00=
+                                </span>
+                                    </div>
+                                    <div class="table-cell align-right">
+                                        <span [text]="&#39;$&#39; + (cart[&#39;{{code}}&#39;] * {{price}}).toFixed(2)">
+                                    $00.00
+                                </span>
+                                    </div>
+                                </div>
+                                {{/seatingInfo.tickets}}
+                                <div class=table-row>
+                                    <div class="table-cell ticket-type-column clickable text-blue-theme">
+                                        <span on=tap:convenience-fee-popup role=button tabindex=0>
+                                    Convenience Fee
+                                </span>
+                                    </div>
+                                    <div class=table-cell></div>
+                                    <div class=table-cell></div>
+                                    <div class="table-cell align-right">
+                                        <span [text]="&#39;$&#39; + (cart[&#39;totalFee&#39;]).toFixed(2)"></span>
+                                    </div>
+                                </div>
+
+                                <div [hidden]=!userState.loyalty.valid class=display-contents>
+
+                                    <div [hidden]=userState.loyalty.advantages.isAMCDiscounts class=display-contents>
+                                        <div [hidden]="userState.loyalty.advantages.exhibitorFeeWaivedTotal == &#39;.00&#39;" class="table-row discount-price-text">
+                                            <div class="table-cell ticket-type-column">
+                                                <span>
+                                                        AMC Stubs Program
+                                                    </span>
+                                            </div>
+                                            <div class=table-cell></div>
+                                            <div class=table-cell></div>
+                                            <div class="table-cell align-right">
+                                                <span [text]="&#39;-$&#39; + abs((userState.loyalty.advantages.exhibitorFeeWaivedTotal + userState.loyalty.advantages.discountTotal)).toFixed(2)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div [hidden]=!userState.loyalty.advantages.isAMCDiscounts class=display-contents hidden>
+
+                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[0]] class="table-row discount-price-text">
+                                            <div class="table-cell ticket-type-column">
+                                                <span [text]=loyaltyConsts.AMCProgramNames[0]>
+                                            AMC Stubs Program
+                                        </span>
+                                            </div>
+                                            <div class=table-cell></div>
+                                            <div class=table-cell></div>
+                                            <div class="table-cell align-right">
+                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[0]]).toFixed(2)"></span>
+                                            </div>
+                                        </div>
+
+                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[1]] class="table-row discount-price-text">
+                                            <div class="table-cell ticket-type-column">
+                                                <span [text]=loyaltyConsts.AMCProgramNames[1]>
+                                            AMC Stubs Program
+                                        </span>
+                                            </div>
+                                            <div class=table-cell></div>
+                                            <div class=table-cell></div>
+                                            <div class="table-cell align-right">
+                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[1]]).toFixed(2)"></span>
+                                            </div>
+                                        </div>
+
+                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[2]] class="table-row discount-price-text">
+                                            <div class="table-cell ticket-type-column">
+                                                <span [text]=loyaltyConsts.AMCProgramNames[2]>
+                                            AMC Stubs Program
+                                        </span>
+                                            </div>
+                                            <div class=table-cell></div>
+                                            <div class=table-cell></div>
+                                            <div class="table-cell align-right">
+                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[2]]).toFixed(2)"></span>
+                                            </div>
+                                        </div>
+
+                                        <div [hidden]=!userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[3]] class="table-row discount-price-text">
+                                            <div class="table-cell ticket-type-column">
+                                                <span [text]=loyaltyConsts.AMCProgramNames[3]>
+                                            AMC Stubs Program
+                                        </span>
+                                            </div>
+                                            <div class=table-cell></div>
+                                            <div class=table-cell></div>
+                                            <div class="table-cell align-right">
+                                                <span [text]="&#39;-$&#39; + abs(userState.loyalty.advantages.AMCDiscounts[loyaltyConsts.AMCProgramNames[3]]).toFixed(2)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class=table-row>
+                                    <div class=table-cell id=total-line>
+                                        <span>Total</span>
+                                    </div>
+                                    <div class=table-cell></div>
+                                    <div class=table-cell></div>
+                                    <div class="table-cell align-right">
+                                        <span [text]="&#39;$&#39; + (cart[&#39;totalPrice&#39;] + cart[&#39;totalFee&#39;] + userState.loyalty.advantages.exhibitorFeeWaivedTotal + userState.loyalty.advantages.discountTotal).toFixed(2)"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="content-centered-container policy-container">
+                                <div class=table-cell-middle-container>
+                                    <span>
+                            <a href=https://www.fandango.com/policies/privacy-policy target=_blank>Your Privacy Rights - Privacy Policy</a>
+                            </span>
+                                    <span>
+                                <a href=https://www.fandango.com/policies/terms-and-policies target=_blank>Terms and Policies</a> | <a href=https://www.fandango.com/policies/movie-ticket-policy target=_blank>Movie Ticket Policy</a> |
+                                <a [hidden]="flowState.currentState != flowState.states.TICKETS_PAYMENT" href=https://fandango.az1.qualtrics.com/jfe/form/SV_8dJhuqLLgXL44vP target=_blank> Feedback </a>
+                                <a [hidden]="flowState.currentState == flowState.states.TICKETS_PAYMENT" href=https://fandango.az1.qualtrics.com/jfe/form/SV_6KFTD3RqwZIptNb target=_blank> Feedback </a>
+                            </span>
+                                </div>
+                            </div>
+                        </template>
+                    </amp-list>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <amp-lightbox class=i-amphtml-layout-nodisplay hidden=hidden i-amphtml-layout=nodisplay id=convenience-fee-popup layout=nodisplay scrollable>
+        <div class=tap-to-close-container on=tap:convenience-fee-popup.close role=button tabindex=0></div>
+        <div class=table-display-container>
+            <div class=table-cell-middle-container>
+                <div class="popup-container lightbox" tabindex=0>
+                    <svg class="close-popup clickable" height=24 width=24>
+                        <g>
+                            <image class=clickable height=24 on=tap:convenience-fee-popup.close role=button tabindex=0 width=24 xlink:href=https://sandbox-dot-amp-actions-io-fandango.appspot.com/assets/icons/close.svg></image>
+                        </g>
+                    </svg>
+                    <div class="popup-text-container popup-first-div">
+                        <p>
+                            <span class=movie-details-title>
+                        Convenience Fee Details
+                    </span>
+                        </p>
+                    </div>
+
+                    <div class=popup-text-container>
+                        <p>
+                            <span>
+                        </span>
+                            <span>
+                            Total convenience fees:
+                            <span [text]="&#39;$&#39; + (cart[&#39;totalFee&#39;]).toFixed(2)" class=display-inline>$0.00</span>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </amp-lightbox>
+
+    <amp-lightbox class="centered-popup i-amphtml-layout-nodisplay" hidden=hidden i-amphtml-layout=nodisplay id=transaction-error-popup layout=nodisplay scrollable>
+        <div class=table-display-container>
+            <div class=table-cell-middle-container>
+                <div class="popup-container lightbox">
+                    <div class="popup-text-container-no-title popup-text-container">
+                        <span [hidden]="orderError == &#39;seatsUnavailable&#39;">An error has happened. Please try again later.</span>
+                        <span [hidden]="orderError != &#39;seatsUnavailable&#39;">One or more of the seats you chose are no longer available. Please choose new seats.</span>
+                    </div>
+                    <div class=popup-container-buttons id=choose-seats-button>
+                        <button on="tap:transaction-error-popup.close,
+                                    pan-zoom.transform(scale=1),
+                                    AMP.setState({
+                                    cart: null,
+                                    flowState: {
+                                        currentState: 0,
+                                        currentSubState: flowState[&#39;hasSeatMap&#39;] ? 0 : 1
+                                    },
+                                    userState: {
+                                        cart: {
+                                            seats: []
+                                        }
+                                    }
+                                }),
+                                ref-to-top-container.scrollTo(duration=1),
+                                availabilityList.refresh">
+                            <span [hidden]="transactionError == &#39;seatsUnavailable&#39;">OK</span>
+                            <span [hidden]="transactionError != &#39;seatsUnavailable&#39;">Choose New Seats</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </amp-lightbox>
+
+
+
+    <amp-analytics class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed id=analytics2 style=width:1px;height:1px; type=adobeanalytics>
+        <script type=application/json>
+            {
+                "requests": {
+                  "globalVariables": "events=${events}&server=${server}&c1=${siteSection}&v1=${siteSection}&c2=${subSection}&v2=${subSection}&c3=${pageName}&v3=${pageName}&c4=${pageName}&v4=${pageName}&v9=${server}&v10=${pageName}&c19=${loggedInStatus}&v19=${loggedInStatus}&v50=${reservedOrGA}&c58=${movieName}&v58=${movieName}&c59=${movieShowtime}&v59=${movieShowtime}&c60=${theaterName}&v60=${theaterName}&c62=${theaterId}&v62=${theaterId}&c63=${exhibitor}&v63=${exhibitor}&v65=${customerGUID}&c69=${movieId}&v69=${movieId}&c70=${movieGenre}&l2=${movieGenre}",
+                  "pageView": "${pageview}&products=;${movieId}&${globalVariables}",
+                  "purchase": "${pageview}&products=;${movieId};${ampState(cart.totalTickets)};${ampState(cart.totalFee)};event60=${ampState(cart.totalPrice)};evar75=amp&${globalVariables}&purchaseID=${ampState(paymentData.order.merchantOrderId)}&xact=${ampState(paymentData.order.merchantOrderId)}",
+                  "errorMessage": "${pageview}&products=;${movieId}&${globalVariables}&c39=${purchaseErrorMessage}&v39=${purchaseErrorMessage}&pe=lnk_o&pev2=amp error",
+                  "completePurchaseClick": "${pageview}&products=;${movieId}&${globalVariables}&pe=lnk_o&pev2=purchase button click"
+                },
+                "vars": {
+                  "host": "os.fandango.com",
+                  "reportSuites": "${ampState(analytics.environment)}",
+                  "siteSection": "amp | purchase",
+                  "movieId": "REryoAZ7",
+                  "movieName": "Night School (2017)",
+                  "movieGenre": "",
+                  "movieShowtime": "November 7 9:30 AM",
+                  "theaterName": "AmcApi Test - AMC02 - 38",
+                  "theaterId": "KKbfknsKNT6zHgr",
+                  "reservedOrGA": "true",
+                  "exhibitor": "AMC",
+                  "loggedInStatus": "${ampState(signedIn)}",
+                  "server": "amp"
+                },
+                "triggers": {
+                  "seatPicker": {
+                    "on": "visible",
+                    "request": "pageView",
+                    "vars": {
+                      "pageName": "amp | purchase | seat picker",
+                      "subSection": "amp | purchase | seat picker",
+                      "events": "event250"
+                    }
+                  },
+                  "tqp": {
+                    "on": "click",
+                    "selector": ".tqp",
+                    "request": "pageView",
+                    "vars": {
+                      "pageName": "amp | purchase | tqp",
+                      "subSection": "amp | purchase | tqp",
+                      "events": "event59"
+                    }
+                  },
+                  "payment": {
+                    "on": "click",
+                    "selector": ".payment",
+                    "request": "pageView",
+                    "vars": {
+                      "pageName": "amp | purchase | payment",
+                      "subSection": "amp | purchase | payment",
+                      "events": "event257"
+                    }
+                  },
+                  "purchase": {
+                    "on": "visible",
+                    "request": "purchase",
+                    "selector": "#ticket-image",
+                    "vars": {
+                      "pageName": "amp | purchase | confirmation",
+                      "subSection": "amp | purchase | confirmation",
+                      "events": "purchase,event60"
+                    }
+                  },
+                  "vipNotSignedIn": {
+                    "on": "visible",
+                    "request": "pageView",
+                    "selector": "#vip-not-signed-in",
+                    "vars": {
+                      "pageName": "amp | purchase | vip+ sign-up | start",
+                      "subSection": "amp | purchase | vip+ sign-up",
+                      "events": "event37"
+                    }
+                  },
+                  "vipSignupComplete": {
+                    "on": "visible",
+                    "request": "pageView",
+                    "selector": "#vip-signup-complete",
+                    "vars": {
+                      "pageName": "amp | purchase | vip+ sign-up | complete",
+                      "subSection": "amp | purchase | vip+ sign-up",
+                      "events": "event38"
+                    }
+                  },
+                  "errorMessage": {
+                    "on": "visible",
+                    "request": "errorMessage",
+                    "selector": "#transaction-error-popup",
+                    "vars": {
+                      "pageName": "amp | purchase | payment",
+                      "subSection": "amp | purchase | payment",
+                      "purchaseErrorMessage": "${ampState(orderError)}",
+                      "events": "event75"
+                    }
+                  },
+                  "completePurchaseClick": {
+                    "on": "click",
+                    "request": "completePurchaseClick",
+                    "selector": ".submit-payment",
+                    "vars": {
+                      "events": ""
+                    }
+                  }
+                }
+              }
+        </script>
+    </amp-analytics>
+
+    <amp-analytics class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:1px;height:1px; type=googleanalytics>
+        <script type=application/json>
+            {
+                "vars": {
+                  "account": "UA-127150977-1"
+                },
+                "requests": {
+                  "customhost": "https://amp-actions-io-fandango.appspot.com",
+                  "customping": "${customhost}/pageview?clientId=CLIENT_ID(a)&pvid=PAGE_VIEW_ID",
+                  "customevent": "${customhost}/${eventAction}?clientId=CLIENT_ID(a)&pvid=PAGE_VIEW_ID",
+                  "gapageview": "${pageview}&pvid=PAGE_VIEW_ID",
+                  "gaevent": "${event}&pvid=PAGE_VIEW_ID"
+                },
+                "triggers": {
+                  "trackPageview": {
+                    "on": "visible",
+                    "request": [
+                      "gapageview",
+                      "customping"
+                    ]
+                  },
+                  "trackClickOnCompletePurchase": {
+                    "on": "click",
+                    "selector": ".submit-payment",
+                    "request": [
+                      "gaevent",
+                      "customevent"
+                    ],
+                    "vars": {
+                      "eventCategory": "ui-components",
+                      "eventAction": "complete-purchase-click"
+                    }
+                  },
+                  "trackOrderComplete": {
+                    "on": "visible",
+                    "selector": "#ticket-image",
+                    "request": [
+                      "gaevent",
+                      "customevent"
+                    ],
+                    "vars": {
+                      "eventCategory": "ui-components",
+                      "eventAction": "complete-purchase"
+                    }
+                  },
+                  "trackOrderCompleteAmpLayout": {
+                    "on": "visible",
+                    "selector": "#ticket-confirmation-code",
+                    "request": [
+                      "gaevent",
+                      "customevent"
+                    ],
+                    "vars": {
+                      "eventCategory": "ui-components",
+                      "eventAction": "complete-purchase-amp-layout"
+                    }
+                  }
+                }
+              }
+        </script>
+    </amp-analytics>
+
+
+    <!-- Original amp state minified, that way we have hopefully the same effect -->
+    <amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=flowState><script type=application/json>{"currentState": 0, "currentSubState": 0, "hasSeatMap": true, "hasAmenities": true, "hasQRCodeReader": false, "states":{"TICKETS_PAYMENT": 0, "CONFIRMATION": 1}, "subStates":{"CHOOSE_SEATS": 0, "CHOOSE_TICKETS": 1, "COMPLETE_PURCHASE": 2, "PURCHASE_CONFIRMATION": 3}, "limitTicketsReservedSeating": 9, "limitTicketsGA": 99}</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=cart><script type=application/json>{"totalPrice": 0.00, "totalFee": 0.00, "totalTickets": 0, "adult": 0, "senior": 0, "child": 0, "military": 0}</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=loyaltyConsts><script type=application/json>{"AMCProgramNames": [ "AMC Stubs Rewards", "AMC Stubs A-List Savings", "AMC Stubs Benefits", "AMC Stubs Program"]}</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=userState><script type=application/json>{"cart":{"seats": []}, "loyalty":{"number": "", "error": false, "valid": false}}</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=emailOptIn><script type=application/json>"on"</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=ticketInfo data-amp-replace="CLIENT_ID PAGE_VIEW_ID"src="https://sandbox-dot-amp-actions-io-fandango.appspot.com/ticket-info/3zW8bv4Q?clientId=CLIENT_ID(a)&pvid=PAGE_VIEW_ID"></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=transform><script type=application/json>{"scale": 1}</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=processingReservation><script type=application/json>false</script></amp-state><amp-state class=i-amphtml-layout-container i-amphtml-layout=container id=analytics><script type=application/json>{"environment": "fanampdev", "environmentGoogle": "UA-127150977-1"}</script></amp-state>
+
+</body>
+</html>
+
