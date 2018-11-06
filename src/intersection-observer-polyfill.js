@@ -298,7 +298,7 @@ export class IntersectionObserverPolyfill {
       this.mutationPass_ = new Pass(ampdoc.win, () => {
         console.log('src/intersection-observer-polyfill Got to the mutation pass! Here is the viewport', this.viewport_);
         if (this.viewport_) {
-          this.tick(this.viewport_.getRect());
+          this.tick(this.viewport_.getRect(), undefined, true);
         }
       });
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
@@ -340,8 +340,10 @@ export class IntersectionObserverPolyfill {
    * The iframe must be a non-scrollable iframe.
    * @param {!./layout-rect.LayoutRectDef} hostViewport
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
+   * @param {boolean} opt_calledFromMutationObserver whether this was called from a mutation observer
+   *    This nees to be done in order to get the correct layout of the elements, as Resource scheduler
    */
-  tick(hostViewport, opt_iframe) {
+  tick(hostViewport, opt_iframe, opt_calledFromMutationObserver) {
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
       hostViewport =
@@ -357,7 +359,7 @@ export class IntersectionObserverPolyfill {
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-          this.observeEntries_[i], hostViewport, opt_iframe);
+          this.observeEntries_[i], hostViewport, opt_iframe, opt_calledFromMutationObserver);
       if (change) {
         changes.push(change);
       }
@@ -380,24 +382,34 @@ export class IntersectionObserverPolyfill {
    * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
+   * @param {boolean} opt_calledFromMutationObserver whether this was called from a mutation observer
+   *    This nees to be done in order to get the correct layout of the elements, as Resource scheduler
+   *    Could be called too late, and not clear the layout cache.
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
+  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe, opt_calledFromMutationObserver) {
     const {element} = state;
 
     // Normalize container LayoutRect to be relative to page
+    let elementRect = null;
+    let owner = element.getOwner();
     let ownerRect = null;
+
 
     // If opt_iframe is provided, all LayoutRect has position relative to
     // the iframe.
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
-    const elementRect = element.getLayoutBox();
-    const owner = element.getOwner();
-    ownerRect = owner && owner.getLayoutBox();
-
-    debugger;
+    // If opt_calledFromMutationObserver is provided, we need to get our bounding rect rather
+    // Than our layout box, in order to avoid race conditions with the resource scheduler
+    if (opt_calledFromMutationObserver) {
+      elementRect = element.getBoundingClientRect();
+      ownerRect = owner && owner.getBoundingClientRect();;
+    } else {
+      elementRect = element.getLayoutBox();
+      ownerRect = owner && owner.getLayoutBox();
+    }
 
     console.log('getValidIntersectionChangeEntry!', state, elementRect, owner, ownerRect);
 
