@@ -40,9 +40,10 @@ export class Expander {
    * @param {boolean=} opt_sync If the method should resolve syncronously.
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
+   * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
   constructor(variableSource, opt_bindings, opt_collectVars, opt_sync,
-    opt_whiteList) {
+    opt_whiteList, opt_noEncode) {
 
     /** @const {?../variable-source.VariableSource} */
     this.variableSource_ = variableSource;
@@ -59,6 +60,9 @@ export class Expander {
 
     /**@const {!Object<string, boolean>|undefined} */
     this.whiteList_ = opt_whiteList;
+
+    /**@const {boolean|undefined} */
+    this.noEncode_ = opt_noEncode;
   }
 
 
@@ -294,10 +298,11 @@ export class Expander {
 
         if (val == null) {
           result = '';
+        } else if (this.noEncode_ || NOENCODE_WHITELIST[name]) {
+          result = val;
         } else {
-          result = NOENCODE_WHITELIST[name] ? val : encodeURIComponent(val);
+          result = encodeURIComponent(val);
         }
-
         return result;
       }).catch(e => {
         rethrowAsync(e);

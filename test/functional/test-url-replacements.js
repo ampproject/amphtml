@@ -1747,6 +1747,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
         expect(expanded).to.equal('abc:X:Y');
       });
     });
+
+    it('should not encode values returned by expandStringAsync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+      return urlReplacements.expandStringAsync(
+          'title=TITLE',
+          {'TITLE': Promise.resolve('test with spaces')},
+      ).then(expanded => {
+        expect(expanded).to.equal('title=test with spaces');
+      });
+    });
   });
 
   describe('Expanding Input Value', () => {
