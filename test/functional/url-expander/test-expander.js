@@ -25,12 +25,10 @@ describes.realWin('Expander', {
   },
 }, env => {
 
-  let expander;
   let variableSource;
 
   beforeEach(() => {
     variableSource = new GlobalVariableSource(env.ampdoc);
-    expander = new Expander(variableSource);
   });
 
 
@@ -47,14 +45,14 @@ describes.realWin('Expander', {
 
     it('should handle empty', () => {
       const url = 'http://www.google.com/?test=FAKE(__ga)';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(url);
     });
 
     it('should return single item', () => {
       const url = 'http://www.google.com/?test=RANDOM';
       const expected = 'http://www.google.com/?test=0.1234';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(expected);
     });
 
@@ -62,28 +60,28 @@ describes.realWin('Expander', {
     it('should sort basic case', () => {
       const url = 'http://www.google.com/?test=ABCD&BAR&foo=RANDOM';
       const expected = 'http://www.google.com/?test=four&BAR&foo=0.1234';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(expected);
     });
 
     it('will always prefer the first match in overlap', () => {
       const url = 'http://www.google.com/?test=ABCDEFGHIJKLMNOPQRS';
       const expected = 'http://www.google.com/?test=tenKLMNOPQRS';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(expected);
     });
 
     it('will prefer longer match if same start index', () => {
       const url = 'http://www.google.com/?test=ABCD';
       const expected = 'http://www.google.com/?test=four';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(expected);
     });
 
     it('should handle keywords next to each other', () => {
       const url = 'http://www.google.com/?test=ABCDRANDOM';
       const expected = 'http://www.google.com/?test=four0.1234';
-      return expect(expander.expand(url, mockBindings))
+      return expect(new Expander(variableSource, mockBindings).expand(url))
           .to.eventually.equal(expected);
     });
   });
@@ -95,7 +93,7 @@ describes.realWin('Expander', {
       ABCD: () => 'four',
     };
 
-    function createExpanderWithWhitelist(whitelist) {
+    function createExpanderWithWhitelist(whitelist, mockBindings) {
       env.win.document.head.appendChild(
           createElementWithAttributes(env.win.document, 'meta', {
             name: 'amp-allowed-url-macros',
@@ -103,31 +101,30 @@ describes.realWin('Expander', {
           }));
 
       variableSource = new GlobalVariableSource(env.ampdoc);
-      return new Expander(variableSource);
+      return new Expander(variableSource, mockBindings);
     }
 
     it('should not replace unwhitelisted RANDOM', () => {
-      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL');
+      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL',
+          mockBindings);
       const url = 'http://www.google.com/?test=RANDOM';
       const expected = 'http://www.google.com/?test=RANDOM';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
+      return expect(expander.expand(url)).to.eventually.equal(expected);
     });
 
     it('should replace whitelisted ABCD', () => {
-      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL');
+      const expander = createExpanderWithWhitelist('ABC,ABCD,CANONICAL',
+          mockBindings);
       const url = 'http://www.google.com/?test=ABCD';
       const expected = 'http://www.google.com/?test=four';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
+      return expect(expander.expand(url)).to.eventually.equal(expected);
     });
 
     it('should not replace anything with empty whitelist', () => {
-      const expander = createExpanderWithWhitelist('');
+      const expander = createExpanderWithWhitelist('', mockBindings);
       const url = 'http://www.google.com/?test=ABCD';
       const expected = 'http://www.google.com/?test=ABCD';
-      return expect(expander.expand(url, mockBindings))
-          .to.eventually.equal(expected);
+      return expect(expander.expand(url)).to.eventually.equal(expected);
     });
 
   });
@@ -248,8 +245,8 @@ describes.realWin('Expander', {
       sharedTestCases.forEach(test => {
         const {description, input, output} = test;
         it(description, () =>
-          expect(expander.expand(input, mockBindings))
-              .to.eventually.equal(output)
+          expect(new Expander(variableSource, mockBindings)
+              .expand(input)).to.eventually.equal(output)
         );
       });
 
@@ -257,28 +254,28 @@ describes.realWin('Expander', {
         it('should handle real urls', () => {
           const url = 'http://www.amp.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
           const expected = 'http://www.amp.google.com/?client=amp-GA12345&canon=www.google.com&random=123456';
-          return expect(expander.expand(url, mockBindings))
-              .to.eventually.equal(expected);
+          return expect(new Expander(variableSource, mockBindings)
+              .expand(url)).to.eventually.equal(expected);
         });
 
         it('throws on bad input with back ticks', () => {
           const url = 'CONCAT(bad`hello`, world)';
           allowConsoleError(() => { expect(() => {
-            expander.expand(url, mockBindings);
+            new Expander(variableSource, mockBindings).expand(url);
           }).to.throw(/bad/); });
         });
 
         it('should handle tokens with parenthesis next to each other', () => {
           const url = 'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
           const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
-          return expect(expander.expand(url, mockBindings))
+          return expect(new Expander(variableSource, mockBindings).expand(url))
               .to.eventually.equal(expected);
         });
 
         it('should not encode NOENCODE_WHITELIST', () => {
           const url = 'ANCESTOR_ORIGIN';
           const expected = 'https://www.google.com@foo';
-          return expect(expander.expand(url, mockBindings))
+          return expect(new Expander(variableSource, mockBindings).expand(url))
               .to.eventually.equal(expected);
         });
       });
@@ -288,18 +285,18 @@ describes.realWin('Expander', {
       sharedTestCases.forEach(test => {
         const {description, input, output} = test;
         it(description, () =>
-          expect(expander.expand(input, mockBindings,
-              /* opt_collectVars */ undefined, /* opt_sync */ true))
-              .to.equal(output)
-        );
+          expect(new Expander(variableSource, mockBindings,
+              /* opt_collectVars */ undefined, /* opt_sync */ true)
+              .expand(input)).to.equal(output));
       });
 
       describe('unique cases', () => {
         it('throws on bad input with back ticks', () => {
           const url = 'CONCAT(bad`hello`, world)';
           allowConsoleError(() => { expect(() => {
-            expander.expand(url, mockBindings, /* opt_collectVars */ undefined,
-                /* opt_sync */ true);
+            new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url);
           }).to.throw(/bad/); });
         });
 
@@ -309,9 +306,9 @@ describes.realWin('Expander', {
           const url = 'ASYNC';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings,
-                /* opt_collectVars */ undefined, /* opt_sync */ true))
-                .to.equal(expected);
+            expect(new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url)).to.equal(expected);
           });
         });
 
@@ -319,9 +316,9 @@ describes.realWin('Expander', {
           const url = 'ASYNCFN';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings,
-                /* opt_collectVars */ undefined, /* opt_sync */ true))
-                .to.equal(expected);
+            expect(new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url)).to.equal(expected);
           });
         });
 
@@ -329,9 +326,9 @@ describes.realWin('Expander', {
           const url = 'ASYNCFN(foo)';
           const expected = '';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings,
-                /* opt_collectVars */ undefined, /* opt_sync */ true))
-                .to.equal(expected);
+            expect(new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url)).to.equal(expected);
           });
         });
 
@@ -339,9 +336,9 @@ describes.realWin('Expander', {
           const url = 'http://www.google.com/?test=RANDOMASYNCFN(foo)UPPERCASE(foo)';
           const expected = 'http://www.google.com/?test=123456FOO';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings,
-                /* opt_collectVars */ undefined, /* opt_sync */ true))
-                .to.equal(expected);
+            expect(new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url)).to.equal(expected);
           });
         });
 
@@ -349,9 +346,9 @@ describes.realWin('Expander', {
           const url = 'CONCAT(foo, ASYNCFN(bar))UPPERCASE(foo)';
           const expected = 'foo-FOO';
           allowConsoleError(() => {
-            expect(expander.expand(url, mockBindings,
-                /* opt_collectVars */ undefined, /* opt_sync */ true))
-                .to.equal(expected);
+            expect(new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ undefined, /* opt_sync */ true)
+                .expand(url)).to.equal(expected);
           });
         });
       });
@@ -402,7 +399,8 @@ describes.realWin('Expander', {
           const {description, input, output} = test;
           it(description, function*() {
             const vars = {};
-            expander.expand(input, mockBindings, /* opt_collectVars */ vars);
+            new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ vars).expand(input);
             yield macroTask();
             const expected = output.both || output.async;
             expect(vars).to.deep.equal(expected);
@@ -412,7 +410,8 @@ describes.realWin('Expander', {
         it('should handle async functions', function*() {
           const vars = {};
           const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
-          expander.expand(input, mockBindings, /* opt_collectVars */ vars);
+          new Expander(variableSource, mockBindings, /* opt_collectVars */ vars)
+              .expand(input);
           yield macroTask();
           expect(vars).to.deep.equal({
             'CLIENT_ID(__ga)': 'amp-GA12345',
@@ -426,8 +425,8 @@ describes.realWin('Expander', {
           const {description, input, output} = test;
           it(description, () => {
             const vars = {};
-            expander.expand(input, mockBindings, /* opt_collectVars */ vars,
-                /* opt_sync */ true);
+            new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ vars, /* opt_sync */ true).expand(input);
             const expected = output.both || output.sync;
             expect(vars).to.deep.equal(expected);
           });
@@ -437,8 +436,8 @@ describes.realWin('Expander', {
           const vars = {};
           const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
           allowConsoleError(() => {
-            expander.expand(input, mockBindings, /* opt_collectVars */ vars,
-                /* opt_sync */ true);
+            new Expander(variableSource, mockBindings,
+                /* opt_collectVars */ vars, /* opt_sync */ true).expand(input);
           });
           expect(vars).to.deep.equal({
             'UPPERCASE(foo)': 'FOO',
@@ -451,11 +450,12 @@ describes.realWin('Expander', {
       it('should only resolve values in the whitelist', () => {
         const url = 'UPPERCASE(foo)RANDOMLOWERCASE(BAR)';
         const whitelist = {RANDOM: true};
-        return expect(expander.expand(url, mockBindings,
+        return expect(new Expander(variableSource, mockBindings,
             /* opt_collectVars */ undefined,
             /* opt_sync */ false,
             /* opt_whiteList */ whitelist
-        )).to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
+        ).expand(url))
+            .to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
       });
     });
   });
