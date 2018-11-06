@@ -275,16 +275,8 @@ const PlaceholderBackground = html =>
   html`<div class="amp-video-docked-placeholder-background">
     <div class="amp-video-docked-placeholder-background-poster">
     </div>
+    <div class="amp-video-docked-placeholder-icon"></div>
   </div>`;
-
-
-/**
- * @param {!HtmlLiteralTagDef} html
- * @return {!Element}
- * @private
- */
-const PlaceholderIcon = html =>
-  html`<div class="amp-video-docked-placeholder-icon"></div>`;
 
 
 /**
@@ -332,6 +324,9 @@ const CONTROLS_BREAKPOINTS = {
   1: 'amp-small',
   300: 'amp-large',
 };
+
+// TODO(alanorozco): PLACEHOLDER_BREAKPOINTS for icon size. Currently it looks
+// a bit too large on mobile screens.
 
 const PLACEHOLDER_ICON_WIDTH = 48;
 const PLACEHOLDER_ICON_MARGIN = 40;
@@ -449,7 +444,8 @@ export class VideoDocking {
           once(() => this.append_(PlaceholderBackground(html)));
 
     /** @private {!Element} */
-    this.getPlaceholderIcon_ = once(() => this.append_(PlaceholderIcon(html)));
+    this.getPlaceholderIcon_ =
+          once(() => this.getPlaceholderBackground_().lastElementChild);
 
     /** @private {?../../video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
@@ -799,8 +795,11 @@ export class VideoDocking {
    * @private
    */
   getTargetFor_(video) {
+    if (!this.isValidScrollingDirection_()) {
+      return null;
+    }
     if (this.isDragging_ ||
-        this.ignoreDueToSize_(video) ||
+        !this.isValidSize_(video) ||
         this.ignoreBecauseAnotherDocked_(video) ||
         this.ignoreDueToNotPlayingManually_(video) ||
         this.undockBecauseVisible_(video)) {
@@ -814,6 +813,15 @@ export class VideoDocking {
       return posY;
     }
     return {posY, posX: this.getRelativeX_()};
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isValidScrollingDirection_() {
+    return this.currentlyDocked_ ||
+        this.scrollDirection_ == Direction.UP;
   }
 
   /**
@@ -841,9 +849,17 @@ export class VideoDocking {
    * @private
    */
   getFixedSlotLayoutBox_() {
-    const rect = dev().assertElement(this.getSlot_()).getLayoutBox();
+    return this.getFixedLayoutBox_(dev().assertElement(this.getSlot_()));
+  }
+
+  /**
+   * @param {!Element|!../../base-element.BaseElement} element
+   * @return {!../../layout-rect.LayoutRectDef}
+   * @private
+   */
+  getFixedLayoutBox_(element) {
     const dy = -this.viewport_.getScrollTop();
-    return moveLayoutRect(rect, /* dx */ 0, dy);
+    return moveLayoutRect(element.getLayoutBox(), /* dx */ 0, dy);
   }
 
   /**
@@ -865,10 +881,13 @@ export class VideoDocking {
    */
   updateOnResize_(video) {
     const target = this.getTargetFor_(video);
-    if (!target) {
+    if (target) {
+      this.dock_(video, target);
       return;
     }
-    this.dock_(video, target);
+    if (this.currentlyDocked_) {
+      this.undock_(this.currentlyDocked_.video);
+    }
   }
 
   /**
@@ -926,17 +945,16 @@ export class VideoDocking {
   /**
    * @param  {!../../video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
+   * @private
    */
-  ignoreDueToSize_(video) {
+  isValidSize_(video) {
     const {width, height} = video.getLayoutBox();
-    if ((width / height) < 1) {
+    if ((width / height) < (1 - FLOAT_TOLERANCE)) {
       complainAboutPortrait(video.element);
-      return true;
+      return false;
     }
-    if (this.getAreaWidth_() < MIN_VIEWPORT_WIDTH) {
-      return true;
-    }
-    return false;
+    return this.getAreaWidth_() >= MIN_VIEWPORT_WIDTH &&
+        this.getAreaHeight_() >= (height * REVERT_TO_INLINE_RATIO);
   }
 
   /**
@@ -1019,6 +1037,14 @@ export class VideoDocking {
    */
   getAreaWidth_() {
     return this.getRightEdge_() - this.getLeftEdge_();
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getAreaHeight_() {
+    return this.getBottomEdge_() - this.getTopEdge_();
   }
 
   /**
@@ -1295,12 +1321,11 @@ export class VideoDocking {
 
     this.placedAt_ = {x, y, scale};
 
-
     const transitionTiming =
-        // Auto-transitions are supposed to smooth-out PositionObserver
-        // frequency, so it makes sense to use 'linear'. When the transition
-        // duration is otherwise larger, 'ease-in' looks much nicer.
-        transitionDurationMs > 200 ? 'ease-in' : 'linear';
+    // Auto-transitions are supposed to smooth-out PositionObserver
+    // frequency, so it makes sense to use 'linear'. When the transition
+    // duration is otherwise larger, 'ease-in' looks much nicer.
+    transitionDurationMs > 200 ? 'ease-in' : 'linear';
 
     const {element} = video;
 
@@ -1308,6 +1333,19 @@ export class VideoDocking {
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
     const placeholderIcon = this.getPlaceholderIcon_();
+
+    const tr = this.ampdoc_.win.getComputedStyle(internalElement)['transform'];
+
+    if (/-[0-9]+.$/.test(tr) || y < 0) {
+      console.log('placeAt', {
+        x,
+        y,
+        scale,
+        step,
+        transitionDurationMs,
+        tr,
+      });
+    }
 
     // Setting explicit dimensions is needed to match the video's aspect
     // ratio. However, we only do this once to prevent jank in subsequent
@@ -1358,6 +1396,7 @@ export class VideoDocking {
 
       this.setPosterImage_(video);
 
+      setTransitionTiming(placeholderIcon);
       setImportantStyles(placeholderIcon, {
         'transform': transform(placeholderIconX, /* y */ 0, /* scale */ 1),
       });
@@ -1393,7 +1432,7 @@ export class VideoDocking {
       return;
     }
     const {x, y, scale} = this.placedAt_;
-    const fixedScrollTop = this.getFixedScrollTop_(video);
+    const {top: fixedScrollTop} = this.getFixedLayoutBox_(video);
     if (y == fixedScrollTop) {
       return;
     }
@@ -1425,9 +1464,9 @@ export class VideoDocking {
   getElementsOnPlaceholderArea_() {
     return [
       this.getPlaceholderBackground_(),
-      this.getPlaceholderIcon_(),
     ];
   }
+
   /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    */
@@ -1732,7 +1771,7 @@ export class VideoDocking {
 
     const {x, y} = pointerCoords(e);
     offset.x = x - startX;
-    offset.y = y - startY;
+    offset.y = 0;
 
     // Prevents dragging misfires.
     const offsetDist = Math.sqrt(Math.pow(offset.x, 2) + Math.pow(offset.y, 2));
@@ -1863,23 +1902,20 @@ export class VideoDocking {
     let closestCornerY = null;
 
     [RelativeX.LEFT, RelativeX.RIGHT].forEach(posX => {
-      [RelativeY.TOP, RelativeY.BOTTOM].forEach(posY => {
-        const cornerX = posX == RelativeX.LEFT ?
-          this.getLeftEdge_() :
-          this.getRightEdge_();
-        const cornerY = posY == RelativeY.TOP ?
-          this.getTopEdge_() :
-          this.getBottomEdge_();
-        const distance = Math.sqrt(
-            Math.pow(cornerX - centerX, 2) +
-            Math.pow(cornerY - centerY, 2));
-        if (minDistance === null ||
-            distance < minDistance) {
-          minDistance = distance;
-          closestCornerY = posY;
-          closestCornerX = posX;
-        }
-      });
+      const posY = RelativeY.TOP;
+      const cornerX = posX == RelativeX.LEFT ?
+        this.getLeftEdge_() :
+        this.getRightEdge_();
+      const cornerY = this.getTopEdge_();
+      const distance = Math.sqrt(
+          Math.pow(cornerX - centerX, 2) +
+          Math.pow(cornerY - centerY, 2));
+      if (minDistance === null ||
+          distance < minDistance) {
+        minDistance = distance;
+        closestCornerY = posY;
+        closestCornerX = posX;
+      }
     });
 
     const target = {
@@ -2002,7 +2038,8 @@ export class VideoDocking {
     const {x, y, targetWidth, initialY} = this.getTargetArea_(video, target);
     const currentX = mapStep(step, left, x);
     const currentWidth = mapStep(step, width, targetWidth);
-    const currentY = mapStep(step, initialY, this.calculateFinalY_(video, y));
+    const currentY = mapStep(step, initialY,
+        this.calculateFinalY_(video, y, step));
     const scale = currentWidth / width;
     return {x: currentX, y: currentY, scale};
   }
@@ -2022,30 +2059,23 @@ export class VideoDocking {
   /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {number} targetY
+   * @param {number} step
    * @return {number}
    * @private
    */
-  calculateFinalY_(video, targetY) {
-    if (this.scrollDirection_ == Direction.UP) {
+  calculateFinalY_(video, targetY, step) {
+    if (this.scrollDirection_ == Direction.UP ||
+        step > FLOAT_TOLERANCE) {
       return targetY;
     }
-    return this.getFixedScrollTop_(video);
-  }
-
-  /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
-   * @return {number}
-   * @private
-   */
-  getFixedScrollTop_(video) {
-    const {top} = video.getLayoutBox();
-    return top - this.viewport_.getScrollTop();
+    return this.getFixedLayoutBox_(video.element).top;
   }
 
   /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
    * @param {number=} unusedDismissDirX
    * @param {number=} unusedDismissDirY
+   * @return {!Promise}
    * @private
    */
   undock_(video, unusedDismissDirX = 0, unusedDismissDirY = 0) {
@@ -2058,21 +2088,22 @@ export class VideoDocking {
     const {target} = dev().assert(this.currentlyDocked_);
     const {x, y, scale} = this.getDims_(video, target, step);
 
-    this.placeAt_(video, x, y, scale, step)
+    return this.placeAt_(video, x, y, scale, step)
         .then(() => this.resetOnUndock_(video));
   }
 
   /**
    * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @return {!Promise}
    * @private
    */
   resetOnUndock_(video) {
     const {element} = video;
     const internalElement = getInternalVideoElementFor(element);
 
-    video.mutateElement(() => {
+    return video.mutateElement(() => {
       this.hideControls_();
-      video.showControls();
+      // video.showControls();
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
       const overlay = this.getOverlay_();
@@ -2106,7 +2137,7 @@ export class VideoDocking {
       this.placedAt_ = null;
       this.sizedAt_ = null;
       this.currentlyDocked_ = null;
-    })
+    });
   }
 
   /**
