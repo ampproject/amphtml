@@ -207,7 +207,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
    */
   createCodeBlob_() {
     //TODO(nainar): This code should be moved into a self-
-    // contained file. 
+    // contained file.
     // See issue: https://github.com/ampproject/amphtml/issues/19155
     return `
     registerAnimator('anim${++animIdCounter}', class {
