@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.35 */
+/** Version: 0.1.22.37 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -4013,7 +4013,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.35',
+    '_client': 'SwG 0.1.22.37',
   });
 }
 
@@ -4080,7 +4080,7 @@ class AnalyticsContext {
     this.utmSource_ = (data[4] == null) ? null : data[4];
 
     /** @private {?string} */
-    this.utmName_ = (data[5] == null) ? null : data[5];
+    this.utmCampaign_ = (data[5] == null) ? null : data[5];
 
     /** @private {?string} */
     this.utmMedium_ = (data[6] == null) ? null : data[6];
@@ -4154,15 +4154,15 @@ class AnalyticsContext {
   /**
    * @return {?string}
    */
-  getUtmName() {
-    return this.utmName_;
+  getUtmCampaign() {
+    return this.utmCampaign_;
   }
 
   /**
    * @param {string} value
    */
-  setUtmName(value) {
-    this.utmName_ = value;
+  setUtmCampaign(value) {
+    this.utmCampaign_ = value;
   }
 
   /**
@@ -4231,7 +4231,7 @@ class AnalyticsContext {
       this.transactionId_,  // field 2 - transaction_id
       this.referringOrigin_,  // field 3 - referring_origin
       this.utmSource_,  // field 4 - utm_source
-      this.utmName_,  // field 5 - utm_name
+      this.utmCampaign_,  // field 5 - utm_campaign
       this.utmMedium_,  // field 6 - utm_medium
       this.sku_,  // field 7 - sku
       this.readyToPay_,  // field 8 - ready_to_pay
@@ -10730,8 +10730,6 @@ class PayClientBindingPayjs {
     /** @private @const {!RedirectVerifierHelper} */
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
-    // TODO(dvoytenko): Pass activities instance.
-    // TODO(dvoytenko): Pass redirect verifier key.
     /** @private @const {!PaymentsAsyncClient} */
     this.client_ = this.createClient_({
       environment: 'PRODUCTION',
@@ -10751,7 +10749,11 @@ class PayClientBindingPayjs {
    * @private
    */
   createClient_(options, handler) {
-    return new PaymentsAsyncClient(options, handler);
+    return new PaymentsAsyncClient(
+        options,
+        handler,
+        /* useIframe */ false,
+        this.activityPorts_);
   }
 
   /** @override */
@@ -11792,11 +11794,11 @@ class AnalyticsService {
   setContext_() {
     const utmParams = parseQueryString$1(this.getQueryString_());
     this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    const name = utmParams['utm_name'];
+    const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
-    if (name) {
-      this.context_.setUtmName(name);
+    if (campaign) {
+      this.context_.setUtmCampaign(campaign);
     }
     if (medium) {
       this.context_.setUtmMedium(medium);
