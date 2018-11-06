@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -65,6 +66,9 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
     installVariableService(win);
+
+    // TODO(ccordry): remove this with linker-meta-opt-in experiment.
+    sandbox.stub(experiments, 'isExperimentOn').returns(true);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {
@@ -373,7 +377,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should add linker for Safari 12', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -394,7 +397,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should only add one linker for auto opt-in', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -415,7 +417,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should not add linker for not google analytics vendor', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -433,7 +434,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should not add linker for Safari 11', () => {
       stubPlatform(true, 11);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -450,7 +450,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should not add linker for Chrome', () => {
       stubPlatform(false, 66);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -467,7 +466,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should not add linker if experiment is off', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(false);
       const config = {
         linkers: {
           testLinker1: {

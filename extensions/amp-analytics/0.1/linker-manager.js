@@ -204,7 +204,7 @@ export class LinkerManager {
 
     const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
         'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
-    if (optInMeta.hasAttribute(LINKER_CREATED) ||
+    if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
         this.type_ !== 'googleanalytics') {
       return false;
     }
