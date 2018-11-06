@@ -160,6 +160,20 @@ export class AmpList extends AMP.BaseElement {
       this.element.setAttribute('aria-live', 'polite');
     }
 
+    // If a placeholder exists and it's taller than amp-list, immediately
+    // schedule the attempt to resize. In layoutCallback this would already
+    // be too late as the placeholder is already displayed and possibly
+    // cut off if the amp-list size initially set is less than the placeholder
+    // height.
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      const scrollHeight = placeholder./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
+      if (scrollHeight > height) {
+        this./*OK*/changeHeight(scrollHeight);
+      }
+    }
+
     // auto-resize is deprecated and will be removed per deprecation schedule
     // It will relaunched under a new attribute (resizable-children) soon.
     // please see https://github.com/ampproject/amphtml/issues/18849
@@ -213,11 +227,6 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
-    // If a placeholder exists and it's taller than amp-list, attempt a resize.
-    const placeholder = this.getPlaceholder();
-    if (placeholder) {
-      this.attemptToFit_(placeholder);
-    }
     return this.fetchList_();
   }
 
