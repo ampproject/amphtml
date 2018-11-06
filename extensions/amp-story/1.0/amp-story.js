@@ -345,10 +345,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     if (this.isDesktop_()) {
-      const uiState =
-          isExperimentOn(this.win, 'amp-story-scroll') ?
-            UIType.SCROLL : UIType.DESKTOP;
-      this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+      this.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
     }
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -1255,12 +1252,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     this.updateViewportSizeStyles_();
 
-    let uiState = UIType.MOBILE;
-
-    if (this.isDesktop_()) {
-      uiState = isExperimentOn(this.win, 'amp-story-scroll') ?
-        UIType.SCROLL : UIType.DESKTOP;
-    }
+    const uiState = this.isDesktop_() ? UIType.DESKTOP : UIType.MOBILE;
 
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
@@ -1311,16 +1303,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.vsync_.mutate(() => {
-      this.element.removeAttribute('desktop');
-      this.element.removeAttribute('scroll');
-    });
-
     switch (uiState) {
       case UIType.MOBILE:
         // Preloads and prerenders the share menu as the share button gets
         // visible on the mobile UI. No-op if already built.
         this.shareMenu_.build();
+        this.vsync_.mutate(() => {
+          this.element.removeAttribute('desktop');
+        });
         break;
       case UIType.DESKTOP:
         this.setDesktopPositionAttributes_(this.activePage_);
@@ -1334,11 +1324,6 @@ export class AmpStory extends AMP.BaseElement {
         if (this.activePage_) {
           this.updateBackground_(this.activePage_.element, /* initial */ true);
         }
-        break;
-      case UIType.SCROLL:
-        this.vsync_.mutate(() => {
-          this.element.setAttribute('scroll', '');
-        });
         break;
     }
   }

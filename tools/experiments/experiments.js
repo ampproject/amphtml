@@ -249,12 +249,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-scroll',
-    name: 'Scrollable experience for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/16465',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
-  },
-  {
     id: 'amp-story-hold-to-pause',
     name: 'Hold to pause an amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/18714',

@@ -52,7 +52,6 @@ export const getStoreService = win => {
 export const UIType = {
   MOBILE: 0,
   DESKTOP: 1,
-  SCROLL: 2,
 };
 
 
