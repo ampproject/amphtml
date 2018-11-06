@@ -2456,6 +2456,7 @@ attr_lists: {
   attrs: { name: "filter" }
   attrs: { name: "flood-color" }
   attrs: { name: "flood-opacity" }
+  attrs: { name: "focusable" }
   attrs: { name: "font-family" }
   attrs: { name: "font-size" }
   attrs: { name: "font-size-adjust" }
