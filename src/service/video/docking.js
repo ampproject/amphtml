@@ -53,6 +53,8 @@ import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';
 import {
+  assertDoesNotContainDisplay,
+  computedStyle,
   px,
   resetStyles,
   setImportantStyles,
@@ -1310,6 +1312,8 @@ export class VideoDocking {
       return Promise.resolve();
     }
 
+    step = Math.max(0, Math.min(1, step));
+
     // TODO(alanorozco): Hide controls immediately when a new placement action
     // occurs.
 
@@ -1322,10 +1326,10 @@ export class VideoDocking {
     this.placedAt_ = {x, y, scale};
 
     const transitionTiming =
-    // Auto-transitions are supposed to smooth-out PositionObserver
-    // frequency, so it makes sense to use 'linear'. When the transition
-    // duration is otherwise larger, 'ease-in' looks much nicer.
-    transitionDurationMs > 200 ? 'ease-in' : 'linear';
+        // Auto-transitions are supposed to smooth-out PositionObserver
+        // frequency, so it makes sense to use 'linear'. When the transition
+        // duration is otherwise larger, 'ease-in' looks much nicer.
+        transitionDurationMs > 200 ? 'ease-in' : 'linear';
 
     const {element} = video;
 
@@ -1333,19 +1337,6 @@ export class VideoDocking {
     const shadowLayer = this.getShadowLayer_();
     const overlay = this.getOverlay_();
     const placeholderIcon = this.getPlaceholderIcon_();
-
-    const tr = this.ampdoc_.win.getComputedStyle(internalElement)['transform'];
-
-    if (/-[0-9]+.$/.test(tr) || y < 0) {
-      console.log('placeAt', {
-        x,
-        y,
-        scale,
-        step,
-        transitionDurationMs,
-        tr,
-      });
-    }
 
     // Setting explicit dimensions is needed to match the video's aspect
     // ratio. However, we only do this once to prevent jank in subsequent
@@ -1428,17 +1419,28 @@ export class VideoDocking {
     if (step >= FLOAT_TOLERANCE / 2) {
       return;
     }
+
     if (!this.placedAt_) {
       return;
     }
+
     const {x, y, scale} = this.placedAt_;
-    const {top: fixedScrollTop} = this.getFixedLayoutBox_(video);
+    const {top: fixedScrollTop, height} = this.getFixedLayoutBox_(video);
+
     if (y == fixedScrollTop) {
       return;
     }
-    const maxTransitionDurationMs = 200;
-    const transitionDurationMs = Math.min(maxTransitionDurationMs,
-        Math.abs(y - fixedScrollTop) / 2);
+
+    if (fixedScrollTop < -(height - height * REVERT_TO_INLINE_RATIO)) {
+      return;
+    }
+
+    const maxTransitionDurationMs = 150;
+    const tentativeTransitionDurationMs = Math.abs(y - fixedScrollTop) / 2;
+
+    const transitionDurationMs = Math.min(
+        maxTransitionDurationMs,
+        tentativeTransitionDurationMs);
 
     return this.placeAt_(
         video, x, fixedScrollTop, scale, step, transitionDurationMs);
