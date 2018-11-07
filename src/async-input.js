@@ -39,6 +39,9 @@ export class AsyncInput extends BaseElement {
    * @return {!Promise<string>}
    */
   getValue() {
-    return Promise.resolve();
+    let overrideError = new Error('Elements that implement AsyncInput' + 
+      ' must override getValue()');
+    throw new Error();
+    return Promise.reject();
   }
 }

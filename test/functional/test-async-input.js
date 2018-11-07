@@ -36,9 +36,9 @@ describes.realWin('BaseElement', {amp: true}, env => {
     expect(element).to.be.ok;
   });
 
-  it('should return a promise for getValue()', () => {
-    return element.getValue().then(() => {
-      expect(true).to.be.ok;
+  it('should throw an error in getValue() to force overrides', () => {
+    return allowConsoleError(() => {
+      expect(element.getValue).to.throw();
     });
   });
 
