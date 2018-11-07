@@ -883,15 +883,19 @@ class TransferLayerBody {
     const bodyAttrs = body.attributes;
     const layerAttrs = layer.attributes;
     for (let i = 0; i < bodyAttrs.length; i++) {
-      const attr = bodyAttrs[i];
-      layer.setAttribute(attr.name, attr.value);
+      const {name, value} = bodyAttrs[i];
+      if (name === 'style') {
+        continue;
+      }
+      layer.setAttribute(name, value);
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
-      if (!body.hasAttribute(name)) {
-        layer.removeAttribute(name);
-        i--;
+      if (name === 'style' || body.hasAttribute(name)) {
+        continue;
       }
+      layer.removeAttribute(name);
+      i--;
     }
   }
 
