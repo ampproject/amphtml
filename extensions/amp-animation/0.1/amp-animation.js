@@ -154,19 +154,6 @@ export class AmpAnimation extends AMP.BaseElement {
       });
     }
 
-    // See if page has a PositionObserver in it associated with this animation.
-    const positionObservers =
-    this.element.ownerDocument.querySelectorAll('amp-position-observer');
-    positionObservers.forEach(observer => {
-      const onAttr = observer.getAttribute('on');
-      // We are only concerned with positionObservers that are associated with
-      // this animation and are controlling it using the seekTo event.
-      if (onAttr.indexOf(this.element.id) !== -1 &&
-        onAttr.indexOf('seekTo') !== -1) {
-        this.hasPositionObserver_ = true;
-      }
-    });
-
     // Actions.
     this.registerAction('start',
         this.startAction_.bind(this), ActionTrust.LOW);
@@ -304,7 +291,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    return this.createRunnerIfNeeded_().then(() => {
+    this.hasPositionObserver_ = !!invocation.caller &&
+      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
+    const viewportData = (invocation && invocation.event) ?
+      invocation.event.additionalViewportData : null;
+    return this.createRunnerIfNeeded_(null, viewportData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -419,12 +410,14 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise}
    * @private
    */
-  createRunnerIfNeeded_(opt_args) {
+  createRunnerIfNeeded_(opt_args, opt_viewportData) {
     if (!this.runnerPromise_) {
-      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+      this.runnerPromise_ = this.createRunner_(
+          opt_args, opt_viewportData).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -458,10 +451,11 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_(opt_args) {
+  createRunner_(opt_args, opt_viewportData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
@@ -484,7 +478,8 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, this.hasPositionObserver_, args);
+      return builder.createRunner(configJson,
+          this.hasPositionObserver_, args, opt_viewportData);
     });
   }
 

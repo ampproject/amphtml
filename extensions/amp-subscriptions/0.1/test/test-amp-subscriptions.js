@@ -443,7 +443,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
@@ -455,7 +455,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.reject());
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
-          'reportPlatformFailure');
+          'reportPlatformFailureAndFallback');
       const promise = subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
@@ -565,12 +565,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       yield subscriptionService.initialize_();
       // Local platform store not created until initialization.
       const platformStore = subscriptionService.platformStore_;
-      sandbox.stub(platformStore, 'reportPlatformFailure');
+      sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
       rejecter();
       // Wait for sendMessageAwaitResponse() to be rejected.
       yield sendMessageAwaitResponsePromise;
-      // reportPlatformFailure() triggers the fallback entitlement.
-      expect(platformStore.reportPlatformFailure).calledWith('local');
+      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
+      expect(platformStore.reportPlatformFailureAndFallback)
+          .calledWith('local');
     });
   });
 

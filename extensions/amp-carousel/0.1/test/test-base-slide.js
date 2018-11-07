@@ -76,7 +76,11 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
       element.setAttribute('loop', '');
     }
     if (options.autoplay) {
-      element.setAttribute('autoplay', '');
+      if (!options.autoplayLoops) {
+        element.setAttribute('autoplay', '');
+      } else {
+        element.setAttribute('autoplay', options.autoplayLoops);
+      }
     }
     if (options.delay) {
       element.setAttribute('delay', options.delay);
@@ -194,6 +198,20 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
     expect(carousel.hasLoop_).to.be.true;
     expect(carousel.shouldLoop).to.be.true;
   });
+
+  it('should setup autoplay with specified number of loops', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      autoplayLoops: 5,
+    }));
+    expect(carousel.element.hasAttribute('loop')).to.be.false;
+    carousel.buildCallback();
+    expect(carousel.element.hasAttribute('loop')).to.be.true;
+    expect(carousel.autoplayLoops_).to.equal(5);
+    expect(carousel.hasLoop_).to.be.true;
+    expect(carousel.shouldLoop).to.be.true;
+  });
+
 
   it('should setup autoplay with delay set', () => {
     const carousel = new TestCarousel(setElement({

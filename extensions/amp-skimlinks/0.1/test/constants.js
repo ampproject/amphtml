@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-amp-story[scroll] {
-  overflow-y: auto !important;
-}
-
-[scroll] amp-story-page {
-  position: relative !important;
-  height: 100vh !important;
-}
-
-[scroll] amp-story-page[distance] {
-  transform: none !important;
-}
+export const pubcode = 'pubXcode';

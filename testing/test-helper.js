@@ -151,12 +151,12 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
  */
 const userAgent = encodeURIComponent(window.navigator.userAgent);
 
-export function depositRequestUrl(id) {
-  return `${REQUEST_URL}deposit/${id}-${userAgent}`;
+export function depositRequestUrl(path) {
+  return `${REQUEST_URL}deposit/${userAgent}/${path}`;
 }
 
-export function withdrawRequest(win, id) {
-  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
+export function withdrawRequest(win, path) {
+  const url = `${REQUEST_URL}withdraw/${userAgent}/${path}`;
   return xhrServiceForTesting(win).fetchJson(url, {
     method: 'GET',
     ampCors: false,
@@ -177,4 +177,38 @@ export function createPointerEvent(type, x, y) {
     pageY: y,
   }];
   return event;
+}
+
+export class ImagePixelVerifier {
+  constructor(windowInterface) {
+    this.imagePixels_ = [];
+    const FakeImage = () => {
+      const pixel = {};
+      this.imagePixels_.push(pixel);
+      return pixel;
+    };
+    windowInterface.getImage.returns(FakeImage);
+  }
+
+  hasRequestSent() {
+    return this.imagePixels_.length > 0;
+  }
+
+  verifyRequest(url, referrerPolicy) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.equal(url);
+    expect(pixel.referrerPolicy).to.equal(referrerPolicy);
+  }
+
+  verifyRequestMatch(regex) {
+    const pixel = this.imagePixels_.shift();
+    expect(pixel.src).to.match(regex);
+  }
+
+  getLastRequestUrl() {
+    if (!this.hasRequestSent()) {
+      return null;
+    }
+    return this.imagePixels_[this.imagePixels_.length - 1].src;
+  }
 }

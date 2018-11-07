@@ -383,7 +383,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
@@ -425,6 +425,17 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>*</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-date-picker&gt;</code></td>
+    <td>
+      <code>[min]</code><br>
+      <code>[max]</code>
+    </td>
+    <td>
+      Sets the earliest selectable date<br>
+      Sets the latest selectable date
+    </td>
   </tr>
   <tr>
     <td><code>&lt;amp-google-document-embed&gt;</code></td>

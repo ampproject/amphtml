@@ -20,6 +20,7 @@ import {
   escapeCssSelectorIdent,
   isIframed,
   openWindowDialog,
+  tryFocus,
 } from '../dom';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
@@ -45,8 +46,12 @@ const VALID_TARGETS = ['_top', '_blank'];
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
 
-/** @enum {number} */
+/**
+ * @enum {number} Priority reserved for extensions in anchor mutations.
+ * The higher the priority, the sooner it's invoked.
+ */
 export const Priority = {
+  LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
 };
 
@@ -300,6 +305,7 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
+
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
@@ -457,6 +463,24 @@ export class Navigation {
         const targetAttr = (target.getAttribute('target') || '').toLowerCase();
         if (targetAttr != '_top' && targetAttr != '_blank') {
           target.setAttribute('target', '_blank');
+        }
+        return; // bail early.
+      }
+
+      // Accessibility fix for IE browser.
+      // Issue: anchor navigation in IE changes visual focus of the browser
+      // and shifts to the element being linked to,
+      // where the input focus stays where it was.
+      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+      // @see https://github.com/ampproject/amphtml/issues/18671
+      if (Services.platformFor(this.ampdoc.win).isIe()) {
+        const internalTargetElmId = tgtLoc.hash.substring(1);
+        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
+        if (internalElm) {
+          if (!(/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName))) {
+            internalElm.tabIndex = -1;
+          }
+          tryFocus(internalElm);
         }
       }
       return;
