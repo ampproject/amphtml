@@ -1,22 +1,12 @@
-# Advertising support in AMP Stories
+# Advertise in AMP Stories
 
-AMP Stories are a full-screen tappable experience that immerses readers in the content. Ads that appears in AMP Stories should have a consistent and cohesive design with the AMP Stories UX. This prevents a jarring or interruptive user experience. 
+AMP Stories are a full-screen tappable experience that immerses readers in the content. Advertising with AMP Story ads allows for seamless and disruption-free integration into the user’s journey, keeping them engaged and delighted by the platform. 
 
-This guide demonstrates how to build an ad for AMP Stories.
+For information on how to include ads in your AMP stories, [refer to our guide](https://www.ampproject.org/docs/ads/advertise_amp_stories). 
 
-## AMP Story Ad Principles
+# Best practices for creating an AMP Story ad
 
-Current ad formats, such as banners and boxes, do not integrate well with the AMP Story format. Classic ads are slow, interruptive, and feel out of place within the Story experience. 
-
-AMP Story ads conform to the following principles:
-
-* Valid AMPHTML Ad: follow the same technical specification as a classic [AMPHTML ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md). 
-* Visual first: Inviting, bold, context-driven invitation state.
-* Native: The ad page has the same dimensions as an organic story page.
-* Same interaction model: User can continue to the next screen just like they would with an organic story page.
-* Fast: The ad never appears to a user in a half-loaded state.
-
-To be consistent with these principles, the AMP Story runtime determines the right placement of an ad page amidst the AMP Story. Read more about ad placement mechanics in [Advertise in AMP Stories](https://www.ampproject.org/docs/ads/advertise_amp_stories).
+If you are interested in creating an ad for the AMP Story platform, [refer to our best practices guide](https://www.ampproject.org/docs/ads/story_ads_best_practices).
 
 
 ## Ad formats
