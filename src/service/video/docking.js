@@ -485,6 +485,9 @@ export class VideoDocking {
     /** @private {!Array<!../../video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
+    /** @private {boolean} */
+    this.isTransitioning_ = false;
+
     /** @private @const {!function()} */
     // Lazily invoked.
     this.install_ = once(() => {
@@ -638,6 +641,9 @@ export class VideoDocking {
   /** @private */
   showControlsOnTapOrHover_() {
     if (this.isDragging_) {
+      return;
+    }
+    if (this.isTransitioning_) {
       return;
     }
     const video = this.getDockedVideo_();
@@ -1367,8 +1373,11 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     });
 
+    // TODO(alanorozco): Place, animate and style icon for RTL.
     const placeholderIconX = step *
         (width - PLACEHOLDER_ICON_WIDTH - PLACEHOLDER_ICON_MARGIN * 2);
+
+    this.isTransitioning_ = true;
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
@@ -1405,8 +1414,9 @@ export class VideoDocking {
       this.positionControlsOnVsync_(scale, x, y, width, height);
     });
 
-    return listenOncePromise(internalElement, 'transitionend').then(() =>
-      this.maybeUpdateStaleYAfterScroll_(video, step));
+    return listenOncePromise(internalElement, 'transitionend')
+        .then(() => this.maybeUpdateStaleYAfterScroll_(video, step))
+        .then(() => this.isTransitioning_ = false);
   }
 
   /**
@@ -2105,7 +2115,7 @@ export class VideoDocking {
 
     return video.mutateElement(() => {
       this.hideControls_();
-      // video.showControls();
+      video.showControls();
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
       const overlay = this.getOverlay_();
