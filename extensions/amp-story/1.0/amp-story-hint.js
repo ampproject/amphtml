@@ -181,6 +181,11 @@ export class AmpStoryHint {
       this.onBookendStateUpdate_(isOpen);
     });
 
+    this.storeService_.subscribe(
+        StateProperty.TOOLTIP_ELEMENT, tooltipIsOpen => {
+          this.onTooltipStateUpdate_(tooltipIsOpen);
+        });
+
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
@@ -301,6 +306,17 @@ export class AmpStoryHint {
    * @private
    */
   onBookendStateUpdate_(isOpen) {
+    if (isOpen) {
+      this.hideAllNavigationHint();
+    }
+  }
+
+  /**
+   * Hides navigation if tooltip is open.
+   * @param {boolean} isOpen
+   * @private
+   */
+  onTooltipStateUpdate_(isOpen) {
     if (isOpen) {
       this.hideAllNavigationHint();
     }
