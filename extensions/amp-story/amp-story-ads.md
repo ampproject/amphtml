@@ -1,20 +1,22 @@
 # Advertising support in AMP Stories
 
-This document describes the principles and practices for including ads in AMP Stories.
-Please note that Advertising support in AMP Stories is highly experimental at the moment and could significantly change from what's described below. We look forward to your feedback as we build this model together.
+AMP Stories are a full-screen tappable experience that immerses readers in the content. Ads that appears in AMP Stories should have a consistent and cohesive design with the AMP Stories UX. This prevents a jarring or interruptive user experience. 
+
+This guide demonstrates how to build an ad for AMP Stories.
 
 ## AMP Story Ad Principles
 
-The current ad formats of banners and boxes doesn't integrate well with the rest of the content around it. Ads feel out of place, are slow, interruptive and don't feel native to the rest of the story experience.
+Current ad formats, such as banners and boxes, do not integrate well with the AMP Story format. Classic ads are slow, interruptive, and feel out of place within the Story experience. 
 
-The following principles will apply to AMP Story ads:
+AMP Story ads conform to the following principles:
 
-* *Visual first*:  Inviting, bold, context-driven invitation state.
-* *Native*: The ad page has the same dimensions as an organic story page.
-* *Same interaction model*: User can continue to the next screen just like they would with an organic story page.
-* *Fast*: The ad never appears to a user in a half-loaded state.
+* Valid AMPHTML Ad: follow the same technical specification as a classic [AMPHTML ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md). 
+* Visual first: Inviting, bold, context-driven invitation state.
+* Native: The ad page has the same dimensions as an organic story page.
+* Same interaction model: User can continue to the next screen just like they would with an organic story page.
+* Fast: The ad never appears to a user in a half-loaded state.
 
-As a result, one key difference from regular web pages is that the AMP stories runtime determines the right placement of the ad page amidst the AMP story. These mechanics are explained as part of [amp-story-auto-ads](./amp-story-auto-ads.md).
+To be consistent with these principles, the AMP Story runtime determines the right placement of an ad page amidst the AMP Story. Read more about ad placement mechanics in [Advertise in AMP Stories](https://www.ampproject.org/docs/ads/advertise_amp_stories).
 
 
 ## Ad formats
@@ -23,10 +25,9 @@ There are two type of ad formats supported as part of AMP Stories:
 * **Single page ad** : Where the ad appears as a single page inside of an AMP story.
 * **Sponsored story ad**: Where the ad is a stand-alone multi-page story.
 
-### Single page ad
+### Sample Single page ad
 
-In-line with the principles, a single page ad appears in between organic story content as a full page.
-Single page ads have a predefined set of call to action buttons and those call to action buttons take a web landing page URL where the user is navigated to, on click.
+AMP Story ads are AMPHTML ads, but have required meta tag data, meet defined layout specifications and required UI elements. An AMP Story ad will always include a call to action(CTA) button and an ad label displayed as a text disclaimer at the top of the page.
 
 ![Story Page Ad](img/story-page-ad.png)
 
@@ -37,13 +38,47 @@ Single page ads have a predefined set of call to action buttons and those call t
 
 ## Consistent UX
 
-The ad label and the call to action (CTA) buttons on the ads must be consistent across all publishers and ad networks. Therefore, the AMP stories runtime takes responsibility of rendering those in a consistent manner.
+To keep the user experience consistent, the AMP Story runtime is responsible for rendering the ad label and the CTA button.
 
-![Consistent Ad UX](img/consistent-ux.png)
+<img src="img/stamp_ad.png" alt="Story Ad" width="350"/>
 
 ## CTA
 To provide a consistent user experience, the AMP story runtime is responsible for rendering
 the button of a CTA ad.
+
+## Meta tag data
+
+Meta tag data specifies that the ad meets the AMP Story format, sets the CTA button text enum, directs where the button will send the user and what type of page it is. 
+
+```html
+<html amp4ads>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+    <!-- Specifies where the user is directed -->
+    <meta name="amp-cta-url" content="%%CLICK_URL_UNESC%%%%DEST_URL%%">
+
+    <!-- Specifies the call to action button text enum -->
+    <meta name="amp-cta-type" content="EXPLORE">
+
+    <!-- Specifies what type of landing page the user is direct to -->
+    <meta name="amp-cta-landing-page-type" content="NONAMP">
+
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <style amp-custom>
+     amp-img {height: 100vh}
+    </style>
+    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  </head>
+  <body>
+    <amp-img src=%%FILE:JPG1%% layout="responsive" height="1280" width="720"></amp-img>
+  </body>
+</html>
+```
+
+
+The `amp-cta-type` tag must include one of the available options below for the CTA Button text enum. This ensures a consistent user experience for AMP Story readers. 
 
 ### CTA Text Enum
 The CTA button must be configured from a pre-defined set of choices.
@@ -72,6 +107,11 @@ The CTA button must be configured from a pre-defined set of choices.
 
 If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 
+### Tracking
+Each story page that has a dynamically inserted ad is assigned a system-generated page ID, prefixed with `i-amphtml-Ad-`. The `story-page-visible` trigger can be used to track ad views.
+
+Also, ad response can leverage the `var` object to set data attributes to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md#variables-as-data-attribute).
+
 ### CTA Landing Page Enum
 This enum can be used to indicate the type of landing page. In the future the AMP
 runtime may make special optimitizations (e.g. preloading) based on these values.
@@ -90,7 +130,7 @@ If you are a publisher, please reach out to your ad server regarding ad support 
 ### Ad servers that are currently supported
 **Important** Ad servers are only supported in `amp-story` version `1.0`. For information
 on migrating from 0.1 => 1.0 please see the [migration docs](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story.md#migrating-from-01-to-10).
-* [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/single-page-ad.md)
+* [Google Ad Manager (previously DoubleClick](https://www.ampproject.org/docs/ads/advertise_amp_stories#google-ad-manager)
 
 
 ## Publisher placed ads
@@ -205,14 +245,3 @@ At runtime, an `amp-ad` element is dynamically inserted:
 And an ad request is made to this URL: `https://adserver.com/getad?slot=abcd1234`.
 Each story can only have one `amp-story-auto-ads` element.
 
-## CTA ad
-See the general CTA documentation [here](#cta). The URL and button text is provided in the `var`
-object of the ad response.
-
-* `ctaType`: the CTA button type, of which the value is an [`enum`](#cta-text-enum)
-* `ctaUrl`: the landing page URL for the CTA button
-
-### Tracking
-Each story page that has a dynamically inserted ad is assigned a system-generated page ID, prefixed with `i-amphtml-Ad-`. The `story-page-visible` trigger can be used to track ad views.
-
-Also, ad response can leverage the `var` object to set data attributes to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md#variables-as-data-attribute).
