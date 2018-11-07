@@ -29,10 +29,6 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-delight-player/"> Annotated code example for amp-delight-player</a></td>
-  </tr>
 </table>
 
 [TOC]
@@ -67,19 +63,15 @@ Example:
 
 ## Attributes
 
-##### data-content-id
+##### data-content-id (**Required**)
 
-The video's content ID. (**Required**)
+The video's content ID.
 
 ##### autoplay
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
 to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
-
-##### dock
-
-Makes the video minimize to the corner when scrolled out of view and has been interacted with.
 
 ##### common attributes
 

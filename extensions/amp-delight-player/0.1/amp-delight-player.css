@@ -22,18 +22,7 @@ amp-delight-player [placeholder] {
   height: 100%;
 }
 
-amp-delight-player [placeholder].i-amphtml-faded {
+amp-delight-player [placeholder].i-amphtml-delight-player-faded {
   opacity: 0;
   pointer-events: none;
-}
-
-amp-delight-player.i-amphtml-expanded {
-  width: 100% !important;
-  height: 100% !important;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  z-index: 9999999;
-  position: fixed;
 }

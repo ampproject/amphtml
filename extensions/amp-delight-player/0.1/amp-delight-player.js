@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
 import {
-  createCustomEvent,
   getData,
   listen,
   listenOncePromise,
 } from '../../../src/event-helper';
-import {createFrameFor, objOrParseJson} from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -195,7 +192,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('div');
+    const placeholder = this.element.ownerDocument.createElement('div');
     const src = `${this.baseURL_}/poster/${this.contentID_}`;
     placeholder.setAttribute('placeholder', '');
 
@@ -211,7 +208,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
     const el = this.placeholderEl_;
     let promise = null;
     if (el && this.isInViewport()) {
-      el.classList.add('i-amphtml-faded');
+      el.classList.add('i-amphtml-delight-player-faded');
       promise = listenOncePromise(el, 'transitionend');
     } else {
       promise = Promise.resolve();
@@ -262,23 +259,19 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.READY: {
-        this.triggerAction_(VideoEvents.LOAD, null);
         element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
       case DelightEvent.PLAYING: {
-        this.triggerAction_(VideoEvents.PLAYING, null);
         element.dispatchCustomEvent(VideoEvents.PLAYING);
         break;
       }
       case DelightEvent.PAUSED: {
-        this.triggerAction_(VideoEvents.PAUSE, null);
         element.dispatchCustomEvent(VideoEvents.PAUSE);
         break;
       }
       case DelightEvent.ENDED: {
-        this.triggerAction_(VideoEvents.ENDED, null);
         element.dispatchCustomEvent(VideoEvents.ENDED);
         break;
       }
@@ -289,12 +282,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.MUTED: {
-        this.triggerAction_(VideoEvents.MUTED, null);
         element.dispatchCustomEvent(VideoEvents.MUTED);
         break;
       }
       case DelightEvent.UNMUTED: {
-        this.triggerAction_(VideoEvents.UNMUTED, null);
         element.dispatchCustomEvent(VideoEvents.UNMUTED);
         break;
       }
@@ -320,21 +311,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
     }
-  }
-
-  /**
-   * Triggers a video event.
-   * @param {string} name
-   * @param {?Object} detail
-   * @private
-   */
-  triggerAction_(name, detail) {
-    const {element} = this;
-    const event =
-        createCustomEvent(this.win, `${TAG}.${name}`,
-            dict({'response': detail}));
-    const actions = Services.actionServiceForDoc(this.element);
-    actions.trigger(element, name, event, ActionTrust.HIGH);
   }
 
   /**
