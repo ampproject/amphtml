@@ -209,9 +209,16 @@ export class AmpStoryTooltip {
    */
   attachTooltipToEl_(clickedEl) {
     const elUrl = clickedEl.getAttribute('href');
-    user().assert(isProtocolValid(elUrl),'%s: The url is invalid', TAG);
+    if (!isProtocolValid(elUrl)) {
+      user().error(TAG, 'The tooltip url is invalid');
+      return;
+    }
+
     const iconUrl = clickedEl.getAttribute('data-tooltip-icon');
-    user().assert(isProtocolValid(iconUrl), '%s: The url is invalid', TAG);
+    if (!isProtocolValid(iconUrl)) {
+      user().error(TAG, 'The tooltip icon url is invalid');
+      return;
+    }
 
     const {href} = parseUrlDeprecated(elUrl);
 
