@@ -29,6 +29,9 @@ import {user} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
 
+/** @const {string} */
+const LINKER_CREATED = 'i-amphtml-linker-created';
+
 export class LinkerManager {
 
   /**
@@ -201,9 +204,13 @@ export class LinkerManager {
 
     const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
         'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
-    const isGaType = this.type_ === 'googleanalytics';
+    if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
+        this.type_ !== 'googleanalytics') {
+      return false;
+    }
 
-    return !!(optInMeta && isGaType);
+    optInMeta.setAttribute(LINKER_CREATED, '');
+    return true;
   }
 
   /**

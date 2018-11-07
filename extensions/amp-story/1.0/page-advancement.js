@@ -20,8 +20,9 @@ import {
 } from './amp-story-store-service';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {TOOLTIP_TRIGGERABLE_SELECTORS} from './amp-story-tooltip';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {isExperimentOn} from '../../../src/experiments';
@@ -431,6 +432,17 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Event} event 'click' event
    */
   maybePerformNavigation_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.isAmpStoryPageDescendant_(event) &&
+      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      // Clicked element triggers a tooltip, so we dispatch the corresponding
+      // event and skip navigation.
+      event.preventDefault();
+      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
+      return;
+    }
+
     if (!this.isRunning() ||
       !this.isNavigationalClick_(event) ||
       this.isProtectedTarget_(event) ||
