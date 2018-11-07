@@ -134,6 +134,12 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
+
+    /** @private @const {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
+
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }
@@ -145,9 +151,11 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const ampdoc = this.getAmpDoc();
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
-        TAG, viewer, this.templates_);
+        TAG, this.viewer_, this.templates_);
 
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
@@ -158,20 +166,6 @@ export class AmpList extends AMP.BaseElement {
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
-    }
-
-    // If a placeholder exists and it's taller than amp-list, immediately
-    // schedule the attempt to resize. In layoutCallback this would already
-    // be too late as the placeholder is already displayed and possibly
-    // cut off if the amp-list size initially set is less than the placeholder
-    // height.
-    const placeholder = this.getPlaceholder();
-    if (placeholder) {
-      const scrollHeight = placeholder./*OK*/scrollHeight;
-      const height = this.element./*OK*/offsetHeight;
-      if (scrollHeight > height) {
-        this./*OK*/changeHeight(scrollHeight);
-      }
     }
 
     // auto-resize is deprecated and will be removed per deprecation schedule
@@ -227,6 +221,11 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
+    // If a placeholder exists and it's taller than amp-list, attempt a resize.
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      this.attemptToFit_(placeholder);
+    }
     return this.fetchList_();
   }
 
@@ -601,7 +600,18 @@ export class AmpList extends AMP.BaseElement {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight).catch(() => {});
+        this.attemptChangeHeight(scrollHeight)
+            .then(() => {
+              this.viewer_.sendMessage(
+                  'amp-list',
+                  dict({
+                    'event': 'resize',
+                    'new-height': scrollHeight,
+                    'target': target,
+                    'documentHeight': this.viewport_.getContentHeight(),
+                  }),
+                  /* cancelUnsent */ true);
+            }).catch(() => {});
       } else if (scrollHeight == height
           && this.hasResizableChildren_) {
         this.changeToLayoutContainer_();
