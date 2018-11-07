@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from '../../../third_party/rrule/rrule';
+import {rrulestr} from '../../../node_modules/rrule/dist/es5/rrule';
 
 
 /** @enum {string} */

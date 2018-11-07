@@ -9755,6 +9755,11 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
+luxon@^1.3.3:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.5.0.tgz#bbb20bc4d3a97f44798e2f0fe13bf5fc2b8784ab"
+  integrity sha512-9IfJ0a5jA3poJSQnamaoOdPG0ulYk1JUI5IYmEdUhUc8dto4t6TVTu+oIM7fpSYy01GwUAA8kGUZMVe7Qx9Y+Q==
+
 macos-release@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/macos-release/-/macos-release-1.1.0.tgz#831945e29365b470aa8724b0ab36c8f8959d10fb"
@@ -12796,6 +12801,13 @@ rollup@0.66.6:
   dependencies:
     "@types/estree" "0.0.39"
     "@types/node" "*"
+
+rrule@2.5.6:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.5.6.tgz#af5ed2f16c6a4469f9dbfa903d3f5a5b92832ff2"
+  integrity sha512-hRUrfv9feW9i1cBwHroLDGa4Oj7K7yRQLH3GQ3AMeqAx+uIM+hzE5mOD29AUeYccThINfF5VUF1Jew2PFHgCUA==
+  optionalDependencies:
+    luxon "^1.3.3"
 
 rsvp@^3.3.3:
   version "3.6.2"
