@@ -387,12 +387,12 @@ export class IntersectionObserverPolyfill {
    * @param {boolean=} opt_calledFromMutationObserver
    *    Whether this was called from a mutation observer
    *    This will signal that the layout of the elements
-   *    must use getBoundingClientRect, as Resource Scheduler 
+   *    must use getBoundingClientRect, as Resource Scheduler
    *    could be called too late, and not clear the layout cache.
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(state, hostViewport, 
+  getValidIntersectionChangeEntry_(state, hostViewport,
     opt_iframe, opt_calledFromMutationObserver) {
     const {element} = state;
 
@@ -401,13 +401,13 @@ export class IntersectionObserverPolyfill {
     const owner = element.getOwner();
     let ownerRect = null;
 
-    // If opt_calledFromMutationObserver is provided, 
+    // If opt_calledFromMutationObserver is provided,
     // we need to get our bounding rect rather
-    // Than our layout box, in order to avoid race conditions 
+    // Than our layout box, in order to avoid race conditions
     // with the resource scheduler
     if (opt_calledFromMutationObserver) {
-      elementRect = element./*OK*/getBoundingClientRect();
-      ownerRect = owner && owner./*OK*/getBoundingClientRect();
+      elementRect = this.viewport_.getLayoutRect(element);
+      ownerRect = owner && this.viewport_.getLayoutRect(owner);
     } else {
       elementRect = element.getLayoutBox();
       ownerRect = owner && owner.getLayoutBox();
