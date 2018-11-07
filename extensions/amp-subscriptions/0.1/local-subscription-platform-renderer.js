@@ -58,10 +58,21 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
+   * Resets all the rendered content back to normal.
+   * @return {!Promise}
+   */
+  reset() {
+    // Close dialog. Ignored if the dialog is not currently open.
+    this.dialog_.close();
+    // Hide subscriptions sections.
+    return this.renderActionsInNode_({}, this.rootNode_, () => false);
+  }
+
+  /**
    * @param {!JsonObject} renderState
    */
   renderActions_(renderState) {
-    this.renderActionsInNode_(renderState, this.rootNode_);
+    this.renderActionsInNode_(renderState, this.rootNode_, evaluateExpr);
   }
 
   /**
@@ -92,7 +103,8 @@ export class LocalSubscriptionPlatformRenderer {
                 /** @type {!JsonObject} */(authResponse);
               return this.renderActionsInNode_(
                   renderState,
-                  element);
+                  element,
+                  evaluateExpr);
             });
       }
       const clone = candidate.cloneNode(true);
@@ -111,10 +123,11 @@ export class LocalSubscriptionPlatformRenderer {
    * Renders actions inside a given node according to an authResponse
    * @param {!JsonObject} renderState
    * @param {!Node} rootNode
+   * @param {function(string, !JsonObject):boolean} evaluateExpr
    * @return {!Promise<Node>}
    * @private
    */
-  renderActionsInNode_(renderState, rootNode) {
+  renderActionsInNode_(renderState, rootNode, evaluateExpr) {
     return this.ampdoc_.whenReady().then(() => {
       // Find the matching actions and sections and make them visible if
       // evalutes to true.
@@ -130,7 +143,8 @@ export class LocalSubscriptionPlatformRenderer {
           candidate.classList.add('i-amphtml-subs-display');
           if (candidate.getAttribute('subscriptions-service')
             && candidate.getAttribute('subscriptions-action')
-            && candidate.getAttribute('subscriptions-decorate') !== 'false') {
+            && candidate.getAttribute('subscriptions-decorate') !== 'false'
+            && !candidate.hasAttribute('i-amphtml-subs-decorated')) {
             this.serviceAdapter_.decorateServiceAction(
                 candidate,
                 candidate.getAttribute('subscriptions-service'),
