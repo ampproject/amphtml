@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -32,7 +33,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   let win;
   let doc;
   let windowInterface;
-  let handler;
+  let handlers;
   let beforeSubmitStub;
 
   beforeEach(() => {
@@ -53,11 +54,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
-    handler = null;
+    handlers = [];
     sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
         if (priority === Priority.ANALYTICS_LINKER) {
-          handler = callback;
+          handlers.push(callback);
         }
       },
     });
@@ -65,6 +66,9 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
     installVariableService(win);
+
+    // TODO(ccordry): remove this with linker-meta-opt-in experiment.
+    sandbox.stub(experiments, 'isExperimentOn').returns(true);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {
@@ -79,17 +83,17 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     }, null).init();
 
-    expect(handler).to.be.ok;
+    expect(handlers.length).to.equal(1);
   });
 
   it('does not register anchor mutator if no linkers config', () => {
     new LinkerManager(ampdoc, {}, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if empty linkers config', () => {
     new LinkerManager(ampdoc, {linkers: {}}, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if no linkers enabled', () => {
@@ -107,7 +111,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if not on proxy', () => {
@@ -124,7 +128,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('registers anchor mutator if not on proxy but proxyOnly=false', () => {
@@ -142,7 +146,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.be.ok;
+    expect(handlers.length).to.equal(1);
   });
 
   it('should resolve vars and append to matching anchor', () => {
@@ -174,7 +178,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     };
 
     return new LinkerManager(ampdoc, config, null).init().then(() => {
-      expect(handler).to.be.ok;
+      expect(handlers.length).to.equal(1);
       expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
           'https://www.source.com/dest' +
           '?a=1' +
@@ -373,7 +377,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should add linker for Safari 12', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -392,9 +395,28 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           });
     });
 
+    it('should only add one linker for auto opt-in', () => {
+      stubPlatform(true, 12);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+        },
+      };
+      const p1 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
+      const p2 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
+      return Promise.all([p1, p2]).then(() => {
+        const a = clickAnchor('https://www.source.com/path');
+        expect(a).to.not.match(/(testLinker1=.*){2}/);
+      });
+    });
+
     it('should not add linker for not google analytics vendor', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -407,12 +429,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'somevendor');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker for Safari 11', () => {
       stubPlatform(true, 11);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -424,12 +445,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker for Chrome', () => {
       stubPlatform(false, 66);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -441,12 +461,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker if experiment is off', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(false);
       const config = {
         linkers: {
           testLinker1: {
@@ -458,7 +477,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
   });
 
@@ -466,7 +485,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     const a = doc.createElement('a');
     a.href = url;
     doc.body.appendChild(a);
-    handler(a);
+    handlers.forEach(handler => handler(a));
     return a.href;
   }
 
