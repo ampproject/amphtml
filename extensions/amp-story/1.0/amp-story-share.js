@@ -322,11 +322,33 @@ export class ShareWidget {
   }
 
   /**
+   * Gets inline share providers config found under the amp-story-bookend tag.
+   * @return {?Array<!Object|string>}
+   */
+  getInlineConfig_() {
+    const bookend = this.storyEl.querySelector('amp-story-bookend');
+    const inlineConfig = bookend.querySelector('script');
+
+    if (!inlineConfig) {
+      return;
+    }
+
+    const jsonConfig = JSON.parse(inlineConfig./*OK*/innerHTML);
+    return jsonConfig[SHARE_PROVIDERS_KEY];
+  }
+
+  /**
    * Loads and applies the share providers configured by the publisher.
    * @protected
    */
   loadProviders() {
     this.loadRequiredExtensions();
+
+    const inlineConfig = this.getInlineConfig_();
+    if (inlineConfig) {
+      this.setProviders_(inlineConfig);
+      return;
+    }
 
     this.requestService_.loadBookendConfig().then(config => {
       const providers = config && (config[SHARE_PROVIDERS_KEY] ||

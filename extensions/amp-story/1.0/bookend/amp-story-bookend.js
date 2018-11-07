@@ -369,12 +369,43 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
+   * Gets inline JSON config found under the amp-story-bookend tag.
+   * @return {?./bookend-component.BookendDataDef}
+   */
+  getInlineConfig_() {
+    const inlineConfig = this.element.querySelector('script');
+
+    if (!inlineConfig) {
+      return;
+    }
+
+    const jsonConfig = JSON.parse(inlineConfig./*OK*/innerHTML);
+
+    const components =
+      BookendComponent.buildFromJson(jsonConfig['components'], this.element);
+
+    const config = /** @type {./bookend-component.BookendDataDef} */ ({
+      [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
+      'components': components,
+      'shareProviders': jsonConfig[SHARE_PROVIDERS_KEY] ||
+        jsonConfig[DEPRECATED_SHARE_PROVIDERS_KEY],
+    });
+
+    return config;
+  }
+
+  /**
    * Retrieves the publisher bookend configuration.
    * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
   loadConfig() {
     if (this.config_) {
       return Promise.resolve(this.config_);
+    }
+
+    const inlineConfig = this.getInlineConfig_();
+    if (inlineConfig) {
+      return Promise.resolve(inlineConfig);
     }
 
     const requestService =
