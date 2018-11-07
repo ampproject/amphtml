@@ -123,7 +123,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
-          this.element.getResourceId(), this.sitekey_, this.action_
+          this.element.getResourceId(), this.action_
       );
     }
     return Promise.reject(new Error(
