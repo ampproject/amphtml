@@ -602,6 +602,7 @@ export class AmpList extends AMP.BaseElement {
       if (scrollHeight > height) {
         this.attemptChangeHeight(scrollHeight)
             .then(() => {
+              dev().info(TAG, 'attemptToFit, new height:', scrollHeight);
               this.viewer_.sendMessage(
                   'amp-list',
                   dict({
