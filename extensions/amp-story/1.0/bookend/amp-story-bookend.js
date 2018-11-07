@@ -37,6 +37,7 @@ import {createShadowRootWithStyle} from '../utils';
 import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
+import {getChildJsonConfig} from '../../../../src/json';
 import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
@@ -369,17 +370,17 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Gets inline JSON config found under the amp-story-bookend tag.
+   * Gets inline JSON config found under the amp-story-bookend tag if specified.
    * @return {?./bookend-component.BookendDataDef}
    */
   getInlineConfig_() {
     const inlineConfig = this.element.querySelector('script');
 
     if (!inlineConfig) {
-      return;
+      return null;
     }
 
-    const jsonConfig = JSON.parse(inlineConfig./*OK*/innerHTML);
+    const jsonConfig = getChildJsonConfig(this.element);
 
     const components =
       BookendComponent.buildFromJson(jsonConfig['components'], this.element);
@@ -396,7 +397,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * Retrieves the publisher bookend configuration.
-   * @return {!Promise<?./bookend-component.BookendDataDef>}
+   * @return {!Promise<./bookend-component.BookendDataDef>}
    */
   loadConfig() {
     if (this.config_) {
