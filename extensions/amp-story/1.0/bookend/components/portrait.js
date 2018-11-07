@@ -16,13 +16,12 @@
 
 import {
   BookendComponentInterface,
-  getSourceOriginForBookendComponent,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -72,7 +71,7 @@ export class PortraitComponent {
   /** @override */
   build(portraitJson, element) {
     const url = portraitJson['url'];
-    const domainName = getSourceOriginForBookendComponent(element, url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const portrait = {
       url,

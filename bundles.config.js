@@ -237,11 +237,31 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
+        'amp-story-consent',
+        'amp-story-hint',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
+        'amp-story-info-dialog',
+        'amp-story-share',
+        'amp-story-share-menu',
+        'amp-story-system-layer',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story',
+    version: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-bookend',
+        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
         'amp-story-unsupported-browser-layer',
