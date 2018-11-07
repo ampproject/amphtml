@@ -85,14 +85,12 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.prerenderAllowed_ = false;
   }
 
-
   /** @override */
   firstAttachedCallback() {
     // Only prerender if child of the first page.
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type amp-story-grid-layer');
   }
-
 
   /** @override */
   buildCallback() {
@@ -102,12 +100,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.setDescendentCssGridStyles_();
   }
 
-
   /** @override */
   prerenderAllowed() {
     return this.prerenderAllowed_;
   }
-
 
   /**
    * Applies internal CSS class names for the template attribute, so that styles
@@ -123,7 +119,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       this.element.classList.add(templateClassName);
     }
   }
-
 
   /**
    * Copies the whitelisted CSS grid styles for descendants of the
@@ -147,7 +142,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   setOwnCssGridStyles_() {
     this.setCssGridStyles_(this.element);
   }
-
 
   /**
    * Copies the values of an element's attributes to its styles, if the

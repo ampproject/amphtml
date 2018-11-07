@@ -173,7 +173,7 @@
 
 .i-amphtml-story-hint-placeholder {
   top: 50% !important;
-  position: absolute;
+  position: absolute !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
