@@ -65,7 +65,7 @@ export class LocalSubscriptionPlatformRenderer {
     // Close dialog. Ignored if the dialog is not currently open.
     this.dialog_.close();
     // Hide subscriptions sections.
-    return this.renderActionsInNode_({}, this.rootNode_, () => false);
+    return this.renderActionsInNode_(dict(), this.rootNode_, () => false);
   }
 
   /**
