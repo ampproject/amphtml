@@ -1320,9 +1320,6 @@ export class VideoDocking {
 
     step = Math.max(0, Math.min(1, step));
 
-    // TODO(alanorozco): Hide controls immediately when a new placement action
-    // occurs.
-
     const transitionDurationMs = optTransitionDurationMs ?
       dev().assertNumber(optTransitionDurationMs) :
       this.calculateTransitionDuration_(step);

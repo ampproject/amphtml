@@ -365,21 +365,5 @@
       </div>
     </aside>
   </main>
-  <script>
-  (function(AMP) {
-    var experiment = 'video-dock'
-    var fragment = 'video';
-
-    if (!(new RegExp('#' + fragment + '$', 'i').test(window.location.href))) {
-      window.location.href += '#' + fragment;
-    }
-
-    if (!AMP.isExperimentOn(experiment)) {
-      AMP.toggleExperiment(experiment, true);
-      window.location.reload();
-    }
-
-  })(window.AMP);
-  </script>
 </body>
 </html>
