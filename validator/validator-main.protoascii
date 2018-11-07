@@ -1976,6 +1976,7 @@ tags: {
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   attrs: { name: "alt" }
+  attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "decoding"
@@ -2004,6 +2005,7 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.7.2 The iframe element
