@@ -25,11 +25,11 @@ import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {parseUrlDeprecated} from '../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {setImportantStyles} from '../../../src/style';
 
 /**
@@ -66,6 +66,8 @@ const DEFAULT_ICON_SRC =
  * }}
  */
 let tooltipElementsDef;
+
+const TAG = 'amp-story-tooltip';
 
 /**
  * Tooltip element triggered by clickable elements in the amp-story-grid-layer.
@@ -206,14 +208,18 @@ export class AmpStoryTooltip {
    * @private
    */
   attachTooltipToEl_(clickedEl) {
-    const {href} = parseUrlDeprecated(clickedEl.getAttribute('href'));
+    const elUrl = clickedEl.getAttribute('href');
+    user().assert(isProtocolValid(elUrl),'%s: The url is invalid', TAG);
+    const iconUrl = clickedEl.getAttribute('data-tooltip-icon');
+    user().assert(isProtocolValid(iconUrl), '%s: The url is invalid', TAG);
+
+    const {href} = parseUrlDeprecated(elUrl);
 
     const tooltipText = clickedEl.getAttribute('data-tooltip-text') ||
       getSourceOriginForElement(clickedEl, href);
     this.updateTooltipText_(tooltipText);
 
-    const iconAttr = clickedEl.getAttribute('data-tooltip-icon');
-    const iconSrc = iconAttr ? parseUrlDeprecated(iconAttr).href :
+    const iconSrc = iconUrl ? parseUrlDeprecated(iconUrl).href :
       DEFAULT_ICON_SRC;
     this.updateTooltipIcon_(iconSrc);
 
