@@ -96,7 +96,7 @@ export class Dialog {
    * @return {!Promise}
    */
   open(content, showCloseAction = true) {
-    return this.action_(() => this.open_(content, showCloseAction = true));
+    return this.action_(() => this.open_(content, showCloseAction));
   }
 
   /**

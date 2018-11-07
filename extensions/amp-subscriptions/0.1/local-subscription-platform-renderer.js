@@ -151,6 +151,7 @@ export class LocalSubscriptionPlatformRenderer {
                 candidate.getAttribute('subscriptions-action'),
                 null
             );
+            candidate.setAttribute('i-amphtml-subs-decorated', true);
           }
         } else {
           candidate.classList.remove('i-amphtml-subs-display');
