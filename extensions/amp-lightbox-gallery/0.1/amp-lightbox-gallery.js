@@ -912,8 +912,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {number} How long to animate for, in milliseconds.
    */
   getTransitionDurationFromElements_(srcImg, targetImg) {
-    const srcRect = srcImg.getBoundingClientRect();
-    const destRect = targetImg.getBoundingClientRect();
+    const srcRect = srcImg./*OK*/getBoundingClientRect();
+    const destRect = targetImg./*OK*/getBoundingClientRect();
     const viewportHeight = this.getViewport().getSize().height;
     const dy = Math.abs(destRect.top - srcRect.top);
 
