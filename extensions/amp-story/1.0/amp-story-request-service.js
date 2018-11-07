@@ -17,11 +17,16 @@
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
 import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import {getChildJsonConfig} from '../../../src/json';
+import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
+
+/** @type {string} */
+export const TAG = 'amp-story-request-service';
 
 /**
  * Service to send XHRs.
@@ -50,25 +55,50 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME);
+    const bookendEl = childElementByTag(this.storyElement_,
+        'amp-story-bookend');
+    if (!bookendEl) {
+      return Promise.resolve(null);
+    }
+
+    if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
+      return this.loadJsonFromAttribute_(
+          BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendEl);
+    }
+
+    return this.loadInlineJson_(bookendEl);
+  }
+
+  /**
+   * If specified, gets bookend config found inline under the amp-story-bookend.
+   * @param {!Element} bookendEl
+   */
+  loadInlineJson_(bookendEl) {
+    const inlineConfig = bookendEl.querySelector('script');
+    if (!inlineConfig) {
+      return Promise.resolve(null);
+    }
+
+    const jsonConfig = getChildJsonConfig(bookendEl);
+
+    return Promise.resolve(jsonConfig);
   }
 
   /**
    * @param {string} attributeName
+   * @param {!Element} bookendEl
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
-  loadJsonFromAttribute_(attributeName) {
-    const bookendEl = childElementByTag(this.storyElement_,
-        'amp-story-bookend');
-
-    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
+  loadJsonFromAttribute_(attributeName, bookendEl) {
     const rawUrl = bookendEl.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
+
+    if (!isProtocolValid(rawUrl)) {
+      user().error(TAG, 'Invalid bookend config url.');
+      return Promise.resolve(null);
+    }
 
     return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
         .expandUrlAsync(user().assertString(rawUrl))

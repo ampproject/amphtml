@@ -22,7 +22,6 @@ import {
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
-import {getChildJsonConfig} from '../../../src/json';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
@@ -323,34 +322,11 @@ export class ShareWidget {
   }
 
   /**
-   * Gets inline share providers config found under the amp-story-bookend tag
-   * if it's specified.
-   * @return {Array<!Object|string>}
-   */
-  getInlineConfig_() {
-    const bookend = this.storyEl.querySelector('amp-story-bookend');
-    const inlineConfig = bookend.querySelector('script');
-
-    if (!inlineConfig) {
-      return null;
-    }
-
-    const jsonConfig = getChildJsonConfig(bookend);
-    return jsonConfig[SHARE_PROVIDERS_KEY];
-  }
-
-  /**
    * Loads and applies the share providers configured by the publisher.
    * @protected
    */
   loadProviders() {
     this.loadRequiredExtensions();
-
-    const inlineConfig = this.getInlineConfig_();
-    if (inlineConfig) {
-      this.setProviders_(inlineConfig);
-      return;
-    }
 
     this.requestService_.loadBookendConfig().then(config => {
       const providers = config && (config[SHARE_PROVIDERS_KEY] ||

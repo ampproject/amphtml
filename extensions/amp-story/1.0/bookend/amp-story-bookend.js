@@ -37,7 +37,6 @@ import {createShadowRootWithStyle} from '../utils';
 import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
-import {getChildJsonConfig} from '../../../../src/json';
 import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
@@ -53,7 +52,7 @@ const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
 
 /**
- * Key for omponents in bookend config.
+ * Key for components in bookend config.
  * @private @const {string}
  */
 const BOOKEND_VERSION_KEY = 'bookendVersion';
@@ -370,43 +369,12 @@ export class AmpStoryBookend extends AMP.BaseElement {
   }
 
   /**
-   * Gets inline JSON config found under the amp-story-bookend tag if specified.
-   * @return {?./bookend-component.BookendDataDef}
-   */
-  getInlineConfig_() {
-    const inlineConfig = this.element.querySelector('script');
-
-    if (!inlineConfig) {
-      return null;
-    }
-
-    const jsonConfig = getChildJsonConfig(this.element);
-
-    const components =
-      BookendComponent.buildFromJson(jsonConfig['components'], this.element);
-
-    const config = /** @type {./bookend-component.BookendDataDef} */ ({
-      [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
-      'components': components,
-      'shareProviders': jsonConfig[SHARE_PROVIDERS_KEY] ||
-        jsonConfig[DEPRECATED_SHARE_PROVIDERS_KEY],
-    });
-
-    return config;
-  }
-
-  /**
    * Retrieves the publisher bookend configuration.
-   * @return {!Promise<./bookend-component.BookendDataDef>}
+   * @return {!Promise<?./bookend-component.BookendDataDef>}
    */
   loadConfig() {
     if (this.config_) {
       return Promise.resolve(this.config_);
-    }
-
-    const inlineConfig = this.getInlineConfig_();
-    if (inlineConfig) {
-      return Promise.resolve(inlineConfig);
     }
 
     const requestService =
@@ -428,7 +396,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
             response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
       } else {
-        // TODO(#14667): Write doc regarding amp-story bookend v1.0.
         dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
         `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
       }
