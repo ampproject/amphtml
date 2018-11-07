@@ -137,7 +137,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private @const {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
