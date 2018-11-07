@@ -34,7 +34,7 @@ const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
 
-app.use(bodyParser.json());
+app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -171,7 +171,7 @@ app.use('/api/dont-show', (req, res) => {
 
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
+  res.end(req.body);
 });
 
 app.use('/analytics/:type', (req, res) => {

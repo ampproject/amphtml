@@ -48,6 +48,7 @@ function addToQueue(global, data) {
     const config = Object.assign(data, {
       clid: JSON.parse(data.clid),
       container: `#${renderTo}`,
+      isAMP: true,
       successCallback: () => {
         if (typeof data.successCallback === 'function') {
           data.successCallback();

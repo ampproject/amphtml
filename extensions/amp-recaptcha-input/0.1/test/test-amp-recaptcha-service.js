@@ -28,15 +28,12 @@ describes.realWin('amp-recaptcha-service', {
     extensions: ['amp-recaptcha-input'],
   },
 }, env => {
-  let win;
   let recaptchaService;
   const fakeSitekey = 'fake-sitekey-fortesting';
   const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
 
   beforeEach(() => {
-    win = env.win;
-
-    recaptchaService = new AmpRecaptchaService(win);
+    recaptchaService = new AmpRecaptchaService(env.ampdoc);
   });
 
   it('should create an iframe on register if first element to register', () => {
