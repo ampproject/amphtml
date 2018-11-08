@@ -260,6 +260,7 @@ amp-story-cta-layer {
 
 /** Grid level */
 amp-story-grid-layer {
+  box-sizing: border-box !important;
   display: grid !important;
   position: absolute !important;
   top: 0 !important;
@@ -291,14 +292,12 @@ amp-story-grid-layer > * {
 }
 
 .i-amphtml-story-grid-template-fill > :first-child {
-  height: 100% !important;
-  bottom: 0 !important;
-  display: block !important;
-  height: auto !important;
-  left: 0 !important;
-  position: absolute !important;
-  right: 0 !important;
   top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  display: block !important;
+  position: absolute !important;
   width: auto !important;
 }
 
