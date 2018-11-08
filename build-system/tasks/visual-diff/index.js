@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
-const fancyLog = require('fancy-log');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
@@ -29,6 +28,7 @@ const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {execScriptAsync} = require('../../exec');
 const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
+const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 const {Percy} = require('@percy/puppeteer');
 
@@ -44,10 +44,6 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
 const MAX_PARALLEL_TABS = 10;
 const WAIT_FOR_TABS_MS = 1000;
-const CSS_SELECTOR_RETRY_MS = 100;
-const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
-const CSS_SELECTOR_TIMEOUT_MS =
-    CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 const BUILD_PROCESSING_POLLING_INTERVAL_MS = 5 * 1000; // Poll every 5 seconds
 const BUILD_PROCESSING_TIMEOUT_MS = 15 * 1000; // Wait for up to 10 minutes
@@ -63,45 +59,6 @@ const preVisualDiffTasks =
 
 let browser_;
 let webServerProcess_;
-
-/**
- * Logs a message to the console.
- *
- * @param {string} mode
- * @param {!Array<string>} messages
- */
-function log(mode, ...messages) {
-  switch (mode) {
-    case 'verbose':
-      if (process.env.TRAVIS) {
-        return;
-      }
-      messages.unshift(colors.green('VERBOSE:'));
-      break;
-    case 'info':
-      messages.unshift(colors.green('INFO:'));
-      break;
-    case 'warning':
-      messages.unshift(colors.yellow('WARNING:'));
-      break;
-    case 'error':
-      messages.unshift(colors.red('ERROR:'));
-      break;
-    case 'fatal':
-      messages.unshift(colors.red('FATAL:'));
-      break;
-    case 'travis':
-      if (process.env['TRAVIS']) {
-        messages.forEach(message => process.stdout.write(message));
-      }
-      return;
-  }
-  // eslint-disable-next-line amphtml-internal/no-spread
-  fancyLog(...messages);
-  if (mode == 'fatal') {
-    process.exit(1);
-  }
-}
 
 /**
  * Override PERCY_* environment variables if passed via gulp task parameters.
@@ -372,23 +329,39 @@ function createPercyPuppeteerController(assetGlobs) {
  *     details about the pages to snapshot.
  */
 async function generateSnapshots(percy, webpages) {
-  const numUnfilteredTests = webpages.length;
+  const numUnfilteredPages = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
-  if (numUnfilteredTests != webpages.length) {
-    log('info', 'Skipping', colors.cyan(numUnfilteredTests - webpages.length),
-        'flaky tests');
+  if (numUnfilteredPages != webpages.length) {
+    log('info', 'Skipping', colors.cyan(numUnfilteredPages - webpages.length),
+        'flaky pages');
   }
   if (argv.grep) {
     webpages = webpages.filter(webpage => argv.grep.test(webpage.name));
     log('info', colors.cyan(`--grep ${argv.grep}`), 'matched',
-        colors.cyan(webpages.length), 'tests');
+        colors.cyan(webpages.length), 'pages');
   }
 
-  if (!webpages.length) {
-    log('fatal', 'No tests left to run!');
+  // Expand all the interactive tests. Every test should have a base test with
+  // no interactions, and each test that has in interactive tests file should
+  // load those tests here.
+  for (const webpage of webpages) {
+    webpage.tests_ = {
+      '': async() => {},
+    };
+    if (webpage.interactive_tests) {
+      Object.assign(webpage.tests_,
+          require(path.resolve(ROOT_DIR, webpage.interactive_tests)));
+    }
+  }
+
+  const totalTests = webpages.reduce(
+      (numTests, webpage) => numTests + Object.keys(webpage.tests_).length, 0);
+  if (!totalTests) {
+    log('fatal', 'No pages left to test!');
     return;
   } else {
-    log('info', 'Executing', colors.cyan(webpages.length), 'visual diff tests');
+    log('info', 'Executing', colors.cyan(totalTests), 'visual diff tests on',
+        colors.cyan(webpages.length), 'pages');
   }
 
   const browser = await launchBrowser();
@@ -414,230 +387,94 @@ async function generateSnapshots(percy, webpages) {
 async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   for (const webpage of webpages) {
-    while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
-      await sleep(WAIT_FOR_TABS_MS);
+    const {viewport, name: pageName} = webpage;
+    const fullUrl = `${BASE_URL}/${webpage.url}`;
+    for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
+      while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
+        await sleep(WAIT_FOR_TABS_MS);
+      }
+
+      const page = await newPage(browser);
+      const name = testName ? `${pageName} (${testName})` : pageName;
+      log('verbose', 'Visual diff test', colors.yellow(name));
+
+      if (viewport) {
+        log('verbose', 'Setting explicit viewport size of',
+            colors.yellow(`${viewport.width}×${viewport.height}`));
+        await page.setViewport({
+          width: viewport.width,
+          height: viewport.height,
+        });
+      }
+      log('verbose', 'Navigating to page', colors.yellow(fullUrl));
+
+      // Navigate to an empty page first to support different webpages that only
+      // modify the #anchor name.
+      await page.goto('about:blank').then(() => {}, () => {});
+
+      // Puppeteer is flaky when it comes to catching navigation requests, so
+      // ignore timeouts. If this was a real non-loading page, this will be
+      // caught in the resulting Percy build. Also attempt to wait until there
+      // are no more network requests. This method is flaky since Puppeteer
+      // doesn't always understand Chrome's network activity, so ignore timeouts
+      // again.
+      const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
+          .then(() => {}, () => {})
+          .then(async() => {
+            log('verbose', 'Navigation to page', colors.yellow(name),
+                'is done, verifying page');
+
+            await page.bringToFront();
+
+            await verifyCssElements(page, name, webpage.forbidden_css,
+                webpage.loading_incomplete_css, webpage.loading_complete_css);
+
+            if (webpage.loading_complete_delay_ms) {
+              log('verbose', 'Waiting',
+                  colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+                  'for loading to complete');
+              await sleep(webpage.loading_complete_delay_ms);
+            }
+
+            await testFunction(page, name);
+
+            const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
+
+            if (webpage.enable_percy_javascript) {
+              snapshotOptions.enableJavaScript = true;
+              // Remove all scripts that have an external source, leaving only
+              // those scripts that are inlined in the page inside a <script>
+              // tag.
+              await page.evaluate(
+                  'document.head.querySelectorAll("script[src]").forEach(' +
+                  'node => node./*OK*/remove())');
+            }
+
+            if (viewport) {
+              snapshotOptions.widths = [viewport.width];
+              log('verbose', 'Wrapping viewport-constrained page in an iframe');
+              await page.evaluate(WRAP_IN_IFRAME_SCRIPT
+                  .replace(/__WIDTH__/g, viewport.width)
+                  .replace(/__HEIGHT__/g, viewport.height));
+              await page.setViewport({
+                width: VIEWPORT_WIDTH,
+                height: VIEWPORT_HEIGHT,
+              });
+            }
+
+            await percy.snapshot(name, page, snapshotOptions);
+            await page.close();
+            log('travis', colors.cyan('●'));
+          })
+          .then(() => delete pagePromises[name]);
+      pagePromises[name] = pagePromise;
     }
-
-    const page = await newPage(browser);
-    const {name, url, viewport} = webpage;
-    log('verbose', 'Visual diff test', colors.yellow(name));
-
-    if (viewport) {
-      log('verbose', 'Setting explicit viewport size of',
-          colors.yellow(`${viewport.width}×${viewport.height}`));
-      await page.setViewport({
-        width: viewport.width,
-        height: viewport.height,
-      });
-    }
-    log('verbose', 'Navigating to page', colors.yellow(`${BASE_URL}/${url}`));
-
-    // Navigate to an empty page first to support different webpages that only
-    // modify the #anchor name.
-    await page.goto('about:blank').then(() => {}, () => {});
-
-    // Puppeteer is flaky when it comes to catching navigation requests, so
-    // ignore timeouts. If this was a real non-loading page, this will be caught
-    // in the resulting Percy build. Also attempt to wait until there are no
-    // more network requests. This method is flaky since Puppeteer doesn't
-    // always understand Chrome's network activity, so ignore timeouts again.
-    const pagePromise = page.goto(
-        `${BASE_URL}/${url}`, {waitUntil: 'networkidle0'})
-        .then(() => {}, () => {})
-        .then(async() => {
-          log('verbose', 'Navigation to page',
-              colors.yellow(`${BASE_URL}/${url}`), 'is done, verifying page');
-
-          await page.bringToFront();
-
-          await verifyCssElements(page, url, webpage.forbidden_css,
-              webpage.loading_incomplete_css, webpage.loading_complete_css);
-
-          if (webpage.loading_complete_delay_ms) {
-            log('verbose', 'Waiting',
-                colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
-                'for loading to complete');
-            await sleep(webpage.loading_complete_delay_ms);
-          }
-
-          const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
-
-          if (webpage.enable_percy_javascript) {
-            snapshotOptions.enableJavaScript = true;
-            // Remove all scripts that have an external source, leaving only
-            // those scripts that are inlined in the page inside a <script> tag.
-            await page.evaluate(
-                'document.head.querySelectorAll("script[src]").forEach(' +
-                'node => node./*OK*/remove())');
-          }
-
-          if (viewport) {
-            snapshotOptions.widths = [viewport.width];
-            log('verbose', 'Wrapping viewport-constrained page in an iframe');
-            await page.evaluate(WRAP_IN_IFRAME_SCRIPT
-                .replace(/__WIDTH__/g, viewport.width)
-                .replace(/__HEIGHT__/g, viewport.height));
-            await page.setViewport({
-              width: VIEWPORT_WIDTH,
-              height: VIEWPORT_HEIGHT,
-            });
-          }
-
-          await percy.snapshot(name, page, snapshotOptions);
-          await page.close();
-          log('travis', colors.cyan('●'));
-        })
-        .then(() => delete pagePromises[name]);
-    pagePromises[name] = pagePromise;
   }
 
   while (Object.keys(pagePromises).length > 0) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
-}
-
-/**
- * Verifies that all CSS elements are as expected before taking a snapshot.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {string} url URL to be snapshotted.
- * @param {!Array<string>} forbiddenCss Array of CSS elements that must not be
- *     found in the page.
- * @param {!Array<string>} loadingIncompleteCss Array of CSS elements that must
- *     eventually be removed from the page.
- * @param {!Array<string>} loadingCompleteCss Array of CSS elements that must
- *     eventually appear on the page.
- */
-async function verifyCssElements(page, url, forbiddenCss, loadingIncompleteCss,
-  loadingCompleteCss) {
-  // Begin by waiting for all loader dots to disappear.
-  await waitForLoaderDot(page, url);
-
-  if (forbiddenCss) {
-    for (const css of forbiddenCss) {
-      if ((await page.$(css)) !== null) {
-        log('fatal', colors.cyan(url), '| The forbidden CSS element',
-            colors.cyan(css), 'exists in the page');
-      }
-    }
-  }
-
-  if (loadingIncompleteCss) {
-    log('verbose', 'Waiting for invisibility of all:',
-        colors.cyan(loadingIncompleteCss.join(', ')));
-    for (const css of loadingIncompleteCss) {
-      if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
-        log('fatal', colors.cyan(url), '| An element with the CSS selector',
-            colors.cyan(css),
-            `is still visible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      }
-    }
-  }
-
-  if (loadingCompleteCss) {
-    log('verbose', 'Waiting for existence of all:',
-        colors.cyan(loadingCompleteCss.join(', ')));
-    for (const css of loadingCompleteCss) {
-      if (!(await waitForSelectorExistence(page, css))) {
-        log('fatal', colors.cyan(url), '| The CSS selector', colors.cyan(css),
-            'does not match any elements in the page');
-      }
-    }
-
-    log('verbose', 'Waiting for visibility of all:',
-        colors.cyan(loadingCompleteCss.join(', ')));
-    for (const css of loadingCompleteCss) {
-      if (!(await waitForElementVisibility(page, css, {visible: true}))) {
-        log('fatal', colors.cyan(url), '| An element with the CSS selector',
-            colors.cyan(css),
-            `is still invisible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-      }
-    }
-  }
-}
-
-/**
- * Wait for all AMP loader dot to disappear.
- *
- * @param {!puppeteer.Page} page page to wait on.
- * @param {string} url URL being snapshotted.
- */
-async function waitForLoaderDot(page, url) {
-  // Wait for loader dot to be hidden.
-  await waitForElementVisibility(
-      page, '.i-amphtml-loader-dot', {hidden: true}).catch(() => {
-    log('fatal', colors.cyan(url),
-        `still has the AMP loader dot after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-  });
-}
-
-/**
- * Wait until the element is either hidden or visible or until timed out.
- *
- * @param {!puppeteer.Page} page page to check the visibility of elements in.
- * @param {string} selector CSS selector for elements to wait on.
- * @param {!Object} options with key 'visible' OR 'hidden' set to true.
- * @return {boolean} true if the expectation is met before the timeout.
- */
-async function waitForElementVisibility(page, selector, options) {
-  const waitForVisible = Boolean(options['visible']);
-  const waitForHidden = Boolean(options['hidden']);
-  if (waitForVisible == waitForHidden) {
-    log('fatal', 'waitForElementVisibility must be called with exactly one of',
-        "'visible' or 'hidden' set to true.");
-  }
-
-  let attempt = 0;
-  do {
-    const elementsAreVisible = [];
-
-    for (const elementHandle of await page.$$(selector)) {
-      const boundingBox = await elementHandle.boundingBox();
-      const elementIsVisible = boundingBox != null && boundingBox.height > 0 &&
-          boundingBox.width > 0;
-      elementsAreVisible.push(elementIsVisible);
-    }
-
-    if (elementsAreVisible.length) {
-      log('verbose', 'Found', colors.cyan(elementsAreVisible.length),
-          'element(s) matching the CSS selector', colors.cyan(selector));
-      log('verbose', 'Expecting all element visibilities to be',
-          colors.cyan(waitForVisible), '; they are',
-          colors.cyan(elementsAreVisible));
-    } else {
-      log('verbose', 'No', colors.cyan(selector), 'matches found');
-    }
-    // Since we assert that waitForVisible == !waitForHidden, there is no need
-    // to check equality to both waitForVisible and waitForHidden.
-    if (elementsAreVisible.every(
-        elementIsVisible => elementIsVisible == waitForVisible)) {
-      return true;
-    }
-
-    await sleep(CSS_SELECTOR_RETRY_MS);
-    attempt++;
-  } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
-  return false;
-}
-
-/**
- * Wait until the CSS selector exists in the page or until timed out.
- *
- * @param {!puppeteer.Page} page page to check the existence of the selector in.
- * @param {string} selector CSS selector.
- * @return {boolean} true if the element exists before the timeout.
- */
-async function waitForSelectorExistence(page, selector) {
-  let attempt = 0;
-  do {
-    if ((await page.$(selector)) !== null) {
-      return true;
-    }
-    await sleep(CSS_SELECTOR_RETRY_MS);
-    attempt++;
-  } while (attempt < CSS_SELECTOR_RETRY_ATTEMPTS);
-  return false;
 }
 
 /**
