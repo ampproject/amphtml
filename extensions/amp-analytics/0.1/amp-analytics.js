@@ -470,7 +470,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
+              this.element, request, this.preconnect,
               this.transport_,
               this.isSandbox_);
         }
