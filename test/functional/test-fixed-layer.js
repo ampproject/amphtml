@@ -177,7 +177,6 @@ describes.sandboxed('FixedLayer', {}, () => {
   });
 
   function createElement(id) {
-    const attrs = {};
     const children = [];
     const elem = {
       id,
@@ -283,15 +282,40 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
         return Node.DOCUMENT_POSITION_PRECEDING;
       },
-      hasAttribute: name => {
-        return Object.prototype.hasOwnProperty.call(attrs, name);
+      hasAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return true;
+          }
+        }
+        return false;
       },
-      setAttribute: (name, value) => {
-        attrs[name] = value;
+      getAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return this.attributes[i].value;
+          }
+        }
+        return null;
       },
-      removeAttribute: name => {
-        delete attrs[name];
+      setAttribute(name, value) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes[i].value = value;
+            return;
+          }
+        }
+        this.attributes.push({name, value});
       },
+      removeAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes.splice(i, 1);
+            return;
+          }
+        }
+      },
+      attributes: [],
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
@@ -1449,6 +1473,44 @@ describes.sandboxed('FixedLayer', {}, () => {
           expect(state['F0'].zIndex).to.equal('');
         });
       });
+    });
+
+    it('should sync attributes between body and layer', () => {
+      const {body} = ampdoc.win.document;
+
+      // Necessary to create the fixed layer
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
+      fixedLayer.vsync_ = {
+        runPromise({measure, mutate}, state) {
+          measure(state);
+          mutate(state);
+          return Promise.resolve();
+        },
+      };
+
+      body.setAttribute('test', 'hello');
+      fixedLayer.update();
+      expect(fixedLayer.transferLayer_).to.exist;
+      const layer = fixedLayer.transferLayer_.layer_;
+      expect(layer.getAttribute('test')).to.equal('hello');
+
+      body.removeAttribute('test');
+      body.setAttribute('test1', 'hello1');
+      body.setAttribute('test2', 'hello2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal('hello1');
+      expect(layer.getAttribute('test2')).to.equal('hello2');
+
+      body.removeAttribute('test1');
+      body.removeAttribute('test2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal(null);
+      expect(layer.getAttribute('test2')).to.equal(null);
     });
   });
 });
