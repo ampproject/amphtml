@@ -107,6 +107,27 @@
    *   // that a user would. (e.g., click on links, swipe gallery images.)
    *   "enable_percy_javascript": true,
    *
+   *   // [optional, EXPERIMENTAL] Path of JavaScript file relative to webserver
+   *   // root that exports a dictionary of (async) test functions keyed by a
+   *   // short descriptive name. Each test function is passed two arguments: a
+   *   // reference to the Puppeteer page, and the full name of the test (page
+   *   // name + test name). e.g., the JS file can be:
+   *   //   module.exports = {
+   *   //     'tap red button': async (page, name) => {
+   *   //       await page.tap('#red_button');
+   *   //       await verifyCssElements(page, name, null, ['.red-loading'],
+   *   //         ['.red-loaded']);
+   *   //     },
+   *   //     'tap red and blue button': async (page, name) => {
+   *   //       await page.tap('#red_button');
+   *   //       await page.tap('#blue_button');   
+   *   //       await verifyCssElements(page, name, null,
+   *   //         ['.red-loading', '.blue-loading'],
+   *   //         ['.red-loaded', '.blue-loaded']);
+   *   //     },
+   *   //   };
+   *   "interactive_tests": "examples/visual-tests/foo/foo-test.js",
+   *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous
    *   // snapshot on Percy that demonstrate the flakiness of this test.
@@ -170,7 +191,8 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
