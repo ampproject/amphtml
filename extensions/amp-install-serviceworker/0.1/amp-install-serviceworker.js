@@ -299,6 +299,7 @@ function install(win, src) {
           registration.scope);
     }
     sendAmpScriptToSwOnFirstVisit(registration, win);
+    prefetchOutgoingLinks(registration, win);
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
@@ -325,7 +326,7 @@ function sendAmpScriptToSwOnFirstVisit(registration, win) {
           .filter(item => item.initiatorType === 'script' &&
             item.name.indexOf(urls.cdn) !== -1)
           .map(script => script.name);
-      // using https://github.com/redux-utilities/flux-standard-action
+      // using convention from https://github.com/redux-utilities/flux-standard-action.
       controllerSw.postMessage(JSON.stringify(dict({
         'type': 'AMP__FIRST-VISIT-CACHING',
         'payload': ampScriptsUsed,
@@ -334,6 +335,43 @@ function sendAmpScriptToSwOnFirstVisit(registration, win) {
   }
 }
 
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ */
+function prefetchOutgoingLinks(registration, win) {
+  const {document} = win;
+  const links = [].map.call(document.querySelectorAll('a[rel=prefetch]'),
+      link => link.getAttribute('href'));
+  if (supportsPrefetch(document)) {
+    links.forEach(link => {
+      const linkTag = document.createElement('link');
+      linkTag.setAttribute('rel', 'prefetch');
+      linkTag.setAttribute('href', link);
+      document.head.appendChild(linkTag);
+    });
+  } else if (registration.active) {
+    registration.active.postMessage(JSON.stringify(dict({
+      'type': 'AMP__LINK-PREFETCH',
+      'payload': links,
+    })));
+  }
+}
+
+/**
+ * Returns whether or not link rel=prefetch is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function supportsPrefetch(doc) {
+  const fakeLink = doc.createElement('link');
+  if (fakeLink.relList && fakeLink.relList.supports) {
+    return fakeLink.relList.supports('prefetch');
+  }
+  return false;
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpInstallServiceWorker);
