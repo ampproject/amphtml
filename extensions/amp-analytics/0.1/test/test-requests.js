@@ -91,10 +91,8 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     describe('batch with batchInterval', () => {
       let spy;
-      let transport;
       beforeEach(() => {
         spy = sandbox.spy();
-        transport = {sendRequest: spy};
       });
 
       it('should support number', () => {
@@ -209,10 +207,8 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     describe('reportWindow', () => {
       let spy;
-      let transport;
       beforeEach(() => {
         spy = sandbox.spy();
-        transport = {sendRequest: spy};
       });
 
       it('should accept reportWindow with number', () => {
