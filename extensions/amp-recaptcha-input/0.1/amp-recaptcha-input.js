@@ -103,7 +103,8 @@ export class AmpRecaptchaInput extends AsyncInput {
     if (!this.registerPromise_ && this.sitekey_) {
       this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
     }
-    return this.registerPromise_;
+
+    return /** @type {!Promise} */ (this.registerPromise_);
   }
 
   /** @override */
@@ -118,6 +119,7 @@ export class AmpRecaptchaInput extends AsyncInput {
   /**
    * Function to return the recaptcha token.
    * Will be an override of AMP.AsyncInput
+   * @override
    * @return {!Promise<string>}
    */
   getValue() {
