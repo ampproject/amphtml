@@ -176,6 +176,10 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+  }
+
+  /** @override */
   isPingbackEnabled() {
     return this.platform_.isPingbackEnabled();
   }

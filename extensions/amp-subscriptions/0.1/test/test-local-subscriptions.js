@@ -270,6 +270,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         expect(renderStub).to.be.calledOnce;
       });
     });
+
+    it('should reset renderer\'s on reset', () => {
+      const resetStub =
+        sandbox.stub(localSubscriptionPlatform.renderer_, 'reset');
+      localSubscriptionPlatform.reset();
+      expect(resetStub).to.be.calledOnce;
+    });
   });
 
   describe('pingback', () => {

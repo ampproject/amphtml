@@ -111,6 +111,15 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         expect(delegateUIStub).to.be.called;
       });
     });
+
+    it('should hide sections on reset', () => {
+      return renderer.render({subscribed: true}).then(() => {
+        displayed([actions2]);
+        return renderer.reset();
+      }).then(() => {
+        displayed([]);
+      });
+    });
   });
 
   describe('dialog renderer', () => {
@@ -150,7 +159,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
 
     afterEach(() => {
       templatesMock.verify();
-      // dialogMock.verify();
+      dialogMock.verify();
     });
 
     it('should render an element', () => {
@@ -190,10 +199,15 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       });
     });
 
-    it('should ignore rendering if nothign found', () => {
+    it('should ignore rendering if nothing found', () => {
       templatesMock.expects('renderTemplate').never();
       dialogMock.expects('open').never();
       return renderer.render({value: 'C'});
+    });
+
+    it('should hide the dialog on reset', () => {
+      dialogMock.expects('close').once();
+      return renderer.reset();
     });
   });
 });
