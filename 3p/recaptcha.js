@@ -85,10 +85,9 @@ export function initRecaptcha() {
   try {
     dataObject = parseJson(win.name);
   } catch (e) {
-    let errorMessage = TAG + ' Could not parse the window name.';
-    dev().error(errorMessage);
-    throw new Error(errorMessage);
-    return;
+    const errorMessage = ' Could not parse the window name.';
+    dev().error(TAG, '%s', errorMessage);
+    throw new Error(TAG + errorMessage);
   }
 
   // Get our sitekey from the iframe name attribute
@@ -109,7 +108,7 @@ export function initRecaptcha() {
   }, function() {
     dev().error(TAG + ' Failed to load recaptcha api script');
   });
-};
+}
 window.initRecaptcha = initRecaptcha;
 
 /**

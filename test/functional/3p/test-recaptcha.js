@@ -15,11 +15,11 @@
  */
 
 import {
-  initRecaptcha, 
-  doesOriginDomainMatchIframeSrc
+  doesOriginDomainMatchIframeSrc,
+  initRecaptcha,
 } from '../../../3p/recaptcha';
 import {
-  parseUrlDeprecated
+  parseUrlDeprecated,
 } from '../../../src/url';
 
 describe('3p recaptcha.js', () => {
@@ -38,12 +38,12 @@ describe('3p recaptcha.js', () => {
       window.name = undefined;
     });
   });
-  
+
   describe('doesOriginDomainMatchIframeSrc()', () => {
 
-    const getMockIframeWindowWithLocation = (url) => {
+    const getMockIframeWindowWithLocation = url => {
       return {
-        location: parseUrlDeprecated(url) 
+        location: parseUrlDeprecated(url),
       };
     };
 
@@ -57,8 +57,8 @@ describe('3p recaptcha.js', () => {
 
     it('should allow localhost as a valid host', () => {
       return doesOriginDomainMatchIframeSrc(
-        getMockIframeWindowWithLocation('http://localhost'), 
-        {origin: 'http://localhost'}
+          getMockIframeWindowWithLocation('http://localhost'),
+          {origin: 'http://localhost'}
       ).then(() => {
         expect(true).to.be.ok;
       });
@@ -66,8 +66,8 @@ describe('3p recaptcha.js', () => {
 
     it('should allow cache domains', () => {
       return doesOriginDomainMatchIframeSrc(
-        getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'), 
-        {origin: 'https://example-com.cdn.ampproject.org'}
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'),
+          {origin: 'https://example-com.cdn.ampproject.org'}
       ).then(() => {
         expect(true).to.be.ok;
       });
@@ -75,12 +75,12 @@ describe('3p recaptcha.js', () => {
 
     it('should allow canonical domains', () => {
       return doesOriginDomainMatchIframeSrc(
-        getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'), 
-        {origin: 'https://example.com'}
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'),
+          {origin: 'https://example.com'}
       ).then(() => {
         expect(true).to.be.ok;
       });
-    });    
+    });
   });
 });
 
