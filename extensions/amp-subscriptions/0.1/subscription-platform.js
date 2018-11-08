@@ -44,6 +44,11 @@ export class SubscriptionPlatform {
   activate(unusedEntitlement) {}
 
   /**
+   * Reset the platform and renderer.
+   */
+  reset() {}
+
+  /**
    * Returns if pingback is enabled for this platform.
    * @return {boolean}
    */

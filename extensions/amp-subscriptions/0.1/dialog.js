@@ -44,6 +44,9 @@ export class Dialog {
     /** @private {?Element} */
     this.content_ = null;
 
+    /** @private {!Promise} */
+    this.lastAction_ = Promise.resolve();
+
     const doc = this.ampdoc_.win.document;
 
     this.wrapper_ = createElementWithAttributes(
@@ -93,6 +96,34 @@ export class Dialog {
    * @return {!Promise}
    */
   open(content, showCloseAction = true) {
+    return this.action_(() => this.open_(content, showCloseAction));
+  }
+
+  /**
+   * Closes the dialog.
+   * @return {!Promise}
+   */
+  close() {
+    return this.action_(() => this.close_());
+  }
+
+  /**
+   * @param {!Function} action
+   * @return {!Promise}
+   * @private
+   */
+  action_(action) {
+    return this.lastAction_ = this.lastAction_.then(action);
+  }
+
+  /**
+   * Opens the dialog with the specified content.
+   * @param {!Element} content
+   * @param {boolean=} showCloseAction
+   * @return {!Promise}
+   * @private
+   */
+  open_(content, showCloseAction = true) {
     if (this.content_) {
       this.wrapper_.replaceChild(content, this.content_);
     } else {
@@ -131,8 +162,9 @@ export class Dialog {
   /**
    * Closes the dialog.
    * @return {!Promise}
+   * @private
    */
-  close() {
+  close_() {
     if (!this.visible_) {
       return Promise.resolve();
     }

@@ -163,6 +163,11 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+    this.renderer_.reset();
+  }
+
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
