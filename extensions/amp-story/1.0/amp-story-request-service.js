@@ -25,8 +25,8 @@ import {user} from '../../../src/log';
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
-/** @type {string} */
-export const TAG = 'amp-story-request-service';
+/** @private @const {string} */
+const TAG = 'amp-story-request-service';
 
 /**
  * Service to send XHRs.
@@ -62,8 +62,8 @@ export class AmpStoryRequestService {
     }
 
     if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
-      return this.loadJsonFromAttribute_(
-          BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendEl);
+      const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
+      return this.loadJsonFromAttribute_(rawUrl);
     }
 
     // Fallback. Check for an inline json config.
@@ -76,18 +76,16 @@ export class AmpStoryRequestService {
   }
 
   /**
-   * @param {string} attributeName
-   * @param {!Element} bookendEl
+   * @param {string} rawUrl
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
-  loadJsonFromAttribute_(attributeName, bookendEl) {
-    const rawUrl = bookendEl.getAttribute(attributeName);
+  loadJsonFromAttribute_(rawUrl) {
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
     if (!isProtocolValid(rawUrl)) {
-      user().error(TAG, 'Invalid bookend config url.');
+      user().error(TAG, 'Invalid config url.');
       return Promise.resolve(null);
     }
 
