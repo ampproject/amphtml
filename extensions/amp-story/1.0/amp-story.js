@@ -44,6 +44,7 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, PageState} from './amp-story-page';
+import {AmpStoryTooltip} from './amp-story-tooltip';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -219,6 +220,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
+    /** Instantiates the tooltip in case its needed. */
+    new AmpStoryTooltip(this.win, this.element);
+
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
@@ -345,10 +349,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     if (this.isDesktop_()) {
-      const uiState =
-          isExperimentOn(this.win, 'amp-story-scroll') ?
-            UIType.SCROLL : UIType.DESKTOP;
-      this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+      this.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
     }
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -583,7 +584,9 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
+      // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
+          this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
           !this.storeService_
@@ -1255,12 +1258,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     this.updateViewportSizeStyles_();
 
-    let uiState = UIType.MOBILE;
-
-    if (this.isDesktop_()) {
-      uiState = isExperimentOn(this.win, 'amp-story-scroll') ?
-        UIType.SCROLL : UIType.DESKTOP;
-    }
+    const uiState = this.isDesktop_() ? UIType.DESKTOP : UIType.MOBILE;
 
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
@@ -1311,16 +1309,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.vsync_.mutate(() => {
-      this.element.removeAttribute('desktop');
-      this.element.removeAttribute('scroll');
-    });
-
     switch (uiState) {
       case UIType.MOBILE:
         // Preloads and prerenders the share menu as the share button gets
         // visible on the mobile UI. No-op if already built.
         this.shareMenu_.build();
+        this.vsync_.mutate(() => {
+          this.element.removeAttribute('desktop');
+        });
         break;
       case UIType.DESKTOP:
         this.setDesktopPositionAttributes_(this.activePage_);
@@ -1334,11 +1330,6 @@ export class AmpStory extends AMP.BaseElement {
         if (this.activePage_) {
           this.updateBackground_(this.activePage_.element, /* initial */ true);
         }
-        break;
-      case UIType.SCROLL:
-        this.vsync_.mutate(() => {
-          this.element.setAttribute('scroll', '');
-        });
         break;
     }
   }

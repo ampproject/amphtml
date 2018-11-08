@@ -1,6 +1,3 @@
-import {Services} from '../../../../../src/services';
-import {getSourceOrigin} from '../../../../../src/url';
-
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -45,24 +42,4 @@ export class BookendComponentInterface {
    * @return {!Element}
    */
   buildElement(unusedComponentJson, unusedDoc) {}
-}
-
-/**
- * Gets the origin url for components that display a url in the bookend. It
- * trims the protocol prefix and returns only the hostname of the origin.
- * @param {!Element} element
- * @param {string} url
- * @return {string}
- */
-export function getSourceOriginForBookendComponent(element, url) {
-  let domainName;
-  try {
-    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
-    // Remove protocol prefix.
-    domainName = Services.urlForDoc(element).parse(domainName).hostname;
-  } catch (e) {
-    // Unknown path prefix in url.
-    domainName = Services.urlForDoc(element).parse(url).hostname;
-  }
-  return domainName;
 }

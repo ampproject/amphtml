@@ -224,6 +224,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-powr-player/0.1/amp-powr-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
@@ -293,6 +295,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/linker-manager.js->' +
           'src/service/navigation.js',
+      'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
+        'src/service/navigation.js',
       'extensions/amp-list/0.1/amp-list.js->' +
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +

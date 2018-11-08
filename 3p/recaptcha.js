@@ -54,6 +54,9 @@ const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 /** {?IframeMessaginClient} **/
 let iframeMessagingClient = null;
 
+/** {?string} **/
+let sitekey = null;
+
 /**
  * Initialize 3p frame.
  */
@@ -91,7 +94,7 @@ window.initRecaptcha = function() {
       dataObject.sitekey,
       'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
-  const {sitekey} = dataObject;
+  sitekey = dataObject.sitekey;
   const recaptchaApiUrl = RECAPTCHA_API_URL + sitekey;
 
   loadScript(win, recaptchaApiUrl, function() {
@@ -126,7 +129,6 @@ function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
  * and sending the token back to the parent amp-recaptcha component
  *
  * Data Object will have the following fields
- * sitekey {string} - reCAPTCHA sitekey used to identify the site
  * action {string} - action to be dispatched with grecaptcha.execute
  * id {number} - id given to us by a counter in the recaptcha service
  *
@@ -136,8 +138,7 @@ function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
  */
 function actionTypeHandler(win, grecaptcha, data) {
   doesOriginDomainMatchIframeSrc(win, data).then(() => {
-    // TODO: @torch2424: Verify sitekey is the same as original
-    const executePromise = grecaptcha.execute(data.sitekey, {
+    const executePromise = grecaptcha.execute(sitekey, {
       action: data.action,
     });
 
