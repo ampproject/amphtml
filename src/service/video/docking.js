@@ -318,11 +318,11 @@ const Controls = html =>
 
 /**
  * Maps minimum target width to classname to be applied.
- * @private @const {!Object<number, string>}
+ * @private @const {!Object<string, string>}
  */
 const CONTROLS_BREAKPOINTS = {
-  1: 'amp-small',
-  300: 'amp-large',
+  '1': 'amp-small',
+  '300': 'amp-large',
 };
 
 // TODO(alanorozco): PLACEHOLDER_BREAKPOINTS for icon size. Currently it looks
@@ -445,7 +445,8 @@ export class VideoDocking {
 
     /** @private @const {function():!Element} */
     this.getPlaceholderIcon_ =
-          once(() => this.getPlaceholderBackground_().lastElementChild);
+          once(() => dev().assertElement(
+              this.getPlaceholderBackground_().lastElementChild));
 
     /** @private {?../../video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
@@ -826,7 +827,7 @@ export class VideoDocking {
    * @private
    */
   isValidScrollingDirection_() {
-    return this.currentlyDocked_ ||
+    return !!this.currentlyDocked_ ||
         this.scrollDirection_ == Direction.UP;
   }
 
@@ -859,7 +860,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!Element|!../../base-element.BaseElement} element
+   * @param {!Element} element
    * @return {!../../layout-rect.LayoutRectDef}
    * @private
    */
@@ -1430,7 +1431,7 @@ export class VideoDocking {
     }
 
     const {x, y, scale} = this.placedAt_;
-    const {top: fixedScrollTop, height} = this.getFixedLayoutBox_(video);
+    const {top: fixedScrollTop, height} = this.getFixedLayoutBox_(video.element);
 
     if (y == fixedScrollTop) {
       return;
@@ -1485,7 +1486,8 @@ export class VideoDocking {
     const placeholderBackground = this.getPlaceholderBackground_();
 
     // First child is the poster layer, see `PlaceholderBackground`.
-    const placeholderPoster = childElementByTag(placeholderBackground, 'div');
+    const placeholderPoster =
+        dev().assertElement(childElementByTag(placeholderBackground, 'div'));
 
     if (!element.hasAttribute('poster')) {
       toggle(placeholderPoster, false);
@@ -1538,13 +1540,14 @@ export class VideoDocking {
 
     let maxBreakpoint = 0;
     for (let i = 0; i < breakpoints.length; i++) {
-      const breakpoint = breakpoints[i];
-      if (breakpoint <= renderWidth &&
-          breakpoint > maxBreakpoint) {
-        container.classList.add(CONTROLS_BREAKPOINTS[breakpoint]);
-        maxBreakpoint = breakpoint;
+      const breakpointStr = breakpoints[i];
+      const breakpointInt = parseInt(breakpointStr, 10);
+      if (breakpointInt <= renderWidth &&
+          breakpointInt > maxBreakpoint) {
+        container.classList.add(CONTROLS_BREAKPOINTS[breakpointStr]);
+        maxBreakpoint = breakpointInt;
       } else {
-        container.classList.remove(CONTROLS_BREAKPOINTS[breakpoint]);
+        container.classList.remove(CONTROLS_BREAKPOINTS[breakpointStr]);
       }
     }
   }
