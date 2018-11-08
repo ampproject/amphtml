@@ -141,7 +141,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
 
     /**
-     * @type {!PriorityQueue<function(!Element)>}
+     * @type {!PriorityQueue<function(!Element, !Event)>}
      * @private
      * @const
      */
@@ -317,6 +317,7 @@ export class Navigation {
       // TODO(alabiaga): investigate fix for handling A2A and custom link
       // protocols.
       this.expandVarsForAnchor_(target);
+      this.anchorMutatorHandlers_(target, e);
     }
   }
 
@@ -340,14 +341,22 @@ export class Navigation {
       return;
     }
 
-    // Handle anchor transformations.
-    this.anchorMutators_.forEach(anchorMutator => {
-      anchorMutator(target);
-    });
+    this.anchorMutatorHandlers_(target, e);
     location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+  }
+
+  /**
+   * Handle anchor transformations.
+   * @param {!Element} target
+   * @param {!Event} e
+   */
+  anchorMutatorHandlers_(target, e) {
+    this.anchorMutators_.forEach(anchorMutator => {
+      anchorMutator(target, e);
+    });
   }
 
   /**
@@ -521,7 +530,7 @@ export class Navigation {
   }
 
   /**
-   * @param {!Function} callback
+   * @param {function(!Element, !Event)} callback
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {
