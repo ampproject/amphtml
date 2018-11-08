@@ -330,6 +330,11 @@ export class Navigation {
 
     let location = this.parseUrl_(target.href);
 
+    // Handle email redirects.
+    if (this.handleRedirect_(e, target)) {
+      return;
+    }
+
     // Handle AMP-to-AMP navigation if rel=amphtml.
     if (this.handleA2AClick_(e, target, location)) {
       return;
@@ -435,6 +440,36 @@ export class Navigation {
     return false;
   }
 
+  /**
+   * Handles clicking on links with possible redirects.
+   * @param {!Event} e
+   * @param {!Element} target
+   * @return {boolean}
+   * @private
+   */
+  handleRedirect_(e, target) {
+    const safeRedirectAttribute = 'data-saferedirectreason';
+    const safeRedirectLink = target.getAttribute('data-saferedirecturl');
+    const isUnsafeRedirect = target.hasAttribute(safeRedirectAttribute);
+
+    if (!safeRedirectLink && !isUnsafeRedirect) {
+      return false;
+    }
+
+    if (isUnsafeRedirect) {
+      e.preventDefault();
+      this.viewer_.sendMessage(
+          safeRedirectAttribute, dict({'target': target}));
+      return true;
+    }
+
+    if (safeRedirectLink) {
+      target.href = safeRedirectLink;
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * Handles clicking on a link with hash navigation.

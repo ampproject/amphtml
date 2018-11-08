@@ -18,6 +18,7 @@ import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
 import {createElementWithAttributes} from '../../src/dom';
+import {dict} from '../../src/utils/object';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
@@ -340,6 +341,46 @@ describes.sandboxed('Navigation', {}, () => {
         expect(winOpenStub).to.not.be.called;
         expect(winOpenStub).to.not.be.calledWith('ftp://example.com/a', '_blank');
         expect(event.defaultPrevented).to.be.false;
+      });
+    });
+
+    describe('handle redirects', () => {
+      let target = null;
+      let originalHref = null;
+      const safeRedirectUrl = 'https://www.play-it-safe.org/';
+
+      beforeEach(() => {
+        target = event.target;
+        originalHref = target.href;
+      });
+
+      it('should not modify or post message if attributes not present', () => {
+        const send = sandbox.stub(handler.viewer_, 'sendMessage');
+        target.removeAttribute('data-saferedirecturl');
+        target.removeAttribute('data-saferedictreason');
+        handler.handle_(event);
+        expect(send).to.have.not.been.called;
+        expect(target.href).to.equal(originalHref);
+      });
+
+      it('should modify href with safe redirect', () => {
+        target.setAttribute('data-saferedirecturl', safeRedirectUrl);
+        handler.handle_(event);
+        expect(target.href).to.equal(safeRedirectUrl);
+      });
+
+      it('should not modify href if safe redirect is empty string', () => {
+        target.setAttribute('data-saferedirecturl', '');
+        handler.handle_(event);
+        expect(target.href).to.equal(originalHref);
+      });
+
+      it('should post message viewer if unsafe link', () => {
+        const send = sandbox.stub(handler.viewer_, 'sendMessage');
+        target.setAttribute('data-saferedirectreason', '');
+        handler.handle_(event);
+        expect(send).to.have.been.calledWith(
+            'data-saferedirectreason', dict({'target': target}));
       });
     });
 
