@@ -30,16 +30,16 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, transport, isSandbox) {
+  constructor(element, request, preconnect, transport, isSandbox) {
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = element.getAmpDoc();
 
     /** @const {!Window} */
     this.win = this.ampdoc_.win;
@@ -60,8 +60,7 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ =
-      Services.urlReplacementsForDoc(this.ampdoc_);
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
