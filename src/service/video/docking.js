@@ -1776,8 +1776,7 @@ export class VideoDocking {
       return;
     }
 
-    const {x, y} = pointerCoords(e);
-    offset.x = x - startX;
+    offset.x = pointerCoords(e).x - startX;
     offset.y = 0;
 
     // Prevents dragging misfires.
