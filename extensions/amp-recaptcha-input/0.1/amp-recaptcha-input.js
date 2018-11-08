@@ -24,13 +24,12 @@ import {AsyncInput} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
-  installRecaptchaService,
-  recaptchaServiceFor,
+  installRecaptchaServiceForDoc,
+  recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {user} from '../../../src/log';
-
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -47,8 +46,8 @@ export class AmpRecaptchaInput extends AsyncInput {
     /** @private {?string} */
     this.action_ = null;
 
-    /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
-    this.recaptchaService_ = recaptchaServiceFor(this.win);
+    /** @private {?./amp-recaptcha-service.AmpRecaptchaService} */
+    this.recaptchaService_ = null;
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
@@ -77,6 +76,8 @@ export class AmpRecaptchaInput extends AsyncInput {
         this.element.getAttribute('data-action'),
         'The data-action attribute is required for <amp-recaptcha-input> %s',
         this.element);
+
+    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
 
     return this.mutateElement(() => {
       toggle(this.element);
@@ -123,7 +124,7 @@ export class AmpRecaptchaInput extends AsyncInput {
 
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
-          this.element.getResourceId(), this.sitekey_, this.action_
+          this.element.getResourceId(), this.action_
       );
     }
     return Promise.reject(new Error(
@@ -134,6 +135,6 @@ export class AmpRecaptchaInput extends AsyncInput {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaService(AMP.win);
+  installRecaptchaServiceForDoc(AMP.ampdoc);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });
