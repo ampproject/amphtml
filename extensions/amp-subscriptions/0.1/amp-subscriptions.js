@@ -485,6 +485,9 @@ export class SubscriptionService {
   reAuthorizePlatform(subscriptionPlatform) {
     this.platformStore_.resetEntitlementFor(
         subscriptionPlatform.getServiceId());
+    this.platformStore_.getAvailablePlatforms()
+        .forEach(platform => platform.reset());
+    this.renderer_.toggleLoading(true);
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
