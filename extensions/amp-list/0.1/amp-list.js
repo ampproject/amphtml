@@ -134,6 +134,10 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
+    this.registerAction('containerize',
+        () => this.changeToLayoutContainer_(),
+        ActionTrust.LOW);
+
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
   }

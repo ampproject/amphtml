@@ -70,47 +70,12 @@
 <article>
   <h1>AMP List Resize Manual Test</h1>
 
-  <h2>AMP List Basic</h2>
-  <p>This contains an incorrectly sized container where the contents exceed the list height. It should show an overflow button. </p>
-  <amp-list width="396" height="80" layout="responsive" resizable-children reset-on-refresh
-      src="/test/manual/amp-list-data.json?RANDOM">
-    <template type="amp-mustache">
-      <div class="story-entry">
-        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
-        {{title}}
-      </div>
-    </template>
-    <div overflow>
-      SEE MORE
-    </div>
-    <div placeholder>
-      <div class="tall">PACEHOLDER</div>
-    </div>
-  </amp-list>
-
-  <div class="split"></div>
-
-  <h2>AMP List Basic Below fold</h2>
-  <p>This contains an incorrectly sized container where the contents exceed the list height. It should be changed to layout container. </p>
-  <amp-list width="396" height="80" layout="responsive" resizable-children reset-on-refresh
-      src="/test/manual/amp-list-data.json?RANDOM">
-    <template type="amp-mustache">
-      <div class="story-entry">
-        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
-        {{title}}
-      </div>
-    </template>
-    <div overflow>
-      SEE MORE
-    </div>
-  </amp-list>
-
   <h2>AMP List Resize with Accordion</h2>
-  <amp-list width="396" height="80" layout=responsive reset-on-refresh resizable-children
+  <amp-list id="accordion-list" width="396" height="180" layout=responsive reset-on-refresh resizable-children
       src="/test/manual/amp-list-data.json">
     <template type="amp-mustache">
       <div class="story-entry">
-        <amp-accordion>
+        <amp-accordion on="expand:accordion-list.containerize;collapse:accordion-list.containerize">
           <section>
             <h1>{{title}}</h1>
             <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -127,6 +92,39 @@
     </div>
     <div placeholder>
       <div class="tall">PACEHOLDER</div>
+    </div>
+  </amp-list>
+
+  <h2>AMP List Basic</h2>
+  <p>This contains an incorrectly sized container where the contents exceed the list height. It should show an overflow button. </p>
+  <amp-list width="396" height="80" layout="fixed" resizable-children reset-on-refresh
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+    <div placeholder>
+      <div class="tall">PLACEHOLDER</div>
+    </div>
+  </amp-list>
+
+  <h2>AMP List Basic Below fold</h2>
+  <p>This contains an incorrectly sized container where the contents exceed the list height. It should be changed to layout container. </p>
+  <amp-list width="396" height="80" layout="responsive" resizable-children reset-on-refresh
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
     </div>
   </amp-list>
 
