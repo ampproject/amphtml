@@ -66,22 +66,13 @@ export class AmpStoryRequestService {
           BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendEl);
     }
 
-    return this.loadInlineJson_(bookendEl);
-  }
+    // Fallback. Check for an inline json config.
+    let config = null;
+    try {
+      config = getChildJsonConfig(bookendEl);
+    } catch (err) {}
 
-  /**
-   * If specified, gets bookend config found inline under the amp-story-bookend.
-   * @param {!Element} bookendEl
-   */
-  loadInlineJson_(bookendEl) {
-    const inlineConfig = bookendEl.querySelector('script');
-    if (!inlineConfig) {
-      return Promise.resolve(null);
-    }
-
-    const jsonConfig = getChildJsonConfig(bookendEl);
-
-    return Promise.resolve(jsonConfig);
+    return Promise.resolve(config);
   }
 
   /**
