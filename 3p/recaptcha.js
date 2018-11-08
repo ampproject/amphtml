@@ -110,7 +110,7 @@ window.initRecaptcha = function() {
  * Function to initialize our IframeMessagingClient
  * @param {Window} win
  * @param {*} grecaptcha
- * @param {JsonObject} dataObject
+ * @param {!JsonObject} dataObject
  */
 function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
   iframeMessagingClient = new IframeMessagingClient(win);
@@ -174,6 +174,8 @@ function doesOriginDomainMatchIframeSrc(win, data) {
     );
   }
 
+  // Using the deprecated parseUrl here, as we don't have access
+  // to the URL service in a 3p frame.
   const originLocation = parseUrlDeprecated(data.origin);
 
   if (originLocation.hostname.includes('localhost') &&
