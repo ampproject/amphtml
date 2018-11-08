@@ -878,8 +878,24 @@ class TransferLayerBody {
 
   /** @override */
   update() {
-    if (this.layer_.className != this.doc_.body.className) {
-      this.layer_.className = this.doc_.body.className;
+    const {body} = this.doc_;
+    const layer = this.layer_;
+    const bodyAttrs = body.attributes;
+    const layerAttrs = layer.attributes;
+    for (let i = 0; i < bodyAttrs.length; i++) {
+      const {name, value} = bodyAttrs[i];
+      if (name === 'style') {
+        continue;
+      }
+      layer.setAttribute(name, value);
+    }
+    for (let i = 0; i < layerAttrs.length; i++) {
+      const {name} = layerAttrs[i];
+      if (name === 'style' || body.hasAttribute(name)) {
+        continue;
+      }
+      layer.removeAttribute(name);
+      i--;
     }
   }
 
