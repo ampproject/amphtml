@@ -71,7 +71,7 @@ init();
 /**
  * Main function called by the recaptcha bootstrap frame
  */
-window.initRecaptcha = function() {
+export function initRecaptcha() {
 
   const win = window;
 
@@ -85,7 +85,9 @@ window.initRecaptcha = function() {
   try {
     dataObject = parseJson(win.name);
   } catch (e) {
-    dev().error(TAG + ' Could not parse the window name.');
+    let errorMessage = TAG + ' Could not parse the window name.';
+    dev().error(errorMessage);
+    throw new Error(errorMessage);
     return;
   }
 
@@ -108,6 +110,7 @@ window.initRecaptcha = function() {
     dev().error(TAG + ' Failed to load recaptcha api script');
   });
 };
+window.initRecaptcha = initRecaptcha;
 
 /**
  * Function to initialize our IframeMessagingClient
@@ -167,7 +170,7 @@ function actionTypeHandler(win, grecaptcha, data) {
  * @param {Object} data
  * @return {!Promise}
  */
-function doesOriginDomainMatchIframeSrc(win, data) {
+export function doesOriginDomainMatchIframeSrc(win, data) {
 
   if (!data.origin) {
     return Promise.reject(
