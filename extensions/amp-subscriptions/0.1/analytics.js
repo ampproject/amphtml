@@ -16,6 +16,9 @@
 
 import {dict} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-subscriptions';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor
@@ -65,6 +68,7 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
+    user().info(TAG, eventType, opt_vars || '');
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
   }
 }
