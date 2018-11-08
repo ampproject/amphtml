@@ -53,8 +53,6 @@ import {mapRange} from '../../utils/math';
 import {moveLayoutRect} from '../../layout-rect';
 import {once} from '../../utils/function';
 import {
-  assertDoesNotContainDisplay,
-  computedStyle,
   px,
   resetStyles,
   setImportantStyles,
@@ -441,11 +439,11 @@ export class VideoDocking {
     /** @private @const {function():!ControlsDef} */
     this.getControls_ = once(() => this.installControls_(Controls(html)));
 
-    /** @private {!Element} */
+    /** @private @const {function():!Element} */
     this.getPlaceholderBackground_ =
           once(() => this.append_(PlaceholderBackground(html)));
 
-    /** @private {!Element} */
+    /** @private @const {function():!Element} */
     this.getPlaceholderIcon_ =
           once(() => this.getPlaceholderBackground_().lastElementChild);
 
