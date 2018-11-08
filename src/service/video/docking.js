@@ -1431,7 +1431,10 @@ export class VideoDocking {
     }
 
     const {x, y, scale} = this.placedAt_;
-    const {top: fixedScrollTop, height} = this.getFixedLayoutBox_(video.element);
+    const {
+      height,
+      top: fixedScrollTop,
+    } = this.getFixedLayoutBox_(video.element);
 
     if (y == fixedScrollTop) {
       return;
