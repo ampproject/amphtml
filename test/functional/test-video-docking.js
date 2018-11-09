@@ -31,16 +31,14 @@ describes.repeated('', {
   'Minimize to corner': {
     useSlot: false,
     topBoundary: 0,
-    bottomBoundary: 400,
   },
   'Minimize to slot element': {
     useSlot: true,
     topBoundary: 20,
-    bottomBoundary: 880,
   },
 }, (name, variant) => {
 
-  const {useSlot, topBoundary, bottomBoundary} = variant;
+  const {useSlot, topBoundary} = variant;
 
   describes.realWin('↗ 🔲', {amp: true}, env => {
     let ampdoc;
