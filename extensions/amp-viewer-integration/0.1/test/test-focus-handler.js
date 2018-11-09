@@ -87,14 +87,18 @@ describes.fakeWin('FocusHandler', {}, env => {
       focusHandler = null;
     });
 
-    it('should only forward supported events', () => {
-      focusHandler.handleEvent_(fakeFocusEvent('notasupportedevent'));
-      expect(messages).to.have.length(0);
-
-      focusHandler.handleEvent_(fakeFocusEvent('focusin'));
+    it('should forward focusin event', () => {
+      focusHandler.forwardEventToViewer_(fakeFocusEvent('focusin'));
       expect(messages).to.have.length(1);
       expect(messages[0].data.name).to.equal('focusin');
       expect(messages[0].data.data.focusTargetRect).to.equal(data);
+    });
+
+    it('should no opt if event is default prevented', () => {
+      const event = fakeFocusEvent('focusIn');
+      event.defaultPrevented = true;
+      focusHandler.forwardEventToViewer_(event);
+      expect(messages).to.have.length(0);
     });
 
   });

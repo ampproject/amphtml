@@ -18,7 +18,7 @@ import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 
 /**
- * @fileoverview Forward focus events' related data from the AMP doc to the
+ * Forward focus events' related data from the AMP doc to the
  * viewer.
  */
 export class FocusHandler {
@@ -41,27 +41,8 @@ export class FocusHandler {
    */
   listenForFocusEvents_() {
     const doc = this.win.document;
-
-    const options = {
-      capture: false,
-    };
-
-    listen(doc, 'focusin', this.handleEvent_.bind(this), options);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  handleEvent_(e) {
-    switch (e.type) {
-      case 'focusin':
-        this.forwardEventToViewer_(e);
-        break;
-      default:
-        // fall through.
-        return;
-    }
+    listen(doc, 'focusin', this.forwardEventToViewer_.bind(this),
+        {capture: false});
   }
 
   /**
@@ -75,7 +56,7 @@ export class FocusHandler {
     this.messaging_.sendRequest(
         e.type,
         dict({'focusTargetRect': e.target./*OK*/getBoundingClientRect()}),
-        false
+        /* awaitResponse */ false
     );
   }
 }

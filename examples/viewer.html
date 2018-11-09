@@ -407,7 +407,7 @@
       switch(name) {
         case 'documentLoaded':
         case 'focusin':
-          log('Focusin event', data)
+          log('Focusin event', data);
           return Promise.resolve();
         case 'requestFullOverlay':
           return this.requestFullOverlay_();
