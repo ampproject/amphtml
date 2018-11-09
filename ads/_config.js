@@ -455,6 +455,11 @@ export const adConfig = {
     ],
   },
 
+  'freewheel': {
+    prefetch: 'http://localhost/outstream-formats/build/fw-amp.min.js',
+    renderStartImplemented: true,
+  },
+
   'fusion': {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
