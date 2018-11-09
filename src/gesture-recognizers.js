@@ -338,7 +338,11 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    const {touches} = e;
+    // Number of current touches on the page
+    if (touches.length == 0) {
+      this.end_(e);
+    }
   }
 
   /** @override */
@@ -791,7 +795,11 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    // Number of current touches on the page
+    const {touches} = e;
+    if (touches.length <= 1) {
+      this.end_(e);
+    }
   }
 
   /** @override */

@@ -297,7 +297,8 @@ export class Gestures {
         continue;
       }
       this.recognizers_[i].onTouchEnd(event);
-      if (!this.pending_[i] || this.pending_[i] < now) {
+      if ((!this.pending_[i] || this.pending_[i] < now)
+        && this.eventing_ != this.recognizers_[i]) {
         this.stopTracking_(i);
       }
     }
