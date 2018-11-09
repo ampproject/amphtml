@@ -34,7 +34,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-class AmpRecaptcha extends AsyncInput {
+export class AmpRecaptcha extends AsyncInput {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -54,11 +54,6 @@ class AmpRecaptcha extends AsyncInput {
 
     /** @private {boolean} */
     this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
-  }
-
-  /** @override */
-  upgradeCallback() {
-    return new AsyncInput(this.element);
   }
 
   /** @override */

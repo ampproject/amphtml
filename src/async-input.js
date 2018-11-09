@@ -42,3 +42,4 @@ export class AsyncInput extends AMP.BaseElement {
       ' must override getValue()');
   }
 }
+
