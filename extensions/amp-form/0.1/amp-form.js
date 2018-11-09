@@ -1044,7 +1044,7 @@ function removeValidityStateClasses(form) {
     const elements = form.querySelectorAll(
         `.${escapeCssSelectorIdent(validityState)}`);
     iterateCursor(elements, element => {
-      /** @type {!Element} */(element).classList.remove(validityState);
+      dev().assertElement(element).classList.remove(validityState);
     });
   }
 }

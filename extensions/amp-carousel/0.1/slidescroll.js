@@ -726,7 +726,7 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        /** @type {!Element} */(this.slideWrappers_[i]).classList
+        dev().assertElement(this.slideWrappers_[i]).classList
             .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
