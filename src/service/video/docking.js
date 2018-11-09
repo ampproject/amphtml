@@ -90,8 +90,8 @@ const FLOAT_TOLERANCE = 0.02;
 /** @private @const {string} */
 const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 
-/** @private @const {number} */
-const REVERT_TO_INLINE_RATIO = 0.7;
+/** @visibleForTesting @const {number} */
+export const REVERT_TO_INLINE_RATIO = 0.7;
 
 /** @enum */
 export const RelativeX = {LEFT: 0, RIGHT: 1};
