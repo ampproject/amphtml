@@ -56,12 +56,11 @@ import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
+import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle} from '../../../src/style';
-import {tryParseJson} from '../../../src/json';
+import {setStyle, setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -114,6 +113,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {(?Object<string, string>|null)} */
     this.atConfig_ = null;
+
+    /** @private {string} */
+    this.widgetType_ = '';
   }
 
   /**
@@ -141,6 +143,7 @@ class AmpAddThis extends AMP.BaseElement {
         ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
+    this.widgetType_ = this.element.getAttribute('data-widget-type');
     this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
@@ -175,30 +178,6 @@ class AmpAddThis extends AMP.BaseElement {
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
-
-    //add addition eventListener for iframe postMessage to handle floating tool
-    this.win.addEventListener('message', function(event) {
-      if (event.origin !== ORIGIN || !getData(event)) {
-        return;
-      }
-      const addThisConfig = tryParseJson(getData(event));
-      if (addThisConfig
-        && hasOwn(addThisConfig,'event')
-        && addThisConfig['event'] === CONFIGURATION_EVENT) {
-        if (hasOwn(addThisConfig, 'config')
-          && hasOwn(addThisConfig['config'], 'widgets')) {
-          for (const key in addThisConfig['config']['widgets']) {
-            if (hasOwn(addThisConfig['config']['widgets'][key],'id')
-              && addThisConfig['config']['widgets'][key]['id'] === 'shfs'
-              && document.getElementById(key)) {
-              const style = 'width:100%;height:100%;position:fixed;bottom:0px';
-              document.getElementById(key)
-                  .setAttribute('style', style);
-            }
-          }
-        }
-      }
-    });
   }
 
 
@@ -259,7 +238,18 @@ class AmpAddThis extends AMP.BaseElement {
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
-    setStyle(iframe, 'margin-bottom', '-5px');
+    if(this.widgetType_ === 'floating'){
+      setStyles(iframe, {
+        width: '100%',
+        height: '100%',
+        position: 'fixed',
+        bottom: '0px'
+      });
+    }
+    else{
+      setStyle(iframe, 'margin-bottom', '-5px');
+    }
+
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
