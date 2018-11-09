@@ -267,9 +267,16 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
-    return this.sync_ ?
-      this.evaluateBindingSync_(binding, name, noEncode, opt_args) :
-      this.evaluateBindingAsync_(binding, name, noEncode, opt_args);
+
+    // We should only ever encode the top level resolution, or not at all.
+    const encode = !noEncode && !NOENCODE_WHITELIST[name];
+    if (this.sync_) {
+      const result = this.evaluateBindingSync_(binding, name,opt_args);
+      return encode ? encodeURIComponent(result) : result;
+    } else {
+      return this.evaluateBindingAsync_(binding, name, opt_args)
+          .then(result => encode ? encodeURIComponent(result) : result);
+    }
   }
 
 
@@ -277,11 +284,10 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
-   * @param {boolean} noEncode Should the result be encoded.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {!Promise<string>} Resolved value.
    */
-  evaluateBindingAsync_(binding, name, noEncode, opt_args) {
+  evaluateBindingAsync_(binding, name, opt_args) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -301,10 +307,8 @@ export class Expander {
 
         if (val == null) {
           result = '';
-        } else if (noEncode || NOENCODE_WHITELIST[name]) {
-          result = val;
         } else {
-          result = encodeURIComponent(val);
+          result = val;
         }
         return result;
       }).catch(e => {
@@ -327,11 +331,10 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
-   * @param {boolean} noEncode Should the result be encoded.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {string} Resolved value.
    */
-  evaluateBindingSync_(binding, name, noEncode, opt_args) {
+  evaluateBindingSync_(binding, name, opt_args) {
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
@@ -348,10 +351,7 @@ export class Expander {
           typeof value === 'boolean') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
-
-        const shouldNotEncode = noEncode || NOENCODE_WHITELIST[name];
-        result = shouldNotEncode ? value.toString() :
-          encodeURIComponent(/** @type {string} */ (value));
+        result = value.toString();
       } else {
         // Most likely a broken binding gets us here.
         this.maybeCollectVars_(name, '', opt_args);
