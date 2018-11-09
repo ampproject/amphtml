@@ -22,10 +22,9 @@
  * a value from a component, and then be used for
  * some other action. For examples, this can be used
  * by reCAPTCHA to request tokens for the form.
+ * @abstract
  */
-import {BaseElement} from './base-element';
-
-export class AsyncInput extends BaseElement {
+export class AsyncInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {

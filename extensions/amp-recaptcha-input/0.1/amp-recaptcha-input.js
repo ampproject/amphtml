@@ -34,7 +34,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-export class AmpRecaptchaInput extends AsyncInput {
+class AmpRecaptcha extends AsyncInput {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -57,8 +57,8 @@ export class AmpRecaptchaInput extends AsyncInput {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+  upgradeCallback() {
+    return new AsyncInput(this.element);
   }
 
   /** @override */
@@ -99,6 +99,11 @@ export class AmpRecaptchaInput extends AsyncInput {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
       this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
@@ -133,6 +138,13 @@ export class AmpRecaptchaInput extends AsyncInput {
         'amp-recaptcha-input requires both the data-sitekey,' +
         ' and data-action attribute'
     ));
+  }
+}
+
+export class AmpRecaptchaInput extends AMP.BaseElement {
+  /** @override */
+  upgradeCallback() {
+    return new AmpRecaptcha(this.element);
   }
 }
 
