@@ -15,31 +15,27 @@
  */
 
 /**
- * Base Class for all AMP Async Input Elements.
- * This simply Extends the Base Element, and adds a new
- * overridable function, getValue(). This should be
- * used by components like AMP form, to async request
+ * Interface for all AMP Async Input Elements.
+ * enforces the overridable function, getValue().
+ * Async Input should be implemented
+ * by components like AMP form, to async request
  * a value from a component, and then be used for
  * some other action. For examples, this can be used
  * by reCAPTCHA to request tokens for the form.
+ *
+ * NOTE: Elements that implemented AsyncInput must
+ * Also add the class 'i-amphtml-async-input'
+ * See amp-recaptcha-input as an example.
+ *
  * @abstract
  */
-export class AsyncInput extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-    element.classList.add('i-amphtml-async-input');
-  }
+export class AsyncInput {
 
   /**
    * Called to get the asynchronous value of an
    * AsyncInput field.
    * @return {!Promise<string>}
    */
-  getValue() {
-    throw new Error('Elements that implement AsyncInput' +
-      ' must override getValue()');
-  }
+  getValue() {}
 }
 
