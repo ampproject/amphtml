@@ -310,7 +310,7 @@ requirement: {
 }
 
 
-# Bans DOM v4 methods
+# Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
 
 requirement: {
   type: BANNED_PROPERTY_CALL
