@@ -34,7 +34,7 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-export class AmpRecaptcha extends AsyncInput {
+class AmpRecaptcha extends AsyncInput {
 
   /** @param {!AmpElement} element */
   constructor(element) {
