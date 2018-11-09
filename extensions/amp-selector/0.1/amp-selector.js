@@ -241,7 +241,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   maybeRefreshOnUpdate_(unusedEvent) {
-    const newElements = this.element.querySelectorAll('[option]');
+    const newElements = toArray(this.element.querySelectorAll('[option]'));
     if (areEqualOrdered(this.elements_, newElements)) {
       return;
     }
@@ -249,11 +249,11 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /**
-   * @param {Array<Element>=} opt_elements
+   * @param {!Array<!Element>=} opt_elements
    * @private
    */
   init_(opt_elements) {
-    this.selectedElements_ = [];
+    this.selectedElements_.length = 0;
 
     const elements = opt_elements
       ? opt_elements
@@ -273,6 +273,7 @@ export class AmpSelector extends AMP.BaseElement {
       el.tabIndex = 0;
     });
     this.elements_ = elements;
+
     this.updateFocus_();
     this.setInputs_();
   }

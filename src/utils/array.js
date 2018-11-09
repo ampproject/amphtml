@@ -19,8 +19,8 @@
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.
  *
- * @param {!IArrayLike<T>} arr1
- * @param {!IArrayLike<T>} arr2
+ * @param {!Array<T>} arr1
+ * @param {!Array<T>} arr2
  * @return {boolean}
  * @template T
  */
