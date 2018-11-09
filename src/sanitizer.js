@@ -110,8 +110,15 @@ export function sanitizeHtml(html, diffing) {
       const bindingAttribs = [];
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
-        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+        if (!attr) {
+          continue;
+        }
+        const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
+        const alternativeBinding = startsWith(attr, 'data-amp-bind-');
+        if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
+        }
+        if (classicBinding || alternativeBinding) {
           bindingAttribs.push(i);
         }
       }

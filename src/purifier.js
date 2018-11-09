@@ -22,9 +22,9 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict} from './utils/object';
-import {endsWith, startsWith} from './string';
 import {parseSrcset} from './srcset';
 import {remove} from './utils/array';
+import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
 import purify from 'dompurify/dist/purify.es';
@@ -394,7 +394,8 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = startsWith(attrName, '[') && endsWith(attrName, ']');
+    const classicBinding = attrName[0] == '['
+        && attrName[attrName.length - 1] == ']';
     const alternativeBinding = startsWith(attrName, BIND_PREFIX);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
