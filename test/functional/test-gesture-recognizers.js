@@ -355,7 +355,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should stop on touchend; velocity doesn\'t change', () => {
-    const event = {};
+    const event = {touches: []};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -380,7 +380,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should stop on touchend; velocity changes', () => {
-    const event = {};
+    const event = {touches: []};
 
     recognizer.startX_ = 101;
     recognizer.startY_ = 201;
@@ -789,7 +789,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    const event = {};
+    const event = {touches: []};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&
@@ -819,7 +819,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    const event = {};
+    const event = {touches: []};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&
