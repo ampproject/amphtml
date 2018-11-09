@@ -216,6 +216,9 @@ export class Store {
   }
 
   /**
+   * Set the storage value along with the current timestamp.
+   * When opt_isUpdated is true, timestamp will be the creation timestamp,
+   * the stored value will be updated w/o updating timestamp.
    * @param {string} name
    * @param {*} value
    * @param {boolean=} opt_isUpdate
