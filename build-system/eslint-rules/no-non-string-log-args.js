@@ -181,6 +181,10 @@ class ArgFixer {
     return '\'' + this.sanitizedStr.replace(/'/g, '\\\'') + '\'';
   }
 
+  appendToSanitizedStr(str) {
+    this.sanitizedStr += str;
+  }
+
   getRefsAsArgumentsString() {
     return this.refs.join(',');
   }
@@ -214,13 +218,13 @@ class ArgFixer {
 
   chompString() {
     // We remove the quotes surrounding the string.
-    this.sanitizedStr += this.cur().value.slice(1, -1);
+    this.appendToSanitizedStr(this.cur().value.slice(1, -1));
     this.next();
   }
 
   chompVarReference() {
     this.refs.push(this.cur().value);
-    this.sanitizedStr += '%s';
+    this.appendToSanitizedStr('%s');
     this.next();
   }
 
@@ -280,7 +284,7 @@ class ArgFixer {
         }
 
         if (!inTemplateEval) {
-          this.sanitizedStr += this.cur().value[i];
+          this.appendToSanitizedStr(this.cur().value[i]);
         } else {
           this.addToCurRef(this.cur().value[i]);
         }
@@ -311,7 +315,7 @@ class ArgFixer {
   }
 
   startNewRef() {
-    this.sanitizedStr += '%s';
+    this.appendToSanitizedStr('%s');
     this.refs.push('');
   }
 
