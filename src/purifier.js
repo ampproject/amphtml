@@ -22,9 +22,9 @@ import {
   resolveRelativeUrl,
 } from './url';
 import {dict} from './utils/object';
+import {endsWith, startsWith} from './string';
 import {parseSrcset} from './srcset';
 import {remove} from './utils/array';
-import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
 import purify from 'dompurify/dist/purify.es';
@@ -42,6 +42,9 @@ const TAG = 'purifier';
 
 /** @private @const {string} */
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
+
+/** @private @const {string} */
+const BIND_PREFIX = 'data-amp-bind-';
 
 /**
  * @const {!Object<string, boolean>}
@@ -391,14 +394,16 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    // Rewrite amp-bind attributes e.g. [foo]="bar" -> data-amp-bind-foo="bar".
+    const classicBinding = startsWith(attrName, '[') && endsWith(attrName, ']');
+    const alternativeBinding = startsWith(attrName, BIND_PREFIX);
+    // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    const isBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    if (isBinding) {
+    if (classicBinding) {
       const property = attrName.substring(1, attrName.length - 1);
-      node.setAttribute(`data-amp-bind-${property}`, attrValue);
+      node.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
+    }
+    if (classicBinding || alternativeBinding) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
