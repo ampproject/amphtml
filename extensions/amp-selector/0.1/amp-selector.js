@@ -168,14 +168,14 @@ export class AmpSelector extends AMP.BaseElement {
       this.clearAllSelections_();
       return;
     }
+    // Only use first value if multiple selection is disabled.
+    if (!this.isMultiple_) {
+      selected = selected.slice(0, 1);
+    }
     // If selection hasn't changed, early-out.
     const current = this.selectedOptions_();
     if (areEqualOrdered(current.sort(), selected.sort())) {
       return;
-    }
-    // Only use first value if multiple selection is disabled.
-    if (!this.isMultiple_) {
-      selected = selected.slice(0, 1);
     }
     // Convert array values to strings and create map for fast lookup.
     const isSelected = selected.reduce((map, value) => {
