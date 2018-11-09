@@ -14,7 +14,8 @@
 # limitations under the license.
 #
 tags: {
-  html_format: AMP
+  # Invalid until launch ready.
+  # html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-script"
@@ -25,7 +26,8 @@ tags: {
 }
 
 tags: {  # <amp-script>
-  html_format: AMP
+  # Invalid until launch ready.
+  # html_format: AMP
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
