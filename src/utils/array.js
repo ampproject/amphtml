@@ -17,11 +17,10 @@
 
 /**
  * Compares if two arrays contains exactly same elements of same number
- * of same order.
- * Notice that it does NOT handle NaN case as expected
+ * of same order. Note that it does NOT handle NaN case as expected.
  *
- * @param {!Array<T>} arr1
- * @param {!Array<T>} arr2
+ * @param {!IArrayLike<T>} arr1
+ * @param {!IArrayLike<T>} arr2
  * @return {boolean}
  * @template T
  */
@@ -29,13 +28,11 @@ export function areEqualOrdered(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-
   for (let i = 0; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) {
       return false;
     }
   }
-
   return true;
 }
 
