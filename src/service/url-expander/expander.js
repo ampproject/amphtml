@@ -125,7 +125,7 @@ export class Expander {
     let ignoringChars = false;
     let nextArgShouldBeRaw = false;
 
-    const evaluateNextLevel = depth => {
+    const evaluateNextLevel = noEncode => {
       let builder = '';
       const results = [];
 
@@ -140,11 +140,13 @@ export class Expander {
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
               prioritized: this.bindings_[match.name],
+              noEncode,
             };
           } else {
             // or the global source
             binding = this.variableSource_.get(match.name);
             binding.name = match.name;
+            binding.noEncode = noEncode;
           }
 
           urlIndex = match.stop + 1;
@@ -159,12 +161,12 @@ export class Expander {
             if (builder.trim().length) {
               results.push(builder);
             }
-            results.push(evaluateNextLevel(depth + 1));
+            results.push(evaluateNextLevel(/* noEncode */ true));
           } else {
             if (builder.length) {
               results.push(builder);
             }
-            results.push(this.evaluateBinding_(binding, depth));
+            results.push(this.evaluateBinding_(binding));
           }
 
           builder = '';
@@ -209,8 +211,7 @@ export class Expander {
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
           results.push(nextArg);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, depth - 1,
-              /* opt_args */ results);
+          const value = this.evaluateBinding_(binding, /* opt_args */ results);
           return value;
         }
 
@@ -237,7 +238,7 @@ export class Expander {
           });
     };
 
-    return evaluateNextLevel(/* depth */ 0);
+    return evaluateNextLevel(this.noEncode_);
   }
 
 
@@ -246,11 +247,10 @@ export class Expander {
    * binding to use and if syncronous or asyncronous version should be called.
    * @param {Object<string, *>} bindingInfo An object containing the name of macro
    *   and value to be resolved.
-   * @param {number} depth How far down the macro callstack.
    * @param {Array=} opt_args Arguments passed to the macro.
    */
-  evaluateBinding_(bindingInfo, depth, opt_args) {
-    const {name} = bindingInfo;
+  evaluateBinding_(bindingInfo, opt_args) {
+    const {noEncode, name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
       // If a binding is passed in through the bindings argument it always takes
@@ -268,8 +268,8 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
     return this.sync_ ?
-      this.evaluateBindingSync_(binding, name, depth, opt_args) :
-      this.evaluateBindingAsync_(binding, name, depth, opt_args);
+      this.evaluateBindingSync_(binding, name, noEncode, opt_args) :
+      this.evaluateBindingAsync_(binding, name, noEncode, opt_args);
   }
 
 
@@ -277,11 +277,11 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
-   * @param {number} depth How far down the macro callstack.
+   * @param {boolean} noEncode Should the result be encoded.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {!Promise<string>} Resolved value.
    */
-  evaluateBindingAsync_(binding, name, depth, opt_args) {
+  evaluateBindingAsync_(binding, name, noEncode, opt_args) {
     let value;
     try {
       if (typeof binding === 'function') {
@@ -301,7 +301,7 @@ export class Expander {
 
         if (val == null) {
           result = '';
-        } else if (depth !== 0 || this.noEncode_ || NOENCODE_WHITELIST[name]) {
+        } else if (noEncode || NOENCODE_WHITELIST[name]) {
           result = val;
         } else {
           result = encodeURIComponent(val);
@@ -327,11 +327,11 @@ export class Expander {
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
-   * @param {number} depth How far down the macro callstack.
+   * @param {boolean} noEncode Should the result be encoded.
    * @param {?Array=} opt_args Arguments to be passed if binding is function.
    * @return {string} Resolved value.
    */
-  evaluateBindingSync_(binding, name, depth, opt_args) {
+  evaluateBindingSync_(binding, name, noEncode, opt_args) {
     try {
       const value = typeof binding === 'function' ?
         binding.apply(null, opt_args) : binding;
@@ -349,8 +349,7 @@ export class Expander {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
 
-        const shouldNotEncode = depth !== 0 || this.noEncode_ ||
-            NOENCODE_WHITELIST[name];
+        const shouldNotEncode = noEncode || NOENCODE_WHITELIST[name];
         result = shouldNotEncode ? value.toString() :
           encodeURIComponent(/** @type {string} */ (value));
       } else {
