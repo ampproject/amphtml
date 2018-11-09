@@ -125,7 +125,7 @@ export class Expander {
     let ignoringChars = false;
     let nextArgShouldBeRaw = false;
 
-    const evaluateNextLevel = noEncode => {
+    const evaluateNextLevel = encode => {
       let builder = '';
       const results = [];
 
@@ -140,13 +140,12 @@ export class Expander {
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
               prioritized: this.bindings_[match.name],
-              noEncode,
+              encode,
             };
           } else {
             // or the global source
-            binding = this.variableSource_.get(match.name);
-            binding.name = match.name;
-            binding.noEncode = noEncode;
+            binding = Object.assign({}, this.variableSource_.get(match.name),
+                {name: match.name, encode});
           }
 
           urlIndex = match.stop + 1;
@@ -161,7 +160,7 @@ export class Expander {
             if (builder.trim().length) {
               results.push(builder);
             }
-            results.push(evaluateNextLevel(/* noEncode */ true));
+            results.push(evaluateNextLevel(/* encode */ false));
           } else {
             if (builder.length) {
               results.push(builder);
@@ -238,7 +237,7 @@ export class Expander {
           });
     };
 
-    return evaluateNextLevel(this.noEncode_);
+    return evaluateNextLevel(/* encode */ !this.noEncode_);
   }
 
 
@@ -250,7 +249,7 @@ export class Expander {
    * @param {Array=} opt_args Arguments passed to the macro.
    */
   evaluateBinding_(bindingInfo, opt_args) {
-    const {noEncode, name} = bindingInfo;
+    const {encode, name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
       // If a binding is passed in through the bindings argument it always takes
@@ -269,13 +268,13 @@ export class Expander {
     }
 
     // We should only ever encode the top level resolution, or not at all.
-    const encode = !noEncode && !NOENCODE_WHITELIST[name];
+    const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
       const result = this.evaluateBindingSync_(binding, name,opt_args);
-      return encode ? encodeURIComponent(result) : result;
+      return shouldEncode ? encodeURIComponent(result) : result;
     } else {
       return this.evaluateBindingAsync_(binding, name, opt_args)
-          .then(result => encode ? encodeURIComponent(result) : result);
+          .then(result => shouldEncode ? encodeURIComponent(result) : result);
     }
   }
 

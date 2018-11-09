@@ -242,7 +242,7 @@ describes.realWin('Expander', {
       },
       {
         description: 'should not double encode nested macros',
-        input: 'title=TRIM(TITLE)',
+        input: 'title=TRIM(TITLE )',
         output: 'title=hello%20world',
       },
     ];
