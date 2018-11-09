@@ -199,6 +199,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
   /** @override */
   acceptCancel() {
     this.tapCount_ = 0;
+    this.eventing_ = false;
   }
 }
 
@@ -285,6 +286,8 @@ class SwipeRecognizer extends GestureRecognizer {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
       return true;
+    } else if (touches && touches.length > 1 && this.eventing_) {
+      return true;
     } else {
       return false;
     }
@@ -293,7 +296,7 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    if (touches && touches.length == 1) {
+    if (touches && touches.length >= 1) {
       const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
@@ -312,15 +315,18 @@ class SwipeRecognizer extends GestureRecognizer {
           if (dx >= 8 && dx > dy) {
             this.signalReady(-10);
           } else if (dy >= 8) {
+            this.acceptCancel();
             return false;
           }
         } else if (this.vert_) {
           if (dy >= 8 && dy > dx) {
             this.signalReady(-10);
           } else if (dx >= 8) {
+            this.acceptCancel();
             return false;
           }
         } else {
+          this.acceptCancel();
           return false;
         }
       }
@@ -723,6 +729,10 @@ export class PinchRecognizer extends GestureRecognizer {
     // for second touch.
     if (touches && touches.length == 1) {
       return true;
+    }
+    // If already in the middle of a pinch event, ignore additional touches.
+    if (this.eventing_ && touches && touches.length > 2) {
+      return true;
     } else if (touches && touches.length == 2) {
       this.startTime_ = Date.now();
       this.startX1_ = touches[0].clientX;
@@ -742,7 +752,12 @@ export class PinchRecognizer extends GestureRecognizer {
     // for second touch.
     if (touches && touches.length == 1) {
       return true;
-    } else if (touches && touches.length == 2) {
+    }
+    // If already in the middle of a pinch event, ignore additional touches.
+    // if (this.eventing_ && touches && touches.length > 2) {
+    //   return true;
+    // }
+    else if (touches && touches.length >= 2) {
       this.lastX1_ = touches[0].clientX;
       this.lastY1_ = touches[0].clientY;
       this.lastX2_ = touches[1].clientX;
@@ -763,9 +778,11 @@ export class PinchRecognizer extends GestureRecognizer {
         } else if (Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD
           || Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD) {
           // Moving in the same direction over a threshold.
+          this.acceptCancel();
           return false;
         }
       }
+      // Threshold not reached, continue listening but do not emit
       return true;
     } else {
       return false;
