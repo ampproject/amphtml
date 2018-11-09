@@ -62,7 +62,7 @@ export class Expander {
     this.whiteList_ = opt_whiteList;
 
     /**@const {boolean|undefined} */
-    this.noEncode_ = opt_noEncode;
+    this.encode_ = !opt_noEncode;
   }
 
 
@@ -237,7 +237,7 @@ export class Expander {
           });
     };
 
-    return evaluateNextLevel(/* encode */ !this.noEncode_);
+    return evaluateNextLevel(this.encode_);
   }
 
 
