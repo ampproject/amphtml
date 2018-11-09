@@ -21,6 +21,7 @@ import ampToolboxCacheUrl from
   '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
+import {config} from '../src/config';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
@@ -188,7 +189,7 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
 
   if (isProxyOrigin(data.origin)) {
     const curlsSubdomain = originLocation.hostname.split('.')[0];
-    if (compareCurlsSubdomain(win, curlsSubdomain)) {
+    if (compareCurlsDomain(win, curlsSubdomain)) {
       return Promise.resolve();
     }
 
@@ -199,7 +200,7 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
 
   return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
       .then(curlsSubdomain => {
-        if (compareCurlsSubdomain(win, curlsSubdomain)) {
+        if (compareCurlsDomain(win, curlsSubdomain)) {
           return Promise.resolve();
         }
 
@@ -210,15 +211,19 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
 }
 
 /**
- * Function to compare curls subdomains with the passed string
+ * Function to compare curls domains with the passed subdomain
  * and window
  * @param {Window} win
  * @param {string} curlsSubdomain
  * @return {boolean}
  */
-function compareCurlsSubdomain(win, curlsSubdomain) {
-  const iframeSrcCurlsSubdomain = win.location.hostname.split('.')[0];
-  if (curlsSubdomain === iframeSrcCurlsSubdomain) {
+function compareCurlsDomain(win, curlsSubdomain) {
+  // Using the deprecated parseUrl here, as we don't have access
+  // to the URL service in a 3p frame.
+  const thirdPartyUrl = parseUrlDeprecated(config.thirdParty);
+  const curlsHostname =
+    curlsSubdomain + '.recaptcha.' + thirdPartyUrl.hostname;
+  if (curlsHostname === win.location.hostname) {
     return true;
   }
   return false;

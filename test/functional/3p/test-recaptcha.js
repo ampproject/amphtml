@@ -42,6 +42,9 @@ describe('3p recaptcha.js', () => {
   describe('doesOriginDomainMatchIframeSrc()', () => {
 
     const getMockIframeWindowWithLocation = url => {
+      // NOTE: The thirdPartyUrl returned by the config
+      // Will return localhost for testing.
+      // Therefore, passed URLS should do the same
       return {
         location: parseUrlDeprecated(url),
       };
@@ -66,7 +69,7 @@ describe('3p recaptcha.js', () => {
 
     it('should allow cache domains', () => {
       return doesOriginDomainMatchIframeSrc(
-          getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'),
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.localhost'),
           {origin: 'https://example-com.cdn.ampproject.org'}
       ).then(() => {
         expect(true).to.be.ok;
@@ -75,7 +78,7 @@ describe('3p recaptcha.js', () => {
 
     it('should allow canonical domains', () => {
       return doesOriginDomainMatchIframeSrc(
-          getMockIframeWindowWithLocation('https://example-com.recaptcha.ampproject.net'),
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.localhost'),
           {origin: 'https://example.com'}
       ).then(() => {
         expect(true).to.be.ok;
