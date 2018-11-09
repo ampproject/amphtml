@@ -884,19 +884,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *    rendered in the lightbox.
    * @param {boolean} enter Whether this is an enter or exit transition.
    * @return {!Promise} A Promise that resolves once the transition is complete.
+   * @private
    */
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
           const imageBox = imageViewer.getImageBoxWithOffset();
-
           if (!imageBox) {
             return this.fade_(0, 1);
           }
 
           const lightboxImg = imageViewer.getImage();
           const sourceImg = childElementByTag(sourceElement, 'img');
-
           return this.runImgTransition_(
               enter ? sourceImg : lightboxImg,
               enter ? lightboxImg : sourceImg,
@@ -910,6 +909,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {!Element} srcImg The img to transition from.
    * @param {!Element} targetImg The img to transition to.
    * @return {number} How long to animate for, in milliseconds.
+   * @private
    */
   getTransitionDurationFromElements_(srcImg, targetImg) {
     const srcRect = srcImg./*OK*/getBoundingClientRect();
@@ -927,6 +927,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {!HTMLImageElement} targetImg The img to transition to.
    * @param {boolean} enter Whether this is an enter or exxit transition.
    * @return {Promise} A Promise that resolves once the transition is complete.
+   * @private
    */
   runImgTransition_(srcImg, targetImg, enter) {
     const carousel = dev().assertElement(this.carousel_);
@@ -1013,8 +1014,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Animates an image from its current location to its target location in the
    * lightbox.
    * @param {!Element} sourceElement
-   * @private
    * @return {!Promise}
+   * @private
    */
   transitionImgIn_(sourceElement) {
     return this.transitionImg_(sourceElement, true);
@@ -1022,8 +1023,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Animate the lightbox image back to its original position in the page..
-   * @private
    * @return {!Promise}
+   * @private
    */
   transitionImgOut_() {
     const currentElementMetadata = this.getCurrentElement_();
@@ -1337,6 +1338,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {string} s
    * @param {number} targetLength
    * @param {string} padString
+   * @private
    */
   padStart_(s, targetLength, padString) {
     if (s.length >= targetLength) {
@@ -1354,6 +1356,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Converts seconds to a timestamp formatted string.
    * @param {number} seconds
    * @return {string}
+   * @private
    */
   secondsToTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);
