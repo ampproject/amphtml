@@ -83,7 +83,7 @@ describe('DOMPurify-based', () => {
 
     it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
       expect(purify('<p data-amp-bind-text="foo"></p>')).to.be
-          .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
+          .equal('<p i-amphtml-binding="" data-amp-bind-text="foo"></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {

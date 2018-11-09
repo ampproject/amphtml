@@ -44,7 +44,7 @@ const TAG = 'purifier';
 const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
 
 /** @private @const {string} */
-const BIND_PREFIX = 'data-amp-bind-';
+export const BIND_PREFIX = 'data-amp-bind-';
 
 /**
  * @const {!Object<string, boolean>}
