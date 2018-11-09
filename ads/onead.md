@@ -8,7 +8,7 @@
       data-playmode="amp-inread"
       data-uid="1000126"
       data-pid="1121156"
-      data-host="//demo.onead.com.tw">
+      data-host="demo">
   </amp-ad>
 ```
 ## Configuration
