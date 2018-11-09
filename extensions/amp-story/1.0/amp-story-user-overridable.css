@@ -23,10 +23,10 @@ amp-story-grid-layer * {
   margin: 0;
 }
 
-.i-amphtml-story-grid-template-fill > amp-anim img,
-.i-amphtml-story-grid-template-fill > amp-img img,
-.i-amphtml-story-grid-template-fill > amp-video video,
-.i-amphtml-story-grid-template-with-full-bleed-animation > amp-img img {
+.i-amphtml-story-grid-template-fill amp-anim img,
+.i-amphtml-story-grid-template-fill amp-img img,
+.i-amphtml-story-grid-template-fill amp-video video,
+.i-amphtml-story-grid-template-with-full-bleed-animation amp-img img {
   object-fit: cover;
 }
 
