@@ -406,6 +406,7 @@
       log(this.id + ': Viewer.prototype.processRequest_', name);
       switch(name) {
         case 'documentLoaded':
+          return this.documentReady_();
         case 'focusin':
           log('Focusin event', data);
           return Promise.resolve();
