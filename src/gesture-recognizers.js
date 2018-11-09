@@ -199,7 +199,6 @@ export class DoubletapRecognizer extends GestureRecognizer {
   /** @override */
   acceptCancel() {
     this.tapCount_ = 0;
-    this.eventing_ = false;
   }
 }
 
