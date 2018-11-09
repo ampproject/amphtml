@@ -57,8 +57,8 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle, setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
@@ -238,15 +238,15 @@ class AmpAddThis extends AMP.BaseElement {
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
-    if(this.widgetType_ === 'floating'){
+    if (this.widgetType_ === 'floating') {
       setStyles(iframe, {
         width: '100%',
         height: '100%',
         position: 'fixed',
-        bottom: '0px'
+        bottom: '0px',
       });
     }
-    else{
+    else {
       setStyle(iframe, 'margin-bottom', '-5px');
     }
 
