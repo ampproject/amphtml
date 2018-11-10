@@ -25,7 +25,6 @@
     "preinstall": "node build-system/check-package-manager.js"
   },
   "dependencies": {
-
     "@ampproject/animations": "0.0.2",
     "@ampproject/worker-dom": "0.2.1",
     "document-register-element": "1.5.0",
