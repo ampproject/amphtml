@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@ampproject/worker-dom@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.0.tgz#77127cae9367479e51d85c18115702c8291a2dc7"
-  integrity sha512-w68ksoclM6VGPwETvvl5xASqpGRHzWeLGuyb0vQpOq5ta38h+iBYZF/weN3QwGKN1qCfZy5le73wlvDsXhc05A==
+"@ampproject/worker-dom@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.2.1.tgz#bf2fc8aaad7f2121cebd5f1ee95ac10731364582"
+  integrity sha512-zbGGEe3U7J5Zx3GaDd1gm31OIR70T7aoY4zzKk4NpX9yf/FeiW0utSm2cKEI3djiFdoThD61waEw925PTSw+RA==
   dependencies:
     dompurify "1.0.8"
 
