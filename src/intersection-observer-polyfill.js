@@ -294,7 +294,7 @@ export class IntersectionObserverPolyfill {
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
       this.viewport_ = Services.viewportForDoc(element);
-      this.resources_ = Services.resourcesForDoc(element);
+      this.resources_ = Services.resourcesForDoc(ampdoc);
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
