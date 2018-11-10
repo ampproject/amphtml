@@ -21,6 +21,7 @@ import {
 import {
   parseUrlDeprecated,
 } from '../../../src/url';
+import {urls} from '../../../src/config';
 
 describe('3p recaptcha.js', () => {
 
@@ -51,25 +52,14 @@ describe('3p recaptcha.js', () => {
     };
 
     it('should require the origin', () => {
-      return allowConsoleError(() => {
-        return doesOriginDomainMatchIframeSrc({}, {}).catch(err => {
-          expect(err.message.includes('origin')).to.be.ok;
-        });
-      });
-    });
-
-    it('should allow localhost as a valid host', () => {
-      return doesOriginDomainMatchIframeSrc(
-          getMockIframeWindowWithLocation('http://localhost'),
-          {origin: 'http://localhost'}
-      ).then(() => {
-        expect(true).to.be.ok;
+      return doesOriginDomainMatchIframeSrc({}, {}).catch(err => {
+        expect(err.message.includes('origin')).to.be.ok;
       });
     });
 
     it('should allow cache domains', () => {
       return doesOriginDomainMatchIframeSrc(
-          getMockIframeWindowWithLocation('https://example-com.recaptcha.localhost'),
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.' + urls.thirdPartyFrameHost),
           {origin: 'https://example-com.cdn.ampproject.org'}
       ).then(() => {
         expect(true).to.be.ok;
@@ -78,8 +68,26 @@ describe('3p recaptcha.js', () => {
 
     it('should allow canonical domains', () => {
       return doesOriginDomainMatchIframeSrc(
-          getMockIframeWindowWithLocation('https://example-com.recaptcha.localhost'),
+          getMockIframeWindowWithLocation('https://example-com.recaptcha.' + urls.thirdPartyFrameHost),
           {origin: 'https://example.com'}
+      ).then(() => {
+        expect(true).to.be.ok;
+      });
+    });
+
+    it('should allow punycode curls encoded domains', () => {
+      return doesOriginDomainMatchIframeSrc(
+          getMockIframeWindowWithLocation('https://xn--bcher-ch-65a.recaptcha.' + urls.thirdPartyFrameHost),
+          {origin: 'https://xn--bcher-kva.ch'}
+      ).then(() => {
+        expect(true).to.be.ok;
+      });
+    });
+
+    it('should allow sha256 curls encoded domains', () => {
+      return doesOriginDomainMatchIframeSrc(
+          getMockIframeWindowWithLocation('https://a6h5moukddengbsjm77rvbosevwuduec2blkjva4223o4bgafgla.recaptcha.' + urls.thirdPartyFrameHost),
+          {origin: 'https://hello.xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c'}
       ).then(() => {
         expect(true).to.be.ok;
       });

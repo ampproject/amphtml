@@ -21,7 +21,6 @@ import ampToolboxCacheUrl from
   '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {config} from '../src/config';
 import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
@@ -182,31 +181,14 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
   // to the URL service in a 3p frame.
   const originLocation = parseUrlDeprecated(data.origin);
 
-  if (originLocation.hostname.includes('localhost') &&
-    win.location.hostname.includes('localhost')) {
-    return Promise.resolve();
-  }
-
   if (isProxyOrigin(data.origin)) {
     const curlsSubdomain = originLocation.hostname.split('.')[0];
-    if (compareCurlsDomain(win, curlsSubdomain)) {
-      return Promise.resolve();
-    }
-
-    return Promise.reject(
-        new Error('Origin domain does not match Iframe src: ' + data.origin)
-    );
+    return compareCurlsDomain(win, curlsSubdomain, data.origin);
   }
 
   return ampToolboxCacheUrl.createCurlsSubdomain(data.origin)
       .then(curlsSubdomain => {
-        if (compareCurlsDomain(win, curlsSubdomain)) {
-          return Promise.resolve();
-        }
-
-        return Promise.reject(
-            new Error('Origin domain does not match Iframe src: ' + data.origin)
-        );
+        return compareCurlsDomain(win, curlsSubdomain, data.origin);
       });
 }
 
@@ -215,17 +197,23 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
  * and window
  * @param {Window} win
  * @param {string} curlsSubdomain
- * @return {boolean}
+ * @param {string} origin
+ * @return {!Promise}
  */
-function compareCurlsDomain(win, curlsSubdomain) {
-  // Using the deprecated parseUrl here, as we don't have access
-  // to the URL service in a 3p frame.
-  const thirdPartyUrl = parseUrlDeprecated(config.thirdParty);
+function compareCurlsDomain(win, curlsSubdomain, origin) {
+
+  // Get the hostname after the culrs subdomain of the current iframe window
+  const locationWithoutCurlsSubdomain =
+    win.location.hostname.split('.').slice(1).join('.');
   const curlsHostname =
-    curlsSubdomain + '.recaptcha.' + thirdPartyUrl.hostname;
+    curlsSubdomain + '.' + locationWithoutCurlsSubdomain;
+
   if (curlsHostname === win.location.hostname) {
-    return true;
+    return Promise.resolve();
   }
-  return false;
+
+  return Promise.reject(
+      new Error('Origin domain does not match Iframe src: ' + origin)
+  );
 }
 
