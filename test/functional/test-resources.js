@@ -1634,6 +1634,34 @@ describe('Resources discoverWork', () => {
       });
     });
   });
+
+  describe('passCallbacks_', () => {
+
+    it('should run passCallbacks_ added from onNextPass()', () => {
+      resources.isRuntimeOn_ = true;
+      resources.documentReady_ = true;
+      resources.firstPassAfterDocumentReady_ = true;
+
+      const passCallback = sandbox.spy();
+      resources.onNextPass(passCallback);
+      resources.doPass();
+
+      expect(passCallback).to.be.called;
+    });
+
+    it('should remove passCallbacks_ added from onNextPass(), ' +
+      ' after the pass', () => {
+      resources.isRuntimeOn_ = true;
+      resources.documentReady_ = true;
+      resources.firstPassAfterDocumentReady_ = true;
+
+      const passCallback = sandbox.spy();
+      resources.onNextPass(passCallback);
+      resources.doPass();
+
+      expect(resources.passCallbacks_.length).to.be.equal(0);
+    });
+  });
 });
 
 describes.realWin('Resources contentHeight', {
