@@ -380,13 +380,12 @@ export class IntersectionObserverPolyfill {
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
-  getValidIntersectionChangeEntry_(state, hostViewport,
-    opt_iframe, opt_calledFromMutationObserver) {
+  getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
     const {element} = state;
 
-    let elementRect = element.getLayoutBox();
+    const elementRect = element.getLayoutBox();
     const owner = element.getOwner();
-    let ownerRect = owner && owner.getLayoutBox();
+    const ownerRect = owner && owner.getLayoutBox();
 
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
