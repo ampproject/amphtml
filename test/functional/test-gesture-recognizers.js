@@ -403,6 +403,45 @@ describe('SwipeXYRecognizer', () => {
     recognizer.onTouchEnd(event);
     expect(recognizer.eventing_).to.equal(false);
   });
+
+  it('should ignore additional touches if eventing', () => {
+    const event = {touches: [{clientX: 111, clientY: 211}]};
+
+    recognizer.startX_ = recognizer.prevX_ = 101;
+    recognizer.startY_ = recognizer.prevY_ = 201;
+    recognizer.eventing_ = true;
+    gesturesMock.expects('signalEmit_').once();
+
+    clock.tick(10);
+    let res = recognizer.onTouchMove(event);
+    expect(res).to.equal(true);
+    expect(recognizer.lastX_).to.equal(111);
+    expect(recognizer.lastY_).to.equal(211);
+
+    res = recognizer.onTouchStart({touches: [
+      {clientX: 111, clientY: 211},
+      {clientX: 122, clientY: 254},
+    ]});
+
+    // Additional touch start should not have any effect
+    expect(res).to.equal(true);
+
+    res = recognizer.onTouchMove({touches: [
+      {clientX: 111, clientY: 211},
+      {clientX: 122, clientY: 234},
+    ]});
+
+    // Additional touch move should not have any effect
+    expect(res).to.equal(true);
+
+    clock.tick(50);
+
+    // If further touches are remaining, do not fire signal end.
+    recognizer.onTouchEnd({touches: [{clientX: 111, clientY: 211}]});
+    expect(recognizer.eventing_).to.equal(true);
+    gesturesMock.expects('signalEnd_').never();
+  });
+
 });
 
 
@@ -835,4 +874,5 @@ describe('PinchRecognizer', () => {
     recognizer.onTouchEnd(event);
     expect(recognizer.eventing_).to.equal(false);
   });
+
 });

@@ -285,7 +285,7 @@ class SwipeRecognizer extends GestureRecognizer {
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
       return true;
-    } else if (touches && touches.length > 1 && this.eventing_) {
+    } else if (this.eventing_ && touches && touches.length > 1) {
       return true;
     } else {
       return false;
@@ -295,7 +295,11 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    if (touches && touches.length >= 1) {
+    // If already eventing, ignore additional touches
+    if (this.eventing_ && touches && touches.length > 1) {
+      return true;
+    }
+    if (touches && touches.length == 1) {
       const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
