@@ -281,8 +281,8 @@ export class Vsync {
 
     // Multi-doc: animations depend on the state of the relevant doc.
     if (opt_contextNode) {
-      const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
-      return Services.viewerForDoc(ampdoc).isVisible();
+      const ampdoc = this.ampdocService_.getAmpDocIfAvailable(opt_contextNode);
+      return !ampdoc || Services.viewerForDoc(ampdoc).isVisible();
     }
 
     return true;
