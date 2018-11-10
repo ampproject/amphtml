@@ -10239,10 +10239,10 @@ ms@^2.0.0, ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
 
-multer@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/multer/-/multer-1.4.0.tgz#c951616c3f97a709b6294acec3a9952a10d33159"
-  integrity sha512-/JATgsDPdb/D9u8A2dFD8MhZYqgDKrWibpA9etSUt8CVzSHtsA13Y8LH9pR2/crsaYFua9g29UBgZB/g6nmOEg==
+multer@1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/multer/-/multer-1.4.1.tgz#24b12a416a22fec2ade810539184bf138720159e"
+  integrity sha512-zzOLNRxzszwd+61JFuAo0fxdQfvku12aNJgnla0AQ+hHxFmfc/B7jBVuPr5Rmvu46Jze/iJrFpSOsD7afO8SDw==
   dependencies:
     append-field "^1.0.0"
     busboy "^0.2.11"
