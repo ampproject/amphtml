@@ -334,9 +334,8 @@ export class IntersectionObserverPolyfill {
    * The iframe must be a non-scrollable iframe.
    * @param {!./layout-rect.LayoutRectDef} hostViewport
    * @param {./layout-rect.LayoutRectDef=} opt_iframe
-   * @param {boolean=} opt_calledFromMutationObserver
    */
-  tick(hostViewport, opt_iframe, opt_calledFromMutationObserver) {
+  tick(hostViewport, opt_iframe) {
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
       hostViewport =
@@ -354,8 +353,7 @@ export class IntersectionObserverPolyfill {
       const change = this.getValidIntersectionChangeEntry_(
           this.observeEntries_[i],
           hostViewport,
-          opt_iframe,
-          opt_calledFromMutationObserver
+          opt_iframe
       );
       if (change) {
         changes.push(change);
@@ -379,11 +377,6 @@ export class IntersectionObserverPolyfill {
    *    If opt_iframe is provided, all LayoutRect has position relative to
    *    the iframe. If opt_iframe is not provided,
    *    all LayoutRect has position relative to the host document.
-   * @param {boolean=} opt_calledFromMutationObserver
-   *    Whether this was called from a mutation observer
-   *    This will signal that the layout of the elements
-   *    must use getBoundingClientRect, as Resource Scheduler
-   *    could be called too late, and not clear the layout cache.
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
@@ -391,22 +384,9 @@ export class IntersectionObserverPolyfill {
     opt_iframe, opt_calledFromMutationObserver) {
     const {element} = state;
 
-    // Normalize container LayoutRect to be relative to page
-    let elementRect = null;
+    let elementRect = element.getLayoutBox();
     const owner = element.getOwner();
-    let ownerRect = null;
-
-    // If opt_calledFromMutationObserver is provided,
-    // we need to get our bounding rect rather
-    // Than our layout box, in order to avoid race conditions
-    // with the resource scheduler
-    if (opt_calledFromMutationObserver) {
-      elementRect = this.viewport_.getLayoutRect(element);
-      ownerRect = owner && this.viewport_.getLayoutRect(owner);
-    } else {
-      elementRect = element.getLayoutBox();
-      ownerRect = owner && owner.getLayoutBox();
-    }
+    let ownerRect = owner && owner.getLayoutBox();
 
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
@@ -437,7 +417,7 @@ export class IntersectionObserverPolyfill {
   handleMutationObserverNotification_() {
     if (this.viewport_ && this.resources_) {
       this.resources_.onNextPass(() => {
-        this.tick(this.viewport_.getRect(), undefined, true);
+        this.tick(this.viewport_.getRect());
       });
     }
     return;
