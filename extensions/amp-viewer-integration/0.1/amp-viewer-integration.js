@@ -15,6 +15,7 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
+import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
   HighlightInfoDef,
@@ -199,6 +200,9 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('keyboard')) {
       this.initKeyboardHandler_(messaging);
     }
+    if (viewer.hasCapability('focus-rect')) {
+      this.initFocusHandler_(messaging);
+    }
     if (this.highlightHandler_ != null) {
       this.highlightHandler_.setupMessaging(messaging);
     }
@@ -212,6 +216,14 @@ export class AmpViewerIntegration {
    */
   handleUnload_(messaging) {
     return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initFocusHandler_(messaging) {
+    new FocusHandler(this.win, messaging);
   }
 
   /**
