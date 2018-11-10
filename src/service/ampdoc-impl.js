@@ -95,19 +95,9 @@ export class AmpDocService {
    * @param {{
    *  closestAmpDoc: boolean
    * }=} opt_options
-   * @return {!AmpDoc}
+   * @return {?AmpDoc}
    */
-  getAmpDoc(opt_node = undefined, {closestAmpDoc = false} = {}) {
-    // Ensure that node is attached if specified. This check uses a new and
-    // fast `isConnected` API and thus only checked on platforms that have it.
-    // See https://www.chromestatus.com/feature/5676110549352448.
-    if (opt_node) {
-      dev().assert(
-          opt_node['isConnected'] === undefined ||
-          opt_node['isConnected'] === true,
-          'The node must be attached to request ampdoc.');
-    }
-
+  getAmpDocIfAvailable(opt_node = undefined, {closestAmpDoc = false} = {}) {
     // Single document: return it immediately.
     if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
@@ -170,7 +160,40 @@ export class AmpDocService {
       return this.singleDoc_;
     }
 
-    throw dev().createError('No ampdoc found for', opt_node);
+    return null;
+  }
+
+  /**
+   * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
+   * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
+   * instance is returned, unless specfically looking for a closer `AmpDoc`.
+   * Otherwise, this method locates the `AmpDoc` that contains the specified
+   * node and, if necessary, initializes it.
+   *
+   * An Error is thrown in development if no `AmpDoc` is found.
+   * @param {!Node=} opt_node
+   * @param {{
+   *  closestAmpDoc: boolean
+   * }=} opt_options
+   * @return {!AmpDoc}
+   */
+  getAmpDoc(opt_node, opt_options) {
+    // Ensure that node is attached if specified. This check uses a new and
+    // fast `isConnected` API and thus only checked on platforms that have it.
+    // See https://www.chromestatus.com/feature/5676110549352448.
+    if (opt_node) {
+      dev().assert(
+          opt_node['isConnected'] === undefined ||
+          opt_node['isConnected'] === true,
+          'The node must be attached to request ampdoc.');
+    }
+
+    const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
+    if (!ampdoc) {
+      throw dev().createError('No ampdoc found for', opt_node);
+    }
+
+    return ampdoc;
   }
 
   /**
