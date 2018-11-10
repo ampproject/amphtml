@@ -44,7 +44,7 @@ const TOUCH_PROPERTIES = [
 const SCROLL_LOCK = 'scrollLock';
 
 /**
- * @fileoverview Forward touch events from the AMP doc to the viewer.
+ * Forward touch events from the AMP doc to the viewer.
  */
 export class TouchHandler {
 
