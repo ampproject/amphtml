@@ -548,8 +548,7 @@ export class AmpConsent extends AMP.BaseElement {
         const keys = Object.keys(config['policy']);
         for (let i = 0; i < keys.length; i++) {
           if (keys[i] != 'default') {
-            user().warn(TAG, `policy ${keys[i]} is currently not supported` +
-              'and will be ignored');
+            user().warn(TAG, 'policy %s is currently not supportedand will be ignored', keys[i]);
             delete config['policy'][keys[i]];
           }
         }

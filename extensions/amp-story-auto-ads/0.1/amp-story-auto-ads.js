@@ -261,8 +261,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const child = this.element.children[0];
     user().assert(
         isJsonScriptTag(child),
-        `The <${TAG}> config should ` +
-        'be inside a <script> tag with type="application/json"');
+        'The <%s> config should be inside a <script> tag with type="application/json"', TAG);
 
     this.config_ = parseJson(child.textContent);
     this.validateConfig_();
@@ -292,12 +291,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   validateConfig_() {
     const adAttributes = this.config_['ad-attributes'];
-    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
-      'Top level JSON should have an "ad-attributes" key');
+    user().assert(adAttributes, '<%s>: Error reading config.Top level JSON should have an "ad-attributes" key', TAG);
 
     const {type} = adAttributes;
-    user().assert(type, `<${TAG}>: Error reading config.` +
-      'Missing ["ad-attribues"]["type"] key');
+    user().assert(type, '<%s>: Error reading config.Missing ["ad-attribues"]["type"] key', TAG);
   }
 
 

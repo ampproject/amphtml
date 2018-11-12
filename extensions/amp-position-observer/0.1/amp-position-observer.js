@@ -348,8 +348,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (!num) {
       return 0;
     }
-    user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid ' +
-      'as units for exclusion margins: ' + val);
+    user().assert(unit == 'px' || unit == 'vh', 'Only pixel or vh are valid as units for exclusion margins: %s', val);
 
     if (unit == 'vh') {
       num = (num / 100) * this.viewportRect_.height;
@@ -366,7 +365,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   validateAndResolveRatio_(val) {
     const num = parseFloat(val);
     user().assert(num >= 0 && num <= 1,
-        'Ratios must be a decimal between 0 and 1: ' + val);
+        'Ratios must be a decimal between 0 and 1: %s', val);
     return num;
   }
 

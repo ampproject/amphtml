@@ -77,7 +77,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     this.slot_ = this.element.getAttribute('data-slot');
     // Ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
-        'custom ad slot should be alphanumeric: ' + this.slot_);
+        'custom ad slot should be alphanumeric: %s', this.slot_);
 
     this.uiHandler = new AmpAdUIHandler(this);
   }

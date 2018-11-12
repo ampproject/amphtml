@@ -113,7 +113,7 @@ export function deserializeMessage(message) {
   try {
     return parseJson(message.substr(startPos));
   } catch (e) {
-    dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
+    dev().error('MESSAGING', 'Failed to parse message: %s',e, message);
     return null;
   }
 }

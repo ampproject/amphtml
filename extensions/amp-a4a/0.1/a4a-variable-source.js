@@ -173,8 +173,7 @@ export class A4AVariableSource extends VariableSource {
       return '[]';
     }
     if (elements.length > HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE) {
-      user().error(TAG, 'CSS selector may match at most ' +
-          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`);
+      user().error(TAG, 'CSS selector may match at most %s elements.', HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE);
       return '[]';
     }
     const result = [];

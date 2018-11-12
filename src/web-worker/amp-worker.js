@@ -161,12 +161,10 @@ class AmpWorker {
 
     const message = this.messages_[id];
     if (!message) {
-      dev().error(TAG, `Received unexpected message (${method}, ${id}) ` +
-          'from worker.');
+      dev().error(TAG, 'Received unexpected message (%s, %s) from worker.', method,id);
       return;
     }
-    dev().assert(method == message.method, 'Received mismatched method ' +
-        `(${method}, ${id}), expected ${message.method}.`);
+    dev().assert(method == message.method, 'Received mismatched method (%s, %s), expected %s.', method,id,message.method);
 
     message.resolve(returnValue);
 

@@ -46,7 +46,7 @@ export class AmpAutoAds extends AMP.BaseElement {
     user().assert(type, 'Missing type attribute');
 
     const adNetwork = getAdNetworkConfig(type, this.element);
-    user().assert(adNetwork, 'No AdNetworkConfig for type: ' + type);
+    user().assert(adNetwork, 'No AdNetworkConfig for type: %s', type);
 
     if (!adNetwork.isEnabled(this.win)) {
       return;

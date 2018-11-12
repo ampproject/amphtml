@@ -146,7 +146,7 @@ function assertFilters(filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
     user().assert(validFilters.indexOf(filters[name].type) != -1,
-        'Supported filters: ' + validFilters.join(', '));
+        'Supported filters: %s', validFilters.join(', '));
   }
 }
 

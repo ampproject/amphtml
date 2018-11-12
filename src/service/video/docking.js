@@ -482,8 +482,7 @@ export class VideoDocking {
   /** @param {!../../video-interface.VideoOrBaseElementDef} video */
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
-        '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
-        `${urls.cdn}/experiments.html`);
+        '`video-dock` experiment must be on to use `dock` on `amp-video`: %s/experiments.html', urls.cdn);
 
     this.install_();
 

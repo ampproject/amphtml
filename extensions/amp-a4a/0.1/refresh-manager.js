@@ -87,8 +87,7 @@ function checkAndSanitizeRefreshInterval(refreshInterval) {
   if (isNaN(refreshIntervalNum) ||
       refreshIntervalNum < MIN_REFRESH_INTERVAL) {
     user().warn(TAG,
-        'invalid refresh interval, must be a number no less than ' +
-        `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+        'invalid refresh interval, must be a number no less than %s: %s', MIN_REFRESH_INTERVAL,refreshInterval);
     return null;
   }
   return refreshIntervalNum * 1000;

@@ -185,9 +185,7 @@ export class WindowMessenger {
         'received:', message);
     }
     if (!this.isAllowedOrigin_(origin, allowedOrigins)) {
-      dev().fine(TAG, `Discarding connection message from ${origin} ` +
-        'because it isn\'t an allowed origin:', message, ' (allowed ' +
-        ' origins are)', allowedOrigins);
+      dev().fine(TAG, 'Discarding connection message from %s because it isn\'t an allowed origin:',message,' (allowed ' + ' origins are)',allowedOrigins, origin);
       return;
     }
     if (!message ||
@@ -280,8 +278,7 @@ export class WindowMessenger {
     // This is the remote frame's reply to our initial handshake topic message
     this.connected_ = true;
     if (this.debug_) {
-      dev().fine(TAG, `Messenger channel to ${expectedRemoteOrigin} ` +
-        'established.');
+      dev().fine(TAG, 'Messenger channel to %s established.', expectedRemoteOrigin);
     }
     // Remove our message handler
     messagePort.removeEventListener('message',
@@ -325,8 +322,7 @@ export class WindowMessenger {
       // Set new incoming message data on existing message
       existingMessage.message = message['data'];
       if (this.debug_) {
-        dev().fine(TAG, `Received reply for topic '${message['topic']}':`,
-            message['data']);
+        dev().fine(TAG, 'Received reply for topic \'%s\':',message['data'], message['topic']);
       }
       promiseResolver([
         message['data'],
@@ -338,8 +334,7 @@ export class WindowMessenger {
         return;
       }
       if (this.debug_) {
-        dev().fine(TAG, 'Received new message for ' +
-          `topic '${message['topic']}': ${message['data']}`);
+        dev().fine(TAG, 'Received new message for topic \'%s\': %s', message['topic'],message['data']);
       }
       for (let i = 0; i < listeners.length; i++) {
         const listener = listeners[i];

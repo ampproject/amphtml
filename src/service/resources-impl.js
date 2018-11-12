@@ -1169,7 +1169,7 @@ export class Resources {
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
           dict({'height': this.contentHeight_}), /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
+      dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1201,7 +1201,7 @@ export class Resources {
           this.viewer_.sendMessage('documentHeight',
               dict({'height': measuredContentHeight}), /* cancelUnsent */true);
           this.contentHeight_ = measuredContentHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
+          dev().fine(TAG_, 'document height changed: %s', this.contentHeight_);
         }
       });
     }

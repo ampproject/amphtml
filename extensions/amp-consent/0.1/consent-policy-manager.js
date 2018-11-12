@@ -161,8 +161,7 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, `can not find defined policy ${policyId}, ` +
-          'only supported predefined policy supported now');
+        user().error(TAG, 'can not find defined policy %s, only supported predefined policy supported now', policyId);
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
     }
@@ -182,8 +181,7 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, `can not find defined policy ${policyId}, ` +
-          'only supported predefined policy supported now');
+        user().error(TAG, 'can not find defined policy %s, only supported predefined policy supported now', policyId);
         return Promise.resolve(false);
       }
     }
@@ -309,7 +307,7 @@ export class ConsentPolicyInstance {
         } else if (timeoutConfig['fallbackAction'] &&
             timeoutConfig['fallbackAction'] != 'dismiss') {
           user().error(TAG,
-              `unsupported fallbackAction ${timeoutConfig['fallbackAction']}`);
+              'unsupported fallbackAction %s', timeoutConfig['fallbackAction']);
         }
         timeoutSecond = timeoutConfig['seconds'];
       } else {

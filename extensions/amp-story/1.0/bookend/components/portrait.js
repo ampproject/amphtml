@@ -61,9 +61,7 @@ export class PortraitComponent {
         !requiredFields.some(field => !(field in portraitJson));
     user().assert(
         hasAllRequiredFields,
-        'Portrait component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
-        ' fields, skipping invalid.');
+        'Portrait component must contain %s fields, skipping invalid.', requiredFields.map(field => '`' + field + '`').join(', '));
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);

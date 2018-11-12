@@ -75,12 +75,10 @@ export class AmpNextPage extends AMP.BaseElement {
       } else {
         const scriptElements = childElementsByTag(element, 'SCRIPT');
         user().assert(scriptElements.length === 1,
-            `${TAG} should contain only one <script> child, or a URL specified `
-            + 'in [src]');
+            '%s should contain only one <script> child, or a URL specified in [src]', TAG);
         const scriptElement = scriptElements[0];
         user().assert(isJsonScriptTag(scriptElement),
-            `${TAG} config should ` +
-            'be inside a <script> tag with type="application/json"');
+            '%s config should be inside a <script> tag with type="application/json"', TAG);
         const configJson = tryParseJson(scriptElement.textContent, error => {
           user().error(TAG, 'failed to parse config', error);
         });

@@ -86,10 +86,7 @@ export class WebPushConfig extends AMP.BaseElement {
       !this.isValidHelperOrPermissionDialogUrl_(config['helper-iframe-url'])
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
-          'helper-iframe-url attribute. It should begin with ' +
-          'the https:// protocol and point to the provided lightweight ' +
-          'template page provided for AMP messaging.'
+          '<%s> must have a valid helper-iframe-url attribute. It should begin with the https:// protocol and point to the provided lightweight template page provided for AMP messaging.', CONFIG_TAG
       );
     }
 
@@ -97,20 +94,14 @@ export class WebPushConfig extends AMP.BaseElement {
       !this.isValidHelperOrPermissionDialogUrl_(config['permission-dialog-url'])
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
-          'permission-dialog-url attribute. It should begin with ' +
-          'the https:// protocol and point to the provided template page ' +
-          'for showing the permission prompt.'
+          '<%s> must have a valid permission-dialog-url attribute. It should begin with the https:// protocol and point to the provided template page for showing the permission prompt.', CONFIG_TAG
       );
     }
 
     if (parseUrlDeprecated(config['service-worker-url']).protocol
       !== 'https:') {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
-          'service-worker-url attribute. It should begin with the ' +
-          'https:// protocol and point to the service worker JavaScript file ' +
-          'to be installed.'
+          '<%s> must have a valid service-worker-url attribute. It should begin with the https:// protocol and point to the service worker JavaScript file to be installed.', CONFIG_TAG
       );
     }
 
@@ -121,9 +112,7 @@ export class WebPushConfig extends AMP.BaseElement {
         parseUrlDeprecated(config['helper-iframe-url']).origin
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> URL attributes ` +
-          'service-worker-url, permission-dialog-url, and ' +
-          'helper-iframe-url must all share the same origin.'
+          '<%s> URL attributes service-worker-url, permission-dialog-url, and helper-iframe-url must all share the same origin.', CONFIG_TAG
       );
     }
   }
@@ -167,10 +156,7 @@ export class WebPushConfig extends AMP.BaseElement {
   ensureSpecificElementId_() {
     if (this.element.getAttribute('id') !== TAG) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have an id ` +
-          "attribute with value '" +
-          TAG +
-          "'."
+          '<%s> must have an id attribute with value \'%s\'.', CONFIG_TAG,TAG
       );
     }
   }

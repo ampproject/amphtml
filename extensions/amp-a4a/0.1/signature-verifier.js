@@ -178,7 +178,7 @@ export class SignatureVerifier {
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
       user().error(
-          'AMP-A4A', `Invalid signature header: ${headerValue.split(':')[0]}`);
+          'AMP-A4A', 'Invalid signature header: %s', headerValue.split(':')[0]);
       return Promise.resolve(VerificationStatus.ERROR_SIGNATURE_MISMATCH);
     }
     return this.verifyCreativeAndSignature(

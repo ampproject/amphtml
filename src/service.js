@@ -640,8 +640,7 @@ export function isEmbeddable(service) {
  */
 export function adoptServiceForEmbed(embedWin, serviceId) {
   const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
-      'or doesn\'t implement EmbeddableService.');
+  dev().assert(adopted, 'Service %s not found on parent or doesn\'t implement EmbeddableService.', serviceId);
 }
 
 

@@ -204,8 +204,7 @@ export class IframeTransport {
   static markCrossDomainIframeAsDone(ampDoc, type) {
     const frameData = IframeTransport.getFrameData(type);
     dev().assert(frameData && frameData.frame && frameData.usageCount,
-        'Marked the ' + type + ' frame as done, but there is no' +
-        ' record of it existing.');
+        'Marked the %s frame as done, but there is no record of it existing.', type);
     if (--(frameData.usageCount)) {
       // Some other instance is still using it
       return;
@@ -248,8 +247,7 @@ export class IframeTransport {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
     dev().assert(frameData.queue,
-        'Event queue is missing for messages from ' + this.type_ +
-        ' to creative ID ' + this.creativeId_);
+        'Event queue is missing for messages from %s to creative ID %s', this.type_,this.creativeId_);
     frameData.queue.enqueue(
         /**
          * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}

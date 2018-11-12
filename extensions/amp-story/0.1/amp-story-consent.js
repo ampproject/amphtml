@@ -288,8 +288,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     user().assert(
         storyConsentScript && isJsonScriptTag(storyConsentScript),
-        `${TAG} config should be put in a <script> tag with ` +
-        'type="application/json"');
+        '%s config should be put in a <script> tag with type="application/json"', TAG);
 
     this.storyConsentConfig_ =
         Object.assign(

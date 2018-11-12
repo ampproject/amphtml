@@ -82,8 +82,7 @@ export class ConsentUI {
       const postPromptUI =
           this.ampdoc_.getElementById(opt_postPromptUI);
       if (!postPromptUI) {
-        user().error(TAG, 'postPromptUI element with ' +
-          `id=${opt_postPromptUI} not found`);
+        user().error(TAG, 'postPromptUI element with id=%s not found', opt_postPromptUI);
       }
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
@@ -95,8 +94,7 @@ export class ConsentUI {
       // Always respect promptUI first
       const promptElement = this.ampdoc_.getElementById(promptUI);
       if (!promptElement || !this.parent_.contains(promptElement)) {
-        user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
+        user().error(TAG, 'child element of <amp-consent> with promptUI id %s not found', promptUI);
       }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {

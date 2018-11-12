@@ -93,12 +93,10 @@ export class IframeTransportMessageQueue {
    */
   enqueue(event) {
     dev().assert(event && event.creativeId && event.message,
-        'Attempted to enqueue malformed message for: ' +
-        event.creativeId);
+        'Attempted to enqueue malformed message for: %s', event.creativeId);
     this.pendingEvents_.push(event);
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' +
-          event.creativeId);
+      dev().warn(TAG_, 'Exceeded maximum size of queue for: %s', event.creativeId);
       this.pendingEvents_.shift();
     }
     this.flushQueue_();

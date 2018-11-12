@@ -161,7 +161,7 @@ function serialize(pairs) {
       .filter(key => {
         const valid = KEY_VALIDATOR.test(key);
         if (!valid) {
-          user().error(TAG, 'Invalid linker key: ' + key);
+          user().error(TAG, 'Invalid linker key: %s', key);
         }
         return valid;
       })

@@ -63,7 +63,7 @@ export class AmpShareTracking extends AMP.BaseElement {
   buildCallback() {
     if (!this.isExperimentOn_()) {
       registerServiceBuilder(this.win, 'share-tracking', function() {
-        return Promise.reject(user().createError(TAG + ' disabled'));
+        return Promise.reject(user().createError('%s disabled', TAG));
       });
       user().assert(false, `${TAG} experiment is disabled`);
     }

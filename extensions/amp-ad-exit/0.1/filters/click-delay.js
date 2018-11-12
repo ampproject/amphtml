@@ -51,8 +51,7 @@ export class ClickDelayFilter extends Filter {
       } else if (
         win['performance']['timing'][spec.startTimingEvent] == undefined) {
         dev().warn(TAG,
-            `Invalid performance timing event type ${spec.startTimingEvent}` +
-            ', falling back to now');
+            'Invalid performance timing event type %s, falling back to now', spec.startTimingEvent);
       } else {
         this.intervalStart =
           win['performance']['timing'][spec.startTimingEvent];

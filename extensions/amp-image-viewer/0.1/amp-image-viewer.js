@@ -130,7 +130,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
     user().assert(
         this.elementIsSupported_(children[0]),
-        children[0].tagName + ' is not supported by <amp-image-viewer>'
+        '%s is not supported by <amp-image-viewer>', children[0].tagName
     );
 
     this.sourceAmpImage_ = children[0];

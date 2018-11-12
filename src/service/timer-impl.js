@@ -134,7 +134,7 @@ export class Timer {
     let timerKey;
     const delayPromise = new this.win.Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
-        reject(user().createError(opt_message || 'timeout'));
+        reject(user().createError('%s', opt_message || 'timeout'));
       }, delay);
 
       if (timerKey == -1) {

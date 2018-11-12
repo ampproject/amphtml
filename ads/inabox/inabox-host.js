@@ -109,8 +109,7 @@ function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
     user().error(TAG,
-        'Missing message.source. message.data='
-        + JSON.stringify(getData(message)));
+        'Missing message.source. message.data=%s', JSON.stringify(getData(message)));
   }
   return valid;
 }

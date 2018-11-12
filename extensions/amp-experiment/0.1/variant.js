@@ -52,7 +52,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
             config['consentNotificationId']))
         .then(userNotification => {
           user().assert(userNotification,
-              `Notification not found: ${config['consentNotificationId']}`);
+              'Notification not found: %s', config['consentNotificationId']);
           return userNotification.isDismissed();
         });
   }
@@ -106,7 +106,7 @@ function validateConfig(config) {
     }
   }
   user().assert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
-      'Total percentage is bigger than 100: ' + totalPercentage);
+      'Total percentage is bigger than 100: %s', totalPercentage);
 }
 
 /**

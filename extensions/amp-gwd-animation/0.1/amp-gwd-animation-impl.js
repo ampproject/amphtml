@@ -208,7 +208,7 @@ export class AmpGwdRuntimeService {
     if (newPageEl) {
       this.activatePage_(newPageEl);
     } else {
-      user().error(LOG_ID, 'Could not find page with index ' + index + '.');
+      user().error(LOG_ID, 'Could not find page with index %s.', index);
     }
   }
 

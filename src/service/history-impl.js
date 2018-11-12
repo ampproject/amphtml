@@ -467,7 +467,7 @@ export class HistoryBindingNatural_ {
       this.replaceState_(this.historyState_(this.stackIndex_,
           /* replace */ true));
     } catch (e) {
-      dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
+      dev().error(TAG_, 'Initial replaceState failed: %s', e.message);
     }
 
     history.pushState = this.historyPushState_.bind(this);
@@ -476,8 +476,7 @@ export class HistoryBindingNatural_ {
     this.popstateHandler_ = e => {
       const state = /** @type {!JsonObject} */(
         /** @type {!PopStateEvent} */(e).state);
-      dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
-        JSON.stringify(state));
+      dev().fine(TAG_, 'popstate event: %s, %s', this.win.history.length,JSON.stringify(state));
       this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -572,8 +571,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   onHistoryEvent_() {
     let state = this.getState_();
-    dev().fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
-        JSON.stringify(state));
+    dev().fine(TAG_, 'history event: %s, %s', this.win.history.length,JSON.stringify(state));
     const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
     const waitingState = this.waitingState_;
@@ -763,8 +761,7 @@ export class HistoryBindingNatural_ {
     historyState.stackIndex = Math.min(historyState.stackIndex,
         this.win.history.length - 1);
     if (this.stackIndex_ != historyState.stackIndex) {
-      dev().fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          historyState.stackIndex);
+      dev().fine(TAG_, 'stack index changed: %s -> %s', this.stackIndex_,historyState.stackIndex);
       this.stackIndex_ = historyState.stackIndex;
       if (this.onStateUpdated_) {
         this.onStateUpdated_(historyState);

@@ -240,8 +240,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.forceSafeframe = false;
     if ('forceSafeframe' in this.element.dataset) {
       if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
-        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
-            this.element.dataset['forceSafeframe']);
+        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: %s', this.element.dataset['forceSafeframe']);
       } else {
         this.forceSafeframe = true;
       }
@@ -388,10 +387,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @private */
   maybeDeprecationWarn_() {
     const warnDeprecation = feature => user().warn(
-        TAG, `${feature} is no longer supported for DoubleClick.` +
-          'Please refer to ' +
-          'https://github.com/ampproject/amphtml/issues/11834 ' +
-          'for more information');
+        TAG, '%s is no longer supported for DoubleClick.Please refer to https://github.com/ampproject/amphtml/issues/11834 for more information', feature);
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
     const hasUSDRD = usdrd in this.element.dataset ||
           (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
@@ -1009,9 +1005,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (!this.iframe || !this.iframe.contentWindow ||
           !this.iframe.contentWindow.document ||
           !this.iframe.contentWindow.document.body) {
-        dev().error(TAG, 'Attempting to expand fluid creative without ' +
-            'a properly set up friendly frame. Slot id: ' +
-            this.element.getAttribute('data-amp-slot-index'));
+        dev().error(TAG, 'Attempting to expand fluid creative without a properly set up friendly frame. Slot id: %s', this.element.getAttribute('data-amp-slot-index'));
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.attemptChangeHeight(

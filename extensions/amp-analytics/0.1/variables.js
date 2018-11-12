@@ -89,11 +89,11 @@ function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let {length} = str;
   user().assert(isFiniteNumber(start),
-      'Start index ' + start + 'in substr macro should be a number');
+      'Start index %sin substr macro should be a number', start);
   if (opt_l) {
     length = Number(opt_l);
     user().assert(isFiniteNumber(length),
-        'Length ' + length + ' in substr macro should be a number');
+        'Length %s in substr macro should be a number', length);
   }
 
   return str.substr(start, length);
@@ -172,8 +172,7 @@ export class VariableService {
    * @param {*} macro
    */
   register_(name, macro) {
-    dev().assert(!this.macros_[name], 'Macro "' + name
-        + '" already registered.');
+    dev().assert(!this.macros_[name], 'Macro "%s" already registered.', name);
     this.macros_[name] = macro;
   }
 
@@ -270,7 +269,7 @@ export function getNameArgs(key) {
     return {name: '', argList: ''};
   }
   const match = key.match(VARIABLE_ARGS_REGEXP);
-  user().assert(match, 'Variable with invalid format found: ' + key);
+  user().assert(match, 'Variable with invalid format found: %s', key);
 
   return {name: match[1] || match[0], argList: match[2] || ''};
 }

@@ -45,9 +45,7 @@ export function adsense(global, data) {
         'Responsive AdSense ad units require the attribute data-full-width.');
 
     user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
-        `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
-      `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
-      'responsive AdSense ad units.');
+        'Specified height %s in <amp-ad> tag is not equal to the required height of %s for responsive AdSense ad units.', data['height'],ADSENSE_RSPV_WHITELISTED_HEIGHT);
   }
 
   if (global.context.clientId) {

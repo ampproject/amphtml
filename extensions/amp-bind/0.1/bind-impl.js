@@ -278,8 +278,7 @@ export class Bind {
         case 'pushState':
           return this.pushStateWithExpression(expression, scope);
         default:
-          return Promise.reject(dev().createError('Unrecognized method: ' +
-              `"${tagOrTarget}.${method}"`));
+          return Promise.reject(dev().createError('Unrecognized method: "%s.%s"', tagOrTarget,method));
       }
     } else {
       user().error('AMP-BIND', 'Please use the object-literal syntax, '
@@ -483,9 +482,7 @@ export class Bind {
         }
       });
       if (ignoredKeys.length > 0) {
-        user().warn(TAG, 'Some state keys could not be premutated ' +
-              'because they are missing the overridable attribute: ' +
-              ignoredKeys.join(', '));
+        user().warn(TAG, 'Some state keys could not be premutated because they are missing the overridable attribute: %s', ignoredKeys.join(', '));
       }
       return this.setState(data['state']);
     });
@@ -576,9 +573,7 @@ export class Bind {
 
   /** Emits console error stating that the binding limit was exceeded. */
   emitMaxBindingsExceededError_() {
-    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
-        `(${this.maxNumberOfBindings_}). Additional elements with ` +
-        'bindings will be ignored.');
+    dev().expectedError(TAG, 'Maximum number of bindings reached (%s). Additional elements with bindings will be ignored.', this.maxNumberOfBindings_);
   }
 
   /**
@@ -892,11 +887,7 @@ export class Bind {
         mismatches[`${tagName}[${property}]${expected}:${actual}`] = true;
 
         if (warn) {
-          user().warn(TAG, `Default value (${actual}) does not match first `
-            + `result (${expected}) for <${tagName} [${property}]="`
-            + `${expressionString}">. We recommend writing expressions with `
-            + 'matching default values, but this can be safely ignored if '
-            + 'intentional.');
+          user().warn(TAG, 'Default value (%s) does not match first result (%s) for <%s [%s]="%s">. We recommend writing expressions with matching default values, but this can be safely ignored if intentional.', actual,expected,tagName,property,expressionString);
         }
       });
     });
@@ -1280,7 +1271,7 @@ export class Bind {
    * @private
    */
   reportWorkerError_(e, message, opt_element) {
-    const userError = user().createError(message + ' ' + e.message);
+    const userError = user().createError('%s %s', message,e.message);
     userError.stack = e.stack;
     this.reportError_(userError, opt_element);
     return userError;
@@ -1332,7 +1323,7 @@ export class Bind {
     try {
       return parseJson(JSON.stringify(o));
     } catch (e) {
-      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+      dev().error(TAG, 'Failed to copy JSON (%s) with error: %s', o,e);
     }
     return null;
   }

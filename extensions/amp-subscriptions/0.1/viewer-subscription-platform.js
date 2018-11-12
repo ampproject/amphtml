@@ -107,7 +107,7 @@ export class ViewerSubscriptionPlatform {
       ));
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
-            `The mismatching "aud" field: ${decodedData['aud']}`);
+            'The mismatching "aud" field: %s', decodedData['aud']);
       }
       if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
         throw user().createError('Payload is expired');

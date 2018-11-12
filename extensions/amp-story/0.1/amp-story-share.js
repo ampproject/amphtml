@@ -379,8 +379,7 @@ export class ShareWidget {
       }
 
       user().warn('AMP-STORY',
-          `Invalid share providers configuration for "${type}" in bookend. ` +
-          'Value must be `true` or a params object.');
+          'Invalid share providers configuration for "%s" in bookend. Value must be `true` or a params object.', type);
     });
   }
 

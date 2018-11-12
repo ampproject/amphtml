@@ -131,13 +131,11 @@ export class AmpBysideContent extends AMP.BaseElement {
   buildCallback() {
     this.webcareId_ = user().assert(
         this.element.getAttribute('data-webcare-id'),
-        'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-webcare-id attribute is required for <%s> %s',this.element, TAG_);
 
     this.label_ = user().assert(
         this.element.getAttribute('data-label'),
-        'The data-label attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-label attribute is required for <%s> %s',this.element, TAG_);
 
     this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
 		DEFAULT_WEBCARE_ZONE_);

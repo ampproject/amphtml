@@ -625,8 +625,7 @@ export class AmpIframe extends AMP.BaseElement {
         return;
       }
       if (e.origin !== this.targetOrigin_) {
-        user().error(TAG_, '"message" received from unexpected origin: ' +
-            e.origin + '. Only allowed from: ' + this.targetOrigin_);
+        user().error(TAG_, '"message" received from unexpected origin: %s. Only allowed from: %s', e.origin,this.targetOrigin_);
         return;
       }
       if (!this.isUserGesture_()) {

@@ -45,8 +45,7 @@ export class IframeTransportClient {
     // Note: amp-ad-exit will validate the vendor name before performing
     // variable substitution, so if the vendor name is not a valid one from
     // vendors.js, then its response messages will have no effect.
-    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in ' +
-        this.win_.location.href);
+    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in %s', this.win_.location.href);
 
     /** @protected {!IframeMessagingClient} */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
@@ -65,13 +64,13 @@ export class IframeTransportClient {
            */
           (eventData['events']);
           dev().assert(events,
-              'Received malformed events list in ' + this.win_.location.href);
+              'Received malformed events list in %s', this.win_.location.href);
           dev().assert(events.length,
-              'Received empty events list in ' + this.win_.location.href);
+              'Received empty events list in %s', this.win_.location.href);
           events.forEach(event => {
             try {
               dev().assert(event.creativeId,
-                  'Received malformed event in ' + this.win_.location.href);
+                  'Received malformed event in %s', this.win_.location.href);
               this.contextFor_(event.creativeId).dispatch(event.message);
             } catch (e) {
               user().error(TAG_,
@@ -129,7 +128,7 @@ export class IframeTransportContext {
 
     user().assert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
-    'Must implement onNewContextInstance in ' + win.location.href);
+    'Must implement onNewContextInstance in %s', win.location.href);
     win['onNewContextInstance'](this);
   }
 

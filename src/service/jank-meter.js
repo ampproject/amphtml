@@ -79,7 +79,7 @@ export class JankMeter {
     this.totalFrameCnt_++;
     if (paintLatency > 16) {
       this.badFrameCnt_++;
-      dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
+      dev().info('JANK', 'Paint latency: %sms', paintLatency);
     }
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.

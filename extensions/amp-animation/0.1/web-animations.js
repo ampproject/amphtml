@@ -945,8 +945,7 @@ export class MeasureScanner extends Scanner {
     // time is fractional.
     if (newValue != null && Math.floor(value) != value && value < 1) {
       user().warn(TAG,
-          `"${field}" is fractional.`
-          + ' Note that all times are in milliseconds.');
+          '"%s" is fractional. Note that all times are in milliseconds.', field);
     }
   }
 }

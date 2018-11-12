@@ -817,8 +817,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return alternativeName;
     }
 
-    user().error(TAG, `Multiple date-pickers with implicit ${name} fields ` +
-        'need to have IDs');
+    user().error(TAG, 'Multiple date-pickers with implicit %s fields need to have IDs', name);
     return '';
   }
 
