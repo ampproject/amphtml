@@ -151,6 +151,7 @@ describes.realWin('Expander', {
       ASYNCFN: arg => Promise.resolve(arg),
       BROKEN: () => undefined,
       ANCESTOR_ORIGIN: () => Promise.resolve('https://www.google.com@foo'),
+      TITLE: 'hello world ',
     };
 
     const sharedTestCases = [
@@ -238,6 +239,11 @@ describes.realWin('Expander', {
         description: 'passes undefined for omitted args',
         input: 'CONCAT(foo)',
         output: 'foo-undefined',
+      },
+      {
+        description: 'should not double encode nested macros',
+        input: 'title=TRIM(TITLE)',
+        output: 'title=hello%20world',
       },
     ];
 
