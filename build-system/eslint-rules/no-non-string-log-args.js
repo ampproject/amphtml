@@ -174,7 +174,6 @@ class ArgFixer {
     this.enteredParen = 0;
     this.templateValue = '';
     this.inTemplateEval = false;
-    console.table(this.tokens);
   }
 
   getSanitizedArg() {
