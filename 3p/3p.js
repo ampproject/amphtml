@@ -68,7 +68,7 @@ export function register(id, draw) {
  */
 export function run(id, win, data) {
   const fn = registrations[id];
-  user().assert(fn, 'Unknown 3p: %s', id);
+  user().assert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
