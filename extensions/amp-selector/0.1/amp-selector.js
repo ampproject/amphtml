@@ -568,6 +568,20 @@ export class AmpSelector extends AMP.BaseElement {
     element.setAttribute('aria-selected', 'true');
     this.selectedElements_.push(element);
   }
+
+  /**
+   * @visibleForTesting
+   */
+  getElementsForTesting() {
+    return this.elements_;
+  }
+
+  /**
+   * @visibleForTesting
+   */
+  getSelectedElementsForTesting() {
+    return this.selectedElements_;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
