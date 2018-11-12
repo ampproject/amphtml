@@ -56,7 +56,7 @@
    *     "width": 400,
    *     "height": 600
    *   },
-   *    
+   *
    *   // [optional] CSS selectors for elements that must never appear on the
    *   // webpage.
    *   "forbidden_css": [
@@ -562,6 +562,15 @@
       "loading_complete_css": [
         ".i-amphtml-story-no-rotation-overlay"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "name": "amp-story: tooltip",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     }
   ]
 }
