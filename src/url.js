@@ -61,6 +61,9 @@ const AMP_GSA_PARAMS_REGEX = /[?&]amp_gsa[^&]*/;
 /** @private @const Matches amp_r parameters in query string. */
 const AMP_R_PARAMS_REGEX = /[?&]amp_r[^&]*/;
 
+/** @private @const Matches amp_kit parameters in query string. */
+const AMP_KIT_PARAMS_REGEX = /[?&]amp_kit[^&]*/;
+
 /** @private @const Matches usqp parameters from goog experiment in query string. */
 const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
 
@@ -425,7 +428,6 @@ export function removeAmpJsParamsFromUrl(url) {
   const parsed = parseUrlDeprecated(url);
   const search = removeAmpJsParamsFromSearch(parsed.search);
   return parsed.origin + parsed.pathname + search + parsed.hash;
-
 }
 
 /**
@@ -456,8 +458,28 @@ function removeAmpJsParamsFromSearch(urlSearch) {
       .replace(AMP_JS_PARAMS_REGEX, '')
       .replace(AMP_GSA_PARAMS_REGEX, '')
       .replace(AMP_R_PARAMS_REGEX, '')
+      .replace(AMP_KIT_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, ''); // Removes first ? or &.
+  return search ? '?' + search : '';
+}
+
+/**
+ * Removes parameters with param name and returns the new search string.
+ * @param {string} urlSearch
+ * @param {string} paramName
+ * @return {string}
+ */
+export function removeParamsFromSearch(urlSearch, paramName) {
+  // TODO: reuse the function in removeAmpJsParamsFromSearch. Accept paramNames
+  // as an array.
+  if (!urlSearch || urlSearch == '?') {
+    return '';
+  }
+  const paramRegex = new RegExp(`[?&]${paramName}=[^&]*`, 'g');
+  const search = urlSearch
+      .replace(paramRegex, '')
+      .replace(/^[?&]/, '');
   return search ? '?' + search : '';
 }
 

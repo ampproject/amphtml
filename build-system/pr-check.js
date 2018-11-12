@@ -125,6 +125,9 @@ function isBuildSystemFile(filePath) {
       // Exclude config files from build-system since we want it to trigger
       // the flag config check.
       !isFlagConfig(filePath) &&
+      // Exclude the dev dashboard from build-system, since we want it to
+      // trigger the devDashboard check
+      !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
       !isVisualDiffFile(filePath))
@@ -188,7 +191,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.js' ||
-          filename == 'visual-tests.js' ||
+          filename == 'visual-tests' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
@@ -201,6 +204,18 @@ function isUnitTest(filePath) {
   return config.unitTestPaths.some(pattern => {
     return minimatch(filePath, pattern);
   });
+}
+
+/**
+ * Determines if the given file is,
+ * a file concerning the dev dashboard
+ * Concerning the dev dashboard
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isDevDashboardFile(filePath) {
+  return (filePath === 'build-system/app.js' ||
+  filePath.startsWith('build-system/app-index/'));
 }
 
 /**
@@ -239,6 +254,7 @@ function determineBuildTargets(filePaths) {
       'VALIDATOR',
       'RUNTIME',
       'UNIT_TEST',
+      'DEV_DASHBOARD',
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
@@ -259,6 +275,8 @@ function determineBuildTargets(filePaths) {
       targetSet.add('FLAG_CONFIG');
     } else if (isUnitTest(p)) {
       targetSet.add('UNIT_TEST');
+    } else if (isDevDashboardFile(p)) {
+      targetSet.add('DEV_DASHBOARD');
     } else if (isIntegrationTest(p)) {
       targetSet.add('INTEGRATION_TEST');
     } else if (isVisualDiffFile(p)) {
@@ -302,6 +320,7 @@ const command = {
     timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
+    timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
@@ -317,8 +336,12 @@ const command = {
     }
     timedExecOrDie(cmd);
   },
-  runBundleSizeCheck: function() {
-    timedExecOrDie('gulp bundle-size');
+  runBundleSizeCheck: function(storeBundleSize = false) {
+    let cmd = 'gulp bundle-size';
+    if (storeBundleSize) {
+      cmd += ' --store';
+    }
+    timedExecOrDie(cmd);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -341,6 +364,9 @@ const command = {
   },
   runUnitTestsOnLocalChanges: function() {
     timedExecOrDie('gulp test --nobuild --headless --local-changes');
+  },
+  runDevDashboardTests: function() {
+    timedExecOrDie('gulp test --dev_dashboard --nobuild');
   },
   runIntegrationTests: function(compiled, coverage) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
@@ -380,7 +406,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff --nobuild --headless';
+    let cmd = 'gulp visual-diff --nobuild';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -429,6 +455,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
+    command.runDevDashboardTests();
     command.runIntegrationTests(/* compiled */ false, /* coverage */ true);
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
@@ -441,7 +468,7 @@ function runAllCommands() {
     command.buildRuntimeMinified(/* extensions */ true);
     // Disable bundle-size check on release branch builds.
     if (process.env['TRAVIS_BRANCH'] === 'master') {
-      command.runBundleSizeCheck();
+      command.runBundleSizeCheck(/* storeBundleSize */ true);
     }
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
@@ -558,7 +585,9 @@ function main() {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
         colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files');
+        'in addition to some other files.  Config and code are not kept in',
+        'sync, and config needs to be backwards compatible with code for at',
+        'least two weeks.  See #8188');
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
@@ -581,6 +610,9 @@ function main() {
     command.runLintCheck();
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
+    }
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      command.runDevDashboardTests();
     }
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('UNIT_TEST') ||
@@ -612,9 +644,11 @@ function main() {
         buildTargets.has('BUILD_SYSTEM')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.buildRuntimeMinified(/* extensions */ false);
-      command.runBundleSizeCheck();
       command.runVisualDiffTests();
+      if (buildTargets.has('RUNTIME')) {
+        command.buildRuntimeMinified(/* extensions */ false);
+        command.runBundleSizeCheck();
+      }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
       command.runVisualDiffTests(/* opt_mode */ 'skip');

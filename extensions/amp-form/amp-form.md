@@ -244,7 +244,7 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 ## Success/error response rendering
 
-You can render success or error responses in your form by using [extended templates (e.g., Mustache)](https://www.ampproject.org/docs/fundamentals/spec#extended-templates) and the following response attributes:
+You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success responses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
 
 | Response attribute | Description |
 |-----------|---------------------|
@@ -252,7 +252,7 @@ You can render success or error responses in your form by using [extended templa
 | `submit-error` | an be used to display a submission error if the response is unsuccessful (i.e., does not have a status of `2XX`).  |
 | `submitting` | Can be used to display a message when the form is submitting. The template for this attribute has access to the form's input fields for any display purposes. Please see the [full form example below](#example-submitting) for how to use the `submitting` attribute. |
 
-To render responses:
+### To render responses with templating:
 
 * Apply a response attribute to *any direct child* of the `<form>` element.
 * Render the response in the child element by including a `<template></template>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
@@ -339,6 +339,49 @@ You can render the responses in a referenced template defined earlier in the doc
 
 See the [full example here](../../examples/forms.amp.html).
 
+### To render a successful response with data binding
+
+* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).  
+* Use the `event` property to capture the response data.
+* Add the state attribute to the desired element to bind the form response.
+
+The following example demonstrates a form `submit-success` response with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind):
+```html
+  <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Subscribe to our newsletter</p>
+  <form method="post"
+        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        target="_top"
+        on="submit-success: AMP.setState({'subscribe': event.response.name})">
+    <div>
+      <input type="text"
+          name="name"
+          placeholder="Name..."
+          required>
+      <input type="email"
+        name="email"
+        placeholder="Email..."
+        required>
+    </div>
+    <input type="submit" value="Subscribe">
+  </form>
+ ``` 
+
+ When the form is submitted successfully it will return a JSON response similar to the following: 
+
+```json
+{
+  "name": "Jane Miller",
+  "email": "email@example.com"
+}
+```
+Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
+
+```html
+...
+  <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Thanks Jane Miller! You have successfully subscribed.</p>
+...
+``` 
+
 ### Redirecting after a submission
 
 You can redirect users to a new page after a successful form submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur.  HTTP response headers are configured via your server.
@@ -349,7 +392,7 @@ Make sure to update your `Access-Control-Expose-Headers` response header to incl
 
 ```text
 AMP-Redirect-To: https://example.com/forms/thank-you
-Access-Control-Expose-Headers: AMP-Redirect-To, Another-Header, And-Some-More
+Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin, AMP-Redirect-To
 ```
 
 
@@ -427,6 +470,10 @@ Here's an example:
             <span>City</span>
             <input type="text" name="city" required>
         </label>
+        <label>
+            <span>Document</span>
+            <input type="file" name="document" no-verify>
+        </label>
         <div class="spinner"></div>
         <input type="submit" value="Submit">
     </fieldset>
@@ -462,6 +509,9 @@ Here is how an error response should look for verification:
   ]
 }
 ```
+
+To remove a field from the `verify-xhr` request, add the `no-verify` attribute
+to the input element.
 
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 

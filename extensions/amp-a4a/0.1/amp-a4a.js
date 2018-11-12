@@ -1084,6 +1084,12 @@ export class AmpA4A extends AMP.BaseElement {
     this.postAdResponseExperimentFeatures = {};
   }
 
+  /** @override */
+  detachedCallback() {
+    super.detachedCallback();
+    this.destroyFrame(true);
+  }
+
   /**
    * Attempts to remove the current frame and free any associated resources.
    * This function will no-op if this ad slot is currently in the process of
@@ -1661,9 +1667,9 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const analyticsEvent =
         dev().assert(LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]);
-    const analyticsVars = Object.assign(
-        {'time': Math.round(this.getNow_())},
-        this.getA4aAnalyticsVars(analyticsEvent));
+    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
+        dict({'time': Math.round(this.getNow_())}),
+        this.getA4aAnalyticsVars(analyticsEvent)));
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -1673,9 +1679,11 @@ export class AmpA4A extends AMP.BaseElement {
    * Note that this function is called for each time an analytics event is
    * fired.
    * @param {string} unusedAnalyticsEvent The name of the analytics event.
-   * @return {!Object<string, string>}
+   * @return {!JsonObject}
    */
-  getA4aAnalyticsVars(unusedAnalyticsEvent) { return {}; }
+  getA4aAnalyticsVars(unusedAnalyticsEvent) {
+    return dict({});
+  }
 
   /**
    * Returns network-specific config for amp-analytics. It should overridden

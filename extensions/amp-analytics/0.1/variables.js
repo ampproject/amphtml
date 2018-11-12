@@ -19,13 +19,10 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-// TODO(calebcordry) remove this once experiment is launched
-// also remove from dep-check-config whitelist;
-import {isExperimentOn} from '../../../src/experiments';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
-const TAG = 'Analytics.Variables';
+const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
@@ -62,6 +59,18 @@ export class ExpansionOptions {
    */
   freezeVar(str) {
     this.freezeVars[str] = true;
+  }
+
+  /**
+   * @param {string} name
+   * @return {*}
+   */
+  getVar(name) {
+    let value = this.vars[name];
+    if (value == null) {
+      value = '';
+    }
+    return value;
   }
 }
 
@@ -150,9 +159,7 @@ export class VariableService {
    * @return {!Object} contains all registered macros
    */
   getMacros() {
-    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
-        'url-replacement-v2');
-    return isV2ExpansionOn ? this.macros_ : {};
+    return this.macros_;
   }
 
   /**
@@ -200,7 +207,7 @@ export class VariableService {
         return match;
       }
 
-      let value = options.vars[name] != null ? options.vars[name] : '';
+      let value = options.getVar(name);
 
       if (typeof value == 'string') {
         value = this.expandTemplateSync(value,
@@ -209,7 +216,7 @@ export class VariableService {
       }
 
       if (!options.noEncode) {
-        value = this.encodeVars(name, value);
+        value = encodeVars(/** @type {string|?Array<string>} */(value));
       }
       if (value) {
         value += argList;
@@ -218,23 +225,6 @@ export class VariableService {
     });
   }
 
-  /**
-   * @param {string} unusedName Name of the variable. Only used in tests.
-   * @param {string|?Array<string>} raw The values to URI encode.
-   * @return {string} The encoded value.
-   */
-  encodeVars(unusedName, raw) {
-    if (raw == null) {
-      return '';
-    }
-
-    if (isArray(raw)) {
-      return raw.map(this.encodeVars.bind(this, unusedName)).join(',');
-    }
-    // Separate out names and arguments from the value and encode the value.
-    const {name, argList} = getNameArgs(String(raw));
-    return encodeURIComponent(name) + argList;
-  }
 
   /**
    * @param {string} value
@@ -245,6 +235,22 @@ export class VariableService {
   }
 }
 
+/**
+ * @param {string|?Array<string>} raw The values to URI encode.
+ * @return {string} The encoded value.
+ */
+export function encodeVars(raw) {
+  if (raw == null) {
+    return '';
+  }
+
+  if (isArray(raw)) {
+    return raw.map(encodeVars).join(',');
+  }
+  // Separate out names and arguments from the value and encode the value.
+  const {name, argList} = getNameArgs(String(raw));
+  return encodeURIComponent(name) + argList;
+}
 
 /**
  * Returns an array containing two values: name and args parsed from the key.
@@ -254,7 +260,7 @@ export class VariableService {
  * @param {string} key The key to be parsed.
  * @return {!FunctionNameArgsDef}
  */
-function getNameArgs(key) {
+export function getNameArgs(key) {
   if (!key) {
     return {name: '', argList: ''};
   }

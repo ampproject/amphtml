@@ -26,6 +26,7 @@ import {
   fullscreenExit,
   insertAfterOrAtStart,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -58,7 +59,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
+ * @note Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
@@ -640,6 +641,19 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    this.removePosterForAndroidBug_();
+  }
+
+  /**
+   * See `createPosterForAndroidBug_`.
+   * @private
+   */
+  removePosterForAndroidBug_() {
+    const poster = this.element.querySelector('i-amphtml-poster');
+    if (!poster) {
+      return;
+    }
+    removeElement(poster);
   }
 
   /**
@@ -658,7 +672,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (placeholder.classList.contains('i-amphtml-blur') &&
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
         isExperimentOn(this.win, 'blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;

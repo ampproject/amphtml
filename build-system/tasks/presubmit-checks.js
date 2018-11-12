@@ -50,6 +50,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal class form',
     whitelist: [
       'build-system/amp4test.js',
+      'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -99,6 +100,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -144,8 +146,8 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
       'extensions/amp-analytics/0.1/config.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -290,6 +292,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -312,6 +315,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
+      '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -351,6 +355,7 @@ const forbiddenTerms = {
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/recaptcha.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
@@ -589,7 +594,7 @@ const forbiddenTerms = {
     ],
   },
   'new FormData\\(': {
-    message: 'Use new FormDataWrapper() instead and call ' +
+    message: 'Use createFormDataWrapper() instead and call ' +
         'formDataWrapper.getFormData() to get the native FormData object.',
     whitelist: [
       'src/form-data-wrapper.js',
@@ -612,7 +617,6 @@ const forbiddenTerms = {
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
-      'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
@@ -700,7 +704,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.getBoundingClientRect\\(': bannedTermsHelpString,
   '\\.getClientRects\\(': bannedTermsHelpString,
   '\\.getMatchedCSSRules\\(': bannedTermsHelpString,
-  '\\.postMessage\\(': bannedTermsHelpString,
   '\\.scrollBy\\(': bannedTermsHelpString,
   '\\.scrollIntoView\\(': bannedTermsHelpString,
   '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
@@ -708,6 +711,12 @@ const forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  '\\.postMessage\\(': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
+    ],
+  },
   'getComputedStyle\\(': {
     message: 'Due to various bugs in Firefox, you must use the computedStyle ' +
     'helper in style.js.',
@@ -739,6 +748,18 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
+    ],
+  },
+  'contentHeightChanged': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/inabox/inabox-viewport.js',
+      'src/service/resources-impl.js',
+      'src/service/viewport/viewport-binding-def.js',
+      'src/service/viewport/viewport-binding-ios-embed-sd.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'preloadExtension': {
@@ -819,6 +840,8 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
+      'extensions/amp-analytics/0.1/cookie-writer.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -835,19 +858,28 @@ const forbiddenTermsSrcInclusive = {
       'src/service/url-replacements-impl.js',
     ],
   },
+  '\\.setNonBoolean\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/storage-impl.js',
+    ],
+  },
   '(cdn|3p)\\.ampproject\\.': {
     message: 'The CDN domain should typically not be hardcoded in source ' +
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
+      'build-system/app-index/template.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/app-video-testbench.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'gulpfile.js',

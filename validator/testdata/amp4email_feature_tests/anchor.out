@@ -31,10 +31,10 @@ FAIL
 >>   ^~~~~~~~~
 amp4email_feature_tests/anchor.html:29:2 The relative URL 'somelink.com' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed. [DISALLOWED_HTML]
 |
-|    <!-- The protocol can only be https or mailto. -->
-|    <a href="http://somelink.com">disallowed</a>
+|    <!-- The protocol can only be http, https or mailto. -->
+|    <a href="ftp://somelink.com">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:32:2 Invalid URL protocol 'http:' for attribute 'href' in tag 'A (AMP4EMAIL)'. [DISALLOWED_HTML]
+amp4email_feature_tests/anchor.html:32:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'A (AMP4EMAIL)'. [DISALLOWED_HTML]
 |
 |    <!-- href of anchor is not bindable. -->
 |    <a [href]="evil">disallowed</a>
@@ -163,6 +163,7 @@ amp4email_feature_tests/anchor.html:105:2 The relative URL '{{foo}}bar' for attr
 amp4email_feature_tests/anchor.html:106:2 The relative URL '{{#foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed. [DISALLOWED_HTML]
 |
 |    <!-- These are allowed. -->
+|    <a href="http://www.somelink.com">http allowed</a>
 |    <a href="https://www.somelink.com">https allowed</a>
 |    <a href="mailto:user@example.com">mailto allowed</a>
 |  </body>

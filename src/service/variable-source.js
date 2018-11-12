@@ -109,12 +109,6 @@ export class VariableSource {
     /** @protected @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @private {!RegExp|undefined} */
-    this.replacementExpr_ = undefined;
-
-    /** @private {!RegExp|undefined} */
-    this.replacementExprV2_ = undefined;
-
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
 
@@ -168,8 +162,6 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -188,8 +180,6 @@ export class VariableSource {
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
-    this.replacementExpr_ = undefined;
-    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -208,49 +198,25 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {boolean=} isV2 Flag to ignore capture of args.
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
    */
-  getExpr(opt_bindings, isV2, opt_whiteList) {
+  getExpr(opt_bindings, opt_whiteList) {
     if (!this.initialized_) {
       this.initialize_();
     }
-
-    const additionalKeys = opt_bindings ? Object.keys(opt_bindings) : null;
-    if (additionalKeys && additionalKeys.length > 0) {
-      const allKeys = Object.keys(this.replacements_);
-      additionalKeys.forEach(key => {
-        if (this.replacements_[key] === undefined) {
-          allKeys.push(key);
-        }
-      });
-      return this.buildExpr_(allKeys, isV2, opt_whiteList);
-    }
-    if (!this.replacementExpr_ && !isV2) {
-      this.replacementExpr_ = this.buildExpr_(
-          Object.keys(this.replacements_));
-    }
-    // sometimes the v1 expand will be called before the v2
-    // so we need to cache both versions
-    if (!this.replacementExprV2_ && isV2) {
-      this.replacementExprV2_ = this.buildExpr_(
-          Object.keys(this.replacements_), isV2, opt_whiteList);
-    }
-
-    return isV2 ? this.replacementExprV2_ :
-      this.replacementExpr_;
+    const all = Object.assign({}, this.replacements_, opt_bindings);
+    return this.buildExpr_(Object.keys(all), opt_whiteList);
   }
 
   /**
    * @param {!Array<string>} keys
-   * @param {boolean=} isV2 flag to ignore capture of args
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, isV2, opt_whiteList) {
+  buildExpr_(keys, opt_whiteList) {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
@@ -286,11 +252,7 @@ export class VariableSource {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
-    let regexStr = '\\$?(' + all + ')';
-    // ignore the capturing of arguments in new parser
-    if (!isV2) {
-      regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
-    }
+    const regexStr = '\\$?(' + all + ')';
     return new RegExp(regexStr, 'g');
   }
 

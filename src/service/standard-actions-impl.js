@@ -124,10 +124,20 @@ export class StandardActions {
         }
         return permission.then(() => {
           Services.navigationForDoc(this.ampdoc).navigateTo(
-              win, args['url'], `AMP.${method}`);
+              win, args['url'], `AMP.${method}`,
+              {target: args['target'], opener: args['opener']});
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
+
+      case 'scrollTo':
+        user().assert(args['id'],
+            'AMP.scrollTo must provide element ID');
+        invocation.node = dev().assertElement(
+            getAmpdoc(node).getElementById(args['id']),
+            'scrollTo element ID must exist on page'
+        );
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();

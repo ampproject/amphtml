@@ -90,6 +90,11 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
     });
+    this.runtime_.setOnFlowCanceled(e => {
+      if (e.flow == 'linkAccount') {
+        this.onLinkComplete_();
+      }
+    });
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
@@ -128,7 +133,6 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onLinkComplete_() {
-    this.runtime_.reset();
     this.serviceAdapter_.reAuthorizePlatform(this);
   }
 
@@ -156,7 +160,6 @@ export class GoogleSubscriptionsPlatform {
    */
   onSubscribeResponse_(response) {
     response.complete().then(() => {
-      this.runtime_.reset();
       this.serviceAdapter_.reAuthorizePlatform(this);
     });
   }
@@ -201,6 +204,11 @@ export class GoogleSubscriptionsPlatform {
     } else if (!entitlement.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
+  }
+
+  /** @override */
+  reset() {
+    this.runtime_.reset();
   }
 
   /**
@@ -259,8 +267,12 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   executeAction(action) {
-    if (action === 'subscribe') {
+    if (action == 'subscribe') {
       this.runtime_.showOffers({list: 'amp', isClosable: true});
+      return Promise.resolve(true);
+    }
+    if (action == 'login') {
+      this.runtime_.linkAccount();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

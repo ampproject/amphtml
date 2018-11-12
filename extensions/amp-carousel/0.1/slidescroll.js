@@ -123,12 +123,17 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    // Keep CSS Scroll Snap points turned on for the following:
+    // - All iOS devices except for 10.3
+    // - All places where the experiment flag is deliberately set.
+    // Conversely turn CSS Scroll Snap points off for the following:
+    // - iOS devices on version 10.3
+    // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = !isExperimentOn(
-        this.win, 'amp-carousel-scroll-snap') ||
-        startsWith(
-            Services.platformFor(this.win).getIosVersionString(),
-            '10.3');
+    this.shouldDisableCssSnap_ = startsWith(
+        Services.platformFor(this.win).getIosVersionString(),
+        '10.3') ? true : this.isIos_ ? false : !isExperimentOn(
+          this.win, 'amp-carousel-chrome-scroll-snap');
   }
 
   /** @override */
@@ -651,6 +656,16 @@ export class AmpSlideScroll extends BaseSlides {
         this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
+    // If we have a specified number of autoplay loops and
+    // we have reached the last slide in the set
+    // carry out removing autoplay logic.
+    // This only works because the initial Slide is always the first slide.
+    if (this.autoplayLoops_ && this.slideIndex_ === this.noOfSlides_ - 1) {
+      this.loopsMade_++;
+      if (this.loopsMade_ == this.autoplayLoops_) {
+        this.removeAutoplay();
+      }
+    }
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
     this.updateButtonTitles();
@@ -776,10 +791,10 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ === null ?
           'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = {
-      fromSlide,
+    const vars = dict({
+      'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    };
+    });
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
@@ -791,7 +806,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
