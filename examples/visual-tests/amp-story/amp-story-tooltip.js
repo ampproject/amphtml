@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const sleep = require('sleep-promise');
 const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
