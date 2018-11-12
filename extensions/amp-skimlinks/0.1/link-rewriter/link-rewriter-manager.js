@@ -130,7 +130,7 @@ export class LinkRewriterManager {
    * tracking requests, handlers of this events should not
    * mutate the anchor!
    * @param {!Element} anchor
-   * @param {!Event} event - 'click' or 'contextmenu'
+   * @param {!Event} event - 'click' or 'contextmenu' event.
    * @public
    */
   maybeRewriteLink(anchor, event) {
