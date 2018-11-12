@@ -42,9 +42,6 @@ limitations under the License.
 The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently, the `parallax` and `fade-in` effects are supported.
-More effects such as `fly-in` are planned to be supported soon.
-
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
 
 
@@ -139,7 +136,7 @@ This parameter determines when to stop the animation. The value specified in `<p
 In the below example, the `<div>` is fully visible by the time it has crossed 80% of the viewport from the bottom. 
 
 ```html
-  <div amp-fx="fade-in" data-margin-end="80%">
+  <div amp-fx="fade-in-scroll" data-margin-end="80%">
     <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
   </div>
 ```
@@ -156,7 +153,7 @@ In the below example, the animation is fully dependent on scroll and the `<div>`
   </div>
 ```
 
-### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top (experimental)
+### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top
 
 The `fly-in` effects allow an element's position to be translated by a specified amount once it is in the viewport.
 
@@ -176,7 +173,7 @@ If the user overrides this default value of `data-duration` to `Xms`, the same d
 
 ##### data-easing (optional)
 
-This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
+This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-out` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
 * “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)

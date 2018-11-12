@@ -22,6 +22,8 @@
 const boilerPlate = require('./boilerplate');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
+const {SettingsModal, SettingsOpenButton} = require('./settings');
+
 
 const examplesDocumentModes = {
   'standard': '/',
@@ -56,10 +58,14 @@ const headerLinks = [
   },
 ];
 
+
 const requiredExtensions = [
   {name: 'amp-bind'},
   {name: 'amp-form'},
+  {name: 'amp-lightbox'},
+  {name: 'amp-selector'},
 ];
+
 
 const ExtensionScript = ({name, version}) =>
   html`<script
@@ -77,11 +83,6 @@ const HeaderLink = ({name, href, divider}) => html`
   </li>`;
 
 
-const SettingsOpener = () =>
-  // preact-rendered, for now
-  html`<div class="settings-opener-component-root"></div>`;
-
-
 const Header = ({isMainPage, links}) => html`
   <header>
     <h1 class="amp-logo">AMP</h1>
@@ -95,7 +96,7 @@ const Header = ({isMainPage, links}) => html`
             name,
             href,
           })).join('')}
-      <li>${SettingsOpener()}</li>
+      <li>${SettingsOpenButton()}</li>
     </ul>
   </header>`;
 
@@ -189,10 +190,10 @@ const selectModePrefix = '/';
 
 const renderTemplate = ({
   basepath,
-  bundle,
   css,
   fileSet,
-  isMainPage}) => html`
+  isMainPage,
+  serveMode}) => html`
 
   <!doctype html>
   <html ⚡>
@@ -240,12 +241,13 @@ const renderTemplate = ({
         })}
       </div>
     </div>
-    <script>${bundle}</script>
     <div class="center">
       Built with 💙  by
       <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
     </div>
+    ${SettingsModal({serveMode})}
   </body>
   </html>`;
+
 
 module.exports = {renderTemplate};

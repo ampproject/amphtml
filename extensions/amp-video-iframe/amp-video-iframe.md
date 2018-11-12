@@ -234,6 +234,17 @@ The valid events are as follows.
   </tbody>
 </table>
 
+#### <a name="postAnalyticsEvent"></a> `postAnalyticsEvent(eventType[, vars])`
+
+Posts a custom analytics event to be consumed by `amp-analytics`. The
+`eventType` must be prefixed with `video-custom-` to prevent naming collisions
+with other analytics event types.
+
+This method takes an optional `vars` param that should define an object with
+custom variables to log. These are available as `VIDEO_STATE`, keyed by name
+prefixed with `custom_`, i.e. the object `{myVar: 'foo'} will be available as
+`{'custom_myVar': 'foo}`.
+
 #### <a name="getIntersection"></a> `getIntersection(callback)`
 
 Gets the intersection ratio (between 0 and 1) for the video element. This is useful for viewability information, e.g.

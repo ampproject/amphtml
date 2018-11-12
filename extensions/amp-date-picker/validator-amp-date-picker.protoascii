@@ -173,6 +173,9 @@ attr_lists: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
+  # amp-bind
+  attrs: { name: "[max]" }
+  attrs: { name: "[min]" }
 }
 
 attr_lists: {
