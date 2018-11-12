@@ -81,6 +81,11 @@ describe('DOMPurify-based', () => {
           .equal('<p data-amp-bind-class="bar" i-amphtml-binding=""></p>');
     });
 
+    it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
+      expect(purify('<p data-amp-bind-text="foo"></p>')).to.be
+          .equal('<p i-amphtml-binding="" data-amp-bind-text="foo"></p>');
+    });
+
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar".
       expect(purify('<a [href]="foo.bar">link</a>')).to.equal(
