@@ -15,6 +15,7 @@
  */
 import {
   Direction,
+  REVERT_TO_INLINE_RATIO,
   VideoDocking,
 } from '../../src/service/video/docking';
 import {PlayingStates} from '../../src/video-interface';
@@ -30,16 +31,14 @@ describes.repeated('', {
   'Minimize to corner': {
     useSlot: false,
     topBoundary: 0,
-    bottomBoundary: 400,
   },
   'Minimize to slot element': {
     useSlot: true,
     topBoundary: 20,
-    bottomBoundary: 880,
   },
 }, (name, variant) => {
 
-  const {useSlot, topBoundary, bottomBoundary} = variant;
+  const {useSlot, topBoundary} = variant;
 
   describes.realWin('↗ 🔲', {amp: true}, env => {
     let ampdoc;
@@ -120,6 +119,14 @@ describes.repeated('', {
       sandbox.stub(docking, 'getAreaWidth_').returns(width);
     }
 
+    function setValidAreaHeight(videoHeight) {
+      mockAreaHeight(videoHeight * REVERT_TO_INLINE_RATIO);
+    }
+
+    function mockAreaHeight(height) {
+      sandbox.stub(docking, 'getAreaHeight_').returns(height);
+    }
+
     function placeVideoLtwh(video, left, top, width, height, ratio = 0) {
       stubLayoutBox(video, layoutRectLtwh(left, top, width, height), ratio);
     }
@@ -155,10 +162,16 @@ describes.repeated('', {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
       const video = createVideo();
-      placeVideoLtwh(video, 0, -200, 400, 300);
+
+      const videoWidth = 400;
+      const videoHeight = 300;
+
+      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
 
       setScrollDirection(Direction.UP);
+
       setValidAreaWidth();
+      setValidAreaHeight(videoHeight);
 
       const target = docking.getTargetFor_(video);
 
@@ -181,8 +194,13 @@ describes.repeated('', {
       const video = createVideo();
       const dock = sandbox.spy(docking, 'dock_');
 
+      const videoWidth = 400;
+      const videoHeight = 300;
+
+      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
+
       mockInvalidAreaWidth();
-      placeVideoLtwh(video, 0, -200, 400, 300);
+      setValidAreaHeight(videoHeight);
 
       docking.updateOnPositionChange_(video);
 
@@ -195,14 +213,20 @@ describes.repeated('', {
       const dock = stubDock();
       const video = createVideo();
 
+      const videoWidth = 300;
+      const videoHeight = 400;
+
       setValidAreaWidth();
+      setValidAreaHeight(videoHeight);
 
-      placeVideoLtwh(video, 0, -400, 300, 400);
+      placeVideoLtwh(video, 0, -400, videoWidth, videoHeight);
 
-      allowConsoleError(() => {
-        // user().error() expected
-        docking.updateOnPositionChange_(video);
-      });
+      // allowConsoleError(() => {
+      // (user().error() expected)
+      // For some reason, getLayoutBox() gets reset to (0, 0, 0, 0) on
+      // `allowConsoleError` callback
+      docking.updateOnPositionChange_(video);
+      // });
 
       expect(dock).to.not.have.been.called;
     });
@@ -230,10 +254,16 @@ describes.repeated('', {
       const dock = stubDock();
       const video = createVideo();
 
-      setValidAreaWidth();
       setScrollDirection(Direction.UP);
 
-      placeVideoLtwh(video, 0, -250, 400, 300, /* ratio */ 1 / 3);
+      const videoWidth = 400;
+      const videoHeight = 300;
+
+      setValidAreaWidth();
+      setValidAreaHeight(videoHeight);
+
+      placeVideoLtwh(
+          video, 0, -250, videoWidth, videoHeight, /* ratio */ 1 / 3);
 
       sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
 
@@ -242,24 +272,6 @@ describes.repeated('', {
       expect(dock).to.have.been.calledOnce;
     });
 
-    it('should dock if video is under bottom boundary', () => {
-      const videoTop = 650;
-      const slotHeight = 100;
-      const slotTop = bottomBoundary - slotHeight;
-
-      maybeCreateSlotElementLtwh(190, slotTop, 200, slotHeight);
-      const dock = stubDock();
-      const video = createVideo();
-
-      setValidAreaWidth();
-      placeVideoLtwh(video, 0, videoTop, 400, 300, /* ratio */ 1 / 3);
-      sandbox.stub(docking, 'getBottomEdge_').returns(bottomBoundary);
-      setScrollDirection(Direction.DOWN);
-
-      docking.updateOnPositionChange_(video);
-
-      expect(dock).to.have.been.calledOnce;
-    });
 
     it('should not dock if the video does not touch boundaries', () => {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
@@ -267,9 +279,13 @@ describes.repeated('', {
       const dock = stubDock();
       const video = createVideo();
 
+      const videoWidth = 400;
+      const videoHeight = 300;
+
       setValidAreaWidth();
+      setValidAreaHeight(videoHeight);
       setScrollDirection(Direction.UP);
-      placeVideoLtwh(video, 0, topBoundary + 1, 400, 300);
+      placeVideoLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
 
       docking.updateOnPositionChange_(video);
 
