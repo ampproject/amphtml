@@ -19,6 +19,7 @@ const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/hel
 
 module.exports = {
    'tapping "click me" link should show tooltip': async (page, name) => {
+    await page.tap('button.i-amphtml-story-button-move');
     await page.tap('a.title-small.center');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
@@ -26,6 +27,7 @@ module.exports = {
       /* loadingCompleteCss */ ['a.i-amphtml-story-tooltip']);
   },
   'tapping outside tooltip should hide it': async (page, name) => {
+    await page.tap('button.i-amphtml-story-button-move');
     await page.tap('a.title-small.center');
     await page.tap('.i-amphtml-story-tooltip-layer');
     await verifyCssElements(page, name,
@@ -33,12 +35,20 @@ module.exports = {
       /* loadingIncompleteCss */ null,
       /* loadingCompleteCss */ ['.i-amphtml-story-tooltip-layer.i-amphtml-hidden']);
   },
+  // 'tapping on tooltip should keep it open': async (page, name) => {
+  //   await page.tap('a.title-small.center');
+  //   await page.tap('a.i-amphtml-story-tooltip');
+  //   await verifyCssElements(page, name,
+  //     /* forbiddenCss */ null,
+  //     /* loadingIncompleteCss */ null,
+  //     /* loadingCompleteCss */ ['a.i-amphtml-story-tooltip']);
+  // },
   'tapping arrow when tooltip is open should navigate': async (page, name) => {
     await page.tap('a.title-small.center');
     await page.tap('button.i-amphtml-story-button-move');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ ['amp-story-page.cover[active]']);
+      /* loadingCompleteCss */ ['amp-story-page#cover[active]']);
   },
  };

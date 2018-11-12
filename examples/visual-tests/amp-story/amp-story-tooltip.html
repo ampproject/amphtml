@@ -42,18 +42,18 @@
       /**
        * On load, jump to the second page (tooltips cannot be in first page).
        */
-      document.addEventListener('ampstory:load', () => {
-        const storyEl = document.querySelector('amp-story');
+      // document.addEventListener('ampstory:load', () => {
+      //   const storyEl = document.querySelector('amp-story');
 
-        // Automatically jump to second page.
-        const switchPageEvent = new CustomEvent('ampstory:switchpage', {
-          detail: {
-            targetPageId: 'page-2',
-          }
-        });
+      //   // Automatically jump to second page.
+      //   const switchPageEvent = new CustomEvent('ampstory:switchpage', {
+      //     detail: {
+      //       targetPageId: 'page-2',
+      //     }
+      //   });
 
-        storyEl.dispatchEvent(switchPageEvent);
-      });
+      //   storyEl.dispatchEvent(switchPageEvent);
+      // });
     </script>
   </head>
 
