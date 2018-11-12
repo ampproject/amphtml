@@ -27,7 +27,7 @@
  * Also add the class 'i-amphtml-async-input'
  * See amp-recaptcha-input as an example.
  *
- * @abstract
+ * @interface
  */
 export class AsyncInput {
 
