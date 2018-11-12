@@ -71,7 +71,8 @@ export function _ping_(global, data) {
     if (data.enableIo) {
       global.context.observeIntersection(function(changes) {
         changes.forEach(function(c) {
-          dev().info('AMP-AD', 'Intersection: (WxH)%sx%s', c.intersectionRect.width,c.intersectionRect.height);
+          dev().info('AMP-AD', 'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
         });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
