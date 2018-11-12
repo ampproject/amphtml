@@ -4344,7 +4344,7 @@ const ReplaceSkuProrationModeMapping = {
 class PayStartFlow {
   /**
    * @param {*} deps
-   * @param {string|../api/subscriptions.SubscriptionRequest} skuOrSubscriptionRequest
+   * @param {*} skuOrSubscriptionRequest
    */
   constructor(deps, skuOrSubscriptionRequest) {
     /** @private @const {*} */
@@ -9085,7 +9085,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-    
+
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
