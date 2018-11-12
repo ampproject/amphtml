@@ -56,10 +56,11 @@ The `amp-script` component allows you to render widgets and other UI using custo
 
 ```js
 // hello-world.js
-const button = document.getElementById('hello')
+const button = document.getElementById('hello');
 button.addEventListener('click', () => {
   const el = document.createElement('h1');
   el.textContent = 'Hello World!';
+  // `document.body` is effectively the <amp-script> element.
   document.body.appendChild(el);
 });
 ```
