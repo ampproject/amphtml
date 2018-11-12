@@ -79,7 +79,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     } else if (urlService.parse(win.location.href).origin ==
       urlService.parse(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
-        return install(this.win, src);
+        return install(this.win, src, this.element);
       });
     } else {
       this.user().error(TAG,
@@ -290,16 +290,20 @@ class UrlRewriter_ {
  * Installs the service worker at src via direct service worker installation.
  * @param {!Window} win
  * @param {string} src
+ * @param {Element} element
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
-function install(win, src) {
+function install(win, src, element) {
   return win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
     sendAmpScriptToSwOnFirstVisit(registration, win);
-    prefetchOutgoingLinks(registration, win);
+    // prefetching outgoing links should be opt in.
+    if (element.hasAttribute('data-prefetch')) {
+      prefetchOutgoingLinks(registration, win);
+    }
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);

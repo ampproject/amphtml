@@ -183,6 +183,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should postMessage all a[rel=prefetch] scripts used to'
     + ' service worker for prefetching', () => {
     const install = doc.createElement('div');
+    install.setAttribute('data-prefetch', true);
     container.appendChild(install);
     install.getAmpDoc = () => ampdoc;
     install.setAttribute('src', 'https://example.com/sw.js');
