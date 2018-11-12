@@ -28,6 +28,7 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
   let storeService;
   let fakePage;
   let clickableEl;
+  let fakeCover;
 
   beforeEach(() => {
     win = env.win;
@@ -49,9 +50,11 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
 
+    fakeCover = win.document.createElement('amp-story-page');
     fakePage = win.document.createElement('amp-story-page');
     addAttributesToElement(fakePage, {'active': ''});
 
+    parentEl.appendChild(fakeCover);
     parentEl.appendChild(fakePage);
 
     tooltip = new AmpStoryTooltip(win, parentEl);
@@ -69,8 +72,8 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
 
-    // Children in parentEl: fakePage and tooltip overlay.
-    expect(parentEl.childElementCount).to.equal(2);
+    // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
+    expect(parentEl.childElementCount).to.equal(3);
   });
 
   it('should show the tooltip on store property update', () => {
@@ -111,7 +114,9 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
   it('should navigate when tooltip is open and user clicks on arrow', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
-    const fakeNavCall = sandbox.stub(tooltip, 'onNavigationalClick_');
+
+    const nextPageSpy = sandbox.spy();
+    parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
     const rightButton = tooltip.tooltipOverlayEl_
         .querySelector('.i-amphtml-story-tooltip-layer-nav-button' +
@@ -119,7 +124,7 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
 
     rightButton.dispatchEvent(new Event('click'));
 
-    expect(fakeNavCall).to.have.been.calledOnce;
+    expect(nextPageSpy).to.have.been.calledOnce;
   });
 
   it('should navigate to previous page when clicked on right arrow and ' +
@@ -128,16 +133,16 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_RTL, true);
     storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
 
-    const fakeNavCall = sandbox.stub(tooltip, 'onNavigationalClick_');
+    const previousPageSpy = sandbox.spy();
+    parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
+
     const rightButton = tooltip.tooltipOverlayEl_
         .querySelector('.i-amphtml-story-tooltip-layer-nav-button' +
           '.i-amphtml-story-tooltip-nav-button-right');
 
     rightButton.dispatchEvent(new Event('click'));
 
-    expect(fakeNavCall).to.be.calledWith(
-        sinon.match(event => event.type == 'click'),
-        EventType.PREVIOUS_PAGE);
+    expect(previousPageSpy).to.have.been.calledOnce;
   });
 
   it('should append icon when icon attribute is present', () => {
@@ -149,7 +154,8 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
 
     expect(tooltipIconEl).to.have.attribute('src');
-    expect(tooltipIconEl['src']).to.equal('http://localhost:9876/my-icon');
+    expect(tooltipIconEl.getAttribute['src'])
+        .to.equal('http://localhost:9876/my-icon');
   });
 
   it('should find invalid urls', () => {
@@ -185,5 +191,14 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
         .querySelector('.i-amphtml-tooltip-text');
 
     expect(tooltipTextEl.textContent).to.equal('localhost');
+  });
+
+  it('should not allow clickable items on the first page', () => {
+    fakeCover.appendChild(clickableEl);
+
+    allowConsoleError(() => { expect(() => {
+      storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
+    }).to.throw();
+    });
   });
 });
