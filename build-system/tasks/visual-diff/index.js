@@ -548,7 +548,7 @@ async function visualDiff() {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
-  if (argv.skip) {
+  if (argv.empty) {
     const browser = await launchBrowser();
     const page = await newPage(browser);
     await createEmptyBuild(page);
