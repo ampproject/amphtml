@@ -118,6 +118,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
