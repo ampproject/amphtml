@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.37 */
+/** Version: 0.1.22.38 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1714,6 +1714,266 @@ var activityPorts_11 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/** @enum {number} */
+const AnalyticsEvent = {
+  UNKNOWN: 0,
+  IMPRESSION_PAYWALL: 1,
+  ACTION_SUBSCRIBE: 1000,
+  ACTION_PAYMENT_COMPLETE: 1001,
+  ACTION_ACCOUNT_CREATED: 1002,
+  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
+  EVENT_PAYMENT_FAILED: 2000,
+};
+
+class AnalyticsContext {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.transactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?string} */
+    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.utmSource_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+
+    /** @private {?string} */
+    this.utmMedium_ = (data[6] == null) ? null : data[6];
+
+    /** @private {?string} */
+    this.sku_ = (data[7] == null) ? null : data[7];
+
+    /** @private {?boolean} */
+    this.readyToPay_ = (data[8] == null) ? null : data[8];
+
+    /** @private {!Array<string>} */
+    this.label_ = data[9] || [];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getEmbedderOrigin() {
+    return this.embedderOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setEmbedderOrigin(value) {
+    this.embedderOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getTransactionId() {
+    return this.transactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setTransactionId(value) {
+    this.transactionId_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getReferringOrigin() {
+    return this.referringOrigin_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setReferringOrigin(value) {
+    this.referringOrigin_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmSource() {
+    return this.utmSource_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmSource(value) {
+    this.utmSource_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmCampaign() {
+    return this.utmCampaign_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmCampaign(value) {
+    this.utmCampaign_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUtmMedium() {
+    return this.utmMedium_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUtmMedium(value) {
+    this.utmMedium_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getReadyToPay() {
+    return this.readyToPay_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setReadyToPay(value) {
+    this.readyToPay_ = value;
+  }
+
+  /**
+   * @return {!Array<string>}
+   */
+  getLabel() {
+    return this.label_;
+  }
+
+  /**
+   * @param {!Array<string>} value
+   */
+  setLabel(value) {
+    this.label_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsContext',  // message type
+      this.embedderOrigin_,  // field 1 - embedder_origin
+      this.transactionId_,  // field 2 - transaction_id
+      this.referringOrigin_,  // field 3 - referring_origin
+      this.utmSource_,  // field 4 - utm_source
+      this.utmCampaign_,  // field 5 - utm_campaign
+      this.utmMedium_,  // field 6 - utm_medium
+      this.sku_,  // field 7 - sku
+      this.readyToPay_,  // field 8 - ready_to_pay
+      this.label_,  // field 9 - label
+    ];
+  }
+}
+
+
+class AnalyticsRequest {
+ /**
+  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?AnalyticsContext} */
+    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
+        AnalyticsContext(data[1]);
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!AnalyticsContext} value
+   */
+  setContext(value) {
+    this.context_ = value;
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
+   */
+  toArray() {
+    return [
+      'AnalyticsRequest',  // message type
+      this.context_ ? this.context_.toArray() : [], // field 1 - context
+      this.event_,  // field 2 - event
+    ];
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * Throws an error if the first argument isn't trueish.
@@ -3186,6 +3446,12 @@ class Entitlement {
     if (!product) {
       return false;
     }
+    // Wildcard allows this product.
+    const eq = product.indexOf(':');
+    if (eq != -1 &&
+        this.products.includes(product.substring(0, eq + 1) + '*')) {
+      return true;
+    }
     return this.products.includes(product);
   }
 
@@ -4013,7 +4279,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.37',
+    '_client': 'SwG 0.1.22.38',
   });
 }
 
@@ -4049,266 +4315,6 @@ function cacheParam(cacheKey) {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-/** @enum {number} */
-const AnalyticsEvent = {
-  UNKNOWN: 0,
-  IMPRESSION_PAYWALL: 1,
-  ACTION_SUBSCRIBE: 1000,
-  ACTION_PAYMENT_COMPLETE: 1001,
-  ACTION_ACCOUNT_CREATED: 1002,
-  ACTION_ACCOUNT_ACKNOWLEDGED: 1003,
-  EVENT_PAYMENT_FAILED: 2000,
-};
-
-class AnalyticsContext {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
-
-    /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
-
-    /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
-
-    /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
-
-    /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
-
-    /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
-
-    /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
-
-    /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
-  }
-
-  /**
-   * @return {?string}
-   */
-  getEmbedderOrigin() {
-    return this.embedderOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setEmbedderOrigin(value) {
-    this.embedderOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getTransactionId() {
-    return this.transactionId_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setTransactionId(value) {
-    this.transactionId_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getReferringOrigin() {
-    return this.referringOrigin_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setReferringOrigin(value) {
-    this.referringOrigin_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmSource() {
-    return this.utmSource_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmSource(value) {
-    this.utmSource_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmCampaign() {
-    return this.utmCampaign_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmCampaign(value) {
-    this.utmCampaign_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getUtmMedium() {
-    return this.utmMedium_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setUtmMedium(value) {
-    this.utmMedium_ = value;
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.sku_;
-  }
-
-  /**
-   * @param {string} value
-   */
-  setSku(value) {
-    this.sku_ = value;
-  }
-
-  /**
-   * @return {?boolean}
-   */
-  getReadyToPay() {
-    return this.readyToPay_;
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setReadyToPay(value) {
-    this.readyToPay_ = value;
-  }
-
-  /**
-   * @return {!Array<string>}
-   */
-  getLabel() {
-    return this.label_;
-  }
-
-  /**
-   * @param {!Array<string>} value
-   */
-  setLabel(value) {
-    this.label_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsContext',  // message type
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-    ];
-  }
-}
-
-
-class AnalyticsRequest {
- /**
-  * @param {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>=} data
-  */
-  constructor(data = []) {
-
-    /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
-
-    /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
-  }
-
-  /**
-   * @return {?AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!AnalyticsContext} value
-   */
-  setContext(value) {
-    this.context_ = value;
-  }
-
-  /**
-   * @return {?AnalyticsEvent}
-   */
-  getEvent() {
-    return this.event_;
-  }
-
-  /**
-   * @param {!AnalyticsEvent} value
-   */
-  setEvent(value) {
-    this.event_ = value;
-  }
-
-  /**
-   * @return {!Array<(string|boolean|number|null|!Array<(string|boolean|number|null)>)>}
-   */
-  toArray() {
-    return [
-      'AnalyticsRequest',  // message type
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-    ];
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
  * The Flow goes like this:
  * a. Start Payments
@@ -4319,15 +4325,28 @@ class AnalyticsRequest {
  * In other words, Flow = Payments + Account Creation.
  */
 
+
+/**
+ * String values input by the publisher are mapped to the number values.
+ * @type {!Object<string, number>}
+ */
+const ReplaceSkuProrationModeMapping = {
+  // The replacement takes effect immediately, and the remaining time will
+  // be prorated and credited to the user. This is the current default
+  // behavior.
+  'IMMEDIATE_WITH_TIME_PRORATION': 1,
+};
+
+
 /**
  * The flow to initiate payment process.
  */
 class PayStartFlow {
   /**
    * @param {*} deps
-   * @param {string} sku
+   * @param {*} skuOrSubscriptionRequest
    */
-  constructor(deps, sku) {
+  constructor(deps, skuOrSubscriptionRequest) {
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -4340,8 +4359,10 @@ class PayStartFlow {
     /** @private @const {*} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {string} */
-    this.sku_ = sku;
+    /** @private @const {*} */
+    this.subscriptionRequest_ =
+        typeof skuOrSubscriptionRequest == 'string' ?
+            {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
 
     /** @private @const {*} */
     this.analyticsService_ = deps.analytics();
@@ -4352,21 +4373,30 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start() {
+    // Add the 'publicationId' key to the subscriptionRequest_ object.
+    const swgPaymentRequest =
+        Object.assign({}, this.subscriptionRequest_, {
+          'publicationId': this.pageConfig_.getPublicationId()});
+
+    // Map the proration mode to the enum value (if proration exists).
+    const prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
+    if (prorationMode) {
+      swgPaymentRequest.replaceSkuProrationMode =
+          ReplaceSkuProrationModeMapping[prorationMode];
+    }
+
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, {
-      'sku': this.sku_,
-    });
-    this.analyticsService_.setSku(this.sku_);
+    this.deps_.callbacks().triggerFlowStarted(
+        SubscriptionFlows.SUBSCRIBE, this.subscriptionRequest_);
+    // TODO(chenshay): Create analytics for 'replace subscription'.
+    this.analyticsService_.setSku(this.subscriptionRequest_.skuId);
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_SUBSCRIBE);
     this.payClient_.start({
       'apiVersion': 1,
       'allowedPaymentMethods': ['CARD'],
       'environment': 'PRODUCTION',
       'playEnvironment': 'PROD',
-      'swg': {
-        'publicationId': this.pageConfig_.getPublicationId(),
-        'skuId': this.sku_,
-      },
+      'swg': swgPaymentRequest,
       'i': {
         'startTimeMs': Date.now(),
         'googleTransactionId': this.analyticsService_.getTransactionId(),
@@ -4402,13 +4432,10 @@ class PayCompleteFlow {
           deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
         } else {
           deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+          deps.jserror().error('Pay failed', reason);
         }
         throw reason;
       });
-    });
-    deps.activities().onRedirectError(() => {
-      deps.analytics().addLabels(['redirect']);
-      deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
     });
   }
 
@@ -6462,6 +6489,46 @@ function irtpStringToBoolean(value) {
  */
 
 
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables GPay API in SwG.
+   * Cleanup issue: #406.
+   */
+  GPAY_API: 'gpay-api',
+
+  /**
+   * Enables GPay native support.
+   * Cleanup issue: #441.
+   */
+  GPAY_NATIVE: 'gpay-native',
+
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+};
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -6857,6 +6924,113 @@ class XhrFetcher {
     });
     return this.xhr_.fetch(url, init).then(response => response.json());
   }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ */
+class JsError {
+
+  /**
+   * @param {*} doc
+   */
+  constructor(doc) {
+    /** @private @const {*} */
+    this.doc_ = doc;
+
+    /** @private @const {!Promise} */
+    this.microTask_ = Promise.resolve();
+  }
+
+  /**
+   * @param {...*} var_args
+   * @return {!Promise}
+   */
+  error(var_args) {
+    const args = Array.prototype.slice.call(arguments, 0);
+    return this.microTask_.then(() => {
+      const error = createErrorVargs.apply(null, args);
+      if (error.reported) {
+        return;
+      }
+      const img = this.doc_.getWin().document.createElement('img');
+      img.src =
+          'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
+          '?error=' + encodeURIComponent(String(error)) +
+          '&script=' + encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
+          '&line=' + (error.lineNumber || 1) +
+          '&trace=' + encodeURIComponent(error.stack);
+      // Appending this image to DOM is not necessary.
+      error.reported = true;
+    });
+  }
+}
+
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = duplicateErrorIfNecessary(arg);
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error}
+ */
+function duplicateErrorIfNecessary(error) {
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
+    return error;
+  }
+
+  const {message, stack} = error;
+  const e = new Error(message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = stack;
+  return e;
 }
 
 /**
@@ -7338,40 +7512,6 @@ class LoginNotificationApi {
     });
   }
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-};
 
 /**
  * @license
@@ -8945,7 +9085,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-    
+
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
@@ -11920,6 +12060,9 @@ class ConfiguredRuntime {
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
 
+    /** @private @const {!JsError} */
+    this.jserror_ = new JsError(this.doc_);
+
     /** @private @const {!Fetcher} */
     this.fetcher_ = opt_integr && opt_integr.fetcher ||
         new XhrFetcher(this.win_);
@@ -11961,6 +12104,13 @@ class ConfiguredRuntime {
     this.payClient_.preconnect(preconnect);
 
     injectStyleSheet(this.win_.document, CSS);
+
+    // Report redirect errors if any.
+    this.activityPorts_.onRedirectError(error => {
+      this.analyticsService_.addLabels(['redirect']);
+      this.analyticsService_.logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+      this.jserror_.error('Redirect error', error);
+    });
   }
 
   /** @override */
@@ -11976,6 +12126,11 @@ class ConfiguredRuntime {
   /** @override */
   pageConfig() {
     return this.pageConfig_;
+  }
+
+  /** @override */
+  jserror() {
+    return this.jserror_;
   }
 
   /** @override */
@@ -12179,9 +12334,13 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  subscribe(sku) {
+  subscribe(skuOrSubscriptionRequest) {
+    if (typeof skuOrSubscriptionRequest != 'string' &&
+        !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)) {
+      throw new Error('Not yet launched!');
+    }
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, sku).start();
+      return new PayStartFlow(this, skuOrSubscriptionRequest).start();
     });
   }
 
