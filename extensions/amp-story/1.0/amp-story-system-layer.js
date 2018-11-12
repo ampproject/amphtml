@@ -521,7 +521,7 @@ export class SystemLayer {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    if ([UIType.SCROLL, UIType.DESKTOP].includes(uiState)) {
+    if (uiState === UIType.DESKTOP) {
       this.buildSharePill_();
     }
 
