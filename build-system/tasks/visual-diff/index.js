@@ -548,7 +548,7 @@ async function visualDiff() {
     log('fatal', `Failed to start a web server: ${reason}`);
   });
 
-  if (argv.skip) {
+  if (argv.empty) {
     const browser = await launchBrowser();
     const page = await newPage(browser);
     await createEmptyBuild(page);
@@ -594,7 +594,7 @@ gulp.task(
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
         'verify_status':
           '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
-        'skip': '  Creates a dummy Percy build with only a blank snapshot',
+        'empty': '  Creates a dummy Percy build with only a blank snapshot',
         'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
