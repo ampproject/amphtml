@@ -42,7 +42,7 @@ limitations under the License.
 The `amp-script` component allows you to render widgets and other UI using custom third-party JavaScript, e.g. a React component.
 
 {% call callout('Important', type='caution') %}
-`amp-script` is in active development and under [experimental availability](https://www.ampproject.org/docs/reference/experimental.html). It's subject to breaking API changes and should not be used in production.
+`amp-script` is in active development and under [experimental availability](https://www.ampproject.org/docs/reference/experimental.html). It's subject to breaking API changes and should not yet be used in production.
 {% endcall %}
 
 ### A simple example
