@@ -257,6 +257,7 @@ function createElementRules_() {
         },
       },
       'state': null,
+      'isContainer': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,

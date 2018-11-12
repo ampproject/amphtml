@@ -72,7 +72,7 @@ let BoundElementDef;
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
-  'AMP-LIST': ['state'],
+  'AMP-LIST': ['state', 'isContainer'],
   'AMP-SELECTOR': ['selected'],
 });
 
