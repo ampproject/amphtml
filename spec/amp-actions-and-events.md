@@ -356,18 +356,6 @@ event.response</pre></td>
   </tr>
 </table>
 
-### amp-bind
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>refresh</code></td>
-    <td>Refetch <code>&lt;amp-state></code> json data <code>src</code>.</td>
-  </tr>
-</table>
-
 ### amp-bodymovin-animation
 <table>
   <tr>
@@ -497,6 +485,18 @@ event.response</pre></td>
   <tr>
     <td><code>toggle</code></td>
     <td>Toggles the state of the sidebar.</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refetches data at the `src` attribute while ignoring browser cache.</td>
   </tr>
 </table>
 
