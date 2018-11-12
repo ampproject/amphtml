@@ -324,6 +324,7 @@ tags: {  # <amp-story-bookend>
   tag_name: "AMP-STORY-BOOKEND"
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
+  descendant_tag_list: "amp-story-bookend-allowed-descendants"
   attrs: {
     name: "layout"
     mandatory: true
@@ -336,8 +337,25 @@ tags: {  # <amp-story-bookend>
       protocol: "https"
     }
   }
-  child_tags: {
-    mandatory_num_child_tags: 0
+}
+descendant_tag_list: {
+  name: "amp-story-bookend-allowed-descendants"
+  tag: "SCRIPT"
+}
+tags: {  # amp-story-bookend (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-bookend extension .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-BOOKEND"
+  unique: true
+  mandatory_last_child: true
+  siblings_disallowed: true
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
 }
 tags: {  # amp-story-consent (json)
