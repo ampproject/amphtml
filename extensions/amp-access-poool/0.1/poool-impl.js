@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listenFor} from '../../../src/iframe-helper';
+import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-access-poool';
 
@@ -97,8 +98,8 @@ export class PooolVendor {
     this.iframe_.setAttribute('id', 'poool-iframe');
     this.iframe_.setAttribute('scrolling', 'no');
     this.iframe_.setAttribute('frameborder', '0');
-    this.iframe_.setAttribute('width', '100%');
-    this.iframe_.setAttribute('height', '500px');
+    setStyle(this.iframe_, 'height', '500px');
+    setStyle(this.iframe_, 'width', '100%');
 
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
 
@@ -166,6 +167,7 @@ export class PooolVendor {
     return urlPromise.then(url => {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
+      listenFor(this.iframe_, 'resize', this.onResize_.bind(this));
       this.pooolContainer_.appendChild(this.iframe_);
     });
   }
@@ -174,19 +176,19 @@ export class PooolVendor {
    * @private
    */
   onRelease_() {
-    const articlePreview = document.getElementById('poool-access-preview');
-    const articleContent = document.getElementById('poool-access-content');
+    const articlePreview = document.querySelector('[poool-access-preview]');
     articlePreview.setAttribute('amp-access-hide', '');
-    articleContent.setAttribute('amp-access-poool', '');
-    // console.log('adapter : ', this.accessSource_.adapter_);
-    // setTimeout(() => {this.accessSource_.runAuthorization();}, 3000);
-    // this.authorize();
+    const articleContent = document.querySelector('[poool-access-content]');
+    articleContent.removeAttribute('amp-access-hide');
   }
 
-  // giveAccessOnPooolRelease_() {
-  //   const articleBody = document.getElementById('poool-access');
-  //   articleBody.setAttribute('amp-access-poool', '');
-  // }
+  /**
+   * @private
+   * @param {Event} e
+   */
+  onResize_(e) {
+    setStyle(this.iframe_, 'height', e.height);
+  }
 
   /**
    * @return {!Promise}
