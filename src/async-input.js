@@ -24,7 +24,7 @@
  * by reCAPTCHA to request tokens for the form.
  *
  * NOTE: Elements that implemented AsyncInput must
- * Also add the class 'i-amphtml-async-input'
+ * Also add and follow the other exported constants.
  * See amp-recaptcha-input as an example.
  *
  * @interface
@@ -38,4 +38,25 @@ export class AsyncInput {
    */
   getValue() {}
 }
+
+/**
+ * Classes
+ *
+ * Components implementing the AsyncInput,
+ * are expected to add the following classes
+ * at the appropriate time.
+ *
+ * @constant {!Object<string, string>}
+ */
+export const AsyncInputClasses = {
+  /**
+   * i-amphtml-async-input
+   *
+   * Required base class that must be added to the async-input
+   * element on buildCallback or layoutCallback.
+   * This will be used by other amp components to find
+   * and use async-input elements.
+   */
+  ASYNC_INPUT: 'i-amphtml-async-input',
+};
 

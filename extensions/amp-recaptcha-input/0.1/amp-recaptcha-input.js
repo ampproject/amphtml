@@ -20,6 +20,7 @@
  * recaptcha tokens
  */
 
+import {AsyncInputClasses} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
@@ -33,9 +34,8 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-/**
- * @implements {../../../src/async-input.AsyncInput}
- */
+
+/** @implements {../../../src/async-input.AsyncInput} */
 export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -79,7 +79,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     return this.mutateElement(() => {
       toggle(this.element);
       // Add the required AsyncInput class
-      this.element.classList.add('i-amphtml-async-input');
+      this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
       /**
        * We are applying styles here, to minizime the amp.css file.
        * These styles will create an in-place element, that is 1x1,
@@ -125,7 +125,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
    * Will be an override of AMP.AsyncInput
    * @override
    * @return {!Promise<string>}
-
+   */
   getValue() {
 
     if (this.sitekey_ && this.action_) {
@@ -138,7 +138,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         ' and data-action attribute'
     ));
   }
-  */
 }
 
 AMP.extension(TAG, '0.1', AMP => {
