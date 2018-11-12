@@ -185,6 +185,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return win;
   }
 
+  it('limit replacement params size', () => {
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().initialize();
+      const variables =
+          Object.keys(replacements.getVariableSource().replacements_);
+      // Restrict the number of replacement params to globalVaraibleSource
+      // Please consider adding the logic to amp-analytics instead.
+      // Please contact @lannka or @zhouyx if the test fail.
+      expect(variables.length).to.equal(69);
+    });
+  });
+
   it('should replace RANDOM', () => {
     return expandUrlAsync('ord=RANDOM?').then(res => {
       expect(res).to.match(/ord=(\d+(\.\d+)?)\?$/);
