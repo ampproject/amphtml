@@ -878,14 +878,18 @@ describe('PinchRecognizer', () => {
 
   it('should ignore additional touches if eventing', () => {
     clock.tick(1);
-    recognizer.onTouchStart({touches:
+    let res = recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
       {clientX: 110, clientY: 120}]});
-    recognizer.onTouchMove({touches:
+    expect(res).to.equal(true);
+
+    res = recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
       {clientX: 120, clientY: 130}]});
-    // Once from touch move, once from acceptStart
-    gesturesMock.expects('signalEmit_').twice();
+    expect(res).to.equal(true);
+
+    gesturesMock.expects('signalEmit_').once();
+
     clock.tick(10);
     recognizer.acceptStart();
 
@@ -893,23 +897,26 @@ describe('PinchRecognizer', () => {
 
     // Trigger additional touch start; nothing should happen
     // for the additional touch
-    recognizer.onTouchStart({touches:
+    res = recognizer.onTouchStart({touches:
       [{clientX: 80, clientY: 70},
         {clientX: 120, clientY: 130},
         {clientX: 160, clientY: 160}]});
+    expect(res).to.equal(true);
 
     // Trigger additional touch move; nothing should happen since the
     // existing touches did not move.
-    recognizer.onTouchMove({touches:
+    res = recognizer.onTouchMove({touches:
       [{clientX: 80, clientY: 70},
         {clientX: 120, clientY: 130},
         {clientX: 160, clientY: 160}]});
+    expect(res).to.equal(true);
 
     // Trigger touch end; should not end since two touches are remaining
-    recognizer.onTouchEnd({touches:
+    res = recognizer.onTouchEnd({touches:
       [{clientX: 80, clientY: 70},
         {clientX: 120, clientY: 130}]});
 
+    clock.tick(50);
     // Additional touch start and touch move should not trigger a signal
     gesturesMock.expects('signalEnd_').never();
   });

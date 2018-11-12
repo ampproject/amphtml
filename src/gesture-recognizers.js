@@ -280,12 +280,14 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchStart(e) {
     const {touches} = e;
+    // If already eventing, ignore additional touches
+    if (this.eventing_ && touches && touches.length > 1) {
+      return true;
+    }
     if (touches && touches.length == 1) {
       this.startTime_ = Date.now();
       this.startX_ = touches[0].clientX;
       this.startY_ = touches[0].clientY;
-      return true;
-    } else if (this.eventing_ && touches && touches.length > 1) {
       return true;
     } else {
       return false;
@@ -761,9 +763,9 @@ export class PinchRecognizer extends GestureRecognizer {
       return true;
     }
     // If already in the middle of a pinch event, ignore additional touches.
-    // if (this.eventing_ && touches && touches.length > 2) {
-    //   return true;
-    // }
+    if (this.eventing_ && touches && touches.length > 2) {
+      return true;
+    }
     else if (touches && touches.length >= 2) {
       this.lastX1_ = touches[0].clientX;
       this.lastY1_ = touches[0].clientY;
@@ -789,7 +791,7 @@ export class PinchRecognizer extends GestureRecognizer {
           return false;
         }
       }
-      // Threshold not reached, continue listening but do not emit
+      // Pinch threshold not reached, continue listening but do not emit
       return true;
     } else {
       return false;
