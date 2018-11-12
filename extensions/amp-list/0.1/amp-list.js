@@ -664,6 +664,7 @@ export class AmpList extends AMP.BaseElement {
     if (overflowElement) {
       toggle(overflowElement, false);
     }
+    this.element.classList.add('i-amphtml-layout-container');
     this.element.setAttribute('layout', 'container');
   }
 
