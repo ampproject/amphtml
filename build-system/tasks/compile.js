@@ -368,6 +368,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         ],
         entry_point: entryModuleFilenames,
         module_resolution: 'NODE',
+        process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
         only_closure_dependencies: true,
