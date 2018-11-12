@@ -297,17 +297,15 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    // If already eventing, ignore additional touches
-    if (this.eventing_ && touches && touches.length > 1) {
-      return true;
-    }
-    if (touches && touches.length == 1) {
+    if (touches && touches.length >= 1) {
       const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
+        // If already eventing, always emit new coordinates
         this.emit_(false, false, e);
       } else {
+        // Figure out whether or not we should start eventing
         const dx = Math.abs(x - this.startX_);
         const dy = Math.abs(y - this.startY_);
         // Swipe is penalized slightly since it's one of the least demanding
@@ -762,18 +760,16 @@ export class PinchRecognizer extends GestureRecognizer {
     if (touches && touches.length == 1) {
       return true;
     }
-    // If already in the middle of a pinch event, ignore additional touches.
-    if (this.eventing_ && touches && touches.length > 2) {
-      return true;
-    }
     else if (touches && touches.length >= 2) {
       this.lastX1_ = touches[0].clientX;
       this.lastY1_ = touches[0].clientY;
       this.lastX2_ = touches[1].clientX;
       this.lastY2_ = touches[1].clientY;
       if (this.eventing_) {
+        // If eventing, always emit gesture with new coordinates
         this.emit_(false, false, e);
       } else {
+        // Figure out whether or not to start eventing
         const dx1 = this.lastX1_ - this.startX1_;
         const dy1 = this.lastY1_ - this.startY1_;
         const dx2 = this.lastX2_ - this.startX2_;

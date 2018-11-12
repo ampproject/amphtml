@@ -410,7 +410,7 @@ describe('SwipeXYRecognizer', () => {
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').once();
+    gesturesMock.expects('signalEmit_').twice();
 
     clock.tick(10);
     let res = recognizer.onTouchMove(event);
@@ -888,7 +888,7 @@ describe('PinchRecognizer', () => {
       {clientX: 120, clientY: 130}]});
     expect(res).to.equal(true);
 
-    gesturesMock.expects('signalEmit_').once();
+    gesturesMock.expects('signalEmit_').twice();
 
     clock.tick(10);
     recognizer.acceptStart();
