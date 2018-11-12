@@ -146,7 +146,6 @@ module.exports = function(context) {
             }
             let argsReplacement = argFixer.getSanitizedArg() + origVarArgs + ', ' +
                 argFixer.getRefsAsArgumentsString();
-            console.log(argsReplacement)
             return fixer.replaceTextRange(
                 [argToEval.start, lastArgToken.end],
                 argsReplacement
@@ -161,7 +160,6 @@ module.exports = function(context) {
 function getVarArgs(context, args) {
   return ',' + args.map(arg => {
     return context.getTokens(arg).map(token => {
-      console.log(token.value);
       return token.value;
     }).join('');
   }).join(',');
@@ -174,11 +172,13 @@ class ArgFixer {
     this.sanitizedStr = '';
     this.refs = [];
     this.enteredParen = 0;
+    this.templateValue = '';
+    this.inTemplateEval = false;
     console.table(this.tokens);
   }
 
   getSanitizedArg() {
-    return '\'' + this.sanitizedStr.replace(/'/g, '\\\'') + '\'';
+    return '\'' + this.sanitizedStr + '\'';
   }
 
   appendToSanitizedStr(str) {
@@ -217,8 +217,16 @@ class ArgFixer {
   }
 
   chompString() {
-    // We remove the quotes surrounding the string.
-    this.appendToSanitizedStr(this.cur().value.slice(1, -1));
+   // We remove the quotes surrounding the string.
+    let strValue = this.cur().value.slice(1, -1);
+    // If the string literal was using double quotes and there
+    // are any unescaped single quotes, we will need to escape
+    // them as we will be placing this string eventually into
+    // a single quote string literal.
+    if (this.cur().value[0] === '"') {
+      strValue = strValue.replace(/([^'\\]*(?:\\.[^'\\]*)*)'/g, "$1\\'");
+    }
+    this.appendToSanitizedStr(strValue);
     this.next();
   }
 
@@ -260,36 +268,52 @@ class ArgFixer {
   }
 
   chompTemplateValueTilEnd() {
-    let templateValue = '';
-    let inTemplateEval = false;
-
     while (!this.isTemplateEnd()) {
-      for (let i = 0; i < this.cur().value.length; i++) {
-
-        // If we're at the beginning of a Token and the first char is
-        // one of these then this is either a closing tick of a template
-        // or a closing of an interpolation segment.
-        if (i === 0 &&
-            (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
-          inTemplateEval = false;
-          continue;
-        }
-
-        // The start of an interpolation segment. It means we need to start
-        // collecting a new ref.
-        if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
-          inTemplateEval = true;
-          this.startNewRef();
-          break;
-        }
-
-        if (!inTemplateEval) {
-          this.appendToSanitizedStr(this.cur().value[i]);
-        } else {
-          this.addToCurRef(this.cur().value[i]);
-        }
-      }
+      this.chompTemplate();
       this.next()
+    }
+    // Consume the last template Node as well.
+    this.chompTemplate();
+    this.templateValue = '';
+    this.inTemplateEval = false;
+  }
+
+  chompTemplate() {
+    for (let i = 0; i < this.cur().value.length; i++) {
+
+      // If we're at the beginning of a Token and the first char is
+      // one of '}' or '`' then this is either a closing tick of a template
+      // or a closing of an interpolation segment.
+      if (i === 0 &&
+          (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
+        this.inTemplateEval = false;
+        continue;
+      }
+
+      // The start of an interpolation segment. It means we need to start
+      // collecting a new ref.
+      if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
+        this.inTemplateEval = true;
+        this.startNewRef();
+        break;
+      }
+
+      // This is the end of an Template and we can now break out. We don't
+      // need to append the backtick.
+      if (this.isTemplateEnd() &&this.cur().value[i] === '`' &&
+          this.cur().value.length - 1 === i) {
+        this.inTemplateEval = false;
+        break;
+      }
+
+      if (!this.inTemplateEval) {
+        // Since we're going to be transforming this template string
+        // into a single quote string literal, we need to escape single quotes.
+        const str = this.cur().value[i] === '\'' ? '\\\'': this.cur().value[i];
+        this.appendToSanitizedStr(str);
+      } else {
+        this.addToCurRef(this.cur().value[i]);
+      }
     }
   }
 
