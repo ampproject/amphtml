@@ -293,7 +293,9 @@ export class AmpAnimation extends AMP.BaseElement {
     this.triggered_ = true;
     this.hasPositionObserver_ = !!invocation.caller &&
       invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
-    return this.createRunnerIfNeeded_().then(() => {
+    const viewportData = (invocation && invocation.event) ?
+      invocation.event.additionalViewportData : null;
+    return this.createRunnerIfNeeded_(null, viewportData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -408,12 +410,14 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise}
    * @private
    */
-  createRunnerIfNeeded_(opt_args) {
+  createRunnerIfNeeded_(opt_args, opt_viewportData) {
     if (!this.runnerPromise_) {
-      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+      this.runnerPromise_ = this.createRunner_(
+          opt_args, opt_viewportData).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -447,10 +451,11 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_(opt_args) {
+  createRunner_(opt_args, opt_viewportData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
@@ -473,7 +478,8 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, this.hasPositionObserver_, args);
+      return builder.createRunner(configJson,
+          this.hasPositionObserver_, args, opt_viewportData);
     });
   }
 

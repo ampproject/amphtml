@@ -18,8 +18,11 @@ import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ExpansionOptions} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '../../../../testing/test-helper';
 import {Services} from '../../../../src/services';
-import {Transport} from '../transport';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 
@@ -47,14 +50,16 @@ describes.realWin('amp-analytics', {
   },
 }, function(env) {
   let win, doc;
-  let sendRequestSpy;
   let ampdoc;
+  let requestVerifier;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    sendRequestSpy = sandbox.stub(Transport, 'sendRequestUsingImage');
+    const wi = mockWindowInterface(env.sandbox);
+    wi.getLocation.returns(win.location);
+    requestVerifier = new ImagePixelVerifier(wi);
   });
 
 
@@ -149,10 +154,8 @@ describes.realWin('amp-analytics', {
             analytics.buildCallback();
             yield analytics.layoutCallback();
 
-            // Wait for event queue to clear and reset sendRequestSpy
-            // to avoid pageView pings.
+            // Wait for event queue to clear.
             yield macroTask();
-            sendRequestSpy.resetHistory();
 
             analytics.handleEvent_({
               request: name,
@@ -160,8 +163,8 @@ describes.realWin('amp-analytics', {
               vars: Object.create(null),
             });
             yield macroTask();
-            expect(sendRequestSpy).to.be.calledOnce;
-            let url = sendRequestSpy.args[0][1];
+            expect(requestVerifier.hasRequestSent()).to.be.true;
+            let url = requestVerifier.getLastRequestUrl();
 
             const vendorData = VENDOR_REQUESTS[vendor];
             if (!vendorData) {
