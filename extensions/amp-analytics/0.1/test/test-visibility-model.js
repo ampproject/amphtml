@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../../src/utils/promise';
 import {VisibilityModel} from '../visibility-model';
+
+const {fail} = assert;
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;
@@ -1120,5 +1123,85 @@ describes.sandboxed('VisibilityModel', {}, () => {
       yield vh.eventPromise_;
       expect(spy).to.be.calledTwice;
     });
+  });
+
+  describe('reportWhen accumulation', () => {
+    it('should not resolve immediately when zero visibility is permitted',
+        () => {
+          let visibility = 0;
+          const vm = new VisibilityModel({
+            reportWhen: 'documentExit',
+            totalTimeMin: 0,
+            continuousTimeMin: 0,
+          }, () => visibility);
+
+          vm.onTriggerEvent(() => {
+            fail('event should not trigger before reportWhen');
+          });
+
+          vm.update();
+
+          visibility = 0.5;
+          vm.update();
+        });
+
+    const shouldResolveTestSpecs = [
+      {reportWhen: 'documentExit', totalTimeMin: 0, continuousTimeMin: 0},
+      {reportWhen: 'documentExit', totalTimeMin: 0, continuousTimeMin: 0,
+        visiblePercentageMin: 50},
+    ];
+    for (const i in shouldResolveTestSpecs) {
+      it(`should resolve on reportWhen when visibility is 0 if specified, ${i}`,
+          () => {
+            const vm = new VisibilityModel(shouldResolveTestSpecs[i], () => 0);
+            vm.setReady(true);
+
+            const spy = sandbox.spy();
+            vm.onTriggerEvent(spy);
+
+            const deferred = new Deferred();
+            const createReportReadyPromise = () => deferred.promise;
+            vm.setReportReady(createReportReadyPromise);
+
+            vm.update();
+            expect(spy).to.not.be.called;
+
+            // Note that visibility is zero.
+            deferred.resolve();
+            expect(spy).to.be.calledOnce;
+          });
+    }
+
+    const shouldNotResolveTestSpecs = [
+      // Missing continuousTimeMin and totalTimeMin
+      {reportWhen: 'documentExit'},
+      // Missing continuousTimeMin
+      {reportWhen: 'documentExit', totalTimeMin: 0},
+      // Missing totalTimeMin
+      {reportWhen: 'documentExit', continuousTimeMin: 0},
+      // Missing reportWhen
+      {visiblePercentageMin: 50, totalTimeMin: 0, continuousTimeMin: 0},
+    ];
+
+    for (const i in shouldNotResolveTestSpecs) {
+      it('should not resolve on reportWhen when visibility is 0 if not ' +
+          `specified, ${i}`, () => {
+        const vm = new VisibilityModel(shouldNotResolveTestSpecs[i], () => 0);
+        vm.setReady(true);
+
+        const spy = sandbox.spy();
+        vm.onTriggerEvent(spy);
+
+        const deferred = new Deferred();
+        const createReportReadyPromise = () => deferred.promise;
+        vm.setReportReady(createReportReadyPromise);
+
+        vm.update();
+        expect(spy).to.not.be.called;
+
+        deferred.resolve();
+        expect(spy).to.not.be.called;
+      });
+    }
   });
 });

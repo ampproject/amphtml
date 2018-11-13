@@ -1267,6 +1267,7 @@ export class VisibilityTracker extends EventTracker {
       root.removeEventListener('pagehide', pageHideListener);
       deferred.resolve();
     });
+
     return deferred.promise;
   }
 
