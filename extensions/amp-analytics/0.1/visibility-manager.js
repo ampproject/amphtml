@@ -326,6 +326,7 @@ export class VisibilityManager {
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
+        model.update();
         model.setReady(true);
       });
     }

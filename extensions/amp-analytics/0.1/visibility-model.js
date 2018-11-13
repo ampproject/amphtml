@@ -51,6 +51,19 @@ export class VisibilityModel {
       this.spec_['visiblePercentageMax'] = 0;
     }
 
+    /** @private @const {boolean} */
+    this.accumulateCounters_ = spec['reportWhen'] !== undefined;
+
+    /**
+     * Allow zero visible time on screen when explicitly provided and when the
+     * ping is deferred to some post-visibility event. Otherwise we treat zero
+     * visible time as an exclusive lower bound.
+     * @private @const {boolean}
+     */
+    this.explicitZeroVisibleTimeRequirement_ =
+        spec['totalTimeMin'] === 0 && spec['continuousTimeMin'] == 0 &&
+        this.accumulateCounters_;
+
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
 
@@ -79,7 +92,7 @@ export class VisibilityModel {
     this.ready_ = true;
 
     /** @private {boolean} */
-    this.reportReady_ = true;
+    this.reportReady_ = !this.accumulateCounters_;
 
     /** @private {?function():!Promise} */
     this.createReportReadyPromise_ = null;
@@ -419,11 +432,12 @@ export class VisibilityModel {
       this.lastVisibleTime_ = now;
     }
 
-    return this.everMatchedVisibility_ &&
-        (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
-        (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
-        (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
-        (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
+    return this.explicitZeroVisibleTimeRequirement_ ||
+        (this.everMatchedVisibility_ &&
+         (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
+         (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
+         (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
+         (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']));
   }
 
   /**
