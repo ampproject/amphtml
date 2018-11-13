@@ -205,6 +205,17 @@ tags: {
     value: "stretch"
   }
   attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "align-items"
     value: "center"
     value: "end"
@@ -298,6 +309,17 @@ tags: {
     value: "whoosh-in-right"
     value: "zoom-in"
     value: "zoom-out"
+  }
+  attrs: {
+    name: "target"
+    value: "_blank"
+  }
+  attrs: {
+    name: "data-tooltip-icon"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
   }
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
@@ -512,6 +534,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
+  tag: "A"
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
