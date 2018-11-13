@@ -888,9 +888,35 @@ describe('PinchRecognizer', () => {
       {clientX: 120, clientY: 130}]});
     expect(res).to.equal(true);
 
-    gesturesMock.expects('signalEmit_').twice();
+    // On acceptStart, we get a null event
+    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
+        sinon.match(data => {
+          return data.centerClientX == 100 &&
+            data.centerClientY == 100 &&
+            data.deltaX == 10 &&
+            data.deltaY == 10 &&
+            data.dir == 1 &&
+            data.first == true &&
+            data.last == false &&
+            data.time == 1;
+        }), null).once();
 
-    clock.tick(10);
+    // On onTouchMove, we didn't actually move the original touches
+    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
+        sinon.match(data => {
+          return data.centerClientX == 100 &&
+            data.centerClientY == 100 &&
+            data.deltaX == 10 &&
+            data.deltaY == 10 &&
+            data.dir == 1 &&
+            data.first == false &&
+            data.last == false;
+        }), {touches: [
+          {clientX: 80, clientY: 70},
+          {clientX: 120, clientY: 130},
+          {clientX: 160, clientY: 160},
+        ]}).once();
+
     recognizer.acceptStart();
 
     expect(recognizer.eventing_).to.equal(true);
