@@ -103,9 +103,6 @@ export class FxElement {
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private {boolean} */
-    this.mutateScheduled_ = false;
-
     /** @private {number} */
     this.offset_ = 0;
 
@@ -295,13 +292,6 @@ export class FxElement {
   }
 
   /**
-   * @return {boolean}
-   */
-  isMutateScheduled() {
-    return this.mutateScheduled_;
-  }
-
-  /**
    * Boolean dictating whether or not the amp-fx preset has the `repeat`
    * attribute set. The `repeat` attribute allows the animation to be fully
    * dependent on scroll.
@@ -309,12 +299,5 @@ export class FxElement {
    */
   hasRepeat() {
     return this.hasRepeat_;
-  }
-
-  /**
-   * @param {boolean} mutateScheduled
-   */
-  setIsMutateScheduled(mutateScheduled) {
-    this.mutateScheduled_ = mutateScheduled;
   }
 }
