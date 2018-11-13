@@ -427,6 +427,16 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Checks if current element is a descendant of amp-story-cta-layer.
+   * @param {!Event} event
+   */
+  isCtaLayerDescendant_(event) {
+    return !!closest(dev().assertElement(event.target), el => {
+      return el.tagName.toLowerCase() == 'amp-story-cta-layer';
+    });
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -435,6 +445,7 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.isAmpStoryPageDescendant_(event) &&
+      !this.isCtaLayerDescendant_(event) &&
       matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
