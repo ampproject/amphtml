@@ -1218,9 +1218,10 @@ export class Resources {
       });
     }
 
-    this.passCallbacks_.forEach(callback => {
-      callback();
-    });
+    for (let i = 0; i < this.passCallbacks_.length; i++) {
+      const fn = this.passCallbacks_[i];
+      fn();
+    }
     this.passCallbacks_.length = 0;
   }
 

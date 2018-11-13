@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Pass} from './pass';
 import {Services} from './services';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
@@ -241,6 +242,9 @@ export class IntersectionObserverPolyfill {
      */
     this.mutationObserver_ = null;
 
+    /** @private {Pass} */
+    this.mutationPass_ = null;
+
     /** @private {?./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
 
@@ -293,8 +297,19 @@ export class IntersectionObserverPolyfill {
     // from multiple documents.
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
-      this.viewport_ = Services.viewportForDoc(element);
-      this.resources_ = Services.resourcesForDoc(ampdoc);
+
+      if (!this.viewport_) {
+        this.viewport_ = Services.viewportForDoc(element);
+      }
+
+      if (!this.resources_) {
+        this.resources_ = Services.resourcesForDoc(ampdoc);
+      }
+
+      this.mutationPass_ = new Pass(
+          ampdoc.win,
+          this.handleMutationObserverPass_.bind(this)
+      );
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
@@ -414,6 +429,22 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   handleMutationObserverNotification_() {
+    if (this.mutationPass_.isPending()) {
+      return;
+    }
+
+    // Wait one animation frame so that other mutations may arrive.
+    this.mutationPass_.schedule(16);
+    return;
+  }
+
+  /**
+   * Handle Mutation Observer Pass
+   * This performas the tick, and is wrapped in a paas
+   * To handle throttling of the observer
+   * @private
+   */
+  handleMutationObserverPass_() {
     if (this.viewport_ && this.resources_) {
       this.resources_.onNextPass(() => {
         this.tick(this.viewport_.getRect());
@@ -431,8 +462,10 @@ export class IntersectionObserverPolyfill {
       this.mutationObserver_.disconnect();
     }
     this.mutationObserver_ = null;
-    this.viewport_ = null;
-    this.resources_ = null;
+    if (this.mutationPass_) {
+      this.mutationPass_.cancel();
+    }
+    this.mutationPass_ = null;
   }
 }
 

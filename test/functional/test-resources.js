@@ -1635,9 +1635,9 @@ describe('Resources discoverWork', () => {
     });
   });
 
-  describe('passCallbacks_', () => {
+  describe('onNextPass', () => {
 
-    it('should run passCallbacks_ added from onNextPass()', () => {
+    it('should only run callbacks once.', () => {
       resources.isRuntimeOn_ = true;
       resources.documentReady_ = true;
       resources.firstPassAfterDocumentReady_ = true;
@@ -1645,21 +1645,9 @@ describe('Resources discoverWork', () => {
       const passCallback = sandbox.spy();
       resources.onNextPass(passCallback);
       resources.doPass();
-
-      expect(passCallback).to.be.called;
-    });
-
-    it('should remove passCallbacks_ added from onNextPass(), ' +
-      ' after the pass', () => {
-      resources.isRuntimeOn_ = true;
-      resources.documentReady_ = true;
-      resources.firstPassAfterDocumentReady_ = true;
-
-      const passCallback = sandbox.spy();
-      resources.onNextPass(passCallback);
       resources.doPass();
 
-      expect(resources.passCallbacks_.length).to.be.equal(0);
+      expect(passCallback).to.be.calledOnce;
     });
   });
 });
