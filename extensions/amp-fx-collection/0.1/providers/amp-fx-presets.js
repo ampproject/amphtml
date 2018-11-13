@@ -95,7 +95,8 @@ export const Presets = {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${style.top == 'auto' ? '0px' : style.top} +
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
@@ -255,7 +256,8 @@ export const Presets = {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${style.top == 'auto' ? '0px' : style.top} -
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
