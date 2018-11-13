@@ -297,11 +297,12 @@ export class Gestures {
         continue;
       }
 
+      this.recognizers_[i].onTouchEnd(event);
+
       const isReady = !this.pending_[i];
       const isExpired = this.pending_[i] < now;
       const isEventing = this.eventing_ == this.recognizers_[i];
 
-      this.recognizers_[i].onTouchEnd(event);
       if (!isEventing && (isReady || isExpired)) {
         this.stopTracking_(i);
       }
