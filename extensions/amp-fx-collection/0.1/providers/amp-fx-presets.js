@@ -77,13 +77,16 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
@@ -117,14 +120,17 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'left':
-            `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
@@ -158,14 +164,17 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'left':
-            `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'left':
+                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
@@ -201,13 +210,16 @@ export const Presets = {
 
       // only do this on the first element
       if (!fxElement.initialTrigger) {
-        const style = computedStyle(fxElement.getAmpDoc().win,
-            fxElement.getElement());
-        setStyles(fxElement.getElement(), {
-          'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
-          'visibility': 'visible',
-        });
-        fxElement.initialTrigger = true;
+        fxElement.getResources().mutateElement(
+            fxElement.getElement(), function() {
+              const style = computedStyle(fxElement.getAmpDoc().win,
+                  fxElement.getElement());
+              setStyles(fxElement.getElement(), {
+                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'visibility': 'visible',
+              });
+              fxElement.initialTrigger = true;
+            });
       }
 
       // If above the threshold of trigger-position
