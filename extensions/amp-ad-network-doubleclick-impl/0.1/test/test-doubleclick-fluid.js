@@ -252,14 +252,12 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     sandbox.stub(impl, 'attemptChangeHeight').returns(mockPromise);
-    sandbox.stub(impl, 'attemptToRenderCreative').returns(mockPromise);
-    sandbox.stub(impl, 'onFriendlyIframeEmbedLoaded').returns(mockPromise);
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
-    impl.onCreativeRender();
+    impl.onCreativeRender(null, mockPromise);
     expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
         .to.be.calledOnce;
   });
