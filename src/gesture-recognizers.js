@@ -340,7 +340,7 @@ class SwipeRecognizer extends GestureRecognizer {
   onTouchEnd(e) {
     const {touches} = e;
     // Number of current touches on the page
-    if (touches.length == 0) {
+    if (touches && touches.length == 0) {
       this.end_(e);
     }
   }
@@ -729,15 +729,19 @@ export class PinchRecognizer extends GestureRecognizer {
   /** @override */
   onTouchStart(e) {
     const {touches} = e;
+    if (!touches) {
+      return false;
+    }
     // Pinch touches are not always simultaneous, continue to listen
     // for second touch.
-    if (touches && touches.length == 1) {
+    if (touches.length == 1) {
       return true;
     }
     // If already in the middle of a pinch event, ignore additional touches.
-    if (this.eventing_ && touches && touches.length > 2) {
+    if (this.eventing_ && touches.length > 2) {
       return true;
-    } else if (touches && touches.length == 2) {
+    }
+    if (touches.length == 2) {
       this.startTime_ = Date.now();
       this.startX1_ = touches[0].clientX;
       this.startY1_ = touches[0].clientY;
@@ -752,50 +756,76 @@ export class PinchRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const {touches} = e;
-    // Pinch touches are not always simultaneous, continue to listen
-    // for second touch.
-    if (touches && touches.length == 1) {
-      return true;
-    }
-    if (touches && touches.length >= 2) {
-      this.lastX1_ = touches[0].clientX;
-      this.lastY1_ = touches[0].clientY;
-      this.lastX2_ = touches[1].clientX;
-      this.lastY2_ = touches[1].clientY;
-      if (this.eventing_) {
-        // If eventing, always emit gesture with new coordinates
-        this.emit_(false, false, e);
-      } else {
-        // Figure out whether or not to start eventing
-        const dx1 = this.lastX1_ - this.startX1_;
-        const dy1 = this.lastY1_ - this.startY1_;
-        const dx2 = this.lastX2_ - this.startX2_;
-        const dy2 = this.lastY2_ - this.startY2_;
-        // Fingers should move in opposite directions and go over the threshold.
-        if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
-          if (Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD
-            || Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD) {
-            this.signalReady(0);
-          }
-        } else if (Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD
-          || Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD) {
-          // Moving in the same direction over a threshold.
-          this.acceptCancel();
-          return false;
-        }
-      }
-      // Pinch threshold not reached, continue listening but do not emit
-      return true;
-    } else {
+    if (!touches || touches.length == 0) {
       return false;
     }
+    // Pinch touches are not always simultaneous, continue to listen
+    // for second touch.
+    if (touches.length == 1) {
+      return true;
+    }
+
+    // Have 2+ touches
+    this.lastX1_ = touches[0].clientX;
+    this.lastY1_ = touches[0].clientY;
+    this.lastX2_ = touches[1].clientX;
+    this.lastY2_ = touches[1].clientY;
+
+    // If eventing, always emit gesture with new coordinates
+    if (this.eventing_) {
+      this.emit_(false, false, e);
+      return true;
+    }
+
+    // Gesture is 2+ touch but direction indicates not a pinch
+    if (this.pinchRejected_()) {
+      return false;
+    }
+
+    if (this.pinchReady_()) {
+      this.signalReady(0);
+    }
+    // Pinch gesture detected but threshold not reached, continue listening
+    return true;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  pinchReady_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionCorrect = dx1 * dx2 <= 0 && dy1 * dy2 <= 0;
+    const xPinchRecognized = Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD;
+    const yPinchRecognized = Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD;
+    return pinchDirectionCorrect && (xPinchRecognized || yPinchRecognized);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  pinchRejected_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionIncorrect = dx1 * dx2 > 0 || dy1 * dy2 > 0;
+    const xPinchRejected = Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD;
+    const yPinchRejected = Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD;
+    return pinchDirectionIncorrect && (xPinchRejected || yPinchRejected);
   }
 
   /** @override */
   onTouchEnd(e) {
-    // Number of current touches on the page
+    // Pinch requires at least two touches on the page
     const {touches} = e;
-    if (touches.length <= 1) {
+    if (touches && touches.length < 2) {
       this.end_(e);
     }
   }
