@@ -778,11 +778,11 @@ export class PinchRecognizer extends GestureRecognizer {
     }
 
     // Gesture is 2+ touch but direction indicates not a pinch
-    if (this.pinchRejected_()) {
+    if (this.isPinchRejected_()) {
       return false;
     }
 
-    if (this.pinchReady_()) {
+    if (this.isPinchReady_()) {
       this.signalReady(0);
     }
     // Pinch gesture detected but threshold not reached, continue listening
@@ -793,7 +793,7 @@ export class PinchRecognizer extends GestureRecognizer {
    * @return {boolean}
    * @private
    */
-  pinchReady_() {
+  isPinchReady_() {
     const dx1 = this.lastX1_ - this.startX1_;
     const dy1 = this.lastY1_ - this.startY1_;
     const dx2 = this.lastX2_ - this.startX2_;
@@ -809,7 +809,7 @@ export class PinchRecognizer extends GestureRecognizer {
    * @return {boolean}
    * @private
    */
-  pinchRejected_() {
+  isPinchRejected_() {
     const dx1 = this.lastX1_ - this.startX1_;
     const dy1 = this.lastY1_ - this.startY1_;
     const dx2 = this.lastX2_ - this.startX2_;
