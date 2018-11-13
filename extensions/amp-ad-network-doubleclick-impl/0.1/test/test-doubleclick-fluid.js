@@ -53,7 +53,14 @@ const rawCreative = `
       })), '*');
   </script>`;
 
-const mockPromise = {then: callback => callback()};
+const mockPromise = {
+  then: callback => {
+    callback();
+    return {
+      catch: () => {},
+    };
+  },
+};
 
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
@@ -246,9 +253,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.win.document.body.appendChild(impl.iframe);
     sandbox.stub(impl, 'attemptChangeHeight').returns(mockPromise);
     sandbox.stub(impl, 'attemptToRenderCreative').returns(mockPromise);
+    sandbox.stub(impl, 'onFriendlyIframeEmbedLoaded').returns(mockPromise);
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
     impl.buildCallback();
-    impl.friendlyIframeEmbed = {whenWindowLoaded: () => mockPromise};
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';

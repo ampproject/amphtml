@@ -959,11 +959,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       setStyles(this.element, {width: `${size.width}px`});
     }
 
-    if (this.friendlyIframeEmbed) {
-      this.friendlyIframeEmbed.whenWindowLoaded().then(() => {
-        this.expandFluidCreative_();
-      });
-    }
+    this.onFriendlyIframeEmbedLoaded().then(() => {
+      this.expandFluidCreative_();
+    });
 
     this.refreshManager_ = this.refreshManager_ ||
         getRefreshManager(this, () => {

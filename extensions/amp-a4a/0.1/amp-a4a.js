@@ -228,7 +228,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adUrl_ = null;
 
     /** @protected {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
-    this.friendlyIframeEmbed = null;
+    this.friendlyIframeEmbed_ = null;
 
     /** @type {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
@@ -493,7 +493,7 @@ export class AmpA4A extends AMP.BaseElement {
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
-    if (this.friendlyIframeEmbed) {
+    if (this.friendlyIframeEmbed_) {
       return;
     }
     this.fromResumeCallback = true;
@@ -1104,9 +1104,9 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed) {
-      this.friendlyIframeEmbed.destroy();
-      this.friendlyIframeEmbed = null;
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.destroy();
+      this.friendlyIframeEmbed_ = null;
     }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
@@ -1120,8 +1120,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.friendlyIframeEmbed) {
-      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed, inViewport);
+    if (this.friendlyIframeEmbed_) {
+      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
     }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
@@ -1395,7 +1395,7 @@ export class AmpA4A extends AMP.BaseElement {
               new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
       checkStillCurrent();
-      this.friendlyIframeEmbed = friendlyIframeEmbed;
+      this.friendlyIframeEmbed_ = friendlyIframeEmbed;
       setFriendlyIframeEmbedVisible(
           friendlyIframeEmbed, this.isInViewport());
       // Ensure visibility hidden has been removed (set by boilerplate).
@@ -1767,6 +1767,17 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isVerifiedAmpCreative() {
     return this.isVerifiedAmpCreative_;
+  }
+
+  /**
+   * Returns a promise that will resolve when the friendly iframe's window's
+   * `onload` event has been emitted.
+   * @return {!Promise}
+   */
+  onFriendlyIframeEmbedLoaded() {
+    return this.friendlyIframeEmbed_ ?
+      this.friendlyIframeEmbed_.whenWindowLoaded() :
+      Promise.reject('Friendly Iframe Embed is not available');
   }
 }
 

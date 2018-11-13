@@ -396,7 +396,7 @@ describe('amp-a4a', () => {
     });
 
     it('for A4A friendly iframe rendering case', () => {
-      expect(a4a.friendlyIframeEmbed).to.not.exist;
+      expect(a4a.friendlyIframeEmbed_).to.not.exist;
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -406,7 +406,7 @@ describe('amp-a4a', () => {
         const a4aBody = child.contentDocument.body;
         expect(a4aBody).to.be.ok;
         expect(a4aBody).to.be.visible;
-        expect(a4a.friendlyIframeEmbed).to.exist;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
       });
     });
 
@@ -441,8 +441,8 @@ describe('amp-a4a', () => {
         iniLoadResolver();
         return layoutPromise;
       }).then(() => {
-        expect(a4a.friendlyIframeEmbed).to.exist;
-        expect(a4a.friendlyIframeEmbed.host).to.equal(a4a.element);
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
         expect(whenIniLoadedStub).to.be.calledOnce;
         expect(lifecycleEventStub).to.be.calledWith('friendlyIframeIniLoad');
       });
@@ -474,17 +474,17 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
-        expect(a4a.friendlyIframeEmbed).to.exist;
-        expect(a4a.friendlyIframeEmbed.isVisible()).to.be.false;
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
 
         a4a.viewportCallback(true);
-        expect(a4a.friendlyIframeEmbed.isVisible()).to.be.true;
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
 
         a4a.viewportCallback(false);
-        expect(a4a.friendlyIframeEmbed.isVisible()).to.be.false;
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
 
         a4a.viewportCallback(true);
-        expect(a4a.friendlyIframeEmbed.isVisible()).to.be.true;
+        expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
       });
     });
 
