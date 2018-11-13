@@ -142,8 +142,8 @@ export class InfoDialog {
   }
 
   /**
-   * Reacts to menu state updates and decides whether to show either the native
-   * system sharing, or the fallback UI.
+   * Reacts to dialog state updates and decides whether to show either the
+   * native system sharing, or the fallback UI.
    * @param {boolean} isOpen
    * @private
    */
