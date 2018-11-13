@@ -28,21 +28,20 @@
  *   width="640"
  *   height="480"
  *   layout="responsive">
- * </amp-instagram>
+ * </amp-byside-content>
  * </code>
  */
 
-import * as utils from './utils';
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {toWin} from '../../../src/types';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -77,10 +76,13 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @private {?string} */
     this.iframeSrc_ = null;
 
-    /** @private {?Element} */
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
+    /**
+     * @private {?Promise}
+     * @visibleForTesting
+     */
     this.iframePromise_ = null;
 
     /** @private {string}  */
@@ -108,8 +110,11 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.baseUrl_ = '';
 
     /** @const {function()} */
-    this.boundUpdateSize_ =
-		utils.debounce(this.updateSize_.bind(this), 100);
+    this.boundUpdateSize_ = debounce(
+        this.win, data => {
+          this.updateSize_(/** @type {Object} */ (data));
+        }, 100
+    );
   }
 
   /** @override */
@@ -122,8 +127,8 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    if (this.iframeSrc_) {
-      this.preconnect.url(this.iframeSrc_, onLayout);
+    if (this.origin_) {
+      this.preconnect.url(this.origin_, onLayout);
     }
   }
 
@@ -131,23 +136,27 @@ export class AmpBysideContent extends AMP.BaseElement {
   buildCallback() {
     this.webcareId_ = user().assert(
         this.element.getAttribute('data-webcare-id'),
-        'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-webcare-id attribute is required for <%s> %s',
+        TAG_,
+        this.element
+    );
 
     this.label_ = user().assert(
         this.element.getAttribute('data-label'),
-        'The data-label attribute is required for <' + TAG_ + '> %s',
-        this.element);
+        'The data-label attribute is required for <%s> %s',
+        TAG_,
+        this.element
+    );
 
     this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
-		DEFAULT_WEBCARE_ZONE_);
+        DEFAULT_WEBCARE_ZONE_);
     this.channel_ = (this.element.getAttribute('data-channel') || '');
     this.lang_ = (this.element.getAttribute('data-lang') || DEFAULT_LANG_);
     this.fid_ = (this.element.getAttribute('data-fid') || '');
 
     this.origin_ = this.composeOrigin_();
     this.baseUrl_ = this.origin_ + '/BWA' +
-		encodeURIComponent(this.webcareId_) + '/amp/';
+        encodeURIComponent(this.webcareId_) + '/amp/';
   }
 
   /** @override */
@@ -167,11 +176,16 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     iframe.name = 'amp_byside_content_iframe' + iframeCount_++;
+
+    iframe.setAttribute('title', this.element.getAttribute('title') || '');
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('title', this.element.getAttribute('title') || '');
+    iframe.setAttribute(
+        'sandbox',
+        'allow-scripts allow-same-origin allow-popups'
+    );
 
     setStyles(iframe, {
       'opacity': 0,
@@ -184,10 +198,11 @@ export class AmpBysideContent extends AMP.BaseElement {
       this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
       iframe.src = this.iframeSrc_;
 
-	  const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
-	  this.unlisteners_.push(unlisten);
+      const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
+      this.unlisteners_.push(unlisten);
 
-	  this.element.appendChild(iframe);
+      this.element.appendChild(iframe);
+
       return (this.iframePromise_ = this.loadPromise(iframe));
     }).then(() => {
       this.getVsync().mutate(() => {
@@ -195,16 +210,16 @@ export class AmpBysideContent extends AMP.BaseElement {
           'opacity': 1,
         });
       });
-    }).then(() => this);
+    });
   }
 
   /** @private */
   composeOrigin_() {
     const subDomain = this.webcareZone_ === MAIN_WEBCARE_ZONE_ ?
       MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
-	  this.webcareZone_;
+      this.webcareZone_;
 
-    return 'https://' + subDomain + '.' + BYSIDE_DOMAIN_;
+    return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
 
   /** @private */
@@ -235,21 +250,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     });
     const url = addParamsToUrl(src, params);
 
-    return new Promise(resolve => {
-      try {
-        // If a node is passed, try to resolve via this node.
-        const win = toWin(/** @type {!Document} */ (
-		  this.element.ownerDocument || this.element).defaultView);
-
-        // for unit integration tests resolve original url
-        // since url replacements implementation throws an uncaught error
-        win.AMP_TEST ? resolve(url) :
-          Services.urlReplacementsForDoc(this.element)
-              .expandUrlAsync(url).then(newUrl => resolve(newUrl));
-      } catch (error) {
-        resolve(url);
-      }
-    });
+    return Services.urlReplacementsForDoc(this.element).expandUrlAsync(url);
   }
 
   /**
@@ -270,27 +271,35 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @private
    */
   getOverflowElement_() {
-    const createElement = utils.getElementCreator(this.element.ownerDocument);
-
-    const overflow = createElement('div', 'i-amphtml-byside-content-overflow',
-        createElement('div', 'i-amphtml-byside-content-overflow-content',
-            createElement('i', 'i-amphtml-byside-content-arrow-down')
-        ));
-    overflow.setAttribute('overflow', '');
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    const overflow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow',
+      'overflow': '',
+    }));
+    const overflowContent = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow-content',
+    }));
+    const arrow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-arrow-down',
+    }));
+    overflowContent.appendChild(arrow);
+    overflow.appendChild(overflowContent);
 
     return overflow;
   }
 
   /** @return {!Element} @private */
   createBySideLoader_() {
-    const createElement = utils.getElementCreator(this.element.ownerDocument);
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    const loadingContainer = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-container',
+    }));
+    const loadingAnimation = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-animation',
+    }));
+    loadingContainer.appendChild(loadingAnimation);
 
-    const loadingPlaceholder =
-      createElement('div', 'i-amphtml-byside-content-loading-container',
-          createElement('div', 'i-amphtml-byside-content-loading-animation')
-      );
-
-    return loadingPlaceholder;
+    return loadingContainer;
   }
 
   /**
@@ -300,28 +309,42 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @private
    */
   updateSize_(data) {
-    // Calculate new height of the container to include the padding.
-    // If padding is negative, just use the requested height directly.
-    if (!data) {
-      return;
-    }
+    this.getVsync().measure(() => {
+      // Calculate new height of the container to include the padding.
+      // If padding is negative, just use the requested height directly.
+      let newHeight, newWidth;
+      const height = parseInt(data['height'], 10);
+      if (!isNaN(height)) {
+        newHeight = Math.max(
+            height + (this.element./*OK*/offsetHeight
+            - this.iframe_./*OK*/offsetHeight),
+            height);
+      }
 
-    let newHeight;
-    const height = parseInt(data['height'], 10);
-    if (!isNaN(height)) {
-      newHeight = Math.max(
-          height + (this.element./*OK*/offsetHeight
-              - this.iframe_./*OK*/offsetHeight),
-          height);
-    }
+      const width = parseInt(data['width'], 10);
+      if (!isNaN(width)) {
+        newWidth = Math.max(
+            width + (this.element./*OK*/offsetWidth
+              - this.iframe_./*OK*/offsetWidth),
+            width);
+      }
 
-    if (newHeight !== undefined) {
-	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
-    } else {
-      dev().warn(TAG_,
-          'Ignoring embed-size request because no height value is provided',
-          this.element);
-    }
+      if (newHeight !== undefined || newWidth !== undefined) {
+        this.attemptChangeSize(newHeight, newWidth).then(() => {
+          if (newHeight !== undefined) {
+            this.element.setAttribute('height', newHeight);
+          }
+          if (newWidth !== undefined) {
+            this.element.setAttribute('width', newWidth);
+          }
+        }, () => {});
+      } else {
+        user().warn(TAG_,
+            'Ignoring embed-size request because '
+            + 'no width or height value is provided',
+            this.element);
+      }
+    });
   }
 
   /** @override */
