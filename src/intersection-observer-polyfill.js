@@ -435,7 +435,6 @@ export class IntersectionObserverPolyfill {
 
     // Wait one animation frame so that other mutations may arrive.
     this.mutationPass_.schedule(16);
-    return;
   }
 
   /**
@@ -450,7 +449,6 @@ export class IntersectionObserverPolyfill {
         this.tick(this.viewport_.getRect());
       });
     }
-    return;
   }
 
   /**
