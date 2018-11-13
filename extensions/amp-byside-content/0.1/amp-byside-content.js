@@ -28,7 +28,7 @@
  *   width="640"
  *   height="480"
  *   layout="responsive">
- * </amp-instagram>
+ * </amp-byside-content>
  * </code>
  */
 
@@ -84,14 +84,6 @@ export class AmpBysideContent extends AMP.BaseElement {
      * @visibleForTesting
      */
     this.iframePromise_ = null;
-
-    /**
-     * The element which will contain the iframe.
-     * This may be the amp-byside-content itself if the iframe is non-scrolling,
-     * or a wrapper element if it is.
-     * @private {?Element}
-     */
-    this.container_ = null;
 
     /** @private {string}  */
     this.webcareZone_ = MAIN_WEBCARE_ZONE_;
@@ -165,8 +157,6 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.origin_ = this.composeOrigin_();
     this.baseUrl_ = this.origin_ + '/BWA' +
         encodeURIComponent(this.webcareId_) + '/amp/';
-
-    this.container_ = makeIOsScrollable(this.element);
   }
 
   /** @override */
@@ -211,20 +201,9 @@ export class AmpBysideContent extends AMP.BaseElement {
       const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
       this.unlisteners_.push(unlisten);
 
-      this.container_.appendChild(iframe);
+      this.element.appendChild(iframe);
 
-      return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
-        // On iOS the iframe at times fails to render inside the `overflow:auto`
-        // container. To avoid this problem, we set the `overflow:auto` property
-        // 1s later via `amp-active` class.
-        if (this.container_ != this.element) {
-          Services.timerFor(this.win).delay(() => {
-            this.mutateElement(() => {
-              this.container_.classList.add('amp-active');
-            });
-          }, 1000);
-        }
-      }));
+      return (this.iframePromise_ = this.loadPromise(iframe));
     }).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
@@ -330,13 +309,6 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @private
    */
   updateSize_(data) {
-    // On iOS the iframe at times fails to render inside the `overflow:auto`
-    // container. To avoid this problem, we set the `overflow:auto` property
-    // via `amp-active` class.
-    this.mutateElement(() => {
-      this.container_.classList.add('amp-active');
-    });
-
     this.getVsync().measure(() => {
       // Calculate new height of the container to include the padding.
       // If padding is negative, just use the requested height directly.
@@ -387,22 +359,6 @@ export class AmpBysideContent extends AMP.BaseElement {
     }
     return true; // Call layoutCallback again.
   }
-}
-
-/**
- * If scrolling is allowed for the iframe, wraps the element into a container
- * that is scrollable because iOS auto expands iframes to their size.
- * @param {!Element} element
- * @return {!Element} The container or the iframe.
- */
-function makeIOsScrollable(element) {
-  if (element.getAttribute('scrolling') != 'no') {
-    const wrapper = element.ownerDocument.createElement(
-        'i-amphtml-scroll-container');
-    element.appendChild(wrapper);
-    return wrapper;
-  }
-  return element;
 }
 
 AMP.extension('amp-byside-content', '0.1', AMP => {
