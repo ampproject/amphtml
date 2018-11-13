@@ -757,7 +757,7 @@ export class PinchRecognizer extends GestureRecognizer {
     if (touches && touches.length == 1) {
       return true;
     }
-    else if (touches && touches.length >= 2) {
+    if (touches && touches.length >= 2) {
       this.lastX1_ = touches[0].clientX;
       this.lastY1_ = touches[0].clientY;
       this.lastX2_ = touches[1].clientX;
