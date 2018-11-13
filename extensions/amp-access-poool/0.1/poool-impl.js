@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listenFor} from '../../../src/iframe-helper';
-import {setStyle} from '../../../src/style';
+import {resetStyles, setStyle} from '../../../src/style';
 
 const TAG = 'amp-access-poool';
 
@@ -95,11 +95,8 @@ export class PooolVendor {
 
     /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
-    this.iframe_.setAttribute('id', 'poool-iframe');
-    this.iframe_.setAttribute('scrolling', 'no');
-    this.iframe_.setAttribute('frameborder', '0');
-    setStyle(this.iframe_, 'height', '500px');
-    setStyle(this.iframe_, 'width', '100%');
+
+    this.initializeIframe_();
 
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
 
@@ -124,6 +121,18 @@ export class PooolVendor {
           this.renderPoool_();
           return {access: false};
         });
+  }
+
+  /**
+   * @private
+   */
+  initializeIframe_() {
+    this.iframe_.setAttribute('id', 'poool-iframe');
+    this.iframe_.setAttribute('scrolling', 'no');
+    this.iframe_.setAttribute('frameborder', '0');
+    setStyle(this.iframe_, 'height', '500px');
+    setStyle(this.iframe_, 'width', '100%');
+    setStyle(this.iframe_, 'transform', 'translateY(-70px)');
   }
 
   /**
@@ -180,6 +189,7 @@ export class PooolVendor {
     articlePreview.setAttribute('amp-access-hide', '');
     const articleContent = document.querySelector('[poool-access-content]');
     articleContent.removeAttribute('amp-access-hide');
+    resetStyles(this.iframe_, ['transform']);
   }
 
   /**
