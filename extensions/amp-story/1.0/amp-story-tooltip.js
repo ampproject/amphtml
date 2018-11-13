@@ -23,12 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {
-  addAttributesToElement,
-  closest,
-  removeElement,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
+import {addAttributesToElement, closest} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -149,25 +144,7 @@ export class AmpStoryTooltip {
       }
     });
 
-    this.checkAndRemoveClickableItemsInFirstPage_();
-
     return this.shadowRoot_;
-  }
-
-  /**
-   * Clickable items are not allowed on the first amp-story page. Remove
-   * those items if they are found.
-   * @private
-   */
-  checkAndRemoveClickableItemsInFirstPage_() {
-    const invalidItems =
-      scopedQuerySelectorAll(this.storyEl_, 'amp-story-page:first-of-type a');
-
-    for (let i = 0; i < invalidItems.length; i++) {
-      user().error(TAG, 'clickable items are not allowed on the first page' +
-      ' of an amp-story.');
-      removeElement(invalidItems[i]);
-    }
   }
 
   /**

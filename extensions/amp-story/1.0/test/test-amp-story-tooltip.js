@@ -154,7 +154,7 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
         .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
 
     expect(tooltipIconEl).to.have.attribute('src');
-    expect(tooltipIconEl.getAttribute['src'])
+    expect(tooltipIconEl.getAttribute('src'))
         .to.equal('http://localhost:9876/my-icon');
   });
 
@@ -191,14 +191,5 @@ describes.realWin('amp-story-tooltip', {amp: true}, env => {
         .querySelector('.i-amphtml-tooltip-text');
 
     expect(tooltipTextEl.textContent).to.equal('localhost');
-  });
-
-  it('should not allow clickable items on the first page', () => {
-    fakeCover.appendChild(clickableEl);
-
-    allowConsoleError(() => { expect(() => {
-      storeService.dispatch(Action.TOGGLE_TOOLTIP, clickableEl);
-    }).to.throw();
-    });
   });
 });
