@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listenFor} from '../../../src/iframe-helper';
-import {resetStyles, setStyle} from '../../../src/style';
+import {resetStyles, setStyle, setStyles} from '../../../src/style';
 
 const TAG = 'amp-access-poool';
 
@@ -42,7 +42,6 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *   debug: (string|null),
  *   forceWidget: (string|null),
  *   loginButtonEnabled: (boolean),
- *   signatureEnabled: (boolean),
  *   videoClient: (string|null)
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
@@ -130,9 +129,20 @@ export class PooolVendor {
     this.iframe_.setAttribute('id', 'poool-iframe');
     this.iframe_.setAttribute('scrolling', 'no');
     this.iframe_.setAttribute('frameborder', '0');
-    setStyle(this.iframe_, 'height', '500px');
     setStyle(this.iframe_, 'width', '100%');
-    setStyle(this.iframe_, 'transform', 'translateY(-70px)');
+
+    if (this.pooolConfig_['forceWidget'] == 'unlock') {
+      setStyles(this.iframe_, {
+        'height': '250px',
+        'position': 'fixed',
+        'bottom': '0',
+      });
+    } else {
+      setStyles(this.iframe_, {
+        'height': '500px',
+        'transform': 'translateY(-70px)',
+      });
+    }
   }
 
   /**
