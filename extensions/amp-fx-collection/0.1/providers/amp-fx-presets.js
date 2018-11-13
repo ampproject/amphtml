@@ -94,8 +94,10 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top == 'auto' ? '0px' : style.top;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} +
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
@@ -146,9 +148,10 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
@@ -199,9 +202,10 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
@@ -254,8 +258,10 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top == 'auto' ? '0px' : style.top;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} -
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
               });
               fxElement.initialTrigger = true;
