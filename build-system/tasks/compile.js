@@ -262,6 +262,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/set-dom/src/**/*.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'node_modules/web-activities/activity-ports.js',
+      'node_modules/@ampproject/animations/dist/animations.js',
       'node_modules/@ampproject/worker-dom/dist/' +
           'unminified.index.safe.mjs.patched.js',
       'node_modules/document-register-element/build/' +

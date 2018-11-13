@@ -112,3 +112,11 @@ describe.skip('amp-brightcove', () => {
     return video;
   });
 });
+
+describe.skip('amp-delight-player', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-delight-player');
+    video.setAttribute('data-content-id', '-LLoCCZqWi18O73b6M0w');
+    return video;
+  });
+});
