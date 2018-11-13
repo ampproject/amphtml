@@ -318,18 +318,15 @@ class SwipeRecognizer extends GestureRecognizer {
           if (dx >= 8 && dx > dy) {
             this.signalReady(-10);
           } else if (dy >= 8) {
-            this.acceptCancel();
             return false;
           }
         } else if (this.vert_) {
           if (dy >= 8 && dy > dx) {
             this.signalReady(-10);
           } else if (dx >= 8) {
-            this.acceptCancel();
             return false;
           }
         } else {
-          this.acceptCancel();
           return false;
         }
       }
