@@ -34,7 +34,6 @@ const TAG = 'amp-consent-ui';
 // Classes for consent UI
 const consentUiClasses = {
   fullscreen: 'i-amphtml-consent-ui-fullscreen',
-  fullscreenExit: 'i-amphtml-consent-ui-fullscreen-exit',
   iframeActive: 'consent-iframe-active',
   uiIn: 'i-amphtml-consent-ui-in',
   loading: 'loading',
@@ -179,36 +178,30 @@ export class ConsentUI {
 
   /**
    * Hide the UI
-   * @return {!Promise}
    */
   hide() {
-    const resetIframeDeferred = new Deferred();
 
     if (!this.ui_) {
       // Nothing to hide from;
-      resetIframeDeferred.resolve();
-      return resetIframeDeferred.promise;
+      return;
     }
 
     if (this.isCreatedIframe_) {
-      this.resetIframe_(resetIframeDeferred.resolve);
-    } else {
-      resetIframeDeferred.resolve();
+      this.resetIframe_();
     }
 
-    return resetIframeDeferred.promise.then(() => {
-      if (!this.isPostPrompt_) {
-        const {classList} = this.parent_;
-        classList.remove('amp-active');
-        classList.add('amp-hidden');
-      }
-      // Need to remove from fixed layer and add it back to update element's top
-      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
-      if (this.ui_) {
-        toggle(this.ui_, false);
-      }
-      this.isVisible_ = false;
-    });
+    if (!this.isPostPrompt_) {
+      const {classList} = this.parent_;
+      classList.remove('amp-active');
+      classList.add('amp-hidden');
+    }
+
+    // Need to remove from fixed layer and add it back to update element's top
+    this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
+    if (this.ui_) {
+      toggle(this.ui_, false);
+    }
+    this.isVisible_ = false;
   }
 
   /**
@@ -284,7 +277,7 @@ export class ConsentUI {
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
     classList.remove('loading');
-    this.vsync_.mutate(() => {
+    this.baseInstance_.mutateElement(() => {
       classList.add(consentUiClasses.uiIn);
       classList.add(consentUiClasses.iframeActive);
     });
@@ -295,35 +288,26 @@ export class ConsentUI {
    * Remove event listener
    * Reset UI state
    * Takes in a function to call after our transition has ended
-   * @param {Function} callback
    */
-  resetIframe_(callback) {
+  resetIframe_() {
     const {classList} = this.parent_;
 
-    // Remove the iframe active to go back to our 30px height
+    // Remove the iframe active to go back to our normal height
     classList.remove('consent-iframe-active');
 
     if (this.isFullscreen_) {
       this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
 
-      classList.add(consentUiClasses.fullscreenExit);
       classList.remove(consentUiClasses.fullscreen);
-
       this.isFullscreen_ = false;
 
-      this.getTransformTransitionEndPromise_().then(() => {
-        classList.remove(consentUiClasses.fullscreenExit);
-        classList.remove(consentUiClasses.uiIn);
-        removeElement(dev().assertElement(this.ui_));
-        callback();
-      });
+      classList.remove(consentUiClasses.uiIn);
+      removeElement(dev().assertElement(this.ui_));
+
     } else {
       this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
       classList.remove(consentUiClasses.uiIn);
-      this.getTransformTransitionEndPromise_().then(() => {
-        removeElement(dev().assertElement(this.ui_));
-        callback();
-      });
+      removeElement(dev().assertElement(this.ui_));
     }
   }
 
@@ -364,22 +348,5 @@ export class ConsentUI {
       });
       return;
     }
-  }
-
-  /**
-   * Return a promise for our transform transition end
-   * @private
-   * @return {!Promise}
-   */
-  getTransformTransitionEndPromise_() {
-    const transitionEndDeferred = new Deferred();
-    const transitionEndHandler = event => {
-      if (event.propertyName === 'transform') {
-        transitionEndDeferred.resolve();
-        this.parent_.removeEventListener('transitionend', transitionEndHandler);
-      }
-    };
-    this.parent_.addEventListener('transitionend', transitionEndHandler);
-    return transitionEndDeferred.promise;
   }
 }

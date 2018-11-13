@@ -282,16 +282,17 @@ export class AmpConsent extends AMP.BaseElement {
           '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
-    consentUi.hide().then(() => {
-      const displayInstance = /** @type {string} */ (
-        this.currentDisplayInstance_);
-      if (this.dialogResolver_[displayInstance]) {
-        this.dialogResolver_[displayInstance]();
-        this.dialogResolver_[displayInstance] = null;
-      }
-      this.consentUIPendingMap_[displayInstance] = false;
-      this.currentDisplayInstance_ = null;
-    });
+    consentUi.hide();
+    const displayInstance = /** @type {string} */ (
+      this.currentDisplayInstance_);
+
+    if (this.dialogResolver_[displayInstance]) {
+      this.dialogResolver_[displayInstance]();
+      this.dialogResolver_[displayInstance] = null;
+    }
+
+    this.consentUIPendingMap_[displayInstance] = false;
+    this.currentDisplayInstance_ = null;
   }
 
   /**

@@ -104,10 +104,9 @@ describes.realWin('consent-ui', {
       consentUI.show();
       expect(parent.classList.contains('amp-active')).to.be.true;
       expect(parent).to.not.have.display('none');
-      return consentUI.hide().then(() => {
-        expect(parent.classList.contains('amp-active')).to.be.false;
-        expect(parent.classList.contains('amp-hidden')).to.be.true;
-      });
+      consentUI.hide();
+      expect(parent.classList.contains('amp-active')).to.be.false;
+      expect(parent.classList.contains('amp-hidden')).to.be.true;
     });
 
     it('append/remove iframe', () => {
@@ -119,9 +118,8 @@ describes.realWin('consent-ui', {
       expect(elementByTag(parent, 'iframe')).to.be.null;
       consentUI.show();
       expect(elementByTag(parent, 'iframe')).to.not.be.null;
-      consentUI.hide().then(() => {
-        expect(elementByTag(parent, 'iframe')).to.be.null;
-      });
+      consentUI.hide();
+      expect(elementByTag(parent, 'iframe')).to.be.null;
     });
   });
 });
