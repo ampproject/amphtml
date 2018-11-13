@@ -120,7 +120,7 @@
    *   //     },
    *   //     'tap red and blue button': async (page, name) => {
    *   //       await page.tap('#red_button');
-   *   //       await page.tap('#blue_button');   
+   *   //       await page.tap('#blue_button');
    *   //       await verifyCssElements(page, name, null,
    *   //         ['.red-loading', '.blue-loading'],
    *   //         ['.red-loaded', '.blue-loaded']);
