@@ -296,9 +296,13 @@ export class Gestures {
         this.stopTracking_(i);
         continue;
       }
+
+      const isReady = !this.pending_[i];
+      const isExpired = this.pending_[i] < now;
+      const isEventing = this.eventing_ == this.recognizers_[i];
+
       this.recognizers_[i].onTouchEnd(event);
-      if ((!this.pending_[i] || this.pending_[i] < now)
-        && this.eventing_ != this.recognizers_[i]) {
+      if (!isEventing && (isReady || isExpired)) {
         this.stopTracking_(i);
       }
     }
