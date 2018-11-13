@@ -893,7 +893,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           // Check if our imageBox has a width or height. We may be in the
           // gallery view if not, and we do not want to animate.
           if (!width || !height) {
-            return this.fade_(enter);
+            return this.fade_(/*fadeIn*/enter);
           }
 
           const lightboxImg = imageViewer.getImage();
@@ -1069,7 +1069,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
-      return this.fade_(true);
+      return this.fade_(/*fadeIn*/true);
     }
 
     return this.getCurrentElement_().imageViewer.signals()
@@ -1084,7 +1084,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   exit_() {
     if (!this.shouldAnimateOut_()) {
-      return this.fade_(false);
+      return this.fade_(/*fadeIn*/false);
     }
 
     return this.transitionImgOut_();
