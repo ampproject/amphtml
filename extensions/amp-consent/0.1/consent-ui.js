@@ -274,12 +274,23 @@ export class ConsentUI {
    */
   showIframe_() {
     const {classList} = this.parent_;
+    classList.add(consentUiClasses.iframeActive);
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
-    classList.remove('loading');
+
+    /**
+     * Waiting for mutation twice here.
+     * First mutation is for when the correct elements,
+     * are shown/hidden, and the iframe active class
+     * pushes it out of view.
+     * Second, is for the loading class to be removed.
+     * This will avoid race conditions with the slidein transition.
+     */
     this.baseInstance_.mutateElement(() => {
-      classList.add(consentUiClasses.uiIn);
-      classList.add(consentUiClasses.iframeActive);
+      classList.remove('loading');
+      this.baseInstance_.mutateElement(() => {
+        classList.add(consentUiClasses.uiIn);
+      });
     });
   }
 

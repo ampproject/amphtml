@@ -61,35 +61,19 @@ amp-consent.loading {
   width: 100%;
 }
 
-@keyframes consent-iframe-in {
-  0% {
-    transform: translate3d(0px, calc(100%), 0px);
-  }
-
-  100% {
-    transform: translate3d(0px, calc(100% - 30vh), 0px);
-  }
-}
-
 amp-consent.consent-iframe-active {
   height: 100vh !important;
+  transform: translate3d(0px, 100%, 0px) !important;
+}
+
+amp-consent.consent-iframe-active.i-amphtml-consent-ui-in {
+  transition: transform 0.5s ease-out !important;
   transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
-  animation: consent-iframe-in 0.5s ease-in-out !important;
 }
 
-@keyframes consent-iframe-enter-fullscreen {
-  0% {
-    transform: translate3d(0px, calc(100% - 30vh), 0px);
-  }
 
-  100% {
-    transform: translate3d(0px, calc(100% - 100vh), 0px);
-  }
-}
-
-amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
+amp-consent.consent-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
   transform: translate3d(0px, calc(100% - 100vh), 0px) !important;
-  animation: consent-iframe-enter-fullscreen 0.5s ease-out !important;
 }
 
 amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill {
