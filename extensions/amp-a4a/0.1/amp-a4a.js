@@ -227,8 +227,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
-    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
-    this.friendlyIframeEmbed_ = null;
+    /** @protected {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
+    this.friendlyIframeEmbed = null;
 
     /** @type {?AMP.AmpAdUIHandler} */
     this.uiHandler = null;
@@ -493,7 +493,7 @@ export class AmpA4A extends AMP.BaseElement {
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
-    if (this.friendlyIframeEmbed_) {
+    if (this.friendlyIframeEmbed) {
       return;
     }
     this.fromResumeCallback = true;
@@ -1104,9 +1104,9 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     // Allow embed to release its resources.
-    if (this.friendlyIframeEmbed_) {
-      this.friendlyIframeEmbed_.destroy();
-      this.friendlyIframeEmbed_ = null;
+    if (this.friendlyIframeEmbed) {
+      this.friendlyIframeEmbed.destroy();
+      this.friendlyIframeEmbed = null;
     }
     if (this.iframe && this.iframe.parentElement) {
       this.iframe.parentElement.removeChild(this.iframe);
@@ -1120,8 +1120,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.friendlyIframeEmbed_) {
-      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
+    if (this.friendlyIframeEmbed) {
+      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed, inViewport);
     }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
@@ -1395,7 +1395,7 @@ export class AmpA4A extends AMP.BaseElement {
               new A4AVariableSource(this.getAmpDoc(), embedWin));
         }).then(friendlyIframeEmbed => {
       checkStillCurrent();
-      this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+      this.friendlyIframeEmbed = friendlyIframeEmbed;
       setFriendlyIframeEmbedVisible(
           friendlyIframeEmbed, this.isInViewport());
       // Ensure visibility hidden has been removed (set by boilerplate).

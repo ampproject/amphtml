@@ -53,6 +53,8 @@ const rawCreative = `
       })), '*');
   </script>`;
 
+const mockPromise = {then: callback => callback()};
+
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
  * tests.
@@ -239,20 +241,20 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should resize slot and fire impression for AMP fluid creative', () => {
+  it('should fire impression for AMP fluid creative', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
-    sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.resolve());
-    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptChangeHeight').returns(mockPromise);
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(mockPromise);
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
     impl.buildCallback();
+    impl.friendlyIframeEmbed = {whenWindowLoaded: () => mockPromise};
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
-    return impl.layoutCallback().then(() => {
-      expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
-          .to.be.calledOnce;
-    });
+    impl.onCreativeRender();
+    expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
+        .to.be.calledOnce;
   });
 
   it('should set expansion re-attempt flag after initial failure', () => {
