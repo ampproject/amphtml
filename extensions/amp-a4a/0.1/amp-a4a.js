@@ -1217,7 +1217,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {?CreativeMetaDataDef} creativeMetaData metadata if AMP creative,
    *    null otherwise.
    * @param {!Promise=} opt_onLoadPromise Promise that resolves when the FIE's
-   *    child window fires on the `onload` event.
+   *    child window fires the `onload` event.
    */
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     this.maybeTriggerAnalyticsEvent_(
