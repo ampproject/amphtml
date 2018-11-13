@@ -889,9 +889,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   transitionImg_(sourceElement, enter) {
     return this.getCurrentElement_().imageViewer.getImpl()
         .then(imageViewer => {
-          const imageBox = imageViewer.getImageBoxWithOffset();
-          if (!imageBox) {
-            return this.fade_(0, 1);
+          const {width, height} = imageViewer.getImageBoxWithOffset();
+          // Check if our imageBox has a width or height. We may be in the
+          // gallery view if not, and we do not want to animate.
+          if (!width || !height) {
+            return this.fade_(/*fadeIn*/enter);
           }
 
           const lightboxImg = imageViewer.getImage();
@@ -1035,12 +1037,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * If no transition image is applicable, fade the lightbox in and out.
-   * @param {number} startOpacity
-   * @param {number} endOpacity
+   * @param {boolean} fadeIn Whether the lighbox is fading in or out.
    * @return {!Promise}
    * @private
    */
-  fade_(startOpacity, endOpacity) {
+  fade_(fadeIn) {
+    const startOpacity = fadeIn ? 0 : 1;
+    const endOpacity = fadeIn ? 1 : 0;
     const duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
     anim.add(0, setStylesTransition(this.element, {
@@ -1066,7 +1069,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   enter_() { // TODO (cathyxz): make this generalizable to more than just images
     const {sourceElement} = this.getCurrentElement_();
     if (!this.elementTypeCanBeAnimated_(sourceElement)) {
-      return this.fade_(0, 1);
+      return this.fade_(/*fadeIn*/true);
     }
 
     return this.getCurrentElement_().imageViewer.signals()
@@ -1081,7 +1084,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   exit_() {
     if (!this.shouldAnimateOut_()) {
-      return this.fade_(1, 0);
+      return this.fade_(/*fadeIn*/false);
     }
 
     return this.transitionImgOut_();
