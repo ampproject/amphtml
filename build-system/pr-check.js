@@ -327,7 +327,7 @@ const command = {
     timedExecOrDie('gulp css');
   },
   buildRuntime: function() {
-    timedExecOrDie('gulp build');
+    timedExecOrDie('gulp build --fortesting');
   },
   buildRuntimeMinified: function(extensions) {
     let cmd = 'gulp dist --fortesting';
