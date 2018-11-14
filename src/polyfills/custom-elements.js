@@ -59,7 +59,7 @@ const INVALID_NAMES = [
  * @param {string} name
  */
 function assertValidName(SyntaxError, name) {
-  if (!VALID_NAME.test(name) || INVALID_NAMES.indexOf(name) >= 0) {
+  if (!VALID_NAME.test(name) || INVALID_NAMES.includes(name)) {
     throw new SyntaxError(`invalid custom element name "${name}"`);
   }
 }
@@ -115,7 +115,7 @@ class CustomElementRegistry {
      * @private
      * @const
      */
-    this.pendingDefines_ = this.win_.Object.create(null);
+    this.pendingDefines_ = win.Object.create(null);
   }
 
   /**
@@ -230,6 +230,14 @@ class Registry {
      * @private {Element}
      */
     this.current_ = null;
+
+    /**
+     * Once started (after the first Custom Element definition), this tracks
+     * DOM append and removals.
+     *
+     * @private {MutationObserver}
+     */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -455,16 +463,28 @@ class Registry {
     this.query_ = name;
 
     // The first registered name starts the mutation observer.
-    const observer = new this.win_.MutationObserver(records => {
+    this.mutationObserver_ = new this.win_.MutationObserver(records => {
       if (records) {
-        this.handleRecords(records);
+        this.handleRecords_(records);
       }
     });
-    observer.observe(this.doc_, {
+    this.mutationObserver_.observe(this.doc_, {
       childList: true,
       subtree: true,
     });
-    installPatches(this.win_, this, observer);
+
+    installPatches(this.win_, this);
+  }
+
+  /**
+   * This causes a synchronous handling of all the Mutation Observer's tracked
+   * mutations. This does nothing until the mutation observer is actually
+   * registered on the first Custom Element definition.
+   */
+  sync() {
+    if (this.mutationObserver_) {
+      this.handleRecords_(this.mutationObserver_.takeRecords());
+    }
   }
 
   /**
@@ -475,7 +495,7 @@ class Registry {
    *
    * @param {!Array<!MutationRecord>} records
    */
-  handleRecords(records) {
+  handleRecords_(records) {
     for (let i = 0; i < records.length; i++) {
       const record = records[i];
       if (!record) {
@@ -508,9 +528,8 @@ class Registry {
  * Patches the DOM APIs to support synchronous Custom Elements.
  * @param {!Window} win
  * @param {!Registry} registry
- * @param {!MutationObserver} observer
  */
-function installPatches(win, registry, observer) {
+function installPatches(win, registry) {
   const {Document, Element, Node, Object} = win;
   const docProto = Document.prototype;
   const elProto = Element.prototype;
@@ -527,7 +546,7 @@ function installPatches(win, registry, observer) {
   // Patch createElement to immediately upgrade the custom element.
   // This has the added benefit that it avoids the "already created but needs
   // constructor code run" chicken-and-egg problem.
-  docProto.createElement = function createElementPatch(name) {
+  docProto.createElement = function(name) {
     const def = registry.getByName(name);
     if (def) {
       return new def.ctor();
@@ -537,7 +556,7 @@ function installPatches(win, registry, observer) {
 
   // Patch importNode to immediately upgrade custom elements.
   // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
-  docProto.importNode = function importNodePatch() {
+  docProto.importNode = function() {
     const imported = importNode.apply(this, arguments);
     if (imported) {
       registry.upgradeSelf(imported);
@@ -547,35 +566,35 @@ function installPatches(win, registry, observer) {
   };
 
   // Patch appendChild to upgrade custom elements before returning.
-  nodeProto.appendChild = function appendChildPatch() {
+  nodeProto.appendChild = function() {
     const appended = appendChild.apply(this, arguments);
-    registry.handleRecords(observer.takeRecords());
+    registry.sync();
     return appended;
   };
 
   // Patch insertBefore to upgrade custom elements before returning.
-  nodeProto.insertBefore = function insertBeforePatch() {
+  nodeProto.insertBefore = function() {
     const inserted = insertBefore.apply(this, arguments);
-    registry.handleRecords(observer.takeRecords());
+    registry.sync();
     return inserted;
   };
 
   // Patch removeChild to upgrade custom elements before returning.
-  nodeProto.removeChild = function removeChildPatch() {
+  nodeProto.removeChild = function() {
     const removed = removeChild.apply(this, arguments);
-    registry.handleRecords(observer.takeRecords());
+    registry.sync();
     return removed;
   };
 
   // Patch replaceChild to upgrade and detach custom elements before returning.
-  nodeProto.replaceChild = function replaceChildPatch() {
+  nodeProto.replaceChild = function() {
     const replaced = replaceChild.apply(this, arguments);
-    registry.handleRecords(observer.takeRecords());
+    registry.sync();
     return replaced;
   };
 
   // Patch cloneNode to immediately upgrade custom elements.
-  nodeProto.cloneNode = function cloneNodePatch() {
+  nodeProto.cloneNode = function() {
     const cloned = cloneNode.apply(this, arguments);
     registry.upgradeSelf(cloned);
     registry.upgrade(cloned);
@@ -587,7 +606,7 @@ function installPatches(win, registry, observer) {
   // connected, but we leave that to the Mutation Observer.
   const innerHTMLDesc = Object.getOwnPropertyDescriptor(elProto, 'innerHTML');
   const innerHTMLSetter = innerHTMLDesc.set;
-  innerHTMLDesc.set = function innerHtmlPatch(html) {
+  innerHTMLDesc.set = function(html) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
