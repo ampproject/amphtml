@@ -17,8 +17,6 @@
 import {Deferred} from '../../../../src/utils/promise';
 import {VisibilityModel} from '../visibility-model';
 
-const {fail} = assert;
-
 const NO_SPEC = {};
 const NO_CALC = () => 0;
 
@@ -1125,9 +1123,17 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
   });
 
-  describe('reportWhen accumulation', () => {
-    it('should not resolve immediately when zero visibility is permitted',
-        () => {
+  describe('reportWhen for non-visibile elements', () => {
+    beforeEach(() => {
+      sandbox.restore(); // Restore timers.
+    });
+
+    // Yields the thread to allow internal promises to complete.
+    const yieldThread =
+      async() => new Promise(resolve => setTimeout(resolve, 1));
+
+    it('should not trigger event immediately when zero visibility is permitted',
+        async() => {
           let visibility = 0;
           const vm = new VisibilityModel({
             reportWhen: 'documentExit',
@@ -1135,25 +1141,30 @@ describes.sandboxed('VisibilityModel', {}, () => {
             continuousTimeMin: 0,
           }, () => visibility);
 
-          vm.onTriggerEvent(() => {
-            fail('event should not trigger before reportWhen');
-          });
+          const spy = sandbox.spy();
+          vm.onTriggerEvent(spy);
 
           vm.update();
+          await yieldThread();
 
           visibility = 0.5;
           vm.update();
+          await yieldThread();
+
+          expect(spy).to.not.be.called;
         });
 
-    const shouldResolveTestSpecs = [
+    const shouldTriggerEventTestSpecs = [
       {reportWhen: 'documentExit', totalTimeMin: 0, continuousTimeMin: 0},
       {reportWhen: 'documentExit', totalTimeMin: 0, continuousTimeMin: 0,
         visiblePercentageMin: 50},
     ];
-    for (const i in shouldResolveTestSpecs) {
-      it(`should resolve on reportWhen when visibility is 0 if specified, ${i}`,
-          () => {
-            const vm = new VisibilityModel(shouldResolveTestSpecs[i], () => 0);
+
+    for (const i in shouldTriggerEventTestSpecs) {
+      it(`should trigger event, test case #${i}`,
+          async() => {
+            const vm =
+              new VisibilityModel(shouldTriggerEventTestSpecs[i], () => 0);
             vm.setReady(true);
 
             const spy = sandbox.spy();
@@ -1164,29 +1175,55 @@ describes.sandboxed('VisibilityModel', {}, () => {
             vm.setReportReady(createReportReadyPromise);
 
             vm.update();
+            await yieldThread();
             expect(spy).to.not.be.called;
 
-            // Note that visibility is zero.
             deferred.resolve();
+            await yieldThread();
+
             expect(spy).to.be.calledOnce;
           });
     }
 
-    const shouldNotResolveTestSpecs = [
-      // Missing continuousTimeMin and totalTimeMin
-      {reportWhen: 'documentExit'},
-      // Missing continuousTimeMin
-      {reportWhen: 'documentExit', totalTimeMin: 0},
-      // Missing totalTimeMin
-      {reportWhen: 'documentExit', continuousTimeMin: 0},
-      // Missing reportWhen
-      {visiblePercentageMin: 50, totalTimeMin: 0, continuousTimeMin: 0},
+    const shouldNotTriggerWhenHiddenTestCases = [
+      {
+        description: 'Missing continuousTimeMin and totalTimeMin',
+        spec: {reportWhen: 'documentExit'},
+      },
+      {
+        description: 'Missing continuousTimeMin',
+        spec: {reportWhen: 'documentExit', totalTimeMin: 0},
+      },
+      {
+        description: 'Missing totalTimeMin',
+        spec: {reportWhen: 'documentExit', continuousTimeMin: 0},
+      },
+      {
+        description: 'Missing reportWhen',
+        spec: {visiblePercentageMin: 50, totalTimeMin: 0, continuousTimeMin: 0},
+      },
+      {
+        description: 'Positive totalTimeMin and continuousTimeMin',
+        spec: {
+          reportWhen: 'documentExit', totalTimeMin: 2, continuousTimeMin: 2,
+        },
+      },
+      {
+        description: 'Positive totalTimeMin',
+        spec: {reportWhen: 'documentExit', totalTimeMin: 2},
+      },
+      {
+        description: 'Positive continuousTimeMin',
+        spec: {reportWhen: 'documentExit', continuousTimeMin: 2},
+      },
     ];
 
-    for (const i in shouldNotResolveTestSpecs) {
-      it('should not resolve on reportWhen when visibility is 0 if not ' +
-          `specified, ${i}`, () => {
-        const vm = new VisibilityModel(shouldNotResolveTestSpecs[i], () => 0);
+    for (const i in shouldNotTriggerWhenHiddenTestCases) {
+      const {description, spec} = shouldNotTriggerWhenHiddenTestCases[i];
+
+      it('should not trigger event if element is hidden, ' +
+        `test case ${description}`, async() => {
+        const vm = new VisibilityModel(spec, () => 0);
         vm.setReady(true);
 
         const spy = sandbox.spy();
@@ -1197,9 +1234,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vm.setReportReady(createReportReadyPromise);
 
         vm.update();
+        await yieldThread();
         expect(spy).to.not.be.called;
 
         deferred.resolve();
+        await yieldThread();
         expect(spy).to.not.be.called;
       });
     }
