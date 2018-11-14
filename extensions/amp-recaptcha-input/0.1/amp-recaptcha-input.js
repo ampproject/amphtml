@@ -79,7 +79,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     return this.mutateElement(() => {
       toggle(this.element);
       // Add the required AsyncInput class
-      this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+      this.element.classList.add(AsyncInputClasses['ASYNC_INPUT']);
       /**
        * We are applying styles here, to minizime the amp.css file.
        * These styles will create an in-place element, that is 1x1,
