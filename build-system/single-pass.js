@@ -48,6 +48,7 @@ const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 const commonJsModules = [
   'node_modules/dompurify/',
   'node_modules/promise-pjs/',
+  'node_modules/set-dom/'
 ];
 
 // Override to local closure compiler JAR
