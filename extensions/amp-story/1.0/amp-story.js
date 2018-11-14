@@ -348,9 +348,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
-    if (this.isDesktop_()) {
-      this.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
-    }
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
@@ -750,9 +748,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   whenPagesLoaded_(timeoutMs = 0) {
-    const pagesToWaitFor = this.isDesktop_() ?
-      [this.pages_[0], this.pages_[1]] :
-      [this.pages_[0]];
+    const pagesToWaitFor =
+        this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP ?
+          [this.pages_[0], this.pages_[1]] :
+          [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
         pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded()));
@@ -937,7 +936,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   performTapNavigation_(direction) {
-    if (this.isDesktop_()) {
+    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
       this.next_();
       return;
     }
@@ -1172,7 +1171,7 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.platform_.isSafari() && !this.platform_.isIos()) {
       return;
     }
-    if (this.isDesktop_()) {
+    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
       // Force repaint is only needed when transitioning from invisible to
       // visible
       return;
@@ -1258,8 +1257,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     this.updateViewportSizeStyles_();
 
-    const uiState = this.isDesktop_() ? UIType.DESKTOP : UIType.MOBILE;
-
+    const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
     if (uiState !== UIType.MOBILE) {
@@ -1316,12 +1314,14 @@ export class AmpStory extends AMP.BaseElement {
         this.shareMenu_.build();
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
+          this.element.removeAttribute('desktop-fullbleed');
         });
         break;
       case UIType.DESKTOP:
         this.setDesktopPositionAttributes_(this.activePage_);
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
+          this.element.removeAttribute('desktop-fullbleed');
         });
         if (!this.background_) {
           this.background_ = new AmpStoryBackground(this.win, this.element);
@@ -1331,20 +1331,48 @@ export class AmpStory extends AMP.BaseElement {
           this.updateBackground_(this.activePage_.element, /* initial */ true);
         }
         break;
+      case UIType.DESKTOP_FULLBLEED:
+        this.shareMenu_.build();
+        this.vsync_.mutate(() => {
+          this.element.setAttribute('desktop-fullbleed', '');
+          this.element.removeAttribute('desktop');
+        });
+        break;
     }
   }
 
   /**
+   * Retrieves the UI type that should be used to view the story.
+   * @return {!UIType}
+   * @private
+   */
+  getUIType_() {
+    if (!this.isDesktop_() ||
+        isExperimentOn(this.win, 'disable-amp-story-desktop')) {
+      return UIType.MOBILE;
+    }
+
+    if (this.element.getAttribute('desktop-mode') ===
+        UIType.DESKTOP_FULLBLEED) {
+      return UIType.DESKTOP_FULLBLEED;
+    }
+
+    // Three panels desktop UI (default).
+    return UIType.DESKTOP;
+  }
+
+  /**
    * @return {boolean} True if the screen size matches the desktop media query.
+   * @private
    */
   isDesktop_() {
-    return this.desktopMedia_.matches && !this.platform_.isBot() &&
-        !isExperimentOn(this.win, 'disable-amp-story-desktop');
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
    * @return {boolean} true if this is a standalone story (i.e. this story is
    *     the only content of the document).
+   * @private
    */
   isStandalone_() {
     return this.element.hasAttribute(Attributes.STANDALONE);
@@ -1516,14 +1544,12 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Toggle content when bookend is opened/closed.
-   * TODO(gmajoulet): these elements should get hidden by listening to bookend
-   *                  state events.
+   * Toggles content when bookend is opened/closed.
    * @param {boolean} isActive
    * @private
    */
   toggleElementsOnBookend_(isActive) {
-    if (!this.isDesktop_()) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP) {
       return;
     }
 
@@ -1704,7 +1730,7 @@ export class AmpStory extends AMP.BaseElement {
     // TODO(newmuis): Change this comment.
     // On mobile there is always a bookend. On desktop, the bookend will only
     // be shown if related articles have been configured.
-    if (!this.isDesktop_()) {
+    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE) {
       return Promise.resolve(true);
     }
 
