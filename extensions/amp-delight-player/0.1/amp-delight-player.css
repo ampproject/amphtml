@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-amp-story[scroll] {
-  overflow-y: auto !important;
+amp-delight-player [placeholder] {
+  transition: opacity 0.5s ease-out;
+  background: no-repeat 50%;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
 }
 
-[scroll] amp-story-page {
-  position: relative !important;
-  height: 100vh !important;
-}
-
-[scroll] amp-story-page[distance] {
-  transform: none !important;
+amp-delight-player [placeholder].i-amphtml-delight-player-faded {
+  opacity: 0;
+  pointer-events: none;
 }

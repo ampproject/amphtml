@@ -41,6 +41,7 @@ import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
+import {toggle} from '../../../../src/style';
 
 
 /** @private @const {string} */
@@ -51,7 +52,7 @@ const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
 
 /**
- * Key for omponents in bookend config.
+ * Key for components in bookend config.
  * @private @const {string}
  */
 const BOOKEND_VERSION_KEY = 'bookendVersion';
@@ -92,7 +93,7 @@ const REPLAY_ICON_TEMPLATE = {
 };
 
 /** @type {string} */
-const TAG = 'amp-story';
+const TAG = 'amp-story-bookend';
 
 /**
  * @param {string} title
@@ -192,12 +193,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
     this.replayButton_ = null;
 
     /**
-     * Root element containing a shadow DOM root.
-     * @private {?Element}
-     */
-    this.root_ = null;
-
-    /**
      * Actual bookend.
      * @private {?Element}
      */
@@ -222,10 +217,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win.document.createElement('div');
     this.bookendEl_ = renderAsElement(this.win.document, ROOT_TEMPLATE);
 
-    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
+    createShadowRootWithStyle(this.element, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -249,9 +243,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
     this.initializeListeners_();
 
-    this.mutateElement(() => {
-      this.element.parentElement.appendChild(this.getRoot());
-    });
+    // Removes the [hidden] attribute the runtime sets because of the
+    // [layout="nodisplay"].
+    toggle(this.element, true);
   }
 
   /**
@@ -305,7 +299,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onReplayButtonClick_(event) {
     event.stopPropagation();
-    dispatch(this.win, this.getRoot(), EventType.REPLAY,
+    dispatch(this.win, this.element, EventType.REPLAY,
     /* payload */ undefined, {bubbles: true});
   }
 
@@ -402,7 +396,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
             response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
       } else {
-        // TODO(#14667): Write doc regarding amp-story bookend v1.0.
         dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
         `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
       }
@@ -529,12 +522,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
           user().error(TAG, 'Unable to fetch localization service.', e.message);
           return null;
         });
-  }
-
-  /** @return {!Element} */
-  getRoot() {
-    this.assertBuilt_();
-    return dev().assertElement(this.root_);
   }
 
   /** @return {!Element} */

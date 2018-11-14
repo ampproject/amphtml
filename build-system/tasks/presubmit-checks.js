@@ -100,6 +100,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -875,6 +876,7 @@ const forbiddenTermsSrcInclusive = {
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
       'build-system/app-video-testbench.js',
@@ -903,9 +905,6 @@ const forbiddenTermsSrcInclusive = {
       'src/mode.js',
       'dist.3p/current/integration.js',
     ],
-  },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1066,7 +1065,8 @@ function hasAnyTerms(file) {
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
   const isA4A = /\/a4a\//.test(pathname);
-  if (is3pFile && !isTestFile && !isA4A) {
+  const isRecaptcha = basename == 'recaptcha.js';
+  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

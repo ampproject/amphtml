@@ -656,6 +656,16 @@ export class AmpSlideScroll extends BaseSlides {
         this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
+    // If we have a specified number of autoplay loops and
+    // we have reached the last slide in the set
+    // carry out removing autoplay logic.
+    // This only works because the initial Slide is always the first slide.
+    if (this.autoplayLoops_ && this.slideIndex_ === this.noOfSlides_ - 1) {
+      this.loopsMade_++;
+      if (this.loopsMade_ == this.autoplayLoops_) {
+        this.removeAutoplay();
+      }
+    }
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
     this.updateButtonTitles();
@@ -716,7 +726,8 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        dev().assertElement(this.slideWrappers_[i]).classList
+            .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide

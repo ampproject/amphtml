@@ -488,11 +488,35 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         granted: true, grantReason: GrantReason.SUBSCRIBER});
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.resolve(entitlement));
-      const resetStub = sandbox.stub(subscriptionService.platformStore_,
+      const resetEntitlementsStub = sandbox.stub(
+          subscriptionService.platformStore_,
           'resetEntitlementFor');
       sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
       return subscriptionService.reAuthorizePlatform(platform).then(() => {
-        expect(resetStub).to.be.calledOnce.calledWith('local');
+        expect(resetEntitlementsStub).to.be.calledOnce.calledWith('local');
+      });
+    });
+
+    it('should reset UI in all platforms on re-authorization', () => {
+      const entitlement = Entitlement.empty('local');
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => Promise.resolve(entitlement));
+      sandbox.stub(subscriptionService.platformStore_, 'resetEntitlementFor');
+      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+
+      const localResetStub = sandbox.stub(platform, 'reset');
+      subscriptionService.platformStore_.resolvePlatform('local', platform);
+
+      const otherPlatform = new LocalSubscriptionPlatform(ampdoc,
+          serviceConfig.services[0],
+          serviceAdapter);
+      const otherResetStub = sandbox.stub(otherPlatform, 'reset');
+      subscriptionService.platformStore_.resolvePlatform(
+          'other', otherPlatform);
+
+      return subscriptionService.reAuthorizePlatform(platform).then(() => {
+        expect(localResetStub).to.be.calledOnce;
+        expect(otherResetStub).to.be.calledOnce;
       });
     });
   });

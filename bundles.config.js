@@ -83,6 +83,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
+  {
+    name: 'amp-delight-player',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
+  },
   {name: 'amp-brightcove', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-byside-content',
@@ -226,6 +232,7 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {name: 'amp-skimlinks', version: '0.1', type: TYPES.MISC},
   {name: 'amp-soundcloud', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-springboard-player', version: '0.1', type: TYPES.MEDIA},
   {
@@ -236,11 +243,31 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
+        'amp-story-consent',
+        'amp-story-hint',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
+        'amp-story-info-dialog',
+        'amp-story-share',
+        'amp-story-share-menu',
+        'amp-story-system-layer',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story',
+    version: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-bookend',
+        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
         'amp-story-unsupported-browser-layer',
@@ -390,6 +417,7 @@ exports.extensionBundles = [
   {name: 'amp-yotpo', version: '0.1', type: TYPES.MISC},
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
 ];
 
 exports.aliasBundles = [
