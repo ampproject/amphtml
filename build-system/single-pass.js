@@ -443,6 +443,7 @@ function getExtensionBundleConfig(filename) {
 }
 
 const knownExtensions = {
+  mjs: true,
   js: true,
   es: true,
   es6: true,
