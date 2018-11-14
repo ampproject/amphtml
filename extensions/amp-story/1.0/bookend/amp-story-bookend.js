@@ -52,7 +52,7 @@ const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
 
 /**
- * Key for omponents in bookend config.
+ * Key for components in bookend config.
  * @private @const {string}
  */
 const BOOKEND_VERSION_KEY = 'bookendVersion';
@@ -396,7 +396,6 @@ export class AmpStoryBookend extends AMP.BaseElement {
             response[DEPRECATED_SHARE_PROVIDERS_KEY],
         });
       } else {
-        // TODO(#14667): Write doc regarding amp-story bookend v1.0.
         dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
         `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
       }

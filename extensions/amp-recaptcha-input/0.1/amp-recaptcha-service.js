@@ -26,9 +26,6 @@ import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  getDevelopmentBootstrapBaseUrl,
-} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -72,6 +69,9 @@ export class AmpRecaptchaService {
     /** @const @private {!Window} */
     this.win_ = this.ampdoc_.win;
 
+    /** @private {?string} */
+    this.sitekey_ = null;
+
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -98,9 +98,18 @@ export class AmpRecaptchaService {
    * @return {Promise}
    */
   register(sitekey) {
+    if (!this.sitekey_) {
+      this.sitekey_ = sitekey;
+    } else if (this.sitekey_ !== sitekey) {
+      return Promise.reject(
+          new Error('You must supply the same sitekey ' +
+          'to all amp-recaptcha-input elements.')
+      );
+    }
+
     this.registeredElementCount_++;
     if (!this.iframeLoadPromise_) {
-      this.iframeLoadPromise_ = this.initialize_(sitekey);
+      this.iframeLoadPromise_ = this.initialize_();
     }
     return this.iframeLoadPromise_;
   }
@@ -122,17 +131,15 @@ export class AmpRecaptchaService {
    * Takes in an element resource ID, sitekey, and the action to execute.
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
-   * @param {string} sitekey
    * @param {string} action
    * @return {Promise}
    */
-  execute(resourceId, sitekey, action) {
+  execute(resourceId, action) {
     if (!this.iframe_) {
       return Promise.reject(new Error(
           'An iframe is not created. You must register before executing'
       ));
     }
-
     const executePromise = new Deferred();
     const messageId = resourceId;
     this.executeMap_[messageId] = {
@@ -143,7 +150,6 @@ export class AmpRecaptchaService {
 
       const message = dict({
         'id': messageId,
-        'sitekey': sitekey,
         'action': 'amp_' + action,
       });
 
@@ -161,11 +167,10 @@ export class AmpRecaptchaService {
   /**
    * Function to create our recaptcha boostrap iframe.
    * Should be assigned to this.iframeLoadPromise_
-   * @param {string} sitekey
    * @private
    */
-  initialize_(sitekey) {
-    return this.createRecaptchaFrame_(sitekey).then(iframe => {
+  initialize_() {
+    return this.createRecaptchaFrame_().then(iframe => {
       this.iframe_ = iframe;
 
       this.unlisteners_ = [
@@ -205,11 +210,11 @@ export class AmpRecaptchaService {
   /**
    * Function to create our bootstrap iframe.
    *
-   * @param {string} sitekey
    * @return {!Promise<!Element>}
    * @private
    */
-  createRecaptchaFrame_(sitekey) {
+  createRecaptchaFrame_() {
+
     const iframe = this.win_.document.createElement('iframe');
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
@@ -217,7 +222,7 @@ export class AmpRecaptchaService {
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute('name', JSON.stringify(dict({
-        'sitekey': sitekey,
+        'sitekey': this.sitekey_,
         'sentinel': 'amp-recaptcha',
       })));
       iframe.classList.add('i-amphtml-recaptcha-iframe');
@@ -247,9 +252,14 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      return tryResolve(() => {
-        return getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha');
-      });
+      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
+          .then(curlsSubdomain => {
+            return 'http://' + curlsSubdomain +
+          '.recaptcha.localhost:8000/dist.3p/' +
+          (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
+            : 'current/recaptcha.max') +
+          '.html';
+          });
     }
 
     // Need to have the curls subdomain match the original document url.
