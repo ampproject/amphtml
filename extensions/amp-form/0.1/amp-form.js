@@ -700,16 +700,19 @@ export class AmpForm {
    * @private
    */
   getValueForAsyncInput_(asyncInput) {
-    return asyncInput.implementation_.getValue().then(value => {
-      const name = asyncInput.getAttribute('data-name');
-      let input = this.form_.querySelector(`input[name=${name}]`);
-      if (!input) {
-        input = document.createElement('input');
-        input.setAttribute('name', asyncInput.getAttribute('data-name'));
-      }
-      input.setAttribute('hidden', 'true');
-      input.setAttribute('value', value);
-      this.form_.appendChild(input);
+    return asyncInput.getImpl().then(implementation => {
+      return implementation.getValue().then(value => {
+        const name = asyncInput.getAttribute('data-name');
+        let input = this.form_
+            .querySelector(`input[name=${escapeCssSelectorIdent(name)}]`);
+        if (!input) {
+          input = document.createElement('input');
+          input.setAttribute('name', asyncInput.getAttribute('data-name'));
+        }
+        input.setAttribute('hidden', 'true');
+        input.setAttribute('value', value);
+        this.form_.appendChild(input);
+      });
     });
   }
 
