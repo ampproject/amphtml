@@ -1456,7 +1456,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          placeholder.classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
