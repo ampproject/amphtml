@@ -213,6 +213,7 @@ tags: {
     value_url: {
       protocol: "http"
       protocol: "https"
+      protocol: "data"
     }
   }
   attrs: {
@@ -319,6 +320,7 @@ tags: {
     value_url: {
       protocol: "http"
       protocol: "https"
+      protocol: "data"
     }
   }
   attrs: { name: "animate-in-after" }

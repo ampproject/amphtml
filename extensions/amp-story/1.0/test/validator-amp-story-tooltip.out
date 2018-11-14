@@ -31,8 +31,11 @@ PASS
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
 |      <amp-story-page id="fill-template-title">
 |        <amp-story-grid-layer template="vertical">
-|          <a href="googlex.com" role="link" data-tooltip-icon="/my-icon" data-tooltip-text="click me">TOOLTIP</a>
-|          <a href="googlex.com" role="link" data-tooltip-icon="/my-icon" data-tooltip-text="click me" target="_blank">TOOLTIP</a>
+|          <a href="googlex.com" role="link" data-tooltip-icon="/my-icon" data-tooltip-text="click me">Tooltip</a>
+|          <a href="googlex.com" role="link" data-tooltip-icon="/my-icon" data-tooltip-text="click me" target="_blank">Tooltip</a>
+|          <a href="googlex.com" role="link" data-tooltip-icon="/my-icon">Tooltip with no text</a>
+|          <a href="googlex.com" role="link" data-tooltip-text="click me">Tooltip with no icon</a>
+|          <a href="googlex.com" role="link">Tooltip with neither text nor icon</a>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |    </amp-story>
