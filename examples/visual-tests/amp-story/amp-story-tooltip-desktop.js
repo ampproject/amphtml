@@ -20,9 +20,8 @@ const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/hel
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitFor(1000);
+    await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
-    await page.waitFor(1000);
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
@@ -30,7 +29,7 @@ module.exports = {
   },
   'tapping outside tooltip should hide it': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitFor(1000);
+    await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('.i-amphtml-story-tooltip-layer');
@@ -41,7 +40,7 @@ module.exports = {
   },
   'tapping on tooltip should keep it open': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitFor(1000);
+    await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('a.i-amphtml-story-tooltip');
@@ -52,10 +51,11 @@ module.exports = {
   },
   'tapping arrow when tooltip is open should navigate': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
-    await page.waitFor(1000);
+    await page.waitFor('amp-story-page#page-2[active]');
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.tap('button.i-amphtml-story-button-move');
+    await page.waitFor(150);
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
