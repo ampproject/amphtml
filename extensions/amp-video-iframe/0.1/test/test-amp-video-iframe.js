@@ -129,20 +129,6 @@ describes.realWin('amp-video-iframe', {
       expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
     });
 
-    it('rejects ads', () => {
-      const adSizes = [
-        [300, 250],
-        [320, 50],
-        [300, 50],
-        [320, 100],
-      ];
-
-      adSizes.forEach(size => {
-        const videoIframe = createVideoIframe(size);
-        expect(whenLoaded(videoIframe)).to.eventually.be.rejected;
-      });
-    });
-
     it('rejects tracking iframes', () => {
       const trackingSizes = [
         [10, 10],
