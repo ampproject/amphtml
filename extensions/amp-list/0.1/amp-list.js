@@ -124,9 +124,6 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {boolean} */
-    this.hasResizableChildren_ = false;
-
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
@@ -136,7 +133,8 @@ export class AmpList extends AMP.BaseElement {
 
     this.registerAction('containerize',
         () => this.changeToLayoutContainer_(),
-        ActionTrust.LOW);
+        ActionTrust.HIGH);
+
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
@@ -172,15 +170,6 @@ export class AmpList extends AMP.BaseElement {
           ' is disabled. This feature will be relaunched under a new name' +
           ' soon. Please see https://github.com/ampproject/amphtml/issues/18849'
       );
-    }
-
-    // TODO(aghassemi): New name to be vetted, since under an experiment flag,
-    // going with `resizable-children` fo now but we can change it.
-    this.hasResizableChildren_ =
-      this.element.hasAttribute('resizable-children');
-    if (this.hasResizableChildren_) {
-      user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
-          'Experiment amp-list-resizable-children is disabled');
     }
 
     Services.bindForDocOrNull(this.element).then(bind => {
@@ -576,13 +565,6 @@ export class AmpList extends AMP.BaseElement {
 
       // Attempt to resize to fit new rendered contents.
       this.attemptToFit_(this.container_);
-
-      if (this.hasResizableChildren_) {
-        // If the element's size was changed, change to container layout
-        // if the resizable-children attribute is set.
-        this.element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END)
-            .then(() => this.changeToLayoutContainer_());
-      }
     });
   }
 
@@ -601,9 +583,6 @@ export class AmpList extends AMP.BaseElement {
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
         this.attemptChangeHeight(scrollHeight).catch(() => {});
-      } else if (scrollHeight == height
-          && this.hasResizableChildren_) {
-        this.changeToLayoutContainer_();
       }
     });
   }
@@ -655,6 +634,10 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
+    // TODO (#18875): cleanup resizable-children experiment
+    user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
+        'Experiment amp-list-resizable-children is disabled');
+
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
