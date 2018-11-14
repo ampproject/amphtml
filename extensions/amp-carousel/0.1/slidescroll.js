@@ -726,7 +726,8 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        dev().assertElement(this.slideWrappers_[i]).classList
+            .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
