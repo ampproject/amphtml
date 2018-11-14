@@ -363,6 +363,7 @@ export class VisibilityManager {
 
       } else {
         state['opacity'] = this.getRootMinOpacity();
+        state['intersectionRatio'] = this.getRootVisibility();
         layoutBox = this.getRootLayoutBox();
       }
       model.maybeDispose();

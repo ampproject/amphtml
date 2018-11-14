@@ -439,6 +439,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.elementY).to.equal(21);
       expect(state.elementWidth).to.equal(101);
       expect(state.elementHeight).to.equal(201);
+      expect(state.intersectionRatio).to.equal(1);
     });
   });
 
@@ -470,6 +471,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(22);
+      expect(state.intersectionRatio).to.equal(1);
     });
   });
 
