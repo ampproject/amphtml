@@ -130,10 +130,11 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    this.registerAction('containerize',
-        () => this.changeToLayoutContainer_(),
-        ActionTrust.HIGH);
-
+    if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
+      this.registerAction('containerize',
+          () => this.changeToLayoutContainer_(),
+          ActionTrust.HIGH);
+    }
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
