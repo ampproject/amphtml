@@ -876,7 +876,11 @@ class TransferLayerBody {
     return this.layer_;
   }
 
-  /** @override */
+  /**
+   * Synchronizes any attribute mutations done on the real body to the layer.
+   * This is to better simulate the body in CSS selectors.
+   * @override
+   */
   update() {
     const {body} = this.doc_;
     const layer = this.layer_;
@@ -884,6 +888,8 @@ class TransferLayerBody {
     const layerAttrs = layer.attributes;
     for (let i = 0; i < bodyAttrs.length; i++) {
       const {name, value} = bodyAttrs[i];
+      // Style is not copied because the fixed-layer must have very precise
+      // styles to enable smooth scrolling.
       if (name === 'style') {
         continue;
       }
