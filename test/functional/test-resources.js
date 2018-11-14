@@ -1644,9 +1644,11 @@ describe('Resources discoverWork', () => {
 
       const passCallback = sandbox.spy();
       resources.onNextPass(passCallback);
+      
       resources.doPass();
-      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
 
+      resources.doPass();
       expect(passCallback).to.be.calledOnce;
     });
   });

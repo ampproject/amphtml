@@ -244,12 +244,6 @@ export class IntersectionObserverPolyfill {
 
     /** @private {Pass} */
     this.mutationPass_ = null;
-
-    /** @private {?./service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = null;
-
-    /** @private {?./service/resources-impl.Resources} */
-    this.resources_ = null;
   }
 
   /**
@@ -297,18 +291,9 @@ export class IntersectionObserverPolyfill {
     // from multiple documents.
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
-
-      if (!this.viewport_) {
-        this.viewport_ = Services.viewportForDoc(element);
-      }
-
-      if (!this.resources_) {
-        this.resources_ = Services.resourcesForDoc(ampdoc);
-      }
-
       this.mutationPass_ = new Pass(
           ampdoc.win,
-          this.handleMutationObserverPass_.bind(this)
+          this.handleMutationObserverPass_.bind(this, element)
       );
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
@@ -441,14 +426,15 @@ export class IntersectionObserverPolyfill {
    * Handle Mutation Observer Pass
    * This performas the tick, and is wrapped in a paas
    * To handle throttling of the observer
+   * @param {!Element} element
    * @private
    */
-  handleMutationObserverPass_() {
-    if (this.viewport_ && this.resources_) {
-      this.resources_.onNextPass(() => {
-        this.tick(this.viewport_.getRect());
-      });
-    }
+  handleMutationObserverPass_(element) {
+    const viewport = Services.viewportForDoc(element);
+    const resources =  Services.resourcesForDoc(element);
+    resources.onNextPass(() => {
+      this.tick(viewport.getRect());
+    });
   }
 
   /**
