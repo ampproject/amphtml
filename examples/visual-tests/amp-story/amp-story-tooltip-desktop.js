@@ -19,18 +19,17 @@ const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/hel
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor(1000);
     await page.tap('a.title-small.center');
+    await page.waitFor(1000);
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
       /* loadingCompleteCss */ ['a.i-amphtml-story-tooltip']);
   },
   'tapping outside tooltip should hide it': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor(1000);
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
@@ -41,8 +40,7 @@ module.exports = {
       /* loadingCompleteCss */ ['.i-amphtml-story-tooltip-layer.i-amphtml-hidden']);
   },
   'tapping on tooltip should keep it open': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor(1000);
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
@@ -53,12 +51,11 @@ module.exports = {
       /* loadingCompleteCss */ ['a.i-amphtml-story-tooltip']);
   },
   'tapping arrow when tooltip is open should navigate': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor(1000);
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.tap('button.i-amphtml-story-tooltip-nav-button-left');
+    await page.tap('button.i-amphtml-story-button-move');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
