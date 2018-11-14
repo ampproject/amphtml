@@ -26,7 +26,7 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../../exec');
+const {execOrDie, execScriptAsync} = require('../../exec');
 const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
@@ -53,9 +53,6 @@ const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
-
-const preVisualDiffTasks =
-    (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
 let browser_;
 let webServerProcess_;
@@ -564,6 +561,23 @@ async function visualDiff() {
   await runVisualTests(
       visualTestsConfig.asset_globs, visualTestsConfig.webpages);
   process.exit(0);
+}
+
+function preVisualDiffTasks() {
+  if (argv.verify_status) {
+    return;
+  }
+  if (argv.nobuild) {
+    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
+        fs.readFileSync('dist/amp.js', 'utf8'));
+    if (!isInTestMode) {
+      log('fatal', 'AMP was not build in test mode. Run',
+          colors.cyan('gulp build --fortesting'), 'or remove the',
+          colors.cyan('--nobuild'), 'option from this command');
+    }
+  } else {
+    execOrDie('gulp build --fortesting');
+  }
 }
 
 function setupCleanup_() {
