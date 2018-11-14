@@ -383,7 +383,7 @@ describes.realWin('amp-story', {
   });
 
   it('should detect fullbleed desktop mode', () => {
-    const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
+    createPages(story.element, 4, ['cover', '1', '2', '3']);
     story.element.setAttribute('desktop-mode', 'fullbleed');
 
     // Don't do this at home. :(
@@ -394,7 +394,7 @@ describes.realWin('amp-story', {
     return story.layoutCallback()
         .then(() => {
           expect(story.storeService_.get(StateProperty.UI_STATE))
-              .to.equals(UIType.FULLBLEED);
+              .to.equals(UIType.DESKTOP_FULLBLEED);
         });
   });
 

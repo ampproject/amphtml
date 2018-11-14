@@ -52,7 +52,7 @@ export const getStoreService = win => {
 export const UIType = {
   MOBILE: 'mobile',
   DESKTOP: 'desktop',
-  FULLBLEED: 'fullbleed',
+  DESKTOP_FULLBLEED: 'fullbleed',
 };
 
 

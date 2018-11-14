@@ -1331,7 +1331,7 @@ export class AmpStory extends AMP.BaseElement {
           this.updateBackground_(this.activePage_.element, /* initial */ true);
         }
         break;
-      case UIType.FULLBLEED:
+      case UIType.DESKTOP_FULLBLEED:
         this.shareMenu_.build();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop-fullbleed', '');
@@ -1352,8 +1352,9 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.MOBILE;
     }
 
-    if (this.element.getAttribute('desktop-mode') === UIType.FULLBLEED) {
-      return UIType.FULLBLEED;
+    if (this.element.getAttribute('desktop-mode') ===
+        UIType.DESKTOP_FULLBLEED) {
+      return UIType.DESKTOP_FULLBLEED;
     }
 
     // Three panels desktop UI (default).
