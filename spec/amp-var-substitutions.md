@@ -686,7 +686,7 @@ requested attribute names and the object values are the elements' values for tho
 
 #### Intersection Ratio
 
-Provides the fraction of the selected element that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
+Provides the fraction of the target that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${intersectionRatio}`
