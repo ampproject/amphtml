@@ -1251,6 +1251,7 @@ export class VisibilityTracker extends EventTracker {
     // On mobile Chrome, and mobile Firefox, neither of these will fire if the
     // user presses the home button, uses the OS task switcher to switch to
     // a different app, answers an incoming call, etc.
+
     root.addEventListener('unload', unloadListener = () => {
       root.removeEventListener('unload', unloadListener);
       deferred.resolve();
@@ -1267,7 +1268,6 @@ export class VisibilityTracker extends EventTracker {
       root.removeEventListener('pagehide', pageHideListener);
       deferred.resolve();
     });
-
     return deferred.promise;
   }
 
