@@ -114,12 +114,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('toggle', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id: %s',
-              sectionId);
-          this.toggle_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          user().assert(sectionEl, 'No element found with id: %s', sectionId);
+          this.toggle_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.toggle_(this.sections_[i]);
@@ -129,12 +127,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('expand', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id: %s',
-              sectionId);
-          this.expand_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          user().assert(sectionEl, 'No element found with id: %s', sectionId);
+          this.expand_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.expand_(this.sections_[i]);
@@ -144,12 +140,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('collapse', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          const sectionEl = this.getAmpDoc().getElementById(sectionId);
-          user().assertElement(
-              sectionEl,
-              'No element found with id: %s',
-              sectionId);
-          this.collapse_(dev().assertElement(sectionEl));
+          let sectionEl = this.getAmpDoc().getElementById(sectionId);
+          sectionEl = user().assertElement(sectionEl);
+          user().assert(sectionEl, 'No element found with id: %s', sectionId);
+          this.collapse_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
             this.collapse_(this.sections_[i]);
