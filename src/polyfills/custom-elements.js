@@ -729,21 +729,22 @@ function subClass(Object, superClass, subClass) {
 }
 
 /**
- * Polyfills Custom Elements v1 API. This has 4 modes:
+ * Polyfills Custom Elements v1 API. This has 5 modes:
  *
  * 1. Custom elements v1 already supported, using native classes
  * 2. Custom elements v1 already supported, using transpiled classes
  * 3. Custom elements v1 not supported, using native classes
  * 4. Custom elements v1 not supported, using transpiled classes
+ * 5. No sample class constructor provided
  *
  * In mode 1, nothing is done. In mode 2, a minimal polyfill is used to support
- * extending the HTMLElement base class. In mode 3 and 4, a full polyfill is
+ * extending the HTMLElement base class. In mode 3, 4, and 5 a full polyfill is
  * done.
  *
  * @param {!Window} win
- * @param {!Function} ctor
+ * @param {!Function=} opt_ctor
  */
-export function install(win, ctor) {
+export function install(win, opt_ctor) {
   if (isPatched(win)) {
     return;
   }
@@ -751,7 +752,7 @@ export function install(win, ctor) {
   let install = true;
   let installWrapper = false;
 
-  if (hasCustomElements(win)) {
+  if (opt_ctor && hasCustomElements(win)) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
@@ -759,8 +760,8 @@ export function install(win, ctor) {
       const {Object, Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = Object.create(ctor.prototype);
-      ctor.call(instance);
+      const instance = Object.create(opt_ctor.prototype);
+      opt_ctor.call(instance);
 
       // If that succeeded, we're in a transpiled environment
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
