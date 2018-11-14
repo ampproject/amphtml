@@ -46,13 +46,13 @@ if (!singlePassDest.endsWith('/')) {
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
 // Since we no longer pass the process_common_js_modules flag to closure
-// compiler, we must now tranform these common JS modules to ESM before passing
-// them to closure.
-// TODO(rsimha, erwinmombay): Derive this list programmatically.
-const commonJsNodeModules = [
+// compiler, we must now tranform these common JS node_modules to ESM before
+// passing them to closure.
+// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
+const commonJsModules = [
   'node_modules/dompurify/',
   'node_modules/promise-pjs/',
-  'node_modules/set-dom/'
+  'node_modules/set-dom/',
 ];
 
 // Override to local closure compiler JAR
