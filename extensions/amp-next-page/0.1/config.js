@@ -84,7 +84,7 @@ function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
       user().assertString(selector,
-          'amp-next-page hideSelector value should be a string: ');
+          'amp-next-page hideSelector value should be a string');
       user().assert(!pattern.test(selector),
           'amp-next-page hideSelector %s not allowed', selector);
     });
