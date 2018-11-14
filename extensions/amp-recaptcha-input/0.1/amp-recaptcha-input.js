@@ -20,7 +20,10 @@
  * recaptcha tokens
  */
 
-import {AsyncInputClasses} from '../../../src/async-input';
+import {
+  AsyncInputAttributes,
+  AsyncInputClasses
+} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
@@ -73,6 +76,12 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         this.element.getAttribute('data-action'),
         'The data-action attribute is required for <amp-recaptcha-input> %s',
         this.element);
+
+    user().assert(
+      this.element.getAttribute(AsyncInputAttributes['NAME']),
+      'The %s attribute is required for <amp-recaptcha-input> %s',
+      AsyncInputAttributes['NAME'],
+      this.element);
 
     this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
 

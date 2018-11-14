@@ -40,6 +40,27 @@ export class AsyncInput {
 }
 
 /**
+ * Attributes
+ *
+ * Components implementing the AsyncInput,
+ * are expected to assert these attributes
+ * at the appropriate time.
+ *
+ * @constant {!Object<string, string>}
+ */
+export const AsyncInputAttributes = {
+  /**
+   * data-name
+   *
+   * Required attribute that must be asserted by every async-input
+   * Element. This is used by AMP form to add the key
+   * for the form submission request
+  */
+  'NAME': 'data-name',
+};
+
+
+/**
  * Classes
  *
  * Components implementing the AsyncInput,
