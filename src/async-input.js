@@ -57,6 +57,6 @@ export const AsyncInputClasses = {
    * This will be used by other amp components to find
    * and use async-input elements.
    */
-  ASYNC_INPUT: 'i-amphtml-async-input',
+  'ASYNC_INPUT': 'i-amphtml-async-input',
 };
 
