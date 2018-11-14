@@ -434,10 +434,10 @@ export class VisibilityModel {
 
     return this.explicitZeroVisibleTimeRequirement_ ||
         (this.everMatchedVisibility_ &&
-        (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
-        (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
-        (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
-        (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']));
+         (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
+         (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
+         (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
+         (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']));
   }
 
   /**
