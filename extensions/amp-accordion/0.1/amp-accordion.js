@@ -117,7 +117,8 @@ class AmpAccordion extends AMP.BaseElement {
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           user().assertElement(
               sectionEl,
-              'No element found with id:' + sectionId);
+              'No element found with id: %s',
+              sectionId);
           this.toggle_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
@@ -131,7 +132,8 @@ class AmpAccordion extends AMP.BaseElement {
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           user().assertElement(
               sectionEl,
-              'No element found with id:' + sectionId);
+              'No element found with id: %s',
+              sectionId);
           this.expand_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
@@ -145,7 +147,8 @@ class AmpAccordion extends AMP.BaseElement {
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           user().assertElement(
               sectionEl,
-              'No element found with id:' + sectionId);
+              'No element found with id: %s',
+              sectionId);
           this.collapse_(dev().assertElement(sectionEl));
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
@@ -211,7 +214,8 @@ class AmpAccordion extends AMP.BaseElement {
           dev().assert(parseJson(dev().assertString(sessionStr))))
         : dict();
     } catch (e) {
-      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION',
+          'Error setting session state: %s, %s', e.message, e.stack);
       return dict();
     }
   }
@@ -229,7 +233,8 @@ class AmpAccordion extends AMP.BaseElement {
       this.win./*OK*/sessionStorage.setItem(
           dev().assertString(this.sessionId_), sessionStr);
     } catch (e) {
-      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      dev().fine('AMP-ACCORDION',
+          'Error setting session state: %s, %s', e.message, e.stack);
     }
   }
 
