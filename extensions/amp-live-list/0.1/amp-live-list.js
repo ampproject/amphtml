@@ -810,7 +810,7 @@ export class AmpLiveList extends AMP.BaseElement {
       numItems++;
     });
     user().assert(!foundInvalid,
-        'All amp-live-list-items under amp-live-list# %s children must '
+        'All amp-live-list-items under amp-live-list#%s children must '
         + 'have id and data-sort-time attributes. data-sort-time must be a '
         + 'Number greater than 0.',
         this.liveListId_);

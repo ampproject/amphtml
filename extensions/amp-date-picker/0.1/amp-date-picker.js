@@ -1695,7 +1695,7 @@ export class AmpDatePicker extends AMP.BaseElement {
             + '%s. You must specify a new "min-height" `for the %s element in '
             + 'your AMP CSS.\n This is necessary due to a bug in the '
             + 'date-picker library. When the bug is fixed, the %s CSS class '
-            + 'will be removed.'
+            + 'will be removed. '
             + 'See https://github.com/ampproject/amphtml/issues/13897',
             this.element,
             DEFAULT_DAY_SIZE,
