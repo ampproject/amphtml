@@ -35,5 +35,4 @@ Supported parameters:
 - `data-targetid`
 - `data-displayid`
 - `data-adtype`
-- `data-async`
 - `data-option`
