@@ -153,6 +153,7 @@ export const Presets = {
                 'left':
                   `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': 'relative',
               });
               fxElement.initialTrigger = true;
             });
@@ -207,6 +208,7 @@ export const Presets = {
                 'left':
                   `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': 'relative',
               });
               fxElement.initialTrigger = true;
             });
