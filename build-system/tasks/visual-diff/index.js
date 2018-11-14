@@ -571,7 +571,7 @@ function preVisualDiffTasks() {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
         fs.readFileSync('dist/amp.js', 'utf8'));
     if (!isInTestMode) {
-      log('fatal', 'AMP was not build in test mode. Run',
+      log('fatal', 'The AMP runtime was not built in test mode. Run',
           colors.cyan('gulp build --fortesting'), 'or remove the',
           colors.cyan('--nobuild'), 'option from this command');
     }
