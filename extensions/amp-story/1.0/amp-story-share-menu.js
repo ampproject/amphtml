@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
@@ -25,7 +26,6 @@ import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
@@ -36,7 +36,8 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
- * @private @const {!./simple-template.ElementDef}
+ * @param {!Element} element
+ * @return {!Element}
  */
 const getTemplate = element => {
   return htmlFor(element)`
@@ -51,7 +52,8 @@ const getTemplate = element => {
 
 /**
  * System amp-social-share button template.
- * @private @const {!./simple-template.ElementDef}
+ * @param {!Element} element
+ * @return {!Element}
  */
 const getAmpSocialSystemShareTemplate = element => {
   return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
@@ -170,6 +172,10 @@ export class ShareMenu {
    * @private
    */
   initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, isOpen => {
       this.onShareMenuStateUpdate_(isOpen);
     });
@@ -222,6 +228,19 @@ export class ShareMenu {
     if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
       this.close_();
     }
+  }
+
+  /**
+   * Reacts to UI state updates and triggers the right UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    this.vsync_.mutate(() => {
+      uiState === UIType.DESKTOP_FULLBLEED ?
+        this.element_.setAttribute('desktop-fullbleed', '') :
+        this.element_.removeAttribute('desktop-fullbleed');
+    });
   }
 
   /**

@@ -335,11 +335,11 @@
   padding-right: 16px !important;
 }
 
-.i-amphtml-story-bookend .i-amphtml-story-share-icon {
+.i-amphtml-story-bookend .i-amphtml-story-share-item .i-amphtml-story-share-icon {
   background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-.i-amphtml-story-bookend .i-amphtml-story-share-label {
+.i-amphtml-story-bookend .i-amphtml-story-share-icon .i-amphtml-story-share-label {
   color: #FFF !important;
 }
 
