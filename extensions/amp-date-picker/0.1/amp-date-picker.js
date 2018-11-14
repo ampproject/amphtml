@@ -470,6 +470,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
       this.state_ = this.getInitialState_();
+      this.render(this.state_);
     });
   }
 
