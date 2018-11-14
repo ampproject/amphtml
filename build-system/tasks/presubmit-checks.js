@@ -906,9 +906,6 @@ const forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     whitelist: [
