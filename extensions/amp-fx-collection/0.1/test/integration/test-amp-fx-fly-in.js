@@ -16,8 +16,7 @@
 
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
-const config = describe.configure().ifNewChrome();
-config.run('amp-fx-collection', function() {
+describe.configure().run('amp-fx-collection', function() {
   this.timeout(100000);
 
   const css = `
