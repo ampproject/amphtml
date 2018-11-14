@@ -92,3 +92,8 @@ The AMP runtime will determine the best place to insert an ad using our own heur
 If there is a specific position in a story that you wish to never show an ad, you
 can add the `next-page-no-ad` attribute to the `<amp-story-page>` that will be
 respected by the insertion algorithm.
+
+```html
+<amp-story-page next-page-no-ad id="page-2"
+</amp-story-page>
+```
