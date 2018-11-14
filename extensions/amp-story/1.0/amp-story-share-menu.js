@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
@@ -25,44 +26,38 @@ import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
-import {renderAsElement} from './simple-template';
+import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
 
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
-/** @const {string} Class for the share widget component container. */
-const SHARE_WIDGET_CONTAINER_CLASS = 'i-amphtml-story-share-menu-container';
-
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
- * @private @const {!./simple-template.ElementDef}
+ * @param {!Element} element
+ * @return {!Element}
  */
-const TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-share-menu i-amphtml-story-system-reset'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': SHARE_WIDGET_CONTAINER_CLASS}),
-      children: [],
-    },
-  ],
+const getTemplate = element => {
+  return htmlFor(element)`
+    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset">
+      <div class="i-amphtml-story-share-menu-container">
+        <span class="i-amphtml-story-share-menu-close-button" role="button">
+          &times;
+        </span>
+      </div>
+    </div>`;
 };
 
 /**
  * System amp-social-share button template.
- * @private @const {!./simple-template.ElementDef}
+ * @param {!Element} element
+ * @return {!Element}
  */
-const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
-  tag: 'amp-social-share',
-  attrs: /** @type {!JsonObject} */ (dict({'type': 'system'})),
+const getAmpSocialSystemShareTemplate = element => {
+  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
 };
-
 
 /**
  * Share menu UI.
@@ -136,8 +131,7 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ =
-        renderAsElement(this.win_.document, AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE);
+    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
 
     this.initializeListeners_();
 
@@ -154,7 +148,7 @@ export class ShareMenu {
   buildForFallbackSharing_() {
     const root = this.win_.document.createElement('div');
 
-    this.element_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.element_ = getTemplate(this.parentEl_);
     createShadowRootWithStyle(root, this.element_, CSS);
 
     this.initializeListeners_();
@@ -163,7 +157,7 @@ export class ShareMenu {
       measure: () => {
         this.innerContainerEl_ =
             this.element_
-                ./*OK*/querySelector(`.${SHARE_WIDGET_CONTAINER_CLASS}`);
+                ./*OK*/querySelector('.i-amphtml-story-share-menu-container');
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
@@ -178,6 +172,10 @@ export class ShareMenu {
    * @private
    */
   initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, isOpen => {
       this.onShareMenuStateUpdate_(isOpen);
     });
@@ -221,10 +219,28 @@ export class ShareMenu {
    */
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
+
+    if (el.classList.contains('i-amphtml-story-share-menu-close-button')) {
+      return this.close_();
+    }
+
     // Closes the menu if click happened outside of the menu main container.
     if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
       this.close_();
     }
+  }
+
+  /**
+   * Reacts to UI state updates and triggers the right UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    this.vsync_.mutate(() => {
+      uiState === UIType.DESKTOP_FULLBLEED ?
+        this.element_.setAttribute('desktop-fullbleed', '') :
+        this.element_.removeAttribute('desktop-fullbleed');
+    });
   }
 
   /**
