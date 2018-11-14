@@ -220,7 +220,7 @@ export class AmpList extends AMP.BaseElement {
     let promise;
     const src = mutations['src'];
     const state = /** @type {!JsonObject} */ (mutations)['state'];
-    const isContainer = mutations['isContainer'];
+    const isContainer = mutations['is-container'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.

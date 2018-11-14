@@ -205,7 +205,7 @@ describe('BindValidator', () => {
     it('should support <amp-list>', () => {
       expect(val.canBind('AMP-LIST', 'src')).to.be.true;
       expect(val.canBind('AMP-LIST', 'state')).to.be.true;
-      expect(val.canBind('AMP-LIST', 'isContainer')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'is-container')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {
