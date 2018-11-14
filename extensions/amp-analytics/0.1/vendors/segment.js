@@ -21,7 +21,7 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
   'vars': {
-    'anonymousId': 'CLIENT_ID(_ga)',
+    'anonymousId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
   },
   'requests': {
     'host': 'https://api.segment.io/v1/pixel',
