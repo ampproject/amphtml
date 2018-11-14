@@ -132,7 +132,7 @@ export class AmpRecaptchaService {
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
    * @param {string} action
-   * @return {Promise}
+   * @return {!Promise<string>}
    */
   execute(resourceId, action) {
     if (!this.iframe_) {
