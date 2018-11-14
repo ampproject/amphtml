@@ -122,13 +122,18 @@ class AmpVideoIframe extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    this.user().assert(!isAdLike(element),
-        '<amp-video-iframe> does not allow ad iframes. ',
-        'Please use amp-ad instead.');
+    // TODO(alanorozco): On integration tests, `getLayoutBox` will returned
+    // a cached default value, which makes these assertions fail. Move to
+    // `describes.integration` to see if that fixes it.
+    if (!element.hasAttribute('i-amphtml-integration-test')) {
+      this.user().assert(!isAdLike(element),
+          '<amp-video-iframe> does not allow ad iframes. ' +
+          'Please use amp-ad instead.');
 
-    this.user().assert(!looksLikeTrackingIframe(element),
-        '<amp-video-iframe> does not allow tracking iframes. ',
-        'Please use amp-analytics instead.');
+      this.user().assert(!looksLikeTrackingIframe(element),
+          '<amp-video-iframe> does not allow tracking iframes. ' +
+          'Please use amp-analytics instead.');
+    }
 
     installVideoManagerForDoc(element);
   }
