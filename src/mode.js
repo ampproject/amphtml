@@ -29,7 +29,7 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   spt: (string|undefined)
+ *   singlePassType: (string|undefined)
  * }}
  */
 export let ModeDef;
