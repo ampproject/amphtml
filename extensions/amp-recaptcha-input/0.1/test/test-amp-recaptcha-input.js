@@ -32,10 +32,14 @@ describes.realWin('amp-recaptcha-input', {
     toggleExperiment(win, 'amp-recaptcha-input', true);
   });
 
-  function getRecaptchaInput(skipSiteKey, skipAction) {
+  function getRecaptchaInput(skipName, skipSiteKey, skipAction) {
     const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
     ampRecaptchaInput.setAttribute('layout',
-        'nodisplay');
+      'nodisplay');
+    if (!skipName) {
+      ampRecaptchaInput.setAttribute('data-name',
+        'recaptcha-test');
+    }
     if (!skipSiteKey) {
       ampRecaptchaInput.setAttribute('data-sitekey',
           'fake-sitekey-fortesting');
@@ -54,9 +58,18 @@ describes.realWin('amp-recaptcha-input', {
 
   describe('amp-recaptcha-input', () => {
 
-    it('Rejects because data-sitekey is missing', () => {
+    it('Rejects because data-name is missing', () => {
       return allowConsoleError(() => {
         return getRecaptchaInput(true)
+          .should.eventually.be.rejectedWith(
+            /The data-name attribute is required for/
+          );
+      });
+    });
+
+    it('Rejects because data-sitekey is missing', () => {
+      return allowConsoleError(() => {
+        return getRecaptchaInput(undefined, true)
             .should.eventually.be.rejectedWith(
                 /The data-sitekey attribute is required for/
             );
@@ -65,7 +78,7 @@ describes.realWin('amp-recaptcha-input', {
 
     it('Rejects because data-action is missing', () => {
       return allowConsoleError(() => {
-        return getRecaptchaInput(undefined, true)
+        return getRecaptchaInput(undefined, undefined, true)
             .should.eventually.be.rejectedWith(
                 /The data-action attribute is required for/
             );
