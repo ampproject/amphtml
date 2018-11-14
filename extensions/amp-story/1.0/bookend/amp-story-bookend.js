@@ -332,9 +332,17 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      uiState === UIType.DESKTOP ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+      this.getShadowRoot().removeAttribute('desktop');
+      this.getShadowRoot().removeAttribute('desktop-fullbleed');
+
+      switch (uiState) {
+        case UIType.DESKTOP:
+          this.getShadowRoot().setAttribute('desktop', '');
+          break;
+        case UIType.DESKTOP_FULLBLEED:
+          this.getShadowRoot().setAttribute('desktop-fullbleed', '');
+          break;
+      }
     });
   }
 
