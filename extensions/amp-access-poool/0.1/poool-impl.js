@@ -42,7 +42,7 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *   debug: (string|null),
  *   forceWidget: (string|null),
  *   loginButtonEnabled: (boolean),
- *   videoClient: (string|null)
+ *   videoClient: (string|null),
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
  * }}
