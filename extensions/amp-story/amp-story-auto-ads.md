@@ -72,7 +72,7 @@ looks like the following:
  `amp-ad` element to be inserted.
 
 The above example will insert the following `amp-ad` element, which represents
-a [ad served by doubleclick](../extensions/amp-ad-doubleclick-impl/amp-ad-network-doubleclick-internal.md):
+a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md):
 
 ```html
 <amp-ad type="doubleclick"
@@ -93,6 +93,6 @@ you can add the `next-page-no-ad` attribute an `<amp-story-page>`. The insertion
 algorithm will then skip the slot after this page when trying to insert an ad.
 
 ```html
-<amp-story-page next-page-no-ad id="page-2"
+<amp-story-page next-page-no-ad id="page-2">
 </amp-story-page>
 ```
