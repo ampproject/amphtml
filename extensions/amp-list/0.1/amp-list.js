@@ -805,7 +805,7 @@ export class AmpList extends AMP.BaseElement {
       this.positionObserver_.observe(this.container_,
           PositionObserverFidelity.LOW,
           ({positionRect, viewportRect}) => {
-            const ratio = 1.5;
+            const ratio = 3;
             if (this.loadMoreSrc_ &&
                 positionRect.bottom < ratio * viewportRect.bottom) {
               this.loadMoreCallback_();
