@@ -625,7 +625,7 @@ export class Extensions {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        opt_extensionVersion, getMode().localDev, getMode().singlePassType);
+        opt_extensionVersion, getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
