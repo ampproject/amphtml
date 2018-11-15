@@ -36,30 +36,25 @@ function log(mode, ...messages) {
       if (process.env.TRAVIS) {
         return;
       }
-      messages.unshift(colors.green('VERBOSE:'));
+      fancyLog.info(colors.green('VERBOSE:'), ...messages);
       break;
     case 'info':
-      messages.unshift(colors.green('INFO:'));
+      fancyLog.info(colors.green('INFO:'), ...messages);
       break;
     case 'warning':
-      messages.unshift(colors.yellow('WARNING:'));
+      fancyLog.warn(colors.yellow('WARNING:'), ...messages);
       break;
     case 'error':
-      messages.unshift(colors.red('ERROR:'));
+      fancyLog.error(colors.red('ERROR:'), ...messages);
       break;
     case 'fatal':
-      messages.unshift(colors.red('FATAL:'));
-      break;
+      fancyLog.error(colors.red('FATAL:'), ...messages);
+      throw new Error(messages.join(' '));
     case 'travis':
       if (process.env['TRAVIS']) {
         messages.forEach(message => process.stdout.write(message));
       }
-      return;
-  }
-  // eslint-disable-next-line amphtml-internal/no-spread
-  fancyLog(...messages);
-  if (mode == 'fatal') {
-    process.exit(1);
+      break;
   }
 }
 
