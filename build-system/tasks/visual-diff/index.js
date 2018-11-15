@@ -395,6 +395,35 @@ async function snapshotWebpages(percy, browser, webpages) {
       }
 
       const page = await newPage(browser);
+
+      // Set up monitoring for network requests
+      await page.setRequestInterception(true);
+      const expectedRequests = {};
+      if (webpage.network_requests) {
+        for (const request of webpage.network_requests) {
+          const entry = {};
+          entry.count = request.count == null ? 1 : request.count;
+          if (request.delay) {
+            entry.delayPromise = sleep(request.delay)
+                .then(() => delete entry.delayPromise);
+          }
+          expectedRequests[request.url] = entry;
+        }
+
+        page.on('request', interceptedRequest => {
+          for (const [url, entry] of Object.entries(expectedRequests)) {
+            if (new RegExp(url).test(interceptedRequest.url())) {
+              if (entry.delayPromise) {
+                log('fatal', 'Network request',
+                    colors.cyan(interceptedRequest.url()),
+                    'made earlier than expected');
+              }
+              entry.count -= 1;
+            }
+          }
+          interceptedRequest.continue();
+        });
+      }
       const name = testName ? `${pageName} (${testName})` : pageName;
       log('verbose', 'Visual diff test', colors.yellow(name));
 
@@ -406,6 +435,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           height: viewport.height,
         });
       }
+
       log('verbose', 'Navigating to page', colors.yellow(fullUrl));
 
       // Navigate to an empty page first to support different webpages that only
@@ -436,6 +466,19 @@ async function snapshotWebpages(percy, browser, webpages) {
               await sleep(webpage.loading_complete_delay_ms);
             }
 
+            for (const [url, entry] of Object.entries(expectedRequests)) {
+              if (entry.count < 0) {
+                log('fatal', 'Network request', colors.cyan(url), 'made',
+                    colors.cyan(`${-entry.count}`),
+                    'more times than expected.');
+              }
+              else if (entry.count > 0) {
+                log('fatal', 'Network request', colors.cyan(url), 'made',
+                    colors.cyan(`${entry.count}`),
+                    'fewer times than expected.');
+              }
+            }
+
             await testFunction(page, name);
 
             const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
@@ -445,9 +488,11 @@ async function snapshotWebpages(percy, browser, webpages) {
               // Remove all scripts that have an external source, leaving only
               // those scripts that are inlined in the page inside a <script>
               // tag.
-              await page.evaluate(
-                  'document.head.querySelectorAll("script[src]").forEach(' +
-                  'node => node./*OK*/remove())');
+              if (!webpage.enable_percy_javascript_external) {
+                await page.evaluate(
+                    'document.head.querySelectorAll("script[src]").forEach(' +
+                      'node => node./*OK*/remove())');
+              }
             }
 
             if (viewport) {

@@ -107,6 +107,12 @@
    *   // that a user would. (e.g., click on links, swipe gallery images.)
    *   "enable_percy_javascript": true,
    *
+   *   // [optional, EXPERIMENTAL] In conjunction with the above flag, allow
+   *   // external Javascript code to run as well. This should only be used for
+   *   // testing regular, non-AMP pages that utilize AMP components
+   *   // (such as AMP Inabox ads rendered by GPT on a regular website).
+   *   "enable_percy_javascript_external": true,
+   *
    *   // [optional, EXPERIMENTAL] Path of JavaScript file relative to webserver
    *   // root that exports a dictionary of (async) test functions keyed by a
    *   // short descriptive name. Each test function is passed two arguments: a
@@ -132,8 +138,53 @@
    *   // also add an explanation and a link to an example of a previous
    *   // snapshot on Percy that demonstrate the flakiness of this test.
    *   "flaky": true
+   *
+   *   // [optional, EXPERIMENTAL] URL of network requests that are expected to
+   *   // be made as the page loads. Each entry includes the URL regex to verify
+   *   // the actual request, an optional count to verify the number of times
+   *   // that request should be made, and an optional delay in ms before which
+   *   // the request must not be made.
+   *   "network_requests" : [
+   *     {
+   *       "url": "https:\/\/pagead2.googlesyndication.com\/pcs\/activeview\?.*"
+   *       "count": 1,
+   *       "delay": 1000,
+   *     },
+   *     {
+   *       "url": "https:\/\/www.googletagservices.com\/tag\/js\/gpt.js",
+   *       "count": 1,
+   *     },
+   *   ],
    * },
    */
+    {
+      "url": "examples/visual-tests/amp-ads.html",
+      "name": "AMP Inabox Ad",
+      "loading_complete_delay_ms": 2000,
+      "enable_percy_javascript": true,
+      "enable_percy_javascript_external": true,
+      "network_requests": [
+         {
+           "url": "https:\/\/cdn.ampproject.org\/rtv\/.*\/amp4ads-host-v0.js",
+           "count": 0,
+         },
+         {
+           "url": "https:\/\/www.googletagservices.com\/tag\/js\/gpt.js",
+           "count": 1,
+         },
+	 {
+           "url": "https:\/\/pagead2.googlesyndication.com\/pcs\/activeview.*",
+           "count": 1,
+           "delay": 1000,
+         },
+      ],
+    },
+    {
+      "url": "examples/visual-tests/iframe-test.html",
+      "name": "Iframe Test",
+      "loading_complete_delay_ms": 1000,
+      "enable_percy_javascript": true,
+    },
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",

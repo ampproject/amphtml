@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>AMP Ads Test</title>
+<script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+<script>
+var googletag = googletag || {};
+googletag.cmd = googletag.cmd || [];
+</script>
+
+<script>
+googletag.cmd.push(function() {
+  googletag.defineSlot('/8479/regtests/AmpInaboxTest.java/firstad', [300, 250], 'div-gpt-ad-1541535279148-0').addService(googletag.pubads());
+  googletag.pubads().enableSingleRequest();
+  googletag.enableServices();
+  googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+    document.getElementById('slotrenderendedannounce').innerHTML = "SlotRenderEnded fired.";
+  });
+  googletag.pubads().addEventListener('impressionViewable', function(event) {
+    document.getElementById('impressionviewableannounce').innerHTML = "ImpressionViewable fired.";
+  });
+  googletag.pubads().addEventListener('slotOnload', function(event) {
+    document.getElementById('slotonloadannounce').innerHTML = "SlotOnload fired.";
+  });
+  googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
+    document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged fired.";
+});
+// We reset the tags because the DOM might get sent to Percy already modified.
+document.getElementById('slotrenderendedannounce').innerHTML = "SlotRenderEnded not fired.";
+document.getElementById('impressionviewableannounce').innerHTML = "ImpressionViewable not fired.";
+document.getElementById('slotonloadannounce').innerHTML = "SlotOnload not fired.";
+document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged not fired.";
+});
+</script>
+<p id='slotrenderendedannounce'>SlotRenderEnded not fired.</p>
+<p id='impressionviewableannounce'>ImpressionViewableEvent not fired.</p>
+<p id='slotonloadannounce'>SlotOnload not fired.</p>
+<p id='slotvisibilitychangedannounce'>SlotVisibilityChanged not fired.</p>
+<!-- /8479/regtests/AmpInaboxTest.java/firstad -->
+<div id='div-gpt-ad-1541535279148-0' style='height:250px; width:300px; background-color:red;'>
+  <script>
+googletag.cmd.push(function() { googletag.display('div-gpt-ad-1541535279148-0'); });
+  </script>
+</div>
