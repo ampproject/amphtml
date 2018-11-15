@@ -24,6 +24,7 @@ const TAG = 'amp-orientation-observer';
 const DEVICE_REST_ORIENTATION_ALPHA_VALUE = 180;
 const DEVICE_REST_ORIENTATION_BETA_VALUE = 0;
 const DEVICE_REST_ORIENTATION_GAMMA_VALUE = 0;
+const DELTA_CONST = 0.1;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
 
@@ -103,15 +104,15 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    */
   deviceOrientationHandler_(event) {
     if (event instanceof DeviceOrientationEvent) {
-      if (event.alpha !== this.alphaValue_) {
+      if (Math.abs(event.alpha - this.alphaValue_) > DELTA_CONST) {
         this.alphaValue_ = event.alpha;
         this.triggerEvent_('alpha', this.alphaValue_, this.alphaRange_);
       }
-      if (event.beta !== this.betaValue_) {
+      if (Math.abs(event.beta - this.betaValue_) > DELTA_CONST) {
         this.betaValue_ = event.beta;
         this.triggerEvent_('beta', this.betaValue_, this.betaRange_);
       }
-      if (event.gamma !== this.gammaValue_) {
+      if (Math.abs(event.gamma - this.gammaValue_) > DELTA_CONST) {
         this.gammaValue_ = event.gamma;
         this.triggerEvent_('gamma', this.gammaValue_, this.gammaRange_);
       }
