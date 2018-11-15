@@ -41,7 +41,8 @@ describe.configure().skipIos().run('amp-video', () => {
   });
 });
 
-describe.configure().skipIos().run('amp-video-iframe', () => {
+// TODO(alanorozco): unskip
+describe.skip('amp-video-iframe', () => {
   runVideoPlayerIntegrationTests(fixture => {
     const video = fixture.doc.createElement('amp-video-iframe');
     video.setAttribute('src', '/examples/amp-video-iframe/frame.html');
