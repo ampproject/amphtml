@@ -516,6 +516,7 @@ async function createEmptyBuild(page) {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
+  ensureOrBuildAmpRuntimeInTestMode_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -562,7 +563,7 @@ async function visualDiff() {
   process.exit(0);
 }
 
-function preVisualDiffTasks() {
+async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.verify_status) {
     return;
   }
@@ -600,7 +601,6 @@ async function cleanup_() {
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
-    preVisualDiffTasks,
     visualDiff,
     {
       options: {
