@@ -90,7 +90,7 @@
     "find-imports": "0.5.2",
     "find-root": "1.1.0",
     "formidable": "1.2.1",
-    "fs-extra": "7.0.0",
+    "fs-extra": "7.0.1",
     "glob-move": "1.0.1",
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20181028.0.1",
