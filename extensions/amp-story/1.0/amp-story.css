@@ -260,6 +260,7 @@ amp-story-cta-layer {
 
 /** Grid level */
 amp-story-grid-layer {
+  box-sizing: border-box !important;
   display: grid !important;
   position: absolute !important;
   top: 0 !important;
@@ -312,6 +313,7 @@ amp-story-grid-layer > * {
 }
 
 .i-amphtml-story-grid-template-thirds {
+  height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
                        "middle-third"
