@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as mustache from '../../../../third_party/mustache/mustache';
 import * as purifier from '../../../../src/purifier';
 import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
+import mustache from '../../../../third_party/mustache/mustache';
 
 describe('amp-mustache 0.2', () => {
   let sandbox;

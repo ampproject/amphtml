@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/* global require: false */
-const mustache = require('../../third_party/mustache/mustache');
+import mustache from '../../third_party/mustache/mustache';
+
 
 describe('Mustache', () => {
 

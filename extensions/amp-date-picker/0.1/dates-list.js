@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from '../../../third_party/rrule/rrule';
+import RRule from '../../../third_party/rrule/rrule';
 
 
 /** @enum {string} */
@@ -114,7 +114,7 @@ export class DatesList {
  */
 function tryParseRrulestr(str) {
   try {
-    return rrulestr(str);
+    return RRule.fromString(str);
   } catch (e) {
     return null;
   }
