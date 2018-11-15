@@ -120,9 +120,8 @@ async function launchWebServer() {
   webServerProcess_.on('close', code => {
     code = code || 0;
     if (code != 0) {
-      log('error', colors.cyan("'serve'"),
+      log('fatal', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
-      process.exit(code);
     }
   });
 
