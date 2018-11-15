@@ -906,9 +906,6 @@ const forbiddenTermsSrcInclusive = {
       'dist.3p/current/integration.js',
     ],
   },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     whitelist: [
@@ -1068,7 +1065,8 @@ function hasAnyTerms(file) {
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
   const isA4A = /\/a4a\//.test(pathname);
-  if (is3pFile && !isTestFile && !isA4A) {
+  const isRecaptcha = basename == 'recaptcha.js';
+  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

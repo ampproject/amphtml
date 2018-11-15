@@ -118,6 +118,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
@@ -772,10 +773,10 @@ function buildExtensionJs(path, name, version, options) {
     // Copy @ampproject/worker-dom/dist/worker.safe.js to the dist/ folder.
     if (name === 'amp-script') {
       // TODO(choumx): Compile this when worker-dom externs are available.
-      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-          `dist/v0/amp-script-worker-${version}.js`);
-      fs.copyFileSync('node_modules/@ampproject/worker-dom/dist/worker.safe.js',
-          `dist/v0/amp-script-worker-${version}.max.js`);
+      const dir = 'node_modules/@ampproject/worker-dom/dist/';
+      const file = `dist/v0/amp-script-worker-${version}`;
+      fs.copyFileSync(dir + 'worker.safe.js', `${file}.js`);
+      fs.copyFileSync(dir + 'unminified.worker.safe.js', `${file}.max.js`);
     }
   });
 }

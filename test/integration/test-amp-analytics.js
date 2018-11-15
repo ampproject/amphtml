@@ -51,7 +51,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     it('should send request', () => {
       return withdrawRequest(
-          env.win, 'analytics-basic?a=2&b=AMP-TEST').then(request => {
+          env.win, 'analytics-basic?a=2&b=AMP%20TEST').then(request => {
         expect(request.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
@@ -98,7 +98,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     it('should send request in batch', () => {
       return withdrawRequest(env.win,
-          'analytics-batch?a=1&b=AMP-TEST&a=1&b=AMP-TEST');
+          'analytics-batch?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
     });
   });
 
@@ -136,7 +136,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     it('should send request use POST body payload', () => {
       return withdrawRequest(
           env.win, 'analytics-useBody').then(request => {
-        expect(request.body).to.equal('{"a":2,"b":"AMP-TEST"}');
+        expect(request.body).to.equal('{"a":2,"b":"AMP TEST"}');
       });
     });
   });
@@ -184,7 +184,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       return withdrawRequest(
           env.win, 'analytics-batch-useBody').then(request => {
         expect(request.body).to
-            .equal('[{"a":1,"b":"AMP-TEST"},{"a":1,"b":"AMP-TEST"}]');
+            .equal('[{"a":1,"b":"AMP TEST"},{"a":1,"b":"AMP TEST"}]');
       });
     });
   });

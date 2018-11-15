@@ -32,6 +32,34 @@
   margin: -20px 0 0 -60px;
 }
 
+.amp-large > .amp-video-docked-main-button-group {
+  margin-left: -70px;
+}
+
+.amp-large > .amp-video-docked-main-button-group >
+    .amp-video-docked-button-group {
+  margin-right: 10px;
+}
+
+.amp-large > .amp-video-docked-button-dismiss-group {
+  margin: 6px 0 0 -6px;
+}
+
+.amp-small > .amp-video-docked-button-dismiss-group,
+.amp-small > .amp-video-docked-button-dismiss-group > div[role=button] {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 32px;
+  background-size: 20px 20px;
+}
+
+.amp-small > .amp-video-docked-button-dismiss-group {
+  /* docking.js will position the button based on a 40px width. Because this
+     breakpoint will render the button at 32px, we set the difference as left
+     margin to compensate. */
+  margin-left: 8px;
+}
+
 
 .amp-video-docked-controls-shown {
   opacity: 1;
@@ -45,7 +73,7 @@
 .amp-video-docked-button-group,
 .amp-video-docked-button-group > div[role=button],
 .amp-video-docked-button-dismiss-group,
-.amp-video-docked-button-dismiss-group > div[role=button]{
+.amp-video-docked-button-dismiss-group > div[role=button] {
   min-width: 40px;
   height: 40px;
   border-radius: 40px;
@@ -108,6 +136,10 @@
   margin: 0 !important;
 }
 
+.i-amphtml-video-docked {
+  transition-property: transform !important;
+}
+
 .amp-video-docked-shadow,
 .amp-video-docked-controls,
 .i-amphtml-video-docked,
@@ -152,6 +184,44 @@
 .amp-video-docked-button-dismiss-group {
   position: absolute;
   top: -40px;
+}
+
+.amp-video-docked-placeholder-background {
+  position: absolute;
+  background: rgba(200, 200, 200, 0.5);
+  transition-property: opacity;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+
+.amp-video-docked-placeholder-icon {
+  mask: url("data:image/svg+xml;charset=utf-8,%3Csvg version='1.1' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpolygon points='0 0 48 0 48 48 0 48'/%3E%3Cpath d='m40 4h-24c-2.2 0-4 1.8-4 4v24c0 2.2 1.8 4 4 4h24c2.2 0 4-1.8 4-4v-24c0-2.2-1.8-4-4-4zm-32 8h-4v28c0 2.2 1.8 4 4 4h28v-4h-28v-28zm28 3.868l-12.618 12.618-2.8284-2.8284 12.658-12.658h-8.2111v-4h15v15h-4v-8.132z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E");
+  mask-size: 48px 48px;
+  height: 48px;
+  width: 48px;
+  mask-repeat: no-repeat;
+  mask-position: bottom left;
+  background: rgba(100, 100, 100, 0.8);
+  transition-property: opacity, transform;
+  will-change: opacity, transform;
+  margin: -88px 0 0 40px;
+}
+
+.amp-video-docked-placeholder-background-poster {
+  width: 100%;
+  height: 100%;
+
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  filter: blur(20px);
+
+  /* Scale outwards to clip blur-bleed. */
+  transform: scale(1.1);
+
+  opacity: 0.3;
 }
 
 /*

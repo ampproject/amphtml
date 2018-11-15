@@ -20,8 +20,9 @@ import {
 } from './amp-story-store-service';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {TOOLTIP_TRIGGERABLE_SELECTORS} from './amp-story-tooltip';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {isExperimentOn} from '../../../src/experiments';
@@ -426,11 +427,40 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * For an element to trigger a tooltip it has to be descendant of
+   * amp-story-page but not of amp-story-cta-layer.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  canShowTooltip_(event) {
+    let valid = true;
+    return !!closest(dev().assertElement(event.target), el => {
+      if (el.tagName.toLowerCase() == 'amp-story-cta-layer') {
+        valid = false;
+        return false;
+      }
+      return el.tagName.toLowerCase() == 'amp-story-page' && valid;
+    }, /* opt_stopAt */ this.element_);
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    */
   maybePerformNavigation_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.canShowTooltip_(event) &&
+      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      // Clicked element triggers a tooltip, so we dispatch the corresponding
+      // event and skip navigation.
+      event.preventDefault();
+      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
+      return;
+    }
+
     if (!this.isRunning() ||
       !this.isNavigationalClick_(event) ||
       this.isProtectedTarget_(event) ||
