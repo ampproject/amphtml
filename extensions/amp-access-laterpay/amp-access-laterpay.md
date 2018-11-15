@@ -98,7 +98,7 @@ The following values can be set in the `laterpay` config object:
     <td>JWT token for dynamic payment configuration</td>
     <td>This option allows you specify a signed JSON Web Token with a configuration for the available paid content. This means that you can provide an in page configuration, programatically generated in your pages rather than specifying it manually on LaterPay's Connector Admin interface. This might be specially useful when configuring Single Purchases for many different articles.
     <br />
-    If you'd like more information on how to create this token and what content can be specified in it, please refer to LaterPay's <a href="http://docs.laterpay.net/connector/connector_script_3_beta/#jwt-paid-content-api">JWT Paid Content API</a> documentation for the Connector Script integration.
+    If you'd like more information on how to create this token and what content can be specified in it, please refer to LaterPay's <a href="https://docs.laterpay.net/connector/configuration/inpage_configuration/config_token/#jwt-object-properties">JWT Paid Content API</a> documentation for the Connector Script integration.
     </td>
   </tr>
   <tr>
