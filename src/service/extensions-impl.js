@@ -464,7 +464,7 @@ export class Extensions {
         // the embed window.
         // To fix this, make sure the extension is installed in the AmpDoc.
         // Ideally, we'd be able to install a service in the FIE _without_
-        // installing it in the AmpDoc. See #TODO.
+        // installing it in the AmpDoc. See #19344.
         const ampdoc = getAmpdoc(childWin.frameElement);
         this.installExtensionInDoc_(ampdoc, extensionId);
         return extension;
