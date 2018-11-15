@@ -26,7 +26,7 @@ const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../../exec');
+const {execOrDie, execScriptAsync} = require('../../exec');
 const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
@@ -53,9 +53,6 @@ const PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds';
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
-
-const preVisualDiffTasks =
-    (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
 let browser_;
 let webServerProcess_;
@@ -123,9 +120,8 @@ async function launchWebServer() {
   webServerProcess_.on('close', code => {
     code = code || 0;
     if (code != 0) {
-      log('error', colors.cyan("'serve'"),
+      log('fatal', colors.cyan("'serve'"),
           `errored with code ${code}. Cannot continue with visual diff tests`);
-      process.exit(code);
     }
   });
 
@@ -243,6 +239,12 @@ async function launchBrowser() {
 
   browser_ = await puppeteer.launch(browserOptions)
       .catch(err => log('fatal', err));
+
+  // Every action on the browser or its pages adds a listener to the
+  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
+  // workaround for the Node runtime warning that is emitted once 11 listeners
+  // are added to the same object.
+  browser_._connection.setMaxListeners(9999);
 
   return browser_;
 }
@@ -497,11 +499,13 @@ function setDebuggingLevel() {
  *
  * Enables us to require percy checks on GitHub, and yet, not have to do a full
  * build for every PR.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  */
-async function createEmptyBuild(page) {
+async function createEmptyBuild() {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
+
+  const browser = await launchBrowser();
+  const page = await newPage(browser);
+
   const blankAssetsDir = '../../../examples/visual-tests/blank-page';
   const percy = new Percy({
     loaders: [
@@ -520,6 +524,7 @@ async function createEmptyBuild(page) {
  * Runs the AMP visual diff tests.
  */
 async function visualDiff() {
+  ensureOrBuildAmpRuntimeInTestMode_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -530,12 +535,24 @@ async function visualDiff() {
   }
 
   if (argv.verify_status) {
-    const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
-    const status = await waitForBuildCompletion(buildId);
-    verifyBuildStatus(status, buildId);
-    return;
+    await performVerifyStatus();
+  } else {
+    await performVisualTests();
   }
 
+  return await cleanup_();
+}
+
+async function performVerifyStatus() {
+  const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
+  const status = await waitForBuildCompletion(buildId);
+  verifyBuildStatus(status, buildId);
+}
+
+/**
+ * Runs the AMP visual diff tests.
+ */
+async function performVisualTests() {
   if (!argv.percy_disabled &&
       (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN)) {
     log('fatal', 'Could not find', colors.cyan('PERCY_PROJECT'), 'and',
@@ -549,34 +566,47 @@ async function visualDiff() {
   });
 
   if (argv.empty) {
-    const browser = await launchBrowser();
-    const page = await newPage(browser);
-    await createEmptyBuild(page);
-    process.exit(0);
+    await createEmptyBuild();
+  } else {
+    // Load and parse the config. Use JSON5 due to JSON comments in file.
+    const visualTestsConfig = JSON5.parse(
+        fs.readFileSync(
+            path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
+            'utf8'));
+    await runVisualTests(
+        visualTestsConfig.asset_globs, visualTestsConfig.webpages);
+  }
+}
+
+async function ensureOrBuildAmpRuntimeInTestMode_() {
+  if (argv.verify_status) {
     return;
   }
-
-  // Load and parse the config. Use JSON5 due to JSON comments in file.
-  const visualTestsConfig = JSON5.parse(
-      fs.readFileSync(
-          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
-          'utf8'));
-  await runVisualTests(
-      visualTestsConfig.asset_globs, visualTestsConfig.webpages);
-  process.exit(0);
+  if (argv.nobuild) {
+    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
+        fs.readFileSync('dist/amp.js', 'utf8'));
+    if (!isInTestMode) {
+      log('fatal', 'The AMP runtime was not built in test mode. Run',
+          colors.cyan('gulp build --fortesting'), 'or remove the',
+          colors.cyan('--nobuild'), 'option from this command');
+    }
+  } else {
+    execOrDie('gulp build --fortesting');
+  }
 }
 
 function setupCleanup_() {
   process.on('exit', cleanup_);
   process.on('SIGINT', cleanup_);
   process.on('uncaughtException', cleanup_);
+  process.on('unhandledRejection', cleanup_);
 }
 
 async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  if (!webServerProcess_.killed) {
+  if (webServerProcess_ && !webServerProcess_.killed) {
     // Explicitly exit the webserver.
     webServerProcess_.kill();
     // The child node process has an asynchronous stdout. See #10409.
@@ -587,7 +617,6 @@ async function cleanup_() {
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
-    preVisualDiffTasks,
     visualDiff,
     {
       options: {
