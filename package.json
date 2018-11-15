@@ -41,8 +41,7 @@
     "@babel/plugin-transform-runtime": "7.1.0",
     "@babel/preset-env": "7.1.0",
     "@babel/runtime-corejs2": "7.1.2",
-    "@octokit/rest": "15.16.1",
-    "@percy/puppeteer": "0.4.0",
+    "@octokit/rest": "15.16.1",    
     "acorn-globals": "4.3.0",
     "ajv": "6.5.4",
     "ajv-keywords": "3.2.0",
@@ -159,7 +158,6 @@
     "pretty-bytes": "5.1.0",
     "prop-types": "15.6.2",
     "pumpify": "1.5.1",
-    "puppeteer": "1.9.0",
     "react": "16.6.1",
     "react-addons-shallow-compare": "15.6.2",
     "react-dates": "15.5.3",
@@ -191,6 +189,10 @@
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.0",
     "yamljs": "0.3.0"
+  },
+  "optionalDependencies": {
+    "@percy/puppeteer" : "0.4.0",
+    "puppeteer" : "1.9.0"
   },
   "ava": {
     "files": [

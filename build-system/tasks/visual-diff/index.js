@@ -22,15 +22,17 @@ const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
-const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
-const {execScriptAsync} = require('../../exec');
+const {execOrDie, execScriptAsync} = require('../../exec');
 const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
-const {Percy} = require('@percy/puppeteer');
+
+// optional dependencies for local development (outside of visual diff tests)
+let puppeteer;
+let percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -54,11 +56,30 @@ const ROOT_DIR = path.resolve(__dirname, '../../../');
 const WRAP_IN_IFRAME_SCRIPT = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 
-const preVisualDiffTasks =
-    (argv.nobuild || argv.verify_status) ? [] : ['build'];
 
 let browser_;
 let webServerProcess_;
+
+/**
+ * Runs or skips build
+ */
+function runOrSkipBuild() {
+  if (argv.nobuild || argv.verify_status) {
+    return;
+  }
+  execOrDie('gulp build');
+}
+
+/**
+ * Installs @percy/puppeteer and puppeteer
+ */
+function runYarnForOptionalDependencies() {
+  log('Info', 'Running', colors.cyan('yarn'), 'to add optional packages...');
+  execOrDie('npx yarn --force');
+
+  puppeteer = require('puppeteer');
+  percy = require('@percy/puppeteer');
+}
 
 /**
  * Override PERCY_* environment variables if passed via gulp task parameters.
@@ -273,9 +294,9 @@ async function newPage(browser) {
  */
 async function runVisualTests(assetGlobs, webpages) {
   // Create a Percy client and start a build.
-  const percy = createPercyPuppeteerController(assetGlobs);
-  await percy.startBuild();
-  const {buildId} = percy;
+  const percy_ = createPercyPuppeteerController(assetGlobs);
+  await percy_.startBuild();
+  const {buildId} = percy_;
   fs.writeFileSync('PERCY_BUILD_ID', buildId);
   log('info', 'Started Percy build', colors.cyan(buildId));
   if (process.env['PERCY_TARGET_COMMIT']) {
@@ -284,11 +305,11 @@ async function runVisualTests(assetGlobs, webpages) {
   }
 
   // Take the snapshots.
-  await generateSnapshots(percy, webpages);
+  await generateSnapshots(percy_, webpages);
 
   // Tell Percy we're finished taking snapshots and check if the build failed
   // early.
-  await percy.finalizeBuild();
+  await percy_.finalizeBuild();
   const status = await getBuildStatus(buildId);
   if (status.state == 'failed') {
     log('fatal', 'Build', colors.cyan(buildId), 'failed!');
@@ -307,7 +328,7 @@ async function runVisualTests(assetGlobs, webpages) {
  */
 function createPercyPuppeteerController(assetGlobs) {
   if (!argv.percy_disabled) {
-    return new Percy({
+    return new percy.Percy({
       loaders: [new PercyAssetsLoader(assetGlobs, ROOT_DIR)],
     });
   } else {
@@ -324,11 +345,11 @@ function createPercyPuppeteerController(assetGlobs) {
  * Sets the AMP config, launches a server, and generates Percy snapshots for a
  * set of given webpages.
  *
- * @param {!Percy} percy a Percy-Puppeteer controller.
+ * @param {!Percy} percy_ a Percy-Puppeteer controller.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function generateSnapshots(percy, webpages) {
+async function generateSnapshots(percy_, webpages) {
   const numUnfilteredPages = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
@@ -369,22 +390,22 @@ async function generateSnapshots(percy, webpages) {
     const page = await newPage(browser);
     await page.goto(
         `${BASE_URL}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+    await percy_.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
   }
 
   log('verbose', 'Generating snapshots...');
-  await snapshotWebpages(percy, browser, webpages);
+  await snapshotWebpages(percy_, browser, webpages);
 }
 
 /**
  * Generates Percy snapshots for a set of given webpages.
  *
- * @param {!Percy} percy a Percy-Puppeteer controller.
+ * @param {!Percy} percy_ a Percy-Puppeteer controller.
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
  */
-async function snapshotWebpages(percy, browser, webpages) {
+async function snapshotWebpages(percy_, browser, webpages) {
   const pagePromises = {};
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
@@ -462,7 +483,7 @@ async function snapshotWebpages(percy, browser, webpages) {
               });
             }
 
-            await percy.snapshot(name, page, snapshotOptions);
+            await percy_.snapshot(name, page, snapshotOptions);
             await page.close();
             log('travis', colors.cyan('●'));
           })
@@ -503,17 +524,17 @@ function setDebuggingLevel() {
 async function createEmptyBuild(page) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
   const blankAssetsDir = '../../../examples/visual-tests/blank-page';
-  const percy = new Percy({
+  const percy_ = new percy.Percy({
     loaders: [
       new PercyAssetsLoader(
           [path.resolve(__dirname, blankAssetsDir)], ROOT_DIR),
     ],
   });
-  await percy.startBuild();
+  await percy_.startBuild();
   await page.goto(`${BASE_URL}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
-  await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
-  await percy.finalizeBuild();
+  await percy_.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  await percy_.finalizeBuild();
 }
 
 /**
@@ -584,11 +605,19 @@ async function cleanup_() {
   }
 }
 
+/**
+ * Installs Percy, runs or skips build, runs visual diff tests
+ */
+function visualDiffTasks() {
+  runOrSkipBuild();
+  runYarnForOptionalDependencies();
+  visualDiff();
+}
+
 gulp.task(
     'visual-diff',
     'Runs the AMP visual diff tests.',
-    preVisualDiffTasks,
-    visualDiff,
+    visualDiffTasks,
     {
       options: {
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
