@@ -35,12 +35,12 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
-    "@babel/core": "7.1.2",
+    "@babel/core": "7.1.6",
     "@babel/helper-plugin-test-runner": "7.1.0",
     "@babel/plugin-proposal-class-properties": "7.1.0",
     "@babel/plugin-transform-runtime": "7.1.0",
-    "@babel/preset-env": "7.1.0",
-    "@babel/runtime-corejs2": "7.1.2",
+    "@babel/preset-env": "7.1.6",
+    "@babel/runtime-corejs2": "7.1.5",
     "@octokit/rest": "15.16.1",
     "@percy/puppeteer": "0.4.0",
     "acorn-globals": "4.3.0",
