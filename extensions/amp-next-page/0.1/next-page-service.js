@@ -277,9 +277,9 @@ export class NextPageService {
               }
             });
           }),
-          e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
+          e => dev().error(TAG, 'failed to fetch %s', next.ampUrl, e))
           .catch(e => dev().error(TAG,
-              `failed to attach shadow document for ${next.ampUrl}`, e))
+              'failed to attach shadow document for %s', next.ampUrl, e))
           // The new page may be short and the next may already need fetching.
           .then(() => this.scrollHandler_());
     }

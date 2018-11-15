@@ -89,7 +89,7 @@ class AmpPinterest extends AMP.BaseElement {
       case 'buttonFollow':
         return new FollowButton(this.element).render();
     }
-    return Promise.reject(user().createError('Invalid selector: ' + selector));
+    return Promise.reject(user().createError('Invalid selector: %s', selector));
   }
 }
 

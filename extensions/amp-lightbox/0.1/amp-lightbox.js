@@ -492,13 +492,13 @@ class AmpLightbox extends AMP.BaseElement {
   waitForScroll_(startingScrollTop) {
     this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'slow scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.scrollTimerId_ = null;
         this.update_(this.pos_);
       } else {
-        dev().fine(TAG, 'fast scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'fast scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.waitForScroll_(this.pos_);
       }
     }, 100);
