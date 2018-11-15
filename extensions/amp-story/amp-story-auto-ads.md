@@ -76,7 +76,7 @@ a [ad served by doubleclick](../extensions/amp-ad-doubleclick-impl/amp-ad-networ
 
 ```html
 <amp-ad type="doubleclick"
-  data-slot="/30497360/a4a/amp_story_dfp_example"
+  data-slot="/30497360/a4a/amp_story_dfp_example">
 </amp-ad>
 ```
 
@@ -88,10 +88,9 @@ here, as ads in story can only be displayed once fully rendered.
 It has to be a direct child of `amp-story` element.
 
 ## Insertion Control
-The AMP runtime will determine the best place to insert an ad using our own heuristics.
-If there is a specific position in a story that you wish to never show an ad, you
-can add the `next-page-no-ad` attribute to the `<amp-story-page>` that will be
-respected by the insertion algorithm.
+If there is a specific position in a story that you wish to never show an ad,
+you can add the `next-page-no-ad` attribute an `<amp-story-page>`. The insertion
+algorithm will then skip the slot after this page when trying to insert an ad.
 
 ```html
 <amp-story-page next-page-no-ad id="page-2"
