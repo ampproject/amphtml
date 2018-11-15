@@ -273,7 +273,7 @@ export class LinkerManager {
   isDomainMatch_(hostname, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
-      user().warn(TAG, `${name} destinationDomains must be an array.`);
+      user().warn(TAG, 'destinationDomains must be an array.');
       return false;
     }
 
