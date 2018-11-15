@@ -493,11 +493,13 @@ function setDebuggingLevel() {
  *
  * Enables us to require percy checks on GitHub, and yet, not have to do a full
  * build for every PR.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
  */
-async function createEmptyBuild(page) {
+async function createEmptyBuild() {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
+
+  const browser = await launchBrowser();
+  const page = await newPage(browser);
+
   const blankAssetsDir = '../../../examples/visual-tests/blank-page';
   const percy = new Percy({
     loaders: [
@@ -527,12 +529,24 @@ async function visualDiff() {
   }
 
   if (argv.verify_status) {
-    const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
-    const status = await waitForBuildCompletion(buildId);
-    verifyBuildStatus(status, buildId);
-    return;
+    await performVerifyStatus();
+  } else {
+    await performVisualTests();
   }
 
+  return await cleanup_();
+}
+
+async function performVerifyStatus() {
+  const buildId = fs.readFileSync('PERCY_BUILD_ID', 'utf8');
+  const status = await waitForBuildCompletion(buildId);
+  verifyBuildStatus(status, buildId);
+}
+
+/**
+ * Runs the AMP visual diff tests.
+ */
+async function performVisualTests() {
   if (!argv.percy_disabled &&
       (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN)) {
     log('fatal', 'Could not find', colors.cyan('PERCY_PROJECT'), 'and',
@@ -546,21 +560,16 @@ async function visualDiff() {
   });
 
   if (argv.empty) {
-    const browser = await launchBrowser();
-    const page = await newPage(browser);
-    await createEmptyBuild(page);
-    process.exit(0);
-    return;
+    await createEmptyBuild();
+  } else {
+    // Load and parse the config. Use JSON5 due to JSON comments in file.
+    const visualTestsConfig = JSON5.parse(
+        fs.readFileSync(
+            path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
+            'utf8'));
+    await runVisualTests(
+        visualTestsConfig.asset_globs, visualTestsConfig.webpages);
   }
-
-  // Load and parse the config. Use JSON5 due to JSON comments in file.
-  const visualTestsConfig = JSON5.parse(
-      fs.readFileSync(
-          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
-          'utf8'));
-  await runVisualTests(
-      visualTestsConfig.asset_globs, visualTestsConfig.webpages);
-  process.exit(0);
 }
 
 async function ensureOrBuildAmpRuntimeInTestMode_() {
