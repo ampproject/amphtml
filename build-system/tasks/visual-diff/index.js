@@ -584,6 +584,7 @@ function setupCleanup_() {
   process.on('exit', cleanup_);
   process.on('SIGINT', cleanup_);
   process.on('uncaughtException', cleanup_);
+  process.on('unhandledRejection', cleanup_);
 }
 
 async function cleanup_() {
