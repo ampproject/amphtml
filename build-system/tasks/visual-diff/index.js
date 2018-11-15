@@ -591,7 +591,7 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  if (!webServerProcess_.killed) {
+  if (webServerProcess_ && !webServerProcess_.killed) {
     // Explicitly exit the webserver.
     webServerProcess_.kill();
     // The child node process has an asynchronous stdout. See #10409.
