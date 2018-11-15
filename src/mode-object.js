@@ -33,6 +33,6 @@ export function getModeObject(opt_win) {
     log: getMode(opt_win).log,
     version: getMode(opt_win).version,
     rtvVersion: getMode(opt_win).rtvVersion,
-    spt: getMode(opt_win).singlePassType,
+    singlePassType: getMode(opt_win).singlePassType,
   };
 }
