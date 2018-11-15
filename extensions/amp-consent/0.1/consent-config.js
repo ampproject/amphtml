@@ -42,15 +42,40 @@ export class ConsentConfig {
   }
 
   /**
+   * Return the consents config
+   * @return {!JsonObject}
+   */
+  getConsentConfig() {
+    return this.getConfig_()['consents'];
+  }
+
+  /**
+   * Return the policy config
+   * @return {!JsonObject}
+   */
+  getPolicyConfig() {
+    return this.getConfig_()['policy'] || dict({});
+  }
+
+  /**
+   * Return the postPromptUI config
+   * @return {string|undefined}
+   */
+  getPostPromptUI() {
+    return this.getConfig_()['postPromptUI'];
+  }
+
+  /**
    * Read validate and return the config
    * @return {!JsonObject}
    */
-  getConfig() {
+  getConfig_() {
     if (!this.config_) {
       this.config_ = this.validateAndParseConfig_();
     }
     return this.config_;
   }
+
 
   /**
    * Read and parse consent config

@@ -20,9 +20,6 @@ import {ConsentConfig, expandPolicyConfig} from '../consent-config';
 import {dict} from '../../../../src/utils/object';
 import {toggleExperiment} from '../../../../src/experiments';
 
-
-
-
 describes.realWin('ConsentConfig', {amp: 1}, env => {
   let win;
   let doc;
@@ -46,27 +43,42 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     });
   });
 
+  function appendConfigScriptElement(doc, element, config) {
+    const scriptElement = doc.createElement('script');
+    scriptElement.setAttribute('type', 'application/json');
+    scriptElement.textContent = JSON.stringify(config);
+    element.appendChild(scriptElement);
+  }
+
   describe('read consent config', () => {
     it('read inline config', () => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConfig()).to.deep.equal(
-          defaultConfig);
+      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
+        'ABC': {
+          'checkConsentHref': 'https://response1',
+        },
+        'DEF': {
+          'checkConsentHref': 'https://response1',
+        },
+      }));
+      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
+      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
     });
 
     it('read cmp config', () => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConfig()).to.deep.equal(dict({
-        'consents': {
-          '_ping_': {
-            'checkConsentHref': 'http://localhost:8000/get-consent-v1',
-            'promptUISrc':
-                'http://ads.localhost:8000/test/manual/diy-consent.html',
-          },
+      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
+        '_ping_': {
+          'checkConsentHref': 'http://localhost:8000/get-consent-v1',
+          'promptUISrc':
+              'http://ads.localhost:8000/test/manual/diy-consent.html',
         },
       }));
+      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
+      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
     });
 
     it('merge inline config w/ cmp config', () => {
@@ -77,21 +89,29 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             'checkConsentHref': '/override',
           },
         },
-        'postPromptUI': 'test',
-      }));
-      element.setAttribute('type', '_ping_');
-      const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConfig()).to.deep.equal(dict({
-        'consents': {
-          '_ping_': {
-            'checkConsentHref': '/override',
-            'promptUISrc':
-                'http://ads.localhost:8000/test/manual/diy-consent.html',
-            'promptIfUnknownForGeoGroup': 'eea',
+        'policy': {
+          'default': {
+            'waitFor': {},
           },
         },
         'postPromptUI': 'test',
       }));
+      element.setAttribute('type', '_ping_');
+      const consentConfig = new ConsentConfig(element);
+      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
+        '_ping_': {
+          'checkConsentHref': '/override',
+          'promptUISrc':
+              'http://ads.localhost:8000/test/manual/diy-consent.html',
+          'promptIfUnknownForGeoGroup': 'eea',
+        },
+      }));
+      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({
+        'default': {
+          'waitFor': {},
+        },
+      }));
+      expect(consentConfig.getPostPromptUI()).to.equal('test');
     });
 
     it('assert valid config', () => {
@@ -111,33 +131,33 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       scriptElement.setAttribute('type', '');
       element.appendChild(scriptElement);
 
-      expect(() => new ConsentConfig(element).getConfig())
+      expect(() => new ConsentConfig(element).getConsentConfig())
           .to.throw(scriptTypeError);
 
       // Check consent config exists
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify({});
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConfig())
+        expect(() => new ConsentConfig(element).getConsentConfig())
             .to.throw(consentExistError);
       });
 
       // Check invalid CMP
       element.setAttribute('type', 'not_exist');
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConfig())
+        expect(() => new ConsentConfig(element).getConsentConfig())
             .to.throw(invalidCMPError);
       });
 
       scriptElement.textContent = '"abc": {"a",}';
-      expect(() => new ConsentConfig(element).getConfig())
+      expect(() => new ConsentConfig(element).getConsentConfig())
           .to.throw(invalidJsonError);
 
       // Check there is only one script object
       scriptElement.textContent = JSON.stringify(defaultConfig);
       const script2 = doc.createElement('script');
       element.appendChild(script2);
-      expect(() => new ConsentConfig(element).getConfig())
+      expect(() => new ConsentConfig(element).getConsentConfig())
           .to.throw(multiScriptError);
     });
 
@@ -152,7 +172,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         },
       }));
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConfig()['policy']).to.deep.equal({});
+      expect(consentConfig.getPolicyConfig()).to.deep.equal({});
     });
   });
 
@@ -235,10 +255,3 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     });
   });
 });
-
-function appendConfigScriptElement(doc, element, config) {
-  const scriptElement = doc.createElement('script');
-  scriptElement.setAttribute('type', 'application/json');
-  scriptElement.textContent = JSON.stringify(config);
-  element.appendChild(scriptElement);
-}

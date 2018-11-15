@@ -73,8 +73,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.consentConfig_ = null;
 
-    /** @private {!JsonObject} */
-    this.policyConfig_ = dict({});
+    /** @private {?JsonObject} */
+    this.policyConfig_ = null;
 
     /** @private {!Object} */
     this.consentRequired_ = map();
@@ -117,16 +117,16 @@ export class AmpConsent extends AMP.BaseElement {
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
 
-    const config = new ConsentConfig(this.element).getConfig();
+    const config = new ConsentConfig(this.element);
 
-    if (config['postPromptUI']) {
+    if (config.getPostPromptUI()) {
       this.postPromptUI_ =
-          new ConsentUI(this, dict({}), config['postPromptUI']);
+          new ConsentUI(this, dict({}), config.getPostPromptUI());
     }
 
-    this.consentConfig_ = config['consents'];
+    this.consentConfig_ = config.getConsentConfig();
 
-    const policyConfig = config['policy'] || dict({});
+    const policyConfig = config.getPolicyConfig();
 
     this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentConfig_);
 
@@ -143,7 +143,8 @@ export class AmpConsent extends AMP.BaseElement {
             .then(manager => {
               this.consentPolicyManager_ = /** @type {!ConsentPolicyManager} */ (
                 manager);
-              const policyKeys = Object.keys(this.policyConfig_);
+              const policyKeys =
+                  Object.keys(/** @type {!Object} */ (this.policyConfig_));
               for (let i = 0; i < policyKeys.length; i++) {
                 this.consentPolicyManager_.registerConsentPolicyInstance(
                     policyKeys[i], this.policyConfig_[policyKeys[i]]);
@@ -186,7 +187,8 @@ export class AmpConsent extends AMP.BaseElement {
       const {args} = invocation;
       let consentId = args && args['consent'];
       if (!this.isMultiSupported_) {
-        consentId = Object.keys(this.consentConfig_)[0];
+        consentId =
+            Object.keys(/** @type {!Object} */ (this.consentConfig_))[0];
       }
       this.handlePostPrompt_(consentId || '');
     });
@@ -335,7 +337,8 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    const instanceKeys = Object.keys(this.consentConfig_);
+    const instanceKeys =
+        Object.keys(/** @type {!Object} */ (this.consentConfig_));
     const initPromptPromises = [];
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
