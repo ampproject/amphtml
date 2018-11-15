@@ -629,8 +629,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Converts the amp-list to de facto layout container. Must be called in
-   * mutation context.
+   * Converts the amp-list to de facto layout container. Called in mutate
+   * context.
    * @private
    */
   changeToLayoutContainer_() {
@@ -643,20 +643,23 @@ export class AmpList extends AMP.BaseElement {
     if (previousLayout == Layout.CONTAINER) {
       return;
     }
-    this.undoPreviousLayout_(previousLayout);
-    this.container_.classList.remove(
-        'i-amphtml-fill-content',
-        'i-amphtml-replaced-content'
-    );
-    // The overflow element is generally hidden with visibility hidden,
-    // but after changing to layout container, this causes an undesirable
-    // empty white space so we hide it with display none instead.
-    const overflowElement = this.getOverflowElement();
-    if (overflowElement) {
-      toggle(overflowElement, false);
-    }
-    this.element.classList.add('i-amphtml-layout-container');
-    this.element.setAttribute('layout', 'container');
+
+    this.mutateElement(() => {
+      this.undoPreviousLayout_(previousLayout);
+      this.container_.classList.remove(
+          'i-amphtml-fill-content',
+          'i-amphtml-replaced-content'
+      );
+      // The overflow element is generally hidden with visibility hidden,
+      // but after changing to layout container, this causes an undesirable
+      // empty white space so we hide it with display none instead.
+      const overflowElement = this.getOverflowElement();
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
+      this.element.classList.add('i-amphtml-layout-container');
+      this.element.setAttribute('layout', 'container');
+    });
   }
 
   /**
