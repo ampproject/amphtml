@@ -59,7 +59,7 @@ const INVALID_NAMES = [
  * @param {string} name
  */
 function assertValidName(SyntaxError, name) {
-  if (!VALID_NAME.test(name) || INVALID_NAMES.indexOf(name) >= 0) {
+  if (!VALID_NAME.test(name) || INVALID_NAMES.includes(name)) {
     throw new SyntaxError(`invalid custom element name "${name}"`);
   }
 }
@@ -115,7 +115,7 @@ class CustomElementRegistry {
      * @private
      * @const
      */
-    this.pendingDefines_ = this.win_.Object.create(null);
+    this.pendingDefines_ = win.Object.create(null);
   }
 
   /**
@@ -230,6 +230,14 @@ class Registry {
      * @private {Element}
      */
     this.current_ = null;
+
+    /**
+     * Once started (after the first Custom Element definition), this tracks
+     * DOM append and removals.
+     *
+     * @private {MutationObserver}
+     */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -455,15 +463,28 @@ class Registry {
     this.query_ = name;
 
     // The first registered name starts the mutation observer.
-    const observer = new this.win_.MutationObserver(records => {
+    this.mutationObserver_ = new this.win_.MutationObserver(records => {
       if (records) {
         this.handleRecords_(records);
       }
     });
-    observer.observe(this.doc_, {
+    this.mutationObserver_.observe(this.doc_, {
       childList: true,
       subtree: true,
     });
+
+    installPatches(this.win_, this);
+  }
+
+  /**
+   * This causes a synchronous handling of all the Mutation Observer's tracked
+   * mutations. This does nothing until the mutation observer is actually
+   * registered on the first Custom Element definition.
+   */
+  sync() {
+    if (this.mutationObserver_) {
+      this.handleRecords_(this.mutationObserver_.takeRecords());
+    }
   }
 
   /**
@@ -504,12 +525,101 @@ class Registry {
 }
 
 /**
+ * Patches the DOM APIs to support synchronous Custom Elements.
+ * @param {!Window} win
+ * @param {!Registry} registry
+ */
+function installPatches(win, registry) {
+  const {Document, Element, Node, Object} = win;
+  const docProto = Document.prototype;
+  const elProto = Element.prototype;
+  const nodeProto = Node.prototype;
+  const {createElement, importNode} = docProto;
+  const {
+    appendChild,
+    cloneNode,
+    insertBefore,
+    removeChild,
+    replaceChild,
+  } = nodeProto;
+
+  // Patch createElement to immediately upgrade the custom element.
+  // This has the added benefit that it avoids the "already created but needs
+  // constructor code run" chicken-and-egg problem.
+  docProto.createElement = function(name) {
+    const def = registry.getByName(name);
+    if (def) {
+      return new def.ctor();
+    }
+    return createElement.apply(this, arguments);
+  };
+
+  // Patch importNode to immediately upgrade custom elements.
+  // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
+  docProto.importNode = function() {
+    const imported = importNode.apply(this, arguments);
+    if (imported) {
+      registry.upgradeSelf(imported);
+      registry.upgrade(imported);
+    }
+    return imported;
+  };
+
+  // Patch appendChild to upgrade custom elements before returning.
+  nodeProto.appendChild = function() {
+    const appended = appendChild.apply(this, arguments);
+    registry.sync();
+    return appended;
+  };
+
+  // Patch insertBefore to upgrade custom elements before returning.
+  nodeProto.insertBefore = function() {
+    const inserted = insertBefore.apply(this, arguments);
+    registry.sync();
+    return inserted;
+  };
+
+  // Patch removeChild to upgrade custom elements before returning.
+  nodeProto.removeChild = function() {
+    const removed = removeChild.apply(this, arguments);
+    registry.sync();
+    return removed;
+  };
+
+  // Patch replaceChild to upgrade and detach custom elements before returning.
+  nodeProto.replaceChild = function() {
+    const replaced = replaceChild.apply(this, arguments);
+    registry.sync();
+    return replaced;
+  };
+
+  // Patch cloneNode to immediately upgrade custom elements.
+  nodeProto.cloneNode = function() {
+    const cloned = cloneNode.apply(this, arguments);
+    registry.upgradeSelf(cloned);
+    registry.upgrade(cloned);
+    return cloned;
+  };
+
+  // Patch the innerHTML setter to immediately upgrade custom elements.
+  // Note, this could technically fire connectedCallbacks if this node was
+  // connected, but we leave that to the Mutation Observer.
+  const innerHTMLDesc = Object.getOwnPropertyDescriptor(elProto, 'innerHTML');
+  const innerHTMLSetter = innerHTMLDesc.set;
+  innerHTMLDesc.set = function(html) {
+    innerHTMLSetter.call(this, html);
+    registry.upgrade(this);
+  };
+  Object.defineProperty(elProto, 'innerHTML', innerHTMLDesc);
+}
+
+/**
  * Does the polyfilling.
  * @param {!Window} win
  */
 function polyfill(win) {
-  const {HTMLElement, Element, Node, Document, Object, document} = win;
-  const {createElement, cloneNode, importNode} = document;
+  const {HTMLElement, Object, document} = win;
+  const {createElement} = document;
 
   const registry = new Registry(win);
   const customElements = new CustomElementRegistry(win, registry);
@@ -523,48 +633,6 @@ function polyfill(win) {
     // writable: false,
     value: customElements,
   });
-
-  // Patch createElement to immediately upgrade the custom element.
-  // This has the added benefit that it avoids the "already created but needs
-  // constructor code run" chicken-and-egg problem.
-  Document.prototype.createElement = function createElementPolyfill(name) {
-    const def = registry.getByName(name);
-    if (def) {
-      return new def.ctor();
-    }
-    return createElement.apply(this, arguments);
-  };
-
-  // Patch importNode to immediately upgrade custom elements.
-  // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
-  Document.prototype.importNode = function importNodePolyfill() {
-    const imported = importNode.apply(this, arguments);
-    if (imported) {
-      registry.upgradeSelf(imported);
-      registry.upgrade(imported);
-    }
-    return imported;
-  };
-
-  // Patch cloneNode to immediately upgrade custom elements.
-  Node.prototype.cloneNode = function cloneNodePolyfill() {
-    const cloned = cloneNode.apply(this, arguments);
-    registry.upgradeSelf(cloned);
-    registry.upgrade(cloned);
-    return cloned;
-  };
-
-  // Patch the innerHTML setter to immediately upgrade custom elements.
-  // Note, this could technically fire connectedCallbacks if this node was
-  // connected, but we leave that to the Mutation Observer.
-  const innerHTMLDesc = Object.getOwnPropertyDescriptor(Element.prototype,
-      'innerHTML');
-  const innerHTMLSetter = innerHTMLDesc.set;
-  innerHTMLDesc.set = function(html) {
-    innerHTMLSetter.call(this, html);
-    registry.upgrade(this);
-  };
-  Object.defineProperty(Element.prototype, 'innerHTML', innerHTMLDesc);
 
   /**
    * You can't use the real HTMLElement constructor, because you can't subclass
