@@ -240,6 +240,12 @@ async function launchBrowser() {
   browser_ = await puppeteer.launch(browserOptions)
       .catch(err => log('fatal', err));
 
+  // Every action on the browser or its pages adds a listener to the
+  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
+  // workaround for the Node runtime warning that is emitted once 11 listeners
+  // are added to the same object.
+  browser_._connection.setMaxListeners(9999);
+
   return browser_;
 }
 
