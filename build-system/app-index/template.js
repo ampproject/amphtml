@@ -111,7 +111,7 @@ const BasePathSearch = (basepath) => html`
         }
       </script>
     </amp-state>
-    <input type="text"></input>
+    <input type="text" on="change:AMP.setState({basePathSearch: {listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value}})"></input>
     <button
       class="find-icon icon">
       Find file
