@@ -384,18 +384,7 @@ describe('getErrorReportData', () => {
       e.fromAssert = true;
       const data = getErrorReportData(undefined, undefined, undefined,
           undefined, e);
-      expect(data).to.not.have.all.keys('spt');
-    });
-
-    it('does nothing for unknown single pass type', () => {
-      window.AMP_CONFIG = {
-        spt: 'lol',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(undefined, undefined, undefined,
-          undefined, e);
-      expect(data).to.not.have.all.keys('spt');
+      expect(data['spt']).to.be.undefined;
     });
   });
 
