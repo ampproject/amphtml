@@ -180,12 +180,6 @@
       ],
     },
     {
-      "url": "examples/visual-tests/iframe-test.html",
-      "name": "Iframe Test",
-      "loading_complete_delay_ms": 1000,
-      "enable_percy_javascript": true,
-    },
-    {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
       "loading_incomplete_css": [".article-body"],
