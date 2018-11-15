@@ -298,7 +298,6 @@ amp-story-grid-layer > * {
   width: 100% !important;
   display: block !important;
   position: absolute !important;
-  width: auto !important;
 }
 
 .i-amphtml-story-grid-template-vertical {
