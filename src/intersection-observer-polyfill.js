@@ -431,7 +431,7 @@ export class IntersectionObserverPolyfill {
    */
   handleMutationObserverPass_(element) {
     const viewport = Services.viewportForDoc(element);
-    const resources =  Services.resourcesForDoc(element);
+    const resources = Services.resourcesForDoc(element);
     resources.onNextPass(() => {
       this.tick(viewport.getRect());
     });

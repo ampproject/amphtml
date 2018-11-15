@@ -1644,7 +1644,7 @@ describe('Resources discoverWork', () => {
 
       const passCallback = sandbox.spy();
       resources.onNextPass(passCallback);
-      
+
       resources.doPass();
       expect(passCallback).to.be.calledOnce;
 
