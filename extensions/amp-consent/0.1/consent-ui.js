@@ -63,6 +63,9 @@ export class ConsentUI {
     this.isVisible_ = false;
 
     /** @private {boolean} */
+    this.isIframeVisible_ = false;
+
+    /** @private {boolean} */
     this.isFullscreen_ = false;
 
     /** @private {?Element} */
@@ -186,22 +189,22 @@ export class ConsentUI {
       return;
     }
 
-    if (this.isCreatedIframe_) {
-      this.resetIframe_();
-    }
+    this.baseInstance_.mutateElement(() => {
+      if (this.isCreatedIframe_) {
+        this.resetIframe_();
+      }
 
-    if (!this.isPostPrompt_) {
-      const {classList} = this.parent_;
-      classList.remove('amp-active');
-      classList.add('amp-hidden');
-    }
+      if (!this.isPostPrompt_) {
+        const {classList} = this.parent_;
+        classList.remove('amp-active');
+        classList.add('amp-hidden');
+      }
 
-    // Need to remove from fixed layer and add it back to update element's top
-    this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
-    if (this.ui_) {
-      toggle(this.ui_, false);
-    }
-    this.isVisible_ = false;
+      // Need to remove from fixed layer and add it back to update element's top
+      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
+      toggle(dev().assertElement(this.ui_), false);
+      this.isVisible_ = false;
+    });
   }
 
   /**
@@ -290,6 +293,7 @@ export class ConsentUI {
       classList.remove('loading');
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.uiIn);
+        this.isIframeVisible_ = true;
       });
     });
   }
@@ -306,20 +310,12 @@ export class ConsentUI {
     // Remove the iframe active to go back to our normal height
     classList.remove('consent-iframe-active');
 
-    if (this.isFullscreen_) {
-      this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
-
-      classList.remove(consentUiClasses.fullscreen);
-      this.isFullscreen_ = false;
-
-      classList.remove(consentUiClasses.uiIn);
-      removeElement(dev().assertElement(this.ui_));
-
-    } else {
-      this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
-      classList.remove(consentUiClasses.uiIn);
-      removeElement(dev().assertElement(this.ui_));
-    }
+    this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
+    classList.remove(consentUiClasses.fullscreen);
+    this.isFullscreen_ = false;
+    classList.remove(consentUiClasses.uiIn);
+    this.isIframeVisible_ = false;
+    removeElement(dev().assertElement(this.ui_));
   }
 
   /**
@@ -354,10 +350,14 @@ export class ConsentUI {
     }
 
     if (data['type'] === 'consent-ui-enter-fullscreen') {
-      this.vsync_.mutate(() => {
+
+      if (!this.isIframeVisible_) {
+        return;
+      }
+
+      this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
       });
-      return;
     }
   }
 }
