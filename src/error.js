@@ -501,7 +501,7 @@ export function getErrorReportData(message, filename, line, col, error,
   }
 
   if (getMode().singlePassType) {
-    data['spt'] = singlePassType;
+    data['spt'] = getMode().singlePassType;
   }
 
   data['rt'] = runtime;
