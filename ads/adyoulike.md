@@ -39,4 +39,5 @@ For configuration details and to generate your tags,  please contact [Adyoulike]
 ### Optional parameters
 
 - `data-dc`
+- `data-campaign`
 

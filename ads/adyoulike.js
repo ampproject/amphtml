@@ -21,7 +21,7 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function adyoulike(global, data) {
-  validateData(data, ['placement'], ['dc']);
+  validateData(data, ['placement'], ['dc', 'campaign']);
   global.adyoulikeParams = data;
 
   writeScript(global, 'https://pixels.omnitagjs.com/amp.js');
