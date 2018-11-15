@@ -14421,10 +14421,10 @@ tryit@^1.0.1:
   resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
   integrity sha1-OTvnMKlEb9Hq1tpZoBQwjzbCics=
 
-tsickle@0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.33.0.tgz#337a8a1abdbc8c9586010a566daf0cd135496fa7"
-  integrity sha512-ww4jhOaKhHHjZzs+dm381hffl1GOHhfA3LgbSoHMogWKm5mazpglVhMl1zJrSzOdhYHlZvrT7hRWCbGptzIpSA==
+tsickle@0.33.1:
+  version "0.33.1"
+  resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.33.1.tgz#eee4ebabeda3bcd8afc32cee34c822cbe3e839ec"
+  integrity sha512-SpW2G3PvDGs4a5sMXPlWnCWHWRviWjSlI3U0734e3fU3U39VAE0NPr8M3W1cuL/OU/YXheYipGeEwtIJ5k0NHQ==
   dependencies:
     minimist "^1.2.0"
     mkdirp "^0.5.1"
