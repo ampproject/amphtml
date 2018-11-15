@@ -588,8 +588,12 @@ export class AmpImageSlider extends AMP.BaseElement {
    * @private
    */
   pointerMoveX_(pointerX, opt_recal = false) {
+    let width, left, right;
     if (!opt_recal) {
-      const {width, left, right} = this.getLayoutBox();
+      const layoutBox = this.getLayoutBox();
+      width = layoutBox.width;
+      left = layoutBox.left;
+      right = layoutBox.right;
       const newPos = Math.max(left, Math.min(pointerX, right));
       const newPercentage = (newPos - left) / width;
       this.mutateElement(() => {
@@ -600,7 +604,6 @@ export class AmpImageSlider extends AMP.BaseElement {
       // This is to address the "snap to leftmost" bug that occurs on
       // pointer down after scrolling away and back 3+ slides
       // layoutBox is not updated correctly when first landed on page
-      let width, left, right;
       this.measureMutateElement(() => {
         const rect = this.element./*OK*/getBoundingClientRect();
         width = rect.width;

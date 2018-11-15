@@ -19,9 +19,8 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizer} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import mustache from '../../../third_party/mustache/mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -39,7 +38,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizer(value =>
+    mustache.setUnescapedSanitizer(value =>
       purifyTagsForTripleMustache(value, this.win.document));
   }
 
@@ -61,7 +60,7 @@ export class AmpMustache extends AMP.BaseTemplate {
 
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_, /* tags */ undefined);
+    mustache.parse(this.template_, /* tags */ undefined);
   }
 
   /**
@@ -99,7 +98,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
-    const html = mustacheRender(this.template_, mustacheData,
+    const html = mustache.render(this.template_, mustacheData,
         /* partials */ undefined);
     return this.purifyAndSetHtml_(html);
   }
