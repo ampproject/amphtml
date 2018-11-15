@@ -573,6 +573,7 @@ const forbiddenTerms = {
       'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/visual-diff/index.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
