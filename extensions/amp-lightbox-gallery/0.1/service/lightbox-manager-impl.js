@@ -244,7 +244,7 @@ export class LightboxManager {
     }
 
     user().assert(this.baseElementIsSupported_(element),
-        `The element ${element.tagName} isn't supported in lightbox yet.`);
+        'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];

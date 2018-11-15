@@ -52,9 +52,6 @@ const ELIGIBLE_TAGS = {
   'AMP-SELECTOR': true,
 };
 
-const SUPPORT_VALIDATION_MSG = `${TAG} should
-  have its target element as the one and only child`;
-
 /**
  * @extends {AMP.BaseElement}
  */
@@ -168,10 +165,16 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     const children = this.getRealChildren();
 
-    user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
+    user().assert(
+        children.length == 1,
+        '%s should have its target element as its one and only child',
+        TAG
+    );
     user().assert(
         this.elementIsSupported_(children[0]),
-        children[0].tagName + ` is not supported by ${TAG}`
+        '%s is not supported by %s',
+        children[0].tagName,
+        TAG
     );
     this.element.classList.add('i-amphtml-pan-zoom');
     this.content_ = children[0];

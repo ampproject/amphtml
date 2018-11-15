@@ -42,9 +42,8 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!isExperimentOn(this.win, 'amp-script')) {
-      const error = 'Experiment "amp-script" is not enabled.';
-      user().error(TAG, error);
-      return Promise.reject(error);
+      user().error(TAG, 'Experiment "amp-script" is not enabled.');
+      return Promise.reject('Experiment "amp-script" is not enabled.');
     }
     // Configure worker-dom's sanitizer with AMP-specific config and hooks.
     const config = purifyConfig();

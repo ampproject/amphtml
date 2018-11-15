@@ -51,9 +51,6 @@ const ELIGIBLE_TAGS = {
   'amp-anim': true,
 };
 
-const SUPPORT_VALIDATION_MSG = `amp-image-viewer should have its target element
-   as the one and only child`;
-
 export class AmpImageViewer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -127,10 +124,15 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
-    user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
+    user().assert(
+        children.length == 1,
+        '%s should have its target element as its one and only child',
+        TAG);
     user().assert(
         this.elementIsSupported_(children[0]),
-        children[0].tagName + ' is not supported by <amp-image-viewer>'
+        '%s is not supported by %s',
+        children[0].tagName,
+        TAG
     );
 
     this.sourceAmpImage_ = children[0];

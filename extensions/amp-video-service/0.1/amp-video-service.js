@@ -322,7 +322,7 @@ export class VideoEntry {
  * @private
  */
 function warnUnimplemented(feature) {
-  dev().warn(TAG, `${feature} unimplemented.`);
+  dev().warn(TAG, '%s unimplemented.', feature);
 }
 
 

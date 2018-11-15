@@ -281,7 +281,7 @@ describe('amp-next-page config', () => {
       };
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
-            .to.throw('amp-next-page hideSelector value 2 is not a string');
+            .to.throw('amp-next-page hideSelector value should be a string: 2');
       });
     });
 

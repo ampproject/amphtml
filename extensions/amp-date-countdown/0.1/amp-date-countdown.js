@@ -248,7 +248,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         'seconds': localeWordList[5],
       };
     } else {
-      user().error(TAG, `Invalid locale '${locale}', return empty locale word`);
+      user().error(TAG, 'Invalid locale %s, return empty locale word', locale);
       return {};
     }
   }
