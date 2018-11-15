@@ -178,10 +178,11 @@ If publisher wishes to ignore a score factor they may either explicitly set it's
 
 Available scoring factors:
 
-1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view. `supportsViewer` has a default score of 10.
+1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view.
 1. `isReadyToPay` returns `1` when the user is known to the service and the service has a form of payment on file allowing a purchase without entering payment details.
 
-In the event of a tie the local service wins.
+All scoring factors have default value of `0`. In the event of a tie the local service wins.
+
 
 ## Error fallback
 If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
@@ -308,6 +309,8 @@ The premium content is marked up using `subscriptions-section="content"` attribu
 </section>
 ```
 
+*Important*: Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content in the first viewport be allowed to render regardless of subscription state.
+
 The fallback content is marked up using `subscriptions-section="content-not-granted"` attribute. For instance:
 
 ```
@@ -356,17 +359,23 @@ The first dialog with matching `subscriptions-display` is shown.
 
 ## Expressions
 
-The `subscriptions-display` uses expressions for actions and dialogs.
+The `subscriptions-display` attribute uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
-
-The expression is executed against the json representation of the entitlement object.
-
-For instance, to show a "subscribe" action to non-subscribers:
+Values in the `data` object of an Entitlements response can be used to build expressions.  In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
 
 ```
-<button subscriptions-display="NOT subscribed" subscriptions-action="subscribe">Become a subscriber</button>
+<section>
+  <button subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</button>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn">
+    <div>My Account</div>
+    <div>Sign out</div>
+  </div>
+  <div subscriptions-actions subscriptions-display="data.isLoggedIn AND NOT data.isSubscriber">
+    <a href='...'>Upgrade your account</a>
+  </div>
+</section>
 ```
+
 
 ## Analytics
 
@@ -417,4 +426,3 @@ Following are the events and the conditions when the events are triggered.
 ## Available vendor services
 
 - [amp-subscriptions-google](../amp-subscriptions-google/amp-subscriptions-google.md)
-

@@ -171,6 +171,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       expect(callbackSpy).to.be.calledWith({
         type: 'response-type',
         sentinel: 'sentinel-123',
+        origin: 'http://www.example.com',
         x: 1,
         y: 'abc',
       });
@@ -185,6 +186,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       const expectedResponseObject = {
         type: 'response-type',
         sentinel: 'sentinel-123',
+        origin: 'http://www.example.com',
         x: 1,
         y: 'abc',
       };

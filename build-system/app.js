@@ -34,7 +34,7 @@ const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
 
-app.use(bodyParser.json());
+app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -48,15 +48,21 @@ app.use((req, res, next) => {
   next();
 });
 
+function isValidServeMode(serveMode) {
+  return ['default', 'compiled', 'cdn'].includes(serveMode);
+}
+
+function setServeMode(serveMode) {
+  pc.env.SERVE_MODE = serveMode;
+}
+
 app.get('/serve_mode=:mode', (req, res) => {
   const newMode = req.params.mode;
-  let info;
-  if (newMode == 'default' || newMode == 'compiled' || newMode == 'cdn') {
-    pc.env.SERVE_MODE = newMode;
-    info = '<h2>Serve mode changed to ' + newMode + '</h2>';
-    res.send(info);
+  if (isValidServeMode(newMode)) {
+    setServeMode(newMode);
+    res.send(`<h2>Serve mode changed to ${newMode}</h2>`);
   } else {
-    info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
+    const info = '<h2>Serve mode ' + newMode + ' is not supported. </h2>';
     res.status(400).send(info);
   }
 });
@@ -86,6 +92,25 @@ if (!global.AMP_TESTING) {
 
   app.get('/serve_mode.json', (req, res) => {
     res.json({serveMode: pc.env.SERVE_MODE || 'default'});
+  });
+
+  app.get('/serve_mode_change', (req, res) => {
+    const sourceOrigin = req.query['__amp_source_origin'];
+    if (sourceOrigin) {
+      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+    }
+    const {mode} = req.query;
+    if (isValidServeMode(mode)) {
+      setServeMode(mode);
+      res.json({ok: true});
+      return;
+    }
+    res.status(400).json({ok: false});
+  });
+
+  app.get('/proxy', (req, res) => {
+    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`proxy/s/${sufix}`);
   });
 }
 
@@ -146,7 +171,7 @@ app.use('/api/dont-show', (req, res) => {
 
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
+  res.end(req.body);
 });
 
 app.use('/analytics/:type', (req, res) => {

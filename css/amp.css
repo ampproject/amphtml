@@ -176,6 +176,18 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   overflow: hidden !important;
 }
 
+/**
+ * TODO(dvoytenko, #19004): if/when "scroll-height-minheight" launched, merge
+ * these styles into _both_: `#i-amphtml-wrapper > body` and
+ * `html.i-amphtml-ios-embed-sd > body` sections above.
+ */
+.i-amphtml-body-minheight > body {
+  /* A slightly overflowing height is necessary to avoid scrolling and
+     rendering bugs on iOS due to
+     https://bugs.webkit.org/show_bug.cgi?id=158342. */
+  min-height: calc(100vh + 1px);
+}
+
 
 .i-amphtml-element {
   display: inline-block;
@@ -421,6 +433,14 @@ i-amphtml-sizer {
 .i-amphtml-element > [placeholder].hidden,
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
+}
+/* Placeholder, by design, expands layout=container unlike other layouts where
+   it is position:absolute and overlays the layout box.
+   However, when it goes away it should no longer expand the parent, so instead
+   of visibility:hidden it must be display:none */
+.i-amphtml-layout-container > [placeholder].hidden,
+.i-amphtml-layout-container > [placeholder].amp-hidden {
+  display: none;
 }
 
 .i-amphtml-element:not(.amp-notsupported) > [fallback] {

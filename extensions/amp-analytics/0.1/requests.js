@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, defaultSerializer} from './transport-serializer';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
@@ -30,16 +30,16 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
-  constructor(ampdoc, request, preconnect, transport, isSandbox) {
+  constructor(element, request, preconnect, transport, isSandbox) {
 
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = element.getAmpDoc();
 
     /** @const {!Window} */
     this.win = this.ampdoc_.win;
@@ -60,8 +60,7 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ =
-      Services.urlReplacementsForDoc(this.ampdoc_);
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
@@ -69,7 +68,7 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
 
-    /** @private {!Array<!Promise<!batchSegmentDef>>} */
+    /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
@@ -211,7 +210,8 @@ export class RequestHandler {
               'iframePing is only available on page view requests.');
           this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
         } else {
-          this.transport_.sendRequest(baseUrl, batchSegments);
+          this.transport_.sendRequest(
+              baseUrl, batchSegments, !!this.batchInterval_);
         }
       });
     });
@@ -323,7 +323,9 @@ export function expandPostMessage(
     //return base url with the appended extra url params;
     return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
         .then(extraUrlParams => {
-          return defaultSerializer(expandedMsg, [{extraUrlParams}]);
+          return defaultSerializer(expandedMsg, [
+            dict({'extraUrlParams': extraUrlParams}),
+          ]);
         });
   });
 }

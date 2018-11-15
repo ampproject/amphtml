@@ -210,6 +210,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   let win;
   let binding;
+  let vsync;
   let child;
 
   beforeEach(() => {
@@ -217,6 +218,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.height = '100px';
     win = env.win;
     win.document.documentElement.className = 'top i-amphtml-singledoc';
+    toggleExperiment(win, 'scroll-height-minheight', false);
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -225,8 +227,25 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentStateService(win);
     installVsyncService(win);
+    vsync = Services.vsyncFor(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
+  });
+
+  it('should NOT setup body min-height w/o experiment', () => {
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal('0px');
+  });
+
+  it('should setup body min-height wwith experiment', () => {
+    toggleExperiment(win, 'scroll-height-minheight', true);
+    try {
+      binding = new ViewportBindingIosEmbedWrapper_(win);
+    } catch (e) {
+      // Ignore a double-init errors.
+    }
+    const style = win.getComputedStyle(win.document.body);
+    expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -263,7 +282,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(child.textContent).to.equal('test');
 
     // Top-level classes moved to the wrapper element.
-    expect(win.document.documentElement).to.not.have.class('top');
+    expect(win.document.documentElement).to.have.class('top');
     expect(binding.wrapper_).to.have.class('top');
   });
 
@@ -437,6 +456,31 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(wrapperCss.overflowX).to.equal('hidden');
     expect(wrapperCss.overflowY).to.equal('auto');
   });
+
+  it('should refresh overscroll when content height changes', () => {
+    toggleExperiment(win, 'scroll-height-bounce', true);
+    const root = win.document.documentElement;
+    return vsync.mutatePromise().then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+      binding.contentHeightChanged();
+      return vsync.mutatePromise();
+    }).then(() => {
+      expect(root).to.not.have.class('i-amphtml-ios-overscroll');
+      return vsync.mutatePromise();
+    }).then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+    });
+  });
+
+  it('should NOT refresh overscroll w/o experiment', () => {
+    // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
+    toggleExperiment(win, 'scroll-height-bounce', false);
+    binding.contentHeightChanged();
+    const root = win.document.documentElement;
+    return vsync.mutatePromise().then(() => {
+      expect(root).to.have.class('i-amphtml-ios-overscroll');
+    });
+  });
 });
 
 describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
@@ -454,6 +498,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       iframe.style.width = '100px';
       iframe.style.height = '100px';
       win = env.win;
+      toggleExperiment(win, 'scroll-height-minheight', false);
       win.document.documentElement.className = 'top i-amphtml-singledoc';
       child = win.document.createElement('div');
       child.style.width = '200px';
@@ -476,6 +521,22 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       vsync = Services.vsyncFor(win);
       binding = new ViewportBindingIosEmbedShadowRoot_(win);
       binding.connect();
+    });
+
+    it('should NOT setup body min-height w/o experiment', () => {
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal('0px');
+    });
+
+    it('should setup body min-height wwith experiment', () => {
+      toggleExperiment(win, 'scroll-height-minheight', true);
+      try {
+        new ViewportBindingIosEmbedShadowRoot_(win);
+      } catch (e) {
+        // Ignore a double-init errors.
+      }
+      const style = win.getComputedStyle(win.document.body);
+      expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
     });
 
     it('should NOT require fixed layer transferring', () => {
@@ -737,6 +798,37 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       scrollerCss = win.getComputedStyle(binding.scroller_);
       expect(scrollerCss.overflowX).to.equal('hidden');
       expect(scrollerCss.overflowY).to.equal('auto');
+    });
+
+    it('should refresh overscroll when content height changes', () => {
+      toggleExperiment(win, 'scroll-height-bounce', true);
+      const scroller = binding.scroller_;
+      const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
+      return vsync.mutatePromise().then(() => {
+        binding.contentHeightChanged();
+        return vsync.mutatePromise();
+      }).then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[0]).to.equal('-webkit-overflow-scrolling');
+        expect(args[1]).to.equal('auto');
+        return vsync.mutatePromise();
+      }).then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[0]).to.equal('-webkit-overflow-scrolling');
+        expect(args[1]).to.equal('touch');
+      });
+    });
+
+    it('should NOT refresh overscroll w/o experiment', () => {
+      // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
+      toggleExperiment(win, 'scroll-height-bounce', false);
+      const scroller = binding.scroller_;
+      const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
+      binding.contentHeightChanged();
+      return vsync.mutatePromise().then(() => {
+        const {args} = setStyleStub.lastCall;
+        expect(args[1]).to.not.equal('auto');
+      });
     });
   });
 });
