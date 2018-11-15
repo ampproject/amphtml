@@ -32,7 +32,7 @@ const {PercyAssetsLoader} = require('./percy-assets-loader');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
-let Percy = {};
+let Percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -600,12 +600,15 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function runYarnForOptionalDependencies_() {
   try {
-    puppeteer = require('puppeteer');
-    Percy = require('@percy/puppeteer').Percy;
+    require.resolve('puppeteer');
+    require.resolve('@percy/puppeteer');
   } catch (er) {
     log('Info', 'Running', colors.cyan('yarn'), 'to add optional packages...');
     execOrDie('yarn install --force');
   }
+
+  puppeteer = require('puppeteer');
+  Percy = require('@percy/puppeteer').Percy;
 }
 
 function setupCleanup_() {
