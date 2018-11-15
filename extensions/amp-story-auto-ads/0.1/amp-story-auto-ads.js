@@ -152,13 +152,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
-    /**
-     * We are counting pages on page-clicks. We initialize this to 1 because
-     * even though we have not yet seen a page click, we have already seen one
-     * page.
-     * @private {number}
-     */
-    this.uniquePagesCount_ = 1;
+    /** @private {number} */
+    this.uniquePagesCount_ = 0;
 
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = dict({});
@@ -195,6 +190,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.firstAdViewed_ = false;
+
+    /** @private {boolean} */
+    this.pendingAdView_ = false;
 
     /**
      * Version of the story store service depends on which version of amp-story
@@ -565,6 +563,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         [Vars.AD_INDEX]: adIndex,
       });
 
+      // Previously inserted ad has been viewed.
+      this.pendingAdView_ = false;
+
       // Start loading next ad.
       this.startNextAdPage_();
 
@@ -573,14 +574,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.idOfAdShowing_ = adIndex;
     }
 
-
-    if (this.enoughContentPagesViewed_()) {
+    // If there is already an ad inserted, but not viewed it doesn't matter how
+    // many pages we have seen, we should not keep trying to insert more ads.
+    if (!this.pendingAdView_ && this.enoughContentPagesViewed_()) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.INSERTED) {
         this.analyticsEventWithCurrentAd_(Events.AD_INSERTED,
             {[Vars.AD_INSERTED]: Date.now()});
         this.adsPlaced_++;
+        // We have an ad inserted that has yet to be viewed.
+        this.pendingAdView_ = true;
       }
 
       if (adState === AD_STATE.FAILED) {
