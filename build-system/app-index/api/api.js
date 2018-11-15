@@ -29,7 +29,7 @@ async function badRequest(res) {
 
 async function searchListing(root, req, res, next) {
 
-  if (!req.query || !req.query.path || !req.query.search) {
+  if (!req.query || !req.query.path) {
     badRequest(res);
     return;
   }
@@ -42,12 +42,16 @@ async function searchListing(root, req, res, next) {
     return;
   }
 
+  if (!req.query.search) {
+    res.status(200).json(fileSet);
+    return;
+  }
+
   // Fuzzy find from the file set
   const fuse = new Fuse(fileSet, {
     shouldSort: true,
     threshold: 0.4
   });
-
   const foundFileIndexes = fuse.search(req.query.search);
 
   const response = [];
@@ -55,7 +59,8 @@ async function searchListing(root, req, res, next) {
     response.push(fileSet[fileIndex]);
   });
 
-  // Send back the found files
+
+
   res.status(200).json(response);
 }
 

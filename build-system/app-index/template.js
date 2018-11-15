@@ -64,6 +64,8 @@ const requiredExtensions = [
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
+  {name: 'amp-mustache', version: '0.2'},
+  {name: 'amp-list'}
 ];
 
 
@@ -99,6 +101,22 @@ const Header = ({isMainPage, links}) => html`
       <li>${SettingsOpenButton()}</li>
     </ul>
   </header>`;
+
+const BasePathSearch = (basepath) => html`
+    ${basepath}
+    <amp-state id="basePathSearch">
+      <script type="application/json">
+        {
+          "listSrc": "/dashboard/api/listing?path=${basepath}"
+        }
+      </script>
+    </amp-state>
+    <input type="text"></input>
+    <button
+      class="find-icon icon">
+      Find file
+    </button>
+  `;
 
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
@@ -156,11 +174,17 @@ const FileListItem = ({name, href, selectModePrefix}) => {
 };
 
 
-const FileList = ({fileSet, selectModePrefix}) => html`
-  <ul class="file-list">
-    ${fileSet.map(({name, href}) =>
-      FileListItem({name, href, selectModePrefix})).join('')}
-  </ul>`;
+const FileList = (basepath) => html`
+  <amp-list [src]="basePathSearch.listSrc" src="/dashboard/api/listing?path=${basepath}" items="." layout="responsive" width="100px" height="100px">
+    <div placeholder>Loading...</div>
+    <div fallback>Failed to load data.</div>
+    <template type="amp-mustache">
+      <div>
+        Hello! {{.}}
+      </div>
+    </template>
+  </amp-list>
+  `;
 
 
 const getFileSet = ({basepath, fileSet, selectModePrefix}) => {
@@ -219,26 +243,13 @@ const renderTemplate = ({
     <div class="file-list-container">
       <div class="wrap">
         <h3 class="code" id="basepath">
-          ${basepath}
-          <a href="https://github.com/ampproject/amphtml/find/master"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="find-icon icon">
-            Find file
-          </a>
+          ${BasePathSearch(basepath)}
         </h3>
         <div class="push-right-after-heading">
           ${SelectModeOptional({basepath, selectModePrefix})}
           <a href="/~" class="underlined">List root directory</a>
         </div>
-        ${FileList({
-          fileSet: getFileSet({
-            basepath,
-            selectModePrefix,
-            fileSet,
-          }),
-          selectModePrefix,
-        })}
+        ${FileList(basepath)}
       </div>
     </div>
     <div class="center">
