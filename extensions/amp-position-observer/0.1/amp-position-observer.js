@@ -174,7 +174,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       'bottom-margin': this.resolvedBottomMargin_,
     };
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
-    if (this.useAnimationWorklet_) {
+    if (this.useAnimationWorklet_ &&
+        !this.action_.hasAction(this.element, 'enter') &&
+        !this.action_.hasAction(this.element, 'exit')) {
       this.maybeUninstallPositionObserver_();
     }
   }
