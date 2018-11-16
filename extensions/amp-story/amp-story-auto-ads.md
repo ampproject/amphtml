@@ -16,8 +16,6 @@ limitations under the License.
 
 # <a name="`amp-story-auto-ads`"></a> `amp-story-auto-ads`
 
-## THIS IS A WORK-IN-PROGRESS
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -58,15 +56,14 @@ looks like the following:
 <amp-story>
   <amp-story-auto-ads>
     <script type="application/json">
-      {
-        "ad-attributes": {
-          "type": "custom",
-          "data-url": "https://adserver.com/getad?slot=abcd1234"
+       {
+          "ad-attributes": {
+            "type": "doubleclick",
+            "data-slot": "/30497360/a4a/amp_story_dfp_example"
+          }
         }
-      }
     </script>
   </amp-story-auto-ads>
-  <amp-story-page>
   ...
 </amp-story>
 ```
@@ -75,45 +72,27 @@ looks like the following:
  `amp-ad` element to be inserted.
 
 The above example will insert the following `amp-ad` element, which represents
-a [custom ad](../../ads/custom.md):
+a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md):
 
 ```html
-<amp-ad type="custom"
-  data-url="https://adserver.com/getad?slot=abcd1234"
+<amp-ad type="doubleclick"
+  data-slot="/30497360/a4a/amp_story_dfp_example">
 </amp-ad>
 ```
 
 Unlike normal `amp-ad`, no `<fallback>` or `<placeholder>` needs to be specified
 here, as ads in story can only be displayed once fully rendered.
 
-## Inlined templates
-If [custom ad](../../ads/custom.md) is used, templates can be inlined in the
-`<amp-story-auto-ads>` element:
-
-```html
-  <amp-story-auto-ads>
-    <script type="application/json">
-        {
-          "ad-attributes": {
-            "type": "custom",
-            "data-url": "https://adserver.com/getad?slot=abcd1234"
-          }
-        }
-    </script>
-
-    <template type="amp-mustache" id="template-1">
-      <amp-img layout="fill" src="{{imgSrc}}"></amp-img>
-      <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-    </template>
-
-    <template type="amp-mustache" id="template-2">
-      <div class="creative-line-1">{{creativeLine1}}</div>
-      <div class="creative-line-2">{{creativeLine2}}</div>
-      <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-    </template>
-  </amp-story-auto-ads>
-```
-
 ## Validation
 
 It has to be a direct child of `amp-story` element.
+
+## Insertion Control
+If there is a specific position in a story that you wish to never show an ad,
+you can add the `next-page-no-ad` attribute an `<amp-story-page>`. The insertion
+algorithm will then skip the slot after this page when trying to insert an ad.
+
+```html
+<amp-story-page next-page-no-ad id="page-2">
+</amp-story-page>
+```
