@@ -123,7 +123,7 @@ export class GwdAnimation extends AMP.BaseElement {
     }
 
     // Retrieve the local document root (either the top-level doc or the FIE
-    // doc). This must be done after a handle on the FIE has been retrieved.
+    // doc). This must be done after the FIE has been retrieved above.
     const root = this.getRoot_();
 
     // Listen for GWD timeline events to re-broadcast them via the doc action
@@ -136,8 +136,7 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
-      user().assert(
-          this.element.id, 'The ' + TAG + ' element must have an id.');
+      user().assert(this.element.id, `The ${TAG} element must have an id.`);
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
@@ -250,8 +249,8 @@ export class GwdAnimation extends AMP.BaseElement {
 /**
  * Adds an event action definition to a node.
  * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc The node
- *     or AmpDoc reference for retrieving the action service. The node is
- *     provided when in an FIE.
+ *     or AmpDoc reference for retrieving the action service. The node rather
+ *     than the doc is provided when in a FIE.
  * @param {!Element} element The target element whose actions to update.
  * @param {string} event The event name, e.g., 'slideChange'.
  * @param {string} actionStr e.g., `someDiv.hide`.

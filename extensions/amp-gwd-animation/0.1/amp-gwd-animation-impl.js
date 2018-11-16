@@ -171,11 +171,10 @@ export class AmpGwdRuntimeService {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as
       // it must activate animations on the first page. It's not clear whether
-      // in production this is a realistic scenario (though this occurs in tests
-      // due to the sequence of `bodyAvailable` and `beforeEach`), but this also
-      // avoids performing initialization on the top-level document, on which
-      // the service is first (unnecessarily) installed when installing in a
-      // FIE.
+      // in production this is a realistic scenario (though this occurs in
+      // tests), but this also avoids performing initialization on the top-level
+      // document on which the service is first (unnecessarily) installed when
+      // in a FIE.
       const body = dev().assertElement(this.doc_.body);
       waitForChild(
           body,
@@ -411,7 +410,7 @@ export class AmpGwdRuntimeService {
    */
   gotoAndPlayNTimes(id, label, maxCount, eventName) {
     if (maxCount <= 0) {
-      user().error(LOG_ID, 'Invalid maxCount parameter: ' + maxCount);
+      user().error(LOG_ID, `Invalid maxCount parameter: ${maxCount}`);
       return;
     }
 
@@ -456,7 +455,7 @@ export class AmpGwdRuntimeService {
     if (receiver && receiver.classList) {
       return receiver;
     } else {
-      user().error(LOG_ID, 'Could not get receiver with id ' + id);
+      user().error(LOG_ID, `Could not get receiver with id ${id}.`);
       return null;
     }
   }
