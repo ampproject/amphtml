@@ -176,9 +176,9 @@ function runYarnCheck() {
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
 
-    const installCmd = yarnExecutable;
+    let installCmd = yarnExecutable;
     if (!process.env.TRAVIS) {
-      installCmd += ' --ignore-optional'; //ignore optional dependencies for local dev
+      installCmd += ' --ignore-optional --pure-lockfile'; //ignore optional dependencies for local dev
     }
     execOrDie(installCmd); // Stop execution when Ctrl + C is detected.
   } else {

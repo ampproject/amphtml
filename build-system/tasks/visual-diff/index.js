@@ -604,7 +604,7 @@ function runYarnForOptionalDependencies_() {
     require.resolve('@percy/puppeteer');
   } catch (er) {
     log('Info', 'Running', colors.cyan('yarn'), 'to add optional packages...');
-    execOrDie('yarn install --force');
+    execOrDie('npx yarn install --pure-lockfile');
   }
 
   puppeteer = require('puppeteer');
