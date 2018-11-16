@@ -72,8 +72,8 @@ export function calculateExtensionScriptUrl(location, extensionId,
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/${getSinglePassExperimentPath()}v0/` +
-    `${extensionId}${extensionVersion}.js`;
+  const spPath = getSinglePassExperimentPath();
+  return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
 }
 
 /**
@@ -89,8 +89,8 @@ export function calculateEntryPointScriptUrl(
   location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/` +
-      `${getSinglePassExperimentPath()}${entryPoint}.js`;
+    const spPath = getSinglePassExperimentPath();
+    return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
   }
   return `${base}/${entryPoint}.js`;
 }
