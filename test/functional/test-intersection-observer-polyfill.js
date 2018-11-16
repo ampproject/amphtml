@@ -25,6 +25,12 @@ import {
 import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
+const fakeAmpDoc = {
+  getRootNode: () => {return window.document;},
+  win: window,
+  isSingleDoc: () => {return true;},
+};
+
 describe('IntersectionObserverApi', () => {
   let sandbox;
   let onScrollSpy;
@@ -70,12 +76,7 @@ describe('IntersectionObserverApi', () => {
     sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
       return mockViewport;
     });
-    sandbox.stub(Services, 'ampdoc').callsFake(() => {
-      return {
-        getRootNode: () => {return window.document;},
-        win: window,
-      };
-    });
+    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
     testEle = {
       isBuilt: () => {return true;},
       getOwner: () => {return null;},
@@ -207,6 +208,7 @@ describe('IntersectionObserverPolyfill', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
   });
 
   afterEach(() => {
@@ -304,12 +306,14 @@ describe('IntersectionObserverPolyfill', () => {
           },
         };
       });
-      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+      sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
         return {
-          getRootNode: () => {return window.document;},
-          win: window,
+          onNextPass: callback => {
+            callback();
+          },
         };
       });
+
 
       element = {
         isBuilt: () => {return true;},
