@@ -175,12 +175,7 @@ function runYarnCheck() {
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
-
-    let installCmd = yarnExecutable;
-    if (!process.env.TRAVIS) {
-      installCmd += ' --ignore-optional --pure-lockfile'; //ignore optional dependencies for local dev
-    }
-    execOrDie(installCmd); // Stop execution when Ctrl + C is detected.
+    execOrDie(yarnExecutable); // Stop execution when Ctrl + C is detected.
   } else {
     log(colors.green('All packages in'),
         colors.cyan('node_modules'), colors.green('are up to date.'));

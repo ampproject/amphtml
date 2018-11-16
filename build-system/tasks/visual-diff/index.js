@@ -527,7 +527,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
-  runYarnForOptionalDependencies_();
+  installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -598,14 +598,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 }
 
-function runYarnForOptionalDependencies_() {
-  try {
-    require.resolve('puppeteer');
-    require.resolve('@percy/puppeteer');
-  } catch (er) {
-    log('Info', 'Running', colors.cyan('yarn'), 'to add optional packages...');
-    execOrDie('npx yarn install --pure-lockfile');
-  }
+function installPercy_() {
+  log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;

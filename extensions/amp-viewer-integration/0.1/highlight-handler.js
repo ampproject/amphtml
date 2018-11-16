@@ -204,7 +204,7 @@ export class HighlightHandler {
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
       setStyles(n, {
-        backgroundColor: '#ff0',
+        backgroundColor: '#fc9741',
         color: '#333',
       });
     }
