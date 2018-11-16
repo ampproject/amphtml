@@ -8,6 +8,8 @@ path_classifiers:
     - "third_party/**/*.*"
   externs:
     - "**/*.extern.js"
+  build-system:
+    - "build-system/**/*.*"
 extraction:
   javascript:
     index:
