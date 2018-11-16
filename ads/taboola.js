@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, validateExactlyOne} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -27,9 +27,8 @@ export function taboola(global, data) {
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateDataExists(data, ['publisher', 'placement', 'mode']);
-  validateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category',
-    'homepage', 'others']);
+  validateData(data, ['publisher', 'placement', 'mode',
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
 
   // setup default values for referrer and url
   const params = {
@@ -53,8 +52,8 @@ export function taboola(global, data) {
     framework: 'amp',
     container: 'c',
   },
-    params,
-    {flush: true}]
+  params,
+  {flush: true}]
   );
 
   // install observation on entering/leaving the view

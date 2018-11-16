@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
-const adImproveField = ['width', 'height', 'placement', 'optin', 'keyvalue'];
-const adImproveMandatoryField = ['placement'];
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function improvedigital(global, data)
-{
-  checkData(data, adImproveField);
-  validateDataExists(data, adImproveMandatoryField);
+export function improvedigital(global, data) {
+  validateData(data, ['placement'], ['width', 'height', 'optin', 'keyvalue']);
 
   let url = 'https://ad.360yield.com' +
       '/adj?' +

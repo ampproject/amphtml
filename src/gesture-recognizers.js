@@ -16,8 +16,8 @@
 
 import {GestureRecognizer} from './gesture';
 import {calcVelocity} from './motion';
-import {timer} from './timer';
 
+const DOUBLETAP_DELAY = 200;
 
 /**
  * A "tap" gesture.
@@ -26,7 +26,7 @@ import {timer} from './timer';
  *   clientY: number
  * }}
  */
-let TapDef;
+export let TapDef;
 
 
 /**
@@ -35,7 +35,7 @@ let TapDef;
  */
 export class TapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tap', manager);
@@ -51,17 +51,22 @@ export class TapRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.lastY_ = 0;
+
+    /** @private {?EventTarget} */
+    this.target_ = null;
   }
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
-    if (!touches || touches.length != 1) {
+    const {touches} = e;
+    this.target_ = e.target;
+    if (touches && touches.length == 1) {
+      this.startX_ = touches[0].clientX;
+      this.startY_ = touches[0].clientY;
+      return true;
+    } else {
       return false;
     }
-    this.startX_ = touches[0].clientX;
-    this.startY_ = touches[0].clientY;
-    return true;
   }
 
   /** @override */
@@ -86,7 +91,11 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   acceptStart() {
-    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, null);
+    this.signalEmit({
+      clientX: this.lastX_,
+      clientY: this.lastY_,
+      target: this.target_,
+    }, null);
     this.signalEnd();
   }
 }
@@ -100,17 +109,17 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-let DoubletapDef;
+export let DoubletapDef;
 
 
 /**
  * Recognizes a "doubletap" gesture. This gesture will block a single "tap"
- * for about 300ms while it's expecting the second "tap".
+ * for about 200ms while it's expecting the second "tap".
  * @extends {GestureRecognizer<DoubletapDef>}
  */
 export class DoubletapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('doubletap', manager);
@@ -129,6 +138,9 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.tapCount_ = 0;
+
+    /** @private {?Event} */
+    this.event_ = null;
   }
 
   /** @override */
@@ -136,18 +148,21 @@ export class DoubletapRecognizer extends GestureRecognizer {
     if (this.tapCount_ > 1) {
       return false;
     }
-    const touches = e.touches;
-    if (!touches || touches.length != 1) {
+    const {touches} = e;
+    if (touches && touches.length == 1) {
+      this.startX_ = touches[0].clientX;
+      this.startY_ = touches[0].clientY;
+      this.lastX_ = touches[0].clientX;
+      this.lastY_ = touches[0].clientY;
+      return true;
+    } else {
       return false;
     }
-    this.startX_ = touches[0].clientX;
-    this.startY_ = touches[0].clientY;
-    return true;
   }
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.changedTouches || e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
@@ -157,16 +172,19 @@ export class DoubletapRecognizer extends GestureRecognizer {
         this.acceptCancel();
         return false;
       }
+      return true;
+    } else {
+      return false;
     }
-    return true;
   }
 
   /** @override */
-  onTouchEnd(unusedE) {
+  onTouchEnd(e) {
     this.tapCount_++;
     if (this.tapCount_ < 2) {
-      this.signalPending(300);
+      this.signalPending(DOUBLETAP_DELAY);
     } else {
+      this.event_ = e;
       this.signalReady(0);
     }
   }
@@ -174,7 +192,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
   /** @override */
   acceptStart() {
     this.tapCount_ = 0;
-    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, null);
+    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, this.event_);
     this.signalEnd();
   }
 
@@ -198,7 +216,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let SwipeDef;
+export let SwipeDef;
 
 
 /**
@@ -208,7 +226,10 @@ let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {string} type
+   * @param {!./gesture.Gestures} manager
+   * @param {boolean} horiz
+   * @param {boolean} vert
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
@@ -258,27 +279,33 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
-    if (!touches || touches.length != 1) {
+    const {touches} = e;
+    // If already eventing, ignore additional touches
+    if (this.eventing_ && touches && touches.length > 1) {
+      return true;
+    }
+    if (touches && touches.length == 1) {
+      this.startTime_ = Date.now();
+      this.startX_ = touches[0].clientX;
+      this.startY_ = touches[0].clientY;
+      return true;
+    } else {
       return false;
     }
-    this.startTime_ = timer.now();
-    this.startX_ = touches[0].clientX;
-    this.startY_ = touches[0].clientY;
-    return true;
   }
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.changedTouches || e.touches;
-    if (touches && touches.length == 1) {
-      const x = touches[0].clientX;
-      const y = touches[0].clientY;
+    const {touches} = e;
+    if (touches && touches.length >= 1) {
+      const {clientX: x, clientY: y} = touches[0] ;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
+        // If already eventing, always emit new coordinates
         this.emit_(false, false, e);
       } else {
+        // Figure out whether or not we should start eventing
         const dx = Math.abs(x - this.startX_);
         const dy = Math.abs(y - this.startY_);
         // Swipe is penalized slightly since it's one of the least demanding
@@ -303,13 +330,19 @@ class SwipeRecognizer extends GestureRecognizer {
           return false;
         }
       }
+      return true;
+    } else {
+      return false;
     }
-    return true;
   }
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    const {touches} = e;
+    // Number of current touches on the page
+    if (touches && touches.length == 0) {
+      this.end_(e);
+    }
   }
 
   /** @override */
@@ -338,11 +371,11 @@ class SwipeRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
-    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+    if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
       this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
           this.velocityX_);
       this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
@@ -360,6 +393,10 @@ class SwipeRecognizer extends GestureRecognizer {
       time: this.lastTime_,
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
+      startX: this.startX_,
+      startY: this.startY_,
+      lastX: this.lastX_,
+      lastY: this.lastY_,
       velocityX: this.horiz_ ? this.velocityX_ : 0,
       velocityY: this.vert_ ? this.velocityY_ : 0,
     }, event);
@@ -384,7 +421,7 @@ class SwipeRecognizer extends GestureRecognizer {
  */
 export class SwipeXYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-xy', manager, true, true);
@@ -397,7 +434,7 @@ export class SwipeXYRecognizer extends SwipeRecognizer {
  */
 export class SwipeXRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-x', manager, true, false);
@@ -410,7 +447,7 @@ export class SwipeXRecognizer extends SwipeRecognizer {
  */
 export class SwipeYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-y', manager, false, true);
@@ -443,7 +480,7 @@ let TapzoomDef;
  */
 export class TapzoomRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tapzoom', manager);
@@ -464,12 +501,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.lastY_ = 0;
 
     /** @private {number} */
-    this.tapX_ = 0;
-
-    /** @private {number} */
-    this.tapY_ = 0;
-
-    /** @private {number} */
     this.tapCount_ = 0;
 
     /** @private {number} */
@@ -477,9 +508,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.prevY_ = 0;
-
-    /** @private {time} */
-    this.startTime_ = 0;
 
     /** @private {time} */
     this.lastTime_ = 0;
@@ -499,18 +527,19 @@ export class TapzoomRecognizer extends GestureRecognizer {
     if (this.eventing_) {
       return false;
     }
-    const touches = e.touches;
-    if (!touches || touches.length != 1) {
+    const {touches} = e;
+    if (touches && touches.length == 1) {
+      this.startX_ = touches[0].clientX;
+      this.startY_ = touches[0].clientY;
+      return true;
+    } else {
       return false;
     }
-    this.startX_ = touches[0].clientX;
-    this.startY_ = touches[0].clientY;
-    return true;
   }
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.changedTouches || e.touches;
+    const {touches} = e;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
@@ -528,8 +557,10 @@ export class TapzoomRecognizer extends GestureRecognizer {
           }
         }
       }
+      return true;
+    } else {
+      return false;
     }
-    return true;
   }
 
   /** @override */
@@ -542,8 +573,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.tapCount_++;
     if (this.tapCount_ == 1) {
       this.signalPending(400);
-      this.tapX_ = this.lastX_;
-      this.tapY_ = this.lastY_;
       return;
     }
 
@@ -570,9 +599,8 @@ export class TapzoomRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     if (first) {
-      this.startTime_ = this.lastTime_;
       this.velocityX_ = this.velocityY_ = 0;
     } else if (this.lastTime_ - this.prevTime_ > 2) {
       this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_,
@@ -627,8 +655,19 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let PinchDef;
+export let PinchDef;
 
+/**
+ * Threshold in pixels for how much two touches move away from
+ * each other before we recognize the gesture as a pinch.
+ */
+const PINCH_ACCEPT_THRESHOLD = 4;
+
+/**
+ * Threshold in pixels for how much two touches move in the same
+ * direction before we reject the gesture as a pinch.
+ */
+const PINCH_REJECT_THRESHOLD = 10;
 
 /**
  * Recognizes a "pinch" gesture.
@@ -636,7 +675,7 @@ let PinchDef;
  */
 export class PinchRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('pinch', manager);
@@ -689,51 +728,106 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    const touches = e.touches;
-    if (!touches || touches.length != 2) {
+    const {touches} = e;
+    if (!touches) {
       return false;
     }
-    this.startTime_ = timer.now();
-    this.startX1_ = touches[0].clientX;
-    this.startY1_ = touches[0].clientY;
-    this.startX2_ = touches[1].clientX;
-    this.startY2_ = touches[1].clientY;
-    return true;
+    // Pinch touches are not always simultaneous, continue to listen
+    // for second touch.
+    if (touches.length == 1) {
+      return true;
+    }
+    // If already in the middle of a pinch event, ignore additional touches.
+    if (this.eventing_ && touches.length > 2) {
+      return true;
+    }
+    if (touches.length == 2) {
+      this.startTime_ = Date.now();
+      this.startX1_ = touches[0].clientX;
+      this.startY1_ = touches[0].clientY;
+      this.startX2_ = touches[1].clientX;
+      this.startY2_ = touches[1].clientY;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.touches;
-    if (!touches || touches.length != 2) {
+    const {touches} = e;
+    if (!touches || touches.length == 0) {
       return false;
     }
+    // Pinch touches are not always simultaneous, continue to listen
+    // for second touch.
+    if (touches.length == 1) {
+      return true;
+    }
+
+    // Have 2+ touches
     this.lastX1_ = touches[0].clientX;
     this.lastY1_ = touches[0].clientY;
     this.lastX2_ = touches[1].clientX;
     this.lastY2_ = touches[1].clientY;
+
+    // If eventing, always emit gesture with new coordinates
     if (this.eventing_) {
       this.emit_(false, false, e);
-    } else {
-      const dx1 = this.lastX1_ - this.startX1_;
-      const dy1 = this.lastY1_ - this.startY1_;
-      const dx2 = this.lastX2_ - this.startX2_;
-      const dy2 = this.lastY2_ - this.startY2_;
-      // Fingers should move in opposite directions and go over the threshold.
-      if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
-        if (Math.abs(dx1 - dx2) >= 8 || Math.abs(dy1 - dy2) >= 8) {
-          this.signalReady(0);
-        }
-      } else if (Math.abs(dx1 + dx2) >= 8 || Math.abs(dy1 + dy2) >= 8) {
-        // Moving in the same direction over a threshold.
-        return false;
-      }
+      return true;
     }
+
+    // Gesture is 2+ touch but direction indicates not a pinch
+    if (this.isPinchRejected_()) {
+      return false;
+    }
+
+    if (this.isPinchReady_()) {
+      this.signalReady(0);
+    }
+    // Pinch gesture detected but threshold not reached, continue listening
     return true;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPinchReady_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionCorrect = dx1 * dx2 <= 0 && dy1 * dy2 <= 0;
+    const xPinchRecognized = Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD;
+    const yPinchRecognized = Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD;
+    return pinchDirectionCorrect && (xPinchRecognized || yPinchRecognized);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPinchRejected_() {
+    const dx1 = this.lastX1_ - this.startX1_;
+    const dy1 = this.lastY1_ - this.startY1_;
+    const dx2 = this.lastX2_ - this.startX2_;
+    const dy2 = this.lastY2_ - this.startY2_;
+
+    const pinchDirectionIncorrect = dx1 * dx2 > 0 || dy1 * dy2 > 0;
+    const xPinchRejected = Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD;
+    const yPinchRejected = Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD;
+    return pinchDirectionIncorrect && (xPinchRejected || yPinchRejected);
   }
 
   /** @override */
   onTouchEnd(e) {
-    this.end_(e);
+    // Pinch requires at least two touches on the page
+    const {touches} = e;
+    if (touches && touches.length < 2) {
+      this.end_(e);
+    }
   }
 
   /** @override */
@@ -759,13 +853,13 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     const deltaX = this.deltaX_();
     const deltaY = this.deltaY_();
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
-    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+    if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
       this.velocityX_ = calcVelocity(deltaX - this.prevDeltaX_, deltaTime,
           this.velocityX_);
       this.velocityY_ = calcVelocity(deltaY - this.prevDeltaY_, deltaTime,

@@ -5,7 +5,7 @@
   <title>AMP Experiments</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <meta name="robots" content="noindex">
-  <script async src="../../dist.tools/experiments/experiments.max.js"></script>
+  <script async src="/dist.tools/experiments/experiments.js"></script>
   <style>
     body {
       max-width: 600px;
@@ -43,12 +43,11 @@
       color: orange;
     }
 
-    .desc a {
-      color: #cc7a00;
-    }
-
     a {
       color: #3ab3eb;
+    }
+
+    .content a {
       text-decoration: none;
     }
 
@@ -79,7 +78,7 @@
       color: #fff;
     }
 
-    .on, .off {
+    .on, .off, .default {
       display: none;
     }
 
@@ -88,6 +87,10 @@
     }
 
     tr[data-on='1'] .on {
+      display: block;
+    }
+
+    tr[data-on='default'] .default {
       display: block;
     }
 
@@ -157,15 +160,31 @@
   </section>
 
   <section class="desc">
-    Please exercise caution. These experiments are not fully tested and might
-    contain bugs or have unexpected side effects. Please only activate them if
-    you work on the
-    <a href="https://github.com/ampproject/amphtml/">AMP project</a>
-    or plan to create AMP documents that use unreleased features.
+    <p>
+      The switches below will toggle experiments for all documents served through the
+      <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>;
+      that is, the cached copies of valid AMP content published to the web at
+      the cdn.ampproject.org domain. See the AMP project
+      <a href="https://www.ampproject.org/docs/reference/experimental.html">documentation</a>
+      to find out more about experiments, and how to activate them outside of
+      the Google AMP Cache (including in local development).
+    </p>
+
+    <p>
+      Please exercise caution. These experiments are not fully tested and might
+      contain bugs or have unexpected side effects. Please only activate them
+      if you work on the <a href="https://github.com/ampproject/amphtml/">AMP Project</a>
+      or plan to create AMP documents that use unreleased features for testing purposes.
+    </p>
   </section>
 
   <section class="content">
     <table id="experiments-table" border=1></table>
+  </section>
+
+  <section class="desc">
+    <a target="_blank" href="https://www.google.com/intl/en/policies/privacy/?fg=1">Privacy Policy</a>
+    <a target="_blank" href="https://www.google.com/intl/en/policies/terms/?fg=1">Terms of Service</a>
   </section>
 
   <div class="popup-graypane" id="popup-container">

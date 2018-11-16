@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python2.7
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
@@ -42,13 +42,15 @@ def EnsureNodeJsIsInstalled():
   """Ensure Node.js is installed and that 'node' is the command to run."""
   logging.info('entering ...')
 
+
     try:
-    output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
+      output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
       if output.strip() == '42':
-      return
+
+        return
     except (subprocess.CalledProcessError, OSError):
-    pass
-  Die('Node.js not found. Try "apt-get install nodejs" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
+      pass
+  Die('Node.js not found. Try "apt-get install nodejs"or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
 
 
 def CheckPrereqs():
@@ -216,8 +218,8 @@ def GenValidatorProtoGeneratedJs(out_dir):
   logging.info('... done')
 
 
-def GenValidatorGeneratedJs(out_dir):
-  """Calls validator_gen_js to generate validator-generated.js.
+def GenValidatorProtoGeneratedJs(out_dir):
+  """Calls validator_gen_js to generate validator-proto-generated.js.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -237,7 +239,7 @@ def GenValidatorGeneratedJs(out_dir):
   # pylint: enable=g-import-not-at-top
   out = []
   validator_gen_js.GenerateValidatorGeneratedJs(
-      specfile='%s/validator.protoascii' % out_dir,
+      specfile=None,
       validator_pb2=validator_pb2,
       generate_proto_only=False,
       generate_spec_only=True,
@@ -246,7 +248,7 @@ def GenValidatorGeneratedJs(out_dir):
       descriptor=descriptor,
       out=out)
   out.append('')
-  f = open('%s/validator-generated.js' % out_dir, 'w')
+  f = open('%s/validator-proto-generated.js' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -282,8 +284,8 @@ def GenValidatorGeneratedPHP(out_dir):
   f.close()
   logging.info('... done')
 
-def GenValidatorGeneratedMd(out_dir):
-  """Calls validator_gen_md to generate validator-generated.md.
+def GenValidatorGeneratedJs(out_dir):
+  """Calls validator_gen_js to generate validator-generated.js.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -295,17 +297,24 @@ def GenValidatorGeneratedMd(out_dir):
   # These imports happen late, within this method because they don't necessarily
   # exist when the module starts running, and the ones that probably do
   # are checked by CheckPrereqs.
+  # pylint: disable=g-import-not-at-top
   from google.protobuf import text_format
+  from google.protobuf import descriptor
   from dist import validator_pb2
-  import validator_gen_md
+  import validator_gen_js
+  # pylint: enable=g-import-not-at-top
   out = []
-  validator_gen_md.GenerateValidatorGeneratedMd(
+  validator_gen_js.GenerateValidatorGeneratedJs(
       specfile='%s/validator.protoascii' % out_dir,
       validator_pb2=validator_pb2,
+      generate_proto_only=False,
+      generate_spec_only=True,
       text_format=text_format,
+      html_format=None,
+      descriptor=descriptor,
       out=out)
   out.append('')
-  f = open('%s/validator-generated.md' % out_dir, 'w')
+  f = open('%s/validator-generated.js' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -329,8 +338,8 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
   cmd += ['--output_manifest=%s' % ('%s.manifest' % output_file)]
   cmd += [
       'node_modules/google-closure-library/closure/**.js',
-          '!node_modules/google-closure-library/closure/**_test.js',
-          'node_modules/google-closure-library/third_party/closure/**.js',
+      '!node_modules/google-closure-library/closure/**_test.js',
+      'node_modules/google-closure-library/third_party/closure/**.js',
       '!node_modules/google-closure-library/third_party/closure/**_test.js'
   ]
   cmd += js_files
@@ -377,7 +386,7 @@ def RunSmokeTest(out_dir):
   p = subprocess.Popen(
       [
           'node', 'nodejs/index.js', '--validator_js',
-       '%s/validator_minified.js' % out_dir,
+          '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
       stdout=subprocess.PIPE,
@@ -392,7 +401,7 @@ def RunSmokeTest(out_dir):
   p = subprocess.Popen(
       [
           'node', 'nodejs/index.js', '--validator_js',
-       '%s/validator_minified.js' % out_dir,
+          '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
       stdout=subprocess.PIPE,
@@ -412,7 +421,7 @@ def RunIndexTest():
   logging.info('entering ...')
   p = subprocess.Popen(
       ['node', './index_test.js'],
-                       stdout=subprocess.PIPE,
+      stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
       cwd='nodejs')
   (stdout, stderr) = p.communicate()
@@ -477,7 +486,7 @@ def CompileHtmlparserTestMinified(out_dir):
       ],
       definitions=[],
       entry_points=['amp.htmlparser.HtmlParserTest'],
-                     output_file='%s/htmlparser_test_minified.js' % out_dir)
+      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -614,7 +623,6 @@ def GenerateTestRunner(out_dir):
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
-             require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
              require('./parse-url_test_minified');
@@ -646,30 +654,8 @@ def RunTests(update_tests, out_dir):
   subprocess.check_call(['node', '%s/test_runner' % out_dir], env=env)
   logging.info('... success')
 
-def CreateWebuiAppengineDist(out_dir):
-  logging.info('entering ...')
-  try:
-    tempdir = tempfile.mkdtemp()
-    shutil.copytree('webui', os.path.join(tempdir, 'webui'))
-    os.symlink(os.path.abspath('node_modules/codemirror'),
-               os.path.join(tempdir, 'webui/codemirror'))
-    for d in os.listdir('node_modules/@polymer'):
-      os.symlink(os.path.abspath(os.path.join('node_modules/@polymer', d)),
-                 os.path.join(tempdir, 'webui/@polymer', d))
-    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
-               os.path.join(tempdir, 'webui/webcomponents-lite'))
-    vulcanized_index_html = subprocess.check_output([
-        'node_modules/vulcanize/bin/vulcanize',
-        '--inline-scripts', '--inline-css',
-        '-p', os.path.join(tempdir, 'webui'), 'index.html'])
-  finally:
-    shutil.rmtree(tempdir)
-  webui_out = os.path.join(out_dir, 'webui_appengine')
-  shutil.copytree('webui', webui_out)
-  f = open(os.path.join(webui_out, 'index.html'), 'w')
-  f.write(vulcanized_index_html)
-  f.close()
-  logging.info('... success')
+
+
 
 
 def Main(parsed_args):
@@ -691,7 +677,6 @@ def Main(parsed_args):
   RunSmokeTest(out_dir='dist')
   RunIndexTest()
   CompileValidatorTestMinified(out_dir='dist')
-  CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseUrlTestMinified(out_dir='dist')

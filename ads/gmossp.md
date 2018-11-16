@@ -19,12 +19,9 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad 
-  width="320"
-  height="50"
+<amp-ad width="320" height="50"
   type="gmossp"
-  data-id="20175"
->
+  data-id="20175">
 </amp-ad>
 ```
 
@@ -34,4 +31,4 @@ For configuration details and to generate your tags, please contact dev@ml.gmo-a
 
 Supported parameters:
 
-- data-id
+- `data-id`

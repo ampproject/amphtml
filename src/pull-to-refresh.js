@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {platformFor} from './platform';
-import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
+import {Services} from './services';
 
 
 /**
@@ -27,9 +25,11 @@ import {viewportFor} from './viewport';
  */
 export function installPullToRefreshBlocker(win) {
   // Only do when requested and don't even try it on Safari!
-  if (viewerFor(win).getParam('p2r') == '0' &&
-          platformFor(win).isChrome()) {
-    new PullToRefreshBlocker(win.document, viewportFor(win));
+  // This mode is only executed in the single-doc mode.
+  if (Services.viewerForDoc(win.document).getParam('p2r') == '0' &&
+          Services.platformFor(win).isChrome()) {
+    new PullToRefreshBlocker(
+        win.document, Services.viewportForDoc(win.document));
   }
 }
 
@@ -41,7 +41,7 @@ export function installPullToRefreshBlocker(win) {
 export class PullToRefreshBlocker {
   /**
    * @param {!Document} doc
-   * @param {!./service/viewport-impl.Viewport} viewport
+   * @param {!./service/viewport/viewport-impl.Viewport} viewport
    */
   constructor(doc, viewport) {
     /** @private {!Document} */
@@ -83,7 +83,7 @@ export class PullToRefreshBlocker {
     // already tracking this touch and for non-single-touch events.
     if (this.tracking_ ||
           !(event.touches && event.touches.length == 1) ||
-          this.viewport_.getTop() > 0) {
+          this.viewport_.getScrollTop() > 0) {
       return;
     }
 

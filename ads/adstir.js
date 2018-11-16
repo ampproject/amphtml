@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adstir(global, data) {
-  checkData(data, ['appId', 'adSpot']);
+  // TODO: check mandatory fields
+  validateData(data, [], ['appId', 'adSpot']);
 
   const v = '4.0';
 

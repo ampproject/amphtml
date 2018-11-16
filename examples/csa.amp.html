@@ -1,0 +1,52 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>CSA example</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .content {
+      margin: 20px;
+    }
+    .organic {
+      width: 100%;
+      height: 1000px;
+      display: flex;
+      justify-content:center;
+      align-content:center;
+      flex-direction:column; /* column | row */
+      text-align: center;
+      background-color: #BDBDBD;
+      color: #FFFFFF;
+      font-size: xx-large;
+    }
+  </style>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+</head>
+<body>
+  <div class="content">
+    <h2>CSA Example</h2>
+    <h3>AdSense for Search ad</h3>
+    <amp-ad 
+        height=300
+        type="csa"
+        data-afs-page-options='{"pubId": "gtech-codegen", "query": "flowers", "sellerRatings": true, "siteLinks": true, "clickToCall": true}'
+        data-afs-adblock-options='{"width": "auto", "maxTop": 1}'>
+    </amp-ad>
+
+    <!-- Make the second ad below the fold. -->
+    <div class="organic">Page Content</div>
+    
+    <h3>AdSense for Shopping ad</h3>
+    <amp-ad 
+        height=300
+        type="csa"
+        data-afsh-page-options='{"pubId": "vert-pla-test1-srp", "query": "flowers"}'
+        data-afsh-adblock-options='{"width": "auto", "height": 300}'>
+    </amp-ad>
+  </div>
+</body>
+</html>

@@ -1,0 +1,61 @@
+FAIL
+|  <!--
+|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests support for the amp-byside-content tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-byside-content" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Example of a valid amp-byside-content. -->
+|    <amp-byside-content
+|        data-webcare-id="D6604AE5D0"
+|        data-label="amp-simple"
+|        data-lang="en"
+|        data-channel=""
+|        height="300"
+|        layout="fixed-height">
+|    </amp-byside-content>
+|    <!-- Valid: data-channel and data-lang are optional. -->
+|    <amp-byside-content
+|        data-webcare-id="D6604AE5D0"
+|        data-label="amp-simple"
+|        height="300"
+|        layout="fixed-height">
+|    </amp-byside-content>
+|    <!-- Invalid: data-webcare-id and data-label is mandatory;
+|         leaving them out results in an error. -->
+|    <amp-byside-content
+>>   ^~~~~~~~~
+amp-byside-content/0.1/test/validator-amp-byside-content.html:49:2 The mandatory attribute 'data-label' is missing in tag 'amp-byside-content'. (see https://www.ampproject.org/docs/reference/components/amp-byside-content) [AMP_TAG_PROBLEM]
+>>   ^~~~~~~~~
+amp-byside-content/0.1/test/validator-amp-byside-content.html:49:2 The mandatory attribute 'data-webcare-id' is missing in tag 'amp-byside-content'. (see https://www.ampproject.org/docs/reference/components/amp-byside-content) [AMP_TAG_PROBLEM]
+|        data-lang="en"
+|        data-channel="en"
+|        height="300"
+|        layout="fixed-height">
+|    </amp-byside-content>
+|  </body>
+|  </html>

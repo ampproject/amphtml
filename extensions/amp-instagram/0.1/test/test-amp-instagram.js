@@ -14,30 +14,56 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-instagram';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-instagram', () => {
+describes.realWin('amp-instagram', {
+  amp: {
+    extensions: ['amp-instagram'],
+  },
+}, env => {
+  let win, doc;
 
-  function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-instagram');
-      ins.setAttribute('data-shortcode', shortcode);
-      ins.setAttribute('width', '111');
-      ins.setAttribute('height', '222');
-      ins.setAttribute('alt', 'Testing');
-      if (opt_responsive) {
-        ins.setAttribute('layout', 'responsive');
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function getIns(shortcode, opt_responsive,
+    opt_beforeLayoutCallback, opt_captioned) {
+    const ins = doc.createElement('amp-instagram');
+    ins.setAttribute('data-shortcode', shortcode);
+    ins.setAttribute('width', '111');
+    ins.setAttribute('height', '222');
+    ins.setAttribute('alt', 'Testing');
+    if (opt_responsive) {
+      ins.setAttribute('layout', 'responsive');
+    }
+    if (opt_captioned) {
+      ins.setAttribute('data-captioned', '');
+    }
+    ins.implementation_.getVsync = () => {
+      return {
+        mutate(cb) { cb(); },
+        measure(cb) { cb(); },
+        runPromise(task, state = {}) {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+          return Promise.resolve();
+        },
+      };
+    };
+    doc.body.appendChild(ins);
+    return ins.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(ins);
       }
-      return iframe.addElement(ins);
-    });
+      return ins.layoutCallback();
+    }).then(() => ins);
   }
 
   function testImage(image) {
@@ -46,13 +72,20 @@ describe('amp-instagram', () => {
         'https://www.instagram.com/p/fBwFP/media/?size=l');
     expect(image.getAttribute('layout')).to.equal('fill');
     expect(image.getAttribute('alt')).to.equal('Testing');
+    expect(image.getAttribute('referrerpolicy')).to.equal('origin');
   }
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
-    expect(iframe.getAttribute('width')).to.equal('111');
-    expect(iframe.getAttribute('height')).to.equal('222');
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?cr=1&v=9');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
+  }
+
+  function testIframeCaptioned(iframe) {
+    expect(iframe).to.not.be.null;
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/captioned/?cr=1&v=9');
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
     expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
@@ -63,13 +96,26 @@ describe('amp-instagram', () => {
     });
   });
 
+  it('renders captioned', () => {
+    return getIns('fBwFP', undefined, undefined, true).then(ins => {
+      testIframeCaptioned(ins.querySelector('iframe'));
+      testImage(ins.querySelector('amp-img'));
+    });
+  });
+
+  it('sets noprerender on amp-img', () => {
+    return getIns('fBwFP').then(ins => {
+      expect(ins.querySelector('amp-img').hasAttribute('noprerender'))
+          .to.be.true;
+    });
+  });
+
   it('builds a placeholder image without inserting iframe', () => {
     return getIns('fBwFP', true, ins => {
-      console.log(ins);
       const placeholder = ins.querySelector('[placeholder]');
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('');
       testImage(placeholder.querySelector('amp-img'));
     }).then(ins => {
       const placeholder = ins.querySelector('[placeholder]');
@@ -82,7 +128,7 @@ describe('amp-instagram', () => {
       testIframe(iframe);
       testImage(placeholder.querySelector('amp-img'));
       ins.implementation_.iframePromise_.then(() => {
-        expect(placeholder.style.display).to.be.equal('none');
+        expect(placeholder).to.be.have.display('none');
       });
     });
   });
@@ -96,18 +142,50 @@ describe('amp-instagram', () => {
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;
-      expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder).to.not.have.display('none');
     });
   });
 
   it('renders responsively', () => {
     return getIns('fBwFP', true).then(ins => {
-      expect(ins.className).to.match(/amp-layout-responsive/);
+      expect(ins.className).to.match(/i-amphtml-layout-responsive/);
     });
   });
 
   it('requires data-shortcode', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-shortcode attribute is required for/);
+    allowConsoleError(() => {
+      expect(getIns('')).to.be.rejectedWith(
+          /The data-shortcode attribute is required for/);
+    });
   });
+
+  it('resizes in response to messages from Instagram iframe', () => {
+    return getIns('fBwFP', true).then(ins => {
+      const impl = ins.implementation_;
+      const iframe = ins.querySelector('iframe');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const newHeight = 977;
+
+      expect(iframe).to.not.be.null;
+
+      sendFakeMessage(ins, iframe, 'MEASURE', {
+        height: newHeight,
+      });
+
+      expect(changeHeight).to.be.calledOnce;
+      // Height minus padding
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
+    });
+  });
+
+  function sendFakeMessage(ins, iframe, type, details) {
+    ins.implementation_.handleInstagramMessages_({
+      origin: 'https://www.instagram.com',
+      source: iframe.contentWindow,
+      data: JSON.stringify({
+        type,
+        details,
+      }),
+    });
+  }
 });

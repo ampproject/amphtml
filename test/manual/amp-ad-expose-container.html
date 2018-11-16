@@ -1,0 +1,75 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Ad examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    nav {
+      margin-top: 60px;
+    }
+    .broken {
+      color: red;
+    }
+    amp-ad {
+      max-width: 500px;
+    }
+    /* Included here to make sure it does not render. */
+    .fixed {
+      position: fixed;
+      top: 0;
+      right: 0;
+    }
+    .red {
+      background-color: red;
+    }
+
+    amp-ad[type="revcontent"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
+    }
+    amp-ad[type="nativo"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
+      height:100px;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+</head>
+<body>
+  <h2 id="fakead3p">fakeAd w/o container</h2>
+  <div>
+    <amp-ad width=300 height=250
+        type="_ping_"
+    </amp-ad>
+  </div>
+
+  <h2 id="fakead3p_1">fakeAd w/ container flying-carpet<h2>
+  <div>
+    <amp-fx-flying-carpet>
+      <amp-ad width=300 height=250
+        type="_ping_"
+        data-ad_container='AMP-FX-FLYING-CARPET';
+      </amp-ad>
+    </amp-fx-flying-carpet>
+  </div>
+
+  <h2 id="fakead3p_2">fakeAd w/ container sticky-ad</h2>
+  <div>
+    <amp-sticky-ad layout='no-display'>
+      <amp-ad width=300 height=250
+          type="_ping_"
+          data-ad_container='AMP-STICKY-AD';
+      </amp-ad>
+    </amp-sticky-ad>
+  </div>
+</body>
+</html>

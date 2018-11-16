@@ -2,52 +2,58 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "stable"
+  - "lts/*"
 python:
   - "2.7"
 notifications:
+  email:
+    recipients:
+      - amp-build-cop@grotations.appspotmail.com
+    on_success: change
+    on_failure: change
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-addons:
-  sauce_connect: true
-  hosts:
-    - ads.localhost
-    - iframe.localhost
-  apt:
-    packages:
-    - protobuf-compiler
-    - python-protobuf
 before_install:
-  - export CHROME_BIN=chromium-browser
+  - export CHROME_BIN=google-chrome-stable
   - export DISPLAY=:99.0
+  - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 before_script:
-  - npm install -g gulp
   - pip install --user protobuf
-script:
-  - gulp lint
-  - gulp build --fortesting
-  - gulp check-types
-  - gulp dist --fortesting
-  - gulp presubmit
-  # dep-check needs to occur after build since we rely on build to generate
-  # the css files into js files.
-  - gulp dep-check
-  # Unit tests with Travis' default chromium
-  - gulp test --compiled --fortesting
-  # Integration tests with all saucelabs browsers
-  - gulp test --saucelabs --integration --compiled --fortesting
-  # All unit tests with an old chrome (best we can do right now to pass tests
-  # and not start relying on new features).
-  # Disabled because it regressed. Better to run the other saucelabs tests.
-  # - gulp test --saucelabs --oldchrome
-  - gulp validator
+script: node build-system/pr-check.js
+after_script:
+  - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
   only:
     - master
     - release
     - canary
     - /^amp-release-.*$/
-env:
-  global:
-    - NPM_CONFIG_PROGRESS="false"
+addons:
+  chrome: stable
+  hosts:
+    - ads.localhost
+    - iframe.localhost
+    # Requested by some tests because they need a valid font host,
+    # but should not resolve in tests.
+    - fonts.googleapis.com
+  apt:
+    packages:
+      - protobuf-compiler
+      - python-protobuf
+matrix:
+  include:
+    - env: BUILD_SHARD="unit_tests"
+    - env: BUILD_SHARD="integration_tests"
+cache:
+  yarn: true
+  directories:
+    - node_modules
+    - validator/node_modules
+    - validator/nodejs/node_modules
+    - validator/webui/node_modules
+    - sauce_connect
+  pip: true
+  bundler: true

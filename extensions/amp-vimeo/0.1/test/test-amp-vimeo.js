@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-vimeo';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-vimeo', () => {
+describes.realWin('amp-vimeo', {
+  amp: {
+    extensions: ['amp-vimeo'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getVimeo(videoId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const vimeo = iframe.doc.createElement('amp-vimeo');
-      vimeo.setAttribute('data-videoid', videoId);
-      vimeo.setAttribute('width', '111');
-      vimeo.setAttribute('height', '222');
-      if (opt_responsive) {
-        vimeo.setAttribute('layout', 'responsive');
-      }
-      iframe.doc.body.appendChild(vimeo);
-      vimeo.implementation_.layoutCallback();
-      return vimeo;
-    });
+    const vimeo = doc.createElement('amp-vimeo');
+    vimeo.setAttribute('data-videoid', videoId);
+    vimeo.setAttribute('width', '111');
+    vimeo.setAttribute('height', '222');
+    if (opt_responsive) {
+      vimeo.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(vimeo);
+    return vimeo.build()
+        .then(() => vimeo.layoutCallback())
+        .then(() => vimeo);
   }
 
   it('renders', () => {
@@ -48,8 +50,6 @@ describe('amp-vimeo', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://player.vimeo.com/video/123');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 
@@ -57,7 +57,7 @@ describe('amp-vimeo', () => {
     return getVimeo('234', true).then(vimeo => {
       const iframe = vimeo.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

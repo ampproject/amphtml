@@ -16,14 +16,23 @@
 
 import {
   createFixtureIframe,
-  poll,
   expectBodyToBecomeVisible,
+  poll,
 } from '../../testing/iframe.js';
 
-describe('error page', () => {
+/** @const {number} */
+const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
+
+// TODO(@cramforce): Find out why it does not work with obfuscated
+// props.
+const t = describe.configure().retryOnSaucelabs()
+    .skipIfPropertiesObfuscated();
+t.run('error page', function() {
+  this.timeout(TIMEOUT);
+
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 500, win => {
+    return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
       // Trigger dev mode.
       try {
         win.history.pushState({}, '', 'test2.html#development=1');
@@ -31,7 +40,6 @@ describe('error page', () => {
         // Some browsers do not allow this.
         win.AMP_DEV_MODE = true;
       }
-      console.error('updated', win.location.hash);
     }).then(f => {
       fixture = f;
       return poll('errors to happen', () => {
@@ -39,23 +47,24 @@ describe('error page', () => {
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
             fixture.doc.documentElement./*TEST*/innerHTML);
-      });
+      }, TIMEOUT - 1000);
     });
   });
 
-  it.skipper().skipFirefox().run('should show the body in error test', () => {
-    return expectBodyToBecomeVisible(fixture.win);
-  });
+  it.configure().skipFirefox().skipEdge()
+      .run('should show the body in error test', () => {
+        return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
+      });
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.skipper().skipFirefox().run('should fail to load #' + id, () => {
+    it.configure().ifNewChrome().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));
       expect(e.getAttribute('error-message')).to.contain(
           e.getAttribute('data-expectederror'));
-      expect(e.className).to.contain('-amp-element-error');
+      expect(e.className).to.contain('i-amphtml-element-error');
     });
   }
 

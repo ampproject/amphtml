@@ -14,15 +14,42 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
-  const revampServiceUrl = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  const endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  const required = [
+    'id',
+    'width',
+    'height',
+    'wrapper',
+  ];
+  const optional = [
+    'api',
+    'key',
+    'ssl',
+    'adxw',
+    'adxh',
+    'rows',
+    'cols',
+    'domain',
+    'source',
+    'testing',
+    'endpoint',
+    'publisher',
+    'branding',
+    'font',
+    'css',
+    'sizer',
+    'debug',
+    'ampcreative',
+  ];
+
+  validateData(data, required, optional);
   global.data = data;
-  writeScript(window, revampServiceUrl);
+  writeScript(window, endpoint);
 }

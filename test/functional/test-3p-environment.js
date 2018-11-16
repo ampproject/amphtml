@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
+import {loadPromise} from '../../src/event-helper';
 import {
-  becomeVisible,
   manageWin,
   setInViewportForTesting,
 } from '../../3p/environment';
-import {createIframePromise} from '../../testing/iframe';
-import {timer} from '../../src/timer';
-import {loadPromise} from '../../src/event-helper';
-import * as lolex from 'lolex';
 
 describe('3p environment', () => {
 
   let testWin;
   let iframeCount;
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     iframeCount = 0;
@@ -108,14 +108,7 @@ describe('3p environment', () => {
 
     function installTimer(win) {
       progress = '';
-      clock = lolex.install(win);
-      // The clock does not override this.
-      win.requestAnimationFrame = function(fn) {
-        return win.setTimeout(fn, 16);
-      };
-      win.cancelAnimationFrame = function(id) {
-        win.clearTimeout(id);
-      };
+      clock = lolex.install({target: win});
       return clock;
     }
 
@@ -219,43 +212,12 @@ describe('3p environment', () => {
       testWin.clearInterval(interval);
       clock.tick(100);
     });
-
-    it('throttle requestAnimationFrame', () => {
-      installTimer(testWin);
-      manageWin(testWin);
-      testWin.requestAnimationFrame(add('a'));
-      testWin.requestAnimationFrame(add('b'));
-      clock.tick(16);
-      clock.tick(16);
-      expect(progress).to.equal('ab');
-      setInViewportForTesting(false);
-      testWin.requestAnimationFrame(add('a'));
-      testWin.requestAnimationFrame(add('b'));
-      const f0 = testWin.requestAnimationFrame(add('CANCEL0'));
-      testWin.cancelAnimationFrame(f0);
-      clock.tick(5000);
-      expect(progress).to.equal('ab');
-      setInViewportForTesting(true);
-      becomeVisible();
-      clock.tick(16);
-      expect(progress).to.equal('abab');
-      testWin.requestAnimationFrame(add('a'));
-      testWin.requestAnimationFrame(add('b'));
-      const f1 = testWin.requestAnimationFrame(add('CANCEL1'));
-      testWin.cancelAnimationFrame(f1);
-      clock.tick(16);
-      expect(progress).to.equal('ababab');
-    });
   });
 
   function testWindow(win) {
     expect(win.ampSeen).to.be.true;
     expect(win.setTimeout).to.not.match(/native/);
     expect(win.setInterval).to.not.match(/native/);
-    expect(win.requestAnimationFrame).to.not.match(/native/);
-    if (win.webkitRequestAnimationFrame) {
-      expect(win.webkitRequestAnimationFrame).to.not.match(/native/);
-    }
     expect(win.alert.toString()).to.not.match(/native/);
     expect(win.prompt.toString()).to.not.match(/native/);
     expect(win.confirm.toString()).to.not.match(/native/);

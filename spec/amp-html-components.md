@@ -102,7 +102,12 @@ example:
 </html>
 ```
 
-Inline `style` attributes are not allowed, as per the AMP spec.
+Inline `style` attributes are also allowed. For example:
+```html
+  <p style="color:blue;font-weight:bold;">AMPlify!</p>
+
+```
+
 
 ### Width, Height, and Layout
 
@@ -159,7 +164,7 @@ AMP-conforming content may not have any JavaScript. Some components, like embedd
 
 **Service-specific JavaScript built-in to a component**
 
-Specific services may contribute their own components to the expanded set of AMP components, which can then be loaded by an AMP file at runtime. These components may execute JavaScript in the context of the main page. They must conform to the specification provided in the “Third-Party Components” section in order to be included.
+Specific services may contribute their own components to the expanded set of AMP components, which can then be loaded by an AMP file at runtime. These components may execute JavaScript in the context of the main page. They must conform to the specification provided in the “[Extended Components](#extended-components)” section in order to be included.
 
 These types of components will be prioritized behind components that are more generalized, to work with a variety of services and endpoints.
 
@@ -172,6 +177,6 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-Built-in components include [amp-img](../builtins/amp-img.md), [amp-ad](../builtins/amp-ad.md), [amp-pixel](../builtins/amp-pixel.md) and [amp-video](../builtins/amp-video.md).
+Built-in components include [amp-img](../builtins/amp-img.md), [amp-layout](../builtins/amp-layout.md) and [amp-pixel](../builtins/amp-pixel.md).
 
 AMP HTML extensions include [extended components](../extensions) and extended templates.

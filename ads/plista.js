@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function plista(global, data) {
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'publickey', 'widgetname', 'urlprefix',
     'item', 'geo', 'categories', 'countrycode',
   ]);

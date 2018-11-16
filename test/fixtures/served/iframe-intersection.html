@@ -1,7 +1,11 @@
 <!doctype html>
 <body style="background-color: red">
 Iframe with Inersection
+
+<textarea id=log-el style="width:100%; height: 50vh;"></textarea>
+
 <script>
+var startTime = Date.now();
 // Default values for non-3P iframe.
 var sentinel = 'amp';
 var ampWindow = parent;
@@ -20,6 +24,25 @@ if (hashMatch) {
   ampWindow = ancestors[depth];
 }
 
+function log(m) {
+  var el = document.getElementById('log-el');
+  el.value =
+      el.value + '\n[' + (Date.now() - startTime) + '] ' + (m || '');
+}
+
+window.addEventListener('message', function(event) {
+  if (event.data) {
+    if (event.data.type == 'intersection') {
+      log('Received intersection message');
+      parent.parent./*OK*/postMessage({
+        sentinel: sentinel,
+        changes: event.data.changes,
+        type: 'received-intersection'
+      }, '*');
+    }
+  }
+});
+
 function sendPostMessage() {
   ampWindow./*OK*/postMessage({
     sentinel: sentinel,
@@ -27,6 +50,10 @@ function sendPostMessage() {
   }, '*');
 }
 sendPostMessage();
-setInterval(sendPostMessage, 10);
+sendPostMessage(); // send twice to test no double registration
+
+// Send foreign message.
+ampWindow./*OK*/postMessage('amp-other', '*');
+
 </script>
 </body>

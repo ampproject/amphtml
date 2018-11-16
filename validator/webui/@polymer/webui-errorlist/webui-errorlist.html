@@ -113,7 +113,9 @@
         this.filter = undefined;
         this.$.listboxErrors.render();
         removeParamFromLocationHashParams('filter');
+        this.fire('webui-errorlist-filter-changes', {'validationDelayMs': 0});
       },
+      getFilter: function() { return this.filter; },
       filterErrors: function(error) {
         // If no filter set, return all errors.
         if (this.filter === undefined) {
@@ -125,7 +127,20 @@
         }
       },
       handleSelect: function(e) {
-        var error = this.errors[this.selectedError];
+        // This.selectedError refers to the index into the filtered array,
+        // but this.errors is not filtered.
+        var filteredErrors;
+        if (this.filter === undefined) {
+          filteredErrors = this.errors;
+        } else {
+          filteredErrors = [];
+          for (var ii = 0; ii < this.errors.length; ii++) {
+            if (this.filter === this.errors[ii].category) {
+              filteredErrors.push(this.errors[ii]);
+            }
+          }
+        }
+        var error = filteredErrors[this.selectedError];
         if (!error) {
           return;
         }

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function sharethrough(global, data) {
-  checkData(data, ['pkey']);
-  validateDataExists(data, ['pkey']);
+  validateData(data, ['pkey'], []);
   global.pkey = data.pkey;
   writeScript(global, 'https://native.sharethrough.com/iframe/amp.js');
 }

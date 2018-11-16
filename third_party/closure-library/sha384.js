@@ -15,25 +15,15 @@
  */
 
 goog.require('goog.crypt.Sha384');
-goog.require('goog.crypt.base64');
 
 /**
  * @param {!Uint8Array|string} input The value to hash.
- * @return {!Array.<number>} Web safe base64 of the digest of the input string.
+ * @return {!Uint8Array} Web safe base64 of the digest of the input string.
  */
 var digest = function(input) {
   var sha384 = new goog.crypt.Sha384();
   sha384.update(input);
-  return sha384.digest();
+  return new Uint8Array(sha384.digest());
 }
 
-/**
- * @param {!Uint8Array|string} input The value to hash.
- * @return {string} Web safe base64 of the digest of the input string.
- */
-var base64Digest = function(input) {
-  return goog.crypt.base64.encodeByteArray(digest(input), /* websafe */ true);
-}
-
-goog.exportSymbol('ampSha384', base64Digest, window);
 goog.exportSymbol('ampSha384Digest', digest, window);

@@ -13,203 +13,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-var BBPromise = require('bluebird');
-var app = require('express')();
-var bodyParser = require('body-parser');
-var morgan = require('morgan');
-var fs = BBPromise.promisifyAll(require('fs'));
-var formidable = require('formidable');
-var jsdom = require('jsdom');
-var path = require('path');
-var request = require('request');
-var url = require('url');
+const app = require(require.resolve('./app.js'));
+const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
+const isRunning = require('is-running');
+const log = require('fancy-log');
+const morgan = require('morgan');
+const webserver = require('gulp-webserver');
 
-app.use(bodyParser.json());
-app.use(morgan('dev'));
+const {
+  SERVE_HOST: host,
+  SERVE_PORT: port,
+  SERVE_PROCESS_ID: gulpProcess,
+} = process.env;
 
-app.use('/examples', function(req, res) {
-  res.redirect('/examples.build');
-});
+const useHttps = process.env.SERVE_USEHTTPS == 'true';
+const quiet = process.env.SERVE_QUIET == 'true';
+const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const noCachingExtensions = process.env.SERVE_EXTENSIONS_WITHOUT_CACHING ==
+    'true';
+const header = require('connect-header');
 
-app.use('/api/show', function(req, res) {
-  res.json({
-    showNotification: true
-  });
-});
-
-app.use('/api/dont-show', function(req, res) {
-  res.json({
-    showNotification: false
-  });
-});
-
-app.use('/api/echo/post', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
-});
-
-app.use('/form/html/post', function(req, res) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields) {
-    res.setHeader('Content-Type', 'text/html');
-    if (fields['email'] == 'already@subscribed.com') {
-      res.statusCode = 500;
-      res.end(`
-        <h1 style="color:red;">Sorry ${fields['name']}!</h1>
-        <p>The email ${fields['email']} is already subscribed!</p>
-      `);
-    } else {
-      res.end(`
-      <h1>Thanks ${fields['name']}!</h1>
-        <p>Please make sure to confirm your email ${fields['email']}</p>
-      `);
-    }
-  });
-});
-
-app.use('/form/echo-json/post', function(req, res) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields) {
-    res.setHeader('Content-Type', 'application/json');
-    if (fields['email'] == 'already@subscribed.com') {
-      res.statusCode = 500;
-    }
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.protocol + '://' + req.headers.host);
-    res.end(JSON.stringify(fields));
-  });
-});
-
-// Fetches an AMP document from the AMP proxy and replaces JS
-// URLs, so that they point to localhost.
-function proxyToAmpProxy(req, res, minify) {
-  var url = 'https://cdn.ampproject.org/c' + req.url;
-  var localUrlPrefix = getUrlPrefix(req);
-  request(url, function (error, response, body) {
-    body = body
-        // Unversion URLs.
-        .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-            'https://cdn.ampproject.org/')
-        // <base> href pointing to the proxy, so that images, etc. still work.
-        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
-        .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
-        .replace('https://cdn.ampproject.org/v0.max.js',
-            localUrlPrefix + '/dist/amp.js')
-        .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
-            localUrlPrefix + '/dist/v0/');
-    if (minify) {
-      body = body.replace(/\.max\.js/g, '.js')
-          .replace('/dist/amp.js', '/dist/v0.js');
-    }
-    res.status(response.statusCode).send(body);
-  });
-}
-
-app.use('/examples.build/live-list.amp.max.html', function(req, res) {
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
-  fs.readFileAsync(process.cwd() +
-      '/examples.build/live-list.amp.max.html').then((file) => {
-        res.end(file);
-  });
-});
-
-var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
-var liveListCtr = 0;
-var itemCtr = 2;
-var liveListDoc = null;
-var doctype = '<!doctype html>\n';
-app.use(liveListUpdateFile, function(req, res) {
-  if (!liveListDoc) {
-    var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
-    var liveListFile = fs.readFileSync(liveListUpdateFullPath);
-    liveListDoc = jsdom.jsdom(liveListFile);
+// Exit if the port is in use.
+process.on('uncaughtException', function(err) {
+  if (err.errno === 'EADDRINUSE') {
+    log(colors.red('Port', port, 'in use, shutting down server'));
+  } else {
+    log(colors.red(err));
   }
-  var action = Math.floor(Math.random() * 3);
-  var liveList = liveListDoc.querySelector('#my-live-list');
-  var item1 = liveList.querySelector('#list-item-1');
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
-  if (liveListCtr != 0) {
-    if (Math.random() < .8) {
-      // Always run a replace on the first item
-      liveListReplace(item1);
+  process.kill(gulpProcess, 'SIGINT');
+  process.exit(1);
+});
 
-      if (Math.random() < .5) {
-        liveListTombstone(liveList);
-      }
+// Exit in the event of a crash in the parent gulp process.
+setInterval(function() {
+  if (!isRunning(gulpProcess)) {
+    process.exit(1);
+  }
+}, 1000);
 
-      if (Math.random() < .8) {
-        liveListInsert(liveList, item1);
-      }
-    } else {
-      // Sometimes we want an empty response to simulate no changes.
-      res.end(`${doctype}<html></html>`);
-      return;
+const middleware = [];
+if (!quiet) {
+  middleware.push(morgan('dev'));
+}
+middleware.push(app.middleware);
+if (sendCachingHeaders) {
+  middleware.push(header({
+    'cache-control': ' max-age=600',
+  }));
+}
+
+if (noCachingExtensions) {
+  middleware.push(function(req, res, next) {
+    if (req.url.startsWith('/dist/v0/amp-')) {
+      log('Skipping caching for ', req.url);
+      res.header('Cache-Control', 'no-store');
     }
-  }
-  var outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
-  res.end(`${doctype}${outerHTML}`);
-  liveListCtr++;
-});
-
-function liveListReplace(item) {
-  item.setAttribute('data-update-time', Date.now());
-  var itemContents = item.querySelectorAll('.content');
-  itemContents[0].textContent = Math.floor(Math.random() * 10);
-  itemContents[1].textContent = Math.floor(Math.random() * 10);
+    next();
+  });
 }
 
-function liveListInsert(liveList, node) {
-  var iterCount = Math.floor(Math.random() * 2) + 1;
-  console.log(`inserting ${iterCount} item(s)`);
-  for (var i = 0; i < iterCount; i++) {
-    var child = node.cloneNode(true);
-    child.setAttribute('id', `list-item-${itemCtr++}`);
-    child.setAttribute('data-sort-time', Date.now());
-    liveList.querySelector('[items]').appendChild(child);
-  }
-}
-
-function liveListTombstone(liveList) {
-  var tombstoneId = Math.floor(Math.random() * itemCtr);
-  console.log(`trying to tombstone #list-item-${tombstoneId}`);
-  // We can tombstone any list item except item-1 since we always do a
-  // replace example on item-1.
-  if (tombstoneId != 1) {
-    var item = liveList.querySelector(`#list-item-${tombstoneId}`);
-    if (item) {
-      item.setAttribute('data-tombstone', '');
-    }
-  }
-}
-
-// Proxy with unminified JS.
-// Example:
-// http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/max/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ false);
-});
-
-// Proxy with minified JS.
-// Example:
-// http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/min/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ true);
-});
-
-app.use('/examples.build/analytics.config.json', function (req, res, next) {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
-  next();
-});
-
-exports.app = app;
-
-function getUrlPrefix(req) {
-  return req.protocol + '://' + req.headers.host;
-}
+// Start gulp webserver
+(async() => {
+  await app.beforeServeTasks();
+  gulp.src(process.cwd())
+      .pipe(webserver({
+        port,
+        host,
+        directoryListing: true,
+        https: useHttps,
+        middleware,
+      }));
+})();

@@ -15,7 +15,6 @@
  */
 
 import {GestureRecognizer, Gestures} from '../../src/gesture';
-import * as sinon from 'sinon';
 
 
 describe('Gestures', () => {
@@ -42,7 +41,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -50,11 +49,17 @@ describe('Gestures', () => {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
+      removeEventListener: eventType => {
+        delete eventListeners[eventType];
+      },
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     onGesture = sandbox.spy();
 
-    gestures = new Gestures(element);
+    gestures = Gestures.get(element);
     gestures.onGesture(TestRecognizer, onGesture);
     expect(gestures.recognizers_.length).to.equal(1);
     recognizer = gestures.recognizers_[0];
@@ -77,7 +82,7 @@ describe('Gestures', () => {
     const handler = sandbox.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
-    expect(handler.callCount).to.equal(1);
+    expect(handler).to.be.calledOnce;
   });
 
 
@@ -211,10 +216,10 @@ describe('Gestures', () => {
 
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       gestures.signalEmit_(recognizer, {}, null);
-    }).to.throw(/Recognizer is not currently allowed/);
-    expect(onGesture.callCount).to.equal(0);
+    }).to.throw(/Recognizer is not currently allowed/); });
+    expect(onGesture).to.have.not.been.called;
   });
 
   it('should allow emit', () => {
@@ -223,7 +228,7 @@ describe('Gestures', () => {
     clock.tick(1);
     gestures.eventing_ = recognizer;
     gestures.signalEmit_(recognizer, data, event);
-    expect(onGesture.callCount).to.equal(1);
+    expect(onGesture).to.be.calledOnce;
     const gesture = onGesture.getCall(0).args[0];
     expect(gesture.type).to.equal('test');
     expect(gesture.data).to.equal(data);
@@ -282,8 +287,8 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(0);
-    expect(event.stopPropagation.callCount).to.equal(0);
+    expect(event.preventDefault).to.have.not.been.called;
+    expect(event.stopPropagation).to.have.not.been.called;
   });
 
   it('should cancel event when eventing', () => {
@@ -294,8 +299,8 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(1);
-    expect(event.stopPropagation.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(event.stopPropagation).to.be.calledOnce;
   });
 
   it('should cancel event after eventing stopped', () => {
@@ -310,8 +315,8 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(1);
-    expect(event.stopPropagation.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(event.stopPropagation).to.be.calledOnce;
     expect(gestures.wasEventing_).to.equal(false);
   });
 
@@ -323,8 +328,8 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(1);
-    expect(event.stopPropagation.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(event.stopPropagation).to.be.calledOnce;
   });
 
   it('should cancel event when anyone is pending', () => {
@@ -335,8 +340,8 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(1);
-    expect(event.stopPropagation.callCount).to.equal(1);
+    expect(event.preventDefault).to.be.calledOnce;
+    expect(event.stopPropagation).to.be.calledOnce;
 
     clock.tick(10);
     event = {
@@ -345,7 +350,136 @@ describe('Gestures', () => {
       stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
-    expect(event.preventDefault.callCount).to.equal(0);
-    expect(event.stopPropagation.callCount).to.equal(0);
+    expect(event.preventDefault).to.have.not.been.called;
+    expect(event.stopPropagation).to.have.not.been.called;
   });
+
+  it('should gesture recognizer on removeGesture', () => {
+    expect(gestures.recognizers_.length).to.equal(1);
+    expect(gestures.removeGesture(TestRecognizer)).to.equal(true);
+    expect(gestures.removeGesture(Test2Recognizer)).to.equal(false);
+    expect(gestures.recognizers_.length).to.equal(0);
+    expect(gestures.ready_.length).to.equal(0);
+    expect(gestures.tracking_.length).to.equal(0);
+    expect(gestures.pending_.length).to.equal(0);
+  });
+
+  it('should remove listeners and shared cache instance on cleanup', () => {
+    const eventNames = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
+    const prop = '__AMP_Gestures';
+    const removeSpy = sandbox.spy(element, 'removeEventListener');
+
+    expect(element[prop]).to.exist;
+
+    gestures.cleanup();
+
+    eventNames.forEach(eventName => {
+      expect(removeSpy.withArgs(eventName)).to.be.calledOnce;
+    });
+    expect(element[prop]).to.not.exist;
+  });
+
+  describe('Gestures - with shouldNotPreventdefault', () => {
+    let sandbox;
+    let element;
+    let clock;
+    let recognizer;
+    let recognizerMock;
+    let gestures;
+    let eventListeners;
+    let onGesture;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox;
+      clock = sandbox.useFakeTimers();
+
+      eventListeners = {};
+      element = {
+        addEventListener: (eventType, handler) => {
+          eventListeners[eventType] = handler;
+        },
+        ownerDocument: {
+          defaultView: window,
+        },
+      };
+
+      onGesture = sandbox.spy();
+
+      gestures = Gestures.get(element, /* shouldNotPreventDefault */true);
+      gestures.onGesture(TestRecognizer, onGesture);
+      expect(gestures.recognizers_.length).to.equal(1);
+      recognizer = gestures.recognizers_[0];
+      recognizerMock = sandbox.mock(recognizer);
+    });
+
+    afterEach(() => {
+      recognizerMock.verify();
+      sandbox.restore();
+    });
+
+    it('should cancel event when eventing', () => {
+      gestures.eventing_ = recognizer;
+      const event = {
+        type: 'touchend',
+        preventDefault: sandbox.spy(),
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.preventDefault).to.have.not.been.called;
+      expect(event.stopPropagation).to.be.calledOnce;
+    });
+
+    it('should cancel event after eventing stopped', () => {
+      gestures.eventing_ = recognizer;
+      gestures.signalEnd_(recognizer);
+      expect(gestures.eventing_).to.equal(null);
+      expect(gestures.wasEventing_).to.equal(true);
+
+      const event = {
+        type: 'touchend',
+        preventDefault: sandbox.spy(),
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.preventDefault).to.have.not.been.called;
+      expect(event.stopPropagation).to.be.calledOnce;
+      expect(gestures.wasEventing_).to.equal(false);
+    });
+
+    it('should cancel event when anyone is ready', () => {
+      gestures.ready_[0] = 1;
+      const event = {
+        type: 'touchend',
+        preventDefault: sandbox.spy(),
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.preventDefault).to.have.not.been.called;
+      expect(event.stopPropagation).to.be.calledOnce;
+    });
+
+    it('should cancel event when anyone is pending', () => {
+      gestures.pending_[0] = 1;
+      let event = {
+        type: 'touchend',
+        preventDefault: sandbox.spy(),
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.preventDefault).to.have.not.been.called;
+      expect(event.stopPropagation).to.be.calledOnce;
+
+      clock.tick(10);
+      event = {
+        type: 'touchend',
+        preventDefault: sandbox.spy(),
+        stopPropagation: sandbox.spy(),
+      };
+      eventListeners[event.type](event);
+      expect(event.preventDefault).to.have.not.been.called;
+      expect(event.stopPropagation).to.have.not.been.called;
+    });
+
+  });
+
 });

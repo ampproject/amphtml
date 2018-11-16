@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+import {computeInMasterFrame, loadScript} from '../3p/3p';
+import {doubleclick} from '../ads/google/doubleclick';
+import {tryParseJson} from '../src/json';
 
 /* global Criteo: false */
 
@@ -24,6 +26,59 @@ import {loadScript} from '../3p/3p';
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
-    Criteo.DisplayAd({'zoneid': data.zone, 'async': true, 'containerid': 'c'});
+    if (data.tagtype === 'rta') {
+      // Make sure RTA is called only once
+      computeInMasterFrame(window, 'call-rta', resultCallback => {
+        const params = {
+          networkid: data.networkid,
+          cookiename:
+            data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+          varname:
+            data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName,
+        };
+        Criteo.CallRTA(params);
+        resultCallback(null);
+      }, () => {});
+      setTargeting(global, data, null);
+    } else if (data.tagtype === 'standalone') {
+      Criteo.PubTag.Adapters.AMP.Standalone(data, () => {}, targ => {
+        setTargeting(global, data, targ);
+      });
+    } else if (!data.tagtype || data.tagtype === 'passback') {
+      Criteo.DisplayAd({
+        zoneid: data.zone,
+        containerid: 'c',
+        integrationmode: 'amp',
+      });
+    }
   });
 }
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {?Object} targeting
+ */
+function setTargeting(global, data, targeting) {
+  if (data.adserver === 'DFP') {
+    const dblParams = tryParseJson(data.doubleclick) || {};
+    dblParams['slot'] = data.slot;
+    dblParams['targeting'] = dblParams['targeting'] || {};
+    dblParams['width'] = data.width;
+    dblParams['height'] = data.height;
+    dblParams['type'] = 'criteo';
+
+    if (!targeting && data.tagtype === 'rta') {
+      targeting = Criteo.ComputeDFPTargetingForAMP(
+          data.cookiename || Criteo.PubTag.RTA.DefaultCrtgRtaCookieName,
+          data.varname || Criteo.PubTag.RTA.DefaultCrtgContentName);
+    }
+    for (const i in targeting) {
+      dblParams['targeting'][i] = targeting[i];
+    }
+
+    doubleclick(global, dblParams);
+  }
+}
+
+

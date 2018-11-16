@@ -14,61 +14,46 @@
  * limitations under the License.
  */
 
-import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installVsyncService} from '../../../../src/service/vsync-impl';
-import {installDynamicClassesService} from '../amp-dynamic-css-classes';
+import '../amp-dynamic-css-classes';
+import {Services} from '../../../../src/services';
+import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
   ' Build/LMY47X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0' +
   ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
 
-describe('dynamic classes are inserted at runtime', () => {
+
+describes.fakeWin('dynamic classes are inserted at runtime', {
+  amp: true, // Extension will be installed manually in tests.
+  location: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+}, env => {
+  let win, doc, ampdoc;
   let body;
-  let mockWin;
   let viewer;
 
   beforeEach(() => {
-    const classList = [];
-    classList.add = classList.push;
-    classList.contains = function(c) {
-      return this.indexOf(c) > -1;
-    };
-    body = {
-      tagName: 'BODY',
-      classList,
-    };
-    mockWin = {
-      document: {
-        referrer: 'http://localhost/',
-        body,
-      },
-      navigator: {
-        userAgent: '',
-      },
-      location: {
-        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
-      },
-    };
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    body = doc.body;
   });
 
   function setup(embeded, userAgent, referrer) {
-    viewer = installViewerService(mockWin);
-    const vsync = installVsyncService(mockWin);
-
+    const vsync = vsyncForTesting(win);
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
-
+    viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => !!embeded;
-
     if (userAgent !== undefined) {
-      mockWin.navigator.userAgent = userAgent;
+      win.navigator.userAgent = userAgent;
     }
     if (referrer !== undefined) {
-      viewer.getUnconfirmedReferrerUrl = () => referrer;
+      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl').callsFake(
+          () => referrer);
     }
-    installDynamicClassesService(mockWin);
+    env.installExtension('amp-dynamic-css-classes');
   }
 
   describe('when embedded', () => {

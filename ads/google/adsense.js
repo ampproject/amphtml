@@ -14,18 +14,46 @@
  * limitations under the License.
  */
 
-import {checkData} from '../../3p/3p';
+import {
+  ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_TAG,
+  ADSENSE_RSPV_WHITELISTED_HEIGHT,
+} from './utils';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
+import {camelCaseToDash} from '../../src/string';
+import {hasOwn} from '../../src/utils/object';
+import {setStyles} from '../../src/style';
+import {user} from '../../src/log';
+import {validateData} from '../../3p/3p';
 
 /**
+ * Make an adsense iframe.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsense(global, data) {
-  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']);
+  // TODO: check mandatory fields
+  validateData(data, [],
+      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
+        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package',
+        'npaOnUnknownConsent', 'matchedContentUiType', 'matchedContentRowsNum',
+        'matchedContentColumnsNum']);
+
+  if (data['autoFormat'] == ADSENSE_RSPV_TAG ||
+      data['autoFormat'] == ADSENSE_MCRSPV_TAG) {
+    user().assert(hasOwn(data, 'fullWidth'),
+        'Responsive AdSense ad units require the attribute data-full-width.');
+
+    user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+        `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
+      `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+      'responsive AdSense ad units.');
+  }
+
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
-      vid: global.context.clientId,
+      cid: global.context.clientId,
       hid: global.context.pageViewId,
     };
   }
@@ -34,22 +62,43 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
-  i.setAttribute('data-ad-client', data['adClient']);
-  if (data['adSlot']) {
-    i.setAttribute('data-ad-slot', data['adSlot']);
-  }
-  if (data['adHost']) {
-    i.setAttribute('data-ad-host', data['adHost']);
-  }
-  if (data['adtest']) {
-    i.setAttribute('data-adtest', data['adtest']);
-  }
-  if (data['tagOrigin']) {
-    i.setAttribute('data-tag-origin', data['tagOrigin']);
-  }
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
+    'package', 'matchedContentUiType', 'matchedContentRowsNum',
+    'matchedContentColumnsNum']
+      .forEach(datum => {
+        if (data[datum]) {
+          i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
+        }
+      });
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
-  i.style.cssText = 'display:inline-block;width:100%;height:100%;';
+  setStyles(i, {
+    display: 'inline-block',
+    width: '100%',
+    height: '100%',
+  });
+  const initializer = {};
+  switch (global.context.initialConsentState) {
+    case CONSENT_POLICY_STATE.UNKNOWN:
+      if (data['npaOnUnknownConsent'] != 'true') {
+        // Unknown w/o NPA results in no ad request.
+        return;
+      }
+    case CONSENT_POLICY_STATE.INSUFFICIENT:
+      (global.adsbygoogle = global.adsbygoogle || [])
+          ['requestNonPersonalizedAds'] = true;
+      break;
+  }
+  if (data['experimentId']) {
+    const experimentIdList = data['experimentId'].split(',');
+    if (experimentIdList) {
+      initializer['params'] = {
+        'google_ad_modifications': {
+          'eids': experimentIdList,
+        },
+      };
+    }
+  }
   global.document.getElementById('c').appendChild(i);
-  (global.adsbygoogle = global.adsbygoogle || []).push({});
+  (global.adsbygoogle = global.adsbygoogle || []).push(initializer);
 }
