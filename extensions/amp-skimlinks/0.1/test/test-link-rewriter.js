@@ -28,6 +28,11 @@ import {Services} from '../../../../src/services';
 import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
 import {createCustomEvent} from '../../../../src/event-helper';
 
+
+const CLICK_EVENT = {
+  type: 'click',
+};
+
 describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
   let rootDocument, linkRewriterManager, win;
   let sendEventHelper, registerLinkRewriterHelper, addPriorityMetaTagHelper;
@@ -233,7 +238,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       });
 
       it('Should only send click event to suitable link rewriters', () => {
-        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(
+            rootDocument.createElement('a'),
+            CLICK_EVENT
+        );
 
         expect(linkRewriterVendor1.events.fire.calledOnce).to.be.true;
         expect(linkRewriterVendor2.events.fire.called).to.be.false;
@@ -245,7 +253,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor2, 'rewriteAnchorUrl').returns(true);
         env.sandbox.stub(linkRewriterVendor3, 'rewriteAnchorUrl').returns(true);
 
-        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(
+            rootDocument.createElement('a'),
+            CLICK_EVENT
+        );
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.equal(
             'vendor1'
@@ -262,7 +273,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
         env.sandbox.stub(linkRewriterVendor1, 'rewriteAnchorUrl').returns(true);
         const anchor = rootDocument.createElement('a');
 
-        linkRewriterManager.maybeRewriteLink(anchor);
+        linkRewriterManager.maybeRewriteLink(anchor, CLICK_EVENT);
 
         expect(getEventData(linkRewriterVendor1).anchor).to.equal(anchor);
       });
@@ -276,7 +287,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
             .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
             .returns(false);
 
-        linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+        linkRewriterManager.maybeRewriteLink(
+            rootDocument.createElement('a'),
+            CLICK_EVENT
+        );
 
         expect(getEventData(linkRewriterVendor1).linkRewriterId).to.be.null;
         // vendor2 has isWatchingLink to false therefore can not replace.
@@ -285,9 +299,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
       });
 
       it('Should set the clickType', () => {
+        const contextMenuEvent = {type: 'contextmenu'};
         linkRewriterManager.maybeRewriteLink(
             rootDocument.createElement('a'),
-            'contextmenu'
+            contextMenuEvent
         );
         expect(getEventData(linkRewriterVendor1).clickType).to.equal(
             'contextmenu'
@@ -328,7 +343,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor2, 'rewriteAnchorUrl')
               .returns(false);
 
-          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(
+              rootDocument.createElement('a'),
+              CLICK_EVENT
+          );
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -345,7 +363,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
               .returns(true);
 
-          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(
+              rootDocument.createElement('a'),
+              CLICK_EVENT
+          );
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -377,7 +398,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
               .stub(linkRewriterVendor3, 'rewriteAnchorUrl')
               .returns(true);
 
-          linkRewriterManager.maybeRewriteLink(rootDocument.createElement('a'));
+          linkRewriterManager.maybeRewriteLink(
+              rootDocument.createElement('a'),
+              CLICK_EVENT
+          );
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.called).to.be.false;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;
@@ -399,7 +423,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
           // Overwrite global priority
           anchor.setAttribute('data-link-rewriters', 'vendor1 vendor3');
 
-          linkRewriterManager.maybeRewriteLink(anchor);
+          linkRewriterManager.maybeRewriteLink(anchor, CLICK_EVENT);
 
           expect(linkRewriterVendor1.rewriteAnchorUrl.calledOnce).to.be.true;
           expect(linkRewriterVendor2.rewriteAnchorUrl.called).to.be.false;

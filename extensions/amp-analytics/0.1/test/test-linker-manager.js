@@ -483,9 +483,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   function clickAnchor(url) {
     const a = doc.createElement('a');
+    const event = {
+      type: 'click',
+    };
     a.href = url;
     doc.body.appendChild(a);
-    handlers.forEach(handler => handler(a));
+    handlers.forEach(handler => handler(a, event));
     return a.href;
   }
 
