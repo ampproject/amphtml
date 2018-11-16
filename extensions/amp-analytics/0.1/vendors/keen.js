@@ -19,13 +19,13 @@ export const KEEN_CONFIG = /** @type {!JsonObject} */ ({
     'base': 'https://api.keen.io/3.0/projects/${projectId}/events',
     'pageview': '${base}/pageviews?api_key=${writeKey}',
     'click': '${base}/clicks?api_key=${writeKey}',
-    'custom': '${base}/${collection}?api_key=${writeKey}'
+    'custom': '${base}/${collection}?api_key=${writeKey}',
   },
   'triggers': {
     'trackPageview': {
       'on': 'visible',
-      'request': 'pageview'
-    }
+      'request': 'pageview',
+    },
   },
   'extraUrlParams': {
     'amp': true,
@@ -63,12 +63,12 @@ export const KEEN_CONFIG = /** @type {!JsonObject} */ ({
     'totalTime': '${totalTime}',
     'userAgent': '${userAgent}',
     'viewportHeight': '${viewportHeight}',
-    'viewportWidth': '${viewportWidth}'
+    'viewportWidth': '${viewportWidth}',
   },
   'transport': {
     'beacon': true,
     'xhrpost': false,
     'img': false,
-    'useBody': true
-  }
+    'useBody': true,
+  },
 });
