@@ -318,6 +318,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
@@ -507,6 +509,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
