@@ -498,5 +498,11 @@ export class AmpGwdRuntimeService {
  * @param {!Element} element
  */
 function reflow(element) {
-  return element./*OK*/offsetWidth;
+  const value = element./*OK*/offsetWidth;
+  // exporting global to trick Closure into thinking this function has side
+  // effects.
+  const globalRef = '__AMP_TEMP';
+  self[globalRef] = value;
+  delete self[globalRef];
+  return value;
 }
