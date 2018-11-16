@@ -191,6 +191,7 @@ describe('refresh', () => {
         return {
           getRootNode: () => {return window.document;},
           win: window,
+          isSingleDoc: () => {return true;},
         };
       });
 
