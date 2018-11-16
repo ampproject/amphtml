@@ -52,7 +52,7 @@
     "autoprefixer": "9.3.1",
     "ava": "0.25.0",
     "babel-eslint": "10.0.1",
-    "babel-plugin-filter-imports": "2.0.3",
+    "babel-plugin-filter-imports": "2.0.4",
     "babel-plugin-istanbul": "5.1.0",
     "babel-plugin-transform-commonjs-es2015-modules": "4.0.1",
     "babel-plugin-transform-react-jsx": "6.24.1",
