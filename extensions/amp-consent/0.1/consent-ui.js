@@ -80,9 +80,6 @@ export class ConsentUI {
     /** @private {!Window} */
     this.win_ = baseInstance.win;
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = baseInstance.getVsync();
-
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
@@ -308,7 +305,7 @@ export class ConsentUI {
     const {classList} = this.parent_;
 
     // Remove the iframe active to go back to our normal height
-    classList.remove('consent-iframe-active');
+    classList.remove(consentUiClasses.iframeActive);
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.fullscreen);
@@ -345,12 +342,13 @@ export class ConsentUI {
       return;
     }
 
-    if (data['type'] == 'consent-ui-ready') {
+    if (data['type'] === 'consent-ui-ready') {
       this.iframeReady_.resolve();
     }
 
     if (data['type'] === 'consent-ui-enter-fullscreen') {
 
+      // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {
         return;
       }
