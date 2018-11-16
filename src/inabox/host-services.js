@@ -124,7 +124,7 @@ export class Fullscreen {
    *
    * @param {!Element} unusedTargetElement
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   enterFullscreenOverlay(unusedTargetElement) {
     throwUnsupportedError();
@@ -135,7 +135,7 @@ export class Fullscreen {
    *
    * @param {!Element} unusedTargetElement
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   exitFullscreenOverlay(unusedTargetElement) {
     throwUnsupportedError();
@@ -154,7 +154,7 @@ export class Exit {
    *
    * @param {string} unusedUrl
    * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request if fulfilled
+   *     indicating if the request was fulfilled
    */
   openUrl(unusedUrl) {
     throwUnsupportedError();
