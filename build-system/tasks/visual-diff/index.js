@@ -396,10 +396,10 @@ async function snapshotWebpages(percy, browser, webpages) {
 
       const page = await newPage(browser);
 
-      // Set up monitoring for network requests
-      await page.setRequestInterception(true);
       const expectedRequests = {};
       if (webpage.network_requests) {
+        // Set up monitoring for network requests
+        await page.setRequestInterception(true);
         for (const request of webpage.network_requests) {
           const entry = {};
           entry.count = request.count == null ? 1 : request.count;
