@@ -63,6 +63,9 @@
 
 .i-amphtml-story-tooltip-layer-nav-button {
   position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
   width: 48px !important;
   height: 48px !important;
   padding: 0 !important;
