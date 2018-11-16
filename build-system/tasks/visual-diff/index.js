@@ -22,7 +22,6 @@ const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
-const puppeteer = require('puppeteer');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
@@ -30,7 +29,10 @@ const {execOrDie, execScriptAsync} = require('../../exec');
 const {gitBranchName, gitBranchPoint, gitCommitterEmail} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
-const {Percy} = require('@percy/puppeteer');
+
+// optional dependencies for local development (outside of visual diff tests)
+let puppeteer;
+let Percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
@@ -525,6 +527,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
+  installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -593,6 +596,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   } else {
     execOrDie('gulp build --fortesting');
   }
+}
+
+function installPercy_() {
+  log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
+
+  puppeteer = require('puppeteer');
+  Percy = require('@percy/puppeteer').Percy;
 }
 
 function setupCleanup_() {
