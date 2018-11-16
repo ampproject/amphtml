@@ -17,6 +17,7 @@
 @import './amp-story-access.css';
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
+@import './pagination-buttons.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {

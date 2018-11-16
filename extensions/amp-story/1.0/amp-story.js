@@ -661,6 +661,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
+    if (this.paginationButtons_) {
+      return;
+    }
+
     this.paginationButtons_ = PaginationButtons.create(this.win);
 
     this.paginationButtons_.attach(this.element);
@@ -695,10 +699,6 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
-
-    if (!this.paginationButtons_) {
-      this.buildPaginationButtons_();
-    }
 
     this.initializeBookend_();
     this.initializeSidebar_();
@@ -1319,6 +1319,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP:
         this.setDesktopPositionAttributes_(this.activePage_);
+        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.removeAttribute('desktop-fullbleed');
@@ -1333,6 +1334,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.shareMenu_.build();
+        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop-fullbleed', '');
           this.element.removeAttribute('desktop');
