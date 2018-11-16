@@ -206,9 +206,11 @@ export class AmpLiveList extends AMP.BaseElement {
 
     const maxItems = this.element.getAttribute('data-max-items-per-page');
     user().assert(Number(maxItems) > 0,
-        `amp-live-list#${this.liveListId_} must have ` +
-        'data-max-items-per-page attribute with numeric value. ' +
-        `Found ${maxItems}`);
+        'amp-live-list # %s must have data-max-items-per-page attribute with'
+        + ' numeric value. Found %s.',
+        this.liveListId_,
+        maxItems
+    );
 
     const actualCount = ([].slice.call(this.itemsSlot_.children)
         .filter(child => !child.hasAttribute('data-tombstone'))).length;
@@ -808,9 +810,10 @@ export class AmpLiveList extends AMP.BaseElement {
       numItems++;
     });
     user().assert(!foundInvalid,
-        `All amp-live-list-items under amp-live-list#${this.liveListId_} ` +
-        'children must have id and data-sort-time attributes. ' +
-        'data-sort-time must be a Number greater than 0.');
+        'All amp-live-list-items under amp-live-list#%s children must '
+        + 'have id and data-sort-time attributes. data-sort-time must be a '
+        + 'Number greater than 0.',
+        this.liveListId_);
     return numItems;
   }
 
@@ -900,9 +903,10 @@ export class AmpLiveList extends AMP.BaseElement {
     // we can't for data-update-time since we always have to evaluate if it
     // changed or not if it exists.
     const time = Number(elem.getAttribute(attr));
-    user().assert(time > 0, `"${attr}" attribute must exist and value ` +
-        `must be a number greater than 0. Found ${time} on ` +
-        `${elem.getAttribute('id')} instead.`);
+    user().assert(time > 0,
+        '%s attribute must exist and value must be a number greater than 0.'
+        + ' Found %s on %s instead.',
+        attr, time, elem.getAttribute('id'));
     return time;
   }
 

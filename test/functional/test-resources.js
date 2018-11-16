@@ -1634,6 +1634,24 @@ describe('Resources discoverWork', () => {
       });
     });
   });
+
+  describe('onNextPass', () => {
+
+    it('should only run callbacks once.', () => {
+      resources.isRuntimeOn_ = true;
+      resources.documentReady_ = true;
+      resources.firstPassAfterDocumentReady_ = true;
+
+      const passCallback = sandbox.spy();
+      resources.onNextPass(passCallback);
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+    });
+  });
 });
 
 describes.realWin('Resources contentHeight', {
