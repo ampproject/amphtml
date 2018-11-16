@@ -27,7 +27,7 @@ import {
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {toggle, setStyles} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 
@@ -277,6 +277,12 @@ export class ConsentUI {
     classList.add(consentUiClasses.iframeActive);
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
+
+    // Remove transition/transform styles added by the fixed layer
+    setStyles(this.parent_, {
+      transform: '',
+      transition: ''
+    });
 
     /**
      * Waiting for mutation twice here.
