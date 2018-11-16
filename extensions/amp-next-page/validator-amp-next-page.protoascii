@@ -85,3 +85,28 @@ tags: {  # <amp-next-page src>
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
+tags: {  # <amp-next-page type="adsense">
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page [type=adsense]"
+  unique: true
+  requires_extension: "amp-next-page"
+  attrs: {
+    name: "data-client"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-slot"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "adsense"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
+}
