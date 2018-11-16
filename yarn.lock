@@ -2032,12 +2032,12 @@ babel-plugin-espower@^2.3.2:
     espurify "^1.6.0"
     estraverse "^4.1.1"
 
-babel-plugin-filter-imports@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/babel-plugin-filter-imports/-/babel-plugin-filter-imports-2.0.3.tgz#21f2773d0d74558986dd7af89f6f753d5fa92da3"
-  integrity sha512-s2vbul45NHOI665jcJvvIdzZLMIKgUdhofGEbxXn7GxfEB6SePCUbj2qBPjV9oqHuYBQucih/tRhO/GJu8mPkg==
+babel-plugin-filter-imports@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/babel-plugin-filter-imports/-/babel-plugin-filter-imports-2.0.4.tgz#9209b708ed3b228349c4e6f660358bf02685e803"
+  integrity sha512-Ra4VylqMFsmTJCUeLRJ/OP2ZqO0cCJQK2HKihNTnoKP4f8IhxHKL4EkbmfkwGjXCeDyXd0xQ6UTK8Nd+h9V/SQ==
   dependencies:
-    "@babel/types" "^7.0.0"
+    "@babel/types" "^7.1.5"
     lodash "^4.17.11"
 
 babel-plugin-istanbul@5.1.0:
