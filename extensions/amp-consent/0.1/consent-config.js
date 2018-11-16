@@ -110,7 +110,7 @@ export class ConsentConfig {
         const keys = Object.keys(config['policy']);
         for (let i = 0; i < keys.length; i++) {
           if (keys[i] != 'default') {
-            user().warn(TAG, 'policy %s is currently not supported' +
+            user().warn(TAG, 'policy %s is currently not supported ' +
               'and will be ignored', keys[i]);
             delete config['policy'][keys[i]];
           }
