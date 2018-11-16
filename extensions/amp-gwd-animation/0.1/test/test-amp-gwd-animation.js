@@ -96,8 +96,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         doc = variant.ampdoc == 'fie' ?
           embed.win.document :
           ampdoc.getRootNode();
-        runtime = getExistingServiceForDocInEmbedScope(
-            variant.ampdoc == 'fie' ? element : ampdoc, GWD_SERVICE_NAME);
 
         // Create a test amp-carousel GWD page deck.
         doc.body.innerHTML =
@@ -123,6 +121,8 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         return createGwdAnimationElement(doc, config).then(el => {
           element = el;
           impl = element.implementation_;
+          runtime = getExistingServiceForDocInEmbedScope(
+              variant.ampdoc == 'fie' ? element : ampdoc, GWD_SERVICE_NAME);
           page1Elem = doc.getElementById('page1');
         });
       });
@@ -248,11 +248,11 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
 
       it('should disable and re-enable', () => {
-        getLocalWinService().setEnabled(true);
+        runtime.setEnabled(true);
         expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS))
             .to.be.false;
 
-        getLocalWinService().setEnabled(false);
+        runtime.setEnabled(false);
         expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS))
             .to.be.true;
       });
@@ -479,8 +479,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
 
       it('should get the receiver element by id if it exists', () => {
-        const runtime = getLocalWinService();
-
         expect(runtime.getReceiver('document.body')).to.equal(
             doc.body);
         expect(runtime.getReceiver('page1')).to.equal(page1Elem);

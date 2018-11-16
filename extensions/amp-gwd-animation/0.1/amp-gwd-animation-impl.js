@@ -133,8 +133,8 @@ function setCounter(receiver, counterName, counterValue) {
 
 /**
  * AMP GWD animation runtime service.
- * @implements {../../../src/service.EmbeddableService}
  * @implements {../../../src/service.Disposable}
+ * @implements {../../../src/service.EmbeddableService}
  */
 export class AmpGwdRuntimeService {
   /**
@@ -181,7 +181,7 @@ export class AmpGwdRuntimeService {
           body,
           () => !!body.querySelector(
               `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`),
-          this.initialize.bind(this));
+          this.initialize_.bind(this));
     });
   }
 
@@ -196,8 +196,9 @@ export class AmpGwdRuntimeService {
   /**
    * Initializes the runtime. Attaches `animationend` event listeners for
    * handling timeline events, and activates animations on the first page.
+   * @private
    */
-  initialize() {
+  initialize_() {
     // TODO(#7846): The GWD animation runtime should start out disabled, but
     // leaving it enabled for now as the main runtime is not yet integrated to
     // enable it. When it does so, uncomment the below code (also see

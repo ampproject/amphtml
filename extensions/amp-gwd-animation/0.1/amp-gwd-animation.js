@@ -99,7 +99,10 @@ export class GwdAnimation extends AMP.BaseElement {
      */
     this.timelineEventPrefix_ = '';
 
-    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
+    /**
+     * The friendly iframe embed, if within one.
+     * @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed}
+     */
     this.fie_ = null;
 
     /** @private {!Function} */
