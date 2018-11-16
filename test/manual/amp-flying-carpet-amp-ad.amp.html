@@ -20,31 +20,10 @@
           background-color: #0653b6;
         }
 
-        .flying-carpet__media {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .flying-carpet__media > div {
-          flex: none;
-          height: auto;
-          min-width: 100%;
-          min-height: 100%;
-        }
-        .flying-carpet__media amp-img:nth-child(1) {
-          min-height: 100vh;
-          min-width: 177.778vh;
-        }
-
-        .flying-carpet__media amp-img:nth-child(2) {
-          min-height: 100vh;
-          min-width: 56.25vh;
+        .ad-border {
+          background-color: black;
+          color: white;
+          text-align: center;
         }
       </style>
   </head>
@@ -53,32 +32,17 @@
   <body>
     <div class="spacer"> One viewport before flying carpet.<br>Scroll down to see demo.</div>
     <h1>Alter window size to less than 768px and more than 768px to change image visibility with media attribute.</h1>
-    <amp-fx-flying-carpet height="300">
-      <div class="flying-carpet__media">
-        <div>
-          <h2>Doubleclick no ad with placeholder and fallback</h2>
-          <amp-ad width=300 height=200
-           type="doubleclick"
-            data-slot="/4119129/doesnt-exist">
-
-            <div class="adv-placeholder" placeholder>
-              <amp-anim width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
-              <amp-img placeholder width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
-              </amp-img>
-              </amp-anim>
-            </div>
-
-            <div fallback>
-              <a href="http://www.repubblica.it/sport/2016/02/09/news/app_rep-133068373/">
-                <amp-img placeholder width=300 height=100 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1/img/adv-300-100.jpg">
-              </a>
-            </div>
-
-          </amp-ad>
-        </div>
-      </div>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+    <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+      <amp-ad width="736" height="737"
+        layout="fixed"
+        type="doubleclick"
+        data-slot="/7336/corey/amp-flying-carpet"
+        json='{"useSameDomainRenderingUntilDeprecated":1}'
+      ></amp-ad>
     </amp-fx-flying-carpet>
-    <div class="spacer"> One viewport after flying carpet</div>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
 
+    <div class="spacer"> One viewport after flying carpet</div>
   </body>
 </html>
