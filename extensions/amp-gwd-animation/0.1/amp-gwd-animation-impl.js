@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {
   escapeCssSelectorIdent,
@@ -23,7 +24,6 @@ import {
 } from '../../../src/dom';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {toArray} from '../../../src/types';
-import {user} from '../../../src/log';
 
 /**
  * CSS class used to deactivate animations.
@@ -176,7 +176,7 @@ export class AmpGwdRuntimeService {
       // avoids performing initialization on the top-level document, on which
       // the service is first (unnecessarily) installed when installing in a
       // FIE.
-      const body = /** @type {!Element} */ (this.doc_.body);
+      const body = dev().assertElement(this.doc_.body);
       waitForChild(
           body,
           () => !!body.querySelector(
