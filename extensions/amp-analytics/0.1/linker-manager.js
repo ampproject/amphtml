@@ -227,10 +227,11 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
+   * @param {!Event} event
    * @private
    */
-  handleAnchorMutation_(element) {
-    if (!element.href) {
+  handleAnchorMutation_(element, event) {
+    if (!element.href || event.type !== 'click') {
       return;
     }
 
