@@ -175,12 +175,15 @@ const FileListItem = ({name, href, selectModePrefix}) => {
 
 
 const FileList = (basepath) => html`
-  <amp-list [src]="basePathSearch.listSrc" src="/dashboard/api/listing?path=${basepath}" items="." layout="responsive" width="100px" height="100px">
+  <amp-list [src]="basePathSearch.listSrc" src="/dashboard/api/listing?path=${basepath}" items="." layout="responsive" width="100px" height="100px" class="file-list">
     <div placeholder>Loading...</div>
     <div fallback>Failed to load data.</div>
     <template type="amp-mustache">
       <div>
-        Hello! {{.}}
+        <a class="file-link"
+          [href]="documentMode.selectModePrefix + '${basepath.substring(1)}{{.}}'">
+          {{.}}
+        </a>
       </div>
     </template>
   </amp-list>

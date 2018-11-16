@@ -157,7 +157,7 @@ a.find-icon:hover {
 }
 code,
 .code,
-.file-list > li > a {
+.file-list .file-link {
   font-family: 'Fira Code', 'Inconsolata', Menlo, Consolas, monospace;
 }
 a {
@@ -213,7 +213,7 @@ a.underlined::before {
   column-count: 3;
   column-gap: 20px;
 }
-.file-list > li {
+.file-list .file-link {
   padding: 0;
   margin: 0 0 10px;
   display: inline-block;
@@ -223,7 +223,7 @@ a.underlined::before {
   overflow: hidden;
   white-space: nowrap;
 }
-.file-list > li > a:hover {
+.file-list .file-link:hover {
   text-decoration: underline;
   color: #333;
 }
@@ -272,7 +272,7 @@ header li.divider {
   .file-list {
     column-count: 1;
   }
-  .file-list > li {
+  .file-list .file-link {
     display: block;
     width: 100%;
   }
