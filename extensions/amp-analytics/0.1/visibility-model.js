@@ -56,13 +56,11 @@ export class VisibilityModel {
 
     /**
      * Allow zero visible time on screen when explicitly provided and when the
-     * ping is deferred to some post-visibility event. Otherwise we treat zero
-     * visible time as an exclusive lower bound.
+     * ping is deferred to some other event.
      * @private @const {boolean}
      */
-    this.explicitZeroVisibleTimeRequirement_ =
-        spec['totalTimeMin'] === 0 && spec['continuousTimeMin'] == 0 &&
-        this.accumulateCounters_;
+    this.forceReport_ =
+        spec['forceReport'] === true && this.accumulateCounters_;
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -311,7 +309,7 @@ export class VisibilityModel {
       return;
     }
     const conditionsMet = this.updateCounters_(visibility);
-    if (conditionsMet) {
+    if (conditionsMet || this.forceReport_) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
         this.scheduledUpdateTimeoutId_ = null;
@@ -432,12 +430,11 @@ export class VisibilityModel {
       this.lastVisibleTime_ = now;
     }
 
-    return this.explicitZeroVisibleTimeRequirement_ ||
-        (this.everMatchedVisibility_ &&
-         (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
-         (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
-         (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
-         (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']));
+    return this.everMatchedVisibility_ &&
+        (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
+        (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
+        (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
+        (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
   }
 
   /**
