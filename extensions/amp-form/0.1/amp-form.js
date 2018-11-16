@@ -16,6 +16,10 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {
+  AsyncInputAttributes,
+  AsyncInputClasses,
+} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
@@ -492,7 +496,9 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = toArray(
-        this.form_.querySelectorAll('.i-amphtml-async-input')
+        this.form_.querySelectorAll(
+            `.${escapeCssSelectorIdent(AsyncInputClasses['ASYNC_INPUT'])}`
+        )
     );
 
     // Do any assertions we may need to do
@@ -504,7 +510,7 @@ export class AmpForm {
       this.assertNoSensitiveFields_();
 
       // If we have no async inputs, we can just submit synchronously
-      if (asyncInputs.length <= 0) {
+      if (asyncInputs.length === 0) {
 
         for (let i = 0; i < varSubsFields.length; i++) {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -512,10 +518,9 @@ export class AmpForm {
 
         this.handleNonXhrGet_();
         return;
-      } else if (event) {
-        event.stopImmediatePropagation();
-        event.preventDefault();
       }
+
+      event.preventDefault();
     }
 
     // Set ourselves to the SUBMITTING State
@@ -574,13 +579,10 @@ export class AmpForm {
   handleXhrSubmit_(trust) {
     let p;
     if (this.ssrTemplateHelper_.isSupported()) {
-      p = Promise.resolve().then(() => this.handleSsrTemplate_(trust));
+      p = this.handleSsrTemplate_(trust);
     } else {
-      p = Promise.resolve()
-          .then(() => {
-            this.submittingWithTrust_(trust);
-            return this.doActionXhr_();
-          })
+      this.submittingWithTrust_(trust);
+      p = this.doActionXhr_()
           .then(response => this.handleXhrSubmitSuccess_(
               /* {!../../../src/utils/xhr-utils.FetchResponse} */ response),
           error => {
@@ -702,12 +704,14 @@ export class AmpForm {
   getValueForAsyncInput_(asyncInput) {
     return asyncInput.getImpl().then(implementation => {
       return implementation.getValue().then(value => {
-        const name = asyncInput.getAttribute('data-name');
-        let input = this.form_
-            .querySelector(`input[name=${escapeCssSelectorIdent(name)}]`);
+        const name = asyncInput.getAttribute(AsyncInputAttributes['NAME']);
+        let input = this.form_.querySelector(
+            `input[name=${escapeCssSelectorIdent(name)}]`
+        );
         if (!input) {
           input = document.createElement('input');
-          input.setAttribute('name', asyncInput.getAttribute('data-name'));
+          input.setAttribute('name',
+              asyncInput.getAttribute(AsyncInputAttributes['NAME']));
         }
         input.setAttribute('hidden', 'true');
         input.setAttribute('value', value);
