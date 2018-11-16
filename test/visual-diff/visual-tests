@@ -160,7 +160,7 @@
     {
       "url": "examples/visual-tests/amp-ads.html",
       "name": "AMP Inabox Ad",
-      "loading_complete_delay_ms": 2000,
+      "loading_complete_delay_ms": 3000,
       "enable_percy_javascript": true,
       "enable_percy_javascript_external": true,
       "network_requests": [

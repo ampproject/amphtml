@@ -396,31 +396,35 @@ async function snapshotWebpages(percy, browser, webpages) {
 
       const page = await newPage(browser);
 
-      const expectedRequests = {};
+      let previousRequestTime = 0;
+      const requestCounts = {};
       if (webpage.network_requests) {
         // Set up monitoring for network requests
         await page.setRequestInterception(true);
-        for (const request of webpage.network_requests) {
-          const entry = {};
-          entry.count = request.count == null ? 1 : request.count;
-          if (request.delay) {
-            entry.delayPromise = sleep(request.delay)
-                .then(() => delete entry.delayPromise);
-          }
-          expectedRequests[request.url] = entry;
-        }
-
         page.on('request', interceptedRequest => {
-          for (const [url, entry] of Object.entries(expectedRequests)) {
-            if (new RegExp(url).test(interceptedRequest.url())) {
-              if (entry.delayPromise) {
+          const requestTime = Date.now();
+          for (const entry of webpage.network_requests) {
+            if (new RegExp(entry.url).test(interceptedRequest.url())) {
+              // found a match, verify parameters
+              if (entry.delay &&
+                  requestTime - previousRequestTime < entry.delay) {
                 log('fatal', 'Network request',
                     colors.cyan(interceptedRequest.url()),
                     'made earlier than expected');
               }
-              entry.count -= 1;
+              if (entry.count) {
+                // if there are no entries, add it and set to 1; otherwise
+                // increment the count
+                if (!requestCounts.hasOwnProperty(entry.url)) {
+                  requestCounts[entry.url] =
+                  {count: 1, expectedCount: entry.count};
+                } else {
+                  requestCounts[entry.url].count += 1;
+                }
+              }
             }
           }
+          previousRequestTime = requestTime;
           interceptedRequest.continue();
         });
       }
@@ -437,6 +441,9 @@ async function snapshotWebpages(percy, browser, webpages) {
       }
 
       log('verbose', 'Navigating to page', colors.yellow(fullUrl));
+
+      // set a baseline time.
+      page.once('load', () => previousRequestTime = Date.now());
 
       // Navigate to an empty page first to support different webpages that only
       // modify the #anchor name.
@@ -466,16 +473,12 @@ async function snapshotWebpages(percy, browser, webpages) {
               await sleep(webpage.loading_complete_delay_ms);
             }
 
-            for (const [url, entry] of Object.entries(expectedRequests)) {
-              if (entry.count < 0) {
+            for (const [url, entry] of Object.entries(requestCounts)) {
+              if (entry.count != entry.expectedCount) {
                 log('fatal', 'Network request', colors.cyan(url), 'made',
-                    colors.cyan(`${-entry.count}`),
-                    'more times than expected.');
-              }
-              else if (entry.count > 0) {
-                log('fatal', 'Network request', colors.cyan(url), 'made',
-                    colors.cyan(`${entry.count}`),
-                    'fewer times than expected.');
+                    colors.cyan(`${entry.count}`), 'times, expected:',
+                    colors.cyan(`${entry.expectedCount}`),
+                    'times.');
               }
             }
 
