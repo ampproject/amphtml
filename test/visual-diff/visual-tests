@@ -56,7 +56,7 @@
    *     "width": 400,
    *     "height": 600
    *   },
-   *    
+   *
    *   // [optional] CSS selectors for elements that must never appear on the
    *   // webpage.
    *   "forbidden_css": [
@@ -120,7 +120,7 @@
    *   //     },
    *   //     'tap red and blue button': async (page, name) => {
    *   //       await page.tap('#red_button');
-   *   //       await page.tap('#blue_button');   
+   *   //       await page.tap('#blue_button');
    *   //       await verifyCssElements(page, name, null,
    *   //         ['.red-loading', '.blue-loading'],
    *   //         ['.red-loaded', '.blue-loaded']);
@@ -562,6 +562,24 @@
       "loading_complete_css": [
         ".i-amphtml-story-no-rotation-overlay"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "name": "amp-story: tooltip",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "name": "amp-story: tooltip desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     }
   ]
 }
