@@ -27,15 +27,15 @@ import {
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle, setStyles} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 
 // Classes for consent UI
 const consentUiClasses = {
-  fullscreen: 'i-amphtml-consent-ui-fullscreen',
-  iframeActive: 'consent-iframe-active',
-  uiIn: 'i-amphtml-consent-ui-in',
+  iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
+  iframeActive: 'i-amphtml-consent-ui-iframe-active',
+  in: 'i-amphtml-consent-ui-in',
   loading: 'loading',
   fill: 'i-amphtml-consent-fill',
   placeholder: 'i-amphtml-consent-placeholder',
@@ -213,7 +213,7 @@ export class ConsentUI {
     }
 
     const {classList} = this.parent_;
-    classList.add(consentUiClasses.fullscreen);
+    classList.add(consentUiClasses.iframeFullscreen);
 
     this.isFullscreen_ = true;
   }
@@ -281,7 +281,7 @@ export class ConsentUI {
     // Remove transition/transform styles added by the fixed layer
     setStyles(this.parent_, {
       transform: '',
-      transition: ''
+      transition: '',
     });
 
     /**
@@ -295,7 +295,7 @@ export class ConsentUI {
     this.baseInstance_.mutateElement(() => {
       classList.remove('loading');
       this.baseInstance_.mutateElement(() => {
-        classList.add(consentUiClasses.uiIn);
+        classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
       });
     });
@@ -314,9 +314,9 @@ export class ConsentUI {
     classList.remove(consentUiClasses.iframeActive);
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
-    classList.remove(consentUiClasses.fullscreen);
+    classList.remove(consentUiClasses.iframeFullscreen);
     this.isFullscreen_ = false;
-    classList.remove(consentUiClasses.uiIn);
+    classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     removeElement(dev().assertElement(this.ui_));
   }

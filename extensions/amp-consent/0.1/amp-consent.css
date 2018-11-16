@@ -61,22 +61,22 @@ amp-consent.loading {
   width: 100%;
 }
 
-amp-consent.consent-iframe-active {
+amp-consent.i-amphtml-consent-ui-iframe-active {
   height: 100vh !important;
   transform: translate3d(0px, 100%, 0px) !important;
 }
 
-amp-consent.consent-iframe-active.i-amphtml-consent-ui-in {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
   transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
 }
 
 
-amp-consent.consent-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
   transform: translate3d(0px, calc(100% - 100vh), 0px) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-fullscreen > .i-amphtml-consent-fill {
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-fill {
   height: 100vh !important;
 }
 
