@@ -41,6 +41,7 @@ import {
 } from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
+import {clamp} from '../utils/math';
 import {
   createCustomEvent,
   getData,
@@ -90,6 +91,9 @@ export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
 /** @visibleForTesting */
 export const PERCENTAGE_FREQUENCY_MIN_MS = 250;
 
+/** @visibleForTesting */
+export const PERCENTAGE_FREQUENCY_MAX_MS = 2000;
+
 
 /**
  * @param {number} durationSeconds
@@ -105,9 +109,10 @@ function calculateIdealPercentageFrequencyMs(durationSeconds) {
  * @return {number}
  */
 function calculateActualPercentageFrequencyMs(durationSeconds) {
-  return Math.max(
+  return clamp(
+      calculateIdealPercentageFrequencyMs(durationSeconds),
       PERCENTAGE_FREQUENCY_MIN_MS,
-      calculateIdealPercentageFrequencyMs(durationSeconds));
+      PERCENTAGE_FREQUENCY_MAX_MS);
 }
 
 
