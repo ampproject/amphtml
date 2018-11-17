@@ -187,7 +187,9 @@ export class AnalyticsPercentageTracker {
       return false;
     }
 
-    if (calculateIdealPercentageFrequencyMs(duration) < PERCENTAGE_FREQUENCY_MIN_MS) {
+    if (calculateIdealPercentageFrequencyMs(duration) <
+        PERCENTAGE_FREQUENCY_MIN_MS) {
+
       const bestResultLength = Math.ceil(
           PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
 
