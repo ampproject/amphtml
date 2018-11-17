@@ -15,6 +15,7 @@
  */
 
 import {getAdContainer} from '../../../src/ad-helper';
+import {ancestorElementsByTag} from '../../../src/dom';
 
 export class AmpAdUIHandler {
 
@@ -78,6 +79,16 @@ export class AmpAdUIHandler {
           this.containerElement_);
       attemptCollapsePromise.then(() => {
       });
+    } else if (this.element_.parentElement.classList.contains('i-amphtml-fx-flying-carpet-container')) {
+      // If we are inside a flying carpet, we want to collapse that instead
+      // TODO: (@torch2424) Why is this not working? Check out src/resources-impl is denying our collapse request
+      console.log('Collapsing, but inside flying carpet');
+      const flyingCarpetElement = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet').pop();
+      console.log(flyingCarpetElement);
+      attemptCollapsePromise = flyingCarpetElement
+        .getImpl(implementation => implementation.attemptCollapse())
+        .then(() => this.baseInstance_.attemptCollapse())
+        .catch(err => console.log('flying carpet collapse caught', err));
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
     }
