@@ -95,7 +95,7 @@ export const PERCENTAGE_FREQUENCY_MIN_MS = 250;
  * @param {number} durationSeconds
  * @return {number}
  */
-function calculateIdealFrequencyMs(durationSeconds) {
+function calculateIdealPercentageFrequencyMs(durationSeconds) {
   return durationSeconds * 10 * PERCENTAGE_INTERVAL;
 }
 
@@ -104,10 +104,10 @@ function calculateIdealFrequencyMs(durationSeconds) {
  * @param {number} durationSeconds
  * @return {number}
  */
-function calculateActualFrequencyMs(durationSeconds) {
+function calculateActualPercentageFrequencyMs(durationSeconds) {
   return Math.max(
       PERCENTAGE_FREQUENCY_MIN_MS,
-      calculateIdealFrequencyMs(durationSeconds));
+      calculateIdealPercentageFrequencyMs(durationSeconds));
 }
 
 
@@ -187,7 +187,7 @@ export class AnalyticsPercentageTracker {
       return false;
     }
 
-    if (calculateIdealFrequencyMs(duration) < PERCENTAGE_FREQUENCY_MIN_MS) {
+    if (calculateIdealPercentageFrequencyMs(duration) < PERCENTAGE_FREQUENCY_MIN_MS) {
       const bestResultLength = Math.ceil(
           PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
 
@@ -234,7 +234,7 @@ export class AnalyticsPercentageTracker {
 
     const duration = video.getDuration();
 
-    const frequencyMs = calculateActualFrequencyMs(duration);
+    const frequencyMs = calculateActualPercentageFrequencyMs(duration);
 
     const percentage = (video.getCurrentTime() / duration) * 100;
     const normalizedPercentage =
