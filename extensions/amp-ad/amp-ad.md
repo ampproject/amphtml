@@ -225,6 +225,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
 - [AdvertServe](../../ads/advertserve.md)
+- [Adyoulike](../../ads/adyoulike.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
