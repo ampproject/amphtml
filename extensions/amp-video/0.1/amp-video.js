@@ -37,6 +37,7 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   setImportantStyles,
   setInitialDisplay,
@@ -96,7 +97,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?Element} */
+    /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
   }
 
@@ -437,20 +438,25 @@ class AmpVideo extends AMP.BaseElement {
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
 
-    this.unlisteners_.push(this.forwardEvents([
+    const forwardEventsUnlisten = this.forwardEvents([
       VideoEvents.ENDED,
       VideoEvents.LOADEDMETADATA,
       VideoEvents.PAUSE,
       VideoEvents.PLAYING,
-    ], video));
+    ], video);
 
-    this.unlisteners_.push(listen(video, 'volumechange', () => {
-      if (this.muted_ != this.video_.muted) {
-        this.muted_ = this.video_.muted;
-        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
-        this.element.dispatchCustomEvent(evt);
+    const mutedOrUnmutedEventUnlisten = listen(video, 'volumechange', () => {
+      const {muted} = this.video_;
+      if (this.muted_ == muted) {
+        return;
       }
-    }));
+      this.muted_ = muted;
+      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+    });
+
+    this.unlisteners_.push(
+        forwardEventsUnlisten,
+        mutedOrUnmutedEventUnlisten);
   }
 
   /** @private */
