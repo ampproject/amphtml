@@ -78,9 +78,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         this.element);
 
     user().assert(
-        this.element.getAttribute(AsyncInputAttributes['NAME']),
+        this.element.getAttribute(AsyncInputAttributes.NAME),
         'The %s attribute is required for <amp-recaptcha-input> %s',
-        AsyncInputAttributes['NAME'],
+        AsyncInputAttributes.NAME,
         this.element);
 
     this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
@@ -88,7 +88,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     return this.mutateElement(() => {
       toggle(this.element);
       // Add the required AsyncInput class
-      this.element.classList.add(AsyncInputClasses['ASYNC_INPUT']);
+      this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
       /**
        * We are applying styles here, to minizime the amp.css file.
        * These styles will create an in-place element, that is 1x1,

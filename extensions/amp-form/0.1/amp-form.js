@@ -494,17 +494,15 @@ export class AmpForm {
     }
 
     // Get our special fields
-    const varSubsFields = this.getVarSubsFields_();
-    const asyncInputs = toArray(
-        this.form_.querySelectorAll(
-            `.${escapeCssSelectorIdent(AsyncInputClasses['ASYNC_INPUT'])}`
-        )
-    );
+    const varSubsFields =
+      this.getVarSubsFields_();
+    const asyncInputs =
+      this.form_.getElementsByClassName(AsyncInputClasses.ASYNC_INPUT);
 
     // Do any assertions we may need to do
     // For NonXhrGET
-    // took out all the code in handleNonXhrGet_
-    // because alot was assertions we want to fail on before getting var subs
+    // That way we can determine if
+    // we can submit synchronously
     if (!this.xhrAction_ && this.method_ == 'GET') {
       this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
       this.assertNoSensitiveFields_();
@@ -529,11 +527,9 @@ export class AmpForm {
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
-    if (asyncInputs.length > 0) {
-      asyncInputs.forEach(asyncInput => {
-        presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
-      });
-    }
+    iterateCursor(asyncInputs, asyncInput => {
+      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+    });
 
     Promise.all(presubmitPromises).then(() => {
       if (this.xhrAction_) {
@@ -702,22 +698,22 @@ export class AmpForm {
    * @private
    */
   getValueForAsyncInput_(asyncInput) {
-    return asyncInput.getImpl().then(implementation => {
-      return implementation.getValue().then(value => {
-        const name = asyncInput.getAttribute(AsyncInputAttributes['NAME']);
-        let input = this.form_.querySelector(
-            `input[name=${escapeCssSelectorIdent(name)}]`
-        );
-        if (!input) {
-          input = document.createElement('input');
-          input.setAttribute('name',
-              asyncInput.getAttribute(AsyncInputAttributes['NAME']));
-        }
-        input.setAttribute('hidden', 'true');
-        input.setAttribute('value', value);
-        this.form_.appendChild(input);
-      });
-    });
+    return asyncInput.getImpl()
+        .then(implementation => implementation.getValue())
+        .then(value => {
+          const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+          let input = this.form_.querySelector(
+              `input[name=${escapeCssSelectorIdent(name)}]`
+          );
+          if (!input) {
+            input = document.createElement('input');
+            input.setAttribute('name',
+                asyncInput.getAttribute(AsyncInputAttributes.NAME));
+          }
+          input.setAttribute('hidden', 'true');
+          input.setAttribute('value', value);
+          this.form_.appendChild(input);
+        });
   }
 
 

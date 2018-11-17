@@ -32,29 +32,20 @@ describes.realWin('amp-recaptcha-input', {
     toggleExperiment(win, 'amp-recaptcha-input', true);
   });
 
-  function getRecaptchaInput(config) {
+  function getRecaptchaInput(config = {}) {
     const ampRecaptchaInput = doc.createElement('amp-recaptcha-input');
     ampRecaptchaInput.setAttribute('layout',
         'nodisplay');
 
-    if (config) {
-      if (!config.skipName) {
-        ampRecaptchaInput.setAttribute('name',
-            'recaptcha-test');
-      }
-      if (!config.skipSitekey) {
-        ampRecaptchaInput.setAttribute('data-sitekey',
-            'fake-sitekey-fortesting');
-      }
-      if (!config.skipAction) {
-        ampRecaptchaInput.setAttribute('data-action',
-            'unit-testing');
-      }
-    } else {
-      ampRecaptchaInput.setAttribute('data-name',
+    if (!config.skipName) {
+      ampRecaptchaInput.setAttribute('name',
           'recaptcha-test');
+    }
+    if (!config.skipSitekey) {
       ampRecaptchaInput.setAttribute('data-sitekey',
           'fake-sitekey-fortesting');
+    }
+    if (!config.skipAction) {
       ampRecaptchaInput.setAttribute('data-action',
           'unit-testing');
     }
