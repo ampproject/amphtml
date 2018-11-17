@@ -138,7 +138,7 @@ function appendAnalyticsRow(urlParams) {
   var container = document.querySelector('.analytics-events-container');
   var table = document.getElementById('analytics-events');
   table.appendChild(createTableRow([
-    getHoursMinutesSeconds(),
+    '[' + getHoursMinutesSeconds() + ']',
     urlParams.get('autoplay'),
     urlParams.get('type'),
     formatNumber(urlParams.get('time'), 's'),
