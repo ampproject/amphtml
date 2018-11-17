@@ -122,6 +122,18 @@ function logAnalyticsEvent(url) {
   appendAnalyticsRow(urlParams);
 }
 
+function formatNumber(str, sufix) {
+  const n = parseFloat(str);
+  if (isNaN(n)) {
+    return 'N/A';
+  }
+  var formatted = n.toFixed(2);
+  if (formatted % 1 == 0) {
+    formatted = n;
+  }
+  return formatted + (sufix || '');
+}
+
 function appendAnalyticsRow(urlParams) {
   var container = document.querySelector('.analytics-events-container');
   var table = document.getElementById('analytics-events');
@@ -129,9 +141,10 @@ function appendAnalyticsRow(urlParams) {
     getHoursMinutesSeconds(),
     urlParams.get('autoplay'),
     urlParams.get('type'),
-    urlParams.get('time'),
-    urlParams.get('total'),
-    urlParams.get('duration'),
+    formatNumber(urlParams.get('time'), 's'),
+    formatNumber(urlParams.get('normalizedPercentage'), '%'),
+    formatNumber(urlParams.get('total'), 's'),
+    formatNumber(urlParams.get('duration'), 's'),
   ]));
   container./*OK*/scrollTop = container./*OK*/scrollHeight;
 }
