@@ -224,6 +224,17 @@
               "eventType": "video-ended"
             }
           },
+          "myVideoPercentagePlayed": {
+            "on": "video-percentage-played",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-percentage-played"
+            },
+            "videoSpec": {
+              "percentages": [25, 50, 75, 100]
+            }
+          },
           "myVideoCustom": {
             "on": "video-custom-foo",
             "request": "event",

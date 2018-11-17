@@ -45,6 +45,7 @@ import {
   createCustomEvent,
   getData,
   listen,
+  listenOnce,
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
@@ -80,6 +81,202 @@ function userInteractedWith(video) {
 }
 
 
+/** @visibleForTesting */
+export const PERCENTAGE_INTERVAL = 5;
+
+/** @visibleForTesting */
+export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
+
+/** @visibleForTesting */
+export const PERCENTAGE_FREQUENCY_MIN_MS = 250;
+
+
+/**
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateIdealFrequencyMs(durationSeconds) {
+  return durationSeconds * 10 * PERCENTAGE_INTERVAL;
+}
+
+
+/**
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateActualFrequencyMs(durationSeconds) {
+  return Math.max(
+      PERCENTAGE_FREQUENCY_MIN_MS,
+      calculateIdealFrequencyMs(durationSeconds));
+}
+
+
+/** @visibleForTesting */
+export class AnalyticsPercentageTracker {
+  /**
+   * @param {!./timer-impl.Timer} timer
+   * @param {!VideoEntry} entry
+   */
+  constructor(timer, entry) {
+
+    // These are destructured in `calculate_()`, but the linter thinks they're
+    // unused.
+    /* eslint-disable amphtml-internal/unused-private-field */
+
+    /** @private @const {!./timer-impl.Timer} */
+    this.timer_ = timer;
+
+    /** @private @const {!VideoEntry} */
+    this.entry_ = entry;
+
+    /* eslint-enable amphtml-internal/unused-private-field */
+
+    /** @private {?Array<!UnlistenDef>} */
+    this.unlisteners_ = null;
+
+    /** @private {number} */
+    this.last_ = 0;
+
+    /** @private {number} */
+    this.triggerId_ = 0;
+  }
+
+  /** @public */
+  start() {
+    const {element} = this.entry_.video;
+
+    this.stop();
+
+    this.unlisteners_ = this.unlisteners_ || [];
+
+    this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        }),
+
+        listen(element, VideoEvents.ENDED, () => {
+          this.maybeTrigger_(/* normalizedPercentage */ 100);
+        }));
+  }
+
+  /** @public */
+  stop() {
+    if (!this.unlisteners_) {
+      return;
+    }
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop().call();
+    }
+    this.triggerId_++;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasDuration_() {
+    const {video} = this.entry_;
+    const duration = video.getDuration();
+
+    // Livestreams or videos with no duration information available.
+    if (!duration ||
+        isNaN(duration) ||
+        duration <= 0) {
+      return false;
+    }
+
+    if (calculateIdealFrequencyMs(duration) < PERCENTAGE_FREQUENCY_MIN_MS) {
+      const bestResultLength = Math.ceil(
+          PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
+
+      this.warnForTesting_(
+          'This video is too short for `video-percentage-played`. ' +
+            'Reports may be innacurate. For best results, use videos over',
+          bestResultLength,
+          'seconds long.',
+          video.element);
+    }
+
+    return true;
+  }
+
+  /**
+   * @param  {...*} args
+   * @private
+   */
+  warnForTesting_(...args) {
+    user().warn.apply(user(), [TAG].concat(args));
+  }
+
+  /**
+   * @param {number=} triggerId
+   * @private
+   */
+  calculate_(triggerId) {
+    if (triggerId != this.triggerId_) {
+      return;
+    }
+
+    const {
+      entry_: entry,
+      timer_: timer,
+    } = this;
+
+    const {video} = entry;
+    const calculateAgain = () => this.calculate_(triggerId);
+
+    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
+      return;
+    }
+
+    const duration = video.getDuration();
+
+    const frequencyMs = calculateActualFrequencyMs(duration);
+
+    const percentage = (video.getCurrentTime() / duration) * 100;
+    const normalizedPercentage =
+        Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
+
+    dev().assert(isFiniteNumber(normalizedPercentage));
+
+    this.maybeTrigger_(normalizedPercentage);
+
+    timer.delay(calculateAgain, frequencyMs);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  maybeTrigger_(normalizedPercentage) {
+    if (normalizedPercentage <= 0) {
+      return;
+    }
+
+    if (this.last_ == normalizedPercentage) {
+      return;
+    }
+
+    this.last_ = normalizedPercentage;
+
+    this.analyticsEventForTesting_({
+      'normalizedPercentage': normalizedPercentage.toString(),
+    });
+  }
+
+  /**
+   * @param {!Object<string, string>} vars
+   * @private
+   */
+  analyticsEventForTesting_(vars) {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, vars);
+  }
+}
+
+
 /**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
@@ -88,6 +285,7 @@ function userInteractedWith(video) {
  * all videos within a document.
  *
  * @implements {VideoServiceInterface}
+ * @implements {../service.Disposable}
  */
 export class VideoManager {
 
@@ -132,6 +330,17 @@ export class VideoManager {
     // if video analytics are present, since the timer is not needed if
     // video analytics are not present.
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /** @override */
+  dispose() {
+    if (!this.entries_) {
+      return;
+    }
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      entry.dispose();
+    }
   }
 
   /**
@@ -411,6 +620,11 @@ class VideoEntry {
       return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
     };
 
+    /** @private @const {function(): !AnalyticsPercentageTracker} */
+    this.getAnalyticsPercentageTracker_ = once(
+        () => new AnalyticsPercentageTracker(
+            Services.timerFor(this.ampdoc_.win), this));
+
     // Autoplay Variables
 
     /** @private {boolean} */
@@ -470,6 +684,11 @@ class VideoEntry {
     });
 
     this.listenForAutoplayDelegation_();
+  }
+
+  /** @public */
+  dispose() {
+    this.getAnalyticsPercentageTracker_().stop();
   }
 
   /**
@@ -607,6 +826,8 @@ class VideoEntry {
     this.internalElement_ = getInternalVideoElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
+
+    this.getAnalyticsPercentageTracker_().start();
 
     this.updateVisibility();
     if (this.isVisible_) {
