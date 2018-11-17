@@ -127,3 +127,40 @@ algorithm will then skip the slot after this page when trying to insert an ad.
   ...
 </amp-story-page>
 ```
+
+## Analytics
+When using `amp-story-auto-ads` several new [analytics triggers](extensions/amp-analytics/amp-analytics.md)
+and [variables] will be availible for your analytics configuration.
+
+### Triggers
+Name | Event
+--- | ---
+`story-ad-request` | An ad is requested.
+`story-ad-load` | An ad is loaded.
+`story-ad-insert` | An ad is inserted.
+`story-ad-view` | An ad is viewed.
+`story-ad-click` | An ad's CTA button has been clicked.
+`story-ad-exit` | A user stops looking at an ad.
+`story-ad-discard` | An ad is discarded due to invalid configuration.
+
+### Variables
+The following variables will be avaiable in roughly sequential order. The variables
+can then be used in any following pings. For instance, a request using the
+`story-ad-load` trigger will not have access to the `viewTime` variable as it has
+not happened yet (this will resolve to an empty string). Whereas a request sent
+using the `story-ad-exit` trigger would be able to get the value of all the previous
+events (`requestTime`, `loadTime`, `insertTime` etc.)
+
+Name | Definition
+--- | ---
+`adIndex` | Index of the ad generating the trigger (available for all triggers)
+`adUniqueId` | Id that should be unique for every ad (available for all triggers)
+`requestTime` | Timestamp when ad is requested
+`loadTime` | Timestamp when ad emits `INI_LOAD` signal
+`insertTime` | Timestamp when ad is inserted into story
+`viewTime` | Timestamp when ad-page becomes active page
+`clickTime` | Timestamp when ad is clicked
+`exitTime` | Timestamp when ad page moves from active => inactive
+`discardTime` | Timestamp when ad is discared due to bad metadata etc.
+`position` | Position in the parent story. Number of page before ad + 1. Does not count previously inserted ad pages. (avaiable at insertion)
+`ctaType` | Given cta-type of inserted ad (avaiable at insertion)
