@@ -92,7 +92,7 @@ export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
 export const PERCENTAGE_FREQUENCY_MIN_MS = 250;
 
 /** @visibleForTesting */
-export const PERCENTAGE_FREQUENCY_MAX_MS = 2000;
+export const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
 
 
 /**
