@@ -37,6 +37,7 @@ import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-position-observer';
 
@@ -100,6 +101,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.firstIterationComplete_ = false;
+
+    /** @private {boolean} */
+    this.useAnimationWorklet_ =
+      Services.platformFor(this.win).isChrome() &&
+      isExperimentOn(this.win, 'chrome-animation-worklet') &&
+      'animationWorklet' in CSS;
   }
 
   /** @override */
@@ -167,6 +174,11 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       'bottom-margin': this.resolvedBottomMargin_,
     };
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
+    if (this.useAnimationWorklet_ &&
+        !this.action_.hasAction(this.element, 'enter') &&
+        !this.action_.hasAction(this.element, 'exit')) {
+      this.maybeUninstallPositionObserver_();
+    }
   }
 
   /**
@@ -450,6 +462,18 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       );
     }
   }
+
+  /**
+   * @private
+   */
+  maybeUninstallPositionObserver_() {
+    if (this.positionObserver_) {
+      const scene = this.discoverScene_();
+      this.positionObserver_.unobserve(scene);
+      this.positionObserver_ = null;
+    }
+  }
+
 }
 
 AMP.extension(TAG, '0.1', AMP => {
