@@ -123,7 +123,7 @@ function logAnalyticsEvent(url) {
 }
 
 function formatNumber(str, sufix) {
-  const n = parseFloat(str);
+  var n = parseFloat(str);
   if (isNaN(n)) {
     return 'N/A';
   }
