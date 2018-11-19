@@ -563,6 +563,9 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = true;
   }
 
@@ -570,7 +573,18 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = false;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isManagedByPool_() {
+    return this.video_.classList.contains('i-amphtml-pool-media');
   }
 
   /**

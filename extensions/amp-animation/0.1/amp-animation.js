@@ -90,9 +90,8 @@ export class AmpAnimation extends AMP.BaseElement {
       user().assert(
           this.element.parentNode == this.element.ownerDocument.body ||
           this.element.parentNode == ampdoc.getBody(),
-          `${TAG} is only allowed as a direct child of <body> element` +
-          ' when trigger is visibility.' +
-          ' This restriction will be removed soon.');
+          '%s is only allowed as a direct child of <body> element when trigger'
+          + ' is visibility. This restriction will be removed soon.', TAG);
     }
 
     // Parse config.
