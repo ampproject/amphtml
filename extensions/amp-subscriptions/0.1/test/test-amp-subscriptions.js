@@ -484,6 +484,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should reset entitlement on re-authorization', () => {
+      subscriptionService.platformStore_.resolvePlatform('local', platform);
       const entitlement = new Entitlement({source: 'local', raw: 'raw',
         granted: true, grantReason: GrantReason.SUBSCRIBER});
       sandbox.stub(platform, 'getEntitlements')
