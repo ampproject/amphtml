@@ -92,6 +92,17 @@ function isPatched(win) {
 }
 
 /**
+ * Throws the error outside the current event loop.
+ *
+ * @param {!Error} error
+ */
+function rethrowAsync(error) {
+  new /*OK*/Promise(() => {
+    throw error;
+  });
+}
+
+/**
  * The public Custom Elements API.
  */
 class CustomElementRegistry {
@@ -396,11 +407,15 @@ class Registry {
     // run on the node. The node itself is already constructed, so the return
     // value is just the node.
     this.current_ = node;
-    const el = new ctor();
+    try {
+      const el = new ctor();
 
-    if (el !== node) {
-      throw new this.win_.Error(
-          'Constructor illegally returned a different instance.');
+      if (el !== node) {
+        throw new this.win_.Error(
+            'Constructor illegally returned a different instance.');
+      }
+    } catch (e) {
+      rethrowAsync(e);
     }
   }
 
@@ -422,7 +437,11 @@ class Registry {
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
     if (node.connectedCallback) {
-      node.connectedCallback();
+      try {
+        node.connectedCallback();
+      } catch (e) {
+        rethrowAsync(e);
+      }
     }
   }
 
@@ -435,7 +454,11 @@ class Registry {
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
     if (node.disconnectedCallback) {
-      node.disconnectedCallback();
+      try {
+        node.disconnectedCallback();
+      } catch (e) {
+        rethrowAsync(e);
+      }
     }
   }
 
