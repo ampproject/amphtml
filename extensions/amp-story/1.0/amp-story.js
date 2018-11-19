@@ -422,7 +422,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
   * @private
   */
-  setThemeColor_(){
+  setThemeColor_() {
     // The theme color should be copied from the story's primary accent color
     // if possible, with the fall back being default light gray.
     let meta = document.createElement('meta');

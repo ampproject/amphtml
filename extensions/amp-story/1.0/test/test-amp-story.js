@@ -399,10 +399,10 @@ describes.realWin('amp-story', {
   });
 
   it('should have a meta tag that sets the theme color', () => {
-    createPages(story.element, pageCount);
+    createPages(story.element, 2);
     story.buildCallback();
     const metaTags = story.element.getElementsByTagName('meta');
-    const metaTagNames = Array.from(pageElements).map(el => el.name);
+    const metaTagNames = Array.from(metTagNames).map(el => el.name);
     expect(metaTagNames.contains('theme-color')).to.be.true;
   });
 
