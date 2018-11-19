@@ -259,22 +259,25 @@ export class LinkerManager {
 
     const /** @type {Array} */ domains = config['destinationDomains'];
 
-    if (this.isDomainMatch_(hostname, domains)) {
+    if (this.isDomainMatch_(hostname, name, domains)) {
       const linkerValue = createLinker(/* version */ '1',
           this.resolvedIds_[name]);
-      el.href = addParamToUrl(href, name, linkerValue);
+      if (linkerValue) {
+        el.href = addParamToUrl(href, name, linkerValue);
+      }
     }
   }
 
   /**
    * Check to see if the url is a match for the given set of domains.
    * @param {string} hostname
+   * @param {string} name Name given in linker config.
    * @param {?Array} domains
    */
-  isDomainMatch_(hostname, domains) {
+  isDomainMatch_(hostname, name, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
-      user().warn(TAG, `${name} destinationDomains must be an array.`);
+      user().warn(TAG, '%s destinationDomains must be an array.', name);
       return false;
     }
 
@@ -339,7 +342,7 @@ export class LinkerManager {
           form.getAttribute('action');
       const {hostname} = this.urlService_.parse(url);
 
-      if (this.isDomainMatch_(hostname, domains)) {
+      if (this.isDomainMatch_(hostname, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
