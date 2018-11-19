@@ -268,6 +268,7 @@ export function imaVideo(global, data) {
     'padding-top': '60px',
     'color': 'white',
     'display': 'none',
+    'font-family': 'Helvetica, Arial, Sans-serif',
     'justify-content': 'center',
     'align-items': 'center',
     'user-select': 'none',
@@ -281,7 +282,6 @@ export function imaVideo(global, data) {
     'box-sizing': 'border-box',
     'display': 'none',
     'flex-grow': '1',
-    'font-family': 'Helvetica, Arial, Sans-serif',
     'font-size': '12px',
     'height': '20px',
     'overflow': 'hidden',
@@ -309,7 +309,6 @@ export function imaVideo(global, data) {
   setStyles(timeDiv, {
     'margin-right': '20px',
     'text-align': 'center',
-    'font-family': 'Helvetica, Arial, Sans-serif',
     'font-size': '14px',
     'text-shadow': '0px 0px 10px black',
   });
