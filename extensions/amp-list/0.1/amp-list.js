@@ -643,7 +643,7 @@ export class AmpList extends AMP.BaseElement {
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
-      return;
+      return Promise.resolve();
     }
 
     return this.mutateElement(() => {
