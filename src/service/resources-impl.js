@@ -1938,6 +1938,7 @@ export class Resources {
     force, opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getPageLayoutBox();
+    console.log('collapse', layoutBox, newHeight, newWidth, marginChange);
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width) &&
         (marginChange === undefined || !areMarginsChanged(
