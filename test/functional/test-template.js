@@ -198,7 +198,7 @@ describes.fakeWin('Template', {amp: true}, env => {
     doc.body.appendChild(parentElement);
     allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template element must be a "template" tag/); });
+    }).to.throw(/Template must be a "template" tag or defined in a script tag/); });
   });
 
   it('should discover template via children', () => {

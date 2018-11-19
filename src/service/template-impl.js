@@ -264,8 +264,11 @@ export class Templates {
   findTemplate(parent, opt_querySelector) {
     const templateElement = this.maybeFindTemplate(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
-    user().assert(templateElement.tagName == 'TEMPLATE',
-        'Template element must be a "template" tag %s', templateElement);
+    const templateTagName = templateElement.tagName;
+    user().assert(
+        templateTagName == 'TEMPLATE' || templateTagName == 'SCRIPT',
+        'Template must be a "template" tag or defined in a script tag %s',
+        templateElement);
     return templateElement;
   }
 
@@ -285,7 +288,9 @@ export class Templates {
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      return childElementByTag(parent, 'template');
+      const template = childElementByTag(parent, 'template');
+      const templateByScript = childElementByTag(parent, 'script');
+      return template || templateByScript;
     }
   }
 

@@ -879,3 +879,14 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   element.classList.add('i-amphtml-element');
   return element;
 }
+
+/**
+ * Run a test suite multiple times against varaible inputs.
+ * @param {!Array} values
+ * @param {func} func
+ */
+export function testCases(values, func) {
+  for (let i = 0, count = values.length; i < count; i++) {
+    func.apply(this, [values[i]]);
+  }
+}
