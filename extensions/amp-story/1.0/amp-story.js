@@ -418,13 +418,16 @@ export class AmpStory extends AMP.BaseElement {
           .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
     });
   }
-  /** TODO(Budnampet): add JSDoc describing this function */
+
+  /**
+  * @private
+  */
   setThemeColor_(){
+    // The theme color should be copied from the story's primary accent color
+    // if possible, with the fall back being default light gray.
     let meta = document.createElement('meta');
     const styles = getComputedStyle(document.body);
     meta.name = "theme-color";
-    // The theme color should be copied from the story's primary accent color
-    // if possible, with the fall back being default light gray.
     meta.content = styles.getPropertyValue('primary-color') || '#F1F3F4';
     document.getElementsByTagName('head')[0].appendChild(meta);
   }
