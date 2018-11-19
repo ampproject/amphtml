@@ -187,6 +187,27 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should not add params where linker value is empty', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            gclid: '',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      expect(handlers.length).to.equal(1);
+      expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
+          'https://www.source.com/dest?a=1'
+      );
+    });
+  });
+
   it('should generate a param valid for ingestion 5 min later', () => {
     const clock = sandbox.useFakeTimers(1533329483292);
     sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
