@@ -118,6 +118,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
@@ -888,7 +889,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 

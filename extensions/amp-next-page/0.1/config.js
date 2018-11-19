@@ -23,6 +23,8 @@ import {
 import {isArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
+const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
+
 /**
  * @typedef {{
  *   pages: !Array<!AmpNextPageItem>,
@@ -84,9 +86,9 @@ function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
       user().assertString(selector,
-          `amp-next-page hideSelector value ${selector} is not a string`);
+          'amp-next-page hideSelector value should be a string');
       user().assert(!pattern.test(selector),
-          `amp-next-page hideSelector '${selector}' not allowed`);
+          'amp-next-page hideSelector %s not allowed', selector);
     });
   });
 }
@@ -108,7 +110,9 @@ function assertReco(context, reco, documentUrl) {
   const {origin} = urlService.parse(documentUrl);
   const sourceOrigin = getSourceOrigin(documentUrl);
 
-  user().assert(url.origin === origin || url.origin === sourceOrigin,
+  user().assert(
+      url.origin === origin || url.origin === sourceOrigin
+      || isValidAdSenseURL(context, url, origin),
       'pages must be from the same origin as the current document');
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
@@ -120,4 +124,20 @@ function assertReco(context, reco, documentUrl) {
         encodeURIComponent(url.host) +
         url.pathname + (url.search || '') + (url.hash || '');
   }
+}
+
+/**
+ * @param {!Element} context
+ * @param {!Location} url
+ * @param {string} origin
+ * @return {boolean}
+ */
+function isValidAdSenseURL(context, url, origin) {
+  const matches = url.search.match(/adurl=(.*)(?:&|$)/);
+  if (!matches) {
+    return false;
+  }
+  const urlService = Services.urlForDoc(context);
+  const targetUrl = urlService.parse(matches[1]);
+  return url.origin === ADSENSE_REC_ORIGIN && targetUrl.origin === origin;
 }

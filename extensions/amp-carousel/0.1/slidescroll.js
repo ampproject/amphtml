@@ -631,10 +631,8 @@ export class AmpSlideScroll extends BaseSlides {
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
-      const error = new Error(
-          `Attempting to access a non-existant slide ${newIndex}/${noOfSlides_}`
-      );
-      dev().error(TAG, error);
+      dev().error(TAG, 'Attempting to access a non-existant slide %s / %s',
+          newIndex, noOfSlides_);
       return false;
     }
     this.updateInViewport(newSlideInView, true);
@@ -726,7 +724,8 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        dev().assertElement(this.slideWrappers_[i]).classList
+            .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide

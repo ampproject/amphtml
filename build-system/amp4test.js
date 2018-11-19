@@ -19,6 +19,17 @@ const app = module.exports = require('express').Router();
 
 /*eslint "max-len": 0*/
 
+/**
+ * Logs the given messages to the console in local dev mode, but not while
+ * running automated tests.
+ * @param {*} messages
+ */
+function log(...messages) {
+  if (!process.env.AMP_TEST) {
+    console.log(messages);
+  }
+}
+
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
@@ -88,7 +99,7 @@ const bank = {};
 app.use('/request-bank/deposit/', (req, res) => {
   // req.url is relative to the path specified in app.use
   const key = req.url;
-  console.log('SERVER-LOG [DEPOSIT]: ', key);
+  log('SERVER-LOG [DEPOSIT]: ', key);
   if (typeof bank[key] === 'function') {
     bank[key](req);
   } else {
@@ -105,7 +116,7 @@ app.use('/request-bank/deposit/', (req, res) => {
 app.use('/request-bank/withdraw/', (req, res) => {
   // req.url is relative to the path specified in app.use
   const key = req.url;
-  console.log('SERVER-LOG [WITHDRAW]: ' + key);
+  log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
