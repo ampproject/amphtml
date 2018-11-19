@@ -154,7 +154,7 @@ function getYarnStableVersion(infoJson) {
 }
 
 function checkGlobalGulp() {
-  const firstInstall = getStdout("ls").trim().match(/node_modules/) === null;
+  const firstInstall = getStdout('ls').trim().match(/node_modules/) === null;
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
