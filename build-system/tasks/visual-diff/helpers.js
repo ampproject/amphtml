@@ -48,6 +48,7 @@ function log(mode, ...messages) {
       fancyLog.error(colors.red('ERROR:'), ...messages);
       break;
     case 'fatal':
+      process.exitCode = 1;
       fancyLog.error(colors.red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
     case 'travis':
@@ -69,17 +70,21 @@ function log(mode, ...messages) {
  *     eventually be removed from the page.
  * @param {!Array<string>} loadingCompleteCss Array of CSS elements that must
  *     eventually appear on the page.
+ * @throws {string} an encountered error.
  */
 async function verifyCssElements(page, testName, forbiddenCss,
   loadingIncompleteCss, loadingCompleteCss) {
   // Begin by waiting for all loader dots to disappear.
-  await waitForLoaderDot(page, testName);
+  if (!(await waitForLoaderDot(page))) {
+    throw new Error(`${colors.cyan(testName)} still has the AMP loader dot ` +
+        `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+  }
 
   if (forbiddenCss) {
     for (const css of forbiddenCss) {
       if ((await page.$(css)) !== null) {
-        log('fatal', colors.cyan(testName), '| The forbidden CSS element',
-            colors.cyan(css), 'exists in the page');
+        throw new Error(`${colors.cyan(testName)} | The forbidden CSS ` +
+            `element ${colors.cyan(css)} exists in the page`);
       }
     }
   }
@@ -89,9 +94,9 @@ async function verifyCssElements(page, testName, forbiddenCss,
         colors.cyan(loadingIncompleteCss.join(', ')));
     for (const css of loadingIncompleteCss) {
       if (!(await waitForElementVisibility(page, css, {hidden: true}))) {
-        log('fatal', colors.cyan(testName),
-            '| An element with the CSS selector', colors.cyan(css),
-            `is still visible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+        throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+            `selector ${colors.cyan(css)} is still visible after ` +
+            `${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }
@@ -101,9 +106,8 @@ async function verifyCssElements(page, testName, forbiddenCss,
         colors.cyan(loadingCompleteCss.join(', ')));
     for (const css of loadingCompleteCss) {
       if (!(await waitForSelectorExistence(page, css))) {
-        log('fatal', colors.cyan(testName),
-            '| The CSS selector', colors.cyan(css),
-            'does not match any elements in the page');
+        throw new Error(`${colors.cyan(testName)} | The CSS selector ` +
+            `${colors.cyan(css)} does not match any elements in the page`);
       }
     }
 
@@ -111,9 +115,9 @@ async function verifyCssElements(page, testName, forbiddenCss,
         colors.cyan(loadingCompleteCss.join(', ')));
     for (const css of loadingCompleteCss) {
       if (!(await waitForElementVisibility(page, css, {visible: true}))) {
-        log('fatal', colors.cyan(testName),
-            '| An element with the CSS selector', colors.cyan(css),
-            `is still invisible after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+        throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+            `selector ${colors.cyan(css)} is still invisible after ` +
+            `${CSS_SELECTOR_TIMEOUT_MS} ms`);
       }
     }
   }
@@ -123,15 +127,11 @@ async function verifyCssElements(page, testName, forbiddenCss,
  * Wait for all AMP loader dot to disappear.
  *
  * @param {!puppeteer.Page} page page to wait on.
- * @param {string} testName the full name of the test.
+ * @return {boolean} true if the loader dot disappeared before the timeout.
  */
-async function waitForLoaderDot(page, testName) {
-  // Wait for loader dot to be hidden.
-  await waitForElementVisibility(
-      page, '.i-amphtml-loader-dot', {hidden: true}).catch(() => {
-    log('fatal', colors.cyan(testName),
-        `still has the AMP loader dot after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
-  });
+async function waitForLoaderDot(page) {
+  return await waitForElementVisibility(
+      page, '.i-amphtml-loader-dot', {hidden: true});
 }
 
 /**
