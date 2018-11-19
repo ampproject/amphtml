@@ -18,6 +18,8 @@
  * @fileoverview Embeds an AddThis widget.
  * The data-pub-id and data-widget-id can be found easily in the AddThis
  * dashboard at addthis.com.
+ * For floating tool, pickup floating widget-id from dashboard
+ * and add an attribute: data-widget-type="floating"
  * Example:
  * <code>
  * <amp-addthis
@@ -60,7 +62,7 @@ import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -195,6 +197,11 @@ class AmpAddThis extends AMP.BaseElement {
     this.preconnect.url('https://su.addthis.com', opt_onLayout);
   }
 
+  /** @override */
+  isAlwaysFixed() {
+    return this.widgetType_ === 'floating';
+  }
+
   /**
    * @return {Element}
    */
@@ -238,17 +245,7 @@ class AmpAddThis extends AMP.BaseElement {
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
-    if (this.widgetType_ === 'floating') {
-      setStyles(iframe, {
-        width: '100%',
-        height: '100%',
-        position: 'fixed',
-        bottom: '0px',
-      });
-    }
-    else {
-      setStyle(iframe, 'margin-bottom', '-5px');
-    }
+    setStyle(iframe, 'margin-bottom', '-5px');
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
