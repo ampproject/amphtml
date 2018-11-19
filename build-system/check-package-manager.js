@@ -154,6 +154,7 @@ function getYarnStableVersion(infoJson) {
 }
 
 function checkGlobalGulp() {
+  const firstInstall = getStdout("ls").trim().match(/node_modules/) === null;
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
@@ -172,7 +173,7 @@ function checkGlobalGulp() {
         cyan('gulp-cli') + yellow('.'));
     console.log(yellow('⤷ To install it, run'),
         cyan('"yarn global add gulp-cli"') + yellow('.'));
-  } else {
+  } else if (!firstInstall) {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
     const gulpVersion = gulpVersions.match(/Local version (.*?)$/);
     if (gulpVersion && gulpVersion.length == 2) {
