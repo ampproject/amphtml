@@ -262,7 +262,9 @@ export class LinkerManager {
     if (this.isDomainMatch_(hostname, domains)) {
       const linkerValue = createLinker(/* version */ '1',
           this.resolvedIds_[name]);
-      el.href = addParamToUrl(href, name, linkerValue);
+      if (linkerValue) {
+        el.href = addParamToUrl(href, name, linkerValue);
+      }
     }
   }
 
