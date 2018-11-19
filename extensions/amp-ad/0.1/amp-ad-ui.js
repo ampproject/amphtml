@@ -85,10 +85,16 @@ export class AmpAdUIHandler {
       console.log('Collapsing, but inside flying carpet');
       const flyingCarpetElement = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet').pop();
       console.log(flyingCarpetElement);
+
+      attemptCollapsePromise = this.baseInstance_.attemptCollapse()
+        .then(() => flyingCarpetElement.getImpl(implementation => implementation.attemptCollapse()))
+        .catch(err => console.log('flying carpet collapse caught', err));
+
+      /*
       attemptCollapsePromise = flyingCarpetElement
         .getImpl(implementation => implementation.attemptCollapse())
         .then(() => this.baseInstance_.attemptCollapse())
-        .catch(err => console.log('flying carpet collapse caught', err));
+        .catch(err => console.log('flying carpet collapse caught', err));*/
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
     }
