@@ -90,9 +90,6 @@ export class PooolVendor {
     this.itemID_ = this.pooolConfig_['itemID'] || '';
 
     /** @const {!Element} */
-    this.pooolContainer_ = document.getElementById('poool');
-
-    /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
 
     this.initializeIframe_();
@@ -174,6 +171,7 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
+    const pooolContainer = document.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(this.iframeUrl_
         + '&bi=' + this.pooolConfig_['bundleID']
         + '&iid=' + this.pooolConfig_['itemID']
@@ -187,7 +185,7 @@ export class PooolVendor {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
       listenFor(this.iframe_, 'resize', this.onResize_.bind(this));
-      this.pooolContainer_.appendChild(this.iframe_);
+      pooolContainer.appendChild(this.iframe_);
     });
   }
 
@@ -204,10 +202,10 @@ export class PooolVendor {
 
   /**
    * @private
-   * @param {Event} e
+   * @param {!Object} msg
    */
-  onResize_(e) {
-    setStyle(this.iframe_, 'height', e.height);
+  onResize_(msg) {
+    setStyle(this.iframe_, 'height', msg.height);
   }
 
   /**
