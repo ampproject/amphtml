@@ -577,6 +577,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
+      "flaky": true,
+      // See https://percy.io/ampproject/amphtml/builds/1179875
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
