@@ -139,6 +139,9 @@ let allAdsCompleted;
 // Flag tracking if an ad request has failed.
 let adRequestFailed;
 
+// IMA SDK Ad object
+let currentAd;
+
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
 
@@ -753,6 +756,9 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
       onAdError);
   adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.LOADED,
+      onAdLoad);
+  adsManager.addEventListener(
       global.google.ima.AdEvent.Type.AD_PROGRESS,
       onAdProgress);
   adsManager.addEventListener(
@@ -794,11 +800,21 @@ export function onAdsLoaderError() {
  */
 export function onAdError() {
   postMessage({event: VideoEvents.AD_END});
+  currentAd = null;
   if (adsManager) {
     adsManager.destroy();
   }
   videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
+}
+
+/**
+ * Called each time a new ad loads. Sets currentAd
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdLoad(global) {
+  currentAd = global.getAd();
 }
 
 /**
@@ -815,7 +831,7 @@ export function onAdProgress(global) {
     remainingSeconds = '0' + remainingSeconds;
   }
   const label = adLabel.replace('%s', adPosition).replace('%s', totalAds);
-  countdownDiv./*OK*/innerHTML
+  countdownDiv.textContent
     = `${label}: ${remainingMinutes}:${remainingSeconds}`;
 }
 
@@ -869,6 +885,7 @@ export function onContentResumeRequested() {
  * @visibleForTesting
  */
 export function onAllAdsCompleted() {
+  currentAd = null;
   allAdsCompleted = true;
 }
 
@@ -1208,16 +1225,21 @@ function onFullscreenChange(global) {
  * @visibleForTesting
  */
 export function showAdControls() {
+  const hasMobileStyles = videoWidth <= 400;
+  const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
+  const miniControls = hasMobileStyles && isSkippable;
   // hide non-ad controls
   const hideElement = button => setStyle(button, 'display', 'none');
   [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(hideElement);
   // set ad control styles
   setStyles(controlsDiv, {
+    'height': miniControls ? '20px' : '30px',
     'justify-content': 'flex-end',
-    'height': '30px',
     'padding': '10px',
   });
-  const buttonDefaults = {'height': '20px'};
+  const buttonDefaults = {
+    'height': miniControls ? '18px' : '22px',
+  };
   setStyles(fullscreenDiv, buttonDefaults);
   setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
     'margin-right': '10px',
@@ -1336,7 +1358,7 @@ function onMessage(global, event) {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
         });
-        if (adsActive) {
+        if (adsActive && !fullscreen) {
           adsManager.resize(
               msg.args.width, msg.args.height,
               global.google.ima.ViewMode.NORMAL);

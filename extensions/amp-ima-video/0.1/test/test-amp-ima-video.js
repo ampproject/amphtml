@@ -133,7 +133,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     };
-    const experiments = [
+    const tests = [
       {
         'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 0},
         'expected': 'Ad (1 of 1): 0:00',
@@ -171,7 +171,7 @@ describes.realWin('amp-ima-video', {
       },
     ];
 
-    experiments.forEach(({mock, label, expected}) => {
+    tests.forEach(({mock, label, expected}) => {
       let defaults = videoDefaults;
       if (label) {
         defaults = Object.assign(defaults, {adLabel: label});
@@ -185,7 +185,7 @@ describes.realWin('amp-ima-video', {
       imaVideoObj.onAdProgress({
         getAdData: () => mock,
       });
-      expect(countdownDiv.innerHTML).to.eql(expected);
+      expect(countdownDiv.textContent).to.eql(expected);
     });
   });
 
@@ -471,13 +471,13 @@ describes.realWin('amp-ima-video', {
     //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
-    const adsManagerMock = {};
-    adsManagerMock.resize = function() {};
-    const mockGlobal = {};
-    mockGlobal.google = {
-      ima: {
-        ViewMode: {
-          NORMAL: 'normal',
+    const adsManagerMock = {resize: () => {}};
+    const mockGlobal = {
+      google: {
+        ima: {
+          ViewMode: {
+            NORMAL: 'normal',
+          },
         },
       },
     };
@@ -660,6 +660,61 @@ describes.realWin('amp-ima-video', {
     expect(muteUnmuteDiv.style.display).not.to.eql('none');
     expect(fullscreenDiv.style.display).not.to.eql('none');
     expect(controlsDiv.style.display).not.to.eql('none');
+  });
+
+  it('ad controls are smaller when skippable on mobile', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    const videoDefaults = {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    };
+    imaVideoObj.imaVideo(win, videoDefaults);
+
+    const ad = {
+      skippable: {getSkipTimeOffset: () => 30},
+      unskippable: {getSkipTimeOffset: () => -1},
+    };
+    const video = {
+      hasMobileStyles: 400,
+      noMobileStyles: 401,
+    };
+
+    const tests = [
+      {
+        msg: 'Controls should be small when ad is skippable and mobile',
+        ad: ad.skippable,
+        videoSize: video.hasMobileStyles,
+        expected: {heightControls: '20px', heightButtons: '18px'},
+      },
+      {
+        msg: 'Controls should be tall when ad is not skippable',
+        ad: ad.unskippable,
+        videoSize: video.hasMobileStyles,
+        expected: {heightControls: '30px', heightButtons: '22px'},
+      },
+      {
+        msg: 'Controls should be tall when ad is not mobile',
+        ad: ad.skippable,
+        videoSize: video.noMobileStyles,
+        expected: {heightControls: '30px', heightButtons: '22px'},
+      },
+    ];
+    tests.forEach(({ad, videoSize, expected, msg}) => {
+      imaVideoObj.setVideoWidthAndHeightForTesting(videoSize, 300);
+      imaVideoObj.onAdLoad({getAd: () => ad});
+      imaVideoObj.showAdControls();
+      const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+      const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+      const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+      expect(controlsDiv.style.height).to.eql(expected.heightControls, msg);
+      expect(muteUnmuteDiv.style.height).to.eql(expected.heightButtons, msg);
+      expect(fullscreenDiv.style.height).to.eql(expected.heightButtons, msg);
+    });
   });
 
   it('shows bigPlayDiv with content complete, ' +
