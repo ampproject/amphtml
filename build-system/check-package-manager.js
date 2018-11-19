@@ -15,6 +15,8 @@
  */
 'use strict';
 
+// NOTE: Do not import any 'node_modules' as this file should be able to run without them
+// github.com/ampproject/amphtml/pull/19386
 const https = require('https');
 const {getStdout} = require('./exec');
 
@@ -154,7 +156,8 @@ function getYarnStableVersion(infoJson) {
 }
 
 function checkGlobalGulp() {
-  const firstInstall = getStdout('ls').trim().match(/node_modules/) === null;
+  const shellListDirectory = (process.platform == 'win32') ? 'DIR' : 'ls';
+  const firstInstall = getStdout(shellListDirectory).trim().match(/node_modules/) === null;
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
