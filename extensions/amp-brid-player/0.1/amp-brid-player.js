@@ -100,9 +100,12 @@ class AmpBridPlayer extends AMP.BaseElement {
     }
 
     let feedType = '';
+    const itemsNum = this.element.hasAttribute('data-dynamic') ? '10' : '1';
 
     if (this.element.hasAttribute('data-video')) {
       feedType = 'video';
+    } else if (this.element.hasAttribute('data-dynamic')) {
+      feedType = this.element.getAttribute('data-dynamic');
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
     } else if (this.element.hasAttribute('data-outstream')) {
@@ -114,7 +117,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         encodeURIComponent(feedType) +
         '/' + encodeURIComponent(this.feedID_) +
         '/' + encodeURIComponent(this.partnerID_) +
-        '/' + encodeURIComponent(this.playerID_) + '/0/1/?amp=1';
+        '/' + encodeURIComponent(this.playerID_) + '/0/' + itemsNum + '/?amp=1';
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
