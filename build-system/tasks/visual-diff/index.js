@@ -491,11 +491,9 @@ async function snapshotWebpages(percy, browser, webpages) {
               // Remove all scripts that have an external source, leaving only
               // those scripts that are inlined in the page inside a <script>
               // tag.
-              if (!webpage.enable_percy_javascript_external) {
-                await page.evaluate(
-                    'document.head.querySelectorAll("script[src]").forEach(' +
-                      'node => node./*OK*/remove())');
-              }
+              await page.evaluate(
+                  'document.head.querySelectorAll("script[src]").forEach(' +
+                    'node => node./*OK*/remove())');
             }
 
             if (viewport) {

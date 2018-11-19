@@ -107,12 +107,6 @@
    *   // that a user would. (e.g., click on links, swipe gallery images.)
    *   "enable_percy_javascript": true,
    *
-   *   // [optional, EXPERIMENTAL] In conjunction with the above flag, allow
-   *   // external Javascript code to run as well. This should only be used for
-   *   // testing regular, non-AMP pages that utilize AMP components
-   *   // (such as AMP Inabox ads rendered by GPT on a regular website).
-   *   "enable_percy_javascript_external": true,
-   *
    *   // [optional, EXPERIMENTAL] Path of JavaScript file relative to webserver
    *   // root that exports a dictionary of (async) test functions keyed by a
    *   // short descriptive name. Each test function is passed two arguments: a
@@ -161,8 +155,6 @@
       "url": "examples/visual-tests/amp-ads.html",
       "name": "AMP Inabox Ad",
       "loading_complete_delay_ms": 3000,
-      "enable_percy_javascript": true,
-      "enable_percy_javascript_external": true,
       "network_requests": [
          {
            "url": "https:\/\/cdn.ampproject.org\/rtv\/.*\/amp4ads-host-v0.js",

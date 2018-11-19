@@ -20,15 +20,12 @@ googletag.cmd.push(function() {
   });
   googletag.pubads().addEventListener('slotOnload', function(event) {
     document.getElementById('slotonloadannounce').innerHTML = "SlotOnload fired.";
+    var adIframe = document.getElementById('google_ads_iframe_/8479/regtests/AmpInaboxTest.java/firstad_0');
+    adIframe.srcdoc = adIframe.contentDocument.documentElement.outerHTML;
   });
   googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
     document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged fired.";
 });
-// We reset the tags because the DOM might get sent to Percy already modified.
-document.getElementById('slotrenderendedannounce').innerHTML = "SlotRenderEnded not fired.";
-document.getElementById('impressionviewableannounce').innerHTML = "ImpressionViewable not fired.";
-document.getElementById('slotonloadannounce').innerHTML = "SlotOnload not fired.";
-document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged not fired.";
 });
 </script>
 <p id='slotrenderendedannounce'>SlotRenderEnded not fired.</p>
