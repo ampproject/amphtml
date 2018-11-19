@@ -75,7 +75,7 @@
       src="/test/manual/amp-list-data.json">
     <template type="amp-mustache">
       <div class="story-entry">
-        <amp-accordion on="expand:accordion-list.containerize;collapse:accordion-list.containerize">
+        <amp-accordion on="expand:accordion-list.changeToLayoutContainer;collapse:accordion-list.changeToLayoutContainer">
           <section>
             <h1>{{title}}</h1>
             <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
@@ -103,7 +103,7 @@
   </amp-state>
   <p>This contains an incorrectly sized container where the contents exceed the list height. It should show an overflow button. </p>
   <button on="tap:AMP.setState({containerState: true})">Change to Container</button>
-  <amp-list width="396" height="80" layout="fixed" reset-on-refresh [is-container]="containerState"
+  <amp-list width="396" height="80" layout="fixed" reset-on-refresh [is-layout-container]="containerState"
       src="/test/manual/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -120,7 +120,7 @@
   </amp-list>
 
   <h2>AMP List Resize After Toggling Class</h2>
-  <button on="tap:AMP.setState({listStyle: 'grid'}),toggleList.containerize()">Show Grid</button>
+  <button on="tap:AMP.setState({listStyle: 'grid'}),toggleList.changeToLayoutContainer()">Show Grid</button>
   <button on="tap:AMP.setState({listStyle: 'list'})">Show List</button>
   <amp-list id="toggleList" width="396" height="80" layout="responsive"
       src="/test/manual/amp-list-data.json?RANDOM">
@@ -150,7 +150,7 @@
       });
       input-debounced:AMP.setState({
         query: event.value
-      }),typeahead.containerize();
+      }),typeahead.changeToLayoutContainer();
     " value="" [value]="query"
     list="locations">
 

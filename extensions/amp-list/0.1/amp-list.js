@@ -61,6 +61,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
+
     super(element);
 
     /** @private {?Element} */
@@ -131,7 +132,7 @@ export class AmpList extends AMP.BaseElement {
     }, ActionTrust.HIGH);
 
     if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
-      this.registerAction('containerize',
+      this.registerAction('changeToLayoutContainer',
           () => this.changeToLayoutContainer_(),
           ActionTrust.HIGH);
     }
@@ -220,7 +221,7 @@ export class AmpList extends AMP.BaseElement {
     let promise;
     const src = mutations['src'];
     const state = /** @type {!JsonObject} */ (mutations)['state'];
-    const isContainer = mutations['is-container'];
+    const isContainer = mutations['is-layout-container'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -631,6 +632,7 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Converts the amp-list to de facto layout container. Called in mutate
    * context.
+   * @return {!Promise}
    * @private
    */
   changeToLayoutContainer_() {
@@ -644,7 +646,7 @@ export class AmpList extends AMP.BaseElement {
       return;
     }
 
-    this.mutateElement(() => {
+    return this.mutateElement(() => {
       this.undoPreviousLayout_(previousLayout);
       this.container_.classList.remove(
           'i-amphtml-fill-content',
