@@ -398,6 +398,14 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should have a meta tag that sets the theme color', () => {
+    createPages(story.element, pageCount);
+    story.buildCallback();
+    const metaTags = story.element.getElementsByTagName('meta');
+    const metaTagNames = Array.from(pageElements).map(el => el.name);
+    expect(metaTagNames.contains('theme-color')).to.be.true;
+  });
+
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')

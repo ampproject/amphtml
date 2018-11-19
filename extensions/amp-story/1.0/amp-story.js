@@ -348,6 +348,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
+    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -416,6 +417,16 @@ export class AmpStory extends AMP.BaseElement {
           .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
           .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
     });
+  }
+  /** TODO(Budnampet): add JSDoc describing this function */
+  setThemeColor_(){
+    let meta = document.createElement('meta');
+    const styles = getComputedStyle(document.body);
+    meta.name = "theme-color";
+    // The theme color should be copied from the story's primary accent color
+    // if possible.
+    meta.content = styles.getPropertyValue('primary-color') || 'black';
+    document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
   /**
