@@ -424,8 +424,8 @@ export class AmpStory extends AMP.BaseElement {
     const styles = getComputedStyle(document.body);
     meta.name = "theme-color";
     // The theme color should be copied from the story's primary accent color
-    // if possible.
-    meta.content = styles.getPropertyValue('primary-color') || 'black';
+    // if possible, with the fall back being default light gray.
+    meta.content = styles.getPropertyValue('primary-color') || '#F1F3F4';
     document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
