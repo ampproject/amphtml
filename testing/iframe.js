@@ -477,8 +477,9 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const {createElement} = win.document;
-  win.document.createElement = function(tagName) {
+  const {prototype} = win.Document;
+  const {createElement} = prototype;
+  prototype.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
