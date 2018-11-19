@@ -159,7 +159,7 @@ module.exports = {
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_Dev: Object.assign({
       base: 'SauceLabs',
-      browserName: 'chrome dev',
+      browserName: 'chrome',
       platform: 'Windows 10',
       version: 'dev',
     }, SAUCE_TIMEOUT_CONFIG),
