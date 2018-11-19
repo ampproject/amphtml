@@ -383,16 +383,5 @@ describes.realWin('amp-addthis', {
         }
     );
   });
-
-  it('gives css style for iframe if floating tool loaded', () => {
-    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
-        ({at}) => {
-          testIframe(at.querySelector('iframe'));
-          const iframe = at.querySelector('iframe');
-          setTimeout(() => {
-            expect(iframe.style.position).to.equal('fixed');
-          }, 5000);
-        }
-    );
-  });
+  
 });
