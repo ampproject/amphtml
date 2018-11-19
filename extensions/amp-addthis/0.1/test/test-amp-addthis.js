@@ -383,5 +383,4 @@ describes.realWin('amp-addthis', {
         }
     );
   });
-  
 });
