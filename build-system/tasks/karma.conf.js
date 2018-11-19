@@ -151,11 +151,11 @@ module.exports = {
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome_67: Object.assign({
+    SL_Chrome_70: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       platform: 'Windows 10',
-      version: '67.0',
+      version: '70.0',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_Android_7: Object.assign({
       base: 'SauceLabs',
@@ -165,39 +165,25 @@ module.exports = {
       platformName: 'Android',
       platformVersion: '7.1',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_45: Object.assign({
+    SL_iOS_12: Object.assign({
       base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 8',
-      version: '45.0',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Android_6: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'Android Emulator',
-      browserName: 'Chrome',
-      platformName: 'Android',
-      platformVersion: '6.0',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_iOS_11: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'iPhone X Simulator',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone XS Simulator',
       browserName: 'Safari',
       platformName: 'iOS',
-      platformVersion: '11.3',
+      platformVersion: '12.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox_61: Object.assign({
+    SL_Firefox_63: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: '61.0',
+      version: '63.0',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Safari_11: Object.assign({
+    SL_Safari_12: Object.assign({
       base: 'SauceLabs',
       browserName: 'safari',
       platform: 'macOS 10.13',
-      version: '11.1',
+      version: '12.0',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Edge_17: Object.assign({
       base: 'SauceLabs',
