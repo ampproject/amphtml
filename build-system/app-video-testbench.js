@@ -19,6 +19,7 @@
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {JSDOM} = require('jsdom');
+const {replaceUrls} = require('./app-utils');
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 
@@ -351,7 +352,8 @@ function isValidExtension(extension) {
 }
 
 
-function runVideoTestBench(req, res) {
+function runVideoTestBench(req, res, next) {
+  const mode = process.env.SERVE_MODE;
   fs.readFileAsync(sourceFile).then(contents => {
     const dom = new JSDOM(contents);
     const {window} = dom;
@@ -379,10 +381,9 @@ function runVideoTestBench(req, res) {
 
     appendClientScript(doc);
 
-    return res.end(dom.serialize());
+    return res.end(replaceUrls(mode, dom.serialize()));
   }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + sourceFile);
+    next();
   });
 }
 
