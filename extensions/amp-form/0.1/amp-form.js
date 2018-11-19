@@ -539,6 +539,12 @@ export class AmpForm {
       } else if (this.method_ == 'GET') {
         this.handleNonXhrGet_();
       }
+    }).catch(error => {
+      this.setState_(FormState.SUBMIT_ERROR);
+      dev().error(TAG, 'Form submission failed: %s', error);
+      this.renderTemplate_({error}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+      });
     });
   }
 
