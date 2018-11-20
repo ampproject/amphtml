@@ -82,208 +82,6 @@ function userInteractedWith(video) {
 }
 
 
-/** @visibleForTesting */
-export const PERCENTAGE_INTERVAL = 5;
-
-/** @visibleForTesting */
-export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
-
-/** @visibleForTesting */
-export const PERCENTAGE_FREQUENCY_MIN_MS = 250;
-
-/** @visibleForTesting */
-export const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
-
-
-/**
- * @param {number} durationSeconds
- * @return {number}
- */
-function calculateIdealPercentageFrequencyMs(durationSeconds) {
-  return durationSeconds * 10 * PERCENTAGE_INTERVAL;
-}
-
-
-/**
- * @param {number} durationSeconds
- * @return {number}
- */
-function calculateActualPercentageFrequencyMs(durationSeconds) {
-  return clamp(
-      calculateIdealPercentageFrequencyMs(durationSeconds),
-      PERCENTAGE_FREQUENCY_MIN_MS,
-      PERCENTAGE_FREQUENCY_MAX_MS);
-}
-
-
-/** @visibleForTesting */
-export class AnalyticsPercentageTracker {
-  /**
-   * @param {!./timer-impl.Timer} timer
-   * @param {!VideoEntry} entry
-   */
-  constructor(timer, entry) {
-
-    // These are destructured in `calculate_()`, but the linter thinks they're
-    // unused.
-    /* eslint-disable amphtml-internal/unused-private-field */
-
-    /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = timer;
-
-    /** @private @const {!VideoEntry} */
-    this.entry_ = entry;
-
-    /* eslint-enable amphtml-internal/unused-private-field */
-
-    /** @private {?Array<!UnlistenDef>} */
-    this.unlisteners_ = null;
-
-    /** @private {number} */
-    this.last_ = 0;
-
-    /** @private {number} */
-    this.triggerId_ = 0;
-  }
-
-  /** @public */
-  start() {
-    const {element} = this.entry_.video;
-
-    this.stop();
-
-    this.unlisteners_ = this.unlisteners_ || [];
-
-    this.unlisteners_.push(
-        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
-          if (this.hasDuration_()) {
-            this.calculate_(this.triggerId_);
-          }
-        }),
-
-        listen(element, VideoEvents.ENDED, () => {
-          this.maybeTrigger_(/* normalizedPercentage */ 100);
-        }));
-  }
-
-  /** @public */
-  stop() {
-    if (!this.unlisteners_) {
-      return;
-    }
-    while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop().call();
-    }
-    this.triggerId_++;
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  hasDuration_() {
-    const {video} = this.entry_;
-    const duration = video.getDuration();
-
-    // Livestreams or videos with no duration information available.
-    if (!duration ||
-        isNaN(duration) ||
-        duration <= 0) {
-      return false;
-    }
-
-    if (calculateIdealPercentageFrequencyMs(duration) <
-        PERCENTAGE_FREQUENCY_MIN_MS) {
-
-      const bestResultLength = Math.ceil(
-          PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
-
-      this.warnForTesting_(
-          'This video is too short for `video-percentage-played`. ' +
-            'Reports may be innacurate. For best results, use videos over',
-          bestResultLength,
-          'seconds long.',
-          video.element);
-    }
-
-    return true;
-  }
-
-  /**
-   * @param  {...*} args
-   * @private
-   */
-  warnForTesting_(...args) {
-    user().warn.apply(user(), [TAG].concat(args));
-  }
-
-  /**
-   * @param {number=} triggerId
-   * @private
-   */
-  calculate_(triggerId) {
-    if (triggerId != this.triggerId_) {
-      return;
-    }
-
-    const {
-      entry_: entry,
-      timer_: timer,
-    } = this;
-
-    const {video} = entry;
-    const calculateAgain = () => this.calculate_(triggerId);
-
-    if (entry.getPlayingState() == PlayingStates.PAUSED) {
-      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
-      return;
-    }
-
-    const duration = video.getDuration();
-
-    const frequencyMs = calculateActualPercentageFrequencyMs(duration);
-
-    const percentage = (video.getCurrentTime() / duration) * 100;
-    const normalizedPercentage =
-        Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
-
-    dev().assert(isFiniteNumber(normalizedPercentage));
-
-    this.maybeTrigger_(normalizedPercentage);
-
-    timer.delay(calculateAgain, frequencyMs);
-  }
-
-  /**
-   * @param {number} normalizedPercentage
-   * @private
-   */
-  maybeTrigger_(normalizedPercentage) {
-    if (normalizedPercentage <= 0) {
-      return;
-    }
-
-    if (this.last_ == normalizedPercentage) {
-      return;
-    }
-
-    this.last_ = normalizedPercentage;
-
-    this.analyticsEventForTesting_({
-      'normalizedPercentage': normalizedPercentage.toString(),
-    });
-  }
-
-  /**
-   * @param {!Object<string, string>} vars
-   * @private
-   */
-  analyticsEventForTesting_(vars) {
-    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, vars);
-  }
-}
-
-
 /**
  * VideoManager keeps track of all AMP video players that implement
  * the common Video API {@see ../video-interface.VideoInterface}.
@@ -628,9 +426,8 @@ class VideoEntry {
     };
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
-    this.getAnalyticsPercentageTracker_ = once(
-        () => new AnalyticsPercentageTracker(
-            Services.timerFor(this.ampdoc_.win), this));
+    this.getAnalyticsPercentageTracker_ = once(() =>
+      new AnalyticsPercentageTracker(this.ampdoc_.win, this));
 
     // Autoplay Variables
 
@@ -1459,6 +1256,209 @@ function isLandscape(win) {
   return Math.abs(win.orientation) == 90;
 }
 
+
+/** @visibleForTesting */
+export const PERCENTAGE_INTERVAL = 5;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MIN_MS = 250;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
+
+
+/**
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateIdealPercentageFrequencyMs(durationSeconds) {
+  return durationSeconds * 10 * PERCENTAGE_INTERVAL;
+}
+
+
+/**
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateActualPercentageFrequencyMs(durationSeconds) {
+  return clamp(
+      calculateIdealPercentageFrequencyMs(durationSeconds),
+      PERCENTAGE_FREQUENCY_MIN_MS,
+      PERCENTAGE_FREQUENCY_MAX_MS);
+}
+
+
+/** @visibleForTesting */
+export class AnalyticsPercentageTracker {
+  /**
+   * @param {!Window} win
+   * @param {!VideoEntry} entry
+   */
+  constructor(win, entry) {
+
+    // These are destructured in `calculate_()`, but the linter thinks they're
+    // unused.
+    /* eslint-disable amphtml-internal/unused-private-field */
+
+    /** @private @const {!./timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
+    /** @private @const {!VideoEntry} */
+    this.entry_ = entry;
+
+    /* eslint-enable amphtml-internal/unused-private-field */
+
+    /** @private {?Array<!UnlistenDef>} */
+    this.unlisteners_ = null;
+
+    /** @private {number} */
+    this.last_ = 0;
+
+    /** @private {number} */
+    this.triggerId_ = 0;
+  }
+
+  /** @public */
+  start() {
+    const {element} = this.entry_.video;
+
+    this.stop();
+
+    this.unlisteners_ = this.unlisteners_ || [];
+
+    this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        }),
+
+        listen(element, VideoEvents.ENDED, () => {
+          if (this.hasDuration_()) {
+            this.maybeTrigger_(/* normalizedPercentage */ 100);
+          }
+        }));
+  }
+
+  /** @public */
+  stop() {
+    if (!this.unlisteners_) {
+      return;
+    }
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop().call();
+    }
+    this.triggerId_++;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasDuration_() {
+    const {video} = this.entry_;
+    const duration = video.getDuration();
+
+    // Livestreams or videos with no duration information available.
+    if (!duration ||
+      isNaN(duration) ||
+      duration <= 0) {
+      return false;
+    }
+
+    if (calculateIdealPercentageFrequencyMs(duration) <
+        PERCENTAGE_FREQUENCY_MIN_MS) {
+
+      const bestResultLength = Math.ceil(
+          PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
+
+      this.warnForTesting_(
+          'This video is too short for `video-percentage-played`. ' +
+          'Reports may be innacurate. For best results, use videos over',
+          bestResultLength,
+          'seconds long.',
+          video.element);
+    }
+
+    return true;
+  }
+
+  /**
+   * @param  {...*} args
+   * @private
+   */
+  warnForTesting_(...args) {
+    user().warn.apply(user(), [TAG].concat(args));
+  }
+
+  /**
+   * @param {number=} triggerId
+   * @private
+   */
+  calculate_(triggerId) {
+    if (triggerId != this.triggerId_) {
+      return;
+    }
+
+    const {
+      entry_: entry,
+      timer_: timer,
+    } = this;
+    const {video} = entry;
+
+    const calculateAgain = () => this.calculate_(triggerId);
+
+    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
+      return;
+    }
+
+    const duration = video.getDuration();
+
+    const frequencyMs = calculateActualPercentageFrequencyMs(duration);
+
+    const percentage = (video.getCurrentTime() / duration) * 100;
+    const normalizedPercentage =
+      Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
+
+    dev().assert(isFiniteNumber(normalizedPercentage));
+
+    this.maybeTrigger_(normalizedPercentage);
+
+    timer.delay(calculateAgain, frequencyMs);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  maybeTrigger_(normalizedPercentage) {
+    if (normalizedPercentage <= 0) {
+      return;
+    }
+
+    if (this.last_ == normalizedPercentage) {
+      return;
+    }
+
+    this.last_ = normalizedPercentage;
+
+    this.analyticsEventForTesting_(normalizedPercentage);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  analyticsEventForTesting_(normalizedPercentage) {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+      'normalizedPercentage': normalizedPercentage.toString(),
+    });
+  }
+}
 
 
 /**
