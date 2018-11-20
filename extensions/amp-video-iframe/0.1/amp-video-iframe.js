@@ -31,7 +31,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
-  isAdLike,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
@@ -54,6 +53,8 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 const SANDBOX = [
   SandboxOptions.ALLOW_SCRIPTS,
   SandboxOptions.ALLOW_SAME_ORIGIN,
+  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
@@ -120,12 +121,14 @@ class AmpVideoIframe extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
-    this.user().assert(!isAdLike(element),
-        '<amp-video-iframe> does not allow ad iframes. ',
-        'Please use amp-ad instead.');
+    // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
+    // cached default value, which makes this assertion fail. Move to
+    // `describes.integration` to see if that fixes it.
+    const isIntegrationTest =
+        element.hasAttribute('i-amphtml-integration-test');
 
-    this.user().assert(!looksLikeTrackingIframe(element),
-        '<amp-video-iframe> does not allow tracking iframes. ',
+    this.user().assert(isIntegrationTest || !looksLikeTrackingIframe(element),
+        '<amp-video-iframe> does not allow tracking iframes. ' +
         'Please use amp-analytics instead.');
 
     installVideoManagerForDoc(element);

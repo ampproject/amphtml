@@ -25,7 +25,6 @@ import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
@@ -324,12 +323,10 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   startListening_() {
-    if (isExperimentOn(this.win_, 'amp-story-hold-to-pause')) {
-      this.element_
-          .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
-      this.element_
-          .addEventListener('touchend', this.onTouchend_.bind(this), true);
-    }
+    this.element_
+        .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
+    this.element_
+        .addEventListener('touchend', this.onTouchend_.bind(this), true);
     this.element_
         .addEventListener(
             'click', this.maybePerformNavigation_.bind(this), true);
@@ -427,6 +424,24 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * For an element to trigger a tooltip it has to be descendant of
+   * amp-story-page but not of amp-story-cta-layer.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  canShowTooltip_(event) {
+    let valid = true;
+    return !!closest(dev().assertElement(event.target), el => {
+      if (el.tagName.toLowerCase() == 'amp-story-cta-layer') {
+        valid = false;
+        return false;
+      }
+      return el.tagName.toLowerCase() == 'amp-story-page' && valid;
+    }, /* opt_stopAt */ this.element_);
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -434,7 +449,7 @@ class ManualAdvancement extends AdvancementConfig {
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
 
-    if (this.isAmpStoryPageDescendant_(event) &&
+    if (this.canShowTooltip_(event) &&
       matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
