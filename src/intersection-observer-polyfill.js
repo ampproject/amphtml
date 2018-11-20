@@ -242,10 +242,7 @@ export class IntersectionObserverPolyfill {
      */
     this.mutationObserver_ = null;
 
-    /** @private {?./service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = null;
-
-    /** @private {?Pass} */
+    /** @private {Pass} */
     this.mutationPass_ = null;
   }
 
@@ -294,12 +291,10 @@ export class IntersectionObserverPolyfill {
     // from multiple documents.
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
-      this.viewport_ = Services.viewportForDoc(element);
-      this.mutationPass_ = new Pass(ampdoc.win, () => {
-        if (this.viewport_) {
-          this.tick(this.viewport_.getRect());
-        }
-      });
+      this.mutationPass_ = new Pass(
+          ampdoc.win,
+          this.handleMutationObserverPass_.bind(this, element)
+      );
       this.mutationObserver_ = new ampdoc.win.MutationObserver(
           this.handleMutationObserverNotification_.bind(this)
       );
@@ -356,7 +351,10 @@ export class IntersectionObserverPolyfill {
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-          this.observeEntries_[i], hostViewport, opt_iframe);
+          this.observeEntries_[i],
+          hostViewport,
+          opt_iframe
+      );
       if (change) {
         changes.push(change);
       }
@@ -376,22 +374,18 @@ export class IntersectionObserverPolyfill {
    * @param {!ElementIntersectionStateDef} state
    * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
    * @param {./layout-rect.LayoutRectDef=} opt_iframe iframe container rect
+   *    If opt_iframe is provided, all LayoutRect has position relative to
+   *    the iframe. If opt_iframe is not provided,
+   *    all LayoutRect has position relative to the host document.
    * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport, opt_iframe) {
     const {element} = state;
 
-    // Normalize container LayoutRect to be relative to page
-    let ownerRect = null;
-
-    // If opt_iframe is provided, all LayoutRect has position relative to
-    // the iframe.
-    // If opt_iframe is not provided, all LayoutRect has position relative to
-    // the host document.
     const elementRect = element.getLayoutBox();
     const owner = element.getOwner();
-    ownerRect = owner && owner.getLayoutBox();
+    const ownerRect = owner && owner.getLayoutBox();
 
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
@@ -426,7 +420,21 @@ export class IntersectionObserverPolyfill {
 
     // Wait one animation frame so that other mutations may arrive.
     this.mutationPass_.schedule(16);
-    return;
+  }
+
+  /**
+   * Handle Mutation Observer Pass
+   * This performas the tick, and is wrapped in a paas
+   * To handle throttling of the observer
+   * @param {!Element} element
+   * @private
+   */
+  handleMutationObserverPass_(element) {
+    const viewport = Services.viewportForDoc(element);
+    const resources = Services.resourcesForDoc(element);
+    resources.onNextPass(() => {
+      this.tick(viewport.getRect());
+    });
   }
 
   /**
@@ -438,7 +446,6 @@ export class IntersectionObserverPolyfill {
       this.mutationObserver_.disconnect();
     }
     this.mutationObserver_ = null;
-    this.viewport_ = null;
     if (this.mutationPass_) {
       this.mutationPass_.cancel();
     }

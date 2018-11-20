@@ -889,7 +889,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 
