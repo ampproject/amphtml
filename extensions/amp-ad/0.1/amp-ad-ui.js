@@ -66,9 +66,24 @@ export class AmpAdUIHandler {
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
   applyNoContentUI() {
+
     if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
       this.baseInstance_./*OK*/collapse();
+      return;
+    }
+
+    const flyingCarpetElements = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
+    if (flyingCarpetElements.length > 0) {
+      // Special case: force collapse ad if only child of a flying carpet.
+      console.log('Collapsing, but inside flying carpet');
+      const flyingCarpetElement = flyingCarpetElements[0];
+      flyingCarpetElement.getImpl(implementation => {
+        if (implementation.children.length === 1) {
+          console.log('Only Child, collapsed');
+          this.baseInstance_./*OK*/collapse();
+        }
+      });
       return;
     }
 
@@ -79,22 +94,6 @@ export class AmpAdUIHandler {
           this.containerElement_);
       attemptCollapsePromise.then(() => {
       });
-    } else if (this.element_.parentElement.classList.contains('i-amphtml-fx-flying-carpet-container')) {
-      // If we are inside a flying carpet, we want to collapse that instead
-      // TODO: (@torch2424) Why is this not working? Check out src/resources-impl is denying our collapse request
-      console.log('Collapsing, but inside flying carpet');
-      const flyingCarpetElement = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet').pop();
-      console.log(flyingCarpetElement);
-
-      attemptCollapsePromise = this.baseInstance_.attemptCollapse()
-        .then(() => flyingCarpetElement.getImpl(implementation => implementation.attemptCollapse()))
-        .catch(err => console.log('flying carpet collapse caught', err));
-
-      /*
-      attemptCollapsePromise = flyingCarpetElement
-        .getImpl(implementation => implementation.attemptCollapse())
-        .then(() => this.baseInstance_.attemptCollapse())
-        .catch(err => console.log('flying carpet collapse caught', err));*/
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
     }

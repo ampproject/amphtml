@@ -46,7 +46,7 @@ export class AsyncInput {
  * are expected to add the following classes
  * at the appropriate time.
  *
- * @enum {string}
+ * @constant {!Object<string, string>}
  */
 export const AsyncInputClasses = {
   /**
