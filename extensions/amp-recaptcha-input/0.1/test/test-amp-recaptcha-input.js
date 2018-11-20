@@ -65,7 +65,7 @@ describes.realWin('amp-recaptcha-input', {
       return allowConsoleError(() => {
         return getRecaptchaInput({skipName: true})
             .should.eventually.be.rejectedWith(
-                /The data-name attribute is required for/
+                /The name attribute is required for/
             );
       });
     });
