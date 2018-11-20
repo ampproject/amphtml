@@ -22,9 +22,9 @@ const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
   'authorization':
-    'http://localhost:8001/api/v2/amp/access?rid=READER_ID',
+    'http://api.poool.fr/api/v2/amp/access?rid=READER_ID',
   'iframe':
-    'https://poool-front.local:35565/amp.html'
+    'https://assets.poool.fr/amp.html'
         + '?rid=READER_ID'
         + '&c=CANONICAL_URL'
         + '&o=AMPDOC_URL'
