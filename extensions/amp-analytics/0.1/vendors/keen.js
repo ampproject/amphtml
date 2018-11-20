@@ -67,7 +67,7 @@ export const KEEN_CONFIG = /** @type {!JsonObject} */ ({
   },
   'transport': {
     'beacon': true,
-    'xhrpost': false,
+    'xhrpost': true,
     'img': false,
     'useBody': true,
   },
