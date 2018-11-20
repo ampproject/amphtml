@@ -53,6 +53,14 @@ const INVALID_NAMES = [
 ];
 
 /**
+ * A MutationObserverInit dictionary to track subtree modifications.
+ */
+const TRACK_SUBTREE = {
+  'childList': true,
+  'subtree': true,
+};
+
+/**
  * Asserts that the custom element name conforms to the spec.
  *
  * @param {!Function} SyntaxError
@@ -249,6 +257,14 @@ class Registry {
      * @private {MutationObserver}
      */
     this.mutationObserver_ = null;
+
+    /**
+     * All the observed DOM trees, including shadow trees. This is cleared out
+     * when the mutation observer is created.
+     *
+     * @private @const {!Array<!Node>}
+     */
+    this.observed_ = [win.document];
   }
 
   /**
@@ -486,17 +502,32 @@ class Registry {
     this.query_ = name;
 
     // The first registered name starts the mutation observer.
-    this.mutationObserver_ = new this.win_.MutationObserver(records => {
+    const mo = new this.win_.MutationObserver(records => {
       if (records) {
         this.handleRecords_(records);
       }
     });
-    this.mutationObserver_.observe(this.doc_, {
-      childList: true,
-      subtree: true,
+    this.mutationObserver_ = mo;
+
+    this.observed_.forEach(tree => {
+      mo.observe(tree, TRACK_SUBTREE);
     });
+    this.observed_.length = 0;
 
     installPatches(this.win_, this);
+  }
+
+  /**
+   * Adds the shadow tree to be observed by the polyfill.
+   *
+   * @param {!Node} tree
+   */
+  observe(tree) {
+    if (this.mutationObserver_) {
+      this.mutationObserver_.observe(tree, TRACK_SUBTREE);
+    } else {
+      this.observed_.push(tree);
+    }
   }
 
   /**
@@ -641,7 +672,7 @@ function installPatches(win, registry) {
  * @param {!Window} win
  */
 function polyfill(win) {
-  const {HTMLElement, Object, document} = win;
+  const {Element, HTMLElement, Object, document} = win;
   const {createElement} = document;
 
   const registry = new Registry(win);
@@ -656,6 +687,17 @@ function polyfill(win) {
     // writable: false,
     value: customElements,
   });
+
+  // Have to patch attachShadow now, since there's no way to find shadow trees
+  // later.
+  const elProto = Element.prototype;
+  const {attachShadow} = elProto;
+  elProto.attachShadow = function() {
+    const shadow = attachShadow.apply(this, arguments);
+    registry.observe(shadow);
+    return shadow;
+  };
+
 
   /**
    * You can't use the real HTMLElement constructor, because you can't subclass
