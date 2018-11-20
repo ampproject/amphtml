@@ -1271,6 +1271,8 @@ const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
 
 
 /**
+ * Calculates the "ideal" analytics check frequency from playback start, e.g.
+ * the amount of ms after each PERCENTAGE_INTERVAL.
  * @param {number} durationSeconds
  * @return {number}
  */
@@ -1280,6 +1282,8 @@ function calculateIdealPercentageFrequencyMs(durationSeconds) {
 
 
 /**
+ * Calculates the "actual" analytics check frequency by calculating the ideal
+ * frequency and clamping it between MIN and MAX.
  * @param {number} durationSeconds
  * @return {number}
  */
@@ -1299,17 +1303,12 @@ export class AnalyticsPercentageTracker {
    */
   constructor(win, entry) {
 
-    // These are destructured in `calculate_()`, but the linter thinks they're
-    // unused.
-    /* eslint-disable amphtml-internal/unused-private-field */
-
+    // This is destructured in `calculate_()`, but the linter thinks it's unused
     /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win);
+    this.timer_ = Services.timerFor(win); // eslint-disable-line
 
     /** @private @const {!VideoEntry} */
     this.entry_ = entry;
-
-    /* eslint-enable amphtml-internal/unused-private-field */
 
     /** @private {?Array<!UnlistenDef>} */
     this.unlisteners_ = null;
@@ -1317,7 +1316,12 @@ export class AnalyticsPercentageTracker {
     /** @private {number} */
     this.last_ = 0;
 
-    /** @private {number} */
+    /**
+     * Counter for each trigger `start`. This is to prevent duplicate events if
+     * two consecutive triggers take place, or to prevent events firing once
+     * the tracker is stopped.
+     * @private {number}
+     */
     this.triggerId_ = 0;
   }
 

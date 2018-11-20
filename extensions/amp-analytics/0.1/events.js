@@ -1091,10 +1091,13 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
-        user().assert(interval, 'video-seconds-played requires interval spec ' +
+      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
+        user().error(TAG, 'video-seconds-played requires interval spec ' +
           'with non-zero value');
+        return;
+      }
 
+      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
         intervalCounter++;
         if (intervalCounter % interval !== 0) {
           return;
@@ -1102,16 +1105,21 @@ export class VideoEventTracker extends EventTracker {
       }
 
       if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
-        user().assert(
-            percentages,
-            'video-percentage-played requires percentages spec.');
+        if (!percentages) {
+          user().error(TAG,
+              'video-percentage-played requires percentages spec.');
+          return;
+        }
 
-        user().assert(
-            percentages.every(percentage =>
-              percentage > 0 && (percentage % percentageInterval) == 0),
-            'Percentages must be set in increments of %s with non-zero ' +
-              'values',
-            percentageInterval);
+        if (!percentages.every(
+            percentage =>
+              percentage > 0 && (percentage % percentageInterval) == 0)) {
+
+          user().error(TAG,
+              'Percentages must be set in increments of %s with non-zero ' +
+                'values',
+              percentageInterval);
+        }
 
         const normalizedPercentage = details['normalizedPercentage'];
         const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
