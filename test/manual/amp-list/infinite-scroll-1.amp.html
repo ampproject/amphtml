@@ -28,6 +28,10 @@
       z-index: 2;
       padding: 16px;
     }
+
+    .amp-load-more-loading {
+      background: red;
+    }
     .story-entry {
       padding: 40px;
       border: 1px solid gray;
@@ -52,12 +56,13 @@
 </head>
 <body>
 <article>
-  <h1>amp-list</h1>
+  <h1>AMP List</h1>
+  <p>This is a flexbox amp-list with tiles, something like an infinite image gallery.</p>
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
     src="/infinite-scroll?items=5&left=3"
-    load-more="auto"
+    load-more
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="story-entry">

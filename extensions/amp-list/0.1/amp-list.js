@@ -119,8 +119,6 @@ export class AmpList extends AMP.BaseElement {
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
-    /** @private {?Element} */
-    this.loadMoreOverflowElement_ = null;
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
@@ -184,9 +182,9 @@ export class AmpList extends AMP.BaseElement {
     });
 
     if (this.loadMoreEnabled_) {
-      this.getLoadMoreOverflowElement_();
+      this.getLoadMoreOverflow_();
       this.getLoadMoreLoadingElement_();
-      if (!this.loadMoreLoadingElement_) {
+      if (!this.loadMoreLoadingOverlay_) {
         this.getLoadMoreLoadingOverlay_();
       }
       this.getLoadMoreFailedElement_();
@@ -197,12 +195,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    * @return {!Element|null}
    */
-  getLoadMoreOverflowElement_() {
+  getLoadMoreOverflow_() {
     if (!this.loadMoreOverflow_) {
       this.loadMoreOverflow_ = childElementByAttr(
           this.element, 'load-more-button');
     }
-    return this.loadMoreOverflowElement_;
+    return this.loadMoreOverflow_;
   }
 
   /** @override */
@@ -377,7 +375,14 @@ export class AmpList extends AMP.BaseElement {
         throw user().createError('Error fetching amp-list', error);
       });
     }
-    return fetch.catch(error => this.showFallback_(error));
+
+    return fetch.catch(error => {
+      if (opt_append) {
+        this.setLoadMoreFailed_();
+      } else {
+        this.showFallback_(error);
+      }
+    });
   }
 
   /**
@@ -706,7 +711,6 @@ export class AmpList extends AMP.BaseElement {
     this.loadMoreSrc_ = null;
     this.toggleLoadMoreLoading_(true);
     return this.fetchList_(/* opt_append */ true)
-        .catch(() => this.setLoadMoreFailed_())
         .then(() => this.toggleLoadMoreLoading_(false));
   }
 
