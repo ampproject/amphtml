@@ -16,11 +16,12 @@
 'use strict';
 
 /*
- * NOTE: DO NOT use node modules in this file.
+ * NOTE: DO NOT use non-native node modules in this file.
  *       This file runs before installing any packages,
  *       so it must work with vanilla NodeJS code.
  * github.com/ampproject/amphtml/pull/19386
  */
+const fs = require('fs');
 const https = require('https');
 const {getStdout} = require('./exec');
 
@@ -160,8 +161,7 @@ function getYarnStableVersion(infoJson) {
 }
 
 function checkGlobalGulp() {
-  const shellListDirectory = (process.platform == 'win32') ? 'DIR' : 'ls';
-  const firstInstall = getStdout(shellListDirectory).trim().match(/node_modules/) === null;
+  const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
