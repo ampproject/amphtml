@@ -478,5 +478,11 @@ describes.realWin('Expander', {
       expect(new Expander(variableSource).getMacroNames(url)).to
           .eql(['TITLE', 'CLIENT_ID']);
     });
+
+    it('should find the nested names', () => {
+      const url = 'https://www.example.com?a=1&t=TITLE&c=CLIENT_ID(QUERY_PARAM(foo))';
+      expect(new Expander(variableSource).getMacroNames(url)).to
+          .eql(['TITLE', 'CLIENT_ID', 'QUERY_PARAM']);
+    });
   });
 });
