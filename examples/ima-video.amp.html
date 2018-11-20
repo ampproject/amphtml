@@ -36,12 +36,13 @@
     </ul>
     <h2>Video1</h2>
     <div class="description">
-      Uses the Pre roll + Bumper IMA Sample Tag.
+      Uses the Pre roll + Bumper IMA Sample Tag. Also, with custom ad label in Spanish
     </div>
     <div id="player-wrapper1" class="player-wrapper">
         <amp-ima-video id="Video1"
             width="640" height="360" layout="responsive"
             data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpreonlybumper&cmsid=496&vid=short_onecue&correlator="
+            data-ad-label="Publicidad (%s de %s)"
             data-poster="/examples/img/ima-poster.png">
             <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
         </amp-ima-video>
@@ -79,11 +80,10 @@
 
     <h2>Video3</h2>
     <div class="description">
-      Uses the Pre-, Mid-, and Post Roll IMA Sample Tag. Also, this video with autoplay
+      Uses the Pre-, Mid-, and Post Roll IMA Sample Tag.
     </div>
     <div id="player-wrapper3" class="player-wrapper">
         <amp-ima-video id="Video3"
-            autoplay
             width="640" height="360" layout="responsive"
             data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpost&cmsid=496&vid=short_onecue&correlator="
             data-poster="/examples/img/ima-poster.png">
@@ -96,5 +96,28 @@
     <button on="tap:Video3.mute">Mute</button>
     <button on="tap:Video3.unmute">Unmute</button>
     <button on="tap:Video3.fullscreen">Fullscreen</button>
+
+    <div class="spacer"></div>
+
+
+    <h2>Video4</h2>
+    <div class="description">
+      Uses the Single Skippable Inline IMA Sample Tag. Also, this video with autoplay
+    </div>
+    <div id="player-wrapper4" class="player-wrapper">
+        <amp-ima-video id="Video4"
+            autoplay
+            width="640" height="360" layout="responsive"
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=" 
+            data-poster="/examples/img/ima-poster.png">
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </amp-ima-video>
+    </div>
+    <h3>Video4 Actions</h3>
+    <button on="tap:Video4.play">Play</button>
+    <button on="tap:Video4.pause">Pause</button>
+    <button on="tap:Video4.mute">Mute</button>
+    <button on="tap:Video4.unmute">Unmute</button>
+    <button on="tap:Video4.fullscreen">Fullscreen</button>
 </body>
 </html>
