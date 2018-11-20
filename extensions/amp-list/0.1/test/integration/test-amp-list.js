@@ -25,7 +25,7 @@ const body =
       '</template>' +
     '</amp-list>';
 
-const extensions = ['amp-list', 'amp-mustache'];
+const extensions = ['amp-list', 'amp-mustache', 'amp-bind'];
 
 describe('amp-list', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
@@ -89,14 +89,14 @@ describe('amp-list', function() {
   });
 
   const body3 =
-  '<amp-state id="containerState">' +
+  '<amp-state id="state">' +
     '<script type="application/json">' +
       'false' +
     '</script>' +
   '</amp-state>' +
     '<button id="button" on="tap:AMP.setState({state: true})">+</button>' +
     '<amp-list id="list" width=300 height=100 ' +
-      '[is-layout-container]="containerState" ' +
+      '[is-layout-container]="state" ' +
       'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
       '<template type="amp-mustache">' +
         '{{name}} : {{quantity}} @ ${{unitPrice}}' +
@@ -115,7 +115,7 @@ describe('amp-list', function() {
       doc = win.document;
     });
 
-    it('should change to layout container as action', function*() {
+    it('should change to layout container as on bind', function*() {
       expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
       const button = doc.getElementById('button');
@@ -130,5 +130,4 @@ describe('amp-list', function() {
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });
   });
-
 });

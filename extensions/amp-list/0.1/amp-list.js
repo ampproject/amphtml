@@ -221,7 +221,7 @@ export class AmpList extends AMP.BaseElement {
     let promise;
     const src = mutations['src'];
     const state = /** @type {!JsonObject} */ (mutations)['state'];
-    const isContainer = mutations['is-layout-container'];
+    const isLayoutContainer = mutations['is-layout-container'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -244,7 +244,7 @@ export class AmpList extends AMP.BaseElement {
       const data = isArray(state) ? state : [state];
       promise = this.scheduleRender_(data, /*append*/ false);
     }
-    if (isContainer) {
+    if (isLayoutContainer) {
       this.changeToLayoutContainer_();
     }
     // Only return the promise for easier testing.
