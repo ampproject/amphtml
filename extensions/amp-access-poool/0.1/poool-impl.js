@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-access-poool-0.1.css';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '../../../src/style';
 
@@ -93,8 +91,6 @@ export class PooolVendor {
     this.iframe_ = document.createElement('iframe');
 
     this.initializeIframe_();
-
-    installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
 
     this.checkMandatoryParams_();
   }

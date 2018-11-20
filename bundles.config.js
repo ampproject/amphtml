@@ -45,11 +45,7 @@ exports.extensionBundles = [
     version: '0.1', options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {
-    name: 'amp-access-poool',
-    version: '0.1', options: {hasCss: true},
-    type: TYPES.MISC,
-  },
+  {name: 'amp-access-poool', version: '0.1', type: TYPES.MISC},
   {name: 'amp-accordion', version: '0.1', type: TYPES.MISC},
   {name: 'amp-ad', version: '0.1', options: {hasCss: true}, type: TYPES.AD},
   {name: 'amp-ad-custom', version: '0.1', type: TYPES.AD},
