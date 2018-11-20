@@ -180,6 +180,11 @@ const TAG = 'amp-story';
 const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
+/**
+ * The default light gray for chrome supported theme color.
+ * @const {string}
+ */
+const DEFAULT_THEME_COLOR = '#F1F3F4';
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -426,9 +431,10 @@ export class AmpStory extends AMP.BaseElement {
     // The theme color should be copied from the story's primary accent color
     // if possible, with the fall back being default light gray.
     let meta = document.createElement('meta');
-    const styles = getComputedStyle(document.body);
-    meta.name = "theme-color";
-    meta.content = styles.getPropertyValue('primary-color') || '#F1F3F4';
+    const styles = getComputedStyle(this.win.document.body);
+    meta.name = 'theme-color';
+    meta.content = styles.getPropertyValue('primary-color') ||
+                   DEFAULT_THEME_COLOR;
     document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
