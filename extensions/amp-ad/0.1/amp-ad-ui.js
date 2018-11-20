@@ -76,11 +76,9 @@ export class AmpAdUIHandler {
     const flyingCarpetElements = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
     if (flyingCarpetElements.length > 0) {
       // Special case: force collapse ad if only child of a flying carpet.
-      console.log('Collapsing, but inside flying carpet');
       const flyingCarpetElement = flyingCarpetElements[0];
-      flyingCarpetElement.getImpl(implementation => {
-        if (implementation.children.length === 1) {
-          console.log('Only Child, collapsed');
+      flyingCarpetElement.getImpl().then(implementation => {
+        if (implementation.children_.length === 1) {
           this.baseInstance_./*OK*/collapse();
         }
       });
