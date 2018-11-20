@@ -401,9 +401,11 @@ describes.realWin('amp-story', {
   it('should have a meta tag that sets the theme color', () => {
     createPages(story.element, 2);
     story.buildCallback();
-    const metaTags = story.element.getElementsByTagName('meta');
-    const metaTagNames = Array.from(metTagNames).map(el => el.name);
-    expect(metaTagNames.contains('theme-color')).to.be.true;
+    return story.layoutCallback()
+        .then(() => {
+          const metaTag = win.document.querySelector('meta[name=theme-color]');
+          expect(metaTag).to.not.be.null;
+        });
   });
 
   describe('amp-story consent', () => {

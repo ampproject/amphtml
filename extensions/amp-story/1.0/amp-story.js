@@ -428,14 +428,19 @@ export class AmpStory extends AMP.BaseElement {
   * @private
   */
   setThemeColor_() {
+    // Don't override the publisher's tag.
+    if (this.win.document.querySelector('meta[name=theme-color]')) {
+      return;
+    }
     // The theme color should be copied from the story's primary accent color
     // if possible, with the fall back being default light gray.
-    let meta = document.createElement('meta');
-    const styles = computedStyle(this.win.document.body);
+    const meta = this.win.document.createElement('meta');
+    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
+    const styles = computedStyle(this.win, ampStoryEl);
     meta.name = 'theme-color';
-    meta.content = styles.getPropertyValue('primary-color') ||
-                   DEFAULT_THEME_COLOR;
-    document.getElementsByTagName('head')[0].appendChild(meta);
+    meta.content = styles.getPropertyValue('--primary-color') ||
+        DEFAULT_THEME_COLOR;
+    this.win.document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
   /**
