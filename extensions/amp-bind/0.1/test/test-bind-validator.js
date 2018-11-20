@@ -16,11 +16,12 @@
 
 import {BindValidator} from '../bind-validator';
 
-describe('BindValidator', () => {
+describe('BindValidator (allowUrlProperties=true)', () => {
   let val;
 
   beforeEach(() => {
-    val = new BindValidator();
+    const allowUrlProperties = true;
+    val = new BindValidator(allowUrlProperties);
   });
 
   describe('canBind()', () => {
@@ -241,5 +242,33 @@ describe('BindValidator', () => {
       expect(val.isResultValid('IMAGE', 'xlink:href',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
     });
+  });
+});
+
+describe('BindValidator (allowUrlProperties=false)', () => {
+  let val;
+
+  beforeEach(() => {
+    const allowUrlProperties = false;
+    val = new BindValidator(allowUrlProperties);
+  });
+
+  it('should disallow URL bindings', () => {
+    expect(val.canBind('A', 'href')).to.be.false;
+    expect(val.canBind('AMP-IMG', 'src')).to.be.false;
+    expect(val.canBind('AMP-IMG', 'srcset')).to.be.false;
+    expect(val.canBind('IMAGE', 'xlink:href')).to.be.false;
+  });
+
+  it('should not validate results of URL properties', () => {
+    expect(val.isResultValid('A', 'href', 'https://google.com')).to.be.false;
+    expect(val.isResultValid('AMP-IMG', 'src', 'https://foo.com/bar.jpg'))
+        .to.be.false;
+    expect(val.isResultValid(
+        'AMP-IMG',
+        'srcset',
+        'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.false;
+    expect(val.isResultValid('IMAGE', 'xlink:href', 'https://foo.com/bar.jpg'))
+        .to.be.false;
   });
 });
