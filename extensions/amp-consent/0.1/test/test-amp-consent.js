@@ -18,7 +18,7 @@ import {
   ACTION_TYPE,
   AmpConsent,
 } from '../amp-consent';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_ITEM_STATE} from '../consent-info';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
