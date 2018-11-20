@@ -15,8 +15,12 @@
  */
 'use strict';
 
-// NOTE: Do not import any 'node_modules' as this file should be able to run without them
-// github.com/ampproject/amphtml/pull/19386
+/*
+ * NOTE: DO NOT use node modules in this file.
+ *       This file runs before installing any packages, 
+ *       so it must work with vanilla NodeJS code
+ * github.com/ampproject/amphtml/pull/19386
+ */
 const https = require('https');
 const {getStdout} = require('./exec');
 
