@@ -623,6 +623,8 @@ export class AmpList extends AMP.BaseElement {
       case Layout.INTRINSIC:
         this.element.classList.remove('i-amphtml-layout-intrinsic');
         break;
+      default:
+        // fall through, always remove sizer and size-defined class
     }
     // The changeSize() call removes the sizer element.
     this.element./*OK*/changeSize();
