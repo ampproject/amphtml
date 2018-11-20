@@ -395,39 +395,6 @@ async function snapshotWebpages(percy, browser, webpages) {
       }
 
       const page = await newPage(browser);
-
-      let previousRequestTime = 0;
-      const requestCounts = {};
-      if (webpage.network_requests) {
-        // Set up monitoring for network requests
-        await page.setRequestInterception(true);
-        page.on('request', interceptedRequest => {
-          const requestTime = Date.now();
-          for (const entry of webpage.network_requests) {
-            if (new RegExp(entry.url).test(interceptedRequest.url())) {
-              // found a match, verify parameters
-              if (entry.delay &&
-                  requestTime - previousRequestTime < entry.delay) {
-                log('fatal', 'Network request',
-                    colors.cyan(interceptedRequest.url()),
-                    'made earlier than expected');
-              }
-              if (entry.count) {
-                // if there are no entries, add it and set to 1; otherwise
-                // increment the count
-                if (!requestCounts.hasOwnProperty(entry.url)) {
-                  requestCounts[entry.url] =
-                  {count: 1, expectedCount: entry.count};
-                } else {
-                  requestCounts[entry.url].count += 1;
-                }
-              }
-            }
-          }
-          previousRequestTime = requestTime;
-          interceptedRequest.continue();
-        });
-      }
       const name = testName ? `${pageName} (${testName})` : pageName;
       log('verbose', 'Visual diff test', colors.yellow(name));
 
@@ -439,11 +406,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           height: viewport.height,
         });
       }
-
       log('verbose', 'Navigating to page', colors.yellow(fullUrl));
-
-      // set a baseline time.
-      page.once('load', () => previousRequestTime = Date.now());
 
       // Navigate to an empty page first to support different webpages that only
       // modify the #anchor name.
@@ -473,15 +436,6 @@ async function snapshotWebpages(percy, browser, webpages) {
               await sleep(webpage.loading_complete_delay_ms);
             }
 
-            for (const [url, entry] of Object.entries(requestCounts)) {
-              if (entry.count != entry.expectedCount) {
-                log('fatal', 'Network request', colors.cyan(url), 'made',
-                    colors.cyan(`${entry.count}`), 'times, expected:',
-                    colors.cyan(`${entry.expectedCount}`),
-                    'times.');
-              }
-            }
-
             await testFunction(page, name);
 
             const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
@@ -493,7 +447,7 @@ async function snapshotWebpages(percy, browser, webpages) {
               // tag.
               await page.evaluate(
                   'document.head.querySelectorAll("script[src]").forEach(' +
-                    'node => node./*OK*/remove())');
+                  'node => node./*OK*/remove())');
             }
 
             if (viewport) {

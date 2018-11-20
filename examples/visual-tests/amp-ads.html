@@ -14,17 +14,22 @@ googletag.cmd.push(function() {
   googletag.enableServices();
   googletag.pubads().addEventListener('slotRenderEnded', function(event) {
     document.getElementById('slotrenderendedannounce').innerHTML = "SlotRenderEnded fired.";
+    document.documentElement.classList.add('slot-render-ended');
   });
   googletag.pubads().addEventListener('impressionViewable', function(event) {
     document.getElementById('impressionviewableannounce').innerHTML = "ImpressionViewable fired.";
+    document.documentElement.classList.add('impression-viewable');
   });
   googletag.pubads().addEventListener('slotOnload', function(event) {
     document.getElementById('slotonloadannounce').innerHTML = "SlotOnload fired.";
+    document.documentElement.classList.add('slot-onload');
+    // serialize the iframe's content to the DOM
     var adIframe = document.getElementById('google_ads_iframe_/8479/regtests/AmpInaboxTest.java/firstad_0');
     adIframe.srcdoc = adIframe.contentDocument.documentElement.outerHTML;
   });
   googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
     document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged fired.";
+    document.documentElement.classList.add('slot-visibility-changed');
 });
 });
 </script>
