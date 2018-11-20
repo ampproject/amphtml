@@ -1164,6 +1164,33 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
   });
 });
 
+app.get('/infinite-scroll', function(req, res) {
+  const query = {req};
+  const results = [];
+  const numberOfItems = query['items'] ? query['items'] : 10;
+  const pagesLeft = query['left'] ? query['left'] : 1;
+
+  if (pagesLeft == 0) {
+    res.json({items: []});
+  }
+
+  for (let i = 0; i < numberOfItems; i++) {
+    const imageUrl = 'http://picsum.photos/200?' +
+        Math.floor(Math.random() * Math.floor(50));
+    const r = {
+      'title': 'Item ' + i,
+      imageUrl,
+      'price': i + 0.99,
+    };
+    results.push(r);
+  }
+
+  const nextUrl = '/infinite-scroll?items=' +
+    numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1);
+  res.json({'items': results, 'next': nextUrl});
+});
+
+
 /**
  * Autosuggest endpoint
  */
