@@ -180,6 +180,11 @@ const TAG = 'amp-story';
 const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
+/**
+ * The default light gray for chrome supported theme color.
+ * @const {string}
+ */
+const DEFAULT_THEME_COLOR = '#F1F3F4';
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -348,6 +353,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
+    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -416,6 +422,25 @@ export class AmpStory extends AMP.BaseElement {
           .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
           .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
     });
+  }
+
+  /**
+  * @private
+  */
+  setThemeColor_() {
+    // Don't override the publisher's tag.
+    if (this.win.document.querySelector('meta[name=theme-color]')) {
+      return;
+    }
+    // The theme color should be copied from the story's primary accent color
+    // if possible, with the fall back being default light gray.
+    const meta = this.win.document.createElement('meta');
+    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
+    const styles = computedStyle(this.win, ampStoryEl);
+    meta.name = 'theme-color';
+    meta.content = styles.getPropertyValue('--primary-color') ||
+        DEFAULT_THEME_COLOR;
+    this.win.document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
   /**
