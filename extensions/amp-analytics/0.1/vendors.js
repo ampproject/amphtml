@@ -41,6 +41,7 @@ import {GEMIUS_CONFIG} from './vendors/gemius';
 import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
+import {KEEN_CONFIG} from './vendors/keen';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -192,6 +193,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'ibeatanalytics': IBEATANALYTICS_CONFIG,
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
+  'keen': KEEN_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
