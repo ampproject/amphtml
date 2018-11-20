@@ -462,7 +462,7 @@ export const adConfig = {
   },
 
   'freewheel': {
-    prefetch: 'http://localhost/outstream-formats/build/fw-amp.min.js',
+    prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
     renderStartImplemented: true,
   },
 
