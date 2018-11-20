@@ -139,9 +139,9 @@
       "name": "AMP Inabox Ad",
       "loading_complete_css": [
         ".slot-render-ended",
-	".impression-viewable",
-	".slot-onload",
-	".slot-visibility-changed",
+        ".impression-viewable",
+        ".slot-onload",
+        ".slot-visibility-changed",
       ],
       // we want to wait for the active view event to be fired
       "loading_complete_delay_ms": 3000,
