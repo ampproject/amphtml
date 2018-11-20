@@ -371,20 +371,32 @@ export class AmpList extends AMP.BaseElement {
           items = items.slice(0, maxLen);
         }
         return this.scheduleRender_(/** @type {!Array} */(items), !!opt_append);
-      }, error => {
-        throw user().createError('Error fetching amp-list', error);
       });
     }
 
     return fetch.catch(error => {
       if (opt_append) {
-        this.setLoadMoreFailed_();
+        this.handleLoadMoreFailed_();
       } else {
         this.showFallback_(error);
       }
     });
   }
 
+  /**
+   * When the fetch fails, we should show the "load-failed" element if
+   * one exists, otherwise show the overflow element that triggers a new
+   * fetch on click.
+   * @private
+   */
+  handleLoadMoreFailed_() {
+    if (this.loadMoreFailedElement_) {
+      this.setLoadMoreFailed_();
+    } else {
+      // TODO (#14060): implement reload for append after failed load
+      this.setLoadMoreReload_();
+    }
+  }
   /**
    * Proxies the template rendering to the viewer.
    * @param {boolean} refresh
@@ -695,6 +707,29 @@ export class AmpList extends AMP.BaseElement {
           'load-more is specified but no means of paging (overflow or ' +
           'load-more=auto) is available', this);
     }
+  }
+
+  /**
+   * @private
+   */
+  setLoadMoreReload_() {
+    if (this.loadMoreOverflow_) {
+      this.mutateElement(() => {
+        this.loadMoreOverflow_.classList.toggle('amp-visible', true);
+        listen(this.loadMoreOverflow_, 'click',
+            () => this.loadMoreReloadCallback_());
+      });
+    }
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  loadMoreReloadCallback_() {
+    this.toggleLoadMoreLoading_(true);
+    return this.fetchList_(/* opt_append */ true)
+        .then(() => this.toggleLoadMoreLoading_(false));
   }
 
   /**
