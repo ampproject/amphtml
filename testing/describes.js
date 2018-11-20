@@ -881,7 +881,7 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
 }
 
 /**
- * Run a test suite multiple times against varaible inputs.
+ * Run a test suite multiple times based on variable inputs.
  * @param {!Array} values
  * @param {func} func
  */
