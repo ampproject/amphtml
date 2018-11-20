@@ -17,8 +17,8 @@
 
 /*
  * NOTE: DO NOT use node modules in this file.
- *       This file runs before installing any packages, 
- *       so it must work with vanilla NodeJS code
+ *       This file runs before installing any packages,
+ *       so it must work with vanilla NodeJS code.
  * github.com/ampproject/amphtml/pull/19386
  */
 const https = require('https');
