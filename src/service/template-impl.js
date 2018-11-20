@@ -267,7 +267,7 @@ export class Templates {
     const templateTagName = templateElement.tagName;
     user().assert(
         templateTagName == 'TEMPLATE' || templateTagName == 'SCRIPT',
-        'Template must be a "template" tag or defined in a script tag %s',
+        'Template must be a "template" tag or defined in a "script" tag %s',
         templateElement);
     return templateElement;
   }
@@ -288,9 +288,7 @@ export class Templates {
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      const template = childElementByTag(parent, 'template');
-      const templateByScript = childElementByTag(parent, 'script');
-      return template || templateByScript;
+      return parent.querySelector('template, script');
     }
   }
 
