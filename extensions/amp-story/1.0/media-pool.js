@@ -712,11 +712,9 @@ export class MediaPool {
     this.sources_[id] = sources;
     this.placeholderEls_[id] = placeholderEl;
 
-    if (placeholderEl instanceof HTMLMediaElement) {
-      placeholderEl.muted = true;
-      placeholderEl.setAttribute('muted', '');
-      placeholderEl.pause();
-    }
+    placeholderEl.muted = true;
+    placeholderEl.setAttribute('muted', '');
+    placeholderEl.pause();
 
     return Promise.resolve();
   }

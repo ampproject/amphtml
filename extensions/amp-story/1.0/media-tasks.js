@@ -138,17 +138,6 @@ function copyAttributes(fromEl, toEl) {
 
 
 /**
- * Determines whether the specified element is a media element.
- * @param {!Element} el The element to check.
- * @return {boolean} true, if the specified element is a media element.
- * @private
- */
-function isMediaElement(el) {
-  return el instanceof HTMLMediaElement;
-}
-
-
-/**
  * Base class for tasks executed in order on HTMLMediaElements.
  */
 export class MediaTask {
@@ -169,21 +158,6 @@ export class MediaTask {
 
     /** @private {?function(*)} */
     this.reject_ = deferred.reject;
-  }
-
-  /**
-   * @param {!Element} targetEl The element that should be checked to see
-   *     whether it is a media element.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved if the
-   *     specified target element is a media element, and rejected otherwise.
-   */
-  assertMediaElement(targetEl) {
-    if (!isMediaElement(targetEl)) {
-      this.failTask(`${this.name_} can only be executed on media elements.`);
-      return Promise.reject();
-    }
-
-    return Promise.resolve(/** @type {!HTMLMediaElement} */ (targetEl));
   }
 
   /**
