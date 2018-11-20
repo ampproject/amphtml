@@ -155,8 +155,8 @@ export class Bind {
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    /** @private {?./bind-validator.BindValidator} */
+    this.validator_ = null;
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
@@ -425,10 +425,19 @@ export class Bind {
    */
   initialize_(root) {
     dev().info(TAG, 'init');
-    return Promise.all([
-      this.addMacros_(),
-      this.addBindingsForNodes_([root]),
-    ]).then(results => {
+
+    // Disallow URL property bindings in AMP4EMAIL.
+    const allowUrlProperties = !this.isAmp4Email_();
+    this.validator_ = new BindValidator(allowUrlProperties);
+
+    // The web worker's evaluator also has an instance of BindValidator
+    // that should be initialized with the same `allowUrlProperties` value.
+    return this.ww_('bind.init', [allowUrlProperties]).then(() => {
+      return Promise.all([
+        this.addMacros_(),
+        this.addBindingsForNodes_([root]),
+      ]);
+    }).then(results => {
       dev().info(TAG, '⤷', 'Δ:', results);
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
@@ -440,6 +449,17 @@ export class Bind {
       this.viewer_.sendMessage('bindReady', undefined);
       this.dispatchEventForTesting_(BindEvents.INITIALIZE);
     });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isAmp4Email_() {
+    const html = this.localWin_.document.documentElement;
+    const amp4email = html.hasAttribute('amp4email')
+        || html.hasAttribute('⚡4email');
+    return amp4email;
   }
 
   /**
@@ -510,6 +530,8 @@ export class Bind {
    * @private
    */
   addMacros_() {
+    // TODO(choumx, #17194): Query selector can miss elements when the body
+    // is streamed. This should be done at the custom element level.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
