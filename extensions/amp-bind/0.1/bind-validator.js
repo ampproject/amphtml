@@ -77,6 +77,14 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
+   * @param {boolean} allowUrlBindings
+   */
+  constructor(allowUrlBindings) {
+    /** @const @private {boolean} */
+    this.allowUrlBindings_ = allowUrlBindings;
+  }
+
+  /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
    * NOTE: `tag` and `property` are case-sensitive.
@@ -98,22 +106,18 @@ export class BindValidator {
    */
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
-
     // `alternativeName` is a reference to another property's rules.
     if (rules && rules.alternativeName) {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
-
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
     }
-
     // If binding is allowed but have no specific rules, return true.
     if (rules === null) {
       return true;
     }
-
     // Validate URL(s) if applicable.
     if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
@@ -129,14 +133,12 @@ export class BindValidator {
       } else {
         urls = [value];
       }
-
       for (let i = 0; i < urls.length; i++) {
         if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
-
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
     const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
@@ -170,7 +172,6 @@ export class BindValidator {
         }
       }
     }
-
     return true;
   }
 
@@ -187,6 +188,10 @@ export class BindValidator {
     // Allow binding to all ARIA attributes.
     if (startsWith(property, 'aria-')) {
       return null;
+    }
+    // Disallow URL property bindings if configured as such.
+    if (ownProperty(URL_PROPERTIES, property) && !this.allowUrlBindings_) {
+      return undefined;
     }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {

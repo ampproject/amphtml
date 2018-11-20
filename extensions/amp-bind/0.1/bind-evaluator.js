@@ -25,8 +25,9 @@ import {remove} from '../../../src/utils/array';
 export class BindEvaluator {
   /**
    * Creates an instance of BindEvaluator.
+   * @param {boolean} allowUrlProperties
    */
-  constructor() {
+  constructor(allowUrlProperties) {
     /** @const @private {!Array<!BindBindingDef>} */
     this.bindings_ = [];
 
@@ -37,7 +38,7 @@ export class BindEvaluator {
     this.macros_ = Object.create(null);
 
     /** @const @private {!./bind-validator.BindValidator} */
-    this.validator_ = new BindValidator();
+    this.validator_ = new BindValidator(allowUrlProperties);
 
     /** @const @private {!Object<string, !BindExpression>} */
     this.expressions_ = Object.create(null);

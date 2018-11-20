@@ -618,4 +618,31 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
           });
         });
   });
+
+  // The only difference in amp4email is that URL attributes cannot be bound.
+  describe('amp4email', () => {
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-amp4email.html');
+    });
+
+    it('should NOT allow mutation of a[href]', () => {
+      const button = fixture.doc.getElementById('changeHrefButton');
+      const a = fixture.doc.getElementById('anchorElement');
+      expect(a.getAttribute('href')).to.equal('https://foo.com');
+      button.click();
+      return waitForSetState().then(() => {
+        expect(a.getAttribute('href')).to.equal('https://foo.com');
+      });
+    });
+
+    it('should NOT allow mutation of img[src]', () => {
+      const button = fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('https://foo.com/foo.jpg');
+      button.click();
+      return waitForSetState().then(() => {
+        expect(img.getAttribute('src')).to.equal('https://foo.com/foo.jpg');
+      });
+    });
+  });
 });
