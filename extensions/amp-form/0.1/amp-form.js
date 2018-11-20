@@ -531,21 +531,10 @@ export class AmpForm {
       presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
     });
 
-    Promise.all(presubmitPromises).then(() => {
-      if (this.xhrAction_) {
-        this.handleXhrSubmit_(trust);
-      } else if (this.method_ == 'POST') {
-        this.handleNonXhrPost_();
-      } else if (this.method_ == 'GET') {
-        this.handleNonXhrGet_();
-      }
-    }).catch(error => {
-      this.setState_(FormState.SUBMIT_ERROR);
-      dev().error(TAG, 'Form submission failed: %s', error);
-      this.renderTemplate_({error}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
-      });
-    });
+    this.waitOnPromisesOrTimeout_(presubmitPromises, 10000).then(
+      () => this.handlePresubmitSuccess_(trust),
+      error => this.handlePresubmitError_(error)
+    );
   }
 
   /**
@@ -557,6 +546,33 @@ export class AmpForm {
     // Fields that support var substitutions.
     return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
   }
+
+  /**
+   * Handle successful presubmit tasks
+   * @param {!ActionTrust} trust
+   */
+  handlePresubmitSuccess_(trust) {
+    if (this.xhrAction_) {
+      this.handleXhrSubmit_(trust);
+    } else if (this.method_ == 'POST') {
+      this.handleNonXhrPost_();
+    } else if (this.method_ == 'GET') {
+      this.handleNonXhrGet_();
+    }
+  }
+
+  /**
+   * Handle errors for presubmit tasks
+   * @param {!Error} error
+   */
+  handlePresubmitError_(error) {
+    this.setState_(FormState.SUBMIT_ERROR);
+    dev().error(TAG, 'Form submission failed: %s', error);
+    this.renderTemplate_({error}).then(() => {
+      this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+    });
+  }
+
 
   /**
    * Send the verify request and control the VERIFYING state.
