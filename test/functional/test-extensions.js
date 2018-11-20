@@ -962,7 +962,9 @@ describes.sandboxed('Extensions', {}, () => {
       }, parentWin.AMP);
       return promise.then(() => {
         // Main extension.
-        expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
+        // TODO(choumx, #19344): Registering in parent window is a temporary
+        // workaround to fix FIE element services.
+        expect(parentWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
         expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
         expect(iframeWin.document
             .querySelector('style[amp-extension=amp-test]')).to.exist;
@@ -971,7 +973,10 @@ describes.sandboxed('Extensions', {}, () => {
             .to.be.instanceOf(AmpTest);
 
         // Secondary extension.
-        expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+        // TODO(choumx, #19344): Registering in parent window is a temporary
+        // workaround to fix FIE element services.
+        expect(parentWin.ampExtendedElements['amp-test-sub'])
+            .to.equal(AmpTestSub);
         expect(iframeWin.ampExtendedElements['amp-test-sub'])
             .to.equal(AmpTestSub);
         expect(iframeWin.document

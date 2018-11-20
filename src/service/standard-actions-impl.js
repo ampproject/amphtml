@@ -106,8 +106,9 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const ampdoc = getAmpdoc(node);
-        return Services.bindForDocOrNull(ampdoc).then(bind => {
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
