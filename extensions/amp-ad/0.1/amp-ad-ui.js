@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getAdContainer} from '../../../src/ad-helper';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {getAdContainer} from '../../../src/ad-helper';
 
 export class AmpAdUIHandler {
 
@@ -66,14 +66,14 @@ export class AmpAdUIHandler {
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
   applyNoContentUI() {
-
     if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
       this.baseInstance_./*OK*/collapse();
       return;
     }
 
-    const flyingCarpetElements = ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
+    const flyingCarpetElements =
+      ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
     if (flyingCarpetElements.length > 0) {
       // Special case: force collapse ad if only child of a flying carpet.
       const flyingCarpetElement = flyingCarpetElements[0];

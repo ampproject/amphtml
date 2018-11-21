@@ -61,7 +61,27 @@
               data-valid='false'>
           </amp-ad>
         </amp-fx-flying-carpet>
-      <div class="ad-border">&uarr; advertisement &uarr;</div>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
+
+
+    <div class="spacer">Keep Scrolling for another ad </div>
+
+    <h1>Should not collapse, even though _ping_ Ad Collapses</h1>
+    <div class="ad-border">&darr; advertisement &darr;</div>
+    <amp-fx-flying-carpet layout="fixed-height" height="50vh">
+      <amp-ad width=300 height=250
+        type="_ping_"
+        data-url='not-exist'
+        data-valid='false'>
+      </amp-ad>
+      <amp-img src="https://ampbyexample.com/img/amp.jpg"
+        width="500"
+        height="300"
+        layout="responsive"
+        alt="AMP">
+      </amp-img>
+    </amp-fx-flying-carpet>
+    <div class="ad-border">&uarr; advertisement &uarr;</div>
 
 
     <div class="spacer">One viewport after flying carpet</div>
