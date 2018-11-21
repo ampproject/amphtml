@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>AMP Ads Test</title>
+<title>AMP Inabox GPT Test</title>
 <script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
 <script>
 var googletag = googletag || {};
@@ -30,7 +30,7 @@ googletag.cmd.push(function() {
   googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
     document.getElementById('slotvisibilitychangedannounce').innerHTML = "SlotVisibilityChanged fired.";
     document.documentElement.classList.add('slot-visibility-changed');
-});
+  });
 });
 </script>
 <p id='slotrenderendedannounce'>SlotRenderEnded not fired.</p>
