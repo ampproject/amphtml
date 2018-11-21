@@ -692,11 +692,17 @@ function polyfill(win) {
   // later.
   const elProto = Element.prototype;
   const {attachShadow} = elProto;
-  elProto.attachShadow = function() {
-    const shadow = attachShadow.apply(this, arguments);
-    registry.observe(shadow);
-    return shadow;
-  };
+  if (attachShadow) {
+    /**
+    * @param {!{mode: string}} options
+    * @return {!ShadowRoot}
+    */
+    elProto.attachShadow = function(options) {
+      const shadow = attachShadow.call(this, options);
+      registry.observe(shadow);
+      return shadow;
+    };
+  }
 
 
   /**
