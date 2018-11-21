@@ -688,17 +688,27 @@ function polyfill(win) {
     value: customElements,
   });
 
-  // Have to patch attachShadow now, since there's no way to find shadow trees
+  // Have to patch shadow methods now, since there's no way to find shadow trees
   // later.
   const elProto = Element.prototype;
-  const {attachShadow} = elProto;
+  const {attachShadow, createShadowRoot} = elProto;
   if (attachShadow) {
     /**
-    * @param {!{mode: string}} options
+    * @param {!{mode: string}} unused
     * @return {!ShadowRoot}
     */
-    elProto.attachShadow = function(options) {
-      const shadow = attachShadow.call(this, options);
+    elProto.attachShadow = function(unused) {
+      const shadow = attachShadow.apply(this, arguments);
+      registry.observe(shadow);
+      return shadow;
+    };
+  }
+  if (createShadowRoot) {
+    /**
+    * @return {!ShadowRoot}
+    */
+    elProto.createShadowRoot = function() {
+      const shadow = createShadowRoot.apply(this, arguments);
       registry.observe(shadow);
       return shadow;
     };
