@@ -3981,10 +3981,9 @@ function validateAttributes(
       }
     }
     if (attrSpec.blacklistedValueRegex !== null) {
-      const decodedAttrValue = decodeAttrValue(attr.value);
       const regex = context.getRules().getPartialMatchCaseiRegex(
           attrSpec.blacklistedValueRegex);
-      if (regex.test(attr.value) || regex.test(decodedAttrValue)) {
+      if (regex.test(attr.value)) {
         context.addError(
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
             context.getLineCol(),
