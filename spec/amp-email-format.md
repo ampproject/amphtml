@@ -39,7 +39,6 @@ There are [AMP components](https://www.ampproject.org/docs/reference/components)
 * [Examples](#examples)
 * [Adding AMP to existing emails](#adding-amp-to-existing-emails)
 * [Replying/forwarding semantics](#replyingforwarding-semantics)
-* [Authentication](#authentication)
 * [FAQ](#faq)
 * [Feedback & Support](#feedback--support)
 
@@ -307,14 +306,6 @@ Content-Type: text/html; charset="UTF-8"
 ## Replying/forwarding semantics
 
 To start, the email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
-
-## Authentication
-
-There is no authentication for outgoing XHR calls from AMP email messages.  Every XHR request is considered anonymous. Email senders should not rely on cookies to authenticate outgoing XHR requests from emails.
-
-{% call callout('Note', type='note') %}
-There is also no plan to include things like OAuth tokens to authenticate a user to a request.
-{% endcall %}
 
 ## FAQ
 
