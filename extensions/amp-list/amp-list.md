@@ -266,7 +266,7 @@ Displays a loading indicator and placeholder again when the list's source is ref
 
 By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
 
-#### is-layout-container (experimental, optional)
+#### [is-layout-container] (experimental, optional)
 This is a bindable attribute that should always be false by default. When set to true via `bind`, it changes the layout of the amp-list to layout `CONTAINER`. This attribute is useful for handling dynamic resizing for amp-list. This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER`--it potentially causes content jumping on first load. This attribute is experimentally available under `amp-list-resizable-children`. Alternatively, one may also use the `changeToLayoutContainer` action.
 
 #### binding (optional)
