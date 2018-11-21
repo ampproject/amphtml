@@ -618,14 +618,14 @@ async function runTests() {
         }
       }
       // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-      if (process.env.TRAVIS) {
-        setTimeout(() => {
-          log(green('Process timed out'));
-          process.exit(exitCode);
-        }, 5000);
-      } else {
-        process.exitCode = exitCode;
-      }
+      // if (process.env.TRAVIS) {
+      //   setTimeout(() => {
+      //     log(green('Process timed out'));
+      //     process.exit(exitCode);
+      //   }, 5000);
+      // } else {
+      //   process.exitCode = exitCode;
+      // }
       resolver();
     }).on('run_start', function() {
       if (argv.saucelabs || argv.saucelabs_lite) {
