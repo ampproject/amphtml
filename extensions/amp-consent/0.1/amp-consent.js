@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
+import {CONSENT_ITEM_STATE} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentConfig, expandPolicyConfig} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
+import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
 import {

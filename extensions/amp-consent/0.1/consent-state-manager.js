@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  CONSENT_ITEM_STATE,
+  ConsentInfoDef,
+  getStoredConsentInfo,
+} from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
@@ -23,20 +28,6 @@ import {isEnumValue} from '../../../src/types';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
-
-/**
- * @enum {number}
- */
-export const CONSENT_ITEM_STATE = {
-  ACCEPTED: 1,
-  REJECTED: 2,
-  DISMISSED: 3,
-  NOT_REQUIRED: 4,
-  UNKNOWN: 5,
-  // TODO(@zhouyx): Seperate UI state from consent state. Add consent
-  // requirement state ui_state = {pending, active, complete} consent_state =
-  // {unknown, accepted, rejected}
-};
 
 export class ConsentStateManager {
   /**
@@ -67,7 +58,7 @@ export class ConsentStateManager {
    */
   registerConsentInstance(instanceId, config) {
     if (this.instances_[instanceId]) {
-      dev().error(TAG, `instance ${instanceId} already registered`);
+      dev().error(TAG, 'instance %s already registered', instanceId);
       return;
     }
     this.instances_[instanceId] = new ConsentInstance(
@@ -88,7 +79,7 @@ export class ConsentStateManager {
   updateConsentInstanceState(instanceId, state) {
     if (!this.instances_[instanceId] ||
         !this.consentChangeObservables_[instanceId]) {
-      dev().error(TAG, `instance ${instanceId} not registered`);
+      dev().error(TAG, 'instance %s not registered', instanceId);
       return;
     }
     this.consentChangeObservables_[instanceId].fire(state);
@@ -102,7 +93,7 @@ export class ConsentStateManager {
    */
   getConsentInstanceState(instanceId) {
     dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
+        '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].get();
   }
 
@@ -113,7 +104,7 @@ export class ConsentStateManager {
    */
   onConsentStateChange(instanceId, handler) {
     dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
+        '%s: cannot find this instance', TAG);
 
     const unlistener = this.consentChangeObservables_[instanceId].add(handler);
     // Fire first consent instance state.
@@ -134,7 +125,7 @@ export class ConsentStateManager {
    */
   setConsentInstanceSharedData(instanceId, sharedDataPromise) {
     dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
+        '%s: cannot find this instance', TAG);
     this.instances_[instanceId].sharedDataPromise = sharedDataPromise;
   }
 
@@ -147,7 +138,7 @@ export class ConsentStateManager {
    */
   getConsentInstanceSharedData(instanceId) {
     dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
+        '%s: cannot find this instance', TAG);
     return this.instances_[instanceId].sharedDataPromise;
   }
 
@@ -263,13 +254,8 @@ export class ConsentInstance {
         // If value has been updated. return most updated value;
         return this.localValue_;
       }
-      if (storedValue === undefined) {
-        // state value undefined;
-        this.localValue_ = CONSENT_ITEM_STATE.UNKNOWN;
-      } else {
-        this.localValue_ = storedValue ?
-          CONSENT_ITEM_STATE.ACCEPTED : CONSENT_ITEM_STATE.REJECTED;
-      }
+      const consentInfo = getStoredConsentInfo(storedValue);
+      this.localValue_ = consentInfo['consentState'];
       return this.localValue_;
     }).catch(e => {
       dev().error(TAG, 'Failed to read storage', e);
