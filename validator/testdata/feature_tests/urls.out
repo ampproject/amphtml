@@ -214,8 +214,6 @@ feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to t
 >>   ^~~~~~~~~
 feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |    <amp-video src="%5f_amp_source%5forigin" width="42" height="42"></amp-video>
->>   ^~~~~~~~~
-feature_tests/urls.html:115:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '%5f_amp_source%5forigin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
