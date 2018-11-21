@@ -184,7 +184,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreEnabled_) {
       this.getLoadMoreOverflow_();
       this.getLoadMoreLoadingElement_();
-      if (!this.loadMoreLoadingOverlay_) {
+      if (!this.loadMoreLoadingElement_) {
         this.getLoadMoreLoadingOverlay_();
       }
       this.getLoadMoreFailedElement_();
