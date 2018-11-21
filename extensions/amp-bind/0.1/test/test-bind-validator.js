@@ -206,6 +206,7 @@ describe('BindValidator (allowUrlProperties=true)', () => {
     it('should support <amp-list>', () => {
       expect(val.canBind('AMP-LIST', 'src')).to.be.true;
       expect(val.canBind('AMP-LIST', 'state')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {

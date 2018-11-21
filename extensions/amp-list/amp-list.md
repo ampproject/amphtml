@@ -99,9 +99,9 @@ Here is how we styled the content fetched:
     amp-list div[role="list"] {
       display: grid;
       grid-gap: 0.5em;
-    } 
+    }
 ```
-    
+
 ## Behavior
 
 The request is always made from the client, even if the document was served from the AMP Cache. Loading is triggered using normal AMP rules depending on how far the element is from
@@ -183,6 +183,23 @@ The `amp-list` element exposes a `refresh` action that other elements can refere
 </amp-list>
 ```
 
+### Dynamic Resizing
+##### Experimental: amp-list-resizable-children
+In several cases, we may need the amp-list to resize on user interaction. For example, when the amp-list contains an amp-accordion that a user may tap on, when the contents of the amp-list change size due to bound CSS classes, or when the number of items inside an amp-list changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+
+```html
+  <button on="list.changeToLayoutContainer()">Show Grid</button>
+  <amp-list id="list"
+    width="396" height="80" layout="responsive"
+    src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      {{title}}
+    </template>
+  </amp-list>
+```
+
+This action is experimentally available under `amp-list-resizable-children`.
+
 ## Attributes
 
 ##### src (required)
@@ -248,6 +265,9 @@ Causes `amp-list` to treat the returned result as if it were a single element ar
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
 By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
+
+#### [is-layout-container] (experimental, optional)
+This is a bindable attribute that should always be false by default. When set to true via `bind`, it changes the layout of the amp-list to layout `CONTAINER`. This attribute is useful for handling dynamic resizing for amp-list. This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER`--it potentially causes content jumping on first load. This attribute is experimentally available under `amp-list-resizable-children`. Alternatively, one may also use the `changeToLayoutContainer` action.
 
 #### binding (optional)
 
