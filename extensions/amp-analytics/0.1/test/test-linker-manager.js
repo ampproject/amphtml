@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
@@ -66,9 +65,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
     installVariableService(win);
-
-    // TODO(ccordry): remove this with linker-meta-opt-in experiment.
-    sandbox.stub(experiments, 'isExperimentOn').returns(true);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {
