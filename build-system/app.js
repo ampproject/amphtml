@@ -1167,8 +1167,9 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 app.get('/infinite-scroll', function(req, res) {
   const query = {req};
   const results = [];
-  const numberOfItems = query['items'] ? query['items'] : 10;
-  const pagesLeft = query['left'] ? query['left'] : 1;
+  const numberOfItems = query['items'] || 10;
+  const pagesLeft = query['left'] || 1;
+  const latency = query['latency'] || 0;
 
   if (pagesLeft == 0) {
     res.json({items: []});
@@ -1187,7 +1188,12 @@ app.get('/infinite-scroll', function(req, res) {
 
   const nextUrl = '/infinite-scroll?items=' +
     numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1);
-  res.json({'items': results, 'next': nextUrl});
+
+  if (latency) {
+    setTimeout(() => res.json({'items': results, 'next': nextUrl}), latency);
+  } else {
+    res.json({'items': results, 'next': nextUrl});
+  }
 });
 
 
