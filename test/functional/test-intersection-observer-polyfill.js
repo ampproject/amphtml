@@ -146,10 +146,13 @@ describe('IntersectionObserverApi', () => {
   });
 
   it('should destroy correctly', () => {
-    const subscriptionApiDestroySy =
-        sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    const subscriptionApiDestroySpy =
+      sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    const polyfillDisconnectSpy =
+      sandbox.spy(ioApi.intersectionObserver_, 'disconnect');
     ioApi.destroy();
-    expect(subscriptionApiDestroySy).to.be.called;
+    expect(subscriptionApiDestroySpy).to.be.called;
+    expect(polyfillDisconnectSpy).to.be.called;
     expect(ioApi.unlistenOnDestroy_).to.be.null;
     expect(ioApi.intersectionObserver_).to.be.null;
     expect(ioApi.subscriptionApi_).to.be.null;
