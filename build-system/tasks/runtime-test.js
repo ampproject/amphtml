@@ -41,7 +41,7 @@ const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
-let browsers = [];
+let saucelabsBrowsers = [];
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -71,7 +71,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
 
-    browsers = argv.saucelabs ?
+    saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
         'SL_Chrome',
@@ -92,7 +92,7 @@ function getConfig() {
 
     return Object.assign({}, karmaDefault, {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
-      browsers: [], // Browser list is set during batch process
+      browsers: saucelabsBrowsers,
     });
   }
   return karmaDefault;
@@ -399,6 +399,7 @@ async function runTests() {
     // Run the tests.
     mocha.run(function(failures) {
       if (failures) {
+        log(green('There are failures. Now exiting'));
         process.exit(1);
       }
       resolver();
@@ -553,11 +554,11 @@ async function runTests() {
     while (left < right) {
       log(green('Beginning batch number ' + batch));
       const configBatch = c;
-      configBatch.browsers = browsers.slice(left, right);
+      configBatch.browsers = saucelabsBrowsers.slice(left, right);
       await createKarmaServer(configBatch);
       left = batch * batchSize;
       batch++;
-      right = Math.min(batch * batchSize, browsers.length);
+      right = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
   } else {
     await createKarmaServer(c);
@@ -619,6 +620,7 @@ async function runTests() {
       // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
       if (process.env.TRAVIS) {
         setTimeout(() => {
+          log(green('Process timed out'));
           process.exit(exitCode);
         }, 5000);
       } else {
