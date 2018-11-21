@@ -91,6 +91,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_ = this.getRealChildren();
     this.container_ = container;
 
+    // TODO (@torch2424) Remove this before merging
+    console.log('this.element', this.element);
+    console.log('this.getRealChildren()', this.getRealChildren());
+
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
