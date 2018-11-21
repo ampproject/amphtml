@@ -68,6 +68,7 @@
       <option>ibeatanalytics</option>
       <option>infonline</option>
       <option>iplabel</option>
+      <option>keen</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -594,6 +595,51 @@ For complete documentation and additional examples please see: https://marketing
 }
 </script>
 </amp-analytics>
+
+<!-- Keen Analytics tracking -->
+<amp-analytics type="keen" id="keen">
+<script type="application/json">
+{
+  "vars": {
+    "projectId": "YOUR_PROJECT_ID",
+    "writeKey": "YOUR_WRITE_KEY"
+  },
+  "extraUrlParams": {
+    "exampleParam": "some general param value"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "extraUrlParams": {
+        "exampleParamForPageviews": "some specific value 123"
+      }
+    },
+    "trackClickOnTestBtn1": {
+      "on": "click",
+      "selector": "#testBtn1",
+      "request": "click",
+      "extraUrlParams": {
+        "exampleParamForClicks": "some click value"
+      }
+    },
+    "trackConversion": {
+      "on": "click",
+      "selector": "#submitOrder",
+      "request": "custom",
+      "vars": {
+        "collection": "conversions"
+      },
+      "extraUrlParams": {
+        "exampleParamForConversion": "some conversion value"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Keen Analytics tracking -->
+
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -1101,7 +1147,7 @@ For complete documentation and additional examples please see: https://marketing
 <amp-analytics type="teaanalytics" id="teaanalytics">
   <script type="application/json">
     {
-      "vars": {        
+      "vars": {
         "app_id": "APP_ID",
         "channel": "example.com",
         "debug": 0
@@ -1144,7 +1190,7 @@ For complete documentation and additional examples please see: https://marketing
       "request": "pageview",
       "vars": {
         "tealium_event": "screen_view"
-      }     
+      }
     },
     "clickOnTest1Trigger": {
       "on": "click",

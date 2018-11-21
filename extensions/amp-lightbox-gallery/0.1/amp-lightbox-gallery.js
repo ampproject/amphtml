@@ -49,7 +49,7 @@ import {
 } from '../../../src/transition';
 import {
   prepareImageAnimation,
-} from '@ampproject/animations/dist/animations';
+} from '@ampproject/animations/dist/animations.mjs';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';

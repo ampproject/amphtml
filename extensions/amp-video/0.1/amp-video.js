@@ -21,6 +21,7 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByTag,
   childElementsByTag,
+  closestByTag,
   elementByTag,
   fullscreenEnter,
   fullscreenExit,
@@ -96,7 +97,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?Element} */
+    /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
   }
 
@@ -185,6 +186,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    this.configure_();
+
     this.video_ = element.ownerDocument.createElement('video');
 
     const poster = element.getAttribute('poster');
@@ -225,6 +228,27 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @private */
+  configure_() {
+    if (!this.descendsFromStory_()) {
+      return;
+    }
+    [
+      'i-amphtml-disable-mediasession',
+      'i-amphtml-poolbound',
+    ].forEach(className => {
+      this.element.classList.add(className);
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  descendsFromStory_() {
+    return !!closestByTag(this.element, 'amp-story-page');
   }
 
   /** @override */
@@ -553,6 +577,9 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = true;
   }
 
@@ -560,7 +587,18 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = false;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isManagedByPool_() {
+    return this.element.classList.contains('i-amphtml-poolbound');
   }
 
   /**
