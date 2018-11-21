@@ -393,7 +393,6 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreFailedElement_) {
       this.setLoadMoreFailed_();
     } else {
-      // TODO (#14060): implement reload for append after failed load
       this.setLoadMoreReload_();
     }
   }
