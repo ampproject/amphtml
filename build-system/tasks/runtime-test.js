@@ -562,6 +562,7 @@ async function runTests() {
   } else {
     await createKarmaServer(c);
   }
+  server.emit('kill');
   exitCtrlcHandler(handlerProcess);
 
   /**
@@ -578,7 +579,6 @@ async function runTests() {
       if (shouldCollapseSummary) {
         console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
       }
-      server.emit('kill');
       if (exitCode) {
         log(
             red('ERROR:'),
