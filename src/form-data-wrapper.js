@@ -14,22 +14,200 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {Services} from './services';
 import {getFormAsObject} from './form';
+import {iterateCursor} from './dom';
 import {map} from './utils/object';
+
+/**
+ * Create a form data wrapper. The wrapper is necessary to provide a common
+ * API for FormData objects on all browsers. For example, not all browsers
+ * support the FormData#entries or FormData#delete functions.
+ *
+ * @param {!Window} win
+ * @param {!HTMLFormElement=} opt_form
+ * @return {!FormDataWrapperInterface}
+ */
+export function createFormDataWrapper(win, opt_form) {
+  const platform = Services.platformFor(win);
+
+  if (platform.isIos() && platform.getMajorVersion() == 11) {
+    return new Ios11NativeFormDataWrapper(opt_form);
+  } else if (FormData.prototype.entries && FormData.prototype.delete) {
+    return new NativeFormDataWrapper(opt_form);
+  } else {
+    return new PolyfillFormDataWrapper(opt_form);
+  }
+}
+
+/**
+ * Check if the given object is a FormDataWrapper instance
+ * @param {*} o
+ * @return {boolean} True if the object is a FormDataWrapper instance.
+ */
+export function isFormDataWrapper(o) {
+  // instanceof doesn't work as expected, so we detect with duck-typing.
+  return !!o && typeof o.getFormData == 'function';
+}
+
+/**
+ * A polyfill wrapper for a `FormData` object.
+ *
+ * If there's no native `FormData#entries`, chances are there are no native
+ * methods to read the content of the `FormData` after construction, so the
+ * only way to implement `entries` in this class is to capture the fields in
+ * the form passed to the constructor (and the arguments passed to the
+ * `append` method).
+ *
+ * For more details on this, see http://mdn.io/FormData.
+ *
+ * @implements {FormDataWrapperInterface}
+ * @visibleForTesting
+ */
+export class PolyfillFormDataWrapper {
+  /** @override */
+  constructor(opt_form = undefined) {
+    /** @private @const {!Object<string, !Array<string>>} */
+    this.fieldValues_ = opt_form ? getFormAsObject(opt_form) : map();
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    // Coercion to string is required to match
+    // the native FormData.append behavior
+    const nameString = String(name);
+    this.fieldValues_[nameString] = this.fieldValues_[nameString] || [];
+    this.fieldValues_[nameString].push(String(value));
+  }
+
+  /** @override */
+  delete(name) {
+    delete this.fieldValues_[name];
+  }
+
+  /** @override */
+  entries() {
+    const fieldEntries = [];
+    Object.keys(this.fieldValues_).forEach(name => {
+      const values = this.fieldValues_[name];
+      values.forEach(value => fieldEntries.push([name, value]));
+    });
+
+    // Generator functions are not supported by the current Babel configuration,
+    // so we must manually implement the iterator interface.
+    let nextIndex = 0;
+    return /** @type {!Iterator<!Array<string>>} */ ({
+      next() {
+        return nextIndex < fieldEntries.length ?
+          {value: fieldEntries[nextIndex++], done: false} :
+          {value: undefined, done: true};
+      },
+    });
+  }
+
+  /** @override */
+  getFormData() {
+    const formData = new FormData();
+
+    Object.keys(this.fieldValues_).forEach(name => {
+      const values = this.fieldValues_[name];
+      values.forEach(value => formData.append(name, value));
+    });
+
+    return formData;
+  }
+}
+
+/**
+ * Wrap the native FormData implementation.
+ *
+ * @implements {FormDataWrapperInterface}
+ */
+class NativeFormDataWrapper {
+  /** @override */
+  constructor(opt_form) {
+    /** @private @const {!FormData} */
+    this.formData_ = new FormData(opt_form);
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    this.formData_.append(name, value);
+  }
+
+  /** @override */
+  delete(name) {
+    this.formData_.delete(name);
+  }
+
+  /** @override */
+  entries() {
+    return this.formData_.entries();
+  }
+
+  /** @override */
+  getFormData() {
+    return this.formData_;
+  }
+}
+
+/**
+ * iOS 11 has a bug when submitting empty file inputs.
+ * This works around the bug by replacing the empty files with Blob objects.
+ */
+class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
+  /** @override */
+  constructor(opt_form) {
+    super(opt_form);
+
+    if (opt_form) {
+      iterateCursor(opt_form.elements, input => {
+        if (input.type == 'file' && input.files.length == 0) {
+          this.formData_.delete(input.name);
+          this.formData_.append(input.name, new Blob([]), '');
+        }
+      });
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @param {string|!File} value
+   * @param {string=} opt_filename
+   * @override
+   */
+  append(name, value, opt_filename) {
+    // Safari 11 breaks on submitting empty File values.
+    if (value && typeof value == 'object' && isEmptyFile(value)) {
+      this.formData_.append(name, new Blob([]), opt_filename || '');
+    } else {
+      this.formData_.append(name, value);
+    }
+  }
+}
 
 /**
  * A wrapper for a native `FormData` object that allows the retrieval of entries
  * in the form data after construction even on browsers that don't natively
  * support `FormData.prototype.entries`.
  *
- * @final
+ * @interface
  * @note Subclassing `FormData` doesn't work in this case as the transpiler
  *     generates code that calls the super constructor directly using
  *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
  *     enforces that constructors be called with the `new` operator.
  */
-export class FormDataWrapper {
+class FormDataWrapperInterface {
   /**
    * Creates a new wrapper for a `FormData` object.
    *
@@ -47,93 +225,60 @@ export class FormDataWrapper {
    *     keys and their submitted value for the values. It will also encode file
    *     input content.
    */
-  constructor(opt_form = undefined) {
-    /** @private @const {!FormData} */
-    this.formData_ = new FormData(opt_form);
-
-    /** @private @const {?Object<string, !Array<string>>} */
-    this.fieldValues_ =
-        this.formData_['entries'] ?
-          null :
-          (opt_form ? getFormAsObject(opt_form) : map());
-  }
+  constructor(opt_form) {}
 
   /**
    * Appends a new value onto an existing key inside a `FormData` object, or
    * adds the key if it does not already exist.
    *
-   * If there's no native `FormData#entries`, chances are there are no native
-   * methods to read the content of the `FormData` after construction, so the
-   * only way to implement `entries` in this class is to capture the arguments
-   * passed to the `append` method (and the form passed to the constructor).
-   *
-   * Since AMP doesn't support `<input type="file">`, appending a `File` object
-   * is not supported and the `filename` parameter is ignored for this wrapper.
+   * Appending a `File` object is not yet supported and the `filename`
+   * parameter is ignored for this wrapper.
    *
    * For more details on this, see http://mdn.io/FormData/append.
    *
-   * @param {string} name The name of the field whose data is contained in
+   * TODO(cvializ): Update file support
+   *
+   * @param {string} unusedName The name of the field whose data is contained in
    *     `value`.
-   * @param {string} value The field's value.
+   * @param {string|!File} unusedValue The field's value.
+   * @param {string=} opt_filename The filename to use if the value is a file.
    */
-  append(name, value) {
-    if (!this.formData_['entries']) {
-      const nameString = String(name);
-      this.fieldValues_[nameString] = this.fieldValues_[nameString] || [];
-      this.fieldValues_[name].push(String(value));
-    }
+  append(unusedName, unusedValue, opt_filename) {}
 
-    return this.formData_.append(name, value);
-  }
+  /**
+   * Remove the given value from the FormData.
+   *
+   * For more details on this, see http://mdn.io/FormData/delete.
+   *
+   * @param {string} unusedName The name of the field to remove from the FormData.
+   */
+  delete(unusedName) {}
 
   /**
    * Returns an iterator of all key/value pairs contained in this object.
    *
    * For more details on this, see http://mdn.io/FormData/entries.
    *
-   * @return {!Iterator<!Array<string>>}
+   * @return {!Iterator<!Array<string|!File>>}
    */
-  entries() {
-    if (this.formData_['entries']) {
-      return this.formData_['entries']();
-    }
-
-    const fieldEntries = [];
-    const fieldValues = /** @type {!Object<string, !Array<string>>} */ (
-      dev().assert(this.fieldValues_));
-    Object.keys(fieldValues).forEach(name => {
-      const values = fieldValues[name];
-      values.forEach(value => fieldEntries.push([name, value]));
-    });
-
-    // Generator functions are not supported by the current Babel configuration,
-    // so we must manually implement the iterator interface.
-    let nextIndex = 0;
-    return /** @type {!Iterator<!Array<string>>} */ ({
-      next() {
-        return nextIndex < fieldEntries.length ?
-          {value: fieldEntries[nextIndex++], done: false} :
-          {value: undefined, done: true};
-      },
-    });
-  }
+  entries() {}
 
   /**
    * Returns the wrapped native `FormData` object.
    *
    * @return {!FormData}
    */
-  getFormData() {
-    return this.formData_;
-  }
+  getFormData() {}
 }
 
 /**
- * Check if the given object is a FormDataWrapper instance
- * @param {*} o
- * @return {boolean} True if the object is a FormDataWrapper instance.
+ * Check if the given file is an empty file, which is the result of submitting
+ * an empty `<input type="file">`. These cause errors when submitting forms
+ * in Safari 11.
+ *
+ * @param {!File} file
+ * @return {boolean}
  */
-export function isFormDataWrapper(o) {
-  // instanceof doesn't work as expected, so we detect with duck-typing.
-  return !!o && typeof o.getFormData == 'function';
+function isEmptyFile(file) {
+  return file.name == '' && file.size == 0;
 }

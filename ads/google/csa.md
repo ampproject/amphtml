@@ -15,9 +15,6 @@ limitations under the License.
 -->
 # Custom Search Ads
 
-_The Custom Search Ads integration is offered as a Beta and is subject to the
-conditions of the Google Program Guidelines._
-
 ## AdSense For Search (AFS)
 
 To request AdSense for Search ads on the Custom Search Ads protocol, use the
@@ -90,6 +87,8 @@ and/or one **data-afsh-adblock-options** attribute can be specified in the tag.
  - You can only request one ad ("maxTop": 1) in an ad unit that is above the fold.
  - You must use a fallback div to show alternate content when no ads are returned. If no ads are returned the ad will not be collapsed because it is above the fold.
 
+<!-- TODO(#19207): Address missing demo -->
+<!--
 ## Demos
-
 Please visit [google-ads-amp-demos.com](http://google-ads-amp-demos.com/) for demos and additional requirements when implementing these ads.
+-->

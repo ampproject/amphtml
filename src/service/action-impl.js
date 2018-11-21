@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
-import {KeyCodes} from '../utils/key-codes';
+import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
@@ -167,7 +167,7 @@ export class ActionInvocation {
    */
   constructor(node, method, args, source, caller, event, trust,
     actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
-    /** @const {!Node} */
+    /** @type {!Node} */
     this.node = node;
     /** @const {string} */
     this.method = method;
@@ -286,8 +286,8 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
-        const {keyCode} = event;
-        if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
+        const {key} = event;
+        if (key == Keys.ENTER || key == Keys.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
@@ -444,9 +444,12 @@ export class ActionService {
     return !!this.findAction_(target, actionEventType, opt_stopAt);
   }
 
-  /** Empties the current action whitelist (if any). */
-  clearWhitelist() {
-    this.whitelist_ = [];
+  /**
+   * Sets the action whitelist. Can be used to clear it.
+   * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
+   */
+  setWhitelist(whitelist) {
+    this.whitelist_ = whitelist;
   }
 
   /**
@@ -762,6 +765,9 @@ export class DeferredEvent {
   constructor(event) {
     /** @type {?Object} */
     this.detail = null;
+
+    /** @type {?Object} */
+    this.additionalViewportData;
 
     cloneWithoutFunctions(event, this);
   }

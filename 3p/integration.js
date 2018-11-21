@@ -64,7 +64,6 @@ import {facebook} from './facebook';
 import {github} from './github';
 import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
-import {recaptcha} from './recaptcha';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 import {viqeoplayer} from './viqeoplayer';
@@ -106,6 +105,7 @@ import {adventive} from '../ads/adventive';
 import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
+import {adyoulike} from '../ads/adyoulike';
 import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
@@ -190,6 +190,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {pressboard} from '../ads/pressboard';
 import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
@@ -198,6 +199,7 @@ import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
 import {realclick} from '../ads/realclick';
+import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
@@ -244,6 +246,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {yieldpro} from '../ads/yieldpro';
 import {zedo} from '../ads/zedo';
+import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
@@ -271,6 +274,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   taboola: true,
+  zen: true,
   zergnet: true,
   runative: true,
 };
@@ -317,6 +321,7 @@ register('adventive', adventive);
 register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
+register('adyoulike', adyoulike);
 register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
@@ -409,6 +414,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('pressboard', pressboard);
 register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
@@ -417,8 +423,8 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('realclick', realclick);
-register('recaptcha', recaptcha);
 register('reddit', reddit);
+register('recomad', recomad);
 register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
@@ -468,12 +474,12 @@ register('yieldone', yieldone);
 register('yieldpro', yieldpro);
 register('yotpo', yotpo);
 register('zedo', zedo);
+register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
-// TODO(@torch2424) Remove this in follow up PR.
 const defaultAllowedTypesInCustomFrame = [
   // Entries must be reasonably safe and not allow overriding the injected
   // JS URL.
@@ -481,7 +487,6 @@ const defaultAllowedTypesInCustomFrame = [
   // draw3p. See amp-ad docs.
   'facebook',
   'twitter',
-  'recaptcha',
   'doubleclick',
   'yieldbot',
   '_ping_',
@@ -630,7 +635,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
     return;
   }
   user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
-      'Non-whitelisted 3p type for custom iframe: ' + type);
+      'Non-whitelisted 3p type for custom iframe: %s', type);
 }
 
 /**

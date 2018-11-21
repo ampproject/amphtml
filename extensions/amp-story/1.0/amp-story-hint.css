@@ -45,9 +45,10 @@
 }
 
 .i-amphtml-story-navigation-help-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .prev-page {
@@ -172,7 +173,7 @@
 
 .i-amphtml-story-hint-placeholder {
   top: 50% !important;
-  position: absolute;
+  position: absolute !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -184,6 +185,8 @@
   font-family: 'Roboto-Medium', sans-serif !important;
   margin-top: 24px !important;
   text-align: center !important;
+  word-break: break-word !important;
+  padding: 0 6px !important;
 }
 
 @keyframes expandingBubble {

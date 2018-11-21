@@ -97,10 +97,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!Activity>}
+   * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
    */
   static activityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!Activity>} */ (
+    return /** @type {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>} */ (
       getElementServiceForDoc(elementOrAmpDoc, 'activity', 'amp-analytics'));
   }
 
@@ -225,6 +225,29 @@ export class Services {
   }
 
   /**
+   * Returns a service to register callbacks we wish to execute when an
+   * amp-form is submitted. This is the sync version used by amp-form only, all
+   * other extensions should use `formSubmitPromiseForDoc` below.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {../extensions/amp-form/0.1/form-submit-service.FormSubmitService}
+   */
+  static formSubmitForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-form/0.1/form-submit-service.FormSubmitService} */ (
+      getServiceForDoc(elementOrAmpDoc, 'form-submit-service'));
+  }
+
+  /**
+   * Returns a service to register callbacks we wish to execute when an
+   * amp-form is submitted.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>}
+   */
+  static formSubmitPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<../extensions/amp-form/0.1/form-submit-service.FormSubmitService>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'form-submit-service'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
@@ -240,6 +263,17 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
+  }
+
+  /**s
+   * Returns a promise for the Inputmask service.
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>}
+   */
+  static inputmaskServiceForDocOrNull(elementOrAmpDoc) {
+    return (/** @type {!Promise<?../extensions/amp-inputmask/0.1/amp-inputmask.AmpInputmaskService>} */ (
+      getElementServiceIfAvailableForDoc(
+          elementOrAmpDoc, 'inputmask', 'amp-inputmask')));
   }
 
   /**

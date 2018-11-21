@@ -19,13 +19,11 @@
 /**
  * @enum {string}
  */
-exports.TYPES = {
+const TYPES = exports.TYPES = {
   AD: '_base_ad',
   MEDIA: '_base_media',
   MISC: '_base_misc',
 };
-
-const TYPES = {...exports.TYPES};
 
 exports.extensionBundles = [
   {name: 'amp-3d-gltf', version: '0.1', type: TYPES.MEDIA},
@@ -85,6 +83,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
+  {
+    name: 'amp-delight-player',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
+  },
   {name: 'amp-brightcove', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-byside-content',
@@ -156,6 +160,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {name: 'amp-imgur', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-inputmask', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-instagram',
     version: '0.1',
@@ -215,6 +220,11 @@ exports.extensionBundles = [
   {name: 'amp-reach-player', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-reddit', version: '0.1', type: TYPES.MISC},
   {name: 'amp-riddle-quiz', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-script',
+    version: '0.1',
+    type: TYPES.MISC,
+  },
   {name: 'amp-share-tracking', version: '0.1', type: TYPES.MISC},
   {
     name: 'amp-sidebar',
@@ -222,6 +232,7 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
+  {name: 'amp-skimlinks', version: '0.1', type: TYPES.MISC},
   {name: 'amp-soundcloud', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-springboard-player', version: '0.1', type: TYPES.MEDIA},
   {
@@ -232,11 +243,31 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
+        'amp-story-consent',
+        'amp-story-hint',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
+        'amp-story-info-dialog',
+        'amp-story-share',
+        'amp-story-share-menu',
+        'amp-story-system-layer',
+      ],
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story',
+    version: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-bookend',
+        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-hint',
         'amp-story-unsupported-browser-layer',
@@ -275,6 +306,9 @@ exports.extensionBundles = [
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
+    postPrepend: [
+      'third_party/react-dates/bundle.js',
+    ],
   },
   {
     name: 'amp-image-viewer',
@@ -337,6 +371,11 @@ exports.extensionBundles = [
     version: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
+    postPrepend: [
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+    ],
   },
   {name: 'amp-google-vrview-image', version: '0.1', type: TYPES.MISC},
   {
@@ -378,6 +417,7 @@ exports.extensionBundles = [
   {name: 'amp-yotpo', version: '0.1', type: TYPES.MISC},
   {name: 'amp-youtube', version: '0.1', type: TYPES.MEDIA},
   {name: 'amp-mowplayer', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-powr-player', version: '0.1', type: TYPES.MEDIA},
 ];
 
 exports.aliasBundles = [
@@ -387,6 +427,19 @@ exports.aliasBundles = [
     latestVersion: '1.0',
     options: {hasCss: true},
     type: 'ads',
+  },
+];
+
+exports.altMainBundles = [
+  {
+    path: 'src/amp-shadow.js',
+    name: 'shadow-v0',
+    version: '0.1',
+  },
+  {
+    path: 'src/inabox/amp-inabox.js',
+    name: 'amp4ads-v0',
+    version: '0.1',
   },
 ];
 

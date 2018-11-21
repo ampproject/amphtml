@@ -118,15 +118,6 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_NO_RECOVER: '21062235',
 };
 
-/** @const {string} */
-const DOUBLECLICK_IDLE_BOOL_EXP = 'doubleclickIdleExp';
-
-/** @const @enum{string} */
-const DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES = {
-  CONTROL: '21062567',
-  EXP: '21062568',
-};
-
 /**
  * Map of pageview tokens to the instances they belong to.
  * @private {!Object<string, !AmpAdNetworkDoubleclickImpl>}
@@ -200,8 +191,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @protected {boolean} */
     this.useSra = false;
 
-    /** @protected {!Deferred<?Response>} */
-    this.sraDeferred = new Deferred();
+    /** @protected {?Deferred<?Response>} */
+    this.sraDeferred = null;
 
     /** @private {?RefreshManager} */
     this.refreshManager_ = null;
@@ -307,8 +298,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const renderOutsideViewport = this.renderOutsideViewport();
     // False will occur when throttle in effect.
-    if (this.experimentIds.includes(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES.EXP) &&
-      typeof renderOutsideViewport === 'boolean') {
+    if (typeof renderOutsideViewport === 'boolean') {
       return renderOutsideViewport;
     }
     this.isIdleRender_ = true;
@@ -371,11 +361,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   'meta[name=amp-ad-doubleclick-sra]'),
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
-        },
-        [DOUBLECLICK_IDLE_BOOL_EXP]: {
-          isTrafficEligible: () => true,
-          branches: Object.keys(DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES).map(
-              key => DOUBLECLICK_IDLE_BOOL_EXP_BRANCHES[key]),
         },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -460,6 +445,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getPageParameters(consentState, instances) {
     instances = instances || [this];
+    const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -467,7 +453,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
-      'psts': getPageviewStateTokensForAdRequest(instances),
+      'psts': tokens.length ? tokens : null,
     };
   }
 
@@ -569,6 +555,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl(consentState, opt_rtcResponsesPromise) {
+    if (this.useSra) {
+      this.sraDeferred = this.sraDeferred || new Deferred();
+    }
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -868,16 +857,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    return super.layoutCallback().then(superReturn => {
-      // We expand fluid here because we must first wait for the iframe to fire
-      // onload.
-      this.expandFluidCreative_();
-      return superReturn;
-    });
-  }
-
-  /** @override */
   viewportCallback(inViewport) {
     super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
@@ -922,7 +901,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(creativeMetaData) {
+  onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
@@ -980,6 +959,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       setStyles(this.element, {width: `${size.width}px`});
     }
 
+    if (opt_onLoadPromise) {
+      opt_onLoadPromise.then(() => {
+        this.expandFluidCreative_();
+      });
+    }
+
     this.refreshManager_ = this.refreshManager_ ||
         getRefreshManager(this, () => {
           if (this.useSra) {
@@ -1027,7 +1012,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+          this.iframe.contentWindow.document.body./*OK*/clientHeight)
           .then(() => {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;
@@ -1078,7 +1063,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra) {
       return super.sendXhrRequest(adUrl);
     }
-    this.sraDeferred = new Deferred();
     const checkStillCurrent = this.verifyStillCurrent();
     // InitiateSraRequests resolves when all blocks have had their SRA
     // responses returned such that sraDeferred being non-null indicates this
@@ -1205,22 +1189,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
                 dev().info(TAG, `single block in network ${networkId}`);
+                // Ensure deferred exists, may not if getAdUrl did not yet
+                // execute.
+                typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
+                  new Deferred();
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
               let sraUrl;
               // Construct and send SRA request.
-              // Chunk handler called with metadata and creative for each slot
-              // in order of URLs given which is then passed to resolver used
-              // for sendXhrRequest.
-              const sraRequestAdUrlResolvers =
-              typeInstances.map(instance => instance.sraDeferred.resolve);
-              const slotCallback = metaJsonCreativeGrouper(
-                  (creative, headersObj, done) => {
-                    checkStillCurrent();
-                    sraBlockCallbackHandler(creative, headersObj, done,
-                        sraRequestAdUrlResolvers, sraUrl);
-                  });
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               return constructSRARequest_(this, typeInstances)
                   .then(sraUrlIn => {
@@ -1234,6 +1211,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   })
                   .then(response => {
                     checkStillCurrent();
+                    // Chunk handler called with metadata and creative for each
+                    // slot in order of URLs given which is then passed to
+                    // resolver used for sendXhrRequest.
+                    const sraRequestAdUrlResolvers =
+                    typeInstances.map(instance => instance.sraDeferred.resolve);
+                    const slotCallback = metaJsonCreativeGrouper(
+                        (creative, headersObj, done) => {
+                          checkStillCurrent();
+                          sraBlockCallbackHandler(creative, headersObj, done,
+                              sraRequestAdUrlResolvers, sraUrl);
+                        });
                     lineDelimitedStreamer(this.win, response, slotCallback);
                     return Promise.all(typeInstances.map(
                         instance => instance.sraDeferred.promise));

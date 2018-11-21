@@ -15,11 +15,13 @@
  */
 
 import {AmpViewerIntegrationVariableService} from './variable-service';
+import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
   HighlightInfoDef,
   getHighlightParam,
 } from './highlight-handler';
+import {KeyboardHandler} from './keyboard-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -195,6 +197,12 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('swipe')) {
       this.initTouchHandler_(messaging);
     }
+    if (viewer.hasCapability('keyboard')) {
+      this.initKeyboardHandler_(messaging);
+    }
+    if (viewer.hasCapability('focus-rect')) {
+      this.initFocusHandler_(messaging);
+    }
     if (this.highlightHandler_ != null) {
       this.highlightHandler_.setupMessaging(messaging);
     }
@@ -214,8 +222,24 @@ export class AmpViewerIntegration {
    * @param {!Messaging} messaging
    * @private
    */
+  initFocusHandler_(messaging) {
+    new FocusHandler(this.win, messaging);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
   initTouchHandler_(messaging) {
     new TouchHandler(this.win, messaging);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initKeyboardHandler_(messaging) {
+    new KeyboardHandler(this.win, messaging);
   }
 }
 

@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
     description: 'Text that informs users that the sound is off after they ' +
@@ -147,9 +147,9 @@ export default {
         'Twitter.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
     description: 'Button label for the share target that shares a link via ' +
-        'Whatsapp.',
+        'WhatsApp.',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
@@ -177,4 +177,4 @@ export default {
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-};
+});

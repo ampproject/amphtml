@@ -105,7 +105,13 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+  children: [
+    {
+      tag: 'span',
+      attrs: dict({'class': 'i-amphtml-story-share-label'}),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+    },
+  ],
 };
 
 
@@ -149,12 +155,18 @@ function buildProvider(doc, shareType, opt_params) {
           attrs: /** @type {!JsonObject} */ (Object.assign(
               dict({
                 'width': 48,
-                'height': 66,
+                'height': 48,
                 'class': 'i-amphtml-story-share-icon',
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          localizedStringId: shareProviderLocalizedStringId,
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({'class': 'i-amphtml-story-share-label'}),
+              localizedStringId: shareProviderLocalizedStringId,
+            },
+          ],
         },
       ]));
 }
