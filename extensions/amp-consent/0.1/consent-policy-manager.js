@@ -165,8 +165,8 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, 'can not find defined policy %s, ' +
-          'only supported predefined policy supported now', policyId);
+        user().error(TAG, 'can not find policy %s, ' +
+          'only predefined policies are supported', policyId);
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
     }
@@ -186,8 +186,8 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, 'can not find defined policy %s, ' +
-          'only supported predefined policy supported now', policyId);
+        user().error(TAG, 'can not find policy %s, ' +
+          'only predefined policies are supported', policyId);
         return Promise.resolve(false);
       }
     }
