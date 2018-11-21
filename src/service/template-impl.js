@@ -269,6 +269,11 @@ export class Templates {
         templateTagName == 'TEMPLATE' || templateTagName == 'SCRIPT',
         'Template must be a "template" tag or defined in a "script" tag %s',
         templateElement);
+    if (templateTagName == 'SCRIPT') {
+      user().assert(
+          templateElement.getAttribute('type') == 'template/amp-mustache',
+          'Script template type must be "template/amp-mustache"');
+    }
     return templateElement;
   }
 

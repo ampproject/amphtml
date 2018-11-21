@@ -71,7 +71,7 @@ export class AmpMustache extends AMP.BaseTemplate {
       this.template_ = container./*OK*/innerHTML;
     } else if (this.element.tagName == 'SCRIPT') {
       //TODO(alabiaga): handle nested templates.
-      this.template_ = this.element.text;
+      this.template_ = this.element.textContent;
     }
 
     mustache.parse(this.template_, /* tags */ undefined);

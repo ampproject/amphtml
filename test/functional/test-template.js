@@ -201,6 +201,21 @@ describes.fakeWin('Template', {amp: true}, env => {
     }).to.throw(/Template must be a "template" tag or defined in a "script" tag/); });
   });
 
+  it('should require discovered "script" template with type defined', () => {
+    // Given a script template with the type not defined.
+    const templateElement = doc.createElement('script');
+    const id = 'template' + Math.random();
+    templateElement.setAttribute('id', id);
+    doc.body.appendChild(templateElement);
+
+    const parentElement = doc.createElement('div');
+    parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
+    allowConsoleError(() => { expect(() => {
+      templates.findAndRenderTemplate(parentElement, {value: 0});
+    }).to.throw(/Script template type must be "template\/amp-mustache"/); });
+  });
+
   it('should discover template via children', () => {
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
