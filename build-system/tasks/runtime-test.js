@@ -399,7 +399,7 @@ async function runTests() {
 
     // Run the tests.
     mocha.run(function(failures) {
-      if (failures) {        
+      if (failures) {
         process.exit(1);
       }
       resolver();
