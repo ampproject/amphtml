@@ -1084,6 +1084,12 @@ export class AmpA4A extends AMP.BaseElement {
     this.postAdResponseExperimentFeatures = {};
   }
 
+  /** @override */
+  detachedCallback() {
+    super.detachedCallback();
+    this.destroyFrame(true);
+  }
+
   /**
    * Attempts to remove the current frame and free any associated resources.
    * This function will no-op if this ad slot is currently in the process of
@@ -1210,8 +1216,10 @@ export class AmpA4A extends AMP.BaseElement {
    *
    * @param {?CreativeMetaDataDef} creativeMetaData metadata if AMP creative,
    *    null otherwise.
+   * @param {!Promise=} opt_onLoadPromise Promise that resolves when the FIE's
+   *    child window fires the `onload` event.
    */
-  onCreativeRender(creativeMetaData) {
+  onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     this.maybeTriggerAnalyticsEvent_(
         creativeMetaData ? 'renderFriendlyEnd' : 'renderCrossDomainEnd');
   }
@@ -1399,7 +1407,7 @@ export class AmpA4A extends AMP.BaseElement {
       protectFunctionWrapper(this.onCreativeRender, this, err => {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error executing onCreativeRender', err);
-      })(creativeMetaData);
+      })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
       // It's enough to wait for "ini-load" signal because in a FIE case
       // we know that the embed no longer consumes significant resources
       // after the initial load.
@@ -1661,9 +1669,9 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const analyticsEvent =
         dev().assert(LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]);
-    const analyticsVars = Object.assign(
-        {'time': Math.round(this.getNow_())},
-        this.getA4aAnalyticsVars(analyticsEvent));
+    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
+        dict({'time': Math.round(this.getNow_())}),
+        this.getA4aAnalyticsVars(analyticsEvent)));
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -1673,9 +1681,11 @@ export class AmpA4A extends AMP.BaseElement {
    * Note that this function is called for each time an analytics event is
    * fired.
    * @param {string} unusedAnalyticsEvent The name of the analytics event.
-   * @return {!Object<string, string>}
+   * @return {!JsonObject}
    */
-  getA4aAnalyticsVars(unusedAnalyticsEvent) { return {}; }
+  getA4aAnalyticsVars(unusedAnalyticsEvent) {
+    return dict({});
+  }
 
   /**
    * Returns network-specific config for amp-analytics. It should overridden

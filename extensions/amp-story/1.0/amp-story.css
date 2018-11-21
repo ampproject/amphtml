@@ -15,9 +15,9 @@
  */
 
 @import './amp-story-access.css';
-@import './amp-story-scroll.css';
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
+@import './pagination-buttons.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
@@ -57,6 +57,8 @@ amp-story {
   text-rendering: geometricPrecision !important;
   user-select: none !important;
   width: 100% !important;
+  /* Disables double tap to zoom, and ensures fast-tap is enabled on iOS. */
+  touch-action: manipulation !important;
 }
 
 html.i-amphtml-story-standalone,
@@ -259,6 +261,7 @@ amp-story-cta-layer {
 
 /** Grid level */
 amp-story-grid-layer {
+  box-sizing: border-box !important;
   display: grid !important;
   position: absolute !important;
   top: 0 !important;
@@ -266,6 +269,12 @@ amp-story-grid-layer {
   bottom: 0 !important;
   left: 0 !important;
   z-index: 2 !important;
+  /** Make sure grid layer does not act as a click shield on elements underneath */
+  pointer-events: none !important;
+}
+
+amp-story-grid-layer > * {
+  pointer-events: auto !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {
@@ -305,6 +314,7 @@ amp-story-grid-layer {
 }
 
 .i-amphtml-story-grid-template-thirds {
+  height: 100% !important;
   grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
                        "middle-third"

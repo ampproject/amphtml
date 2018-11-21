@@ -436,6 +436,16 @@ class VideoEntry {
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
+    /** @private @const {function()} */
+    this.boundMediasessionPlay_ = () => {
+      this.video.play(/* isAutoplay */ false);
+    };
+
+    /** @private @const {function()} */
+    this.boundMediasessionPause_ = () => {
+      this.video.pause();
+    };
+
     listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
@@ -443,6 +453,15 @@ class VideoEntry {
     listen(video.element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(video.element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
+
+    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+      const data = getData(e);
+      const eventType = data['eventType'];
+      const vars = data['vars'];
+      this.logCustomAnalytics_(
+          dev().assertString(eventType, '`eventType` missing'),
+          vars);
+    });
 
     video.signals().whenSignal(VideoEvents.REGISTERED)
         .then(() => this.onRegister_());
@@ -461,6 +480,20 @@ class VideoEntry {
     });
 
     this.listenForAutoplayDelegation_();
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {!Object<string, string>} vars
+   */
+  logCustomAnalytics_(eventType, vars) {
+    const prefixedVars = {};
+
+    Object.keys(vars).forEach(key => {
+      prefixedVars[`custom_${key}`] = vars[key];
+    });
+
+    analyticsEvent(this, eventType, prefixedVars);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
@@ -531,15 +564,17 @@ class VideoEntry {
       this.firstPlayEventOrNoop_();
     }
 
-    if (!this.video.preimplementsMediaSessionAPI()) {
-      const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
-      };
-      const pauseHandler = () => {
-        this.video.pause();
-      };
-      // Update the media session
-      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
+    const {video} = this;
+    const {element} = video;
+
+    if (!video.preimplementsMediaSessionAPI() &&
+        !element.classList.contains('i-amphtml-disable-mediasession')) {
+
+      setMediaSession(
+          this.ampdoc_,
+          this.metadata_,
+          this.boundMediasessionPlay_,
+          this.boundMediasessionPause_);
     }
 
     this.actionSessionManager_.beginSession();
@@ -664,7 +699,7 @@ class VideoEntry {
     });
   }
 
-  /* Autoplay Behaviour */
+  /* Autoplay Behavior */
 
   /**
    * Called when an autoplay video is built.
@@ -861,7 +896,7 @@ class VideoEntry {
 
   /**
    * Collects a snapshot of the current video state for video analytics
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>}
+   * @return {!Promise<!VideoAnalyticsDetailsDef>}
    */
   getAnalyticsDetails() {
     const {video} = this;
@@ -1212,18 +1247,18 @@ function isLandscape(win) {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents|string} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */
 function analyticsEvent(entry, eventType, opt_vars) {
   const {video} = entry;
-  const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-    entry.getAnalyticsDetails();
 
-  detailsPromise.then(details => {
-    video.element.dispatchCustomEvent(
-        eventType, details);
+  entry.getAnalyticsDetails().then(details => {
+    if (opt_vars) {
+      Object.assign(details, opt_vars);
+    }
+    video.element.dispatchCustomEvent(eventType, details);
   });
 }
 

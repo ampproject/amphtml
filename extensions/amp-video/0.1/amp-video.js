@@ -21,11 +21,13 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByTag,
   childElementsByTag,
+  closestByTag,
   elementByTag,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -58,7 +60,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behaviour is managed by
+ * @note Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
@@ -95,7 +97,7 @@ class AmpVideo extends AMP.BaseElement {
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
 
-    /** @private {?Element} */
+    /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
   }
 
@@ -184,6 +186,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    this.configure_();
+
     this.video_ = element.ownerDocument.createElement('video');
 
     const poster = element.getAttribute('poster');
@@ -224,6 +228,27 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @private */
+  configure_() {
+    if (!this.descendsFromStory_()) {
+      return;
+    }
+    [
+      'i-amphtml-disable-mediasession',
+      'i-amphtml-poolbound',
+    ].forEach(className => {
+      this.element.classList.add(className);
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  descendsFromStory_() {
+    return !!closestByTag(this.element, 'amp-story-page');
   }
 
   /** @override */
@@ -552,6 +577,9 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   mute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = true;
   }
 
@@ -559,7 +587,18 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   unmute() {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     this.video_.muted = false;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isManagedByPool_() {
+    return this.element.classList.contains('i-amphtml-poolbound');
   }
 
   /**
@@ -640,6 +679,19 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
+    this.removePosterForAndroidBug_();
+  }
+
+  /**
+   * See `createPosterForAndroidBug_`.
+   * @private
+   */
+  removePosterForAndroidBug_() {
+    const poster = this.element.querySelector('i-amphtml-poster');
+    if (!poster) {
+      return;
+    }
+    removeElement(poster);
   }
 
   /**
@@ -658,7 +710,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (placeholder.classList.contains('i-amphtml-blur') &&
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
         isExperimentOn(this.win, 'blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;

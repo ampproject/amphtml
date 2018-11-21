@@ -84,8 +84,10 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |              binding="no">
 |      <div></div>
 |    </amp-list>
-|    <!-- Valid amp-list with auto-resize attribute -->
+|    <!-- Valid amp-list with deprecated auto-resize attribute -->
 |    <amp-list width=10 height=10
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:85:2 The attribute 'auto-resize' in tag 'amp-list' is deprecated - use 'replacement-to-be-determined-at-a-later-date' instead. (see https://github.com/ampproject/amphtml/issues/18849) [DEPRECATION]
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      auto-resize>
 |    <div></div>

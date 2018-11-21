@@ -33,14 +33,6 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 import {user} from '../log';
 
 /**
- * @typedef {{
- *  xhrUrl: string,
- *  fetchOpt: !FetchInitDef
- * }}
- */
-export let FetchRequestDef;
-
-/**
  * A service that polyfills Fetch API for use within AMP.
  *
  * @package Visible for type.
@@ -87,7 +79,9 @@ export class Xhr {
           // will expect a native `FormData` object in the `body` property, so
           // the native `FormData` object needs to be unwrapped.
           if (isFormDataWrapper(init.body)) {
-            init.body = /** @type {!FormDataWrapper} */ (init.body).getFormData();
+            const formDataWrapper =
+              /** @type {!FormDataWrapperInterface} */ (init.body);
+            init.body = formDataWrapper.getFormData();
           }
           return (this.win.fetch).apply(null, arguments);
         });

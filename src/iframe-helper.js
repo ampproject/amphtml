@@ -18,9 +18,9 @@ import {addAttributesToElement, closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
+import {remove} from './utils/array';
 import {setStyle} from './style';
 import {tryParseJson} from './json';
 
@@ -204,6 +204,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
       return;
     }
     const data = parseIfNeeded(getData(event));
+
     if (!data || !data['sentinel']) {
       return;
     }
@@ -438,7 +439,7 @@ export class SubscriptionApi {
       }
       requestCallback(data, source, origin);
     }, this.is3p_,
-        // For 3P frames we also allow nested frames within them to subscribe..
+    // For 3P frames we also allow nested frames within them to subscribe..
     this.is3p_ /* opt_includingNestedWindows */);
   }
 
@@ -449,7 +450,7 @@ export class SubscriptionApi {
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
-    filterSplice(this.clientWindows_, client => !!client.win.parent);
+    remove(this.clientWindows_, client => !client.win.parent);
     postMessageToWindows(
         this.iframe_,
         this.clientWindows_,

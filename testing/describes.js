@@ -108,6 +108,7 @@ import {
 } from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
+import {maybeTrackImpression} from '../src/impression';
 import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
@@ -411,9 +412,6 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private {boolean} */
-    this.sandboxOwner_ = false;
   }
 
   /** @override */
@@ -423,23 +421,12 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    // Sandbox.
-    let {sandbox} = global;
-    if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox;
-      this.sandboxOwner_ = true;
-    }
-    env.sandbox = sandbox;
+    env.sandbox = sinon.createSandbox();
   }
 
   /** @override */
   teardown(env) {
-    // Sandbox.
-    if (this.sandboxOwner_) {
-      env.sandbox.restore();
-      delete global.sandbox;
-      this.sandboxOwner_ = false;
-    }
+    env.sandbox.restore();
   }
 }
 
@@ -472,10 +459,15 @@ class IntegrationFixture {
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
 
+    let url = '/amp4test/compose-doc';
+    if (this.spec.params) {
+      url = addParamsToUrl(url, this.spec.params);
+    }
+
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc',
-            {body, css, experiments, extensions}) + `#${this.hash}`,
+        src: addParamsToUrl(url, {body, css, experiments, extensions})
+            + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -684,6 +676,7 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+    maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach(extensionIdWithVersion => {

@@ -75,9 +75,9 @@ amp-story/1.0/test/validator-amp-story-bookend-error.html:64:2 The attribute 'bo
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="bookendv1.json" layout=nodisplay>
->>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-bookend-error.html:74:4 Tag 'amp-story-bookend' must have 0 child tags - saw 1 child tags. [AMP_TAG_PROBLEM]
 |        <h1>Illegal child inside amp-story-bookend!</h1>
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-bookend-error.html:75:6 The tag 'h1' may not appear as a descendant of tag 'amp-story-bookend'. [AMP_TAG_PROBLEM]
 |      </amp-story-bookend>
 |    </amp-story>
 |  </body>

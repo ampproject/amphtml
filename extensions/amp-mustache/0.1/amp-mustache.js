@@ -20,15 +20,11 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
-  parse as mustacheParse,
-  render as mustacheRender,
-  setUnescapedSanitizer,
-} from '../../../third_party/mustache/mustache';
-import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
 import {user} from '../../../src/log';
+import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
@@ -48,7 +44,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
 
     user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
         'Please use a more recent version of this extension.');
@@ -80,19 +76,22 @@ export class AmpMustache extends AMP.BaseTemplate {
     container.appendChild(content);
     /** @private @const {string} */
     this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    mustache.parse(this.template_, /* tags */ undefined);
+  }
+
+  /** @override */
+  setHtml(html) {
+    return this.serializeHtml_(html);
   }
 
   /** @override */
   render(data) {
-    let html = data;
-    if (!this.viewerCanRenderTemplates()) {
-      let mustacheData = data;
-      if (typeof data === 'object') {
-        mustacheData = Object.assign({}, data, this.nestedTemplates_);
-      }
-      html = mustacheRender(this.template_, mustacheData);
+    let mustacheData = data;
+    if (typeof data === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
+    const html = mustache.render(this.template_, mustacheData,
+        /* partials */ undefined);
     return this.serializeHtml_(html);
   }
 

@@ -41,6 +41,16 @@ describe.configure().skipIos().run('amp-video', () => {
   });
 });
 
+// TODO(alanorozco): unskip
+describe.skip('amp-video-iframe', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-video-iframe');
+    video.setAttribute('src', '/examples/amp-video-iframe/frame.html');
+    video.setAttribute('poster', 'https://placekitten.com/800/450');
+    return video;
+  });
+});
+
 //TODO(aghassemi, #9379): unskip
 describe.skip('amp-youtube', () => {
   runVideoPlayerIntegrationTests(fixture => {
@@ -109,6 +119,14 @@ describe.skip('amp-brightcove', () => {
     video.setAttribute('data-account-id', '1290862519001');
     video.setAttribute('data-player-id', 'SyIOV8yWM');
     video.setAttribute('data-video-id', 'amp-test-video');
+    return video;
+  });
+});
+
+describe.skip('amp-delight-player', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-delight-player');
+    video.setAttribute('data-content-id', '-LLoCCZqWi18O73b6M0w');
     return video;
   });
 });

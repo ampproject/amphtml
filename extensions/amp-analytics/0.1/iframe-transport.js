@@ -24,7 +24,7 @@ import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransport';
+const TAG_ = 'amp-analytics/iframe-transport';
 
 /** @private @const {number} */
 const LONG_TASK_REPORTING_THRESHOLD = 5;
@@ -180,7 +180,7 @@ export class IframeTransport {
               (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
               entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc &&
+                if (this.frameUrl_ == attrib['containerSrc'] &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
                   user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
                 }

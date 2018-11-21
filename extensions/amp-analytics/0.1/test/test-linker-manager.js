@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,12 +15,16 @@
  * limitations under the License.
  */
 
-import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
 import {installVariableService} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
@@ -27,7 +32,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   let win;
   let doc;
   let windowInterface;
-  let handler;
+  let handlers;
+  let beforeSubmitStub;
 
   beforeEach(() => {
     sandbox = env.sandbox;
@@ -35,17 +41,23 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     windowInterface = mockWindowInterface(sandbox);
+
+    beforeSubmitStub = sandbox.stub();
+    sandbox.stub(Services, 'formSubmitPromiseForDoc').resolves({
+      beforeSubmit: beforeSubmitStub,
+    });
+
     sandbox.stub(Services, 'documentInfoForDoc')
         .returns({
           sourceUrl: 'https://amp.source.com/some/path?q=123',
           canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
-    handler = null;
+    handlers = [];
     sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
         if (priority === Priority.ANALYTICS_LINKER) {
-          handler = callback;
+          handlers.push(callback);
         }
       },
     });
@@ -67,17 +79,17 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     }, null).init();
 
-    expect(handler).to.be.ok;
+    expect(handlers.length).to.equal(1);
   });
 
   it('does not register anchor mutator if no linkers config', () => {
     new LinkerManager(ampdoc, {}, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if empty linkers config', () => {
     new LinkerManager(ampdoc, {linkers: {}}, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if no linkers enabled', () => {
@@ -95,7 +107,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if not on proxy', () => {
@@ -112,7 +124,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.not.be.ok;
+    expect(handlers.length).to.equal(0);
   });
 
   it('registers anchor mutator if not on proxy but proxyOnly=false', () => {
@@ -130,7 +142,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       },
     }, null).init();
-    expect(handler).to.be.ok;
+    expect(handlers.length).to.equal(1);
   });
 
   it('should resolve vars and append to matching anchor', () => {
@@ -162,12 +174,60 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     };
 
     return new LinkerManager(ampdoc, config, null).init().then(() => {
-      expect(handler).to.be.ok;
+      expect(handlers.length).to.equal(1);
       expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
           'https://www.source.com/dest' +
           '?a=1' +
           '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
           '&testLinker2=1*1u4ugj3*foo*YmFy');
+    });
+  });
+
+  it('should not add params where linker value is empty', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            gclid: '',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      expect(handlers.length).to.equal(1);
+      expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
+          'https://www.source.com/dest?a=1'
+      );
+    });
+  });
+
+  it('should generate a param valid for ingestion 5 min later', () => {
+    const clock = sandbox.useFakeTimers(1533329483292);
+    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    const config = {
+      linkers: {
+        enabled: true,
+        testLinker: {
+          ids: {
+            cid: '12345',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      clock.tick(1000 * 60 * 5); // 5 minutes.
+      const linkerUrl = clickAnchor('https://www.source.com/dest?a=1');
+
+      windowInterface.history = {replaceState: () => {}};
+      windowInterface.location = {href: linkerUrl};
+
+      installLinkerReaderService(windowInterface);
+      const linkerReader = linkerReaderServiceFor(windowInterface);
+      return expect(linkerReader.get('testLinker', 'cid')).to.equal('12345');
     });
   });
 
@@ -334,7 +394,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     it('should add linker for Safari 12', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -353,9 +412,28 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           });
     });
 
+    it('should only add one linker for auto opt-in', () => {
+      stubPlatform(true, 12);
+      const config = {
+        linkers: {
+          testLinker1: {
+            ids: {
+              _key: 'CLIENT_ID(_ga)',
+              gclid: '234',
+            },
+          },
+        },
+      };
+      const p1 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
+      const p2 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
+      return Promise.all([p1, p2]).then(() => {
+        const a = clickAnchor('https://www.source.com/path');
+        expect(a).to.not.match(/(testLinker1=.*){2}/);
+      });
+    });
+
     it('should not add linker for not google analytics vendor', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -368,12 +446,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'somevendor');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker for Safari 11', () => {
       stubPlatform(true, 11);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -385,12 +462,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker for Chrome', () => {
       stubPlatform(false, 66);
-      sandbox.stub(experiments, 'isExperimentOn').returns(true);
       const config = {
         linkers: {
           testLinker1: {
@@ -402,12 +478,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
 
     it('should not add linker if experiment is off', () => {
       stubPlatform(true, 12);
-      sandbox.stub(experiments, 'isExperimentOn').returns(false);
       const config = {
         linkers: {
           testLinker1: {
@@ -419,15 +494,18 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       };
 
       new LinkerManager(ampdoc, config, 'googleanalytics');
-      expect(handler).to.be.null;
+      expect(handlers.length).to.equal(0);
     });
   });
 
   function clickAnchor(url) {
     const a = doc.createElement('a');
+    const event = {
+      type: 'click',
+    };
     a.href = url;
     doc.body.appendChild(a);
-    handler(a);
+    handlers.forEach(handler => handler(a, event));
     return a.href;
   }
 
@@ -443,6 +521,204 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     sandbox.stub(platform, 'isSafari').returns(isSafari);
     sandbox.stub(platform, 'getMajorVersion').returns(version);
   }
+
+  describe('form support', () => {
+    it('should register the `beforeSubmit` callback', () => {
+      toggleExperiment(win, 'linker-form', true);
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        expect(beforeSubmitStub.calledOnce).to.be.true;
+        toggleExperiment(win, 'linker-form', false);
+        return expect(beforeSubmitStub).calledWith(sinon.match.func);
+      });
+    });
+
+    it('should add hidden elements to form if not action-xhr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action', 'https://www.ampproject.com');
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.notCalled).to.be.true;
+        const el = form.firstChild;
+        expect(el).to.be.ok;
+        expect(el.tagName).to.equal('INPUT');
+        expect(el.getAttribute('name')).to.equal('testLinker');
+        expect(el.getAttribute('value')).to.contain('foo');
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+        return expect(el.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    it('if action-xhr and method=GET it should add linker-xhr attr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        form.setAttribute('method', 'get');
+
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
+      });
+    });
+
+    it('if action-xhr and method=POST it should add linker-xhr attr', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.ampproject.com');
+        form.setAttribute('method', 'post');
+
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.calledOnce).to.be.true;
+
+        const calledWithLinkerUrl = setterSpy
+            .calledWith(sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/));
+        return expect(calledWithLinkerUrl).to.be.true;
+      });
+    });
+
+
+    it('should not add linker if no domain match', () => {
+      const linkerManager = new LinkerManager(ampdoc, {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+          destinationDomains: ['www.ampproject.com'],
+        },
+      }, null);
+
+      return linkerManager.init().then(() => {
+        const form = createForm();
+        form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
+        const setterSpy = sandbox.spy();
+        linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+        expect(setterSpy.notCalled).to.be.true;
+        return expect(form.children.length).to.equal(0);
+      });
+    });
+
+    it('should add multiple linker data to one form if not action-xhr', () => {
+      windowInterface.getLocation.returns({
+        origin: 'https://www.ampbyexample.com',
+      });
+
+      const manager1 = new LinkerManager(ampdoc, {
+        linkers: {
+          proxyOnly: false,
+          testLinker: {
+            enabled: true,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      }, null);
+
+      const manager2 = new LinkerManager(ampdoc, {
+        linkers: {
+          proxyOnly: false,
+          testLinker2: {
+            enabled: true,
+            ids: {
+              hello: 'world',
+            },
+          },
+        },
+      }, null);
+
+      const p1 = manager1.init();
+      const p2 = manager2.init();
+
+      return Promise.all([p1, p2]).then(() => {
+        const form = createForm();
+        form.setAttribute('action', 'https://www.source.com');
+        const setterSpy = sandbox.spy();
+        manager1.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+        manager2.handleFormSubmit_({form, actionXhrMutator: setterSpy});
+
+        expect(setterSpy.notCalled).to.be.true;
+        const prefixRegex = new RegExp('1\\*\\w{5,7}\\*.+');
+
+        const firstChild = form.children[0];
+        expect(firstChild).to.be.ok;
+        expect(firstChild.tagName).to.equal('INPUT');
+        expect(firstChild.getAttribute('name')).to.equal('testLinker');
+        expect(firstChild.getAttribute('value')).to.contain('foo');
+        expect(firstChild.getAttribute('value')).to.match(prefixRegex);
+
+        const secondChild = form.children[1];
+        expect(secondChild).to.be.ok;
+        expect(secondChild.tagName).to.equal('INPUT');
+        expect(secondChild.getAttribute('name')).to.equal('testLinker2');
+        expect(secondChild.getAttribute('value')).to.contain('hello');
+        return expect(secondChild.getAttribute('value')).to.match(prefixRegex);
+      });
+    });
+
+    function createForm() {
+      const form = doc.createElement('form');
+      doc.body.appendChild(form);
+      return form;
+    }
+  });
 });
 
 describe('areFriendlyDomains', () => {

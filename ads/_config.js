@@ -88,7 +88,7 @@ export const adConfig = {
   },
 
   'a9': {
-    prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+    prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
   },
 
   'accesstrade': {
@@ -249,6 +249,12 @@ export const adConfig = {
   'adverticum': {},
 
   'advertserve': {
+    renderStartImplemented: true,
+  },
+
+  'adyoulike': {
+    consentHandlingOverride: true,
+    prefetch: 'https://pixels.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
@@ -727,6 +733,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
@@ -763,6 +773,10 @@ export const adConfig = {
   },
 
   'realclick': {
+    renderStartImplemented: true,
+  },
+
+  'recomad': {
     renderStartImplemented: true,
   },
 
@@ -1027,6 +1041,14 @@ export const adConfig = {
 
   'zedo': {
     prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
+  },
+
+  'zen': {
+    prefetch: 'https://zen.yandex.ru/widget-loader',
+    preconnect: [
+      'https://yastatic.net/',
+    ],
     renderStartImplemented: true,
   },
 

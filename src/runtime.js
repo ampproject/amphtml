@@ -530,7 +530,7 @@ export class MultidocManager {
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    amp.setVisibilityState = function(state) {
+    amp['setVisibilityState'] = function(state) {
       setViewerVisibilityState(viewer, state);
     };
 
@@ -542,7 +542,7 @@ export class MultidocManager {
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
-    amp.postMessage = viewer.receiveMessage.bind(viewer);
+    amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
     /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
     let onMessage;
@@ -552,7 +552,7 @@ export class MultidocManager {
      * messages to the viewer.
      * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp.onMessage = function(callback) {
+    amp['onMessage'] = function(callback) {
       onMessage = callback;
     };
 
@@ -572,7 +572,7 @@ export class MultidocManager {
     /**
      * Closes the document. The document can no longer be activated again.
      */
-    amp.close = () => {
+    amp['close'] = () => {
       this.closeShadowRoot_(shadowRoot);
     };
 
@@ -656,7 +656,7 @@ export class MultidocManager {
           // Start streaming.
           let renderStarted = false;
           const writer = createShadowDomWriter(this.win);
-          amp.writer = writer;
+          amp['writer'] = writer;
           writer.onBody(doc => {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
