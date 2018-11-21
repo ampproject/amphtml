@@ -331,11 +331,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'linker-meta-opt-in',
-    name: 'Opts-in users that have included the GA client-id meta tag ',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
-  },
-  {
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',

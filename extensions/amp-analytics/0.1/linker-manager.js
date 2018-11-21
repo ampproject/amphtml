@@ -198,10 +198,6 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
-    if (!isExperimentOn(this.ampdoc_.win, 'linker-meta-opt-in')) {
-      return false;
-    }
-
     const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
         'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
     if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
