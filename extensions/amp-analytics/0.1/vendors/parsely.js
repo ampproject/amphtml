@@ -29,7 +29,7 @@ export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
       'date=${timestamp}&' +
       'ampid=${clientId(_parsely_visitor)}',
     'pageview': '${basePrefix}&action=pageview&metadata=' +
-    '{\"canonical_url\":\"${canonicalUrl}\"}"',
+    '{\"canonical_url\":\"${canonicalUrl}\"}',
     'heartbeat': '${basePrefix}&action=heartbeat' +
     '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
   },
