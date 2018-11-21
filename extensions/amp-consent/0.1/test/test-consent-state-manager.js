@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CONSENT_ITEM_STATE} from '../consent-info';
 import {
-  CONSENT_ITEM_STATE,
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';

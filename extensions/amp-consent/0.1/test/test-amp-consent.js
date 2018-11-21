@@ -18,7 +18,7 @@ import {
   ACTION_TYPE,
   AmpConsent,
 } from '../amp-consent';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_ITEM_STATE} from '../consent-info';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -389,9 +389,9 @@ describes.realWin('amp-consent', {
       });
       it('handle postPromptUI', function* () {
         storageValue = {
-          'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
-          'amp-consent:DEF': CONSENT_ITEM_STATE.ACCEPTED,
-          'amp-consent:GH': CONSENT_ITEM_STATE.ACCEPTED,
+          'amp-consent:ABC': true,
+          'amp-consent:DEF': true,
+          'amp-consent:GH': true,
         };
         ampConsent.buildCallback();
         ampConsent.element.classList.remove('i-amphtml-notbuilt');
@@ -438,7 +438,7 @@ describes.realWin('amp-consent', {
 
         it('show postPromptUI', function* () {
           storageValue = {
-            'amp-consent:ABC': CONSENT_ITEM_STATE.ACCEPTED,
+            'amp-consent:ABC': true,
           };
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
