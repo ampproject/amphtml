@@ -141,7 +141,7 @@ export class Navigation {
     this.a2aFeatures_ = null;
 
     /**
-     * @type {!PriorityQueue<function(!Element)>}
+     * @type {!PriorityQueue<function(!Element, !Event)>}
      * @private
      * @const
      */
@@ -309,14 +309,7 @@ export class Navigation {
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
-      // Handles contextmenu click. Note that currently this only deals
-      // with url variable substitution and expansion, as there is
-      // straightforward way of determining what the user clicked in the
-      // context menu, required for A2A navigation and custom link protocol
-      // handling.
-      // TODO(alabiaga): investigate fix for handling A2A and custom link
-      // protocols.
-      this.expandVarsForAnchor_(target);
+      this.handleContextMenuClick_(target, e);
     }
   }
 
@@ -340,14 +333,39 @@ export class Navigation {
       return;
     }
 
-    // Handle anchor transformations.
-    this.anchorMutators_.forEach(anchorMutator => {
-      anchorMutator(target);
-    });
+    this.anchorMutatorHandlers_(target, e);
     location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
     this.handleNavClick_(e, target, location);
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {!Event} e
+   * @private
+   */
+  handleContextMenuClick_(target, e) {
+    // Handles contextmenu click. Note that currently this only deals
+    // with url variable substitution and expansion, as there is
+    // straightforward way of determining what the user clicked in the
+    // context menu, required for A2A navigation and custom link protocol
+    // handling.
+    // TODO(alabiaga): investigate fix for handling A2A and custom link
+    // protocols.
+    this.expandVarsForAnchor_(target);
+    this.anchorMutatorHandlers_(target, e);
+  }
+
+  /**
+   * Handle anchor transformations.
+   * @param {!Element} target
+   * @param {!Event} e
+   */
+  anchorMutatorHandlers_(target, e) {
+    this.anchorMutators_.forEach(anchorMutator => {
+      anchorMutator(target, e);
+    });
   }
 
   /**
@@ -521,7 +539,7 @@ export class Navigation {
   }
 
   /**
-   * @param {!Function} callback
+   * @param {function(!Element, !Event)} callback
    * @param {number} priority
    */
   registerAnchorMutator(callback, priority) {

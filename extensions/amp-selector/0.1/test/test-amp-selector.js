@@ -152,11 +152,11 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       yield ampSelector.build();
       expect(impl.element.getAttribute('role')).to.equal('tablist');
-      expect(impl.options_[0].getAttribute('role')).to.equal('tab');
+      const options = impl.getElementsForTesting();
+      expect(options[0].getAttribute('role')).to.equal('tab');
     });
 
     it('should init properly for single select', function* () {
-
       let ampSelector = getSelector({});
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
@@ -165,7 +165,7 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(0);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(0);
       expect(setInputsSpy).to.have.been.calledOnce;
 
 
@@ -181,10 +181,10 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(1);
-      expect(impl.options_[1].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
+      expect(impl.getSelectedElementsForTesting().length).to.equal(1);
+      const options = impl.getElementsForTesting();
+      expect(options[1].hasAttribute('selected')).to.be.true;
+      expect(options[1].getAttribute('aria-selected')).to.be.equal('true');
       expect(setInputsSpy).to.have.been.calledThrice; // once to set, twice to clear
     });
 
@@ -204,7 +204,7 @@ describes.realWin('amp-selector', {
       yield ampSelector.build();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(2);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
     });
 
@@ -226,8 +226,8 @@ describes.realWin('amp-selector', {
 
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.options_.length).to.equal(10);
-      expect(impl.selectedOptions_.length).to.equal(2);
+      expect(impl.getElementsForTesting().length).to.equal(10);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
     });
 
@@ -246,20 +246,19 @@ describes.realWin('amp-selector', {
       const clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       yield ampSelector.build();
 
+      const options = impl.getElementsForTesting();
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(1);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(1);
       expect(setInputsSpy).to.have.been.calledThrice;
-      expect(impl.options_[1].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
+      expect(options[1].hasAttribute('selected')).to.be.true;
+      expect(options[1].getAttribute('aria-selected')).to.be.equal('true');
 
-      impl.setSelection_(impl.options_[3]);
-      expect(impl.selectedOptions_.length).to.equal(1);
-      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[3].getAttribute('aria-selected')).to.be.equal('true');
+      impl.setSelection_(options[3]);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(1);
+      expect(clearSelectionSpy).to.have.been.calledWith(options[1]);
+      expect(options[3].hasAttribute('selected')).to.be.true;
+      expect(options[3].getAttribute('aria-selected')).to.be.equal('true');
 
     });
 
@@ -279,22 +278,20 @@ describes.realWin('amp-selector', {
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
       yield ampSelector.build();
 
+      const options = impl.getElementsForTesting();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(2);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
-      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[0].getAttribute('aria-selected')).to.be.equal('true');
-      expect(impl.options_[1].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
+      expect(options[0].hasAttribute('selected')).to.be.true;
+      expect(options[0].getAttribute('aria-selected')).to.be.equal('true');
+      expect(options[1].hasAttribute('selected')).to.be.true;
+      expect(options[1].getAttribute('aria-selected')).to.be.equal('true');
 
-      impl.setSelection_(impl.options_[3]);
-      expect(impl.selectedOptions_.length).to.equal(3);
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[3].getAttribute('aria-selected')).to.be.equal('true');
+      impl.setSelection_(options[3]);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(3);
+      expect(options[3].hasAttribute('selected')).to.be.true;
+      expect(options[3].getAttribute('aria-selected')).to.be.equal('true');
     });
 
 
@@ -314,22 +311,20 @@ describes.realWin('amp-selector', {
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
       yield ampSelector.build();
 
+      const options = impl.getElementsForTesting();
       expect(impl.isMultiple_).to.be.true;
       expect(initSpy).to.have.been.calledOnce;
-      expect(impl.selectedOptions_.length).to.equal(2);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(2);
       expect(setInputsSpy).to.have.been.calledOnce;
-      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[0].getAttribute('aria-selected')).to.be.equal('true');
-      expect(impl.options_[1].hasAttribute('selected')).to.be.true;
-      expect(
-          impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
+      expect(options[0].hasAttribute('selected')).to.be.true;
+      expect(options[0].getAttribute('aria-selected')).to.be.equal('true');
+      expect(options[1].hasAttribute('selected')).to.be.true;
+      expect(options[1].getAttribute('aria-selected')).to.be.equal('true');
 
-      impl.clearSelection_(impl.options_[1]);
-      expect(impl.selectedOptions_.length).to.equal(1);
-      expect(impl.options_[1].hasAttribute('selected')).to.be.false;
-      expect(
-          impl.options_[1].getAttribute('aria-selected')).to.be.equal('false');
+      impl.clearSelection_(options[1]);
+      expect(impl.getSelectedElementsForTesting().length).to.equal(1);
+      expect(options[1].hasAttribute('selected')).to.be.false;
+      expect(options[1].getAttribute('aria-selected')).to.be.equal('false');
 
     });
 
@@ -373,14 +368,17 @@ describes.realWin('amp-selector', {
       });
       impl = ampSelector.implementation_;
       yield ampSelector.build();
-      expect(impl.inputs_.length).to.equal(1);
-      expect(impl.selectedOptions_).to.include.members([impl.options_[1]]);
 
-      impl.setSelection_(impl.options_[3]);
+      let options = impl.getElementsForTesting();
+      expect(impl.inputs_.length).to.equal(1);
+      expect(impl.getSelectedElementsForTesting())
+          .to.include.members([options[1]]);
+
+      impl.setSelection_(options[3]);
       impl.setInputs_();
       expect(impl.inputs_.length).to.equal(1);
-      expect(impl.selectedOptions_).to.include.members([impl.options_[3]]);
-
+      expect(impl.getSelectedElementsForTesting())
+          .to.include.members([options[3]]);
 
       ampSelector = getSelector({
         attributes: {
@@ -393,20 +391,22 @@ describes.realWin('amp-selector', {
         },
       });
       impl = ampSelector.implementation_;
+
       yield ampSelector.build();
+      options = impl.getElementsForTesting();
       expect(impl.inputs_.length).to.equal(2);
-      expect(impl.selectedOptions_).to.include.members([
-        impl.options_[0],
-        impl.options_[1],
+      expect(impl.getSelectedElementsForTesting()).to.include.members([
+        options[0],
+        options[1],
       ]);
 
-      impl.setSelection_(impl.options_[2]);
+      impl.setSelection_(options[2]);
       impl.setInputs_();
       expect(impl.inputs_.length).to.equal(3);
-      expect(impl.selectedOptions_).to.include.members([
-        impl.options_[0],
-        impl.options_[1],
-        impl.options_[2],
+      expect(impl.getSelectedElementsForTesting()).to.include.members([
+        options[0],
+        options[1],
+        options[2],
       ]);
     });
 
@@ -424,9 +424,10 @@ describes.realWin('amp-selector', {
       });
       const impl = ampSelector.implementation_;
       yield ampSelector.build();
-      expect(impl.inputs_.length).to.equal(0);
 
-      impl.setSelection_(impl.options_[3]);
+      const options = impl.getElementsForTesting();
+      expect(impl.inputs_.length).to.equal(0);
+      impl.setSelection_(options[3]);
       impl.setInputs_();
       expect(impl.inputs_.length).to.equal(0);
     });
@@ -444,17 +445,18 @@ describes.realWin('amp-selector', {
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
       yield ampSelector.build();
+
+      let options = impl.getElementsForTesting();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
-
       let e = {
-        target: impl.options_[3],
+        target: options[3],
       };
       impl.clickHandler_(e);
 
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
-      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
+      expect(options[3].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[3]);
+      expect(clearSelectionSpy).to.have.been.calledWith(options[1]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -467,7 +469,7 @@ describes.realWin('amp-selector', {
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
       e = {
-        target: impl.options_[3],
+        target: options[3],
       };
       impl.clickHandler_(e);
       expect(setSelectionSpy).to.have.been.calledOnce;
@@ -487,31 +489,33 @@ describes.realWin('amp-selector', {
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
       yield ampSelector.build();
+
+      options = impl.getElementsForTesting();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
       e = {
-        target: impl.options_[4],
+        target: options[4],
       };
 
       impl.clickHandler_(e);
-      expect(impl.options_[4].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(options[4].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.not.have.been.called;
 
       impl.clickHandler_(e);
-      expect(impl.options_[4].hasAttribute('selected')).to.be.false;
-      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      expect(options[4].hasAttribute('selected')).to.be.false;
+      expect(clearSelectionSpy).to.have.been.calledWith(options[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
       e = {
-        target: impl.options_[2],
+        target: options[2],
       };
       impl.clickHandler_(e);
-      expect(impl.options_[2].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
+      expect(options[2].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[2]);
       expect(setSelectionSpy).to.have.been.calledTwice;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -555,16 +559,19 @@ describes.realWin('amp-selector', {
       let impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
       yield ampSelector.build();
+
+      let options = impl.getElementsForTesting();
       let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
-      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[3]);
-      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[1]);
+
+      keyPress(ampSelector, Keys.ENTER, options[3]);
+      expect(options[3].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[3]);
+      expect(clearSelectionSpy).to.have.been.calledWith(options[1]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, Keys.ENTER, impl.options_[3]);
+      keyPress(ampSelector, Keys.ENTER, options[3]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -582,24 +589,26 @@ describes.realWin('amp-selector', {
       impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
       yield ampSelector.build();
+
+      options = impl.getElementsForTesting();
       clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
       setSelectionSpy = sandbox.spy(impl, 'setSelection_');
 
-      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
-      expect(impl.options_[4].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, options[4]);
+      expect(options[4].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.not.have.been.called;
 
-      keyPress(ampSelector, Keys.SPACE, impl.options_[4]);
-      expect(impl.options_[4].hasAttribute('selected')).to.be.false;
-      expect(clearSelectionSpy).to.have.been.calledWith(impl.options_[4]);
+      keyPress(ampSelector, Keys.SPACE, options[4]);
+      expect(options[4].hasAttribute('selected')).to.be.false;
+      expect(clearSelectionSpy).to.have.been.calledWith(options[4]);
       expect(setSelectionSpy).to.have.been.calledOnce;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
-      keyPress(ampSelector, Keys.ENTER, impl.options_[2]);
-      expect(impl.options_[2].hasAttribute('selected')).to.be.true;
-      expect(setSelectionSpy).to.have.been.calledWith(impl.options_[2]);
+      keyPress(ampSelector, Keys.ENTER, options[2]);
+      expect(options[2].hasAttribute('selected')).to.be.true;
+      expect(setSelectionSpy).to.have.been.calledWith(options[2]);
       expect(setSelectionSpy).to.have.been.calledTwice;
       expect(clearSelectionSpy).to.have.been.calledOnce;
 
@@ -635,21 +644,23 @@ describes.realWin('amp-selector', {
 
       const impl = ampSelector.implementation_;
       ampSelector.build();
+
+      const options = impl.getElementsForTesting();
       const setInputsSpy = sandbox.spy(impl, 'setInputs_');
 
-      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+      expect(options[0].hasAttribute('selected')).to.be.true;
+      expect(options[3].hasAttribute('selected')).to.be.false;
 
       impl.mutatedAttributesCallback({selected: '3'});
 
-      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+      expect(options[0].hasAttribute('selected')).to.be.false;
+      expect(options[3].hasAttribute('selected')).to.be.true;
 
       // Integers should be converted to strings.
       impl.mutatedAttributesCallback({selected: 0});
 
-      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+      expect(options[0].hasAttribute('selected')).to.be.true;
+      expect(options[3].hasAttribute('selected')).to.be.false;
 
       expect(setInputsSpy).to.have.callCount(4);
     });
@@ -666,14 +677,15 @@ describes.realWin('amp-selector', {
       impl.mutateElement = fn => fn();
       ampSelector.build();
 
-      expect(impl.options_[0].hasAttribute('selected')).to.be.true;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.false;
+      const options = impl.getElementsForTesting();
+      expect(options[0].hasAttribute('selected')).to.be.true;
+      expect(options[3].hasAttribute('selected')).to.be.false;
 
-      impl.clickHandler_({target: impl.options_[3]});
+      impl.clickHandler_({target: options[3]});
 
       // When not disabled, clicking an option should select it.
-      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+      expect(options[0].hasAttribute('selected')).to.be.false;
+      expect(options[3].hasAttribute('selected')).to.be.true;
 
       expect(ampSelector.hasAttribute('aria-disabled')).to.be.false;
 
@@ -682,11 +694,11 @@ describes.realWin('amp-selector', {
 
       expect(ampSelector.getAttribute('aria-disabled')).to.equal('true');
 
-      impl.clickHandler_({target: impl.options_[0]});
+      impl.clickHandler_({target: options[0]});
 
       // When disabled, clicking an option should not select it.
-      expect(impl.options_[0].hasAttribute('selected')).to.be.false;
-      expect(impl.options_[3].hasAttribute('selected')).to.be.true;
+      expect(options[0].hasAttribute('selected')).to.be.false;
+      expect(options[3].hasAttribute('selected')).to.be.true;
     });
 
     it('should trigger `toggle` action even when no `value` argument is' +
@@ -778,8 +790,9 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
 
+      const options = impl.getElementsForTesting();
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
-      impl.clickHandler_({target: impl.options_[3]});
+      impl.clickHandler_({target: options[3]});
 
       expect(triggerSpy).to.be.calledOnce;
       expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
@@ -806,8 +819,9 @@ describes.realWin('amp-selector', {
       const impl = ampSelector.implementation_;
       impl.mutateElement = fn => fn();
 
+      const options = impl.getElementsForTesting();
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
-      impl.clickHandler_({target: impl.options_[2]});
+      impl.clickHandler_({target: options[2]});
 
       expect(triggerSpy).to.be.calledOnce;
       expect(triggerSpy).to.have.been.calledWith(ampSelector, 'select');
