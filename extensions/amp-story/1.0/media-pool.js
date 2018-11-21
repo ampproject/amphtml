@@ -51,7 +51,7 @@ export const MediaType = {
 /**
  * A marker type to indicate an element that originated in the document that is
  * being swapped for an element from the pool.
- * @typedef {!HTMLMediaElement}
+ * @typedef {!Element}
  */
 export let PlaceholderElementDef;
 
@@ -712,9 +712,11 @@ export class MediaPool {
     this.sources_[id] = sources;
     this.placeholderEls_[id] = placeholderEl;
 
-    placeholderEl.muted = true;
-    placeholderEl.setAttribute('muted', '');
-    placeholderEl.pause();
+    if (placeholderEl instanceof HTMLMediaElement) {
+      placeholderEl.muted = true;
+      placeholderEl.setAttribute('muted', '');
+      placeholderEl.pause();
+    }
 
     return Promise.resolve();
   }
