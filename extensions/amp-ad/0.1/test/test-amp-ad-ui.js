@@ -15,9 +15,11 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
+import * as dom from '../../../../src/dom';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
 import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-ad-ui handler', {
@@ -43,11 +45,30 @@ describes.realWin('amp-ad-ui handler', {
   });
 
   describe('applyNoContentUI', () => {
-    it('should force collapse ad in special container', () => {
+    it('should force collapse ad in sticky ad container', () => {
       adContainer = 'AMP-STICKY-AD';
       const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
       const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
       uiHandler.applyNoContentUI();
+      expect(collapseSpy).to.be.calledOnce;
+      expect(attemptCollapseSpy).to.not.be.called;
+    });
+
+    it('should force collapse ad inside flying carpet', function* () {
+      const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
+      const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
+
+      sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+        return [{
+          getImpl: () => Promise.resolve({
+            children_: [''],
+          }),
+        }];
+      });
+
+      uiHandler.applyNoContentUI();
+      yield macroTask();
+
       expect(collapseSpy).to.be.calledOnce;
       expect(attemptCollapseSpy).to.not.be.called;
     });
