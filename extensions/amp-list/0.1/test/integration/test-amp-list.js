@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  depositRequestUrl,
+  withdrawRequest,
+} from '../../../../../testing/test-helper';
 import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
@@ -128,6 +132,27 @@ describe('amp-list', function() {
       }, undefined, /* opt_timeout */ TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
+    });
+  });
+
+  describes.integration('data-amp-replace', {
+    body:
+    `<amp-list id=list width=300 height=100
+      src=${depositRequestUrl('amp-list-test?qp=QUERY_PARAM(a)')}
+      data-amp-replace="QUERY_PARAM"
+     >
+     </amp-list>`,
+    params: {
+      a: 123,
+    },
+    extensions: ['amp-list', 'amp-mustache'],
+  }, env => {
+    it('expands correctly', () => {
+      return withdrawRequest(env.win, 'amp-list-test' +
+        '?qp=123&__amp_source_origin=http%3A%2F%2Flocalhost%3A9876')
+          .then(request => {
+            expect(request).to.be.ok;
+          });
     });
   });
 });
