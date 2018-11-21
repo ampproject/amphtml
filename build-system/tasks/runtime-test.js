@@ -545,7 +545,7 @@ async function runTests() {
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
-  if (argv.integration) {
+  if (argv.saucelabs || argv.saucelabs_lite) {
     let batch = 1;
     const batchSize = 3; // Number of Sauce Lab browsers
     let left = 0;
