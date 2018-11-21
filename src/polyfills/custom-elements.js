@@ -702,6 +702,10 @@ function polyfill(win) {
       registry.observe(shadow);
       return shadow;
     };
+    // Necessary for Shadow AMP
+    elProto.attachShadow.toString = function() {
+      return attachShadow.toString();
+    };
   }
   if (createShadowRoot) {
     /**
@@ -711,6 +715,10 @@ function polyfill(win) {
       const shadow = createShadowRoot.apply(this, arguments);
       registry.observe(shadow);
       return shadow;
+    };
+    // Necessary for Shadow AMP
+    elProto.createShadowRoot.toString = function() {
+      return createShadowRoot.toString();
     };
   }
 
