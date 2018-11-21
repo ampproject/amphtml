@@ -41,6 +41,7 @@ const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
+let browsers = [];
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -69,10 +70,10 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-    return Object.assign({}, karmaDefault, {
-      reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
-      browsers: argv.saucelabs ? [
-        // With --saucelabs, integration tests are run on this set of browsers.
+
+    browsers = argv.saucelabs ?
+    // With --saucelabs, integration tests are run on this set of browsers.
+      [
         'SL_Chrome',
         'SL_Chrome_Dev',
         'SL_Firefox',
@@ -80,14 +81,18 @@ function getConfig() {
         'SL_Chrome_Android_7',
         'SL_iOS_12',
         'SL_Edge_17',
-        'SL_IE_11',
-        // TODO(amp-infra): Evaluate and add more platforms here.
-      ] : [
-        // With --saucelabs_lite, a subset of the unit tests are run.
-        // Only browsers that support chai-as-promised may be included below.
-        // TODO(rsimha-amp): Add more browsers to this list. #6039.
+        'SL_IE_11']
+      // TODO(amp-infra): Evaluate and add more platforms here.
+      : [
+      // With --saucelabs_lite, a subset of the unit tests are run.
+      // Only browsers that support chai-as-promised may be included below.
+      // TODO(rsimha-amp): Add more browsers to this list. #6039.
         'SL_Safari_12',
-      ],
+      ];
+
+    return Object.assign({}, karmaDefault, {
+      reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
+      browsers: [], // Browser list is set during batch process
     });
   }
   return karmaDefault;
@@ -372,7 +377,7 @@ function unitTestsToRun() {
 /**
  * Runs all the tests.
  */
-function runTests() {
+async function runTests() {
 
   if (argv.dev_dashboard) {
 
@@ -540,96 +545,124 @@ function runTests() {
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
-  let resolver;
-  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
-  new Karma(c, function(exitCode) {
-    if (shouldCollapseSummary) {
-      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+  if (argv.integration) {
+    let batch = 1;
+    const batchSize = 3; // Number of Sauce Lab browsers
+    let left = 0;
+    let right = batchSize;
+    while (left < right) {
+      log(green('Beginning batch number ' + batch));
+      const configBatch = c;
+      configBatch.browsers = browsers.slice(left, right);
+      await createKarmaServer(configBatch);
+      left = batch * batchSize;
+      batch++;
+      right = Math.min(batch * batchSize, browsers.length);
     }
-    server.emit('kill');
-    if (exitCode) {
-      log(
-          red('ERROR:'),
-          yellow('Karma test failed with exit code ' + exitCode));
-    }
-    if (argv.coverage) {
-      if (process.env.TRAVIS) {
-        const codecovCmd =
-            './node_modules/.bin/codecov --file=test/coverage/lcov.info';
-        let flags = '';
-        if (argv.unit) {
-          flags = ' --flags=unit_tests';
-        } else if (argv.integration) {
-          flags = ' --flags=integration_tests';
-        }
-        log(green('INFO: ') + 'Uploading code coverage report to ' +
-            cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
-            cyan(codecovCmd + flags) + '...');
-        const output = getStdout(codecovCmd + flags);
-        const viewReportPrefix = 'View report at: ';
-        const viewReport = output.match(viewReportPrefix + '.*');
-        if (viewReport && viewReport.length > 0) {
-          log(green('INFO: ') + viewReportPrefix +
-              cyan(viewReport[0].replace(viewReportPrefix, '')));
+  } else {
+    await createKarmaServer(c);
+  }
+  exitCtrlcHandler(handlerProcess);
+
+  /**
+   * Creates and starts karma server
+   *
+   * @param {!Object} configBatch
+   *
+   * @return {!Promise}
+   */
+  function createKarmaServer(configBatch) {
+    let resolver;
+    const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+    new Karma(configBatch, function(exitCode) {
+      if (shouldCollapseSummary) {
+        console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+      }
+      server.emit('kill');
+      if (exitCode) {
+        log(
+            red('ERROR:'),
+            yellow('Karma test failed with exit code ' + exitCode));
+      }
+      if (argv.coverage) {
+        if (process.env.TRAVIS) {
+          const codecovCmd =
+              './node_modules/.bin/codecov --file=test/coverage/lcov.info';
+          let flags = '';
+          if (argv.unit) {
+            flags = ' --flags=unit_tests';
+          } else if (argv.integration) {
+            flags = ' --flags=integration_tests';
+          }
+          log(green('INFO: ') + 'Uploading code coverage report to ' +
+              cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+              cyan(codecovCmd + flags) + '...');
+          const output = getStdout(codecovCmd + flags);
+          const viewReportPrefix = 'View report at: ';
+          const viewReport = output.match(viewReportPrefix + '.*');
+          if (viewReport && viewReport.length > 0) {
+            log(green('INFO: ') + viewReportPrefix +
+                cyan(viewReport[0].replace(viewReportPrefix, '')));
+          } else {
+            log(yellow('WARNING: ') +
+                'Code coverage report upload may have failed:\n' +
+                yellow(output));
+          }
         } else {
-          log(yellow('WARNING: ') +
-              'Code coverage report upload may have failed:\n' +
-              yellow(output));
+          const coverageReportUrl =
+              'file://' + path.resolve('test/coverage/index.html');
+          log(green('INFO: ') + 'Generated code coverage report at ' +
+              cyan(coverageReportUrl));
+          opn(coverageReportUrl, {wait: false});
         }
+      }
+      // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+      if (process.env.TRAVIS) {
+        setTimeout(() => {
+          process.exit(exitCode);
+        }, 5000);
       } else {
-        const coverageReportUrl =
-            'file://' + path.resolve('test/coverage/index.html');
-        log(green('INFO: ') + 'Generated code coverage report at ' +
-            cyan(coverageReportUrl));
-        opn(coverageReportUrl, {wait: false});
+        process.exitCode = exitCode;
       }
-    }
-    // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-    if (process.env.TRAVIS) {
-      setTimeout(() => {
-        process.exit(exitCode);
-      }, 5000);
-    } else {
-      process.exitCode = exitCode;
-    }
-    resolver();
-  }).on('run_start', function() {
-    if (argv.saucelabs || argv.saucelabs_lite) {
-      log(green('Running tests on ' + c.browsers.length +
-          ' Sauce Labs browser(s)...'));
-    } else {
-      log(green('Running tests locally...'));
-    }
-  }).on('run_complete', function() {
-    if (shouldCollapseSummary) {
-      console./* OK*/log(bold(red('Console errors:')),
-          'Expand this section and fix all errors printed by your tests.');
-      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
-    }
-  }).on('browser_complete', function(browser) {
-    const result = browser.lastResult;
-    // Prevent cases where Karma detects zero tests and still passes. #16851.
-    if (result.total == 0) {
-      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
-      if (!argv.watch) {
-        process.exit(1);
-      }
-    }
-    if (shouldCollapseSummary) {
-      let message = browser.name + ': ';
-      message += 'Executed ' + (result.success + result.failed) +
-          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
-      if (result.failed === 0) {
-        message += green('SUCCESS');
+      resolver();
+    }).on('run_start', function() {
+      if (argv.saucelabs || argv.saucelabs_lite) {
+        log(green('Running tests on ' + configBatch.browsers.length +
+            ' Sauce Labs browser(s)...'));
       } else {
-        message += red(result.failed + ' FAILED');
+        log(green('Running tests locally...'));
       }
-      message += '\n';
-      console./* OK*/log('\n');
-      log(message);
-    }
-  }).start();
-  return deferred.then(() => exitCtrlcHandler(handlerProcess));
+    }).on('run_complete', function() {
+      if (shouldCollapseSummary) {
+        console./* OK*/log(bold(red('Console errors:')),
+            'Expand this section and fix all errors printed by your tests.');
+        console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
+      }
+    }).on('browser_complete', function(browser) {
+      const result = browser.lastResult;
+      // Prevent cases where Karma detects zero tests and still passes. #16851.
+      if (result.total == 0) {
+        log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+        if (!argv.watch) {
+          process.exit(1);
+        }
+      }
+      if (shouldCollapseSummary) {
+        let message = browser.name + ': ';
+        message += 'Executed ' + (result.success + result.failed) +
+            ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+        if (result.failed === 0) {
+          message += green('SUCCESS');
+        } else {
+          message += red(result.failed + ' FAILED');
+        }
+        message += '\n';
+        console./* OK*/log('\n');
+        log(message);
+      }
+    }).start();
+    return deferred;
+  }
 }
 
 /**
