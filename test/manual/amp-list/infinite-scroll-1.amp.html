@@ -17,7 +17,7 @@
     amp-list {
       border: 1px solid green;
     }
-    [load-more-button], [load-more-failed] {
+    [load-more-button], [load-more-failed], [load-more-loading] {
       background: gray;
       color: #fff;
       cursor: pointer;
@@ -70,9 +70,6 @@
         <div><a href="/link.html">{{title}}</a></div>
       </div>
     </template>
-    <div overflow>
-      OVERFLOW
-    </div>
     <div load-more-button>
       SEE MORE
     </div>
@@ -81,6 +78,9 @@
     </div>
     <div fallback>
       FALLBACK
+    </div>
+    <div load-more-loading>
+      LOADING
     </div>
   </amp-list>
 
