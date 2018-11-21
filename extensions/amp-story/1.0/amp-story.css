@@ -176,6 +176,22 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
+amp-sidebar {
+  background-color: #ffffff !important;
+  max-width: 280px !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+/**
+ * Tablets and desktop UI overrides.
+ * Basically triggers for anything bigger than a Pixel XL / iPhone Plus.
+ */
+@media (min-width: 420px) {
+  amp-sidebar {
+    max-width: 320px !important;
+  }
+}
+
 .i-amphtml-story-fallback amp-story-page {
   display: none !important;
 }
