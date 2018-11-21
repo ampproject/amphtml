@@ -17,7 +17,6 @@
 import * as setDOM from 'set-dom/src/index';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
-import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Pass} from '../../../src/pass';
@@ -62,6 +61,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
+
     super(element);
 
     /** @private {?Element} */
@@ -124,15 +124,18 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {boolean} */
-    this.hasResizableChildren_ = false;
-
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
         return this.fetchList_(/*opt_append*/false, /* opt_refresh */ true);
       }
     }, ActionTrust.HIGH);
+
+    if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
+      this.registerAction('changeToLayoutContainer',
+          () => this.changeToLayoutContainer_(),
+          ActionTrust.HIGH);
+    }
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
@@ -168,15 +171,6 @@ export class AmpList extends AMP.BaseElement {
           ' is disabled. This feature will be relaunched under a new name' +
           ' soon. Please see https://github.com/ampproject/amphtml/issues/18849'
       );
-    }
-
-    // TODO(aghassemi): New name to be vetted, since under an experiment flag,
-    // going with `resizable-children` fo now but we can change it.
-    this.hasResizableChildren_ =
-      this.element.hasAttribute('resizable-children');
-    if (this.hasResizableChildren_) {
-      user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
-          'Experiment amp-list-resizable-children is disabled');
     }
 
     Services.bindForDocOrNull(this.element).then(bind => {
@@ -227,6 +221,7 @@ export class AmpList extends AMP.BaseElement {
     let promise;
     const src = mutations['src'];
     const state = /** @type {!JsonObject} */ (mutations)['state'];
+    const isLayoutContainer = mutations['is-layout-container'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -248,6 +243,9 @@ export class AmpList extends AMP.BaseElement {
       this.resetIfNecessary_(/* isFetch */ false);
       const data = isArray(state) ? state : [state];
       promise = this.scheduleRender_(data, /*append*/ false);
+    }
+    if (isLayoutContainer) {
+      this.changeToLayoutContainer_();
     }
     // Only return the promise for easier testing.
     if (getMode().test) {
@@ -568,13 +566,6 @@ export class AmpList extends AMP.BaseElement {
 
       // Attempt to resize to fit new rendered contents.
       this.attemptToFit_(this.container_);
-
-      if (this.hasResizableChildren_) {
-        // If the element's size was changed, change to container layout
-        // if the resizable-children attribute is set.
-        this.element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END)
-            .then(() => this.changeToLayoutContainer_());
-      }
     });
   }
 
@@ -593,9 +584,6 @@ export class AmpList extends AMP.BaseElement {
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
         this.attemptChangeHeight(scrollHeight).catch(() => {});
-      } else if (scrollHeight == height
-          && this.hasResizableChildren_) {
-        this.changeToLayoutContainer_();
       }
     });
   }
@@ -635,6 +623,8 @@ export class AmpList extends AMP.BaseElement {
       case Layout.INTRINSIC:
         this.element.classList.remove('i-amphtml-layout-intrinsic');
         break;
+      default:
+        // fall through, always remove sizer and size-defined class
     }
     // The changeSize() call removes the sizer element.
     this.element./*OK*/changeSize();
@@ -642,30 +632,38 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Converts the amp-list to de facto layout container. Must be called in
-   * mutation context.
+   * Converts the amp-list to de facto layout container. Called in mutate
+   * context.
+   * @return {!Promise}
    * @private
    */
   changeToLayoutContainer_() {
+    // TODO (#18875): cleanup resizable-children experiment
+    user().assert(isExperimentOn(this.win, 'amp-list-resizable-children'),
+        'Experiment amp-list-resizable-children is disabled');
+
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
-      return;
+      return Promise.resolve();
     }
-    this.undoPreviousLayout_(previousLayout);
-    this.container_.classList.remove(
-        'i-amphtml-fill-content',
-        'i-amphtml-replaced-content'
-    );
-    // The overflow element is generally hidden with visibility hidden,
-    // but after changing to layout container, this causes an undesirable
-    // empty white space so we hide it with display none instead.
-    const overflowElement = this.getOverflowElement();
-    if (overflowElement) {
-      toggle(overflowElement, false);
-    }
-    this.element.classList.add('i-amphtml-layout-container');
-    this.element.setAttribute('layout', 'container');
+
+    return this.mutateElement(() => {
+      this.undoPreviousLayout_(previousLayout);
+      this.container_.classList.remove(
+          'i-amphtml-fill-content',
+          'i-amphtml-replaced-content'
+      );
+      // The overflow element is generally hidden with visibility hidden,
+      // but after changing to layout container, this causes an undesirable
+      // empty white space so we hide it with display none instead.
+      const overflowElement = this.getOverflowElement();
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
+      this.element.classList.add('i-amphtml-layout-container');
+      this.element.setAttribute('layout', 'container');
+    });
   }
 
   /**
