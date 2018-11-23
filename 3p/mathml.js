@@ -52,7 +52,7 @@ export function mathml(global, data) {
         delete data.width;
         delete data.height;
         const div = document.createElement('div');
-        div.setAttribute('id','mathmlformula');
+        div.setAttribute('id', 'mathmlformula');
         div.textContent = data.formula;
         setStyle(div, 'visibility', 'hidden');
         global.document.body.appendChild(div);
