@@ -62,15 +62,20 @@ export function mathml(global, data) {
         mathjax.Hub.Queue(function() {
           const rendered = document.getElementById('MathJax-Element-1-Frame');
           // Remove built in mathjax margins.
-          const display = document.getElementsByClassName('MJXc-display');
-          if (display[0]) {
-            display[0].setAttribute('style','margin-top:0;margin-bottom:0');
-            context.requestResize(
-                rendered./*OK*/offsetWidth,
-                rendered./*OK*/offsetHeight
-            );
-            setStyle(div, 'visibility', 'visible');
+          var display = document.getElementsByClassName('MJXc-display');
+          if (!display[0]) {
+            const span = document.createElement('span');
+            span.setAttribute('class', 'mjx-chtml MJXc-display');
+            span.appendChild(rendered);
+            div.appendChild(span);
+            display = document.getElementsByClassName('MJXc-display');
           }
+          display[0].setAttribute('style','margin-top:0;margin-bottom:0');
+          context.requestResize(
+              rendered./*OK*/offsetWidth,
+              rendered./*OK*/offsetHeight
+          );
+          setStyle(div, 'visibility', 'visible');
         });
       }
   );
