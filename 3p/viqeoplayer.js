@@ -29,6 +29,8 @@ import {setStyles} from '../src/style';
  * @private
  */
 function viqeoPlayerInitLoaded(global, autoplay, VIQEO) {
+  const {canonicalUrl, pageViewId} = global.context;
+  VIQEO['setConfig']({url: canonicalUrl, amp: {pageViewId}});
   let viqeoPlayerInstance;
   global.addEventListener('message', parseMessage, false);
 
