@@ -30,7 +30,6 @@ import {
   VideoEvents,
 } from '../video-interface';
 import {Services} from '../services';
-import {VideoDocking} from './video/docking';
 import {
   VideoServiceInterface,
   VideoServiceSignals,
@@ -124,9 +123,6 @@ export class VideoManager {
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
         once(() => new AutoFullscreenManager(this.ampdoc, this));
-
-    /** @private @const {function():!VideoDocking} */
-    this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -348,11 +344,6 @@ export class VideoManager {
     this.getAutoFullscreenManager_().register(entry);
   }
 
-  /** @param {!VideoEntry} entry */
-  registerForDocking(entry) {
-    this.getDocking_().register(entry.video);
-  }
-
   /**
    * @return {!AutoFullscreenManager}
    * @visibleForTesting
@@ -509,22 +500,10 @@ class VideoEntry {
       this.manager_.registerForAutoFullscreen(this);
     }
 
-    if (this.isDockable_()) {
-      this.manager_.registerForDocking(this);
-    }
-
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isDockable_() {
-    return this.video.element.hasAttribute(VideoAttributes.DOCK);
   }
 
   /**
