@@ -48,7 +48,7 @@ For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-v
 
 attribute: **`dock`**
 
-**Experimental feature. Setting this attribute is not currently valid.**
+**Experimental feature.**
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
@@ -58,6 +58,9 @@ component's visual area.
 - Multiple videos on the same page can be docked.
 - Users can dismiss the docked video by flicking it out of view. Once dismissed
 by the user, docking will no longer occur.
+
+In order to use this attribute, the [`amp-video-docking`](https://www.ampproject.org/docs/reference/components/amp-video-docking)
+extension script must be present.
 
 ### Styling
 
