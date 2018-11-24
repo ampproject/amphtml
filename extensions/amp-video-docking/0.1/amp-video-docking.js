@@ -536,8 +536,9 @@ export class VideoDocking {
 
     listen(ampdoc.getBody(), VideoEvents.REGISTERED, e => {
       const {target} = e;
-      if (isDockable(target)) {
-        this.registerElement(target);
+      const targetAsEl = dev().assertElement(target);
+      if (isDockable(targetAsEl)) {
+        this.registerElement(targetAsEl);
       }
     });
   }
