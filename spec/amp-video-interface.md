@@ -42,7 +42,7 @@ If this attribute is present, and the browser supports autoplay:
 
 For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
 
-<a id="rotate-to-fullscreen"></a>
+<a id="docking"></a>
 
 ## Docking (minimize to corner)
 
@@ -59,7 +59,7 @@ component's visual area.
 - Users can dismiss the docked video by flicking it out of view. Once dismissed
 by the user, docking will no longer occur.
 
-In order to use this attribute, the [`amp-video-docking`](https://www.ampproject.org/docs/reference/components/amp-video-docking)
+In order to use this attribute, the [`amp-video-docking`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
 extension script must be present.
 
 ### Styling
@@ -116,6 +116,8 @@ Represents the `unmute` button.
 #### `.amp-docked-video-fullscreen`
 
 Represents the `fullscreen` button.
+
+<a id="rotate-to-fullscreen"></a>
 
 ## Rotate-to-fullscreen
 
