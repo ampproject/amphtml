@@ -386,6 +386,7 @@ function isDockable(element) {
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
  * {@see ../../../src/video-interface.VideoInterface}.
+ * @visibleForTesting
  */
 export class VideoDocking {
 
