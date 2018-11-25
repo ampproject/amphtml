@@ -180,7 +180,7 @@ describes.realWin('amp-install-serviceworker', {
         });
   });
 
-  it('should postMessage all a[rel=prefetch] scripts used to'
+  it('should postMessage all a[data-rel=prefetch] scripts used to'
     + ' service worker for prefetching', () => {
     const install = doc.createElement('div');
     install.setAttribute('data-prefetch', true);
