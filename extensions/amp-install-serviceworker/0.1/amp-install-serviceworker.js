@@ -347,7 +347,7 @@ function sendAmpScriptToSwOnFirstVisit(registration, win) {
  */
 function prefetchOutgoingLinks(registration, win) {
   const {document} = win;
-  const links = [].map.call(document.querySelectorAll('a[rel=prefetch]'),
+  const links = [].map.call(document.querySelectorAll('a[data-rel=prefetch]'),
       link => link.getAttribute('href'));
   if (supportsPrefetch(document)) {
     links.forEach(link => {
