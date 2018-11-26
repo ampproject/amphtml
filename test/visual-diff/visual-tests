@@ -614,7 +614,8 @@
     "name": "amp-story: sidebar",
     "viewport": {"width": 1440, "height": 900},
     "loading_complete_css": [
-      ".i-amphtml-story-loaded"
+      ".i-amphtml-story-sidebar-control.i-amphtml-story-button"
+      "amp-sidebar"
     ],
     "interactive_tests": "examples/visual-tests/amp-story/amp-story-sidebar.js"
   }
