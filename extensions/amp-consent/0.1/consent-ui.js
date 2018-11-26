@@ -36,7 +36,7 @@ const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
-  loading: 'loading',
+  loading: 'i-amphtml-consent-loading',
   fill: 'i-amphtml-consent-fill',
   placeholder: 'i-amphtml-consent-placeholder',
 };
