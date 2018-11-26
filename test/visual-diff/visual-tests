@@ -576,15 +576,12 @@
         ".slot-onload",
         ".slot-visibility-changed",
       ],
-      // we want to wait for the active view event to be fired
-      "loading_complete_delay_ms": 3000,
     },
     {
       "url": "examples/visual-tests/amp-inabox/amp-ads-second.html",
       "name": "AMP Inabox Two Ads",
       "forbidden_css": [".second-impression-viewable"],
       "loading_complete_css": [".first-impression-viewable"],
-      "loading_complete_delay_ms": 3000,
       "interactive_tests": "examples/visual-tests/amp-inabox/amp-ads-second.js"
     },
     {
