@@ -125,8 +125,9 @@ export class VideoManager {
 
       user().warn(TAG,
           'The `dock` attribute requires the `amp-video-docking` extension. ' +
-            'This extension has been loaded for you, but explicitly including' +
-            ' the extension will be required by January 2019.');
+            'This extension has been automatically loaded, but explicitly ' +
+            'including the `amp-video-docking-0.1.js` script will be ' +
+            'required by January 2019. ');
 
       this.extensions_.installExtensionForDoc(this.ampdoc, 'amp-video-docking');
     });
