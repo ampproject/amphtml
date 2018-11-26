@@ -73,22 +73,26 @@ module.exports = function(babel) {
         // This might not be the case like in assertEnum which we currently
         // don't remove.
         const args = path.node.arguments[0];
+        const type = typeMap[property.name];
+
         if (args) {
           if (parenthesized) {
             path.replaceWith(t.parenthesizedExpression(args));
             path.skip();
+          // If is not an assert type, we won't need to do type annotation.
+          // If it has no type that we can cast to, then we also won't need to
+          // do type annotation.
+          } else if (!/^assert/.test(property.name) || !type) {
+              path.replaceWith(args);
           } else {
             // Special case null value argument since it's mostly used for
             // interface methods with no implementation.
-            if (args.value == null) {
+            if (args.raw === "null") {
               return;
             } else {
               path.replaceWith(t.parenthesizedExpression(args));
-              const type = typeMap[property.name];
-              if (type) {
-                // Add a cast annotation to fix type.
-                path.addComment('leading', `* @type {${type}} `);
-              }
+              // Add a cast annotation to fix type.
+              path.addComment('leading', `* @type {${type}} `);
             }
           }
         } else {

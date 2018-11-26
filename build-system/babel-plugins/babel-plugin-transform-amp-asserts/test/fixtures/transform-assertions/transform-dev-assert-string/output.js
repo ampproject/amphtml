@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'hello';
-let result = 'world';
+
+/** @type {string} */
+('hello');
+let result =
+/** @type {string} */
+('world');
 let result2 = undefined;
