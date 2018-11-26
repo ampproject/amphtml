@@ -18,6 +18,7 @@ import {
   PlayingStates,
   VideoAttributes,
   VideoEvents,
+  isDockable,
 } from '../../../src/video-interface';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
@@ -371,15 +372,6 @@ class Timeout {
   isWaiting() {
     return this.id_ !== null;
   }
-}
-
-
-/**
- * @param {!Element} element
- * @return {boolean}
- */
-export function isDockable(element) {
-  return element.hasAttribute(VideoAttributes.DOCK);
 }
 
 

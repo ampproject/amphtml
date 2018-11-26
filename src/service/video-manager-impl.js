@@ -28,6 +28,7 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
+  isDockable,
 } from '../video-interface';
 import {Services} from '../services';
 import {
@@ -50,9 +51,6 @@ import {dev, user} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
-import {
-  isDockable,
-} from '../../extensions/amp-video-docking/0.1/amp-video-docking';
 import {isFiniteNumber} from '../types';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
