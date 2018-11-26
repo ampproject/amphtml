@@ -38,6 +38,10 @@ export const SubscriptionAnalyticsEvents = {
   STARTED: 'subscriptions-started',
   ACCESS_GRANTED: 'subscriptions-access-granted',
   ACCESS_DENIED: 'subscriptions-access-denied',
+  // common service adapter events
+  LINK_REQUESTED: 'subscriptions-link-requested',
+  LINK_COMPLETE: 'subscriptions-link-complete',
+  LINK_CANCELED: 'subscriptions-link-canceled',
 };
 
 export class SubscriptionAnalytics {
