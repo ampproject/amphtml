@@ -58,7 +58,7 @@ const TRUSTED_REFERRER_HOSTS = [
  */
 export function getTrackImpressionPromise() {
   return user().assert(trackImpressionPromise,
-      `E#19457 trackImpressionPromise:"${trackImpressionPromise}"`);
+      'E#19457 trackImpressionPromise');
 }
 
 /**

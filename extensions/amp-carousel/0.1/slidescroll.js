@@ -283,7 +283,7 @@ export class AmpSlideScroll extends BaseSlides {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
           this.getScrollLeftForIndex_(user().assertNumber(this.slideIndex_,
-            `E#19457 this.slideIndex_:"${this.slideIndex_}"`));
+              'E#19457 this.slideIndex_'));
       this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
   }
@@ -298,7 +298,7 @@ export class AmpSlideScroll extends BaseSlides {
       // does not change (example when browser window size changes,
       // or orientation changes)
       this.scheduleLayout(this.slides_[user().assertNumber(this.slideIndex_,
-        `E#19457 this.slideIndex_:"${this.slideIndex_}"`)]);
+          'E#19457 this.slideIndex_')]);
     }
     return Promise.resolve();
   }
@@ -314,7 +314,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(
           this.slides_[user().assertNumber(this.slideIndex_,
-            `E#19457 this.slideIndex_:"${this.slideIndex_}"`)], inViewport);
+              'E#19457 this.slideIndex_')], inViewport);
     }
   }
 
@@ -629,8 +629,8 @@ export class AmpSlideScroll extends BaseSlides {
     }
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
-          user().assertNumber(this.slideIndex_,
-            `E#19457 this.slideIndex_:"${this.slideIndex_}"`)], false);
+          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')],
+              false);
     }
     const newSlideInView = this.slides_[newIndex];
 
