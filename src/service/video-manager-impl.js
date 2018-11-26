@@ -50,6 +50,9 @@ import {dev, user} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
+import {
+  isDockable,
+} from '../../extensions/amp-video-docking/0.1/amp-video-docking';
 import {isFiniteNumber} from '../types';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
@@ -104,6 +107,20 @@ export class VideoManager {
 
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
+
+    /** @private {!../service/extensions-impl.Extensions} */
+    this.extensions_ = Services.extensionsFor(this.ampdoc.win);
+
+    /** @private {} */
+    this.loadDockingExtensionWithWarning_ = once(() => {
+      const TAG = 'video-manager';
+      user().warn(TAG,
+          'The `dock` attribute requires the `amp-video-docking` extension. ' +
+            'This extension has been loaded for you, but explicitly including' +
+            ' the extension will be required by January 2019.');
+
+      this.extensions_.installExtensionForDoc(this.ampdoc, 'amp-video-docking');
+    });
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
@@ -183,6 +200,14 @@ export class VideoManager {
     this.entries_.push(entry);
 
     const {element} = entry.video;
+    const {document} = this.ampdoc.win;
+
+    const dockingExtensionSelector = 'script[custom-element=amp-video-docking]';
+    if (isDockable(element) &&
+        !document.querySelector(dockingExtensionSelector)) {
+      this.loadDockingExtensionWithWarning_();
+    }
+
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
     setVideoComponentClassname(element);

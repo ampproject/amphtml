@@ -378,7 +378,7 @@ class Timeout {
  * @param {!Element} element
  * @return {boolean}
  */
-function isDockable(element) {
+export function isDockable(element) {
   return element.hasAttribute(VideoAttributes.DOCK);
 }
 
