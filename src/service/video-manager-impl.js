@@ -110,8 +110,7 @@ export class VideoManager {
     this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
     /** @private {} */
-    this.loadDockingExtensionWithWarning_ = once(() => {
-      const TAG = 'video-manager';
+    this.loadDockingExtensionAsFallback_ = once(() => {
       user().warn(TAG,
           'The `dock` attribute requires the `amp-video-docking` extension. ' +
             'This extension has been loaded for you, but explicitly including' +
@@ -200,10 +199,9 @@ export class VideoManager {
     const {element} = entry.video;
     const {document} = this.ampdoc.win;
 
-    const dockingExtensionSelector = 'script[custom-element=amp-video-docking]';
     if (isDockable(element) &&
-        !document.querySelector(dockingExtensionSelector)) {
-      this.loadDockingExtensionWithWarning_();
+        !document.querySelector('script[custom-element=amp-video-docking]')) {
+      this.loadDockingExtensionAsFallback_();
     }
 
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
