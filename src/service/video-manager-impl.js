@@ -110,7 +110,7 @@ export class VideoManager {
     this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
     /** @private {} */
-    this.loadDockingExtensionAsFallback_ = once(() => {
+    this.fallbackToInstallingDockingExtension_ = once(() => {
       user().warn(TAG,
           'The `dock` attribute requires the `amp-video-docking` extension. ' +
             'This extension has been loaded for you, but explicitly including' +
@@ -206,7 +206,7 @@ export class VideoManager {
         !this.ampdoc.getRootNode()
             .querySelector('script[custom-element=amp-video-docking]')) {
 
-      this.loadDockingExtensionAsFallback_();
+      this.fallbackToInstallingDockingExtension_();
     }
 
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
