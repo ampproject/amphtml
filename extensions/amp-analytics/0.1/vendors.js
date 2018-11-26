@@ -49,6 +49,7 @@ import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware';
 import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie';
 import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics';
 import {MEDIATOR_CONFIG} from './vendors/mediator';
+import {MERKLESEARCH_CONFIG} from  './vendors/merklesearch';
 import {METRIKA_CONFIG} from './vendors/metrika';
 import {MOBIFY_CONFIG} from './vendors/mobify';
 import {MPARTICLE_CONFIG} from './vendors/mparticle';
@@ -201,6 +202,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'mediametrie': MEDIAMETRIE_CONFIG,
   'mediarithmics': MEDIARITHMICS_CONFIG,
   'mediator': MEDIATOR_CONFIG,
+  'merklesearch': MERKLESEARCH_CONFIG,
   'metrika': METRIKA_CONFIG,
   'moat': MOAT_CONFIG,
   'mobify': MOBIFY_CONFIG,
