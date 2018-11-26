@@ -1176,7 +1176,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
         deferred.resolve();
         await yieldThread();
+        expect(spy).to.be.calledOnce;
 
+        // Subsequent calls should not trigger the event again.
+        vm.update();
+        await yieldThread();
         expect(spy).to.be.calledOnce;
       });
     }

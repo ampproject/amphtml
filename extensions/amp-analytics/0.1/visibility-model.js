@@ -89,6 +89,10 @@ export class VisibilityModel {
     /** @private {boolean} */
     this.ready_ = true;
 
+    // NOTE: there is a race condition where amp-analytics will set the ping
+    // without waiting on reportWhen (1) if update is called before
+    // setReportReady and (2) the visibilitySpec conditions are met. To fix
+    // this, we initialize reportReady_ to false here.
     /** @private {boolean} */
     this.reportReady_ = !this.accumulateCounters_;
 
@@ -308,8 +312,8 @@ export class VisibilityModel {
     if (!this.eventResolver_) {
       return;
     }
-    const conditionsMet = this.updateCounters_(visibility);
-    if (conditionsMet || this.forceReport_) {
+    const conditionsMet = this.updateCounters_(visibility) || this.forceReport_;
+    if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
         this.scheduledUpdateTimeoutId_ = null;
