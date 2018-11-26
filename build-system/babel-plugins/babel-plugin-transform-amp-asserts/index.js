@@ -23,6 +23,13 @@ function isRemovableMethod(t, node, names) {
   });
 }
 
+const typeMap = {
+  'assertElement': '!Element',
+  'assertString': 'string',
+  'assertNumber': 'number',
+  'assertBoolean': 'boolean',
+}
+
 const removableDevAsserts = [
   'assert',
   'fine',
@@ -71,7 +78,18 @@ module.exports = function(babel) {
             path.replaceWith(t.parenthesizedExpression(args));
             path.skip();
           } else {
-            path.replaceWith(args);
+            // Special case null value argument since it's mostly used for
+            // interface methods with no implementation.
+            if (args.value == null) {
+              return;
+            } else {
+              path.replaceWith(t.parenthesizedExpression(args));
+              const type = typeMap[property.name];
+              if (type) {
+                // Add a cast annotation to fix type.
+                path.addComment('leading', `* @type {${type}} `);
+              }
+            }
           }
         } else {
           // This is to resolve right hand side usage of expression where
