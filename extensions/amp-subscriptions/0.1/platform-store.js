@@ -41,15 +41,15 @@ let PlatformWeightDef;
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
-   * @param {!JsonObject} scoreConfig
+   * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
-   * @param {JsonObject} optPlatforms
+   * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
    */
   constructor(expectedServiceIds, scoreConfig,
-    fallbackEntitlement, optPlatforms) {
+    fallbackEntitlement, opt_Platforms) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = optPlatforms || dict();
+    this.subscriptionPlatforms_ = opt_Platforms || dict();
 
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
@@ -119,7 +119,7 @@ export class PlatformStore {
         this.serviceIds_,
         this.scoreConfig_,
         this.fallbackEntitlement_,
-        this.subscriptionPlatforms_,
+        this.subscriptionPlatforms_
     );
   }
 

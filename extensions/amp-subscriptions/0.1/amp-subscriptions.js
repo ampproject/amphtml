@@ -496,10 +496,12 @@ export class SubscriptionService {
     );
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+        ''
     );
     // deprecated event fired for backward compatibility
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+        ''
     );
     this.startAuthorizationFlow_();
   }
