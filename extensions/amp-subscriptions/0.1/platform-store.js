@@ -43,11 +43,12 @@ export class PlatformStore {
    * @param {!Array<string>} expectedServiceIds
    * @param {!JsonObject} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
+   * @param {JsonObject} optPlatforms
    */
-  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
+  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement, optPlatforms) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = dict();
+    this.subscriptionPlatforms_ = optPlatforms || dict();
 
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
@@ -105,6 +106,20 @@ export class PlatformStore {
     this.onPlatformResolvedCallbacks_.fire({
       serviceId,
     });
+  }
+
+  /**
+   * Reset the platformStore via a factory that returns a
+   * new PlatformStore with the same platforms as this one.
+   * @return {PlatformStore}
+   */
+  resetPlatformStore() {
+    return new PlatformStore(
+        this.serviceIds_,
+        this.scoreConfig_,
+        this.fallbackEntitlement_,
+        this.subscriptionPlatforms_,
+    );
   }
 
   /**

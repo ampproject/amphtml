@@ -482,10 +482,7 @@ export class SubscriptionService {
    * external event (for example a login)
    */
   resetPlatforms() {
-    const serviceIds = this.platformConfig_['services'].map(service =>
-      service['serviceId'] || 'local');
-
-    this.initializePlatformStore_(serviceIds);
+    this.platformStore_ = this.platformStore_.resetPlatformStore();
     this.renderer_.toggleLoading(true);
 
     this.platformConfig_['services'].forEach(service => {
