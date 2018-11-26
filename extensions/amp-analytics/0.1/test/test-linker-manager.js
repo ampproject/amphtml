@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
@@ -66,9 +65,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
     installVariableService(win);
-
-    // TODO(ccordry): remove this with linker-meta-opt-in experiment.
-    sandbox.stub(experiments, 'isExperimentOn').returns(true);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {
@@ -184,6 +180,27 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           '?a=1' +
           '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
           '&testLinker2=1*1u4ugj3*foo*YmFy');
+    });
+  });
+
+  it('should not add params where linker value is empty', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            gclid: '',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      expect(handlers.length).to.equal(1);
+      expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
+          'https://www.source.com/dest?a=1'
+      );
     });
   });
 
