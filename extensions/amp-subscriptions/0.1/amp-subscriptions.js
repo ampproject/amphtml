@@ -482,6 +482,7 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   reAuthorizePlatform(subscriptionPlatform) {
+    this.platformStore_.reset();
     this.platformStore_.getAvailablePlatforms()
         .forEach(platform => {
           platform.reset();
@@ -499,7 +500,6 @@ export class SubscriptionService {
         SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
         subscriptionPlatform.getServiceId()
     );
-    this.platformStore_.reset();
     this.startAuthorizationFlow_();
   }
 
