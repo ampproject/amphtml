@@ -64,13 +64,23 @@ First, the `amp-mustache` has to be declared/loaded like this:
 <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
-Then, the Mustache templates can be defined in the `template` tags like this:
+Then, the Mustache templates can be defined either in a `script` or `template` tag
+like this:
 
 ```html
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
+
+```html
+<script template="amp-mustache">
+  Hello {{world}}!
+</script>
+```
+
+Choosing one over the other is a matter of preference and needs. The script template
+currently doesn't support nested templates but solves an issue with templating in the context with tables; present when using template tags. See the "Tables" section further below.
 
 How templates are discovered, when they are rendered, how data is provided is  all decided by the
 target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
@@ -139,7 +149,18 @@ The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 </table>
 ```
 
-Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`) or using non-table elements like `<div>` instead.
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using the script tag to
+define your templates.
+
+```html
+<script type="text/plain" template="amp-mustache">
+  <table>
+    <tr>
+      {{#foo}}<td></td>{{/foo}}
+    </tr>
+  </table>
+</script>
+```
 
 ### Quote escaping
 
