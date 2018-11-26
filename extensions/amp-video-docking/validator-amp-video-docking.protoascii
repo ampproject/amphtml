@@ -23,5 +23,7 @@ tags: {  # amp-video-docking
     version: "latest"
   }
   html_format: AMP
+  requires_extension: "amp-video"
+  spec_name: "amp-video-docking for amp-video"
   tag_name: "SCRIPT"
 }
