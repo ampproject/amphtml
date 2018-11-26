@@ -124,7 +124,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           },
           "extraUrlParams": {
             "a": 1,
-            "b": "\${title}"
+            "b": "\${title}",
+            "c": {
+              "d": "\${title}"
+            },
+            "e": ["\${title}", "\${title}"]
           }
         }
         </script>
@@ -134,7 +138,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     it('should send request use POST body payload', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
-        expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
+        expect(req.body).to.equal(
+            '{"a":2,"b":"AMP TEST","c":{"d":"AMP TEST"},' +
+        '"e":["AMP TEST","AMP TEST"]}'
+        );
       });
     });
   });
