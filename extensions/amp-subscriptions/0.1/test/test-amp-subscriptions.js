@@ -483,36 +483,21 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     });
 
-    it('should reset entitlement on re-authorization', () => {
+    it('should reset platform on re-authorization', () => {
+      const service = serviceConfig.services[0];
+      subscriptionService.serviceAdapter_ =
+        new ServiceAdapter(subscriptionService);
+      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      subscriptionService.initializeLocalPlatforms_(service);
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const resetEntitlementsStub = sandbox.stub(
-          subscriptionService.platformStore_,
-          'resetEntitlementFor');
+      const initPlatformsStub = sandbox.stub(
+          subscriptionService, 'initializePlatformStore_');
       sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-      subscriptionService.reAuthorizePlatform(platform);
-      expect(resetEntitlementsStub).to.be.calledOnce.calledWith('local');
-    });
-
-    it('should reset UI in all platforms on re-authorization', () => {
-      const entitlement = Entitlement.empty('local');
-      sandbox.stub(platform, 'getEntitlements')
-          .callsFake(() => Promise.resolve(entitlement));
-      sandbox.stub(subscriptionService.platformStore_, 'resetEntitlementFor');
-      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-
-      const localResetStub = sandbox.stub(platform, 'reset');
-      subscriptionService.platformStore_.resolvePlatform('local', platform);
-
-      const otherPlatform = new LocalSubscriptionPlatform(ampdoc,
-          serviceConfig.services[0],
-          serviceAdapter);
-      const otherResetStub = sandbox.stub(otherPlatform, 'reset');
-      subscriptionService.platformStore_.resolvePlatform(
-          'other', otherPlatform);
-
-      subscriptionService.reAuthorizePlatform(platform);
-      expect(localResetStub).to.be.calledOnce;
-      expect(otherResetStub).to.be.calledOnce;
+      subscriptionService.resetPlatforms();
+      expect(initPlatformsStub).to.be.calledOnce
+          .calledWith(['local', 'google.subscription']);
     });
   });
 

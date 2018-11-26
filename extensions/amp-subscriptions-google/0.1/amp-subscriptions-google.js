@@ -133,7 +133,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onLinkComplete_() {
-    this.serviceAdapter_.reAuthorizePlatform(this);
+    this.serviceAdapter_.resetPlatforms();
   }
 
   /** @private */
@@ -160,7 +160,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onSubscribeResponse_(response) {
     response.complete().then(() => {
-      this.serviceAdapter_.reAuthorizePlatform(this);
+      this.serviceAdapter_.resetPlatforms();
     });
   }
 

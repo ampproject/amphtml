@@ -216,15 +216,6 @@ export class PlatformStore {
   }
 
   /**
-   * @param {string} serviceId
-   */
-  resetEntitlementFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
-        `Platform ${serviceId} is not declared`);
-    this.entitlementDeferredMap_[serviceId] = new Deferred();
-  }
-
-  /**
    * @return {!Promise<boolean>}
    */
   getGrantStatus() {

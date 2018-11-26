@@ -478,27 +478,31 @@ export class SubscriptionService {
   }
 
   /**
-   * Re authorizes a platform
-   * @param {!SubscriptionPlatform} subscriptionPlatform
+   * Reset all platforms and re-fetch entitlements after an
+   * external event (for example a login)
    */
-  reAuthorizePlatform(subscriptionPlatform) {
-    this.platformStore_.reset();
-    this.platformStore_.getAvailablePlatforms()
-        .forEach(platform => {
-          platform.reset();
-          this.platformStore_.resetEntitlementFor(
-              platform.getServiceId());
-          this.fetchEntitlements_(platform);
-        });
+  resetPlatforms() {
+    const serviceIds = this.platformConfig_['services'].map(service =>
+      service['serviceId'] || 'local');
+
+    this.initializePlatformStore_(serviceIds);
     this.renderer_.toggleLoading(true);
+
+    this.platformConfig_['services'].forEach(service => {
+      this.initializeLocalPlatforms_(service);
+    });
+
+    this.platformStore_.getAvailablePlatforms().forEach(
+        subscriptionPlatform => {
+          this.fetchEntitlements_(subscriptionPlatform);
+        }
+    );
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-        subscriptionPlatform.getServiceId()
     );
     // deprecated event fired for backward compatibility
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
-        subscriptionPlatform.getServiceId()
     );
     this.startAuthorizationFlow_();
   }
