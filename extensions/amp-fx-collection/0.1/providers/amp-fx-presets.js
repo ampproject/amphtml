@@ -81,9 +81,9 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const topAsLength = style.top == 'auto' ? '0px' : style.top;
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
               const positionKeyword =
-                style.position !== 'static' ? 'relative' : 'static';
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} +
                   ${fxElement.getFlyInDistance()}vh)`,
@@ -132,7 +132,6 @@ export const Presets = {
               const leftAsLength = style.left === 'auto' ? '0px' : style.left;
               const positionKeyword =
                 style.position === 'static' ? 'relative' : style.position;
-
               setStyles(fxElement.getElement(), {
                 'left':
                   `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
@@ -230,7 +229,7 @@ export const Presets = {
                   fxElement.getElement());
               const topAsLength = style.top === 'auto' ? '0px' : style.top;
               const positionKeyword =
-                style.position !== 'static' ? 'relative' : 'static';
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} -
                   ${fxElement.getFlyInDistance()}vh)`,
