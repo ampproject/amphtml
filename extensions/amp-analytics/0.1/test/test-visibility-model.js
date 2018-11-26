@@ -16,6 +16,7 @@
 
 import {Deferred} from '../../../../src/utils/promise';
 import {VisibilityModel} from '../visibility-model';
+import {macroTask} from '../../../../testing/yield';
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;
@@ -165,8 +166,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
   });
 
-  describe('structure', () => {
-    let visibility;
+  describe('structure', () => { let visibility;
     let calcVisibility;
 
     beforeEach(() => {
@@ -1128,10 +1128,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
       sandbox.restore(); // Restore timers.
     });
 
-    // Yields the thread to allow internal promises to complete.
-    const yieldThread =
-      async() => new Promise(resolve => setTimeout(resolve, 1));
-
     it('should not trigger event immediately', async() => {
       let visibility = 0;
       const vm = new VisibilityModel({
@@ -1143,11 +1139,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vm.onTriggerEvent(spy);
 
       vm.update();
-      await yieldThread();
+      await macroTask();
 
       visibility = 0.5;
       vm.update();
-      await yieldThread();
+      await macroTask();
 
       expect(spy).to.not.be.called;
     });
@@ -1171,16 +1167,16 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vm.setReportReady(createReportReadyPromise);
 
         vm.update();
-        await yieldThread();
+        await macroTask();
         expect(spy).to.not.be.called;
 
         deferred.resolve();
-        await yieldThread();
+        await macroTask();
         expect(spy).to.be.calledOnce;
 
         // Subsequent calls should not trigger the event again.
         vm.update();
-        await yieldThread();
+        await macroTask();
         expect(spy).to.be.calledOnce;
       });
     }
@@ -1224,11 +1220,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vm.setReportReady(createReportReadyPromise);
 
         vm.update();
-        await yieldThread();
+        await macroTask();
         expect(spy).to.not.be.called;
 
         deferred.resolve();
-        await yieldThread();
+        await macroTask();
         expect(spy).to.not.be.called;
       });
     }
