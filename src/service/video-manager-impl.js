@@ -109,8 +109,20 @@ export class VideoManager {
     /** @private {!../service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
-    /** @private {} */
-    this.fallbackToInstallingDockingExtension_ = once(() => {
+    /**
+     * Authors must include the `amp-video-docking` script for instantiation of
+     * the docking service, but it's installed in case the script is not
+     * present.
+     * This supports the rare case of very outdated documents created when the
+     * extension was not required.
+     * @private @const {function()}
+     */
+    this.maybeInstallDockingExtension_ = once(() => {
+      if (this.ampdoc.getRootNode().querySelector(
+          'script[custom-element=amp-video-docking]')) {
+        return;
+      }
+
       user().warn(TAG,
           'The `dock` attribute requires the `amp-video-docking` extension. ' +
             'This extension has been loaded for you, but explicitly including' +
@@ -198,15 +210,8 @@ export class VideoManager {
 
     const {element} = entry.video;
 
-    // Authors must include the `amp-video-docking` script for instantiation of
-    // the docking service, but it gets initialized in case it's not present.
-    // This supports the rare case of very outdated documents created when the
-    // extension was not required.
-    if (isDockable(element) &&
-        !this.ampdoc.getRootNode()
-            .querySelector('script[custom-element=amp-video-docking]')) {
-
-      this.fallbackToInstallingDockingExtension_();
+    if (isDockable(element)) {
+      this.maybeInstallDockingExtension_();
     }
 
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
