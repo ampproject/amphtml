@@ -86,8 +86,9 @@ module.exports = function(babel) {
               path.replaceWith(args);
           } else {
             // Special case null value argument since it's mostly used for
-            // interface methods with no implementation.
-            if (args.raw === "null") {
+            // interface methods with no implementation which will most likely
+            // get DCE'd by Closure Compiler since they are unused code methods.
+            if (args.value === "null" || args.type === "NullLiteral") {
               return;
             } else {
               path.replaceWith(t.parenthesizedExpression(args));
@@ -97,7 +98,8 @@ module.exports = function(babel) {
           }
         } else {
           // This is to resolve right hand side usage of expression where
-          // no argument is passed in.
+          // no argument is passed in. This bare undefined value is eventually
+          // stripped by Closure Compiler.
           path.replaceWith(t.identifier('undefined'));
         }
       },
