@@ -90,7 +90,7 @@ Supporting AMP Access requires that the Publisher implement the components descr
 
 To assist access services and use cases, AMP Access introduces the concept of *Reader ID*.
 
-The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each Reader/Publisher pair - a Reader is identified differently to two different Publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications. Publishers must use the Reader ID to identify the Reader and map it to their own identity systems.
+The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each Reader/Publisher pair - a Reader is identified differently to two different Publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications and has very high entropy. Publishers can use the Reader ID to identify the Reader and map it to their own identity systems.
 
 The Reader ID is constructed on the user device and intended to be long-lived. However, it follows the normal browser storage rules, including those for incognito windows. The intended lifecycle of a Reader ID is 1 year between uses or until the user clears their cookies. The Reader IDs are not currently shared between devices.
 
@@ -98,9 +98,7 @@ The Reader ID is constructed similarly to the mechanism used to build ExternalCI
 
 ### AMP Access and Cookies
 
-Even though some of the Publisher’s own authentication cookies may be available at the time of the Authorization and Pingback requests, the cookies should only be used for internal mapping. There are no guarantees that the Publisher will be able to read or write cookies given all surfaces and platforms where an AMP document can be embedded. The Reader ID is the only identifier that is guaranteed to work.
-
-This means, in particular, that features such as metering and first-click-free have to rely on the AMP Reader ID and server-side storage.
+Publishers can use their own authentication cookies, or they may rely on the Reader ID, or a combination of both.
 
 ### Access Content Markup
 
