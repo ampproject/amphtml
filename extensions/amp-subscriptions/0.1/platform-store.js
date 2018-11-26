@@ -45,7 +45,8 @@ export class PlatformStore {
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {JsonObject} optPlatforms
    */
-  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement, optPlatforms) {
+  constructor(expectedServiceIds, scoreConfig,
+    fallbackEntitlement, optPlatforms) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = optPlatforms || dict();

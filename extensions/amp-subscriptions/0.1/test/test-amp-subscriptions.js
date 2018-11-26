@@ -492,12 +492,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const initPlatformsStub = sandbox.stub(
-          subscriptionService, 'initializePlatformStore_');
+      const resetSubscriptionPlatformSpy = sandbox.spy(
+          subscriptionService.platformStore_, 'resetPlatformStore');
       sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+      const origPlatforms = subscriptionService.platformStore_.serviceIds_;
       subscriptionService.resetPlatforms();
-      expect(initPlatformsStub).to.be.calledOnce
-          .calledWith(['local', 'google.subscription']);
+      expect(resetSubscriptionPlatformSpy).to.be.calledOnce;
+      expect(subscriptionService.platformStore_.serviceIds_)
+          .to.equal(origPlatforms);
     });
   });
 
