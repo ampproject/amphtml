@@ -16,7 +16,6 @@
 
 import {Deferred} from '../../../../src/utils/promise';
 import {VisibilityModel} from '../visibility-model';
-import {macroTask} from '../../../../testing/yield';
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;
@@ -25,6 +24,13 @@ const NO_CALC = () => 0;
 describes.sandboxed('VisibilityModel', {}, () => {
   let startTime;
   let clock;
+
+  const tick = async(timeout = 0) => {
+    // Wait for the micro-task queue to clear since we need to wait for
+    // internal promises to finish before running assertions;
+    await Promise.resolve();
+    clock.tick(timeout);
+  };
 
   beforeEach(() => {
     clock = sandbox.useFakeTimers();
@@ -457,19 +463,18 @@ describes.sandboxed('VisibilityModel', {}, () => {
       let reportPromise;
       let promiseResolver;
       beforeEach(() => {
-        reportPromise = new Promise(resolve => {
-          promiseResolver = resolve;
-        });
-        vh.setReportReady(() => {return reportPromise;});
+        promiseResolver = new Deferred();
+        vh.setReportReady(() => promiseResolver.promise);
+        reportPromise = promiseResolver.promise;
       });
 
       it('conditions met, send when report ready', () => {
-        visibilityValueForTesting = 0.5;
-        vh.update_(1);
+        visibilityValueForTesting = 1;
+        vh.update();
         clock.tick(20);
-        vh.update_(1);
+        vh.update();
         expect(eventSpy).to.not.be.called;
-        promiseResolver();
+        promiseResolver.resolve();
         return reportPromise.then(() => {
           expect(eventSpy).to.be.calledOnce;
         });
@@ -477,16 +482,116 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
       it('conditions met, but no longer met when ready to report', () => {
         visibilityValueForTesting = 1;
-        vh.update_(1);
+        vh.update();
         clock.tick(20);
-        vh.update_(1);
+        vh.update();
         eventSpy.resetHistory();
         expect(eventSpy).to.not.be.called;
         clock.tick(1001);
-        promiseResolver();
+        promiseResolver.resolve();
         return reportPromise.then(() => {
           expect(eventSpy).to.not.be.called;
         });
+      });
+
+      describe('with forceReport', () => {
+        beforeEach(() => {
+          visibilityValueForTesting = 0;
+        });
+
+        it('should not trigger event immediately when conditions are met',
+            async() => {
+              const vh = new VisibilityModel({
+                reportWhen: 'documentExit',
+                forceReport: true,
+                minVisiblePercentage: 0,
+              }, () => visibilityValueForTesting);
+              vh.setReady(true);
+
+              vh.update();
+              await tick();
+
+              visibilityValueForTesting = 0.5;
+              vh.update();
+              await tick();
+
+              expect(eventSpy).to.not.be.called;
+            });
+
+        const shouldTriggerEventTestSpecs = [
+          {reportWhen: 'documentExit', forceReport: true},
+          {reportWhen: 'documentExit', forceReport: true, totalTimeMin: 100000,
+            visiblePercentageMin: 50},
+        ];
+
+        for (const i in shouldTriggerEventTestSpecs) {
+          it('should trigger event with forceReport,' +
+              `test case #${i}`, async() => {
+            const vh = new VisibilityModel(
+                shouldTriggerEventTestSpecs[i], () => 0);
+
+            vh.setReady(true);
+            vh.onTriggerEvent(eventSpy);
+            vh.setReportReady(() => reportPromise);
+
+            vh.update();
+            await tick();
+            expect(eventSpy).to.not.be.called;
+
+            promiseResolver.resolve();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
+
+            // Subsequent calls should not trigger the event again.
+            vh.update();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
+          });
+        }
+
+        const shouldNotTriggerWhenHiddenTestCases = [
+          {
+            description: 'forceReport is undefined',
+            spec: {reportWhen: 'documentExit'},
+          },
+          {
+            description: 'forceReport = false',
+            spec: {reportWhen: 'documentExit', forceReport: false},
+          },
+          {
+            description: 'forceReport = 1 (not a boolean)',
+            spec: {reportWhen: 'documentExit', forceReport: 1},
+          },
+          {
+            description: 'forceReport = "true" (not a boolean)',
+            spec: {reportWhen: 'documentExit', forceReport: 'true'},
+          },
+          {
+            description: 'Missing reportWhen',
+            spec: {forceReport: true},
+          },
+        ];
+
+        for (const i in shouldNotTriggerWhenHiddenTestCases) {
+          const {description, spec} = shouldNotTriggerWhenHiddenTestCases[i];
+
+          it('should not trigger event, ' +
+            `test case ${description}`, async() => {
+            const vh = new VisibilityModel(spec, () => 0);
+            vh.setReady(true);
+            vh.onTriggerEvent(eventSpy);
+            vh.setReportReady(() => reportPromise);
+
+            vh.update();
+            await tick();
+            expect(eventSpy).to.not.be.called;
+
+            promiseResolver.resolve();
+            await tick();
+            expect(eventSpy).to.not.be.called;
+          });
+        }
+
       });
     });
 
@@ -1128,105 +1233,5 @@ describes.sandboxed('VisibilityModel', {}, () => {
       sandbox.restore(); // Restore timers.
     });
 
-    it('should not trigger event immediately', async() => {
-      let visibility = 0;
-      const vm = new VisibilityModel({
-        reportWhen: 'documentExit',
-        forceReport: true,
-      }, () => visibility);
-
-      const spy = sandbox.spy();
-      vm.onTriggerEvent(spy);
-
-      vm.update();
-      await macroTask();
-
-      visibility = 0.5;
-      vm.update();
-      await macroTask();
-
-      expect(spy).to.not.be.called;
-    });
-
-    const shouldTriggerEventTestSpecs = [
-      {reportWhen: 'documentExit', forceReport: true},
-      {reportWhen: 'documentExit', forceReport: true, totalTimeMin: 100000,
-        visiblePercentageMin: 50},
-    ];
-
-    for (const i in shouldTriggerEventTestSpecs) {
-      it(`should trigger event with forceReport, test case #${i}`, async() => {
-        const vm = new VisibilityModel(shouldTriggerEventTestSpecs[i], () => 0);
-        vm.setReady(true);
-
-        const spy = sandbox.spy();
-        vm.onTriggerEvent(spy);
-
-        const deferred = new Deferred();
-        const createReportReadyPromise = () => deferred.promise;
-        vm.setReportReady(createReportReadyPromise);
-
-        vm.update();
-        await macroTask();
-        expect(spy).to.not.be.called;
-
-        deferred.resolve();
-        await macroTask();
-        expect(spy).to.be.calledOnce;
-
-        // Subsequent calls should not trigger the event again.
-        vm.update();
-        await macroTask();
-        expect(spy).to.be.calledOnce;
-      });
-    }
-
-    const shouldNotTriggerWhenHiddenTestCases = [
-      {
-        description: 'forceReport is undefined',
-        spec: {reportWhen: 'documentExit'},
-      },
-      {
-        description: 'forceReport = false',
-        spec: {reportWhen: 'documentExit', forceReport: false},
-      },
-      {
-        description: 'forceReport = 1 (not a boolean)',
-        spec: {reportWhen: 'documentExit', forceReport: 1},
-      },
-      {
-        description: 'forceReport = "true" (not a boolean)',
-        spec: {reportWhen: 'documentExit', forceReport: 'true'},
-      },
-      {
-        description: 'Missing reportWhen',
-        spec: {forceReport: true},
-      },
-    ];
-
-    for (const i in shouldNotTriggerWhenHiddenTestCases) {
-      const {description, spec} = shouldNotTriggerWhenHiddenTestCases[i];
-
-      it('should not trigger event, ' +
-        `test case ${description}`, async() => {
-        const vm = new VisibilityModel(spec, () => 0);
-        vm.setReady(true);
-
-        const spy = sandbox.spy();
-        vm.onTriggerEvent(spy);
-
-        const deferred = new Deferred();
-        const createReportReadyPromise = () => deferred.promise;
-        vm.setReportReady(createReportReadyPromise);
-
-        vm.update();
-        await macroTask();
-        expect(spy).to.not.be.called;
-
-        deferred.resolve();
-        await macroTask();
-        expect(spy).to.not.be.called;
-      });
-    }
   });
 });
