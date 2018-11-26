@@ -485,17 +485,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should reset entitlement on re-authorization', () => {
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        granted: true, grantReason: GrantReason.SUBSCRIBER});
-      sandbox.stub(platform, 'getEntitlements')
-          .callsFake(() => Promise.resolve(entitlement));
       const resetEntitlementsStub = sandbox.stub(
           subscriptionService.platformStore_,
           'resetEntitlementFor');
       sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-      return subscriptionService.reAuthorizePlatform(platform).then(() => {
-        expect(resetEntitlementsStub).to.be.calledOnce.calledWith('local');
-      });
+      subscriptionService.reAuthorizePlatform(platform);
+      expect(resetEntitlementsStub).to.be.calledOnce.calledWith('local');
     });
 
     it('should reset UI in all platforms on re-authorization', () => {
@@ -515,10 +510,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.platformStore_.resolvePlatform(
           'other', otherPlatform);
 
-      return subscriptionService.reAuthorizePlatform(platform).then(() => {
-        expect(localResetStub).to.be.calledOnce;
-        expect(otherResetStub).to.be.calledOnce;
-      });
+      subscriptionService.reAuthorizePlatform(platform);
+      expect(localResetStub).to.be.calledOnce;
+      expect(otherResetStub).to.be.calledOnce;
     });
   });
 

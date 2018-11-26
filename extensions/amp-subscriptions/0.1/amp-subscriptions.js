@@ -480,7 +480,6 @@ export class SubscriptionService {
   /**
    * Re authorizes a platform
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise}
    */
   reAuthorizePlatform(subscriptionPlatform) {
     this.platformStore_.getAvailablePlatforms()
@@ -488,21 +487,20 @@ export class SubscriptionService {
           platform.reset();
           this.platformStore_.resetEntitlementFor(
               platform.getServiceId());
+          this.fetchEntitlements_(platform);
         });
     this.renderer_.toggleLoading(true);
-    return this.fetchEntitlements_(subscriptionPlatform).then(() => {
-      this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-          subscriptionPlatform.getServiceId()
-      );
-      // deprecated event fired for backward compatibility
-      this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
-          subscriptionPlatform.getServiceId()
-      );
-      this.platformStore_.reset();
-      this.startAuthorizationFlow_();
-    });
+    this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+        subscriptionPlatform.getServiceId()
+    );
+    // deprecated event fired for backward compatibility
+    this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+        subscriptionPlatform.getServiceId()
+    );
+    this.platformStore_.reset();
+    this.startAuthorizationFlow_();
   }
 
   /**
