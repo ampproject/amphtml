@@ -197,10 +197,15 @@ export class VideoManager {
     this.entries_.push(entry);
 
     const {element} = entry.video;
-    const {document} = this.ampdoc.win;
 
+    // Authors must include the `amp-video-docking` script for instantiation of
+    // the docking service, but it gets initialized in case it's not present.
+    // This supports the rare case of very outdated documents created when the
+    // extension was not required.
     if (isDockable(element) &&
-        !document.querySelector('script[custom-element=amp-video-docking]')) {
+        !this.ampdoc.getRootNode()
+            .querySelector('script[custom-element=amp-video-docking]')) {
+
       this.loadDockingExtensionAsFallback_();
     }
 
