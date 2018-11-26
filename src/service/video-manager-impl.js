@@ -106,9 +106,6 @@ export class VideoManager {
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
-    /** @private {!../service/extensions-impl.Extensions} */
-    this.extensions_ = Services.extensionsFor(this.ampdoc.win);
-
     /**
      * Authors must include the `amp-video-docking` script for instantiation of
      * the docking service, but it's installed in case the script is not
@@ -118,18 +115,22 @@ export class VideoManager {
      * @private @const {function()}
      */
     this.maybeInstallDockingExtension_ = once(() => {
-      if (this.ampdoc.getRootNode().querySelector(
-          'script[custom-element=amp-video-docking]')) {
+      const {ampdoc} = this;
+
+      if (ampdoc
+          .getRootNode()
+          .querySelector('script[custom-element=amp-video-docking]')) {
         return;
       }
+
+      Services.extensionsFor(ampdoc.win)
+          .installExtensionForDoc(ampdoc, 'amp-video-docking');
 
       user().warn(TAG,
           'The `dock` attribute requires the `amp-video-docking` extension. ' +
             'This extension has been automatically loaded, but explicitly ' +
             'including the `amp-video-docking-0.1.js` script will be ' +
             'required by January 2019. ');
-
-      this.extensions_.installExtensionForDoc(this.ampdoc, 'amp-video-docking');
     });
 
     /** @private {?Array<!VideoEntry>} */
