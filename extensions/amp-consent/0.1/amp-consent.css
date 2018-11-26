@@ -41,7 +41,7 @@ amp-consent.amp-hidden {
   visibility: hidden;
 }
 
-amp-consent.loading {
+amp-consent.i-amphtml-consent-loading {
   /* TODO: Finalize the placeholder design */
 }
 
