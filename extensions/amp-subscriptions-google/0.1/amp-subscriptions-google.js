@@ -79,7 +79,7 @@ export class GoogleSubscriptionsPlatform {
   constructor(ampdoc, platformConfig, serviceAdapter) {
     const configElement = ampdoc.getElementById(CONFIG_TAG);
 
-    /** @private {!./analytics.SubscriptionAnalytics} */
+    /** @private {!../../amp-subscriptions/0.1/analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = new SubscriptionAnalytics(
         user().assertElement(configElement)
     );
