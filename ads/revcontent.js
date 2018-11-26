@@ -23,13 +23,14 @@ import {validateData, writeScript} from '../3p/3p';
 export function revcontent(global, data) {
   const endpoint = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
   const required = [
-    'id',
-    'width',
-    'height',
-    'wrapper',
+    'id'
   ];
   const optional = [
     'api',
+    'wrapper',    
+    'width',
+    'height',
+    'feed',
     'key',
     'ssl',
     'adxw',
