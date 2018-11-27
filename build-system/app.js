@@ -1165,7 +1165,7 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 app.get('/infinite-scroll', function(req, res) {
-  const query = {req};
+  const {query} = req;
   const results = [];
   const numberOfItems = query['items'] || 10;
   const pagesLeft = query['left'] || 1;
