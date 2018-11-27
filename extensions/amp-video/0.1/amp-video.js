@@ -21,7 +21,6 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByTag,
   childElementsByTag,
-  closestByTag,
   elementByTag,
   fullscreenEnter,
   fullscreenExit,
@@ -29,6 +28,7 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -232,23 +232,16 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   configure_() {
-    if (!this.descendsFromStory_()) {
+    const {element} = this;
+    if (!descendsFromStory(element)) {
       return;
     }
     [
       'i-amphtml-disable-mediasession',
       'i-amphtml-poolbound',
     ].forEach(className => {
-      this.element.classList.add(className);
+      element.classList.add(className);
     });
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  descendsFromStory_() {
-    return !!closestByTag(this.element, 'amp-story-page');
   }
 
   /** @override */
