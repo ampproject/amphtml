@@ -482,8 +482,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (isInStandardMode && descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
-        toggle(dev().assertElement(this.navControls_), false);
-        toggle(dev().assertElement(this.topBar_), false);
+        toggle(user().assertElement(this.navControls_,
+            'E#19457 this.navControls_'), false);
+        toggle(user().assertElement(this.topBar_, 'E#19457 this.topBar_'),
+            false);
       } else if (isInOverflowMode) {
         this.clearDescOverflowState_();
       }
@@ -499,8 +501,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_./*OK*/scrollTop = 0;
     this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
     this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
-    toggle(dev().assertElement(this.navControls_), true);
-    toggle(dev().assertElement(this.topBar_), true);
+    toggle(user().assertElement(this.navControls_,
+        'E#19457 this.navControls_'), true);
+    toggle(user().assertElement(this.topBar_,
+        'E#19457 this.topBar_'), true);
   }
 
   /**
