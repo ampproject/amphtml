@@ -22,7 +22,7 @@ const {hasOwnProperty} = Object.prototype;
  * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Object/values.
  *
  * @param {!Object} target
- * @returns {!Array<*>}
+ * @return {!Array<*>}
  */
 export function values(target) {
   if (target == null) {
