@@ -295,82 +295,84 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.classList.add('amp-apester-container');
-    const vsync = Services.vsyncFor(this.win);
-    return this.queryMedia_().then(
-        response => {
-          if (!response || response['status'] === 204) {
-            dev().error(TAG, 'Display', 'No Content for provided tag');
-            return this.unlayoutCallback();
-          }
-          const payload = response['payload'];
-          // If it's a playlist we choose a media randomly.
-          // The response will be an array.
-          const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
-            ? payload[Math.floor(Math.random() * payload.length)]
-            : payload);
+    if (this.element) {
+      this.element.classList.add('amp-apester-container');
+      const vsync = Services.vsyncFor(this.win);
+      return this.queryMedia_().then(
+          response => {
+            if (!response || response['status'] === 204) {
+              dev().error(TAG, 'Display', 'No Content for provided tag');
+              return this.unlayoutCallback();
+            }
+            const payload = response['payload'];
+            // If it's a playlist we choose a media randomly.
+            // The response will be an array.
+            const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
+              ? payload[Math.floor(Math.random() * payload.length)]
+              : payload);
 
-          const interactionId = media['interactionId'];
-          const usePlayer = media['usePlayer'];
+            const interactionId = media['interactionId'];
+            const usePlayer = media['usePlayer'];
 
-          const src = this.constructUrlFromMedia_(interactionId, usePlayer);
-          const iframe = this.constructIframe_(src);
-          this.intersectionObserverApi_ = new IntersectionObserverApi(
-              this,
-              iframe
-          );
+            const src = this.constructUrlFromMedia_(interactionId, usePlayer);
+            const iframe = this.constructIframe_(src);
+            this.intersectionObserverApi_ = new IntersectionObserverApi(
+                this,
+                iframe
+            );
 
-          this.mediaId_ = interactionId;
-          this.iframe_ = iframe;
-          this.registerToApesterEvents_();
+            this.mediaId_ = interactionId;
+            this.iframe_ = iframe;
+            this.registerToApesterEvents_();
 
-          return vsync
-              .mutatePromise(() => {
-                const overflow = this.constructOverflow_();
-                this.element.appendChild(overflow);
-                this.element.appendChild(iframe);
-              })
-              .then(() => {
-                return this.loadPromise(iframe).then(() => {
-                  return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
-                    if (media['campaignData']) {
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                          /** @type {JsonObject} */ ({
-                            type: 'campaigns',
-                            data: media['campaignData'],
-                          }),
-                          '*'
-                      );
-                    }
-                    this.togglePlaceholder(false);
-                    this.ready_ = true;
-                    let height = 0;
-                    if (media && media['data'] && media['data']['size']) {
-                      height = media['data']['size']['height'];
-                    }
-                    if (height != this.height_) {
-                      this.height_ = height;
-                      if (this.random_) {
-                        this./*OK*/ attemptChangeHeight(height);
-                      } else {
-                        this./*OK*/ changeHeight(height);
+            return vsync
+                .mutatePromise(() => {
+                  const overflow = this.constructOverflow_();
+                  this.element.appendChild(overflow);
+                  this.element.appendChild(iframe);
+                })
+                .then(() => {
+                  return this.loadPromise(iframe).then(() => {
+                    return vsync.mutatePromise(() => {
+                      this.iframe_.classList
+                          .add('i-amphtml-apester-iframe-ready');
+                      if (media['campaignData']) {
+                        this.iframe_.contentWindow./*OK*/ postMessage(
+                            /** @type {JsonObject} */ ({
+                              type: 'campaigns',
+                              data: media['campaignData'],
+                            }),
+                            '*'
+                        );
                       }
-                    }
+                      this.togglePlaceholder(false);
+                      this.ready_ = true;
+                      let height = 0;
+                      if (media && media['data'] && media['data']['size']) {
+                        height = media['data']['size']['height'];
+                      }
+                      if (height != this.height_) {
+                        this.height_ = height;
+                        if (this.random_) {
+                          this./*OK*/ attemptChangeHeight(height);
+                        } else {
+                          this./*OK*/ changeHeight(height);
+                        }
+                      }
+                    });
                   });
+                })
+                .catch(error => {
+                  dev().error(TAG, 'Display', error);
+                  return undefined;
                 });
-              })
-              .catch(error => {
-                dev().error(TAG, 'Display', error);
-                return undefined;
-              });
-        },
-        error => {
-          dev().error(TAG, 'Display', error);
-          return undefined;
-        }
-    );
+          },
+          error => {
+            dev().error(TAG, 'Display', error);
+            return undefined;
+          }
+      );
+    }
   }
 
   /** @override */
