@@ -28,6 +28,7 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {descendsFromStory} from '../../../src/utils/story';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
@@ -185,6 +186,8 @@ class AmpVideo extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    this.configure_();
+
     this.video_ = element.ownerDocument.createElement('video');
 
     const poster = element.getAttribute('poster');
@@ -225,6 +228,20 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @private */
+  configure_() {
+    const {element} = this;
+    if (!descendsFromStory(element)) {
+      return;
+    }
+    [
+      'i-amphtml-disable-mediasession',
+      'i-amphtml-poolbound',
+    ].forEach(className => {
+      element.classList.add(className);
+    });
   }
 
   /** @override */
@@ -574,7 +591,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   isManagedByPool_() {
-    return this.video_.classList.contains('i-amphtml-pool-media');
+    return this.element.classList.contains('i-amphtml-poolbound');
   }
 
   /**
