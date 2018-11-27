@@ -294,6 +294,7 @@ describes.realWin('amp-consent', {
     let updateConsentInstanceStateSpy;
     let consentElement;
     let postPromptUI;
+
     beforeEach(() => {
       defaultConfig = dict({
         'consents': {
@@ -395,18 +396,28 @@ describes.realWin('amp-consent', {
           'amp-consent:DEF': true,
           'amp-consent:GH': true,
         };
+
+        // Build the amp consent, and check that everything is
+        // initialized correctly
         ampConsent.buildCallback();
         ampConsent.element.classList.remove('i-amphtml-notbuilt');
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(ampConsent.element).to.have.display('none');
         expect(postPromptUI).to.have.display('none');
-        yield macroTask();
 
+        // Wait for all modifications to the element to be applied.
+        // Then make more assertions.
+        yield macroTask();
         expect(ampConsent.element).to.not.have.display('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
         expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
         expect(postPromptUI).to.not.have.display('none');
+
+        // Schedule the display of the element
         ampConsent.scheduleDisplay_('ABC');
+
+        // Wait for the element to be displayed,
+        // And the postPrompt to be hidden.
         yield macroTask();
         expect(postPromptUI).to.have.display('none');
       });
@@ -434,8 +445,9 @@ describes.realWin('amp-consent', {
         it('hide postPromptUI', function* () {
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(postPromptUI).to.not.be.null;
           yield macroTask();
+
+          expect(postPromptUI).to.not.be.null;
           expect(postPromptUI).to.have.display('none');
         });
 
@@ -445,8 +457,9 @@ describes.realWin('amp-consent', {
           };
           ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
-          expect(postPromptUI).to.not.be.null;
           yield macroTask();
+
+          expect(postPromptUI).to.not.be.null;
           expect(postPromptUI).to.not.have.display('none');
         });
       });

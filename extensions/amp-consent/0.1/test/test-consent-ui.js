@@ -61,6 +61,7 @@ describes.realWin('consent-ui', {
         };
       },
       scheduleLayout: () => {},
+      mutateElement: (callback) => callback(),
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
