@@ -76,6 +76,7 @@
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
+      <option>merklesearch</option>
       <option>mobify</option>
       <option>mparticle</option>
       <option>mpulse</option>
@@ -777,7 +778,30 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mediator.media example -->
+<!-- Merklesearch example 
+  Ensure you replace "mid" with your mid.
 
+  Note: There is no click event configured for this tag.
+        The tag should always be triggered by a Page View.
+-->
+<amp-analytics type="merklesearch" id="merklesearch">
+	<script type="application/json">
+	  {
+		"vars": {
+			"endpoint" : "order",
+			"mid" : "test",
+			"oid" : "1234578",
+			"lid" : "1",
+			"iid" : "foo",
+			"icent" : "100",
+			"iqty" : "2",
+			"iname" : "towels",
+			"v" : "amp_1"
+		}
+     }
+	</script>
+</amp-analytics>
+<!-- End Merklesearch example -->
 <!-- Mobify tracking -->
 <amp-analytics type="mobify" id="mobify">
 <script type="application/json">

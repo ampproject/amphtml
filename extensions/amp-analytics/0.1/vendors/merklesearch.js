@@ -15,30 +15,30 @@
  */
 
 export const MERKLESEARCH_CONFIG = /** @type {!JsonObject} */ ({
-  "vars": {
-    "endpoint" : "", //"order" or "micro"
-    "mid" : "",
-    "oid" : "",
-    "lid" : "",
-    "iid" : "",
-    "cid" : "",
-    "icent" : "",
-    "iqty" : "",
-    "iname" : "",
-    "ts" : ""
+  'vars': {
+    'endpoint': '',
+    'mid': '',
+    'oid': '',
+    'lid': '',
+    'iid': '',
+    'cid': '',
+    'icent': '',
+    'iqty': '',
+    'iname': '',
+    'ts': '',
   },
-  "requests": {
-	"pageview": "https://www.rkdms.com/${endpoint}.gif?&mid=${mid}&oid=${oid}&lid=${lid}&cid=${cid}&iid=${iid}&icent=${icent}&iqty=${iqty}&iname=${iname}&ts=${ts}&rkglsid=${clientId(rkglsid)}&v=amp_1"
+  'requests': {
+    'pageview': 'https://www.rkdms.com/${endpoint}.gif?&mid=${mid}&oid=${oid}&lid=${lid}&cid=${cid}&iid=${iid}&icent=${icent}&iqty=${iqty}&iname=${iname}&ts=${ts}&rkglsid=${clientId(rkglsid)}&v=amp_1',
   },
-  "triggers": {
-	"defaultPageview": {
-		"on": "visible",
-		"request": "pageview"
-	}
+  'triggers': {
+    'defaultPageview': {
+      'on': 'visible',
+      'request': 'pageview',
+    },
   },
-  "transport": {
-	"beacon": false,
-	"xhrpost": false,
-	"image": true
-  }
+  'transport': {
+    'beacon': false,
+    'xhrpost': false,
+    'image': true,
+  },
 });
