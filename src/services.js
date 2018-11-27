@@ -89,8 +89,7 @@ export class Services {
    */
   static actionServiceForDoc(elementOrAmpDoc) {
     return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'action', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(elementOrAmpDoc, 'action'));
   }
 
   /**
@@ -482,8 +481,7 @@ export class Services {
    */
   static urlReplacementsForDoc(elementOrAmpDoc) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(elementOrAmpDoc, 'url-replace'));
   }
 
   /**
@@ -526,8 +524,7 @@ export class Services {
    */
   static urlForDoc(elementOrAmpDoc) {
     return /** @type {!./service/url-impl.Url} */ (
-      getExistingServiceForDocInEmbedScope(
-          elementOrAmpDoc, 'url', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(elementOrAmpDoc, 'url'));
   }
 
   /**
