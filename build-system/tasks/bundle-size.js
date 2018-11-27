@@ -108,7 +108,7 @@ async function getAncestorBundleSize() {
  */
 function storeBundleSize(bundleSize) {
   if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
-    log(yellow('Skipping'), cyan('--store') + ':',
+    log(yellow('Skipping'), cyan('--master') + ':',
         'this action can only be performed on `push` builds on Travis');
     return;
   }
@@ -257,7 +257,7 @@ async function checkBundleSize() {
     }
   }
 
-  if (argv.store) {
+  if (argv.master) {
     return storeBundleSize(newBundleSize);
   }
 }
@@ -269,7 +269,7 @@ gulp.task(
     checkBundleSize,
     {
       options: {
-        'store': '  Store bundle size in AMP build artifacts repo (used only '
+        'master': '  Store bundle size in AMP build artifacts repo (used only '
             + 'for `master` builds)',
       },
     });
