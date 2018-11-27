@@ -15,6 +15,7 @@
  */
 
 import {validateData} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -48,17 +49,16 @@ function createOneadSlot(win) {
  * @param {!Window} win
  */
 function createAdUnit(win) {
-  const src = 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js';
-  const js = document.createElement('script');
-  js.async = false;
   win.ONEAD_AMP.isAMP = true;
-  js.onload = () => win.Guoshi.queryAd.amp.setup({
-    playMode: win.ONEAD_AMP.playMode,
-    uid: win.ONEAD_AMP.uid,
-    pid: win.ONEAD_AMP.pid,
-    host: win.ONEAD_AMP.host,
-  });
-  js.type = 'text/javascript';
-  js.src = src;
-  win.document.head.appendChild(js);
+  const src = 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js';
+  const jsLoadCb = () => {
+    win.Guoshi.queryAd.amp.setup({
+      playMode: win.ONEAD_AMP.playMode,
+      uid: win.ONEAD_AMP.uid,
+      pid: win.ONEAD_AMP.pid,
+      host: win.ONEAD_AMP.host,
+    });
+  };
+
+  loadScript(win, src, jsLoadCb);
 }
