@@ -52,6 +52,12 @@ export class ViewportBindingDef {
   requiresFixedLayerTransfer() {}
 
   /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {}
+
+  /**
    * Register a callback for scroll events.
    * @param {function()} unusedCallback
    */
@@ -83,13 +89,13 @@ export class ViewportBindingDef {
    */
   showViewerHeader(unusedTransient, unusedPaddingTop) {}
 
-  /*
+  /**
    * Disable the scrolling by setting overflow: hidden.
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {}
 
-  /*
+  /**
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {}
@@ -151,6 +157,14 @@ export class ViewportBindingDef {
   getContentHeight() {}
 
   /**
+   * Resource manager signals to the viewport that content height is changed
+   * and some action may need to be taken.
+   * @restricted Use is restricted due to potentially very heavy performance
+   *   impact. Can only be called when not actively scrolling.
+   */
+  contentHeightChanged() {}
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} unusedEl
    * @param {number=} unusedScrollLeft Optional arguments that the caller may
@@ -172,4 +186,11 @@ export class ViewportBindingDef {
    * @return {!Element}
    */
   getScrollingElement() {}
+
+  /**
+   * Whether the root scroller is a native root scroller (behaves like a
+   * viewport), or an overflow scroller (scrolls like an element).
+   * @return {boolean}
+   */
+  getScrollingElementScrollsLikeViewport() {}
 }

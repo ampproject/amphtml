@@ -56,23 +56,12 @@ const builtRuntimePaths = [
   },
 ];
 
-const commonTestPaths =
+const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+
+const commonIntegrationTestPaths =
     initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
 
-const coveragePaths = [
-  {
-    pattern: 'test/coverage/**/*',
-    included: false,
-    nocache: false,
-    watched: false,
-  },
-];
-
-const simpleTestPath = [
-  'test/simple-test.js',
-];
-
-const testPaths = commonTestPaths.concat([
+const testPaths = commonIntegrationTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
@@ -88,50 +77,44 @@ const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
 ];
 
-const unitTestPaths = initTestsPath.concat(fixturesExamplesPaths, [
+const unitTestPaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
-]);
+];
 
-const unitTestOnSaucePaths = initTestsPath.concat(fixturesExamplesPaths, [
+const unitTestOnSaucePaths = [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
-]);
+];
 
-const integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = [
   'test/integration/**/*.js',
   'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
-]);
+];
+
+const devDashboardTestPaths = [
+  'build-system/app-index/test/**/*.js',
+];
+
+const lintGlobs = [
+  '**/*.js',
+  // To ignore a file / directory, add it to .eslintignore.
+];
 
 /** @const  */
 module.exports = {
-  commonTestPaths,
-  simpleTestPath,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
+  commonUnitTestPaths,
+  commonIntegrationTestPaths,
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
-  coveragePaths,
-  lintGlobs: [
-    '**/*.js',
-    '!**/*.extern.js',
-    '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party}/**/*.*',
-    '!{testing,examples}/**/*.*',
-    // TODO: temporary, remove when validator is up to date
-    '!validator/**/*.*',
-    '!eslint-rules/**/*.*',
-    '!karma.conf.js',
-    '!**/local-amp-chrome-extension/background.js',
-    '!extensions/amp-access/0.1/access-expr-impl.js',
-    '!extensions/amp-animation/0.1/css-expr-impl.js',
-    '!extensions/amp-bind/0.1/bind-expr-impl.js',
-    '!test/coverage/**/*.*',
-  ],
+  devDashboardTestPaths,
+  lintGlobs,
   jsonGlobs: [
     '**/*.json',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
@@ -143,15 +126,19 @@ module.exports = {
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
-        'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+        'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
+    '!out/**/*.*',
+    '!validator/validator.pb.go',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
     '!validator/webui/dist/**/*.*',
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
+    '!build-system/tasks/visual-diff/node_modules/**/*.*',
+    '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
     '!third_party/**/*.*',
@@ -159,9 +146,10 @@ module.exports = {
     // Files in this testdata dir are machine-generated and are not part
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/*.js',
+    '!examples/**/*',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!firebase/**/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

@@ -16,7 +16,7 @@
 
 import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 
@@ -87,6 +87,39 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.isConnectedNode(c)).to.be.false;
   });
 
+  it('isConnectedNode (no Node.p.isConnected)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'isConnected');
+    try {
+      delete Node.prototype.isConnected;
+
+      expect(dom.isConnectedNode(document)).to.be.true;
+
+      const a = document.createElement('div');
+      expect(dom.isConnectedNode(a)).to.be.false;
+
+      const b = document.createElement('div');
+      b.appendChild(a);
+
+      document.body.appendChild(b);
+      expect(dom.isConnectedNode(a)).to.be.true;
+
+      const shadow = a.attachShadow({mode: 'open'});
+      const c = document.createElement('div');
+      shadow.appendChild(c);
+      expect(dom.isConnectedNode(c)).to.be.true;
+
+      document.body.removeChild(b);
+      expect(dom.isConnectedNode(c)).to.be.false;
+    } finally {
+      Object.defineProperty(Node.prototype, 'isConnected', desc);
+    }
+  });
+
   it('rootNodeFor', () => {
     const a = document.createElement('div');
     expect(dom.rootNodeFor(a)).to.equal(a);
@@ -98,6 +131,31 @@ describes.sandboxed('DOM', {}, env => {
     const c = document.createElement('div');
     b.appendChild(c);
     expect(dom.rootNodeFor(c)).to.equal(a);
+  });
+
+  it('rootNodeFor (no Node.p.getRootNode)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'getRootNode');
+    try {
+      delete Node.prototype.getRootNode;
+
+      const a = document.createElement('div');
+      expect(dom.rootNodeFor(a)).to.equal(a);
+
+      const b = document.createElement('div');
+      a.appendChild(b);
+      expect(dom.rootNodeFor(b)).to.equal(a);
+
+      const c = document.createElement('div');
+      b.appendChild(c);
+      expect(dom.rootNodeFor(c)).to.equal(a);
+    } finally {
+      Object.defineProperty(Node.prototype, 'getRootNode', desc);
+    }
   });
 
   it('closest should find itself', () => {
@@ -772,10 +830,10 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
-      }).to.throw(/intentional2/);
+      }).to.throw(/intentional2/); });
     });
 
     it('should retry only non-top target', () => {
@@ -949,6 +1007,45 @@ describes.sandboxed('DOM', {}, env => {
     expect(spans[0].innerHTML).to.equal('123');
     expect(spans[1].innerHTML).to.equal('456<em>789</em>');
   });
+
+  describe('domOrderComparator', () => {
+    it('should sort elements by dom order', () => {
+      //
+      // <div id='elem1'>
+      //   <div id='elem2'>
+      //      <div id='elem3'>
+      //   <div id='elem4'>
+      //
+      const elem1 = document.createElement('div');
+      const elem2 = document.createElement('div');
+      const elem3 = document.createElement('div');
+      const elem4 = document.createElement('div');
+
+      elem1.appendChild(elem2);
+      elem2.appendChild(elem3);
+      elem1.appendChild(elem4);
+
+      expect(dom.domOrderComparator(elem1, elem1)).to.equal(0);
+      expect(dom.domOrderComparator(elem1, elem2)).to.equal(-1);
+      expect(dom.domOrderComparator(elem1, elem3)).to.equal(-1);
+      expect(dom.domOrderComparator(elem1, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem2, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem2, elem2)).to.equal(0);
+      expect(dom.domOrderComparator(elem2, elem3)).to.equal(-1);
+      expect(dom.domOrderComparator(elem2, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem3, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem3, elem2)).to.equal(1);
+      expect(dom.domOrderComparator(elem3, elem3)).to.equal(0);
+      expect(dom.domOrderComparator(elem3, elem4)).to.equal(-1);
+
+      expect(dom.domOrderComparator(elem4, elem1)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem2)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem3)).to.equal(1);
+      expect(dom.domOrderComparator(elem4, elem4)).to.equal(0);
+    });
+  });
 });
 
 describes.realWin('DOM', {
@@ -965,8 +1062,10 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-          'element is not AmpElement');
+      allowConsoleError(() => {
+        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement');
+      });
     });
 
     it('should resolve if element has already upgrade', () => {
@@ -981,10 +1080,8 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-test');
       doc.body.appendChild(element);
       env.win.setTimeout(() => {
-        doc.registerElement('amp-test', {
-          prototype: createAmpElementProtoForTesting(
-              env.win, 'amp-test', TestElement),
-        });
+        env.win.customElements.define('amp-test', createAmpElementForTesting(
+            env.win, 'amp-test', TestElement));
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
         expect(element.whenBuilt).to.exist;

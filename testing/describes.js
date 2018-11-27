@@ -30,7 +30,7 @@
  *     describe('myTest', () => {
  *       // I gotta do this sandbox creation and restore for every test? Ugh...
  *       let sandbox;
- *       beforeEach(() => { sandbox = sinon.sandbox.create(); })
+ *       beforeEach(() => { sandbox = sinon.sandbox; })
  *       it('stubbing', () => { sandbox.stub(foo, 'bar'); });
  *       afterEach(() => { sandbox.restore(); });
  *     });
@@ -79,42 +79,42 @@
  * and `integration` below.
  */
 
-import fetchMock from 'fetch-mock';
-import installCustomElements from
-    'document-register-element/build/document-register-element.node';
 import {BaseElement} from '../src/base-element';
+import {CSS} from '../build/amp-ad-0.1.css.js';
 import {
   FakeCustomElements,
   FakeLocation,
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {stubService} from './test-helper';
-import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
-import {doNotLoadExternalResourcesInTest} from './iframe';
 import {Services} from '../src/services';
+import {addParamsToUrl} from '../src/url';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
+import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
-import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
-import {CSS} from '../build/amp-ad-0.1.css.js';
-import {createAmpElementProtoForTesting} from '../src/custom-element';
-import {installDocService} from '../src/service/ampdoc-impl';
+import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   installBuiltinElements,
   installExtensionsService,
-  registerExtension,
 } from '../src/service/extensions-impl';
+import {
+  install as installCustomElements,
+} from '../src/polyfills/custom-elements';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
+import {maybeTrackImpression} from '../src/impression';
 import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import * as sinon from 'sinon';
+import {stubService} from './test-helper';
+import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -183,7 +183,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export const sandboxed = describeEnv(spec => []);
+export const sandboxed = describeEnv(unusedSpec => []);
 
 
 /**
@@ -295,7 +295,7 @@ export const repeated = (function() {
  * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
  */
 function attachFetchMock(env) {
-  fetchMock.constructor.global = env.win;
+  fetchMock.global = env.win;
   fetchMock._mock();
 
   env.fetchMock = fetchMock;
@@ -329,7 +329,7 @@ function describeEnv(factory) {
       beforeEach(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
-        fixtures.forEach((fixture, index) => {
+        fixtures.forEach((fixture, unusedIndex) => {
           if (totalPromise) {
             totalPromise = totalPromise.then(() => fixture.setup(env));
           } else {
@@ -387,7 +387,7 @@ function describeEnv(factory) {
 
 
 /** @interface */
-class Fixture {
+class FixtureInterface {
 
   /** @return {boolean} */
   isOn() {}
@@ -396,25 +396,22 @@ class Fixture {
    * @param {!Object} env
    * @return {!Promise|undefined}
    */
-  setup(env) {}
+  setup(unusedEnv) {}
 
   /**
    * @param {!Object} env
    */
-  teardown(env) {}
+  teardown(unusedEnv) {}
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class SandboxFixture {
 
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private {boolean} */
-    this.sandboxOwner_ = false;
   }
 
   /** @override */
@@ -424,29 +421,16 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
-
-    // Sandbox.
-    let sandbox = global.sandbox;
-    if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox.create();
-      this.sandboxOwner_ = true;
-    }
-    env.sandbox = sandbox;
+    env.sandbox = sinon.createSandbox();
   }
 
   /** @override */
   teardown(env) {
-    // Sandbox.
-    if (this.sandboxOwner_) {
-      env.sandbox.restore();
-      delete global.sandbox;
-      this.sandboxOwner_ = false;
-    }
+    env.sandbox.restore();
   }
 }
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class IntegrationFixture {
 
   /** @param {!{body: string}} spec */
@@ -467,18 +451,23 @@ class IntegrationFixture {
   /** @override */
   setup(env) {
     const body = typeof this.spec.body == 'function' ?
-          this.spec.body() : this.spec.body;
+      this.spec.body() : this.spec.body;
     const css = typeof this.spec.css == 'function' ?
-          this.spec.css() : this.spec.css;
+      this.spec.css() : this.spec.css;
     const experiments = this.spec.experiments == undefined ?
-        undefined : this.spec.experiments.join(',');
+      undefined : this.spec.experiments.join(',');
     const extensions = this.spec.extensions == undefined ?
-        undefined : this.spec.extensions.join(',');
+      undefined : this.spec.extensions.join(',');
+
+    let url = '/amp4test/compose-doc';
+    if (this.spec.params) {
+      url = addParamsToUrl(url, this.spec.params);
+    }
 
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc',
-            {body, css, experiments, extensions}) + `#${this.hash}`,
+        src: addParamsToUrl(url, {body, css, experiments, extensions})
+            + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -497,7 +486,7 @@ class IntegrationFixture {
   }
 }
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class FakeWinFixture {
 
   /** @param {!{win: !FakeWindowSpec}} spec */
@@ -518,10 +507,14 @@ class FakeWinFixture {
     if (this.spec.mockFetch !== false) {
       attachFetchMock(env);
     }
+
+    if (!this.spec.Promise) {
+      env.win.Promise = window.Promise;
+    }
   }
 
   /** @override */
-  teardown(env) {
+  teardown(unusedEnv) {
     if (this.spec.mockFetch !== false) {
       fetchMock./*OK*/restore();
     }
@@ -529,7 +522,7 @@ class FakeWinFixture {
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class RealWinFixture {
 
   /** @param {!{
@@ -550,7 +543,7 @@ class RealWinFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
+    const {spec} = this;
     return new Promise((resolve, reject) => {
       const iframe = document.createElement('iframe');
       env.iframe = iframe;
@@ -590,7 +583,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
@@ -624,7 +617,7 @@ class RealWinFixture {
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class AmpFixture {
 
   /**
@@ -643,7 +636,7 @@ class AmpFixture {
   /** @override */
   setup(env) {
     const spec = this.spec.amp;
-    const win = env.win;
+    const {win} = env;
     let completePromise;
 
     // Configure mode.
@@ -683,6 +676,7 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
+    maybeTrackImpression(self);
     const extensionIds = [];
     if (spec.extensions) {
       spec.extensions.forEach(extensionIdWithVersion => {
@@ -694,9 +688,9 @@ class AmpFixture {
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
           if (env.ampdoc) {
-            env.ampdoc.declareExtension_(extensionId);
+            env.ampdoc.declareExtension(extensionId);
           }
-          registerExtension(env.extensions, extensionId, installer, win.AMP);
+          env.extensions.registerExtension(extensionId, installer, win.AMP);
         }
       });
     }
@@ -725,9 +719,9 @@ class AmpFixture {
             ' Make sure the module is imported');
       }
       if (env.ampdoc) {
-        env.ampdoc.declareExtension_(extensionId);
+        env.ampdoc.declareExtension(extensionId);
       }
-      registerExtension(env.extensions, extensionId, installer, win.AMP);
+      env.extensions.registerExtension(extensionId, installer, win.AMP);
     };
 
     /**
@@ -767,27 +761,27 @@ class AmpFixture {
             interceptEventListeners(embedWin.document.documentElement);
             interceptEventListeners(embedWin.document.body);
           }).then(embed => {
-            env.embed = embed;
-            env.parentWin = env.win;
-            env.win = embed.win;
-            configureAmpTestMode(embed.win);
-          });
+        env.embed = embed;
+        env.parentWin = env.win;
+        env.win = embed.win;
+        configureAmpTestMode(embed.win);
+      });
       completePromise = completePromise ?
-          completePromise.then(() => promise) : promise;
+        completePromise.then(() => promise) : promise;
     } else if (ampdocType == 'shadow') {
       const hostElement = win.document.createElement('div');
       win.document.body.appendChild(hostElement);
       const importDoc = win.document.implementation.createHTMLDocument('');
       const ret = win.AMP.attachShadowDoc(
           hostElement, importDoc, win.location.href);
-      const ampdoc = ret.ampdoc;
+      const {ampdoc} = ret;
       env.ampdoc = ampdoc;
       const promise = Promise.all([
-        env.extensions.installExtensionsInDoc_(ampdoc, extensionIds),
+        env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
         ampdoc.whenReady(),
       ]);
       completePromise = completePromise ?
-          completePromise.then(() => promise) : promise;
+        completePromise.then(() => promise) : promise;
     }
 
     return completePromise;
@@ -795,7 +789,7 @@ class AmpFixture {
 
   /** @override */
   teardown(env) {
-    const win = env.win;
+    const {win} = env;
     if (env.embed) {
       env.embed.destroy();
     }
@@ -864,7 +858,7 @@ function installAmpAdStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProtoForTesting(win, name);
+  const proto = createAmpElementForTesting(win, name).prototype;
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;
@@ -880,4 +874,4 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   element.createdCallback();
   element.classList.add('i-amphtml-element');
   return element;
-};
+}

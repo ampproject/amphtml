@@ -17,6 +17,7 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
+import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -130,11 +131,10 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
-    return Services.xhrFor(this.ampdoc.win)
-        // TODO(erwinm): add update time here when possible.
-        .fetchDocument(url, {
-          requireAmpResponseSourceOrigin: false,
-        }).then(this.getLiveLists_.bind(this));
+    // TODO(erwinm): add update time here when possible.
+    return fetchDocument(this.ampdoc.win, url, {
+      requireAmpResponseSourceOrigin: false,
+    }).then(this.getLiveLists_.bind(this));
   }
 
   /**
@@ -167,8 +167,8 @@ export class LiveListManager {
   updateLiveList_(liveList) {
     const id = liveList.getAttribute('id');
     user().assert(id, 'amp-live-list must have an id.');
-    user().assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
-        'not exist on original page load.');
+    user().assert(id in this.liveLists_,
+        'amp-live-list#%s found but did not exist on original page load.', id);
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 

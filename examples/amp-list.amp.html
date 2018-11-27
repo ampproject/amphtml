@@ -13,7 +13,7 @@
   <!-- Import the `amp-list` component ... -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <!-- ... and the `amp-mustache` component in the header -->
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <link rel="canonical" href="https://ampbyexample.com/components/amp-list/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -28,6 +28,10 @@
   </style>
 </head>
 <body>
+
+  <div on="tap:list1.refresh,list2.refresh,list3.refresh,list4.refresh,list5.refresh">
+    Refresh All Lists
+  </div>
 
   <!-- ## Using a nested template -->
   <!--
@@ -47,7 +51,7 @@
   ```
   The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
   -->
-  <amp-list width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1">
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
@@ -59,7 +63,7 @@
     `template` element. This example references the template from the
     previous sample.
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json"
+  <amp-list id="list2" width="auto" height="100" layout="fixed-height"  src="list.example.json"
       template="amp-template-id" class="m1">
   </amp-list>
 
@@ -67,15 +71,15 @@
   <!--
  Use the `max-items` attribute to limit the number of list elements displayed
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
-      template="amp-template-id" class="m1">
+  <amp-list id="list3" width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
+      template="amp-template-id" class="m1" reset-on-refresh>
   </amp-list>
 
    <!-- ## Single Entry list -->
   <!--
  If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
+  <amp-list id="list4" width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
   template="amp-template-id" class="m1">
 </amp-list>
 
@@ -83,12 +87,21 @@
   <!--
  If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
   -->
-  <amp-list width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1">
+  <amp-list id="list5" width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" reset-on-refresh>
     <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
       Show more
     </div>
   </amp-list>
 
+  <!-- ## Handling Paging -->
+  <!--
+ If the `amp-list` multiple pages ... .
+  -->
+  <amp-list width="auto" height="200" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
 
 
 </body>

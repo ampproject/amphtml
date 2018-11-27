@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
-import {dev} from '../../../src/log';
 import {isConnectedNode} from '../../../src/dom';
 
 
@@ -129,8 +129,7 @@ function copyAttributes(fromEl, toEl) {
 
   // Copy all of the unprotected attributes from the fromEl to the toEl.
   for (let i = 0; i < fromAttributes.length; i++) {
-    const attributeName = fromAttributes[i].name;
-    const attributeValue = fromAttributes[i].value;
+    const {name: attributeName, value: attributeValue} = fromAttributes[i] ;
     if (!isProtectedAttributeName(attributeName)) {
       toEl.setAttribute(attributeName, attributeValue);
     }
@@ -143,21 +142,23 @@ function copyAttributes(fromEl, toEl) {
  * Base class for tasks executed in order on HTMLMediaElements.
  */
 export class MediaTask {
+  /**
+   * @param {string} name
+   */
   constructor(name) {
     /** @private @const {string} */
     this.name_ = name;
 
-    /** @private {?function()} */
-    this.resolve_ = null;
-
-    /** @private {?function(*)} */
-    this.reject_ = null;
+    const deferred = new Deferred();
 
     /** @private @const {!Promise} */
-    this.completionPromise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.completionPromise_ = deferred.promise;
+
+    /** @private {?function()} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {?function(*)} */
+    this.reject_ = deferred.reject;
   }
 
   /**
@@ -217,6 +218,9 @@ export class MediaTask {
  * Plays the specified media element.
  */
 export class PlayTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('play');
   }
@@ -232,7 +236,7 @@ export class PlayTask extends MediaTask {
     // The play() invocation is wrapped in a Promise.resolve(...) due to the
     // fact that some browsers return a promise from media elements' play()
     // function, while others return a boolean.
-    return Promise.resolve(mediaEl.play());
+    return tryResolve(() => mediaEl.play());
   }
 }
 
@@ -241,6 +245,9 @@ export class PlayTask extends MediaTask {
  * Pauses the specified media element.
  */
 export class PauseTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('pause');
   }
@@ -257,6 +264,9 @@ export class PauseTask extends MediaTask {
  * Unmutes the specified media element.
  */
 export class UnmuteTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('unmute');
   }
@@ -274,6 +284,9 @@ export class UnmuteTask extends MediaTask {
  * Mutes the specified media element.
  */
 export class MuteTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('mute');
   }
@@ -291,6 +304,9 @@ export class MuteTask extends MediaTask {
  * Seeks the specified media element to the beginning.
  */
 export class RewindTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('rewind');
   }
@@ -307,6 +323,9 @@ export class RewindTask extends MediaTask {
  * Loads the specified media element.
  */
 export class LoadTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('load');
   }
@@ -325,6 +344,9 @@ export class LoadTask extends MediaTask {
  * be invoked in response to a user gesture.
  */
 export class BlessTask extends MediaTask {
+  /**
+   * @public
+   */
   constructor() {
     super('bless');
   }
@@ -336,30 +358,12 @@ export class BlessTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    const isPaused = mediaEl.paused;
     const isMuted = mediaEl.muted;
-    const currentTime = mediaEl.currentTime;
-
-    const whenPlaying = isPaused ?
-      Promise.resolve(mediaEl.play()) : Promise.resolve();
-
-    return whenPlaying.then(() => {
-      mediaEl.muted = false;
-
-      if (isPaused) {
-        mediaEl.pause();
-        mediaEl.currentTime = currentTime;
-      }
-
-      if (isMuted) {
-        mediaEl.muted = true;
-      }
-
-      mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
-    }).catch(reason => {
-      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason, mediaEl);
-    });
+    mediaEl.muted = false;
+    if (isMuted) {
+      mediaEl.muted = true;
+    }
+    return Promise.resolve();
   }
 }
 
@@ -371,16 +375,12 @@ export class UpdateSourcesTask extends MediaTask {
   /**
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    */
-  constructor(newSources, vsync) {
+  constructor(newSources) {
     super('update-src');
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
   }
 
   /** @override */
@@ -399,16 +399,12 @@ export class SwapIntoDomTask extends MediaTask {
   /**
    * @param {!HTMLMediaElement} replacedMediaEl The element to be replaced by
    *     the media element on which this task is executed.
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    */
-  constructor(replacedMediaEl, vsync) {
+  constructor(replacedMediaEl) {
     super('swap-into-dom');
 
     /** @private @const {!HTMLMediaElement} */
     this.replacedMediaEl_ = replacedMediaEl;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
   }
 
   /** @override */
@@ -435,16 +431,12 @@ export class SwapOutOfDomTask extends MediaTask {
   /**
    * @param {!HTMLMediaElement} placeholderMediaEl The element to be replaced by
    *     the media element on which this task is executed.
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    */
-  constructor(placeholderMediaEl, vsync) {
+  constructor(placeholderMediaEl) {
     super('swap-out-of-dom');
 
     /** @private @const {!HTMLMediaElement} */
     this.placeholderMediaEl_ = placeholderMediaEl;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
   }
 
   /** @override */

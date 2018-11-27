@@ -38,6 +38,7 @@ describes.realWin('amp-subscriptions renderer before initialized', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    doc.body.parentNode.setAttribute('amp-version', '1');
     unrelated = createElementWithAttributes(doc, 'div', {});
     section = createElementWithAttributes(doc, 'div', {
       'subscriptions-section': '',
@@ -82,11 +83,12 @@ describes.realWin('amp-subscriptions renderer', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+    doc.body.parentNode.setAttribute('amp-version', '1');
 
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
-    const vsync = Services.vsyncFor(win);
-    sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+    const resources = Services.resourcesForDoc(ampdoc);
+    sandbox.stub(resources, 'mutateElement').callsFake((element, mutator) => {
       mutator();
     });
 
@@ -188,46 +190,37 @@ describes.realWin('amp-subscriptions renderer', {
 
   it('should show appropriate elements when granted', () => {
     renderer.setGrantState(true);
-    displayed([content1, content2, actions1, actions2]);
+    displayed([content1, content2]);
   });
 
   it('should show appropriate elements when denied', () => {
     renderer.setGrantState(false);
-    displayed([contentNotGranted1, contentNotGranted2, actions1, actions2]);
+    displayed([contentNotGranted1, contentNotGranted2]);
   });
 
-  it('should show appropriate elements when logged-in', () => {
-    renderer.setGrantState(true);
-    renderer.setLoggedinState_(true);
-    displayed([
-      actionLogout,
-      content1, content2, actions1, actions2,
-    ]);
-  });
+  describe('addLoadingBar', () => {
+    let appendChildStub;
 
-  it('should show appropriate elements when logged-out', () => {
-    renderer.setGrantState(false);
-    renderer.setLoggedinState_(false);
-    displayed([
-      actionLogin,
-      contentNotGranted1, contentNotGranted2, actions1, actions2,
-    ]);
-  });
+    beforeEach(() => {
+      appendChildStub = sandbox.stub(renderer.ampdoc_.getBody(),
+          'appendChild');
+    });
 
-  it('should show appropriate elements when subscriber', () => {
-    renderer.setGrantState(true);
-    renderer.setSubscriberState_(true);
-    displayed([
-      content1, content2, actions1, actions2,
-    ]);
-  });
+    it('shouldn\'t add a progress bar if loading section is found', () => {
+      return renderer.addLoadingBar().then(() => {
+        expect(appendChildStub).to.not.be.called;
+      });
+    });
 
-  it('should show appropriate elements when not subscriber', () => {
-    renderer.setGrantState(false);
-    renderer.setSubscriberState_(false);
-    displayed([
-      actionSubscribe,
-      contentNotGranted1, contentNotGranted2, actions1, actions2,
-    ]);
+    it('should add a progress bar if no loading section is found', () => {
+      loading1.remove();
+      loading2.remove();
+      return renderer.addLoadingBar().then(() => {
+        expect(appendChildStub).to.be.called;
+        const element = appendChildStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+      });
+    });
   });
 });

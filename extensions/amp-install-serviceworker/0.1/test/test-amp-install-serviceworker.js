@@ -16,13 +16,30 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  isSecureUrlDeprecated,
+  parseUrlDeprecated,
+} from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
+
+
+function stubUrlService(sandbox) {
+  sandbox.stub(Services, 'urlForDoc').returns({
+    assertHttpsUrl,
+    getSourceOrigin,
+    isProxyOrigin,
+    isSecure: isSecureUrlDeprecated,
+    parse: parseUrlDeprecated,
+  });
+}
 
 
 describes.realWin('amp-install-serviceworker', {
@@ -34,19 +51,19 @@ describes.realWin('amp-install-serviceworker', {
 }, env => {
 
   let doc;
-  let clock;
   let sandbox;
   let container;
   let ampdoc;
   let maybeInstallUrlRewriteStub;
+  let whenVisible;
 
   beforeEach(() => {
     doc = env.win.document;
     sandbox = env.sandbox;
-    clock = sandbox.useFakeTimers();
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
+    stubUrlService(sandbox);
     maybeInstallUrlRewriteStub = sandbox.stub(
         AmpInstallServiceWorker.prototype,
         'maybeInstallUrlRewrite_');
@@ -55,6 +72,7 @@ describes.realWin('amp-install-serviceworker', {
   it('should install for same origin', () => {
     const install = doc.createElement('div');
     container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
     install.setAttribute('src', 'https://example.com/sw.js');
     const implementation = new AmpInstallServiceWorker(install);
     let calledSrc;
@@ -74,13 +92,92 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
+    });
     implementation.buildCallback();
     expect(calledSrc).to.be.undefined;
-    return loadPromise(implementation.win).then(() => {
-      expect(calledSrc).to.equal('https://example.com/sw.js');
-      // Should not be called before `register` resolves.
-      expect(maybeInstallUrlRewriteStub).to.not.be.called;
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          expect(calledSrc).to.equal('https://example.com/sw.js');
+          // Should not be called before `register` resolves.
+          expect(maybeInstallUrlRewriteStub).to.not.be.called;
+        });
+  });
+
+  it('should postMessage all AMP scripts used to the service worker', () => {
+    const install = doc.createElement('div');
+    container.appendChild(install);
+    install.getAmpDoc = () => ampdoc;
+    install.setAttribute('src', 'https://example.com/sw.js');
+    const implementation = new AmpInstallServiceWorker(install);
+    const AMP_SCRIPTS = [
+      'https://cdn.ampproject.org/rtv/001525381599226/v0.js',
+      'https://cdn.ampproject.org/rtv/001810022028350/v0/amp-mustache-0.1.js',
+    ];
+    const eventListener = (evtName, cb) => {
+      cb({
+        target: {
+          state: 'activated',
+        },
+      });
+    };
+    const fakeRegistration = {
+      installing: {
+        addEventListener: sandbox.spy(eventListener),
+      },
+    };
+    const p = Promise.resolve(fakeRegistration);
+    const postMessageStub = sandbox.stub();
+    implementation.win = {
+      complete: true,
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: () => {
+            return p;
+          },
+          controller: {
+            postMessage: postMessageStub,
+          },
+        },
+      },
+      performance: {
+        getEntriesByType: () => {
+          return AMP_SCRIPTS.concat('https://code.jquery.com/jquery-3.3.1.min.js').map(script => {
+            return {
+              initiatorType: 'script',
+              name: script,
+            };
+          });
+        },
+      },
+    };
+    whenVisible = Promise.resolve();
+    registerServiceBuilder(implementation.win, 'viewer', function() {
+      return {
+        whenFirstVisible: () => whenVisible,
+        isVisible: () => true,
+      };
     });
+    implementation.buildCallback();
+    return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+        () => {
+          return p.then(fakeRegistration => {
+            expect(fakeRegistration.installing.addEventListener)
+                .to.be.calledWith('statechange', sinon.match.func);
+            expect(postMessageStub).to.be.calledWith(JSON.stringify({
+              type: 'FIRST_VISIT_CACHING',
+              payload: AMP_SCRIPTS,
+            }));
+          });
+        });
   });
 
   it('should be ok without service worker.', () => {
@@ -117,7 +214,9 @@ describes.realWin('amp-install-serviceworker', {
         },
       },
     };
-    implementation.buildCallback();
+    allowConsoleError(() => {
+      implementation.buildCallback();
+    });
     expect(install.children).to.have.length(0);
   });
 
@@ -164,6 +263,7 @@ describes.realWin('amp-install-serviceworker', {
       calledSrc = undefined;
       const p = new Promise(() => {});
       const win = {
+        complete: true,
         location: {
           href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         },
@@ -182,7 +282,6 @@ describes.realWin('amp-install-serviceworker', {
           createElement: doc.createElement.bind(doc),
         },
       };
-      installTimerService(win);
       win.document.defaultView = win;
       implementation.win = win;
       docInfo = {
@@ -207,9 +306,8 @@ describes.realWin('amp-install-serviceworker', {
     function testIframe() {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
-      implementation.buildCallback();
       let iframe;
-      const appendChild = install.appendChild;
+      const {appendChild} = install;
       install.appendChild = child => {
         iframe = child;
         iframe.complete = true; // Mark as loaded.
@@ -217,26 +315,23 @@ describes.realWin('amp-install-serviceworker', {
         iframe.src = 'about:blank';
         appendChild.call(install, iframe);
       };
-      let deferredMutate;
-      implementation.deferMutate = fn => {
-        expect(deferredMutate).to.be.undefined;
-        deferredMutate = fn;
-      };
-      return whenVisible.then(() => {
-        clock.tick(9999);
-        expect(deferredMutate).to.be.undefined;
+      const mutateElement = sandbox.stub(implementation, 'mutateElement');
+      mutateElement.callsFake(fn => {
         expect(iframe).to.be.undefined;
-        clock.tick(1);
-        expect(deferredMutate).to.exist;
-        expect(iframe).to.be.undefined;
-        deferredMutate();
+        const returnedValue = fn();
         expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
-        expect(install.style.display).to.equal('none');
+        expect(install).to.have.display('none');
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('sandbox')).to.equal(
             'allow-same-origin allow-scripts');
+        return returnedValue;
       });
+      implementation.buildCallback();
+      return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+          () => {
+            expect(mutateElement).to.have.been.calledOnce;
+          });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
@@ -250,17 +345,20 @@ describes.realWin('amp-install-serviceworker', {
       testIframe();
     });
 
-    it('should reject bad iframe URLs', () => {
-      const iframeSrc = 'https://www2.example.com/install-sw.html';
-      install.setAttribute('data-iframe-src', iframeSrc);
-      expect(() => {
+    it('should reject bad iframe URL (not same origin)', () => {
+      install.setAttribute('data-iframe-src',
+          'https://www2.example.com/install-sw.html');
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/should be a URL on the same origin as the source/);
+      }).to.throw(/should be a URL on the same origin as the source/); });
+    });
+
+    it('should reject bad iframe URL (not https)', () => {
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
   });
 });
@@ -282,6 +380,7 @@ describes.fakeWin('url rewriter', {
     win = env.win;
     ampdoc = env.ampdoc;
     viewer = win.services.viewer.obj;
+    stubUrlService(sandbox);
     element = win.document.createElement('amp-install-serviceworker');
     element.setAttribute('src', 'https://example.com/sw.js');
     // This is a RegExp string.
@@ -338,24 +437,24 @@ describes.fakeWin('url rewriter', {
 
     it('should fail when only mask configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-shell-url');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when only shell configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-url-match');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when shell is on different origin', () => {
       element.setAttribute('data-no-service-worker-fallback-shell-url',
           'https://acme.org/shell#abc');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be the same as source origin/);
+      }).to.throw(/must be the same as source origin/); });
     });
 
     it('should fail when mask is an invalid expression', () => {
@@ -368,12 +467,12 @@ describes.fakeWin('url rewriter', {
   });
 
   describe('start shell preload', () => {
-    let deferMutateStub;
+    let mutateElementStub;
     let preloadStub;
 
     beforeEach(() => {
-      deferMutateStub = sandbox.stub(implementation, 'deferMutate').callsFake(
-          callback => callback());
+      mutateElementStub = sandbox.stub(implementation, 'mutateElement')
+          .callsFake(callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');
     });
@@ -400,7 +499,7 @@ describes.fakeWin('url rewriter', {
         return viewer.whenFirstVisible();
       }).then(() => {
         expect(preloadStub).to.be.calledOnce;
-        expect(deferMutateStub).to.be.calledOnce;
+        expect(mutateElementStub).to.be.calledOnce;
       });
     });
   });
@@ -411,7 +510,7 @@ describes.fakeWin('url rewriter', {
       const iframe = element.querySelector('iframe');
       expect(iframe).to.exist;
       expect(iframe.src).to.equal('https://example.com/shell#preload');
-      expect(iframe.style.display).to.equal('none');
+      expect(iframe).to.have.attribute('hidden');
       expect(iframe.getAttribute('sandbox'))
           .to.equal('allow-scripts allow-same-origin');
     });

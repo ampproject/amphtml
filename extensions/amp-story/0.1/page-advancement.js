@@ -19,6 +19,7 @@ import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
+import {map} from '../../../src/utils/object';
 
 
 /** @private @const {number} */
@@ -33,12 +34,21 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
+/** @const */
+const PROTECTED_ELEMENTS = map({
+  A: true,
+  BUTTON: true,
+});
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
  * invoked.
  */
 export class AdvancementConfig {
+  /**
+   * @public
+   */
   constructor() {
     /** @private @const {!Array<function(number)>} */
     this.progressListeners_ = [];
@@ -159,7 +169,7 @@ export class AdvancementConfig {
    */
   static forPage(page) {
     const rootEl = page.element;
-    const win = rootEl.ownerDocument.defaultView;
+    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
@@ -296,13 +306,26 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * We want clicks on certain elements to be exempted from normal page
+   * navigation
+   * @param {!Event} event
+   * @return {boolean}
+   */
+  isProtectedTarget_(event) {
+    return !!closest(dev().assertElement(event.target), el => {
+      return PROTECTED_ELEMENTS[el.tagName];
+    }, /* opt_stopAt */ this.element_);
+  }
+
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    * @private
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event)) {
+    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -403,6 +426,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * auto-advance string (from the 'auto-advance-after' attribute on the page).
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
+   * @param {!Window} win
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
@@ -434,6 +458,10 @@ class TimeBasedAdvancement extends AdvancementConfig {
  * guaranteed.
  */
 class MediaBasedAdvancement extends AdvancementConfig {
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   */
   constructor(win, element) {
     super();
 
@@ -564,6 +592,8 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * auto-advance string (from the 'auto-advance-after' attribute on the page).
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
+   * @param {!Window} win
+   * @param {!Element} rootEl
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.

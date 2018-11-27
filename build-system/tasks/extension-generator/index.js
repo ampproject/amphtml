@@ -50,48 +50,19 @@ function getValidatorFile(name) {
 tags: {  # ${name}
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "${name} extension .js script"
-  satisfies: "${name} extension .js script"
-  requires: "${name}"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "${name}"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "${name}"
+    version: "0.1"
+    version: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "${name}"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/${name}-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <${name}>
   html_format: AMP
   tag_name: "${name.toUpperCase()}"
-  satisfies: "${name}"
-  requires: "${name} extension .js script"
+  requires_extension: "${name}"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
@@ -116,7 +87,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="\`${name}\`"></a> \`${name}\`
+# \`${name}\`
 
 <table>
   <tr>
@@ -129,7 +100,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="${name}" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -155,7 +126,6 @@ See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions
 }
 
 function getJsTestExtensionFile(name) {
-  const className = pascalCase(name);
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
  *
@@ -172,12 +142,12 @@ function getJsTestExtensionFile(name) {
  * limitations under the License.
  */
 
-import {${className}} from '../${name}';
+import '../${name}';
 
 describes.realWin('${name}', {
   amp: {
     extensions: ['${name}'],
-  }
+  },
 }, env => {
 
   let win;
@@ -226,12 +196,13 @@ export class ${className} extends AMP.BaseElement {
     /** @private {string} */
     this.myText_ = 'hello world';
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?Element} */
+    this.container_ = null;
   }
 
   /** @override */
   buildCallback() {
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
@@ -276,7 +247,8 @@ function makeExtension() {
     log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
   }
-  const name = argv.name;
+  const {name} = argv;
+  const examplesFile = getExamplesFile(name);
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
   fs.writeFileSync(`extensions/${name}/${name}.md`,
@@ -287,11 +259,18 @@ function makeExtension() {
       getJsExtensionFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
       getJsTestExtensionFile(name));
+  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.html`,
+      examplesFile);
+
+  const examplesFileValidatorOut = examplesFile.trim().split('\n')
+      .map(line => `|  ${line}`)
+      .join('\n');
+
+  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.out`,
+      ['PASS', examplesFileValidatorOut].join('\n'));
+
   fs.writeFileSync(`examples/${name}.amp.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.html`,
-      getExamplesFile(name));
-  fs.writeFileSync(`validator/testdata/feature_tests/${name}.out`, 'PASS');
+      examplesFile);
 }
 
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {

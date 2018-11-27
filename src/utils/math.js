@@ -57,7 +57,7 @@ export function mapRange(val, min1, max1, min2, max2) {
  * Computes the modulus of values `a` and `b`.
  *
  * This is needed because the % operator in JavaScript doesn't implement
- * modulus behaviour as can be seen by the spec here:
+ * modulus behavior as can be seen by the spec here:
  * http://www.ecma-international.org/ecma-262/5.1/#sec-11.5.3.
  * It instead is used to obtain the remainder of a division.
  * This function uses the remainder (%) operator to determine the modulus.
@@ -66,7 +66,7 @@ export function mapRange(val, min1, max1, min2, max2) {
  *
  * @param {number} a
  * @param {number} b
- * @returns {number} returns the modulus of the two numbers.
+ * @return {number} returns the modulus of the two numbers.
  * @example
  *
  * _.min(10, 5);

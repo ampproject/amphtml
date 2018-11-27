@@ -27,12 +27,17 @@ const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
 
-const host = process.env.SERVE_HOST;
-const port = process.env.SERVE_PORT;
+const {
+  SERVE_HOST: host,
+  SERVE_PORT: port,
+  SERVE_PROCESS_ID: gulpProcess,
+} = process.env;
+
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
-const gulpProcess = process.env.SERVE_PROCESS_ID;
 const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const noCachingExtensions = process.env.SERVE_EXTENSIONS_WITHOUT_CACHING ==
+    'true';
 const header = require('connect-header');
 
 // Exit if the port is in use.
@@ -55,21 +60,34 @@ setInterval(function() {
 
 const middleware = [];
 if (!quiet) {
-  middleware.push(morgan('dev'), app);
+  middleware.push(morgan('dev'));
 }
+middleware.push(app.middleware);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
   }));
 }
 
-// Start gulp webserver
-gulp.src(process.cwd())
-    .pipe(webserver({
-      port,
-      host,
-      directoryListing: true,
-      https: useHttps,
-      middleware,
-    }));
+if (noCachingExtensions) {
+  middleware.push(function(req, res, next) {
+    if (req.url.startsWith('/dist/v0/amp-')) {
+      log('Skipping caching for ', req.url);
+      res.header('Cache-Control', 'no-store');
+    }
+    next();
+  });
+}
 
+// Start gulp webserver
+(async() => {
+  await app.beforeServeTasks();
+  gulp.src(process.cwd())
+      .pipe(webserver({
+        port,
+        host,
+        directoryListing: true,
+        https: useHttps,
+        middleware,
+      }));
+})();

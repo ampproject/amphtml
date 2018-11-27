@@ -34,13 +34,15 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     /** @private {?number} */
     this.riddleId_ = null;
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
-
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
 
+  /**
+   * Handles message.
+   *
+   * @param {!Event} event
+   */
   handleMessage_(event) {
     if (!this.iframe_ ||
         event.origin != 'https://www.riddle.com' ||

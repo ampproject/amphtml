@@ -26,18 +26,24 @@ const BACKGROUND_AUDIO_ELEMENT_CLASS_NAME = 'i-amphtml-story-background-audio';
  * Adds support for the background-audio property on the specified element.
  * @param {!Element} element The element to upgrade with support for background
  *     audio.
+ * @return {?Element} audioEl
  */
 export function upgradeBackgroundAudio(element) {
-  if (element.hasAttribute('background-audio')) {
-    const audioEl = element.ownerDocument.createElement('audio');
-    const audioSrc =
-        assertHttpsUrl(element.getAttribute('background-audio'), element);
-    audioEl.setAttribute('src', audioSrc);
-    audioEl.setAttribute('preload', 'auto');
-    audioEl.setAttribute('loop', '');
-    audioEl.setAttribute('autoplay', '');
-    audioEl.setAttribute('muted', '');
-    audioEl.classList.add(BACKGROUND_AUDIO_ELEMENT_CLASS_NAME);
-    element.appendChild(audioEl);
+  if (!element.hasAttribute('background-audio')) {
+    return null;
   }
+
+  const audioEl = element.ownerDocument.createElement('audio');
+  const audioSrc =
+      assertHttpsUrl(element.getAttribute('background-audio'), element);
+  audioEl.setAttribute('src', audioSrc);
+  audioEl.setAttribute('preload', 'auto');
+  audioEl.setAttribute('loop', '');
+  audioEl.setAttribute('autoplay', '');
+  audioEl.setAttribute('muted', '');
+  audioEl.muted = true;
+  audioEl.classList.add(BACKGROUND_AUDIO_ELEMENT_CLASS_NAME);
+  element.appendChild(audioEl);
+
+  return audioEl;
 }

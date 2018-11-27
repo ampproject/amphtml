@@ -26,7 +26,8 @@
  * </code>
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -63,21 +64,31 @@ const TEMPLATE_ATTRIBUTE_NAME = 'template';
 
 /**
  * A mapping of template attribute values to CSS class names.
- * @private @const {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
-const TEMPLATE_CLASS_NAMES = {
+export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
   'fill': 'i-amphtml-story-grid-template-fill',
   'vertical': 'i-amphtml-story-grid-template-vertical',
   'horizontal': 'i-amphtml-story-grid-template-horizontal',
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
-export class AmpStoryGridLayer extends AMP.BaseElement {
+/**
+ * Grid layer template templating system.
+ */
+export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private @const {boolean} Only prerender if child of the first page. */
+    /** @private {boolean} */
+    this.prerenderAllowed_ = false;
+  }
+
+
+  /** @override */
+  firstAttachedCallback() {
+    // Only prerender if child of the first page.
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type amp-story-grid-layer');
   }
@@ -85,6 +96,7 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    super.buildCallback();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -107,7 +119,7 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
   applyTemplateClassName_() {
     if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
       const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = TEMPLATE_CLASS_NAMES[templateName];
+      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
       this.element.classList.add(templateClassName);
     }
   }
@@ -127,7 +139,6 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
     });
   }
 
-
   /**
    * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
@@ -146,21 +157,16 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
    *     its attributes.
    */
   setCssGridStyles_(element) {
+    const styles = {};
     for (let i = element.attributes.length - 1; i >= 0; i--) {
       const attribute = element.attributes[i];
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
-        element.style[propertyName] = attribute.value;
+        styles[propertyName] = attribute.value;
         element.removeAttribute(attributeName);
       }
     }
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    setStyles(element, assertDoesNotContainDisplay(styles));
   }
 }
-
-AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);

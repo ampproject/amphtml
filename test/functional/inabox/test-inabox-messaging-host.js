@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
@@ -25,20 +24,30 @@ describes.realWin('inabox-host:messaging', {}, env => {
   let host;
   let iframe1;
   let iframe2;
+  let iframe3;
   let iframeUntrusted;
 
   beforeEach(() => {
     win = env.win;
     iframe1 = win.document.createElement('iframe');
     iframe2 = win.document.createElement('iframe');
+    iframe3 = win.document.createElement('iframe');
     iframeUntrusted = win.document.createElement('iframe');
     win.document.body.appendChild(iframe1);
     win.document.body.appendChild(iframe2);
+    win.document.body.appendChild(iframe3);
     win.document.body.appendChild(iframeUntrusted);
     iframe1.contentWindow.postMessage = () => {};
     iframe2.contentWindow.postMessage = () => {};
+    iframe3.contentWindow.postMessage = () => {};
     iframeUntrusted.contentWindow.postMessage = () => {};
-    host = new InaboxMessagingHost(win, [iframe1, iframe2]);
+    iframe1.dataset.ampAllowed =
+        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+    iframe2.dataset.ampAllowed =
+        'send-positions';
+    iframeUntrusted.dataset.ampAllowed =
+        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+    host = new InaboxMessagingHost(win, [iframe1, iframe2, iframe3]);
   });
 
   describe('processMessage', () => {
@@ -50,6 +59,17 @@ describes.realWin('inabox-host:messaging', {}, env => {
         data: 'amp-' + JSON.stringify({
           sentinel: '0-123',
           type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should process valid message 2', () => {
+      expect(host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
         }),
       })).to.be.true;
     });
@@ -92,6 +112,50 @@ describes.realWin('inabox-host:messaging', {}, env => {
           type: 'send-positions',
         }),
       })).to.be.false;
+    });
+
+    it('should tolerate message with null source', () => {
+      host.processMessage({
+        source: null,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'send-positions',
+        }),
+      });
+    });
+
+    it('should process messages with allowed actions', () => {
+      expect(host.processMessage({
+        source: iframe2.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-124',
+          type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should ignore messages with disallowed actions', () => {
+      expect(host.processMessage({
+        source: iframe2.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-124',
+          type: 'full-overlay-frame',
+        }),
+      })).to.be.false;
+    });
+
+    it('should allow messages from frames with no whitelist for now', () => {
+      expect(host.processMessage({
+        source: iframe3.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-125',
+          type: 'full-overlay-frame',
+        }),
+      })).to.be.true;
     });
   });
 
@@ -189,7 +253,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         }),
       });
 
-      postMessageSpy.reset();
+      postMessageSpy.resetHistory();
       callback({x: 1});
       expect(postMessageSpy).to.be.calledOnce;
     });
@@ -304,7 +368,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   describe('getMeasureableFrame', () => {
     it('should return correct frame when many iframes at same level', () => {
-      const source = createNestedIframeMocks(6,3).source;
+      const {source} = createNestedIframeMocks(6,3);
       const expectedMeasureableWin = source.parent.parent;
       const correctFrame =
             expectedMeasureableWin.parent.document.querySelectorAll()[0];
@@ -319,20 +383,20 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
 
     it('should return correct frame multiple level of xdomain', () => {
-      const source = createNestedIframeMocks(6,3).source;
+      const {source} = createNestedIframeMocks(6,3);
       const expectedMeasurableWin = source.parent.parent;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           expectedMeasurableWin);
     });
 
     it('should return correct frame for single xdomain frame', () => {
-      const source = createNestedIframeMocks(10,1).source;
+      const {source} = createNestedIframeMocks(10,1);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });
 
     it('should return correct frame for no xdomain frames', () => {
-      const source = createNestedIframeMocks(5).source;
+      const {source} = createNestedIframeMocks(5);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });
@@ -343,38 +407,35 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return correct frame when intermediate xdomain frames', () => {
       const iframeObj = createNestedIframeMocks(6,3);
-      const sourceMock = iframeObj.source;
-      const topWinMock = iframeObj.topWin;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock.parent.parent;
       host = new InaboxMessagingHost(win, [frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return correct frame when all frames friendly', () => {
       const iframeObj = createNestedIframeMocks(6);
-      const sourceMock = iframeObj.source;
-      const topWinMock = iframeObj.topWin;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(win, [frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return correct frame when many frames registered', () => {
       const iframeObj = createNestedIframeMocks(6);
-      const sourceMock = iframeObj.source;
-      const topWinMock = iframeObj.topWin;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMockWrong1 = {};
       const frameMockWrong2 = {};
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
       host = new InaboxMessagingHost(
           win, [frameMockWrong1, frameMockWrong2, frameMock]);
-      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
-      ).to.deep.equal(expectedWin);
+      const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
+      expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
 
     it('should return cached frame', () => {
@@ -383,9 +444,11 @@ describes.realWin('inabox-host:messaging', {}, env => {
       };
       const creativeWinMock = {};
       const creativeIframeMock = {};
-      host.iframeMap_[sentinel] = creativeIframeMock;
-      expect(host.getFrameElement_(creativeWinMock, sentinel)
-      ).to.equal(creativeIframeMock);
+      host.iframeMap_[sentinel] = {
+        'iframe': creativeIframeMock, 'measurableFrame': creativeIframeMock};
+      const {measurableFrame} =
+          host.getFrameElement_(creativeWinMock, sentinel);
+      expect(measurableFrame).to.equal(creativeIframeMock);
     });
 
     it('should return null if frame is not registered', () => {
@@ -396,11 +459,59 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
     it('should return null if frame is more than 10 levels deep', () => {
       const iframeObj = createNestedIframeMocks(12,1);
-      const sourceMock = iframeObj.source;
-      const topWinMock = iframeObj.topWin;
+      const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
       expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
+    });
+  });
+
+  describe('unregisterIframe', () => {
+    it('unregisters frames', () => {
+      // Setup 3 frames with mock sentinel values.
+      const iframeObjA = createNestedIframeMocks(6,3);
+      const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
+      const iframeObjB = createNestedIframeMocks(6,6);
+      const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
+      const iframeObjC = createNestedIframeMocks(6,0);
+      const frameMockC = iframeObjC.topWin.document.querySelectorAll()[0];
+      const observeUnregisterMock = sandbox.spy();
+      host = new InaboxMessagingHost(win, [frameMockA, frameMockB, frameMockC]);
+      host.getFrameElement_(iframeObjA.source, 'sentinelA');
+      host.getFrameElement_(iframeObjB.source, 'sentinelB');
+      host.iframeMap_['sentinelB'].observeUnregisterFn = observeUnregisterMock;
+      host.getFrameElement_(iframeObjC.source, 'sentinelC');
+      expect(host.iframes_.length).to.equal(3);
+      expect('sentinelA' in host.iframeMap_).to.be.true;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      // Unregister each frame one at a time and verify state.
+      host.unregisterIframe(frameMockA);
+      expect(host.iframes_.length).to.equal(2);
+      expect('sentinelA' in host.iframeMap_).to.be.false;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      expect(observeUnregisterMock).to.not.be.called;
+      host.unregisterIframe(frameMockB);
+      expect(host.iframes_.length).to.equal(1);
+      expect('sentinelA' in host.iframeMap_).to.be.false;
+      expect('sentinelB' in host.iframeMap_).to.be.false;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      expect(observeUnregisterMock).to.be.calledOnce;
+      host.unregisterIframe(frameMockC);
+      expect(host.iframes_).to.be.empty;
+      expect(host.iframeMap_).to.be.empty;
+      expect(observeUnregisterMock).to.be.calledOnce;
+    });
+
+    it('no errors or effects if called with a non-registered iframe', () => {
+      const iframeObj = createNestedIframeMocks(6,3);
+      const frameMock = iframeObj.topWin.document.querySelectorAll()[0];
+      host = new InaboxMessagingHost(win, [frameMock]);
+      host.getFrameElement_(iframeObj.source, 'sentinelA');
+      host.unregisterIframe(createNestedIframeMocks(1,1));
+      expect(host.iframes_.length).to.equal(1);
+      expect('sentinelA' in host.iframeMap_).to.be.true;
     });
   });
 });

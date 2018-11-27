@@ -20,11 +20,20 @@ For instructions on how to set the rtc-config attribute on the amp-ad, refer to 
 ## Available URL Macros
 Doubleclick's RTC implementation has made many macros available for RTC url expansion. Please note that the time to expand the URL is counted against the RTC timeout. Additionally, note that all RTC URLs are truncated at 16384 characters, so keep possible truncation in mind when determining which macros to include, and which order to include them in your URL. Currently available macros are as follows:
 
-* **PAGEVIEWID**: pageViewId for the amp-ad element.
-* **HREF**: window.location.href
-* **TGT**: The JSON stringified targeting parameter extracted from the JSON attribute on the amp-ad element.
-* **ADCID**: The adClientId that corresponds to the given publisher page and DoubleClick. This adCid should be the same as used by AMP Analytics. IMPORTANT NOTE: This is an asynchronous call to use this macro, and can be slow. To impose a strict timeout, can pass an optional timeout. This is done in the url like: `https://www.foo.com/?adcid=ADCID(10)` where the passed timeout is in milliseconds.
-* **ATTR**: Makes various attributes on the amp-ad element available, by calling as ATTR(attribute).If the attribute does not exist, returns empty string. Currently available attributes are: height, width, data-slot, data-multi-size, data-multi-size-validation, data-override-width, data-override-height.
+- **PAGEVIEWID** - pageViewId
+- **HREF** - equivalent to window.context.location.href
+- **ATTR(height)** - Height attribute of the amp-ad element
+- **ATTR(width)** - Width attribute of the amp-ad element
+- **ATTR(data-slot)** - data-slot attribute of the amp-ad element
+- **ATTR(data-multi-size)** - data-multi-size attribute of the amp-ad element
+- **ATTR(data-multi-size-validation)** - data-multi-size-validation attribute of the amp-ad element
+- **ATTR(data-override-width)** - data-override-width attribute of the amp-ad element
+- **ATTR(data-override-height)** - data-override-height attribute of the amp-ad element
+- **ATTR(data-json)** -  data-json attribute of the amp-ad element
+- **ADCID** - adClientId 
+- **TGT** - Just the targeting piece of data-json
+- **CANONICAL_URL** - The canonical URL of the page. 
+- **TIMEOUT** - The publisher-specified timeout for the RTC callout. 
 
 
 ## Response and Endpoint Specification
@@ -35,15 +44,13 @@ The requirements for an RTC endpoint to be used with DoubleClick are the same as
 
 The RTC Response to a GET must meet the following requirements:
 
-
-
 *   Status Code = 200
-*   Headers (in addition to automatically added headers):
-    *   CORS
-    *   AMP-Access-Control-Allow-Source-Origin
-    *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
-*   Must respond within default 1 second timeout on the response imposed by real-time-config-manager.js. Publishers may optionally shorten this timeout.
+*   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+*   Body of response is a JSON object of targeting information such as:
+    *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+
+
 
 The body of the response must meet the following specification:
 
@@ -300,7 +307,7 @@ The results will be merged with the value set on the amp-ad element, and the res
 
 _Note: the ordering of items is not guaranteed._
 
-This resulting object will then be sent on the **scp **parameter of the ad request, as
+This resulting object will then be sent on the **scp** parameter of the ad request, as
 
 
 ```
@@ -312,3 +319,5 @@ https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26e
 ## Using RTC In DFP
 
 The results of the RTC Callouts will be added to the DoubleClick Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for DoubleClick.
+
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>

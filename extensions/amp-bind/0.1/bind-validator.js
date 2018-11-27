@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ownProperty} from '../../../src/utils/object';
+import {hasOwn, ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -66,6 +66,7 @@ const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
+  'xlink:href': true,
 };
 
 /**
@@ -76,9 +77,17 @@ const URL_PROPERTIES = {
  */
 export class BindValidator {
   /**
+   * @param {boolean} allowUrlBindings
+   */
+  constructor(allowUrlBindings) {
+    /** @const @private {boolean} */
+    this.allowUrlBindings_ = allowUrlBindings;
+  }
+
+  /**
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
-   * @note `tag` and `property` are case-sensitive.
+   * NOTE: `tag` and `property` are case-sensitive.
    * @param {string} tag
    * @param {string} property
    * @return {boolean}
@@ -97,22 +106,18 @@ export class BindValidator {
    */
   isResultValid(tag, property, value) {
     let rules = this.rulesForTagAndProperty_(tag, property);
-
     // `alternativeName` is a reference to another property's rules.
     if (rules && rules.alternativeName) {
       rules = this.rulesForTagAndProperty_(tag, rules.alternativeName);
     }
-
     // If binding to (tag, property) is not allowed, return false.
     if (rules === undefined) {
       return false;
     }
-
     // If binding is allowed but have no specific rules, return true.
     if (rules === null) {
       return true;
     }
-
     // Validate URL(s) if applicable.
     if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
@@ -124,21 +129,18 @@ export class BindValidator {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
         }
-        const sources = srcset.getSources();
-        urls = sources.map(source => source.url);
+        urls = srcset.getUrls();
       } else {
         urls = [value];
       }
-
       for (let i = 0; i < urls.length; i++) {
         if (!this.isUrlValid_(urls[i], rules)) {
           return false;
         }
       }
     }
-
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const blacklistedValueRegex = rules.blacklistedValueRegex;
+    const {blacklistedValueRegex} = rules;
     if (value && blacklistedValueRegex) {
       const re = new RegExp(blacklistedValueRegex, 'i');
       if (re.test(value)) {
@@ -158,19 +160,18 @@ export class BindValidator {
    */
   isUrlValid_(url, rules) {
     // @see validator/engine/validator.ParsedUrlSpec.validateUrlAndProtocol()
-    const allowedProtocols = rules.allowedProtocols;
+    const {allowedProtocols} = rules;
     if (allowedProtocols && url) {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
       if (match !== null) {
         const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
-        if (!allowedProtocols.hasOwnProperty(protocol)) {
+        if (!hasOwn(allowedProtocols, protocol)) {
           return false;
         }
       }
     }
-
     return true;
   }
 
@@ -178,6 +179,8 @@ export class BindValidator {
    * Returns the property rules object for (tag, property), if it exists.
    * Returns null if binding is allowed without constraints.
    * Returns undefined if binding is not allowed.
+   * @param {string} tag
+   * @param {string} property
    * @return {(?PropertyRulesDef|undefined)}
    * @private
    */
@@ -185,6 +188,10 @@ export class BindValidator {
     // Allow binding to all ARIA attributes.
     if (startsWith(property, 'aria-')) {
       return null;
+    }
+    // Disallow URL property bindings if configured as such.
+    if (ownProperty(URL_PROPERTIES, property) && !this.allowUrlBindings_) {
+      return undefined;
     }
     const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
     if (globalRules !== undefined) {
@@ -220,6 +227,14 @@ function createElementRules_() {
     'AMP-CAROUSEL': {
       'slide': null,
     },
+    'AMP-DATE-PICKER': {
+      'max': null,
+      'min': null,
+    },
+    'AMP-GOOGLE-DOCUMENT-EMBED': {
+      'src': null,
+      'title': null,
+    },
     'AMP-IFRAME': {
       'src': null,
     },
@@ -237,6 +252,9 @@ function createElementRules_() {
         'alternativeName': 'src',
       },
     },
+    'AMP-LIGHTBOX': {
+      'open': null,
+    },
     'AMP-LIST': {
       'src': {
         'allowedProtocols': {
@@ -244,6 +262,7 @@ function createElementRules_() {
         },
       },
       'state': null,
+      'is-layout-container': null,
     },
     'AMP-SELECTOR': {
       'disabled': null,
@@ -255,6 +274,10 @@ function createElementRules_() {
           'https': true,
         },
       },
+    },
+    'AMP-TIMEAGO': {
+      'datetime': null,
+      'title': null,
     },
     'AMP-VIDEO': {
       'alt': null,
@@ -301,6 +324,14 @@ function createElementRules_() {
     'FIELDSET': {
       'disabled': null,
     },
+    'IMAGE': {
+      'xlink:href': {
+        'allowedProtocols': {
+          'http': true,
+          'https': true,
+        },
+      },
+    },
     'INPUT': {
       'accept': null,
       'accesskey': null,
@@ -323,7 +354,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,

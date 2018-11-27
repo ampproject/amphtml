@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 
@@ -30,7 +29,7 @@ describe('LoginDoneDialog', () => {
   let closeButton;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     messageListener = undefined;
@@ -201,6 +200,20 @@ describe('LoginDoneDialog', () => {
           });
     });
 
+    it('should work around double-encoding of URL on redirect', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent(encodeURIComponent('http://acme.com/doc1'));
+      windowApi.opener = null;
+      return dialog.postbackOrRedirect_()
+          .then(() => 'SUCCESS', error => 'ERROR ' + error)
+          .then(res => {
+            expect(res).to.equal('SUCCESS');
+            expect(windowApi.location.replace).to.be.calledOnce;
+            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+                'http://acme.com/doc1');
+          });
+    });
+
     it('should redirect to url without opener with HTTPS', () => {
       windowApi.location.search = '?url=' +
           encodeURIComponent('https://acme.com/doc1');
@@ -215,13 +228,38 @@ describe('LoginDoneDialog', () => {
           });
     });
 
+    it('should work around double-encoding of URL on redirect w/HTTPS', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent(encodeURIComponent('https://acme.com/doc1'));
+      windowApi.opener = null;
+      return dialog.postbackOrRedirect_()
+          .then(() => 'SUCCESS', error => 'ERROR ' + error)
+          .then(res => {
+            expect(res).to.equal('SUCCESS');
+            expect(windowApi.location.replace).to.be.calledOnce;
+            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+                'https://acme.com/doc1');
+          });
+    });
+
+    it('should fail tripple-encoding of URL', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent(
+              encodeURIComponent(encodeURIComponent('https://acme.com/doc1')));
+      windowApi.opener = null;
+      allowConsoleError(() => { expect(() => {
+        dialog.postbackOrRedirect_();
+      }).to.throw(/URL must start with/); });
+      expect(windowApi.location.replace).to.have.not.been.called;
+    });
+
     it('should fail redirect to url without opener and invalid URL', () => {
       windowApi.location.search = '?url=' +
           encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
       windowApi.opener = null;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dialog.postbackOrRedirect_();
-      }).to.throw(/URL must start with/);
+      }).to.throw(/URL must start with/); });
       expect(windowApi.location.replace).to.have.not.been.called;
     });
 

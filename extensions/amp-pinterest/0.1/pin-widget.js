@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {Util} from './util';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
@@ -48,7 +48,7 @@ export class PinWidget {
 
   /**
    * Override the default href click handling to log and open popup
-   * @param {Event} event: the HTML event object
+   * @param {Event} event
    */
   handleClick(event) {
     event.preventDefault();
@@ -57,6 +57,7 @@ export class PinWidget {
     const href = el.getAttribute('data-pin-href');
     const log = el.getAttribute('data-pin-log');
     if (href) {
+      assertAbsoluteHttpOrHttpsUrl(href);
       if (shouldPop) {
         openWindowDialog(window, href, '_pinit', POP);
       } else {
@@ -240,6 +241,11 @@ export class PinWidget {
     return structure;
   }
 
+  /**
+   * Renders the pin widget.
+   *
+   * @return {!Promise}
+   */
   render() {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');
@@ -251,7 +257,7 @@ export class PinWidget {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
     } catch (err) {
       return Promise.reject(
-          user().createError('Invalid pinterest url: ' + this.pinUrl)
+          user().createError('Invalid pinterest url: %s', this.pinUrl)
       );
     }
 

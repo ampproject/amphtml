@@ -20,27 +20,23 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
+const eslintIfFixed = require('gulp-eslint-if-fixed');
 const gulp = require('gulp-help')(require('gulp'));
-const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
+const path = require('path');
 const watch = require('gulp-watch');
+const {gitDiffNameOnlyMaster} = require('../git');
 
 const isWatching = (argv.watch || argv.w) || false;
-
 const options = {
   fix: false,
+  quiet: argv.quiet || false,
 };
+let collapseLintResults = !!process.env.TRAVIS;
 
-/**
- * Checks if current Vinyl file has been fixed by eslint.
- * @param {!Vinyl} file
- * @return {boolean}
- */
-function isFixed(file) {
-  // Has ESLint fixed the file contents?
-  return file.eslint != null && file.eslint.fixed;
-}
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
  * Initializes the linter stream based on globs
@@ -62,7 +58,7 @@ function initializeStream(globs, streamOptions) {
  * @param {string} message
  */
 function logOnSameLine(message) {
-  if (!process.env.TRAVIS) {
+  if (!process.env.TRAVIS && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
@@ -72,51 +68,117 @@ function logOnSameLine(message) {
 
 /**
  * Runs the linter on the given stream using the given options.
- * @param {string} path
+ * @param {string} filePath
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}
  */
-function runLinter(path, stream, options) {
-  let errorsFound = false;
+function runLinter(filePath, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
   }
+  if (collapseLintResults) {
+    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+    log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
+    console./* OK*/log('travis_fold:start:lint_results\n');
+  }
+  const fixedFiles = {};
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
-        errorsFound = true;
-        logOnSameLine(colors.red('Linter error:') + msg + '\n');
+        logOnSameLine(msg.trim() + '\n');
       }))
-      .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslintIfFixed(filePath))
       .pipe(eslint.result(function(result) {
         if (!process.env.TRAVIS) {
-          logOnSameLine(colors.green('Linting: ') + result.filePath);
+          logOnSameLine(colors.green('Linted: ') + result.filePath);
+        }
+        if (options.fix && result.fixed) {
+          const relativePath = path.relative(rootDir, result.filePath);
+          const status = result.errorCount == 0 ?
+            colors.green('Fixed: ') : colors.yellow('Partially fixed: ');
+          logOnSameLine(status + colors.cyan(relativePath));
+          fixedFiles[relativePath] = status;
         }
       }))
       .pipe(eslint.results(function(results) {
-        if (results.errorCount == 0) {
+        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
+        if (collapseLintResults) {
+          console./* OK*/log('travis_fold:end:lint_results');
+        }
+        if (results.errorCount == 0 && results.warningCount == 0) {
           if (!process.env.TRAVIS) {
-            logOnSameLine(colors.green('Success: ') + 'No linter errors');
+            logOnSameLine(colors.green('SUCCESS: ') +
+                'No linter warnings or errors.');
           }
         } else {
-          logOnSameLine(colors.red('Error: ') + results.errorCount +
-              ' linter error(s) found.');
-          process.exit(1);
+          const prefix = results.errorCount == 0 ?
+            colors.yellow('WARNING: ') : colors.red('ERROR: ');
+          logOnSameLine(prefix + 'Found ' +
+              results.errorCount + ' error(s) and ' +
+              results.warningCount + ' warning(s).');
+          if (!options.fix) {
+            log(colors.yellow('NOTE 1:'),
+                'You may be able to automatically fix some of these warnings ' +
+                '/ errors by running',
+                colors.cyan('gulp lint --local-changes --fix'),
+                'from your local branch.');
+            log(colors.yellow('NOTE 2:'),
+                'Since this is a destructive operation (that edits your files',
+                'in-place), make sure you commit before running the command.');
+          }
+        }
+        if (options.fix && Object.keys(fixedFiles).length > 0) {
+          log(colors.green('INFO: ') + 'Summary of fixes:');
+          Object.keys(fixedFiles).forEach(file => {
+            log(fixedFiles[file] + colors.cyan(file));
+          });
         }
       }))
-      .pipe(eslint.failAfterError())
-      .on('error', function() {
-        if (errorsFound && !options.fix) {
-          log(colors.red('ERROR:'),
-              'Lint errors found.');
-          log(colors.yellow('NOTE:'),
-              'You can run', colors.cyan('gulp lint --fix'),
-              'to automatically fix some of these lint errors.');
-          log(colors.yellow('WARNING:'),
-              'Since this is a destructive operation (operates on the file',
-              'system), make sure you commit before running the command.');
-        }
-      });
+      .pipe(eslint.failAfterError());
+}
+
+/**
+ * Extracts the list of JS files in this PR from the commit log.
+ *
+ * @return {!Array<string>}
+ */
+function jsFilesChanged() {
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.extname(file) == '.js';
+  });
+}
+
+/**
+ * Checks if there are eslint rule changes, in which case we must lint all
+ * files.
+ *
+ * @return {boolean}
+ */
+function eslintRulesChanged() {
+  if (process.env.TRAVIS_EVENT_TYPE === 'push') {
+    return false;
+  }
+  return gitDiffNameOnlyMaster().filter(function(file) {
+    return path.basename(file).includes('.eslintrc') ||
+        path.dirname(file) === 'build-system/eslint-rules';
+  }).length > 0;
+}
+
+/**
+ * Sets the list of files to be linted.
+ *
+ * @param {!Array<string>} files
+ */
+function setFilesToLint(files) {
+  config.lintGlobs =
+      config.lintGlobs.filter(e => e !== '**/*.js').concat(files);
+  if (!process.env.TRAVIS) {
+    log(colors.green('INFO: ') + 'Running lint on the following files:');
+    files.forEach(file => {
+      log(colors.cyan(file));
+    });
+  }
+  collapseLintResults = false;
 }
 
 /**
@@ -127,19 +189,36 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  const stream = initializeStream(config.lintGlobs, {});
-  return runLinter('.', stream, options);
+  if (argv.files) {
+    setFilesToLint(argv.files.split(','));
+  } else if (!eslintRulesChanged() &&
+      (process.env.TRAVIS_EVENT_TYPE === 'pull_request' ||
+       process.env.LOCAL_PR_CHECK ||
+       argv['local-changes'])) {
+    const jsFiles = jsFilesChanged();
+    if (jsFiles.length == 0) {
+      log(colors.green('INFO: ') + 'No JS files in this PR');
+      return Promise.resolve();
+    }
+    setFilesToLint(jsFiles);
+  }
+  const basePath = '.';
+  const stream = initializeStream(config.lintGlobs, {base: basePath});
+  return runLinter(basePath, stream, options);
 }
 
 
 gulp.task(
     'lint',
     'Validates against Google Closure Linter',
-    ['update-packages'],
+    maybeUpdatePackages,
     lint,
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',
-        'fix': '  Fixes simple lint errors (spacing etc).',
+        'fix': '  Fixes simple lint errors (spacing etc)',
+        'local-changes':
+            '  Lints just the changes commited to the local branch',
+        'quiet': '  Suppress warnings from outputting',
       },
     });

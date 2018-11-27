@@ -22,10 +22,6 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.</td>
   </tr>
-   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>
@@ -116,16 +112,14 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 #### Example: using `lightbox-thumbnail-id` to specify a thumbnail
 
 ```html
-<amp-facebook
-  lightbox
-  lightbox-thumbnail-id="fb-thumbnail-img"
-  width="552"
-  height="303"
+<amp-youtube width="480"
+  height="270"
   layout="responsive"
-  data-href="https://www.facebook.com/zuck/posts/10102593740125791">
-</amp-facebook>
+  data-videoid="lBTCB7yLs8Y"
+  lightbox-thumbnail-id="my-thumbnail-img">
+</amp-youtube>
 
-<amp-img id="fb-thumbnail-img"
+<amp-img id="my-thumbnail-img"
   width="200"
   height="200"
   layout="nodisplay"
@@ -135,72 +129,78 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 
 If no thumbnail is specified, `<amp-img>` elements will be cropped per `object-fit: cover`, `<amp-video>` will use the image src specified in its `poster` attribute, and placeholder images will be used for lightboxed elements that have one.
 
-## CSS API
+## Analytics events
 
-The CSS API exposes the following CSS classes so that you can customize the style of your lightbox:
+To track usage of `amp-lightbox-gallery`, please use one of the following analytics events:
 
-<table>
-  <tr>
-    <th width="40%">CSS class</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>.amp-lbg-mask</code></td>
-    <td>Use to customize the background color and opacity for the lightbox.</td>
-  </tr>
-   <tr>
-    <td><code>.amp-lbv-desc-box.standard</code>,<code>.amp-lbv-desc-box.overflow</code></td>
-    <td>Use to customize the description box's background color and gradient.</td>
-  </tr>
-  <tr>
-    <td><code>.amp-lbg-top-bar</code></td>
-    <td>Use to customize the color and gradient for the lightbox's top controls bar.</td>
-  </tr>
-    <td><code>.amp-lbv-desc-text</code></td>
-    <td>Use to customize the font and colors for the description.</td>
-  </tr>
-  <tr>
-    <td><code>.amp-lbg-icon</code></td>
-    <td>Use to customize the icon colors.</td>
-  </tr>
-  <tr>
-    <td><code>.amp-lbg-button-close</code>,<code>.amp-lbg-icon</code></td>
-    <td>Use to customize the icon for the close button.</td>
-  </tr>
-  <tr>
-    <td><code>.amp-lbg-button-gallery</code>,<code>.amp-lbg-icon</code></td>
-    <td>Use to customize the icon for the gallery button.</td>
-  </tr>
-    <tr>
-    <td><code>.amp-lbg-button-slide</code>,<code>.amp-lbg-icon</code></td>
-    <td>Use to customize the icon for the slide button.</td>
-  </tr>
-</table>
+### `lightboxOpened`
 
-#### Example: Using CSS to invert lightbox colors
+This event tracks when the lightbox is opened when the user clicks on a lightboxed `<amp-img>`.
 
-The following example uses the CSS API to set the lightbox background to white and the icon colors to black.
+You can track this event using the following code snippet:
 
 ```html
-.amp-lbg-mask {
-  opacity: 0.9;
-  background-color: rgba(255, 255, 255, 1);
-}
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "open": "https://foo.com/open",
+        },
+        "triggers": {
+          "trackLightboxOpened": {
+            "on": "lightboxOpened",
+            "request": "open"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
+```
 
-.amp-lbv-desc-box.standard, .amp-lbv-desc-box.overflow {
-  background: linear-gradient(transparent,rgba(255, 255, 255, 0.5));
-  color: #000000;
-}
+### `thumbnailsViewToggled`
 
-.amp-lbg-top-bar {
-  background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0));
-}
+This event tracks when the thumbnails view is triggered by clicking on the trigger when the user is in the lightbox view.
 
-.amp-lbg-icon {
-  background-color: #000000;
-}
+You can track this event using the following code snippet:
 
-.amp-lbv-desc-text {
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-}
+```html
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "thumb": "https://foo.com/thumb",
+        },
+        "triggers": {
+          "trackThumbnailsViewToggled": {
+            "on": "thumbnailsViewToggled",
+            "request": "thumb"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
+```
+
+### `descriptionOverflowToggled`
+
+This event tracks when the user toggles the description by clicking on the description to expand/collapse it, tracking engagement with the description for the lightboxed image.
+
+You can track this event using the following code snippet:
+
+```html
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "descOverflow": "https://foo.com/descOverflow"
+        },
+        "triggers": {
+          "trackDescriptionOverflowed": {
+            "on": "descriptionOverflowToggled",
+            "request": "descOverflow"
+          }
+        }
+      }
+      </script>
+      </amp-analytics>
 ```

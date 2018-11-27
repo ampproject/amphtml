@@ -165,6 +165,9 @@ export class Performance {
     });
   }
 
+  /**
+   * Callback for onload.
+   */
   onload_() {
     this.tick('ol');
     this.tickLegacyFirstPaintTime_();
@@ -222,8 +225,8 @@ export class Performance {
     if (!this.win.PerformancePaintTiming
         && this.win.chrome
         && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = this.win.chrome.loadTimes().firstPaintTime
-          * 1000 - this.win.performance.timing.navigationStart;
+      const fpTime = (this.win.chrome.loadTimes()['firstPaintTime'] * 1000)
+          - this.win.performance.timing.navigationStart;
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
@@ -322,7 +325,8 @@ export class Performance {
       this.mark(label);
     }
 
-    // Store certain page visibility metrics to be exposed as analytics variables.
+    // Store certain page visibility metrics to be exposed as analytics
+    // variables.
     const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
 				 : value - this.initTime_);
     switch (label) {
@@ -453,23 +457,32 @@ export class Performance {
   }
 
   /**
-   * Identifies if the viewer is able to track performance.
-   * If the document is not embedded, there is no messaging channel,
-   * so no performance tracking is needed since there is nobody to forward the events.
+   * Identifies if the viewer is able to track performance. If the document is
+   * not embedded, there is no messaging channel, so no performance tracking is
+   * needed since there is nobody to forward the events.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
     return this.isPerformanceTrackingOn_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getFirstContentfulPaint() {
     return this.firstContentfulPaint_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getMakeBodyVisible() {
     return this.makeBodyVisible_;
   }
 
+  /**
+   * @return {number|null}
+   */
   getFirstViewportReady() {
     return this.firstViewportReady_;
   }

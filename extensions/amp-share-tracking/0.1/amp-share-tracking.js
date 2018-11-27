@@ -22,6 +22,7 @@ import {dict} from '../../../src/utils/object';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
+import {tryResolve} from '../../../src/utils/promise';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
@@ -50,7 +51,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     * @private
     */
   isExperimentOn_() {
-    return isExperimentOn(this.win, TAG);
+    return isExperimentOn(this.win, 'amp-share-tracking');
   }
 
   /** @override */
@@ -62,9 +63,9 @@ export class AmpShareTracking extends AMP.BaseElement {
   buildCallback() {
     if (!this.isExperimentOn_()) {
       registerServiceBuilder(this.win, 'share-tracking', function() {
-        return Promise.reject(user().createError(TAG + ' disabled'));
+        return Promise.reject(user().createError('%s disabled', TAG));
       });
-      user().assert(false, `${TAG} experiment is disabled`);
+      user().assert(false, '%s experiment is disabled', TAG);
     }
 
     this.vendorHref_ = this.element.getAttribute('data-href');
@@ -125,7 +126,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return Promise.resolve(base64UrlEncodeFromBytes(
+    return tryResolve(() => base64UrlEncodeFromBytes(
         this.getShareTrackingRandomBytes_()));
   }
 

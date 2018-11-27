@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   IframeTransportClient, IframeTransportContext,
 } from '../../../../3p/iframe-transport-client';
@@ -34,7 +33,7 @@ describe('iframe-transport-client', () => {
   let sentinel;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sentinel = createUniqueId();
     window.name = JSON.stringify({sentinel, type: 'some-vendor'});
     iframeTransportClient = new IframeTransportClient(window);
@@ -47,7 +46,7 @@ describe('iframe-transport-client', () => {
   /**
    * Sends a message from the current window to itself
    * @param {string} type Type of the message.
-   * @param {!JsonObject} object Message payload.
+   * @param {!JsonObject} data Message payload.
    */
   function send(type, data) {
     const object = {};
@@ -74,20 +73,20 @@ describe('iframe-transport-client', () => {
   it('fails to create iframeTransportClient if window.name is missing' +
     ' sentinel', () => {
     const oldWindowName = window.name;
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       window.name = JSON.stringify({type: 'some-vendor'});
       new IframeTransportClient(window);
-    }).to.throw(/missing sentinel/);
+    }).to.throw(/missing sentinel/); });
     window.name = oldWindowName;
   });
 
   it('fails to create iframeTransportClient if window.name is missing' +
     ' type', () => {
     const oldWindowName = window.name;
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       window.name = JSON.stringify({sentinel});
       new IframeTransportClient(window);
-    }).to.throw(/must supply vendor name/);
+    }).to.throw(/must supply vendor name/); });
     window.name = oldWindowName;
   });
 
@@ -108,11 +107,11 @@ describe('iframe-transport-client', () => {
   });
 
   it('requires onNewContextInstance', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new IframeTransportContext(window,
           iframeTransportClient.iframeMessagingClient_,
           'my_creative', 'my_vendor');
-    }).to.throw(/Must implement onNewContextInstance/);
+    }).to.throw(/Must implement onNewContextInstance/); });
   });
 
   it('calls onNewContextInstance', () => {

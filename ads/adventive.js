@@ -116,16 +116,13 @@ function callback(id, ns) { ns.addInstance(id); }
  *    provided, otherwise false
  */
 function getUrl(context, data, ns) {
-  const location = context.location,
-      mode = ns.mode,
+  const {mode} = ns,
       isDev = hasOwn(data, 'isDev'),
       sld_ = sld[!mode.dev],
       thld_ = thld[isDev && !mode.live],
       search = reduceSearch(ns, data.pid, data.click, context.referrer),
       url = search ?
         addParamsToUrl(`https://${thld_}.${sld_}.com/ad`, search) : false;
-
-  if (isDev && mode.live) { logSuspiciousActivity(location, data, url); }
   return url;
 }
 
@@ -142,10 +139,13 @@ function getUrl(context, data, ns) {
  *    representation of the url search query.
  */
 function reduceSearch(ns, placementId, click, referrer) {
-  const isRecipeLoaded = hasOwn(ns.args, 'placementId'),
-      isRecipeStale = !isRecipeLoaded ? true :
-        (Date.now() - ns.args[placementId].requestTime) > (60 * cacheTime),
-      needsRequest = !isRecipeLoaded || isRecipeStale;
+  const isRecipeLoaded = hasOwn(ns.args, 'placementId');
+  let isRecipeStale = true;
+  if (isRecipeLoaded) {
+    const info = ns.args[placementId];
+    isRecipeStale = (Date.now() - info['requestTime']) > (60 * cacheTime);
+  }
+  const needsRequest = !isRecipeLoaded || isRecipeStale;
 
   return !needsRequest ? null : dict({
     'click': click,
@@ -155,6 +155,3 @@ function reduceSearch(ns, placementId, click, referrer) {
     'pid': needsRequest ? placementId : '',
   });
 }
-
-// eslint-disable-next-line no-unused-vars
-function logSuspiciousActivity(location, data, url) { /* todo implement */ }

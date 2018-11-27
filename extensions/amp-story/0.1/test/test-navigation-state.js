@@ -13,29 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventType, dispatch} from '../events';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {NavigationState, StateChangeType} from '../navigation-state';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   let navigationState;
-  let pageElement;
   let hasBookend = false;
-
-  function createObserver() {
-    return sandbox.spy();
-  }
+  let storeService;
 
   beforeEach(() => {
+    storeService = new AmpStoryStoreService(env.win);
+    registerServiceBuilder(env.win, 'story-store', () => storeService);
     hasBookend = false;
-    pageElement = env.win.document.createElement('div');
-    navigationState = new NavigationState(pageElement,
+    navigationState = new NavigationState(env.win,
         // Not using `Promise.resolve` since we need synchronicity.
         () => ({then(fn) { fn(hasBookend); }}));
   });
 
   it('should dispatch active page changes to all observers', () => {
-    const observers = Array(5).fill(undefined).map(createObserver);
+    const observers = Array(5).fill(undefined).map(() => sandbox.spy());
 
     observers.forEach(observer => navigationState.observe(observer));
 
@@ -46,17 +44,19 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 0
               && e.value.totalPages === 10
-              && e.value.pageId == 'my-page-id-1'));
+              && e.value.pageId == 'my-page-id-1'
+              && e.value.storyProgress === 0));
     });
 
-    navigationState.updateActivePage(5, 15);
+    navigationState.updateActivePage(5, 15, 'foo');
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 5
               && e.value.totalPages === 15
-              && !('pageId' in e.value)));
+              && e.value.pageId === 'foo'
+              && e.value.storyProgress === (1 / 3)));
     });
 
     navigationState.updateActivePage(2, 5, 'one-two-three');
@@ -66,7 +66,8 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 2
               && e.value.totalPages === 5
-              && e.value.pageId == 'one-two-three'));
+              && e.value.pageId == 'one-two-three'
+              && e.value.storyProgress === 0.4));
     });
   });
 
@@ -111,12 +112,12 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     navigationState.observe(event => observer(event.type));
 
-    dispatch(pageElement, EventType.SHOW_BOOKEND);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
 
     expect(observer).to.have.been.calledWith(StateChangeType.BOOKEND_ENTER);
     expect(observer).to.have.been.calledWith(StateChangeType.END);
 
-    dispatch(pageElement, EventType.CLOSE_BOOKEND);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, false);
 
     expect(observer).to.have.been.calledWith(StateChangeType.BOOKEND_EXIT);
   });
