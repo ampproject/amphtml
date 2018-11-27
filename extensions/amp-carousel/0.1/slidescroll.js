@@ -630,7 +630,7 @@ export class AmpSlideScroll extends BaseSlides {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
           user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')],
-              false);
+      false);
     }
     const newSlideInView = this.slides_[newIndex];
 
