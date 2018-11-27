@@ -479,6 +479,7 @@ export class AmpForm {
    * Helper method that actual handles the different cases (post, get, xhr...).
    * @param {ActionTrust} trust
    * @param {?Event} event
+   * @return {!Promise}
    * @private
    */
   submit_(trust, event) {
@@ -515,7 +516,7 @@ export class AmpForm {
         }
 
         this.handleNonXhrGet_();
-        return;
+        return Promise.resolve();
       }
 
       event.preventDefault();
@@ -531,9 +532,9 @@ export class AmpForm {
       presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
     });
 
-    this.waitOnPromisesOrTimeout_(presubmitPromises, 10000).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => this.handlePresubmitError_(error)
+    return this.waitOnPromisesOrTimeout_(presubmitPromises, 10000).then(
+        () => this.handlePresubmitSuccess_(trust),
+        error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
 
@@ -568,7 +569,10 @@ export class AmpForm {
   handlePresubmitError_(error) {
     this.setState_(FormState.SUBMIT_ERROR);
     dev().error(TAG, 'Form submission failed: %s', error);
-    this.renderTemplate_({error}).then(() => {
+    const errorJsonObject = dict({
+      'error': error.message,
+    });
+    this.renderTemplate_(errorJsonObject).then(() => {
       this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
     });
   }
