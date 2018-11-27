@@ -14,11 +14,21 @@
     src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4">
   </video>
 
-  <!-- Wait for API to initialize -->
+  <!-- Integration script -->
   <script>
+    //  #######  #####   #####    ###     #   #######
+    //  #       #     # #     #  #   #   ##   #         #
+    //  #       #             # #     # # #   #         #
+    //  #####    #####   #####  #     #   #   ######  #####
+    //  #             # #       #     #   #         #   #
+    //  #       #     # #        #   #    #   #     #   #
+    //  #######  #####  #######   ###   #####  #####
+
     // This example is written in ES2015+.
     // If you require ES5 support, transpile this code. If you wish to write an
     // integration script in ES5, see ./frame.html.
+
+    // Wait for API to initialize
     (window.AmpVideoIframe = window.AmpVideoIframe || [])
         .push(onAmpIntegrationReady);
 
