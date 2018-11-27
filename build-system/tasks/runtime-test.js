@@ -40,6 +40,7 @@ const {green, yellow, cyan, red, bold} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
+const batchSize = 4; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
@@ -546,20 +547,21 @@ async function runTests() {
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
+  // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
+  // Sauce Labs environment.
   if (argv.saucelabs || argv.saucelabs_lite) {
     let batch = 1;
-    const batchSize = 4; // Number of Sauce Lab browsers
-    let left = 0;
-    let right = batchSize;
-    while (left < right) {
+    let startIndex = 0;
+    let endIndex = batchSize;
+    while (startIndex < endIndex) {
       const configBatch = c;
-      configBatch.browsers = saucelabsBrowsers.slice(left, right);
+      configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
       await createKarmaServer(configBatch);
-      left = batch * batchSize;
+      startIndex = batch * batchSize;
       batch++;
-      right = Math.min(batch * batchSize, saucelabsBrowsers.length);
+      endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
   } else {
     await createKarmaServer(c);
