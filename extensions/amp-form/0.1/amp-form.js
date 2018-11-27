@@ -332,7 +332,11 @@ export class AmpForm {
     });
 
     this.form_.addEventListener(
-        'submit', this.handleSubmitEvent_.bind(this), true);
+        'submit',
+        /** @type {function(!Event): (boolean|undefined)|null}*/
+        (this.handleSubmitEvent_.bind(this)),
+        true
+    );
 
     this.form_.addEventListener('blur', e => {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
@@ -406,14 +410,15 @@ export class AmpForm {
    * Handles submissions through action service invocations.
    *   e.g. <img on=tap:form.submit>
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
    * @private
    */
   handleSubmitAction_(invocation) {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
-      return;
+      return null;
     }
     // `submit` has the same trust level as the AMP Action that caused it.
-    this.submit_(invocation.trust, null);
+    return this.submit_(invocation.trust, null);
   }
 
   /**
@@ -458,13 +463,14 @@ export class AmpForm {
    *   - It's a non-XHR POST submission (unsupported).
    *
    * @param {!Event} event
+   * @return {?Promise}
    * @private
    */
   handleSubmitEvent_(event) {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
-      return;
+      return null;
     }
 
     if (this.xhrAction_ || this.method_ == 'POST') {
@@ -472,7 +478,7 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    this.submit_(ActionTrust.HIGH, event);
+    return this.submit_(ActionTrust.HIGH, event);
   }
 
   /**

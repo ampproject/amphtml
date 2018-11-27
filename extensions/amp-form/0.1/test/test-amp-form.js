@@ -373,12 +373,12 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      allowConsoleError(() => {
-        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      expectAsyncConsoleError(errorRe);
+      return ampForm.handleSubmitEvent_(event).catch(() => {
+        expect(event.preventDefault).to.be.called;
+        expect(ampForm.analyticsEvent_).to.have.not.been.called;
+        document.body.removeChild(form);
       });
-      expect(event.preventDefault).to.be.called;
-      expect(ampForm.analyticsEvent_).to.have.not.been.called;
-      document.body.removeChild(form);
     });
 
     it('should respect novalidate on a form', () => {
