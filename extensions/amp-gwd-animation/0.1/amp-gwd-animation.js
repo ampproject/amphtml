@@ -140,8 +140,9 @@ export class GwdAnimation extends AMP.BaseElement {
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;
-      const nodeOrDoc = this.fie_ ? this.element : this.getAmpDoc();
-      addAction(nodeOrDoc, gwdPageDeck, 'slideChange', setCurrentPageAction);
+      const elementOrAmpDoc = this.fie_ ? this.element : this.getAmpDoc();
+      addAction(elementOrAmpDoc, gwdPageDeck, 'slideChange',
+          setCurrentPageAction);
     }
 
     // Register handlers for supported actions.
@@ -247,21 +248,20 @@ export class GwdAnimation extends AMP.BaseElement {
 }
 
 /**
- * Adds an event action definition to a node.
- * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc The node
- *     or AmpDoc reference for retrieving the action service. The node rather
- *     than the doc is provided when in a FIE.
- * @param {!Element} element The target element whose actions to update.
+ * Adds an event action definition to an element.
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element} target The target element whose actions to update.
  * @param {string} event The event name, e.g., 'slideChange'.
  * @param {string} actionStr e.g., `someDiv.hide`.
- * @private Visible for testing.
+ * @private
+ * @visibleForTesting
  */
-export function addAction(nodeOrDoc, element, event, actionStr) {
+export function addAction(elementOrAmpDoc, target, event, actionStr) {
   // Assemble the new actions string by splicing in the new action string
   // with any existing actions.
   let newActionsStr;
 
-  const currentActionsStr = element.getAttribute('on') || '';
+  const currentActionsStr = target.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
   const eventActionsIndex = currentActionsStr.indexOf(eventPrefix);
 
@@ -284,7 +284,8 @@ export function addAction(nodeOrDoc, element, event, actionStr) {
   }
 
   // Reset the element's actions with the new actions string.
-  Services.actionServiceForDoc(nodeOrDoc).setActions(element, newActionsStr);
+  const actionService = Services.actionServiceForDoc(elementOrAmpDoc);
+  actionService.setActions(target, newActionsStr);
 }
 
 AMP.extension(TAG, '0.1', AMP => {

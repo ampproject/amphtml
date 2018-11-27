@@ -579,7 +579,10 @@ export class Navigation {
    */
   parseUrl_(url) {
     // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
-    return Services.urlForDoc(this.rootNode_).parse(url);
+    const elementOrAmpDoc = (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+      ? this.rootNode_.documentElement
+      : this.ampdoc;
+    return Services.urlForDoc(elementOrAmpDoc).parse(url);
   }
 }
 

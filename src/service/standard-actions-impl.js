@@ -67,7 +67,8 @@ export class StandardActions {
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+    const element = embedWin.document.documentElement;
+    this.installActions_(Services.actionServiceForDoc(element));
   }
 
   /**
