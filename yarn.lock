@@ -902,10 +902,10 @@
     pretty-ms "^0.2.1"
     text-table "^0.2.0"
 
-"@octokit/rest@15.17.0":
-  version "15.17.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-15.17.0.tgz#323a3f40f8ad8f271bd1354eaa3a50e7e5f62a90"
-  integrity sha512-tN16FJOGBPxt9QtPfl8yVbbuik3bQ7EI66zcX2XDh05Wcs8t+7mVEE3SWtCeK/Qm0RTLCeFQgGzuvkbD2J6cEg==
+"@octokit/rest@15.18.0":
+  version "15.18.0"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-15.18.0.tgz#e6de702b57dec94c71e806f1cff0ecb9725b3054"
+  integrity sha512-D1dDJMbvT4dok9++vc8uwCr92ndadwfz6vHK+IklzBHKSsuLlhpv2/dzx97Y4aRlm0t74LeXKDp4j0b4M2vmQw==
   dependencies:
     before-after-hook "^1.1.0"
     btoa-lite "^1.0.0"
@@ -12666,10 +12666,10 @@ rollup-pluginutils@^2.3.0, rollup-pluginutils@^2.3.3:
     estree-walker "^0.5.2"
     micromatch "^2.3.11"
 
-rollup@0.67.1:
-  version "0.67.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.67.1.tgz#4094110c944d3c9e25b5bf196771b51132ec3adb"
-  integrity sha512-BfwL9pw5VyxrAWx/G1tP8epgG+NH4KcR78aoWacV7+dFp1Mj6ynH8QTIC/lDQ3KlwzDakqZmJQ4LQ7TmLg+pBA==
+rollup@0.67.3:
+  version "0.67.3"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.67.3.tgz#55475b1b62c43220c3b4bd7edc5846233932f50b"
+  integrity sha512-TyNQCz97rKuVVbsKUTXfwIjV7UljWyTVd7cTMuE+aqlQ7WJslkYF5QaYGjMLR2BlQtUOO5CAxSVnpQ55iYp5jg==
   dependencies:
     "@types/estree" "0.0.39"
     "@types/node" "*"
@@ -14091,10 +14091,10 @@ tryit@^1.0.1:
   resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
   integrity sha1-OTvnMKlEb9Hq1tpZoBQwjzbCics=
 
-tsickle@0.33.1:
-  version "0.33.1"
-  resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.33.1.tgz#eee4ebabeda3bcd8afc32cee34c822cbe3e839ec"
-  integrity sha512-SpW2G3PvDGs4a5sMXPlWnCWHWRviWjSlI3U0734e3fU3U39VAE0NPr8M3W1cuL/OU/YXheYipGeEwtIJ5k0NHQ==
+tsickle@0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.34.0.tgz#10187fa6401a288a65efb93a60bf28b2ff95f90b"
+  integrity sha512-O3wCPRtL18Hc/ZBnaiKwmmjVzeCWTOTpsi0btfC7FWL3RnXpxLPxD6hoJ0QEXuSfG/0QJk+MWNjqT9N6fOyyIg==
   dependencies:
     minimist "^1.2.0"
     mkdirp "^0.5.1"
