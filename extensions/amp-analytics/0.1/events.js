@@ -1111,14 +1111,17 @@ export class VideoEventTracker extends EventTracker {
           return;
         }
 
-        if (!percentages.every(
-            percentage =>
-              percentage > 0 && (percentage % percentageInterval) == 0)) {
+        for (let i = 0; i < percentages.length; i++) {
+          const percentage = percentages[i];
 
-          user().error(TAG,
-              'Percentages must be set in increments of %s with non-zero ' +
-                'values',
-              percentageInterval);
+          if (percentage <= 0 || (percentage % percentageInterval) != 0) {
+            user().error(TAG,
+                'Percentages must be set in increments of %s with non-zero ' +
+                  'values',
+                percentageInterval);
+
+            return;
+          }
         }
 
         const normalizedPercentage = details['normalizedPercentage'];
