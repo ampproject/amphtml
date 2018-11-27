@@ -172,7 +172,7 @@ export class LocalSubscriptionPlatform {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
       if (result) {
-        this.serviceAdapter_.reAuthorizePlatform(this);
+        this.serviceAdapter_.resetPlatforms();
       }
       return !!result;
     });

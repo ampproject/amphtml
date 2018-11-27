@@ -228,15 +228,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should reauthorize on complete linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.linkComplete)();
   });
 
   it('should reauthorize on canceled linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
@@ -245,8 +243,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const promise = Promise.resolve();
     const response = new SubscribeResponse(null, null, null, null,
         () => promise);
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;
