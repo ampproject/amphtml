@@ -653,15 +653,14 @@ export function adoptServiceForEmbed(embedWin, serviceId) {
  * @return {boolean}
  */
 export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
-  const frameElement = /** @type {!Node} */ (dev().assert(
-      embedWin.frameElement,
-      'frameElement not found for embed'));
+  const frameElement = dev().assertElement(embedWin.frameElement,
+      'frameElement not found for embed');
   const ampdoc = getAmpdoc(frameElement);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (!isServiceRegistered(holder, serviceId)) {
     return false;
   }
-  const service = getServiceForDocDeprecated(frameElement, serviceId);
+  const service = getServiceForDoc(frameElement, serviceId);
   if (!isEmbeddable(service)) {
     return false;
   }

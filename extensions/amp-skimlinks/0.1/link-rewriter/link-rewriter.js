@@ -157,8 +157,12 @@ export class LinkRewriter {
           resolve();
         });
       });
-
-      chunk(this.rootNode_, task, ChunkPriority.LOW);
+      const elementOrShadowRoot =
+          (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+            ? this.rootNode_.documentElement
+            : this.rootNode_;
+      chunk(/** @type {!Element|!ShadowRoot} */ (elementOrShadowRoot),
+          task, ChunkPriority.LOW);
     });
   }
 
