@@ -27,7 +27,6 @@ require('./csvify-size');
 require('./dep-check');
 require('./firebase');
 require('./get-zindex');
-require('./gen-codeowners');
 require('./extension-generator');
 require('./pr-check');
 require('./process-github-issues');
