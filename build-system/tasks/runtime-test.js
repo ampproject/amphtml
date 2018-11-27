@@ -554,7 +554,7 @@ async function runTests() {
     let startIndex = 0;
     let endIndex = batchSize;
     while (startIndex < endIndex) {
-      const configBatch = c;
+      const configBatch = Object.assign({}, c);
       configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
