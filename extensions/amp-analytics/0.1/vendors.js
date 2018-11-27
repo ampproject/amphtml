@@ -49,7 +49,7 @@ import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware';
 import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie';
 import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics';
 import {MEDIATOR_CONFIG} from './vendors/mediator';
-import {MERKLESEARCH_CONFIG} from  './vendors/merklesearch';
+import {MERKLESEARCH_CONFIG} from './vendors/merklesearch';
 import {METRIKA_CONFIG} from './vendors/metrika';
 import {MOBIFY_CONFIG} from './vendors/mobify';
 import {MPARTICLE_CONFIG} from './vendors/mparticle';
