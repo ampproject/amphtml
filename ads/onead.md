@@ -1,4 +1,4 @@
-<!--
+<!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,4 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-This documentation has moved to the [amp-story-auto-ads folder](../amp-story-auto-ads/amp-story-auto-ads.md).
+
+# OneAD
+
+## Example
+```html
+  <amp-ad width="300" height="250"
+      type="onead"
+      layout="responsive"
+      data-playmode="amp-inread"
+      data-uid="1000126"
+      data-pid="1121156"
+      data-host="demo">
+  </amp-ad>
+```
+## Configuration
+Supported parameters:
+
+- `data-playmode`
+- `data-uid`
+- `data-pid` (optional)
+- `data-host` (optional)
+
+For configuration details, please contact [OneAD](https://www.onead.com.tw/)
