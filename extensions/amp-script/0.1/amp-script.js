@@ -19,13 +19,14 @@ import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
+import {
+  callbacks,
+  sanitizer,
+  upgrade,
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  sanitizer,
-  upgradeElement,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -41,9 +42,8 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!isExperimentOn(this.win, 'amp-script')) {
-      const error = 'Experiment "amp-script" is not enabled.';
-      user().error(TAG, error);
-      return Promise.reject(error);
+      user().error(TAG, 'Experiment "amp-script" is not enabled.');
+      return Promise.reject('Experiment "amp-script" is not enabled.');
     }
     // Configure worker-dom's sanitizer with AMP-specific config and hooks.
     const config = purifyConfig();
@@ -58,10 +58,18 @@ export class AmpScript extends AMP.BaseElement {
         user().warn(TAG, 'Node was sanitized:', node);
       },
     });
-
-    const url = this.workerThreadUrl_();
-    dev().fine(TAG, 'Fetching amp-script-worker from:', url);
-    upgradeElement(this.element, url);
+    // Configure callbacks.
+    callbacks.onSendMessage = data => {
+      dev().info(TAG, 'To worker:', data);
+    };
+    callbacks.onReceiveMessage = data => {
+      dev().info(TAG, 'From worker:', data);
+    };
+    // Create worker and hydrate.
+    const authorUrl = this.element.getAttribute('src');
+    const workerUrl = this.workerThreadUrl_();
+    dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
+    upgrade(this.element, authorUrl, workerUrl);
     return Promise.resolve();
   }
 

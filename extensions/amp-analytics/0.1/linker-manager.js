@@ -29,6 +29,9 @@ import {user} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
 
+/** @const {string} */
+const LINKER_CREATED = 'i-amphtml-linker-created';
+
 export class LinkerManager {
 
   /**
@@ -195,15 +198,15 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
-    if (!isExperimentOn(this.ampdoc_.win, 'linker-meta-opt-in')) {
+    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
+        'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
+    if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
+        this.type_ !== 'googleanalytics') {
       return false;
     }
 
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
-        'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
-    const isGaType = this.type_ === 'googleanalytics';
-
-    return !!(optInMeta && isGaType);
+    optInMeta.setAttribute(LINKER_CREATED, '');
+    return true;
   }
 
   /**
@@ -220,10 +223,11 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
+   * @param {!Event} event
    * @private
    */
-  handleAnchorMutation_(element) {
-    if (!element.href) {
+  handleAnchorMutation_(element, event) {
+    if (!element.href || event.type !== 'click') {
       return;
     }
 
@@ -251,22 +255,25 @@ export class LinkerManager {
 
     const /** @type {Array} */ domains = config['destinationDomains'];
 
-    if (this.isDomainMatch_(hostname, domains)) {
+    if (this.isDomainMatch_(hostname, name, domains)) {
       const linkerValue = createLinker(/* version */ '1',
           this.resolvedIds_[name]);
-      el.href = addParamToUrl(href, name, linkerValue);
+      if (linkerValue) {
+        el.href = addParamToUrl(href, name, linkerValue);
+      }
     }
   }
 
   /**
    * Check to see if the url is a match for the given set of domains.
    * @param {string} hostname
+   * @param {string} name Name given in linker config.
    * @param {?Array} domains
    */
-  isDomainMatch_(hostname, domains) {
+  isDomainMatch_(hostname, name, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
-      user().warn(TAG, `${name} destinationDomains must be an array.`);
+      user().warn(TAG, '%s destinationDomains must be an array.', name);
       return false;
     }
 
@@ -331,7 +338,7 @@ export class LinkerManager {
           form.getAttribute('action');
       const {hostname} = this.urlService_.parse(url);
 
-      if (this.isDomainMatch_(hostname, domains)) {
+      if (this.isDomainMatch_(hostname, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }

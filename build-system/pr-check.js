@@ -320,13 +320,14 @@ const command = {
     timedExecOrDie('gulp lint');
   },
   runJsonCheck: function() {
+    timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
   },
   buildCss: function() {
     timedExecOrDie('gulp css');
   },
   buildRuntime: function() {
-    timedExecOrDie('gulp build');
+    timedExecOrDie('gulp build --fortesting');
   },
   buildRuntimeMinified: function(extensions) {
     let cmd = 'gulp dist --fortesting';
@@ -406,8 +407,8 @@ const command = {
       return;
     }
     let cmd = 'gulp visual-diff --nobuild';
-    if (opt_mode === 'skip') {
-      cmd += ' --skip';
+    if (opt_mode === 'empty') {
+      cmd += ' --empty';
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
@@ -650,7 +651,7 @@ function main() {
       }
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
-      command.runVisualDiffTests(/* opt_mode */ 'skip');
+      command.runVisualDiffTests(/* opt_mode */ 'empty');
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||

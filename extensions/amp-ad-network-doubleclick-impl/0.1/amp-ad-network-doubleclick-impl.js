@@ -445,6 +445,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getPageParameters(consentState, instances) {
     instances = instances || [this];
+    const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -452,7 +453,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
-      'psts': getPageviewStateTokensForAdRequest(instances),
+      'psts': tokens.length ? tokens : null,
     };
   }
 
@@ -856,16 +857,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    return super.layoutCallback().then(superReturn => {
-      // We expand fluid here because we must first wait for the iframe to fire
-      // onload.
-      this.expandFluidCreative_();
-      return superReturn;
-    });
-  }
-
-  /** @override */
   viewportCallback(inViewport) {
     super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
@@ -910,7 +901,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(creativeMetaData) {
+  onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
@@ -968,6 +959,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       setStyles(this.element, {width: `${size.width}px`});
     }
 
+    if (opt_onLoadPromise) {
+      opt_onLoadPromise.then(() => {
+        this.expandFluidCreative_();
+      });
+    }
+
     this.refreshManager_ = this.refreshManager_ ||
         getRefreshManager(this, () => {
           if (this.useSra) {
@@ -1015,7 +1012,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/scrollHeight)
+          this.iframe.contentWindow.document.body./*OK*/clientHeight)
           .then(() => {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;

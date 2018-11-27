@@ -264,7 +264,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
-        this.advancement_.stop();
+        this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.state_ = state;
         break;
@@ -459,7 +459,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
-            /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl),
+            rewindToBeginning);
       }
     });
   }
@@ -474,7 +475,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (this.isBotUserAgent_) {
         mediaEl.play();
       } else {
-        return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+        return mediaPool.play(
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -489,7 +491,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (this.isBotUserAgent_) {
         // No-op.
       } else {
-        return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+        return mediaPool.preload(
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -504,7 +507,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.muted = true;
         mediaEl.setAttribute('muted', '');
       } else {
-        return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+        return mediaPool.mute(
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -519,7 +523,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.muted = false;
         mediaEl.removeAttribute('muted');
       } else {
-        return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+        return mediaPool.unmute(
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -534,7 +539,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (this.isBotUserAgent_) {
         // No-op.
       } else {
-        return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+        return mediaPool.register(
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -550,7 +556,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.currentTime = 0;
       } else {
         return mediaPool.rewindToBeginning(
-            /** @type {!HTMLMediaElement} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }

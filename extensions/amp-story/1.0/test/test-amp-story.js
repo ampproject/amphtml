@@ -382,6 +382,32 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should detect fullbleed desktop mode', () => {
+    createPages(story.element, 4, ['cover', '1', '2', '3']);
+    story.element.setAttribute('desktop-mode', 'fullbleed');
+
+    // Don't do this at home. :(
+    story.desktopMedia_ = {matches: true};
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.storeService_.get(StateProperty.UI_STATE))
+              .to.equals(UIType.DESKTOP_FULLBLEED);
+        });
+  });
+
+  it('should have a meta tag that sets the theme color', () => {
+    createPages(story.element, 2);
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          const metaTag = win.document.querySelector('meta[name=theme-color]');
+          expect(metaTag).to.not.be.null;
+        });
+  });
+
   describe('amp-story consent', () => {
     it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
@@ -690,9 +716,9 @@ describes.realWin('amp-story', {
       const desktopAttribute = 'i-amphtml-desktop-position';
       const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
-
       story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
 
       return story.layoutCallback()
           .then(() => {
@@ -707,9 +733,9 @@ describes.realWin('amp-story', {
       const desktopAttribute = 'i-amphtml-desktop-position';
       const pages = createPages(story.element, 4, ['cover', '1', '2', '3']);
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
-
       story.buildCallback();
+
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
 
       return story.layoutCallback()
           .then(() => story.switchTo_('2'))

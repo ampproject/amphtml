@@ -50,6 +50,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal class form',
     whitelist: [
       'build-system/amp4test.js',
+      'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -99,6 +100,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -571,6 +573,7 @@ const forbiddenTerms = {
       'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/visual-diff/index.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
@@ -702,7 +705,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.getBoundingClientRect\\(': bannedTermsHelpString,
   '\\.getClientRects\\(': bannedTermsHelpString,
   '\\.getMatchedCSSRules\\(': bannedTermsHelpString,
-  '\\.postMessage\\(': bannedTermsHelpString,
   '\\.scrollBy\\(': bannedTermsHelpString,
   '\\.scrollIntoView\\(': bannedTermsHelpString,
   '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
@@ -710,6 +712,12 @@ const forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  '\\.postMessage\\(': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
+    ],
+  },
   'getComputedStyle\\(': {
     message: 'Due to various bugs in Firefox, you must use the computedStyle ' +
     'helper in style.js.',
@@ -741,6 +749,18 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
+    ],
+  },
+  'contentHeightChanged': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/inabox/inabox-viewport.js',
+      'src/service/resources-impl.js',
+      'src/service/viewport/viewport-binding-def.js',
+      'src/service/viewport/viewport-binding-ios-embed-sd.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'preloadExtension': {
@@ -851,11 +871,13 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
+      'build-system/app-index/template.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
       'build-system/app-video-testbench.js',
@@ -884,9 +906,6 @@ const forbiddenTermsSrcInclusive = {
       'src/mode.js',
       'dist.3p/current/integration.js',
     ],
-  },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1047,7 +1066,8 @@ function hasAnyTerms(file) {
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
   const isA4A = /\/a4a\//.test(pathname);
-  if (is3pFile && !isTestFile && !isA4A) {
+  const isRecaptcha = basename == 'recaptcha.js';
+  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

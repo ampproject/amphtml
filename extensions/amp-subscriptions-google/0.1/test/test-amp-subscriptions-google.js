@@ -44,9 +44,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let callbacks;
   let methods;
   let ackStub;
+  let element;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
+    element = env.win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    env.win.document.head.appendChild(element);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -59,6 +63,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLoginRequest'),
       linkComplete:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLinkComplete'),
+      flowCanceled:
+          sandbox.stub(ConfiguredRuntime.prototype, 'setOnFlowCanceled'),
       subscribeRequest:
           sandbox.stub(ConfiguredRuntime.prototype,
               'setOnNativeSubscribeRequest'),
@@ -83,6 +89,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   function callback(stub) {
     return stub.args[0][0];
   }
+
+  it('should reset runtime on platform reset', () => {
+    expect(methods.reset).to.not.be.called;
+    platform.reset();
+    expect(methods.reset).to.be.calledOnce.calledWithExactly();
+  });
 
   it('should listen on callbacks', () => {
     expect(callbacks.loginRequest).to.be.calledOnce;
@@ -220,7 +232,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         .withExactArgs(platform)
         .once();
     callback(callbacks.linkComplete)();
-    expect(methods.reset).to.be.calledOnce.calledWithExactly();
+  });
+
+  it('should reauthorize on canceled linking', () => {
+    serviceAdapterMock.expects('reAuthorizePlatform')
+        .withExactArgs(platform)
+        .once();
+    callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
   it('should reauthorize on complete subscribe', () => {
@@ -232,12 +250,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         .once();
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;
-    return promise.then(() => {
-      // Skip microtask.
-      return Promise.resolve();
-    }).then(() => {
-      expect(methods.reset).to.be.calledOnce.calledWithExactly();
-    });
+    return promise;
   });
 
   it('should delegate native subscribe request', () => {

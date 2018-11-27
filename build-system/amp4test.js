@@ -19,6 +19,17 @@ const app = module.exports = require('express').Router();
 
 /*eslint "max-len": 0*/
 
+/**
+ * Logs the given messages to the console in local dev mode, but not while
+ * running automated tests.
+ * @param {*} messages
+ */
+function log(...messages) {
+  if (!process.env.AMP_TEST) {
+    console.log(messages);
+  }
+}
+
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
@@ -52,6 +63,7 @@ app.use('/compose-doc', function(req, res) {
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
+  <title>AMP TEST</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   ${metaTag}
   <script>
@@ -84,11 +96,14 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/:id', (req, res) => {
-  if (typeof bank[req.params.id] === 'function') {
-    bank[req.params.id](req);
+app.use('/request-bank/deposit/', (req, res) => {
+  // req.url is relative to the path specified in app.use
+  const key = req.url;
+  log('SERVER-LOG [DEPOSIT]: ', key);
+  if (typeof bank[key] === 'function') {
+    bank[key](req);
   } else {
-    bank[req.params.id] = req;
+    bank[key] = req;
   }
   res.end();
 });
@@ -98,21 +113,24 @@ app.use('/request-bank/deposit/:id', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/:id', (req, res) => {
-  const result = bank[req.params.id];
+app.use('/request-bank/withdraw/', (req, res) => {
+  // req.url is relative to the path specified in app.use
+  const key = req.url;
+  log('SERVER-LOG [WITHDRAW]: ' + key);
+  const result = bank[key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }
   const callback = function(result) {
     res.json({
       headers: result.headers,
+      body: result.body,
     });
-    delete bank[req.params.id];
+    delete bank[key];
   };
   if (result) {
     callback(result);
   } else {
-    bank[req.params.id] = callback;
+    bank[key] = callback;
   }
 });
-

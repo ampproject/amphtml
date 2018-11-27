@@ -19,6 +19,7 @@
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const {JSDOM} = require('jsdom');
+const {replaceUrls} = require('./app-utils');
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 
@@ -60,7 +61,10 @@ const requiredAttrs = {
     'data-playerid': '26e2e3c1049c4e70ae08a242638b5c40',
     'data-playerversion': 'v4',
   },
-  'amp-video-iframe': {'src': '/examples/amp-video-iframe/frame.html'},
+  'amp-video-iframe': {
+    'src': '/examples/amp-video-iframe/frame.html',
+    'poster': 'https://placekitten.com/g/1600/900',
+  },
   'amp-vimeo': {'data-videoid': '27246366'},
   'amp-viqeo-player': {
     'data-profileid': '184',
@@ -348,7 +352,8 @@ function isValidExtension(extension) {
 }
 
 
-function runVideoTestBench(req, res) {
+function runVideoTestBench(req, res, next) {
+  const mode = process.env.SERVE_MODE;
   fs.readFileAsync(sourceFile).then(contents => {
     const dom = new JSDOM(contents);
     const {window} = dom;
@@ -376,10 +381,9 @@ function runVideoTestBench(req, res) {
 
     appendClientScript(doc);
 
-    return res.end(dom.serialize());
+    return res.end(replaceUrls(mode, dom.serialize()));
   }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + sourceFile);
+    next();
   });
 }
 
