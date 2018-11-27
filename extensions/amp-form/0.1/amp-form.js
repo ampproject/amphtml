@@ -294,8 +294,8 @@ export class AmpForm {
    */
   actionHandler_(invocation) {
     if (invocation.method == 'submit') {
-      this.whenDependenciesReady_().then(() => {
-        this.handleSubmitAction_(invocation);
+      return this.whenDependenciesReady_().then(() => {
+        return this.handleSubmitAction_(invocation);
       });
     } else if (invocation.method === 'clear') {
       this.handleClearAction_();
@@ -489,7 +489,6 @@ export class AmpForm {
    * @private
    */
   submit_(trust, event) {
-    // TODO(torch2424) remove this todo. Used to navigate code :p
     try {
       const event = {
         form: this.form_,
@@ -521,7 +520,7 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_();
+        this.handleNonXhrGet_(event);
         return Promise.resolve();
       }
 
@@ -564,7 +563,7 @@ export class AmpForm {
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_();
+      this.handleNonXhrGet_(event);
     }
   }
 
@@ -868,11 +867,15 @@ export class AmpForm {
   }
 
   /**
-   * Triggers Submit Analytics, and Form Element submit
+   * Triggers Submit Analytics,
+   * and Form Element submit if not triggered by an event
+   * @param {?Event} event
    */
-  handleNonXhrGet_() {
+  handleNonXhrGet_(event) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    this.form_.submit();
+    if (!event) {
+      this.form_.submit();
+    }
     this.setState_(FormState.INITIAL);
   }
 
