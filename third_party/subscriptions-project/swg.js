@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.38 */
+/** Version: 0.1.22.39 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -1874,14 +1874,14 @@ class AnalyticsContext {
   /**
    * @return {!Array<string>}
    */
-  getLabel() {
+  getLabelList() {
     return this.label_;
   }
 
   /**
    * @param {!Array<string>} value
    */
-  setLabel(value) {
+  setLabelList(value) {
     this.label_ = value;
   }
 
@@ -2492,6 +2492,25 @@ function injectStyleSheet(doc, styleText) {
   styleElement.textContent = styleText;
   doc.head.appendChild(styleElement);
   return styleElement;
+}
+
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return root && root.contains(node) || false;
 }
 
 /**
@@ -4279,7 +4298,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.38',
+    '_client': 'SwG 0.1.22.39',
   });
 }
 
@@ -5139,10 +5158,7 @@ class FriendlyIframe {
    * @return {boolean}
    */
   isConnected() {
-    if (!this.getElement().ownerDocument) {
-      return false;
-    }
-    return this.getElement().ownerDocument.contains(this.iframe_);
+    return isConnected(this.getElement());
   }
 }
 
@@ -9085,7 +9101,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-
+    
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
@@ -11895,13 +11911,13 @@ class AnalyticsService {
    */
   addLabels(labels) {
     if (labels && labels.length > 0) {
-      const newLabels = [].concat(this.context_.getLabel());
+      const newLabels = [].concat(this.context_.getLabelList());
       labels.forEach(label => {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
       });
-      this.context_.setLabel(newLabels);
+      this.context_.setLabelList(newLabels);
     }
   }
 
