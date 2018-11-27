@@ -1053,21 +1053,13 @@ export class UrlReplacements {
    */
   collectUnwhitelistedVarsSync(element) {
     const url = element.getAttribute('src');
-    const vars = Object.create(null);
-    this.expandStringSync(url, /* opt_bindings */ undefined, vars);
-    const varNames = Object.keys(vars)
-        // Strip arguments from collect_vars to match whitelist api.
-        .map(key => {
-          const argsIndex = key.indexOf('(');
-          return argsIndex === -1 ? key : key.substring(0, argsIndex);
-        });
-
+    const macroNames = new Expander(this.variableSource_).getMacroNames(url);
     const whitelist = this.getWhitelistForElement_(element);
     if (whitelist) {
-      return varNames.filter(v => !whitelist[v]);
+      return macroNames.filter(v => !whitelist[v]);
     } else {
       // All vars are unwhitelisted if the element has no whitelist.
-      return varNames;
+      return macroNames;
     }
   }
 
