@@ -132,7 +132,7 @@ module.exports = {
   ],
 
   // Number of sauce platforms to start in parallel
-  concurrency: 4,
+  concurrency: Infinity,
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
