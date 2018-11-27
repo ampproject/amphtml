@@ -324,6 +324,8 @@ function runSanitizerTests() {
           'a<a target="_top">b</a>');
       expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>');
+      expect(purify('a<a href="?__amp_source_origin=foo">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
     });
 
     it('should NOT output blacklisted values for class attributes', () => {
