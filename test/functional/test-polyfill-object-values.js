@@ -18,10 +18,8 @@ import {values} from '../../src/polyfills/object-values';
 
 describe('Object.values', () => {
   it('should disallow null and undefined', () => {
-    expect(() => values(null))
-        .to.throw(/Cannot convert undefined or null to object/);
-    expect(() => values(undefined))
-        .to.throw(/Cannot convert undefined or null to object/);
+    expect(() => values(null)).to.throw;
+    expect(() => values(undefined)).to.throw;
   });
 
   it('should allow primitives', () => {

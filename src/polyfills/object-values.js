@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const {hasOwnProperty} = Object.prototype;
-
 
 /**
  * Implements `Object.values` API.
@@ -25,17 +23,7 @@ const {hasOwnProperty} = Object.prototype;
  * @return {!Array<*>}
  */
 export function values(target) {
-  if (target == null) {
-    throw new TypeError('Cannot convert undefined or null to object');
-  }
-
-  const output = [];
-  for (const key in target) {
-    if (hasOwnProperty.call(target, key)) {
-      output.push(target[key]);
-    }
-  }
-  return output;
+  return Object.keys(target).map(k => target[k]);
 }
 
 
@@ -46,7 +34,6 @@ export function values(target) {
 export function install(win) {
   if (!win.Object.values) {
     win.Object.defineProperty(win.Object, 'values', {
-      enumerable: false,
       configurable: true,
       writable: true,
       value: values,
