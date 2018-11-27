@@ -75,10 +75,9 @@ export class ServiceAdapter {
 
   /**
    * Reauthorize platforms
-   * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
-  reAuthorizePlatform(subscriptionPlatform) {
-    this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
+  resetPlatforms() {
+    this.subscriptionService_.resetPlatforms();
   }
 
   /**

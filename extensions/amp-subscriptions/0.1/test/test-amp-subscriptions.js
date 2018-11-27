@@ -483,42 +483,23 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     });
 
-    it('should reset entitlement on re-authorization', () => {
+    it('should reset platform on re-authorization', () => {
+      const service = serviceConfig.services[0];
+      subscriptionService.serviceAdapter_ =
+        new ServiceAdapter(subscriptionService);
+      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      subscriptionService.initializeLocalPlatforms_(service);
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const entitlement = new Entitlement({source: 'local', raw: 'raw',
-        granted: true, grantReason: GrantReason.SUBSCRIBER});
-      sandbox.stub(platform, 'getEntitlements')
-          .callsFake(() => Promise.resolve(entitlement));
-      const resetEntitlementsStub = sandbox.stub(
-          subscriptionService.platformStore_,
-          'resetEntitlementFor');
+      const resetSubscriptionPlatformSpy = sandbox.spy(
+          subscriptionService.platformStore_, 'resetPlatformStore');
       sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-      return subscriptionService.reAuthorizePlatform(platform).then(() => {
-        expect(resetEntitlementsStub).to.be.calledOnce.calledWith('local');
-      });
-    });
-
-    it('should reset UI in all platforms on re-authorization', () => {
-      const entitlement = Entitlement.empty('local');
-      sandbox.stub(platform, 'getEntitlements')
-          .callsFake(() => Promise.resolve(entitlement));
-      sandbox.stub(subscriptionService.platformStore_, 'resetEntitlementFor');
-      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-
-      const localResetStub = sandbox.stub(platform, 'reset');
-      subscriptionService.platformStore_.resolvePlatform('local', platform);
-
-      const otherPlatform = new LocalSubscriptionPlatform(ampdoc,
-          serviceConfig.services[0],
-          serviceAdapter);
-      const otherResetStub = sandbox.stub(otherPlatform, 'reset');
-      subscriptionService.platformStore_.resolvePlatform(
-          'other', otherPlatform);
-
-      return subscriptionService.reAuthorizePlatform(platform).then(() => {
-        expect(localResetStub).to.be.calledOnce;
-        expect(otherResetStub).to.be.calledOnce;
-      });
+      const origPlatforms = subscriptionService.platformStore_.serviceIds_;
+      subscriptionService.resetPlatforms();
+      expect(resetSubscriptionPlatformSpy).to.be.calledOnce;
+      expect(subscriptionService.platformStore_.serviceIds_)
+          .to.equal(origPlatforms);
     });
   });
 

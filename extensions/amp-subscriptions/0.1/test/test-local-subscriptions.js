@@ -250,13 +250,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       const executeStub =
         sandbox.stub(localSubscriptionPlatform.actions_, 'execute')
             .callsFake(() => Promise.resolve(true));
-      const entitlementsStub = sandbox.stub(
-          localSubscriptionPlatform.serviceAdapter_,
-          'reAuthorizePlatform');
+      const resetStub = sandbox.stub(
+          serviceAdapter, 'resetPlatforms');
       localSubscriptionPlatform.executeAction(actionString);
       expect(executeStub).to.be.calledWith(actionString);
       return executeStub().then(() => {
-        expect(entitlementsStub).to.be.calledOnce;
+        expect(resetStub).to.be.calledOnce;
       });
     });
   });
