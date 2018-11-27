@@ -167,6 +167,22 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
         dict({'percent': this.scrollProgress_}));
+    this.action_.trigger(this.element, name, event, ActionTrust.LOW);
+  }
+
+  /**
+   * Dispatches the `scroll` event (at most every animation frame)
+   * Only called if we are running AnimationWorklet to manage the animation.
+   *
+   * This event is triggered only when position-observer triggers which is
+   * at most every animation frame.
+   *
+   * @private
+   */
+  triggerAnimationWorkletScroll_() {
+    const name = 'scroll';
+    const event = createCustomEvent(this.win, `${TAG}.${name}`,
+        dict({'percent': this.scrollProgress_}));
     event.additionalViewportData = {
       'top-ratio': this.topRatio_,
       'bottom-ratio': this.bottomRatio_,
@@ -191,6 +207,10 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     if (this.runOnce_ && this.firstIterationComplete_) {
       return;
+    }
+
+    if (this.useAnimationWorklet_) {
+      this.triggerAnimationWorkletScroll_();
     }
 
     const wasVisible = this.isVisible_;
@@ -222,7 +242,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
-      this.triggerScroll_();
+      if (!this.useAnimationWorklet_) {
+        this.triggerScroll_();
+      }
       this.triggerExit_();
       this.firstIterationComplete_ = true;
     }
@@ -234,7 +256,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send scroll progress if visible.
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
-      this.triggerScroll_();
+      if (!this.useAnimationWorklet_) {
+        this.triggerScroll_();
+      }
     }
   }
 

@@ -243,7 +243,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
             this.prevPos = currentScrollPos;
           }
         } else {
-          if ((currentScrollPos - this.topRatio * this.height) <=
+          if ((currentScrollPos - this.topRatio * this.height) >=
           this.startOffset) {
             effect.localTime = currentTime;
             this.prevPos = currentScrollPos;
@@ -282,6 +282,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
           timeRange: request.timing.duration,
           startScrollOffset: `${adjustedViewportRect['top']}px`,
           endScrollOffset: `${adjustedViewportRect['bottom']}px`,
+          fill: 'forwards',
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
