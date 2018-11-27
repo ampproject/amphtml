@@ -325,6 +325,9 @@ describes.realWin('amp-consent', {
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
         fn();
       });
+      sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
+        fn();
+      });
     });
 
     it('update current displaying consent', function* () {
