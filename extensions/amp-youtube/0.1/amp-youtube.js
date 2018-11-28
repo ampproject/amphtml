@@ -399,6 +399,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
+      element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
 
@@ -566,7 +567,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.info_) {
       return this.info_.currentTime;
     }
-    return 0;
+    return NaN;
   }
 
   /** @override */
@@ -575,7 +576,7 @@ class AmpYoutube extends AMP.BaseElement {
       return this.info_.duration;
     }
     // Not supported.
-    return 1;
+    return NaN;
   }
 
   /** @override */

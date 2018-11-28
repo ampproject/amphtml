@@ -129,6 +129,27 @@ The `video-seconds-played` trigger is fired every `interval` seconds when the vi
 ```
 
 
+### Video percentage played trigger (`"on": "video-percentage-played"`)
+
+The `video-percentage-played` trigger is fired every `percentages` when the video is playing. The `video-percentage-played` trigger *requires* `percentages` to be set in the `videoSpec`. Use these configurations to fire a request for this event.
+
+Percentages must be set in increments of 5% and must be over zero.
+
+```javascript
+"triggers": {
+  "myVideoPercentagePlayed": {
+    "on": "video-percentage-played",
+    "request": "event",
+    "selector": "#myVideo",
+    "videoSpec": {
+      "percentages": [5, 25, 50, 75, 100], /* required */
+      /* other optional videoSpec properties */
+    }
+  },
+}
+```
+
+
 ## Video spec
 
 You can use the `videoSpec` configuration object to control how the requests are fired.
