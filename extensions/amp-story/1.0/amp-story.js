@@ -1288,11 +1288,11 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const {history} = this.win;
-    if (history.replaceState && history.state &&
+    if (history.replaceState && getState(history.state) &&
         this.getHistoryStatePageId_() !== pageId) {
-      history.state.ampStoryPageId = pageId;
-      history.replaceState(history.state, '');
-    } else if (!history.state) {
+      getState(history.state).ampStoryPageId = pageId;
+      history.replaceState(getState(history.state), '');
+    } else if (!getState(history.state)) {
       history.replaceState({ampStoryPageId: pageId}, '');
     }
   }
@@ -1630,11 +1630,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   updateHistoryState_(stateName, newValue) {
     const {history} = this.win;
-    if (history.replaceState && history.state &&
+    if (history.replaceState && getState(history.state) &&
         this.getHistoryState_(stateName) !== newValue) {
-      history.state[stateName] = newValue;
-      history.replaceState(history.state, '');
-    } else if (!history.state) {
+      getState(history.state)[stateName] = newValue;
+      history.replaceState(getState(history.state), '');
+    } else if (!getState(history.state)) {
       // First time writing to history state. Nothing to overwrite.
       history.replaceState({[stateName]: newValue}, '');
     }
@@ -1646,8 +1646,8 @@ export class AmpStory extends AMP.BaseElement {
    */
   getHistoryState_(stateName) {
     const {history} = this.win;
-    if (history && history.state) {
-      return history.state[stateName];
+    if (history && getState(history.state)) {
+      return getState(history.state)[stateName];
     }
     return null;
   }
