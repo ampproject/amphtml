@@ -222,7 +222,8 @@ export function sanitizeHtml(html, diffing) {
           // Bindings contain expressions and shouldn't be rewritten.
           const rewrite = (bindingAttribs.includes(i))
             ? attrValue
-            : rewriteAttributeValue(tagName, attrName, attrValue);
+            : rewriteAttributeValue(
+                tagName.toLowerCase(), attrName.toLowerCase(), attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
