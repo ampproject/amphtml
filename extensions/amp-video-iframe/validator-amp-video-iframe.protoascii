@@ -92,7 +92,7 @@ tags: {  # <amp-video-iframe> with poster
 tags: {  # <amp-video-iframe> with [placeholder]
   html_format: AMP
   tag_name: "AMP-VIDEO-IFRAME"
-  spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
+  spec_name: "AMP-VIDEO-IFRAME with [placeholder]"
   requires_extension: "amp-video-iframe"
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
