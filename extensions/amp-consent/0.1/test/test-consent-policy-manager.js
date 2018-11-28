@@ -15,7 +15,7 @@
  */
 
 import * as lolex from 'lolex';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_ITEM_STATE} from '../consent-info';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,

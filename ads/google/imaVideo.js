@@ -56,7 +56,6 @@ const icons = {
   `<circle cx="12" cy="12" r="12" />`
 };
 
-const controlsBg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAQAAADtJZLrAAAAQklEQVQY03WOwQoAIAxC1fX/v1yHaCgVeHg6wWFCAEABJl7glgZtmVaHZYmDjpxblVCfZPPIhHl9NntovBaZnf12LeWZAm6dMYNCAAAAAElFTkSuQmCC';
 /*eslint-enable */
 
 const bigPlayDivDisplayStyle = 'table-cell';
@@ -72,6 +71,12 @@ let playButtonDiv;
 
 // Div containing player controls.
 let controlsDiv;
+
+// Wrapper for ad countdown element.
+let countdownWrapperDiv;
+
+// Div containing ad countdown timer.
+let countdownDiv;
 
 // Div containing play or pause button.
 let playPauseDiv;
@@ -134,6 +139,9 @@ let allAdsCompleted;
 // Flag tracking if an ad request has failed.
 let adRequestFailed;
 
+// IMA SDK Ad object
+let currentAd;
+
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
 
@@ -160,6 +168,9 @@ let fullscreenWidth;
 
 // Height the player should be in fullscreen mode.
 let fullscreenHeight;
+
+// "Ad" label used in ad controls.
+let adLabel;
 
 // Flag tracking if ads are currently active.
 let adsActive;
@@ -210,6 +221,7 @@ export function imaVideo(global, data) {
 
   videoWidth = global./*OK*/innerWidth;
   videoHeight = global./*OK*/innerHeight;
+  adLabel = data.adLabel || 'Ad (%s of %s)';
 
   // Wraps *everything*.
   wrapperDiv = global.document.createElement('div');
@@ -248,17 +260,38 @@ export function imaVideo(global, data) {
     'bottom': '0px',
     'width': '100%',
     'height': '100px',
+    'background-color': 'rgba(7, 20, 30, .7)',
+    'background':
+      'linear-gradient(0, rgba(7, 20, 30, .7) 0%, rgba(7, 20, 30, 0) 100%)',
     'box-sizing': 'border-box',
     'padding': '10px',
     'padding-top': '60px',
-    'background-image': `url(${controlsBg})`,
-    'background-position': 'bottom',
     'color': 'white',
     'display': 'none',
+    'font-family': 'Helvetica, Arial, Sans-serif',
     'justify-content': 'center',
     'align-items': 'center',
     'user-select': 'none',
+    'z-index': '1',
   });
+  // Ad progress
+  countdownWrapperDiv = global.document.createElement('div');
+  countdownWrapperDiv.id = 'ima-countdown';
+  setStyles(countdownWrapperDiv, {
+    'align-items': 'center',
+    'box-sizing': 'border-box',
+    'display': 'none',
+    'flex-grow': '1',
+    'font-size': '12px',
+    'height': '20px',
+    'overflow': 'hidden',
+    'padding': '5px',
+    'text-shadow': '0px 0px 10px black',
+    'white-space': 'nowrap',
+  });
+  countdownDiv = global.document.createElement('div');
+  countdownWrapperDiv.appendChild(countdownDiv);
+  controlsDiv.appendChild(countdownWrapperDiv);
   // Play button
   playPauseDiv = createIcon(global, 'play');
   playPauseDiv.id = 'ima-play-pause';
@@ -276,7 +309,6 @@ export function imaVideo(global, data) {
   setStyles(timeDiv, {
     'margin-right': '20px',
     'text-align': 'center',
-    'font-family': 'Helvetica, Arial, Sans-serif',
     'font-size': '14px',
     'text-shadow': '0px 0px 10px black',
   });
@@ -332,6 +364,7 @@ export function imaVideo(global, data) {
   setStyles(muteUnmuteDiv, {
     'width': '30px',
     'height': '30px',
+    'flex-shrink': '0',
     'margin-right': '20px',
     'font-size': '1.25em',
     'cursor': 'pointer',
@@ -344,6 +377,7 @@ export function imaVideo(global, data) {
   setStyles(fullscreenDiv, {
     'width': '30px',
     'height': '30px',
+    'flex-shrink': '0',
     'font-size': '1.25em',
     'cursor': 'pointer',
     'text-align': 'center',
@@ -716,13 +750,16 @@ export function onContentEnded() {
 export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   const adsRenderingSettings = new global.google.ima.AdsRenderingSettings();
   adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
-  adsRenderingSettings.uiElements =
-  [global.google.ima.UiElements.AD_ATTRIBUTION,
-    global.google.ima.UiElements.COUNTDOWN];
   adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer,
       adsRenderingSettings);
   adsManager.addEventListener(global.google.ima.AdErrorEvent.Type.AD_ERROR,
       onAdError);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.LOADED,
+      onAdLoad);
+  adsManager.addEventListener(
+      global.google.ima.AdEvent.Type.AD_PROGRESS,
+      onAdProgress);
   adsManager.addEventListener(
       global.google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested.bind(null, global));
@@ -762,11 +799,39 @@ export function onAdsLoaderError() {
  */
 export function onAdError() {
   postMessage({event: VideoEvents.AD_END});
+  currentAd = null;
   if (adsManager) {
     adsManager.destroy();
   }
   videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
+}
+
+/**
+ * Called each time a new ad loads. Sets currentAd
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdLoad(global) {
+  currentAd = global.getAd();
+}
+
+/**
+ * Called intermittently as the ad plays, allowing us to display ad counter.
+ * @param {!Object} global
+ * @visibleForTesting
+ */
+export function onAdProgress(global) {
+  const {adPosition, totalAds} = global.getAdData();
+  const remainingTime = adsManager.getRemainingTime();
+  const remainingMinutes = Math.floor(remainingTime / 60);
+  let remainingSeconds = Math.floor(remainingTime % 60);
+  if (remainingSeconds.toString().length < 2) {
+    remainingSeconds = '0' + remainingSeconds;
+  }
+  const label = adLabel.replace('%s', adPosition).replace('%s', totalAds);
+  countdownDiv.textContent
+    = `${label}: ${remainingMinutes}:${remainingSeconds}`;
 }
 
 /**
@@ -788,7 +853,7 @@ export function onContentPauseRequested(global) {
   videoPlayer.removeEventListener(interactEvent, showControls);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
-  hideControls();
+  showAdControls();
   videoPlayer.pause();
 }
 
@@ -801,6 +866,7 @@ export function onContentResumeRequested() {
   adsActive = false;
   videoPlayer.addEventListener(interactEvent, showControls);
   postMessage({event: VideoEvents.AD_END});
+  resetControlsAfterAd();
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
     // resume content in that case.
@@ -818,6 +884,7 @@ export function onContentResumeRequested() {
  * @visibleForTesting
  */
 export function onAllAdsCompleted() {
+  currentAd = null;
   allAdsCompleted = true;
 }
 
@@ -1151,6 +1218,61 @@ function onFullscreenChange(global) {
 }
 
 /**
+ * Show a subset of controls when ads are playing.
+ * Visible controls are countdownDiv, muteUnmuteDiv, and fullscreenDiv
+ *
+ * @visibleForTesting
+ */
+export function showAdControls() {
+  const hasMobileStyles = videoWidth <= 400;
+  const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
+  const miniControls = hasMobileStyles && isSkippable;
+  // hide non-ad controls
+  const hideElement = button => setStyle(button, 'display', 'none');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(hideElement);
+  // set ad control styles
+  setStyles(controlsDiv, {
+    'height': miniControls ? '20px' : '30px',
+    'justify-content': 'flex-end',
+    'padding': '10px',
+  });
+  const buttonDefaults = {
+    'height': miniControls ? '18px' : '22px',
+  };
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '10px',
+  }));
+  // show ad controls
+  setStyle(countdownWrapperDiv, 'display', 'flex');
+  showControls();
+}
+
+/**
+ * Reinstate access to all controls when ads have ended.
+ *
+ * @visibleForTesting
+ */
+export function resetControlsAfterAd() {
+  // hide ad controls
+  setStyle(countdownWrapperDiv, 'display', 'none');
+  // set non-ad control styles
+  setStyles(controlsDiv, {
+    'justify-content': 'center',
+    'height': '100px',
+    'padding': '60px 10px 10px',
+  });
+  const buttonDefaults = {'height': '30px'};
+  setStyles(fullscreenDiv, buttonDefaults);
+  setStyles(muteUnmuteDiv, Object.assign(buttonDefaults, {
+    'margin-right': '20px',
+  }));
+  // show non-ad controls
+  const showElement = button => setStyle(button, 'display', 'block');
+  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(showElement);
+}
+
+/**
  * Show video controls and reset hide controls timeout.
  *
  * @visibleForTesting
@@ -1166,12 +1288,14 @@ export function showControls() {
 }
 
 /**
- * Hide video controls.
+ * Hide video controls, except when ads are active.
  *
  * @visibleForTesting
  */
 export function hideControls() {
-  setStyle(controlsDiv, 'display', 'none');
+  if (!adsActive) {
+    setStyle(controlsDiv, 'display', 'none');
+  }
 }
 
 /**
@@ -1233,7 +1357,7 @@ function onMessage(global, event) {
           'width': px(msg.args.width),
           'height': px(msg.args.height),
         });
-        if (adsActive) {
+        if (adsActive && !fullscreen) {
           adsManager.resize(
               msg.args.width, msg.args.height,
               global.google.ima.ViewMode.NORMAL);
