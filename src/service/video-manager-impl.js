@@ -28,7 +28,6 @@ import {
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
-  isDockable,
 } from '../video-interface';
 import {Services} from '../services';
 import {
@@ -105,33 +104,6 @@ export class VideoManager {
 
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
-
-    /**
-     * Authors must include the `amp-video-docking` script for instantiation of
-     * the docking service, but it's installed in case the script is not
-     * present.
-     * This supports the rare case of very outdated documents created when the
-     * extension was not required.
-     * @private @const {function()}
-     */
-    this.maybeInstallDockingExtension_ = once(() => {
-      const {ampdoc} = this;
-
-      if (ampdoc
-          .getRootNode()
-          .querySelector('script[custom-element=amp-video-docking]')) {
-        return;
-      }
-
-      Services.extensionsFor(ampdoc.win)
-          .installExtensionForDoc(ampdoc, 'amp-video-docking');
-
-      user().warn(TAG,
-          'The `dock` attribute requires the `amp-video-docking` extension. ' +
-            'This extension has been automatically loaded, but explicitly ' +
-            'including the `amp-video-docking-0.1.js` script will be ' +
-            'required by January 2019. ');
-    });
 
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
@@ -211,10 +183,6 @@ export class VideoManager {
     this.entries_.push(entry);
 
     const {element} = entry.video;
-
-    if (isDockable(element)) {
-      this.maybeInstallDockingExtension_();
-    }
 
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
@@ -460,16 +428,6 @@ class VideoEntry {
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    /** @private @const {function()} */
-    this.boundMediasessionPlay_ = () => {
-      this.video.play(/* isAutoplay */ false);
-    };
-
-    /** @private @const {function()} */
-    this.boundMediasessionPause_ = () => {
-      this.video.pause();
-    };
-
     listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
@@ -576,17 +534,15 @@ class VideoEntry {
       this.firstPlayEventOrNoop_();
     }
 
-    const {video} = this;
-    const {element} = video;
-
-    if (!video.preimplementsMediaSessionAPI() &&
-        !element.classList.contains('i-amphtml-disable-mediasession')) {
-
-      setMediaSession(
-          this.ampdoc_,
-          this.metadata_,
-          this.boundMediasessionPlay_,
-          this.boundMediasessionPause_);
+    if (!this.video.preimplementsMediaSessionAPI()) {
+      const playHandler = () => {
+        this.video.play(/*isAutoplay*/ false);
+      };
+      const pauseHandler = () => {
+        this.video.pause();
+      };
+      // Update the media session
+      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
     }
 
     this.actionSessionManager_.beginSession();
