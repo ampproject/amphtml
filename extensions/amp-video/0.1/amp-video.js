@@ -294,6 +294,13 @@ class AmpVideo extends AMP.BaseElement {
     return !!closestByTag(this.element, 'amp-story-page');
   }
 
+  /**
+   * @return {!Element}
+   */
+  getMediaReference() {
+    return this.video_;
+  }
+
   /** @override */
   mutatedAttributesCallback(mutations) {
     if (!this.video_) {

@@ -866,19 +866,26 @@ describes.realWin('amp-video', {
 
     it('creates a definition element', () => {
       getVideo().then(element => {
-        const defintionElement = element.implementation_.video_;
+        const definitionElement = element.implementation_.video_;
 
-        expect(defintionElement.tagName.toLowerCase())
+        expect(definitionElement.tagName.toLowerCase())
             .to.equal('i-amphtml-media-def');
 
-        expect(defintionElement.getAttribute('type')).to.equal('video');
+        expect(definitionElement.getAttribute('type')).to.equal('video');
       });
     });
 
     it('does not append defintion element', () => {
       getVideo().then(element => {
-        const defintionElement = element.implementation_.video_;
-        expect(defintionElement.parentNode).to.be.undefined;
+        const definitionElement = element.implementation_.video_;
+        expect(definitionElement.parentNode).to.be.undefined;
+      });
+    });
+
+    it('returns defintion element as media reference', () => {
+      getVideo().then(element => {
+        const definitionElement = element.implementation_.video_;
+        expect(element.getMediaReference()).to.equal(definitionElement);
       });
     });
   });
