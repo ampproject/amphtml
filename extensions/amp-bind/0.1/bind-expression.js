@@ -411,8 +411,7 @@ export class BindExpression {
         if (memberType !== 'string' && memberType !== 'number') {
           return null;
         }
-        // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (hasOwn(/** @type {Object} */ (target), member)) {
+        if (hasOwn(target, String(member))) {
           return target[member];
         }
         return null;
@@ -422,7 +421,7 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (hasOwn(scope, variable)) {
+        if (hasOwn(scope, String(variable))) {
           return scope[variable];
         }
         return null;
