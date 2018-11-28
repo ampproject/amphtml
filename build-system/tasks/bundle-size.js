@@ -337,7 +337,7 @@ async function reportBundleSize() {
   }
 }
 
-async function performBundleSize() {
+async function performBundleSizeCheck() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else {
@@ -357,7 +357,7 @@ async function performBundleSize() {
 gulp.task(
     'bundle-size',
     'Checks if the minified AMP binary has exceeded its size cap',
-    performBundleSize,
+    performBundleSizeCheck,
     {
       options: {
         'on_push_build': '  Store bundle size in AMP build artifacts repo '
