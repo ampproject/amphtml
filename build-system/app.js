@@ -1189,13 +1189,13 @@ app.get('/infinite-scroll', function(req, res) {
   const nextUrl = '/infinite-scroll?items=' +
     numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1);
 
+  const next = pagesLeft == 0 ? undefined : nextUrl;
+
   if (latency) {
-    setTimeout(() => res.json({
-      'items': results,
-      'next': pagesLeft == 0 ? undefined : nextUrl,
-    }), latency);
+    setTimeout(() => res.json({'items': results, next}), latency);
   } else {
-    res.json({'items': results, 'next': nextUrl});
+    res.json({
+      'items': results, next});
   }
 });
 
