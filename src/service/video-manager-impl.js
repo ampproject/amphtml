@@ -183,7 +183,6 @@ export class VideoManager {
     this.entries_.push(entry);
 
     const {element} = entry.video;
-
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
     setVideoComponentClassname(element);
@@ -428,6 +427,16 @@ class VideoEntry {
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
+    /** @private @const {function()} */
+    this.boundMediasessionPlay_ = () => {
+      this.video.play(/* isAutoplay */ false);
+    };
+
+    /** @private @const {function()} */
+    this.boundMediasessionPause_ = () => {
+      this.video.pause();
+    };
+
     listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
@@ -534,15 +543,17 @@ class VideoEntry {
       this.firstPlayEventOrNoop_();
     }
 
-    if (!this.video.preimplementsMediaSessionAPI()) {
-      const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
-      };
-      const pauseHandler = () => {
-        this.video.pause();
-      };
-      // Update the media session
-      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
+    const {video} = this;
+    const {element} = video;
+
+    if (!video.preimplementsMediaSessionAPI() &&
+        !element.classList.contains('i-amphtml-disable-mediasession')) {
+
+      setMediaSession(
+          this.ampdoc_,
+          this.metadata_,
+          this.boundMediasessionPlay_,
+          this.boundMediasessionPause_);
     }
 
     this.actionSessionManager_.beginSession();
