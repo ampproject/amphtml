@@ -282,7 +282,7 @@ export class AnimationWorkletRunner extends AnimationRunner {
           timeRange: request.timing.duration,
           startScrollOffset: `${adjustedViewportRect['top']}px`,
           endScrollOffset: `${adjustedViewportRect['bottom']}px`,
-          fill: 'forwards',
+          fill: request.timing.fill,
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
