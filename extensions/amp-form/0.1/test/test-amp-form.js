@@ -1557,8 +1557,7 @@ describes.repeated('', {
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
-      // TODO: torch2424 find out why this error is never thrown
-      // expectAsyncConsoleError(/Form submission failed/);
+      expectAsyncConsoleError(/Form submission failed/);
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
