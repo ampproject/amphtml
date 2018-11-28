@@ -115,22 +115,6 @@ function generateFunctionWhitelist() {
     return sort;
   }
 
-  /**
-   * Polyfills Object.values for IE.
-   * @param {!Object} object
-   * @return {!Array}
-   * @see https://github.com/es-shims/Object.values
-   */
-  function values(object) {
-    const v = [];
-    for (const key in object) {
-      if (hasOwn(object, key)) {
-        v.push(object[key]);
-      }
-    }
-    return v;
-  }
-
   // Prototype functions.
   const whitelist = dict({
     '[object Array]': {
@@ -181,7 +165,8 @@ function generateFunctionWhitelist() {
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
-    'keys': Object.keys, // Object.values is polyfilled below.
+    'keys': Object.keys,
+    'values': Object.values,
   };
 
   // Creates a map of function name to the function itself.
@@ -209,8 +194,6 @@ function generateFunctionWhitelist() {
   out[CUSTOM_FUNCTIONS]['copyAndSplice'] = splice; // Deprecated.
   out[CUSTOM_FUNCTIONS]['sort'] = sort; // Deprecated.
   out[CUSTOM_FUNCTIONS]['splice'] = splice; // Deprecated.
-  out[CUSTOM_FUNCTIONS]['values'] =
-      (typeof Object.values == 'function') ? Object.values : values;
 
   return out;
 }
