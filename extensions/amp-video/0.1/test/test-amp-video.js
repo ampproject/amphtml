@@ -853,4 +853,33 @@ describes.realWin('amp-video', {
       });
     });
   });
+
+  describe('pool-bound', () => {
+    const getVideo = () => new Promise(resolve => {
+      getVideo({
+        'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+        'class': 'i-amphtml-poolbound',
+        width: 160,
+        height: 90,
+      }, /* children */ null, resolve);
+    });
+
+    it('creates a definition element', () => {
+      getVideo().then(element => {
+        const defintionElement = element.implementation_.video_;
+
+        expect(defintionElement.tagName.toLowerCase())
+            .to.equal('i-amphtml-media-def');
+
+        expect(defintionElement.getAttribute('type')).to.equal('video');
+      });
+    });
+
+    it('does not append defintion element', () => {
+      getVideo().then(element => {
+        const defintionElement = element.implementation_.video_;
+        expect(defintionElement.parentNode).to.be.undefined;
+      });
+    });
+  });
 });
