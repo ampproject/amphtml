@@ -32,7 +32,7 @@ module.exports = {
   create(context) {
 
     function isModuleExports(node) {
-      return node.object.type === 'Identifier' && (/^(module|exports)$/).test(node.object.name)
+      return node.object.type === 'Identifier' && (/^(module.exports)$/).test(node.object.name)
     }
 
     return {
