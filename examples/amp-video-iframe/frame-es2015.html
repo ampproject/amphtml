@@ -48,7 +48,7 @@
         ampIntegration.postEvent('canplay');
       }
 
-      video.addEventListener('volumechange', function() {
+      video.addEventListener('volumechange', () => {
         if (video.volume < 0.01) {
           muted = true;
           ampIntegration.postEvent('muted');
