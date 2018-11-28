@@ -170,26 +170,18 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
-    const {
-      bundleID,
-      itemID,
-      cookiesEnabled,
-      debug,
-      forceWidget,
-      customSegment,
-    } = this.pooolConfig_;
-
     const pooolContainer = document.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(
         addParamsToUrl(this.iframeUrl_, dict({
-          'bi': bundleID,
-          'iid': itemID,
-          'ce': cookiesEnabled,
-          'd': typeof debug !== 'undefined' && debug !== null
-            ? debug
+          'bi': this.pooolConfig_['bundleID'],
+          'iid': this.pooolConfig_['itemID'],
+          'ce': this.pooolConfig_['cookiesEnabled'],
+          'd': typeof this.pooolConfig_['debug'] !== 'undefined' &&
+            this.pooolConfig_['debug'] !== null
+            ? this.pooolConfig_['debug']
             : getMode().development || getMode().localDev,
-          'fw': forceWidget,
-          'cs': customSegment,
+          'fw': this.pooolConfig_['forceWidget'],
+          'cs': this.pooolConfig_['customSegment']
         })),
         false);
 
