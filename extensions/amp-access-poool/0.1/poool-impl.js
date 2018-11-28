@@ -39,7 +39,7 @@ const AUTHORIZATION_TIMEOUT = 3000;
  * @typedef {{
  *   appId: string,
  *   pageType: (string),
- *   debug: (string|null),
+ *   debug: (boolean|null),
  *   forceWidget: (string|null),
  *   loginButtonEnabled: (boolean),
  *   videoClient: (string|null),
