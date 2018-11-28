@@ -60,7 +60,11 @@ component's visual area.
 by the user, docking will no longer occur.
 
 In order to use this attribute, the [`amp-video-docking`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
-extension script must be present.
+extension script must be present:
+
+```
+<script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+```
 
 ### Styling
 
