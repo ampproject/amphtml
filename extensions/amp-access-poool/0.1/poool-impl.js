@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '../../../src/style';
 
@@ -151,7 +153,7 @@ export class PooolVendor {
    * @private
    */
   getPooolAccess_() {
-    const url = this.accessUrl_ + '&iid=' + this.itemID_;
+    const url = addParamToUrl(this.accessUrl_ , 'iid', this.itemID_);
     const urlPromise = this.accessSource_.buildUrl(url, false);
     return urlPromise.then(url => {
       return this.accessSource_.getLoginUrl(url);
@@ -167,15 +169,27 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
+    const {
+      bundleID,
+      itemID,
+      cookiesEnabled,
+      debug,
+      forceWidget,
+      customSegment,
+    } = this.pooolConfig_;
     const pooolContainer = document.getElementById('poool');
-    const urlPromise = this.accessSource_.buildUrl(this.iframeUrl_
-        + '&bi=' + this.pooolConfig_['bundleID']
-        + '&iid=' + this.pooolConfig_['itemID']
-        + '&ce=' + this.pooolConfig_['cookiesEnabled']
-        + '&d=' + this.pooolConfig_['debug']
-        + '&fw=' + this.pooolConfig_['forceWidget']
-        + '&cs=' + this.pooolConfig_['customSegment']
-    , false);
+    const urlPromise = this.accessSource_.buildUrl(
+        addParamsToUrl(this.iframeUrl_, {
+          'bi': bundleID,
+          'iid': itemID,
+          'ce': cookiesEnabled,
+          'd': typeof debug !== 'undefined' && debug !== null
+            ? debug
+            : getMode().development || getMode().localDev,
+          'fw': forceWidget,
+          'cs': customSegment,
+        }),
+        false);
 
     return urlPromise.then(url => {
       this.iframe_.src = url;
