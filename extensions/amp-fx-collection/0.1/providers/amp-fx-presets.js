@@ -81,11 +81,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const topAsLength = style.top == 'auto' ? '0px' : style.top;
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} +
                   ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -126,11 +129,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
                   `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -171,11 +177,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const leftAsLength = style.left == 'auto' ? '0px' : style.left;
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
                   `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
@@ -218,11 +227,14 @@ export const Presets = {
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
-              const topAsLength = style.top == 'auto' ? '0px' : style.top;
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'top': `calc(${topAsLength} -
                   ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
