@@ -120,7 +120,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
     /**@private {?UnlistenDef} */
-    this.unlistenLoadMoreButton_ = null;
+    this.unlistenLoadMore_ = null;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
@@ -376,27 +376,14 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
-      if (opt_append) {
-        this.handleLoadMoreFailed_();
+      if (opt_append && this.loadMoreFailedElement_) {
+        this.setLoadMoreFailed_();
       } else {
         this.showFallback_(error);
       }
     });
   }
 
-  /**
-   * When the fetch fails, we should show the load-more-failed element if
-   * one exists, otherwise show the load-more-button element that triggers
-   *  a new fetch on click.
-   * @private
-   */
-  handleLoadMoreFailed_() {
-    if (this.loadMoreFailedElement_) {
-      this.setLoadMoreFailed_();
-    } else {
-      this.setLoadMoreReload_();
-    }
-  }
   /**
    * Proxies the template rendering to the viewer.
    * @param {boolean} refresh
@@ -701,7 +688,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreButton_) {
       this.mutateElement(() => {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
-        this.unlistenLoadMoreButton_ = listen(this.loadMoreButton_, 'click',
+        this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
             () => this.loadMoreCallback_());
       });
     }
@@ -709,21 +696,6 @@ export class AmpList extends AMP.BaseElement {
       user().error(TAG,
           'load-more is specified but no means of paging (overflow or ' +
           'load-more=auto) is available', this);
-    }
-  }
-
-  /**
-   * Called when a fetch fails under load-more. Shows the load-more-button
-   * element and triggers a reloading of the failed src on click.
-   * @private
-   */
-  setLoadMoreReload_() {
-    if (this.loadMoreButton_) {
-      this.mutateElement(() => {
-        this.loadMoreButton_.classList.toggle('amp-visible', true);
-        this.unlistenLoadMoreButton_ = listen(this.loadMoreButton_, 'click',
-            () => this.loadMoreCallback_());
-      });
     }
   }
 
@@ -742,9 +714,9 @@ export class AmpList extends AMP.BaseElement {
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
           this.toggleLoadMoreLoading_(false);
-          if (this.unlistenLoadMoreButton_) {
-            this.unlistenLoadMoreButton_();
-            this.unlistenLoadMoreButton_ = null;
+          if (this.unlistenLoadMore_) {
+            this.unlistenLoadMore_();
+            this.unlistenLoadMore_ = null;
           }
         });
   }
@@ -808,6 +780,11 @@ export class AmpList extends AMP.BaseElement {
       if (this.loadMoreFailedElement_) {
         this.loadMoreFailedElement_.classList.toggle('amp-visible', true);
       }
+      this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
+          () => {
+            this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+            this.loadMoreCallback_();
+          });
       if (this.loadMoreButton_) {
         this.loadMoreButton_.classList.toggle('amp-visible', false);
       }
