@@ -188,7 +188,9 @@ class AmpVideo extends AMP.BaseElement {
 
     this.configure_();
 
-    this.video_ = element.ownerDocument.createElement('video');
+    const video = this.createVideoOrDefinitionElement_();
+
+    this.video_ = video;
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -197,17 +199,18 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     // Enable inline play for iOS.
-    this.video_.setAttribute('playsinline', '');
-    this.video_.setAttribute('webkit-playsinline', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
-    this.video_.setAttribute('preload', 'none');
-    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
+    video.setAttribute('preload', 'none');
+    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, video,
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
-    this.applyFillContent(this.video_, true);
+    this.applyFillContent(video, true);
 
     this.createPosterForAndroidBug_();
-    element.appendChild(this.video_);
+
+    this.maybeAppendInitialVideo_(video);
 
     this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
@@ -228,6 +231,46 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createVideoOrDefinitionElement_() {
+    const {element} = this;
+
+    if (!this.isManagedByPool_()) {
+      return element.ownerDocument.createElement('video');
+    }
+
+    const html = htmlFor(element);
+    return html`<i-amphtml-media-def type=video></i-amphtml-media-def>`;
+  }
+
+  /**
+   * @param {!Element} video
+   * @private
+   */
+  maybeAppendInitialVideo_(video) {
+    if (this.isManagedByPool_()) {
+      return;
+    }
+    this.element.appendChild(video);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPlayable_() {
+    return (typeof this.video_.play) == 'function';
+  }
+
+  /** @private */
+  assertIsPlayable_() {
+    dev().assert(this.isPlayable_(),
+        'Tried to execute playable method on mediapool definition element.');
   }
 
   /** @private */
@@ -526,6 +569,8 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
+    this.assertIsPlayable_();
+
     const ret = this.video_.play();
 
     if (ret && ret.catch) {
@@ -570,6 +615,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   pause() {
+    this.assertIsPlayable_();
     this.video_.pause();
   }
 
@@ -605,6 +651,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   showControls() {
+    this.assertIsPlayable_();
     this.video_.controls = true;
   }
 
@@ -612,6 +659,7 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   hideControls() {
+    this.assertIsPlayable_();
     this.video_.controls = false;
   }
 
@@ -651,17 +699,20 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
+    this.assertIsPlayable_();
     return this.video_.currentTime;
   }
 
   /** @override */
   getDuration() {
+    this.assertIsPlayable_();
     return this.video_.duration;
   }
 
   /** @override */
   getPlayedRanges() {
     // TODO(cvializ): remove this because it can be inferred by other events
+    this.assertIsPlayable_();
     const {played} = this.video_;
     const {length} = played;
     const ranges = [];
