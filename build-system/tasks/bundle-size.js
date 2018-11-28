@@ -211,7 +211,7 @@ function compareBundleSize(maxBundleSize) {
  * Checks gzipped size of existing v0.js (amp.js) against `maxSize`.
  * Does _not_ rebuild: run `gulp dist --fortesting --noextensions` first.
  */
-async function checkBundleSize() {
+async function legacyBundleSizeCheck() {
   if (!fs.existsSync(runtimeFile)) {
     log(yellow('Could not find'), cyan(runtimeFile) +
         yellow('. Skipping bundlesize check.'));
@@ -346,7 +346,9 @@ async function performBundleSize() {
     } else if (argv.report) {
       await reportBundleSize();
     }
-    return await checkBundleSize();
+    // TODO(danielrozenberg): remove the legacy check once the app has been
+    // activated and tested on the repository.
+    return await legacyBundleSizeCheck();
   }
 }
 
