@@ -218,10 +218,13 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 });
 
 /**
- * Test for invalid `style` attribute values. `!important` is a general AMP
- * rule, while `position:fixed|sticky` is a current runtime limitation since
- * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
- * elements.
+ * Test for invalid `style` attribute values.
+ *
+ * !important avoids overriding AMP styles, while `position:fixed|sticky` is a
+ * FixedLayer limitation (it only scans the style[amp-custom] stylesheet
+ * for potential fixed/sticky elements). Note that the latter can be
+ * circumvented with CSS comments -- not a big deal.
+ *
  * @const {!RegExp}
  */
 const INVALID_INLINE_STYLE_REGEX =
@@ -508,8 +511,8 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
 
 /**
  * Whether the attribute/value is valid.
- * @param {string} tagName
- * @param {string} attrName
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
@@ -533,14 +536,18 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
     }
   }
 
-  // Inline styles are not allowed.
+  // Don't allow certain inline style values.
   if (attrName == 'style') {
     return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
   }
 
   // Don't allow CSS class names with internal AMP prefix.
-  // See https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
   if (attrName == 'class' && attrValue && /(^|\W)i-amphtml-/i.test(attrValue)) {
+    return false;
+  }
+
+  // Don't allow '__amp_source_origin' in URLs.
+  if (isUrlAttribute(attrName) && /__amp_source_origin/.test(attrValue)) {
     return false;
   }
 
@@ -612,20 +619,27 @@ export function rewriteAttributesForElement(
 /**
  * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
  * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
- * @see resolveUrlAttr for rewriting rules.
- * @param {string} tagName
- * @param {string} attrName
+ * See resolveUrlAttr() for rewriting rules.
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @private Visible for testing.
+ * @private
+ * @visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
-  const tag = tagName.toLowerCase();
-  const attr = attrName.toLowerCase();
-  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
-    return resolveUrlAttr(tag, attr, attrValue, self.location);
+  if (isUrlAttribute(attrName)) {
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
   return attrValue;
+}
+
+/**
+ * @param {string} attrName Lowercase attribute name.
+ * @return {boolean}
+ */
+function isUrlAttribute(attrName) {
+  return (attrName == 'src' || attrName == 'href' || attrName == 'srcset');
 }
 
 /**
@@ -635,12 +649,13 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
  * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
  *   again to be served with AMP Cache (cdn.ampproject.org).
  *
- * @param {string} tagName
- * @param {string} attrName
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @param {!Location} windowLocation
  * @return {string}
- * @private Visible for testing.
+ * @private
+ * @visibleForTesting
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);
