@@ -724,26 +724,9 @@ export class AmpList extends AMP.BaseElement {
       this.mutateElement(() => {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
         this.unlistenLoadMoreButton_ = listen(this.loadMoreButton_, 'click',
-            () => this.loadMoreReloadCallback_());
+            () => this.loadMoreCallback_());
       });
     }
-  }
-
-  /**
-   * Reloads the existing src, which previously failed to fetch.
-   * @return {!Promise}
-   * @private
-   */
-  loadMoreReloadCallback_() {
-    this.toggleLoadMoreLoading_(true);
-    return this.fetchList_(/* opt_append */ true)
-        .then(() => {
-          this.toggleLoadMoreLoading_(false);
-          if (this.unlistenLoadMoreButton_) {
-            this.unlistenLoadMoreButton_();
-            this.unlistenLoadMoreButton_ = null;
-          }
-        });
   }
 
   /**
@@ -753,18 +736,19 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   loadMoreCallback_() {
-    if (!this.loadMoreSrc_) {
-      return;
+    if (this.loadMoreSrc_) {
+      this.element.setAttribute('src', this.loadMoreSrc_);
+      this.loadMoreSrc_ = null;
     }
-    if (this.unlistenLoadMoreButton_) {
-      this.unlistenLoadMoreButton_();
-      this.unlistenLoadMoreButton_ = null;
-    }
-    this.element.setAttribute('src', this.loadMoreSrc_);
-    this.loadMoreSrc_ = null;
     this.toggleLoadMoreLoading_(true);
     return this.fetchList_(/* opt_append */ true)
-        .then(() => this.toggleLoadMoreLoading_(false));
+        .then(() => {
+          this.toggleLoadMoreLoading_(false);
+          if (this.unlistenLoadMoreButton_) {
+            this.unlistenLoadMoreButton_();
+            this.unlistenLoadMoreButton_ = null;
+          }
+        });
   }
 
   /**
