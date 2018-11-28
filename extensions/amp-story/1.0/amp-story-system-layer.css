@@ -440,11 +440,11 @@ span.i-amphtml-story-share-pill-label {
   background-position: center center !important;
 }
 
-[desktop] .i-amphtml-story-share-icon::before {
-  display: none !important;
+[desktop] .i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  background-color: transparent !important;
 }
 
-[desktop] .i-amphtml-story-share-icon:active::before {
+[desktop] .i-amphtml-story-share-pill .i-amphtml-story-share-label {
   display: none !important;
 }
 
