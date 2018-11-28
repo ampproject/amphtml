@@ -127,7 +127,7 @@ async function getAncestorBundleSize() {
  */
 function storeBundleSize() {
   if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
-    log(yellow('Skipping'), cyan('--master') + ':',
+    log(yellow('Skipping'), cyan('--on_push_build') + ':',
         'this action can only be performed on `push` builds on Travis');
     return;
   }
@@ -338,13 +338,13 @@ async function reportBundleSize() {
 }
 
 async function performBundleSize() {
-  if (argv.skipped) {
+  if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else {
-    if (argv.master) {
+    if (argv.on_push_build) {
       await storeBundleSize();
       await reportBundleSize();
-    } else if (argv.report) {
+    } else if (argv.on_pr_build) {
       await reportBundleSize();
     }
     // TODO(danielrozenberg): remove the legacy check once the app has been
@@ -360,10 +360,11 @@ gulp.task(
     performBundleSize,
     {
       options: {
-        'master': '  Store bundle size in AMP build artifacts repo (used only '
-            + 'for `master` builds)',
-        'skipped': '  Set the status of this pull request\'s bundle size in '
-            + 'GitHub to `skipped`',
-        'report': '  Report the bundle size of this pull request to GitHub',
+        'on_push_build': '  Store bundle size in AMP build artifacts repo '
+            + '(also implies --on_pr_build)',
+        'on_pr_build': '  Report the bundle size of this pull request to '
+            + 'GitHub',
+        'on_skipped_build': '  Set the status of this pull request\'s bundle '
+            + 'size check in GitHub to `skipped`',
       },
     });

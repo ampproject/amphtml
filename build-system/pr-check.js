@@ -337,7 +337,7 @@ const command = {
     timedExecOrDie(cmd);
   },
   runBundleSizeCheck: function(action) {
-    timedExecOrDie(`gulp bundle-size --${action}`);
+    timedExecOrDie(`gulp bundle-size --on_${action}_build`);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -462,7 +462,7 @@ function runAllCommands() {
     command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    command.runBundleSizeCheck('master');
+    command.runBundleSizeCheck('push');
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
     command.runSinglePassCompiledIntegrationTests();
@@ -639,7 +639,7 @@ function main() {
       command.runVisualDiffTests();
       if (buildTargets.has('RUNTIME')) {
         command.buildRuntimeMinified(/* extensions */ false);
-        command.runBundleSizeCheck('report');
+        command.runBundleSizeCheck('pr');
       } else {
         command.runBundleSizeCheck('skipped');
       }
