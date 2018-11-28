@@ -393,7 +393,7 @@ exports.extensionBundles = [
   {
     name: 'amp-video',
     version: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-video-iframe',
