@@ -30,6 +30,7 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createLoaderElement} from '../../../src/loader';
@@ -37,7 +38,6 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {
   installPositionObserverServiceForDoc,
@@ -47,6 +47,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
+  setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 
@@ -385,6 +386,7 @@ export class AmpList extends AMP.BaseElement {
    */
   ssrTemplate_(refresh) {
     let request;
+    assertHttpsUrl(this.element.getAttribute('src'), this.element);
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return requestForBatchFetch(
@@ -394,6 +396,8 @@ export class AmpList extends AMP.BaseElement {
         refresh).then(r => {
       request = r;
 
+      request.xhrUrl =
+         setupInput(this.win, request.xhrUrl, request.fetchOpt);
       request.fetchOpt = setupAMPCors(
           this.win, request.xhrUrl, request.fetchOpt);
       setupJsonFetchInit(r.fetchOpt);
