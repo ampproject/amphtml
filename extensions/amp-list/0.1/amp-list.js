@@ -756,17 +756,22 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   toggleLoadMoreLoading_(state) {
-    if (this.loadMoreLoadingElement_) {
-      this.mutateElement(() => {
+    this.mutateElement(() => {
+      // If it's loading, then it's no longer failed
+      if (this.loadMoreFailedElement_) {
+        this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+      }
+      if (this.loadMoreLoadingElement_) {
         this.loadMoreButton_.classList.toggle('amp-visible', !state);
         this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
-      });
-    } else if (this.loadMoreButton_) {
-      this.mutateElement(() => {
+      } else if (this.loadMoreButton_) {
         this.loadMoreButton_.classList.toggle('amp-load-more-loading', state);
         this.loadMoreLoadingOverlay_.classList.toggle('amp-active', !state);
-      });
-    }
+        if (this.loadMoreFailedElement_) {
+          this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+        }
+      }
+    });
   }
 
   /**
@@ -781,12 +786,9 @@ export class AmpList extends AMP.BaseElement {
     this.mutateElement(() => {
       if (this.loadMoreFailedElement_) {
         this.loadMoreFailedElement_.classList.toggle('amp-visible', true);
+        this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
+            () => this.loadMoreCallback_());
       }
-      this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
-          () => {
-            this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
-            this.loadMoreCallback_();
-          });
       if (this.loadMoreButton_) {
         this.loadMoreButton_.classList.toggle('amp-visible', false);
       }
