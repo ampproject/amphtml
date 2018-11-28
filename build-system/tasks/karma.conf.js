@@ -176,6 +176,14 @@ module.exports = {
       platformName: 'iOS',
       platformVersion: '12.0',
     }, SAUCE_TIMEOUT_CONFIG),
+    SL_iOS_11: Object.assign({
+      base: 'SauceLabs',
+      appiumVersion: '1.8.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '11.3',
+    }, SAUCE_TIMEOUT_CONFIG),
     SL_Firefox: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
@@ -187,6 +195,12 @@ module.exports = {
       browserName: 'safari',
       platform: 'macOS 10.13',
       version: '12.0',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Safari_11: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '11.1',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Edge_17: Object.assign({
       base: 'SauceLabs',

@@ -76,20 +76,22 @@ function getConfig() {
     // With --saucelabs, integration tests are run on this set of browsers.
       [
         'SL_Chrome',
-        'SL_Chrome_Dev',
         'SL_Firefox',
-        'SL_Safari_12',
-        'SL_Chrome_Android_7',
-        'SL_iOS_12',
+        'SL_Safari_11',
+        'SL_iOS_11',
         'SL_Edge_17',
-        //'SL_IE_11'  This throws errors that kill entire integration test
       ]
       // TODO(amp-infra): Evaluate and add more platforms here.
+      //'SL_Chrome_Dev',
+      //'SL_Chrome_Android_7',
+      //'SL_Safari_12',
+      //'SL_iOS_12'
+      //'SL_IE_11'
       : [
       // With --saucelabs_lite, a subset of the unit tests are run.
       // Only browsers that support chai-as-promised may be included below.
       // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_12',
+        'SL_Safari_11',
       ];
 
     return Object.assign({}, karmaDefault, {
