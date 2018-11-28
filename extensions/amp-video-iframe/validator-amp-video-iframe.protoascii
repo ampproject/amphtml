@@ -44,13 +44,7 @@ attr_lists: {
     name: "implements-rotate-to-fullscreen"
     value: ""
   }
-  attrs: {
-    name: "preload"
-    value: "auto"
-    value: "metadata"
-    value: "none"
-    value: ""
-  }
+  attrs: { name: "referrerpolicy" }
   attrs: {
     name: "rotate-to-fullscreen"
     value: ""
