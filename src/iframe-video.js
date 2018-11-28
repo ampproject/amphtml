@@ -92,7 +92,7 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
 
   // Will propagate for every component, but only validation rules will actually
   // allow the attribute to be set.
-  element.propagateAttributes(['referrerpolicy'], frame);
+  video.propagateAttributes(['referrerpolicy'], frame);
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 
