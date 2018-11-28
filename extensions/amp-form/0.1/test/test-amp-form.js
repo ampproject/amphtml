@@ -136,7 +136,7 @@ describes.repeated('', {
     }
 
     function getAmpFormWithAsyncInput() {
-      return getAmpForm(getForm()).then((ampForm) => {
+      return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
 
         // Create our async input element
@@ -144,14 +144,16 @@ describes.repeated('', {
         const asyncInput = createElement('amp-mock-async-input');
         asyncInput.classList.add(AsyncInputClasses.ASYNC_INPUT);
         asyncInput.setAttribute(
-          AsyncInputAttributes.NAME,
-          'mock-async-input'
+            AsyncInputAttributes.NAME,
+            'mock-async-input'
         );
 
         // Create stubs that can be used for observing the async input
-        const getValueStub = sandbox.stub().returns(Promise.resolve('async-input-value'));
+        const asyncInputValue = 'async-input-value';
+        const getValueStub = sandbox.stub()
+            .returns(Promise.resolve(asyncInputValue));
         asyncInput.getImpl = () => Promise.resolve({
-          getValue: getValueStub
+          getValue: getValueStub,
         });
 
 
@@ -159,7 +161,8 @@ describes.repeated('', {
         return Promise.resolve({
           ampForm,
           asyncInput,
-          getValueStub
+          asyncInputValue,
+          getValueStub,
         });
       });
     }
@@ -1345,8 +1348,7 @@ describes.repeated('', {
 
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
-        // TODO (torch2424) un comment these, they work on travis but not local
-        // expectAsyncConsoleError(/Form submission failed/);
+        expectAsyncConsoleError(/Form submission failed/);
         setReportValiditySupportedForTesting(false);
         return getAmpForm(getForm(/*button1*/ true)).then(ampForm => {
           const form = ampForm.form_;
@@ -1591,8 +1593,7 @@ describes.repeated('', {
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
-      // TODO (torch2424) un comment these, they work on travis but not local
-      // expectAsyncConsoleError(/Form submission failed/);
+      expectAsyncConsoleError(/Form submission failed/);
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
         const form = ampForm.form_;
@@ -2183,11 +2184,25 @@ describes.repeated('', {
 
     describe('Async Inputs', () => {
 
-      it('should call getValue() on async Input Elements', () => {
-        return getAmpFormWithAsyncInput().then((response) => {
-          const ampForm = response.ampForm;
-          const asyncInput = response.asyncInput;
-          const getValueStub = response.getValueStub;
+      it('NonXHRGet should submit sync if no Async Input', () => {
+        return getAmpForm(getForm()).then(ampForm => {
+
+          // Make the form a NonXHRGet
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+
+          const assertNoSensitiveFieldsStub =
+            sandbox.stub(ampForm, 'assertNoSensitiveFields_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(assertNoSensitiveFieldsStub).to.be.called;
+          });
+        });
+      });
+
+      it('should call getValue() on Async Input Elements', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, getValueStub} = response;
 
           return ampForm.submit_(ActionTrust.HIGH).then(() => {
             expect(getValueStub).to.be.called;
@@ -2195,6 +2210,150 @@ describes.repeated('', {
         });
       });
 
+      it('should create a hidden input for Async Input Elements,' +
+        'with the correct name attribute', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, asyncInput} = response;
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+
+            const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+            const hiddenInput = ampForm.form_
+                .querySelector(`input[hidden][name=${name}]`);
+            expect(hiddenInput).to.be.ok;
+          });
+        });
+      });
+
+      it('should add the resolved value for, ' +
+        'hidden input for Async Input Elements', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, asyncInput, asyncInputValue} = response;
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+
+            const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+            const hiddenInput = ampForm.form_
+                .querySelector(`input[hidden][name=${name}]`);
+            const value = hiddenInput.getAttribute('value');
+            expect(value).to.be.equal(asyncInputValue);
+          });
+        });
+      });
+
+      it('should recycle already created ' +
+        'hidden inputs for Async Inputs', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, asyncInput, asyncInputValue, getValueStub} = response;
+
+          const newAsyncInputValue = 'new-async-input-value';
+          let hiddenInput;
+          let previousHiddenInputCount;
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+
+            previousHiddenInputCount = ampForm.form_
+                .querySelectorAll('input[hidden]').length;
+            const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+            hiddenInput = ampForm.form_
+                .querySelector(`input[hidden][name=${name}]`);
+            const value = hiddenInput.getAttribute('value');
+            expect(value).to.be.equal(asyncInputValue);
+
+            getValueStub.returns(Promise.resolve(newAsyncInputValue));
+            return ampForm.submit_(ActionTrust.HIGH);
+          }).then(() => {
+
+            const totalHiddenInputs = ampForm.form_
+                .querySelectorAll('input[hidden]');
+            expect(totalHiddenInputs.length)
+                .to.be.equal(previousHiddenInputCount);
+            expect(hiddenInput).to.be.ok;
+
+            const newValue = hiddenInput.getAttribute('value');
+
+            expect(newValue).to.be.equal(newAsyncInputValue);
+          });
+        });
+      });
+
+      it('should continue submitting when, ' +
+        'Async Input Elements getValue() resolve', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm} = response;
+
+          const handlePresubmitSuccessStub =
+            sandbox.stub(ampForm, 'handlePresubmitSuccess_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(handlePresubmitSuccessStub).to.be.called;
+          });
+        });
+      });
+
+      it('should handle errors when, ' +
+        'AsyncInput Elements getValue() reject', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, getValueStub} = response;
+
+          const getValueError = new Error('amp-async-input-error');
+          getValueStub.returns(Promise.reject(getValueError));
+          const handlePresubmitErrorStub =
+            sandbox.stub(ampForm, 'handlePresubmitError_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(handlePresubmitErrorStub).to.be.called;
+            expect(handlePresubmitErrorStub).to.be.calledWith(getValueError);
+          });
+        });
+      });
+
+      it('should enter the submitting state when, ' +
+        'waiting for Async Input Elements getValue() to resolve', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm} = response;
+
+          const setStateStub = sandbox.stub(ampForm, 'setState_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(setStateStub)
+                .to.be.calledWith('submitting');
+          });
+        });
+      });
+
+      it('should enter the initial state when, ' +
+        'No Async Inputs and NonXhrGet', () => {
+        return getAmpForm(getForm()).then(ampForm => {
+
+          // Make the form a NonXHRGet
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+
+          const setStateStub = sandbox.stub(ampForm, 'setState_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(setStateStub)
+                .to.be.calledWith('initial');
+          });
+        });
+      });
+
+      it('should enter the submit error state when, ' +
+      'Async Input Elements getValue() rejects', () => {
+        return getAmpFormWithAsyncInput().then(response => {
+          const {ampForm, getValueStub} = response;
+
+          const getValueError = new Error('amp-async-input-error');
+          getValueStub.returns(Promise.reject(getValueError));
+          const setStateStub = sandbox.stub(ampForm, 'setState_');
+
+          return ampForm.submit_(ActionTrust.HIGH).then(() => {
+            expect(setStateStub)
+                .to.be.calledWith('submit-error');
+          });
+        });
+      });
     });
   });
 });

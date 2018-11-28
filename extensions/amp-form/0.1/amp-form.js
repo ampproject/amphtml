@@ -410,12 +410,12 @@ export class AmpForm {
    * Handles submissions through action service invocations.
    *   e.g. <img on=tap:form.submit>
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @return {?Promise}
+   * @return {!Promise}
    * @private
    */
   handleSubmitAction_(invocation) {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
-      return null;
+      return Promise.resolve(null);
     }
     // `submit` has the same trust level as the AMP Action that caused it.
     return this.submit_(invocation.trust, null);
@@ -463,14 +463,14 @@ export class AmpForm {
    *   - It's a non-XHR POST submission (unsupported).
    *
    * @param {!Event} event
-   * @return {?Promise}
+   * @return {!Promise}
    * @private
    */
   handleSubmitEvent_(event) {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
-      return null;
+      return Promise.resolve(null);
     }
 
     if (this.xhrAction_ || this.method_ == 'POST') {
