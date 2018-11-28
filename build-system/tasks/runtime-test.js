@@ -71,7 +71,7 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-    
+
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
@@ -583,7 +583,6 @@ async function runTests() {
       configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
-      
       const batchExitCode = await createKarmaServer(configBatch);
       if (batchExitCode) { // test failed
         processExitCode += ' Batch #' + batch + ': ' + batchExitCode + ';';
