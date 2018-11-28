@@ -1312,8 +1312,7 @@ describes.repeated('', {
 
     describe('User Validity', () => {
       it('should manage valid/invalid on input/fieldset/form on submit', () => {
-        // TODO: torch2424 Figure out why the erorr is never thrown
-        // expectAsyncConsoleError(/Form submission failed/);
+        expectAsyncConsoleError(/Form submission failed/);
         setReportValiditySupportedForTesting(false);
         return getAmpForm(getForm(/*button1*/ true)).then(ampForm => {
           const form = ampForm.form_;
@@ -1333,8 +1332,10 @@ describes.repeated('', {
             stopImmediatePropagation: sandbox.spy(),
             preventDefault: sandbox.spy(),
           };
-          ampForm.handleSubmitEvent_(event);
 
+          // Submit an invalid form, no promise returned
+          const optionalPromiseResponse = ampForm.handleSubmitEvent_(event);
+          expect(optionalPromiseResponse).to.not.be.ok;
           expect(form.checkValidity).to.be.called;
           expect(emailInput.checkValidity).to.be.called;
           expect(fieldset.checkValidity).to.be.called;
@@ -1344,9 +1345,13 @@ describes.repeated('', {
           expect(event.stopImmediatePropagation).to.be.called;
 
           emailInput.value = 'cool@bea.ns';
-          ampForm.handleSubmitEvent_(event);
-          expect(form.className).to.contain('user-valid');
-          expect(emailInput.className).to.contain('user-valid');
+
+          const submitPromise = ampForm.handleSubmitEvent_(event);
+          expect(submitPromise).to.be.ok;
+          submitPromise.then(() => {
+            expect(form.className).to.contain('user-valid');
+            expect(emailInput.className).to.contain('user-valid');
+          });
         });
       });
 
