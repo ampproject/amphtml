@@ -511,8 +511,8 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
 
 /**
  * Whether the attribute/value is valid.
- * @param {string} tagName
- * @param {string} attrName
+ * @param {string} tagName Lowercase tag name.
+ * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
