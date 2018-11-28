@@ -244,6 +244,10 @@
           <a on="tap:amp-access.login">Login to read more!</a>
         </section>
 
+        <section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
+          <a on="tap:amp-access.refresh">Refresh authorization</a>
+        </section>
+
         <section amp-access="error" amp-access-hide class="error-section">
           Oops... Something broke.
         </section>

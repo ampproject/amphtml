@@ -659,6 +659,11 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_(invocation.method.substring('login-'.length));
+    } else if (invocation.method == 'refresh') {
+      if (invocation.event) {
+        invocation.event.preventDefault();
+      }
+      this.runAuthorization_();
     }
     return null;
   }
