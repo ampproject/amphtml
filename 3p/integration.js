@@ -251,6 +251,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+import {baidu} from '../ads/baidu';
 
 
 /**
@@ -481,6 +482,7 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
+register('baidu', baidu);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

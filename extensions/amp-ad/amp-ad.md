@@ -361,6 +361,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
+- [Baidu](../../ads/baidu.md)
 
 ## Supported embed types
 
