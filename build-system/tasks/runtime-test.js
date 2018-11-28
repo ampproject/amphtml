@@ -559,11 +559,11 @@ async function runTests() {
   server.emit('kill');
   exitCtrlcHandler(handlerProcess);
 
-  if (processExitCode) {
+  if (processExitCode != 0) {
     log(
         red('ERROR:'),
         yellow('Karma test failed with exit code ' + processExitCode));
-    process.exitCode = processExitCode;
+    process.exitCode = 1;
   }
 
   /**
@@ -574,7 +574,7 @@ async function runTests() {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
-    let processExitCode = '';
+    let processExitCode = 0;
 
     log(green('Testing on ' + saucelabsBrowsers.length +
       ' Sauce Lab browsers in total'));
@@ -584,22 +584,21 @@ async function runTests() {
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
       const batchExitCode = await createKarmaServer(configBatch);
-      if (batchExitCode) { // test failed
-        processExitCode += ' ' + batchExitCode + ' (Batch # ' + batch + ');';
+      if (batchExitCode && processExitCode == 0) {
+        processExitCode = batchExitCode;
       }
       startIndex = batch * batchSize;
       batch++;
       endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
 
-    processExitCode && processExitCode.length > 0 ? processExitCode.trim() : '';
     return processExitCode;
   }
 
   /**
    * Creates and starts karma server
    * @param {!Object} configBatch
-   * @return {!Promise<string>}
+   * @return {!Promise<number>}
    */
   function createKarmaServer(configBatch) {
     let resolver;
