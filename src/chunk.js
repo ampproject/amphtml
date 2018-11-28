@@ -40,11 +40,11 @@ let deactivated = /nochunking=1/.test(self.location.hash);
 const resolved = Promise.resolve();
 
 /**
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!Chunks}
  * @private
  */
-function getChunkServiceForDoc_(elementOrAmpDoc) {
+function chunkServiceForDoc(elementOrAmpDoc) {
   registerServiceBuilderForDoc(elementOrAmpDoc, 'chunk', Chunks);
   return getServiceForDoc(elementOrAmpDoc, 'chunk');
 }
@@ -64,7 +64,7 @@ export function startupChunk(document, fn) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(document.documentElement);
+  const service = chunkServiceForDoc(document.documentElement);
   service.runForStartup(fn);
 }
 
@@ -87,7 +87,7 @@ export function chunk(elementOrAmpDoc, fn, priority) {
     resolved.then(fn);
     return;
   }
-  const service = getChunkServiceForDoc_(elementOrAmpDoc);
+  const service = chunkServiceForDoc(elementOrAmpDoc);
   service.run(fn, priority);
 }
 
@@ -96,7 +96,7 @@ export function chunk(elementOrAmpDoc, fn, priority) {
  * @return {!Chunks}
  */
 export function chunkInstanceForTesting(elementOrAmpDoc) {
-  return getChunkServiceForDoc_(elementOrAmpDoc);
+  return chunkServiceForDoc(elementOrAmpDoc);
 }
 
 /**
