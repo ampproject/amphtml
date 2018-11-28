@@ -15,18 +15,17 @@
 
   <!-- Integration script -->
   <script>
-    //  #######  #####  #######
-    //  #       #     # #
-    //  #       #       #
-    //  #####    #####  ######
-    //  #             #       #
-    //  #       #     # #     #
-    //  #######  #####   #####
+    //  #######  #####   #####    ###     #   #######
+    //  #       #     # #     #  #   #   ##   #         #
+    //  #       #             # #     # # #   #         #
+    //  #####    #####   #####  #     #   #   ######  #####
+    //  #             # #       #     #   #         #   #
+    //  #       #     # #        #   #    #   #     #   #
+    //  #######  #####  #######   ###   #####  #####
 
-    // This example is written in ES5 for browser compatibility.
-    // If you wish to write an integration script in ES2015+ that doesn't
-    // require older browser support or is otherwise transpiled into ES5, see
-    // ./frame-es2015.html.
+    // This example is written in ES2015+.
+    // If you require ES5 support, transpile this code. If you wish to write an
+    // integration script in ES5, see ./frame.html.
 
     // Wait for API to initialize
     (window.AmpVideoIframe = window.AmpVideoIframe || [])
@@ -36,26 +35,20 @@
       // `ampIntegration` is an object containing the tools required to
       // integrate.
 
-      var video = document.querySelector('video');
-      var muted = false;
+      const video = document.querySelector('video');
 
-      var events = ['canplay', 'playing', 'pause', 'ended'];
+      let muted = false;
 
-      for (var i = 0; i < events.length; i++) {
-        // Wrap in IIFE to preserve iterated value.
-        (function(e) {
-          video.addEventListener(e, function() {
-            ampIntegration.postEvent(e);
-          });
-        })(events[i]);
-      }
+      ['canplay', 'playing', 'pause', 'ended'].forEach(e => {
+        video.addEventListener(e, () => ampIntegration.postEvent(e));
+      });
 
       // in case we miss `canplay`.
       if (video.readyState >= video.HAVE_FUTURE_DATA) {
         ampIntegration.postEvent('canplay');
       }
 
-      video.addEventListener('volumechange', function() {
+      video.addEventListener('volumechange', () => {
         if (video.volume < 0.01) {
           muted = true;
           ampIntegration.postEvent('muted');
@@ -67,34 +60,34 @@
         }
       });
 
-      ampIntegration.method('play', function() {
+      ampIntegration.method('play', () => {
         video.play();
       });
-      ampIntegration.method('pause', function() {
+      ampIntegration.method('pause', () => {
         video.pause();
       });
-      ampIntegration.method('mute', function() {
+      ampIntegration.method('mute', () => {
         video.muted = true;
       });
-      ampIntegration.method('unmute', function() {
+      ampIntegration.method('unmute', () => {
         video.muted = false;
       });
-      ampIntegration.method('showcontrols', function() {
+      ampIntegration.method('showcontrols', () => {
         video.controls = true;
       });
-      ampIntegration.method('hidecontrols', function() {
+      ampIntegration.method('hidecontrols', () => {
         video.controls = false;
       });
-      ampIntegration.method('fullscreenenter', function() {
+      ampIntegration.method('fullscreenenter', () => {
         // Unsupported in example. This should be a call to `requestFullscreen`
         // or browser equivalents.
       });
-      ampIntegration.method('fullscreenexit', function() {
+      ampIntegration.method('fullscreenexit', () => {
         // Unsupported in example. This should be a call to `exitFullscreen`
         // or browser equivalents.
       });
 
-      setInterval(function() {
+      setInterval(() => {
         // Post a custom analytics event every 3 seconds.
         ampIntegration.postAnalyticsEvent('video-custom-foo', /* optional */ {
           'myVar': Math.random().toString(),
