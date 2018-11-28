@@ -303,6 +303,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
 
+    /** @private {boolean} Bookend opened in window history. */
+    this.openedBookend_ = false;
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -730,7 +733,6 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
-    const bookendActive = !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
 
     this.initializeBookend_();
     this.initializeSidebar_();
@@ -748,7 +750,26 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.initializeBookend_())
+        .then(() => {
+          const bookendActive =
+              !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
+          return this.hasBookend_().then(hasBookend => {
+            if (hasBookend && bookendActive) {
+              // Ensure that when bookend is built in the switchTo_ call below,
+              // it will skip the opening animation.
+              this.openedBookend_ = true;
+            }
+          });
+        })
         .then(() => this.switchTo_(initialPageId))
+        .then(() => {
+          if (this.openedBookend_) {
+            // The bookend trigger must be done AFTER the swithTo_ call above
+            // to ensure the correct displaying of pagination buttons in
+            // desktop.
+            this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
+          }
+        })
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -762,9 +783,8 @@ export class AmpStory extends AMP.BaseElement {
             new InfoDialog(this.win, this.element) : null;
           if (infoDialog) {
             infoDialog.build();
-          }}
-        )
-        .then(() => this.checkForReturnToBookend_());
+          }
+        });
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -1284,7 +1304,6 @@ export class AmpStory extends AMP.BaseElement {
   getHistoryStatePageId_() {
     const state = getState(this.win.history);
     return state ? state.ampStoryPageId : null;
-    this.updateHistoryState_(HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1556,22 +1575,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Checks if user returned from another page back to the bookend page and
-   * displays it.
-   * @return {!Promise}
-   * @private
-   */
-  checkForReturnToBookend_() {
-    const bookendActive = !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
-
-    if (bookendActive) {
-      return this.showBookend_().then(() => bookendActive);
-    }
-    return Promise.resolve();
-  }
-
-
-  /**
    * Shows the bookend overlay.
    * @private
    * @return {!Promise}
@@ -1605,7 +1608,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     if (!isActive) {
-      this.activePage_.setState(PageState.ACTIVE);
+      this.activePage_.setState(PageState.PLAYING);
     }
   }
 
@@ -1822,7 +1825,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build();
+    this.bookend_.build(this.openedBookend_);
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
