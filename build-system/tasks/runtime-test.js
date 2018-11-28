@@ -556,15 +556,15 @@ async function runTests() {
     processExitCode = await createKarmaServer(c);
   }
 
+  server.emit('kill');
+  exitCtrlcHandler(handlerProcess);
+
   if (processExitCode) {
     log(
         red('ERROR:'),
         yellow('Karma test failed with exit code ' + processExitCode));
-    process.exitCode = processExitCode;
+    process.exit(processExitCode);
   }
-
-  server.emit('kill');
-  exitCtrlcHandler(handlerProcess);
 
   /**
    * Runs tests in batches
@@ -585,7 +585,7 @@ async function runTests() {
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
       const batchExitCode = await createKarmaServer(configBatch);
       if (batchExitCode) { // test failed
-        processExitCode += ' Batch #' + batch + ': ' + batchExitCode + ';';
+        processExitCode += ' ' + batchExitCode + ' (Batch # ' + batch + '); ';
       }
       startIndex = batch * batchSize;
       batch++;
