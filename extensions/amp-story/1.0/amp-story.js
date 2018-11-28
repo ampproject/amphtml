@@ -748,7 +748,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
 
-    this.initializeBookend_();
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -1305,14 +1304,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const {history} = this.win;
-    if (history.replaceState && history.state &&
-        this.getHistoryStatePageId_() !== pageId) {
-      history.state.ampStoryPageId = pageId;
-      history.replaceState(history.state, '');
-    } else if (!history.state) {
-      history.replaceState({ampStoryPageId: pageId}, '');
-    }
+    this.updateHistoryState_(HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1672,19 +1664,9 @@ export class AmpStory extends AMP.BaseElement {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
     this.setHistoryBookendState_(isActive);
-
-    if (isActive) {
-      this.systemLayer_.hideDeveloperLog();
-      this.activePage_.setState(PageState.PAUSED);
-    }
-
-    if (!isActive) {
-      this.activePage_.setState(PageState.PLAYING);
-    }
   }
 
   /**
-   * Toggles content when bookend is opened/closed.
    * Save bookend state using history API.
    * @param {boolean} isActive state of the bookend
    * @private
@@ -1701,11 +1683,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   updateHistoryState_(stateName, newValue) {
     const {history} = this.win;
-    if (history.replaceState && history.state &&
+    if (history.replaceState && getState(history) &&
         this.getHistoryState_(stateName) !== newValue) {
-      history.state[stateName] = newValue;
-      history.replaceState(history.state, '');
-    } else if (!history.state) {
+      getState(history)[stateName] = newValue;
+      history.replaceState(getState(history), '');
+    } else if (!getState(history)) {
       // First time writing to history state. Nothing to overwrite.
       history.replaceState({[stateName]: newValue}, '');
     }
@@ -1717,15 +1699,15 @@ export class AmpStory extends AMP.BaseElement {
    */
   getHistoryState_(stateName) {
     const {history} = this.win;
-    if (history && history.state) {
-      return history.state[stateName];
+    if (history && getState(history)) {
+      return getState(history)[stateName];
     }
     return null;
   }
 
 
   /**
-   * Toggle content when bookend is opened/closed.
+   * Toggles content when bookend is opened/closed.
    * @param {boolean} isActive
    * @private
    */

@@ -216,7 +216,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
 
   /**
    * Builds the bookend components and appends it to the provided story.
-   * @param {string} skipAnimation Skips opening animation of the bookend.
+   * @param {boolean} skipAnimation Skips opening animation of the bookend.
    */
   build(skipAnimation = false) {
     if (this.isBuilt_) {

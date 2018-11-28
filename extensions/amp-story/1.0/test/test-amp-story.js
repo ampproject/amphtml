@@ -362,7 +362,7 @@ describes.realWin('amp-story', {
     const pageCount = 1;
     createPages(story.element, pageCount, ['last-page']);
 
-    sandbox.stub(story, 'buildAndPreloadBookend_');
+    sandbox.stub(AmpStoryBookend.prototype, 'build');
 
     story.buildCallback();
 
@@ -378,12 +378,9 @@ describes.realWin('amp-story', {
 
 
   it('should not block layoutCallback when bookend xhr fails', () => {
-    createPages(story.element, 2, ['cover', 'page-1']);
-
-    sandbox.stub(story, 'getHistoryState_')
-        .withArgs('ampStoryBookendActive')
-        .returns(true);
+    createPages(story.element, 1, ['page-1']);
     sandbox.stub(AmpStoryBookend.prototype, 'build');
+
     const bookendXhr = sandbox
         .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
         .returns(Promise.reject());
@@ -392,8 +389,6 @@ describes.realWin('amp-story', {
 
     return story.layoutCallback().then(() => {
       expect(bookendXhr).to.have.been.calledOnce;
-      expect(story.element.classList.contains('i-amphtml-story-loaded'))
-          .to.be.true;
     }).catch(error => {
       expect(error).to.be.undefined;
     });
