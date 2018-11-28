@@ -26,7 +26,7 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -1071,9 +1071,14 @@ export class VideoEventTracker extends EventTracker {
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
+    const percentages = videoSpec['percentages'];
+
     const on = config['on'];
 
+    const percentageInterval = 5;
+
     let intervalCounter = 0;
+    let lastPercentage = 0;
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
@@ -1088,7 +1093,7 @@ export class VideoEventTracker extends EventTracker {
 
       if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
         user().error(TAG, 'video-seconds-played requires interval spec ' +
-            'with non-zero value');
+          'with non-zero value');
         return;
       }
 
@@ -1097,6 +1102,43 @@ export class VideoEventTracker extends EventTracker {
         if (intervalCounter % interval !== 0) {
           return;
         }
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
+        if (!percentages) {
+          user().error(TAG,
+              'video-percentage-played requires percentages spec.');
+          return;
+        }
+
+        for (let i = 0; i < percentages.length; i++) {
+          const percentage = percentages[i];
+
+          if (percentage <= 0 || (percentage % percentageInterval) != 0) {
+            user().error(TAG,
+                'Percentages must be set in increments of %s with non-zero ' +
+                  'values',
+                percentageInterval);
+
+            return;
+          }
+        }
+
+        const normalizedPercentage = details['normalizedPercentage'];
+        const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
+
+        dev().assert(isFiniteNumber(normalizedPercentageInt));
+        dev().assert((normalizedPercentageInt % percentageInterval) == 0);
+
+        if (lastPercentage == normalizedPercentageInt) {
+          return;
+        }
+
+        if (percentages.indexOf(normalizedPercentageInt) < 0) {
+          return;
+        }
+
+        lastPercentage = normalizedPercentageInt;
       }
 
       if (isVisibleType && !endSessionWhenInvisible) {
