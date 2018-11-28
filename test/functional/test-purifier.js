@@ -18,7 +18,6 @@ import {
   purifyHtml,
   purifyTagsForTripleMustache,
   resolveUrlAttr,
-  rewriteAttributeValue,
   rewriteAttributesForElement,
 } from '../../src/purifier';
 

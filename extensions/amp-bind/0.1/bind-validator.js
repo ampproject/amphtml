@@ -170,7 +170,7 @@ export class BindValidator {
         const match = re.exec(url);
         if (match !== null) {
           const protocol = match[1].toLowerCase().trim();
-          // hasOwnProperty() needed since nested objects are not prototype-less.
+          // hasOwn() needed since nested objects are not prototype-less.
           if (!hasOwn(allowedProtocols, protocol)) {
             return false;
           }
