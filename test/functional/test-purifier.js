@@ -549,18 +549,6 @@ describe('rewriteAttributesForElement', () => {
   });
 });
 
-describe('rewriteAttributeValue', () => {
-  it('should be case-insensitive to tag and attribute name', () => {
-    expect(rewriteAttributeValue('a', 'href', '/doc2'))
-        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
-    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
-        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
-    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
-        .to.equal(rewriteAttributeValue(
-            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
-  });
-});
-
 describe('resolveUrlAttr', () => {
   it('should throw if __amp_source_origin is set', () => {
     allowConsoleError(() => {
