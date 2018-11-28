@@ -90,12 +90,10 @@ function userInteractedWith(video) {
  * @implements {VideoServiceInterface}
  */
 export class VideoManager {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
@@ -116,7 +114,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
@@ -475,8 +473,9 @@ class VideoEntry {
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
           /* detail */ dict({}));
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
-      actions.trigger(this.video.element, firstPlay, event, trust);
+      const {element} = this.video;
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, firstPlay, event, trust);
     });
 
     this.listenForAutoplayDelegation_();

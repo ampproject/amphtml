@@ -111,22 +111,31 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-  nodeOrDoc, id, opt_fallbackToTopWin) {
-  // First, try to resolve via local (embed) window.
-  if (nodeOrDoc.nodeType) {
-    // If a node is passed, try to resolve via this node.
-    const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
-    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-    if (local) {
-      return local;
-    }
+  nodeOrDoc, id, opt_fallbackToTopWin)
+{
+  const isAmpDoc = !nodeOrDoc.nodeType;
+  // If an ampdoc is passed, resolve via ampdoc.
+  if (isAmpDoc) {
+    const ampdoc =
+      /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
+    return getServiceForDoc(ampdoc, id);
   }
-  // If an ampdoc is passed or fallback is allowed, continue resolving.
-  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDocDeprecated(nodeOrDoc, id);
+  // Now nodeOrDoc must be a node.
+  // First, try to resolve via local embed window.
+  const document =
+    /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc);
+  const win = toWin(document.defaultView);
+  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
+  if (local) {
+    return local;
   }
-  return null;
+  // Next, node is embedded AND fallback is not allowed, return null.
+  // Otherwise, resolve via ampdoc.
+  const isEmbed = win != getTopWindow(win);
+  if (isEmbed && !opt_fallbackToTopWin) {
+    return null;
+  }
+  return getServiceForDocOrNullInternal(nodeOrDoc, id);
 }
 
 /**
@@ -272,6 +281,23 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
   const ampdoc = getAmpdoc(elementOrAmpDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   return getServiceInternal(holder, id);
+}
+
+
+/**
+ * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
+ * If service `id` is not registered, returns null.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ */
+function getServiceForDocOrNullInternal(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  if (isServiceRegistered(holder, id)) {
+    return getServiceInternal(holder, id);
+  } else {
+    return null;
+  }
 }
 
 
