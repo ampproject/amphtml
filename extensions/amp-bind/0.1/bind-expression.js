@@ -412,8 +412,7 @@ export class BindExpression {
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object} */ (target), member)) {
+        if (hasOwn(/** @type {Object} */ (target), member)) {
           return target[member];
         }
         return null;
@@ -423,7 +422,7 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (Object.prototype.hasOwnProperty.call(scope, variable)) {
+        if (hasOwn(scope, variable)) {
           return scope[variable];
         }
         return null;
