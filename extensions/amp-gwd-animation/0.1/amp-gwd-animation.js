@@ -247,18 +247,18 @@ export class GwdAnimation extends AMP.BaseElement {
 
 /**
  * Adds an event action definition to an element.
- * @param {!Element} element
+ * @param {!Element} context
  * @param {!Element} target The target element whose actions to update.
  * @param {string} event The event name, e.g., 'slideChange'.
  * @param {string} actionStr e.g., `someDiv.hide`.
  * @private Visible for testing.
  */
-export function addAction(element, target, event, actionStr) {
+export function addAction(context, target, event, actionStr) {
   // Assemble the new actions string by splicing in the new action string
   // with any existing actions.
   let newActionsStr;
 
-  const currentActionsStr = element.getAttribute('on') || '';
+  const currentActionsStr = target.getAttribute('on') || '';
   const eventPrefix = `${event}:`;
   const eventActionsIndex = currentActionsStr.indexOf(eventPrefix);
 
@@ -281,7 +281,7 @@ export function addAction(element, target, event, actionStr) {
   }
 
   // Reset the element's actions with the new actions string.
-  const actionService = Services.actionServiceForDoc(element);
+  const actionService = Services.actionServiceForDoc(context);
   actionService.setActions(target, newActionsStr);
 }
 
