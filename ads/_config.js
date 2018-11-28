@@ -204,9 +204,6 @@ export const adConfig = {
 
   'baidu': {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
-    preconnect: [
-      'https://dup.baidustatic.com',
-    ],
   },
 
   'adthrive': {
