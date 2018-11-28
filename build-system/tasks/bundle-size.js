@@ -57,7 +57,7 @@ async function getMaxBundleSize() {
     });
   }
 
-  return await octokit.repos.getContent(
+  return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
         path: path.join('bundle-size', '.max_size'),
       })
@@ -101,7 +101,7 @@ async function getAncestorBundleSize() {
   const gitBranchPointSha = gitBranchPoint(/* fromMerge */ isPullRequest());
   const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
   log('Branch point from master is', cyan(gitBranchPointShortSha));
-  return await octokit.repos.getContent(
+  return await octokit.repos.getContents(
       Object.assign(buildArtifactsRepoOptions, {
         path: path.join('bundle-size', gitBranchPointSha),
       })
@@ -158,7 +158,7 @@ function storeBundleSize() {
     token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
   });
 
-  return octokit.repos.getContent(githubApiCallOptions).then(() => {
+  return octokit.repos.getContents(githubApiCallOptions).then(() => {
     log('The file', cyan(`bundle-size/${commitHash}`), 'already exists in the',
         'build artifacts repository on GitHub. Skipping...');
   }).catch(() => {
