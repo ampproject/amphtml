@@ -22,6 +22,8 @@
 // This list should not get longer without a very good reason.
 import {install as installMathSign} from '../src/polyfills/math-sign';
 import {install as installObjectAssign} from '../src/polyfills/object-assign';
+import {install as installObjectValues} from '../src/polyfills/object-values';
 
 installMathSign(self);
 installObjectAssign(self);
+installObjectValues(self);
