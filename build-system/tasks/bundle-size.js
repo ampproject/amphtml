@@ -343,6 +343,7 @@ async function performBundleSize() {
   } else {
     if (argv.master) {
       await storeBundleSize();
+      await reportBundleSize();
     } else if (argv.report) {
       await reportBundleSize();
     }
