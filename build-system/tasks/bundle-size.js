@@ -74,6 +74,15 @@ async function getMaxBundleSize() {
 }
 
 /**
+ * Get the bundle size of the current build.
+ *
+ * @return {number} the bundle size in KB rounded to 2 decimal points;
+ */
+function getBundleSize() {
+  return Math.round((fs.statSync(runtimeFile).size / 1024) * 1e2) / 1e2;
+}
+
+/**
  * Return true if this task is running on Travis as part of a pull request.
  *
  * @return {boolean} true if running on Travis as part of a pull request.
@@ -114,10 +123,9 @@ async function getAncestorBundleSize() {
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  *
- * @param {string} bundleSize the new bundle size in 99.99KB format.
  * @return {!Promise}
  */
-function storeBundleSize(bundleSize) {
+function storeBundleSize() {
   if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
     log(yellow('Skipping'), cyan('--master') + ':',
         'this action can only be performed on `push` builds on Travis');
@@ -139,6 +147,7 @@ function storeBundleSize(bundleSize) {
     return;
   }
 
+  const bundleSize = `${getBundleSize().toFixed(2)}KB`;
   const commitHash = gitCommitHash();
   const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
     path: path.join('bundle-size', commitHash),
@@ -267,10 +276,6 @@ async function checkBundleSize() {
         break;
     }
   }
-
-  if (argv.master) {
-    return storeBundleSize(newBundleSize);
-  }
 }
 
 /**
@@ -303,6 +308,9 @@ async function performBundleSize() {
   if (argv.skipped) {
     return await skipBundleSize();
   } else {
+    if (argv.master) {
+      await storeBundleSize();
+    }
     return await checkBundleSize();
   }
 }
