@@ -304,12 +304,47 @@ async function skipBundleSize() {
   }
 }
 
+/**
+ * Report the size to the bundle-size GitHub App, to determine size changes.
+ */
+async function reportBundleSize() {
+  if (isPullRequest()) {
+    const bundleSize = getBundleSize();
+    const commitHash = gitCommitHash();
+    try {
+      const response = await requestPost({
+        uri: url.resolve(bundleSizeAppBaseUrl,
+            path.join('commit', commitHash, 'report')),
+        json: true,
+        body: {
+          bundleSize,
+        },
+      });
+      if (response.statusCode !== '200') {
+        throw new Error(
+            `${response.statusCode} ${response.statusMessage}: ` +
+            response.body);
+      }
+    } catch (error) {
+      log(red('Could not report a skipped pull request'));
+      log(red(error));
+      process.exitCode = 1;
+      return;
+    }
+  } else {
+    log(yellow('Not reporting the bundle size of this pull request because '
+               + 'that can only be done on Travis'));
+  }
+}
+
 async function performBundleSize() {
   if (argv.skipped) {
     return await skipBundleSize();
   } else {
     if (argv.master) {
       await storeBundleSize();
+    } else if (argv.report) {
+      await reportBundleSize();
     }
     return await checkBundleSize();
   }
@@ -326,5 +361,6 @@ gulp.task(
             + 'for `master` builds)',
         'skipped': '  Set the status of this pull request\'s bundle size in '
             + 'GitHub to `skipped`',
+        'report': '  Report the bundle size of this pull request to GitHub',
       },
     });
