@@ -56,8 +56,10 @@ amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'loop' in tag 'am
 |    <amp-video rotate-to-fullscreen layout=fill width=300 height=500
 |      loop preload="metadata" controls></amp-video>
 |
-|    <!-- Valid: dock -->
+|    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
 |    <amp-video dock layout=fill width=300 height=500 controls></amp-video>
+>>   ^~~~~~~~~
+amp-video/0.1/test/validator-amp-video.html:55:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500

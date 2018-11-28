@@ -396,6 +396,11 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-video-docking',
+    version: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-video-iframe',
     version: '0.1',
     type: TYPES.MEDIA,
