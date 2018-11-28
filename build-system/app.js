@@ -1190,7 +1190,10 @@ app.get('/infinite-scroll', function(req, res) {
     numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1);
 
   if (latency) {
-    setTimeout(() => res.json({'items': results, 'next': nextUrl}), latency);
+    setTimeout(() => res.json({
+      'items': results,
+      'next': pagesLeft == 0 ? undefined : nextUrl,
+    }), latency);
   } else {
     res.json({'items': results, 'next': nextUrl});
   }
