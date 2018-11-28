@@ -1166,11 +1166,4 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(spy).to.be.calledTwice;
     });
   });
-
-  describe('reportWhen', () => {
-    beforeEach(() => {
-      sandbox.restore(); // Restore timers.
-    });
-
-  });
 });
