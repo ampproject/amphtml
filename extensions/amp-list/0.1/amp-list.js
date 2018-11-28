@@ -691,7 +691,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   setLoadMore_() {
-    if (!this.loadMoreSrc_ && !this.loadMoreButton_) {
+    // Done loading, nothing more to load.
+    if (!this.loadMoreSrc_) {
+      this.loadMoreButton_.classList.toggle('amp-visible', false);
       return;
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
