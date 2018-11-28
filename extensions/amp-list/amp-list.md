@@ -281,6 +281,35 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+## Experimental: Infinite Scroll (amp-list-load-more)
+We've introduced an experiment called `amp-list-load-more` as an implementation for pagination and infinite scroll in amp-list. This is an experimental feature, and final APIs may change.
+
+### Attributes
+#### load-more (mandatory)
+Adding this attribute will allow amp-list (with no value) to show a “load-more" button at the end of the amp-list. The value of this attribute can be set to “auto" to trigger automatic loading more elements three viewports down for an infinite scroll effect.
+
+#### load-more-bookmark (mandatory)
+This attribute specifies an attribute in the returned data that will give the url of the next items to load. E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
+
+```
+{ "items": [], "next": "https://url.to.load" }
+```
+
+### Additional children of `<amp-list>`
+`<amp-list>` with the `load-more` attribute expects the following additional child elements:
+
+#### load-more-button (mandatory)
+An element containing the `load-more-button` attribute. Clicking on this button will trigger a fetch to load more elements from the url contained in the field of the data returned corresponding to the `load-more-bookmark` attribute.
+
+In the case of `load-more="auto"`, or infinite scroll, this button will show up if the user has reached the end of the list but the contents are still loading.
+
+#### load-more-failed (optional)
+An element containing the `load-more-failed` attribute. This element will be displayed at the bottom of the `<amp-list>` if loading failed. If this element is not provided, the `load-more-button` element will be displayed and clicking on it will result in an attempt to re-fetch data from the last (failed) url.
+
+#### .amp-load-more-loading (css class)
+This class is applied to the element with the `load-more-button` attribute while the data is loading. This can be used to tweak the visual appearance of the load-more-button (e.g. show a loader) when the `<amp-list>` is in the middle of loading data.
+
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
