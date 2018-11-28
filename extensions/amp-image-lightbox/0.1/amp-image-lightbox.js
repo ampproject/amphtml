@@ -850,6 +850,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   closeOnEscape_(event) {
     if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }
