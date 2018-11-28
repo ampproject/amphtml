@@ -476,3 +476,12 @@ export const VideoAnalyticsEvents = {
  * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
 export let VideoOrBaseElementDef;
+
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
+}

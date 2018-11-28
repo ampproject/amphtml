@@ -1,5 +1,5 @@
 <!--
-  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests for amp-video tag.
+  Invalid usage test for amp-video-docking.
 -->
 <!doctype html>
 <html ⚡>
@@ -25,37 +25,9 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-latest.js"></script>
+  <!-- Invalid: extension without player extension -->
+  <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-latest.js"></script>
 </head>
 <body>
-  <!-- Valid -->
-  <amp-video controls
-    width="640"
-    height="360"
-    layout="responsive"
-    poster="images/kitten-playing.png">
-    <source src="videos/kitten-playing.webm"
-      type="video/webm" />
-    <source src="videos/kitten-playing.mp4"
-      type="video/mp4" />
-    <div fallback>
-      <p>This browser does not support the video element.</p>
-    </div>
-  </amp-video>
-
-  <!-- Invalid: Incorrect attribute value for autoplay -->
-  <amp-video autoplay=true layout=fill width=300 height=500
-    loop="1" preload="metadata" controls="controls"></amp-video>
-
-  <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
-  <amp-video rotate-to-fullscreen layout=fill width=300 height=500
-    loop preload="metadata" controls></amp-video>
-
-  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
-  <amp-video dock layout=fill width=300 height=500 controls></amp-video>
-
-  <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
-  <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
-    loop preload="metadata" controls></amp-video>
 </body>
 </html>
