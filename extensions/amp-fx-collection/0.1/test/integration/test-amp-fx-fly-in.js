@@ -61,7 +61,7 @@ describe.configure().run('amp-fx-collection', function() {
       win = env.win;
       toggleExperiment(win, 'amp-fx-fly-in', true, false);
     });
-
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
     it.skip('runs fly-in-left animation with default parameters', () => {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
@@ -70,7 +70,7 @@ describe.configure().run('amp-fx-collection', function() {
         expect(getComputedLeft(win)).to.be.above(initialLeft);
       });
     });
-  }); //TODO: fails in Firefox 63.0.0
+  });
 
   // Can't test a default `fly-in-right` animation as the
   // `data-fly-in-distance` and `data-duration` parameters differ/device.
@@ -96,7 +96,7 @@ describe.configure().run('amp-fx-collection', function() {
       win = env.win;
       toggleExperiment(win, 'amp-fx-fly-in', true, false);
     });
-
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
     it.skip('runs fly-in-right animation with default parameters', () => {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
@@ -105,7 +105,7 @@ describe.configure().run('amp-fx-collection', function() {
         expect(getComputedLeft(win)).to.be.below(initialLeft);
       });
     });
-  }); //TODO: fails in Firefox 63.0.0
+  });
 
   // Can't test a default `fly-in-bottom` animation as the
   // `data-fly-in-distance` and `data-duration` parameters differ/device.

@@ -71,7 +71,7 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-
+    
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
@@ -549,32 +549,58 @@ async function runTests() {
 
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
+  let processExitCode;
   if (argv.saucelabs || argv.saucelabs_lite) {
+    processExitCode = await runTestInBatches();
+  } else {
+    processExitCode = await createKarmaServer(c);
+  }
+
+  if (processExitCode) {
+    log(
+        red('ERROR:'),
+        yellow('Karma test failed with exit code ' + processExitCode));
+    process.exitCode = processExitCode;
+  }
+
+  server.emit('kill');
+  exitCtrlcHandler(handlerProcess);
+
+  /**
+   * Runs tests in batches
+   * @return {string} processExitCode
+   */
+  async function runTestInBatches() {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
+    let processExitCode = '';
+
+    log(green('Testing on ' + saucelabsBrowsers.length +
+      ' Sauce Lab browsers in total'));
     while (startIndex < endIndex) {
       const configBatch = Object.assign({}, c);
       configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
-      await createKarmaServer(configBatch);
+      
+      const batchExitCode = await createKarmaServer(configBatch);
+      if (batchExitCode) { // test failed
+        processExitCode += ' Batch #' + batch + ': ' + batchExitCode + ';';
+      }
       startIndex = batch * batchSize;
       batch++;
       endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
-  } else {
-    await createKarmaServer(c);
+
+    processExitCode && processExitCode.length > 0 ? processExitCode.trim() : '';
+    return processExitCode;
   }
-  server.emit('kill');
-  exitCtrlcHandler(handlerProcess);
 
   /**
    * Creates and starts karma server
-   *
    * @param {!Object} configBatch
-   *
-   * @return {!Promise}
+   * @return {!Promise<string>}
    */
   function createKarmaServer(configBatch) {
     let resolver;
@@ -582,11 +608,6 @@ async function runTests() {
     new Karma(configBatch, function(exitCode) {
       if (shouldCollapseSummary) {
         console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
-      }
-      if (exitCode) {
-        log(
-            red('ERROR:'),
-            yellow('Karma test failed with exit code ' + exitCode));
       }
       if (argv.coverage) {
         if (process.env.TRAVIS) {
@@ -629,7 +650,7 @@ async function runTests() {
       // } else {
       //   process.exitCode = exitCode;
       // }
-      resolver();
+      resolver(exitCode);
     }).on('run_start', function() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
