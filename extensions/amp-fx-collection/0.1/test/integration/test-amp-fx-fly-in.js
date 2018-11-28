@@ -16,7 +16,7 @@
 
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
-describe.configure().run('amp-fx-collection', function() {
+describe.skip('amp-fx-collection', function() {
   this.timeout(100000);
 
   const css = `
