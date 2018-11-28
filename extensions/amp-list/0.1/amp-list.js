@@ -119,6 +119,8 @@ export class AmpList extends AMP.BaseElement {
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
+    /** @private {?Element} */
+    this.loadMoreEndElement_ = null;
     /**@private {?UnlistenDef} */
     this.unlistenLoadMore_ = null;
 
@@ -185,6 +187,7 @@ export class AmpList extends AMP.BaseElement {
         this.getLoadMoreLoadingOverlay_();
       }
       this.getLoadMoreFailedElement_();
+      this.getLoadMoreEndElement_();
     }
   }
 
@@ -679,6 +682,7 @@ export class AmpList extends AMP.BaseElement {
     // Done loading, nothing more to load.
     if (!this.loadMoreSrc_) {
       this.loadMoreButton_.classList.toggle('amp-visible', false);
+      this.loadMoreEndElement_.classList.toggle('amp-visible', true);
       return;
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
@@ -754,9 +758,7 @@ export class AmpList extends AMP.BaseElement {
   toggleLoadMoreLoading_(state) {
     if (this.loadMoreLoadingElement_) {
       this.mutateElement(() => {
-        if (state) {
-          this.loadMoreButton_.classList.toggle('amp-visible', false);
-        }
+        this.loadMoreButton_.classList.toggle('amp-visible', !state);
         this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
       });
     } else if (this.loadMoreButton_) {
@@ -800,6 +802,15 @@ export class AmpList extends AMP.BaseElement {
           this.element, 'load-more-failed');
     }
     return this.loadMoreFailedElement_;
+  }
+
+  /** @private */
+  getLoadMoreEndElement_() {
+    if (!this.loadMoreEndElement_) {
+      this.loadMoreEndElement_ = childElementByAttr(
+          this.element, 'load-more-end');
+    }
+    return this.loadMoreEndElement_;
   }
 
 
