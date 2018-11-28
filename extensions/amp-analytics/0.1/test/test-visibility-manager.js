@@ -1082,6 +1082,75 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     });
   });
 
+  it('should wait for readyReportPromise', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {}, readyPromise, () =>
+      readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    fireIntersect(25); // visible
+    clock.tick(1);
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+  });
+
+  it('should wait for readyReportPromise, missing readyPromise', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {}, null, () =>
+      readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    fireIntersect(25); // visible
+    clock.tick(1);
+
+    clock.tick(1);
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+  });
+
+  it('should wait for readyPromise', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {}, readyPromise, () =>
+      readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    fireIntersect(25); // visible
+    clock.tick(1);
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyResolver();
+    await Promise.resolve();
+    // Wait for the micro task clear again to queue after handling the ready
+    // promise.
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+  });
+
   it('should execute "visible" trigger with percent range', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);

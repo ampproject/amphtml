@@ -51,16 +51,12 @@ export class VisibilityModel {
       this.spec_['visiblePercentageMax'] = 0;
     }
 
-    /** @private @const {boolean} */
-    this.accumulateCounters_ = spec['reportWhen'] !== undefined;
-
     /**
-     * Allow zero visible time on screen when explicitly provided and when the
-     * ping is deferred to some other event.
+     * Accumulate visibility counters but do not fire the trigger until the
+     * ready promise resolves.
      * @private @const {boolean}
      */
-    this.forceReport_ =
-        spec['forceReport'] === true && this.accumulateCounters_;
+    this.accumulateCounters_ = spec['reportWhen'] !== undefined;
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -86,15 +82,14 @@ export class VisibilityModel {
     /** @const @private {time} */
     this.createdTime_ = Date.now();
 
+    // TODO(warrengm): Consider refactoring so that the ready defaults are
+    // false.
+
     /** @private {boolean} */
     this.ready_ = true;
 
-    // NOTE: there is a race condition where amp-analytics will set the ping
-    // without waiting on reportWhen (1) if update is called before
-    // setReportReady and (2) the visibilitySpec conditions are met. To fix
-    // this, we initialize reportReady_ to false here.
     /** @private {boolean} */
-    this.reportReady_ = !this.accumulateCounters_;
+    this.reportReady_ = true;
 
     /** @private {?function():!Promise} */
     this.createReportReadyPromise_ = null;
@@ -312,7 +307,11 @@ export class VisibilityModel {
     if (!this.eventResolver_) {
       return;
     }
-    const conditionsMet = this.updateCounters_(visibility) || this.forceReport_;
+
+    // When accumulateCounters_ is true, we update counters but fire the event
+    // when the ready promise is resolved.
+    const conditionsMet =
+        this.updateCounters_(visibility) || this.accumulateCounters_;
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);

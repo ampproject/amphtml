@@ -494,33 +494,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
         });
       });
 
-      describe('with forceReport', () => {
+      describe('with reportWhen', () => {
         beforeEach(() => {
           visibilityValueForTesting = 0;
         });
 
-        it('should not trigger event immediately when conditions are met',
-            async() => {
-              const vh = new VisibilityModel({
-                reportWhen: 'documentExit',
-                forceReport: true,
-                minVisiblePercentage: 0,
-              }, () => visibilityValueForTesting);
-              vh.setReady(true);
-
-              vh.update();
-              await tick();
-
-              visibilityValueForTesting = 0.5;
-              vh.update();
-              await tick();
-
-              expect(eventSpy).to.not.be.called;
-            });
-
         const shouldTriggerEventTestSpecs = [
-          {reportWhen: 'documentExit', forceReport: true},
-          {reportWhen: 'documentExit', forceReport: true, totalTimeMin: 100000,
+          {reportWhen: 'documentExit'},
+          {reportWhen: 'documentExit', totalTimeMin: 100000,
             visiblePercentageMin: 50},
         ];
 
@@ -530,9 +511,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
             const vh = new VisibilityModel(
                 shouldTriggerEventTestSpecs[i], () => 0);
 
-            vh.setReady(true);
             vh.onTriggerEvent(eventSpy);
+            // TODO(warrengm): Inverting the two following lines will break this
+            // test. Consider updating the API to make it safer.
             vh.setReportReady(() => reportPromise);
+            vh.setReady(true);
 
             vh.update();
             await tick();
@@ -548,50 +531,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
             expect(eventSpy).to.be.calledOnce;
           });
         }
-
-        const shouldNotTriggerWhenHiddenTestCases = [
-          {
-            description: 'forceReport is undefined',
-            spec: {reportWhen: 'documentExit'},
-          },
-          {
-            description: 'forceReport = false',
-            spec: {reportWhen: 'documentExit', forceReport: false},
-          },
-          {
-            description: 'forceReport = 1 (not a boolean)',
-            spec: {reportWhen: 'documentExit', forceReport: 1},
-          },
-          {
-            description: 'forceReport = "true" (not a boolean)',
-            spec: {reportWhen: 'documentExit', forceReport: 'true'},
-          },
-          {
-            description: 'Missing reportWhen',
-            spec: {forceReport: true},
-          },
-        ];
-
-        for (const i in shouldNotTriggerWhenHiddenTestCases) {
-          const {description, spec} = shouldNotTriggerWhenHiddenTestCases[i];
-
-          it('should not trigger event, ' +
-            `test case ${description}`, async() => {
-            const vh = new VisibilityModel(spec, () => 0);
-            vh.setReady(true);
-            vh.onTriggerEvent(eventSpy);
-            vh.setReportReady(() => reportPromise);
-
-            vh.update();
-            await tick();
-            expect(eventSpy).to.not.be.called;
-
-            promiseResolver.resolve();
-            await tick();
-            expect(eventSpy).to.not.be.called;
-          });
-        }
-
       });
     });
 
