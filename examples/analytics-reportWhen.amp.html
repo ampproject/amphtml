@@ -58,29 +58,15 @@
         "reportWhen": "documentExit"
       }
     },
-    "any_visible_time": {
-      "on": "visible",
-      "request": ["endpoint"],
-      "selector": "#target",
-      "visibilitySpec": {
-        "reportWhen": "documentExit",
-        "forceReport": true
-      },
-      "extraUrlParams": {
-        "forceReport": true
-      }
-    },
     "50pct_visible_time": {
       "on": "visible",
       "request": ["endpoint"],
       "selector": "#target",
       "visibilitySpec": {
         "reportWhen": "documentExit",
-        "visiblePercentageMin": 50,
-        "forceReport": true
+        "visiblePercentageMin": 50
       },
       "extraUrlParams": {
-        "forceReport": true,
         "50PctMin": true
       }
     }
