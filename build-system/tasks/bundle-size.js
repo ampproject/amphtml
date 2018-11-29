@@ -112,8 +112,8 @@ function storeBundleSize() {
       message: `bundle-size: ${commitHash} (${bundleSize})`,
       content: Buffer.from(bundleSize).toString('base64'),
     })).then(() => {
-      log('Stored the new bundle size of', cyan(bundleSize), 'in the ',
-          'artifacts repository on GitHub');
+      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
+          'repository on GitHub');
     }).catch(error => {
       log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
           red('the build artifacts repository on GitHub!'));
