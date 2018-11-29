@@ -765,7 +765,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   });
 
   describe('sendErrorMessage', () => {
-    let imageStub, requestUrl, ampDoc;
+    let imageStub, requestUrl;
     let errorType, errorReportingUrl;
     let imageMock;
 
@@ -776,7 +776,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       sandbox.stub(Xhr.prototype, 'fetch');
       imageMock = {};
       imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
-      ampDoc = a4aElement.getAmpDoc();
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
@@ -785,12 +784,12 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         ERROR_TYPE: errorType,
         HREF: env.win.location.href,
       };
-      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+      requestUrl = Services.urlReplacementsForDoc(a4aElement).expandUrlSync(
           errorReportingUrl, macros, whitelist);
     });
 
     it('should send error message pingback to correct url', () => {
-      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      sendErrorMessage(errorType, errorReportingUrl);
       expect(imageStub).to.be.calledOnce;
       expect(imageMock.src).to.equal(requestUrl);
     });

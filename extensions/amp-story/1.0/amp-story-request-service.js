@@ -89,7 +89,7 @@ export class AmpStoryRequestService {
       return Promise.resolve(null);
     }
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
+    return Services.urlReplacementsForDoc(this.storyElement_)
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => this.xhr_.fetchJson(url, opts))
         .then(response => {

@@ -106,14 +106,8 @@ export class AccessSource {
     /** @const {!AccessTypeAdapterDef} */
     this.adapter_ = this.createAdapter_(configJson);
 
-    /** @const @private {!string} */
-    this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
-
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(accessElement);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
