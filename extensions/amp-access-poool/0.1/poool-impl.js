@@ -181,7 +181,7 @@ export class PooolVendor {
             ? this.pooolConfig_['debug']
             : getMode().development || getMode().localDev,
           'fw': this.pooolConfig_['forceWidget'],
-          'cs': this.pooolConfig_['customSegment']
+          'cs': this.pooolConfig_['customSegment'],
         })),
         false);
 
