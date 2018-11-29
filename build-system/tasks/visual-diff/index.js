@@ -630,7 +630,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
+      {'stdio': 'ignore'});
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;
