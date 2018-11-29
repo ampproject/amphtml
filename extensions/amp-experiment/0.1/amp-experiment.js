@@ -81,10 +81,10 @@ export class AmpExperiment extends AMP.BaseElement {
    */
   addToBody_(experiments) {
     const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(() => {
+    return doc.whenBodyAvailable().then(body => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.getBody().setAttribute(ATTR_PREFIX + name,
+          body.setAttribute(ATTR_PREFIX + name,
               dev().assertString(experiments[name]));
         }
       }
