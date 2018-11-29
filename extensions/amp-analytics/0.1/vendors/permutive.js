@@ -39,7 +39,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       'on': 'visible',
       'request': 'pageview',
     },
-    'duration': {
+    'trackEngagement': {
       'on': 'visible',
       'timerSpec': {
         'interval': 5,
@@ -48,7 +48,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       },
       'request': 'engagement',
     },
-    'scrollPings': {
+    'trackCompletion': {
       'on': 'scroll',
       'scrollSpec': {
         'verticalBoundaries': [25, 50, 75, 100],
