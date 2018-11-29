@@ -36,7 +36,7 @@ describes.realWin('amp-action-macro', {
     toggleExperiment(win, 'amp-action-macro', true);
   });
 
-  function newActionMacro(type) {
+  function newActionMacro() {
     const actionMacro = doc.createElement('amp-action-macro');
     doc.body.appendChild(actionMacro);
     return actionMacro.build().then(() => {
@@ -47,9 +47,9 @@ describes.realWin('amp-action-macro', {
   it('should  build if experiment is on', done => {
     newActionMacro().then(() => {
       done();
-    }, err => {
+    }, unused => {
       done(new Error('component should have built'));
-    })
+    });
   });
 
   it('should not build if experiment is off', () => {
