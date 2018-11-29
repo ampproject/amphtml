@@ -193,6 +193,7 @@ module.exports = {
                 return '%s';
               });
 
+              message = message.replace(/'/g, '\\\'');
               return fixer.replaceTextRange(
                   [argToEval.start, node.end - 1],
                   `'${message}', ${args.join(', ')}`
