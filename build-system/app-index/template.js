@@ -49,6 +49,10 @@ const headerLinks = [
     'href': 'https://github.com/ampproject/amphtml/',
   },
   {
+    'name': 'Find File',
+    'href': 'https://github.com/ampproject/amphtml/find/master'
+  },
+  {
     'name': 'Travis',
     'href': 'https://travis-ci.org/ampproject/amphtml',
   },
@@ -111,11 +115,10 @@ const BasePathSearch = (basepath) => html`
         }
       </script>
     </amp-state>
-    <input type="text" on="change:AMP.setState({basePathSearch: {listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value}})"></input>
-    <button
-      class="find-icon icon">
-      Find file
-    </button>
+    <input type="text"
+      placeholder="Fuzzy Find in File List"
+      on="input-debounced:AMP.setState({basePathSearch: {listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value}})">
+    </input>
   `;
 
 
@@ -175,17 +178,26 @@ const FileListItem = ({name, href, selectModePrefix}) => {
 
 
 const FileList = (basepath) => html`
-  <amp-list [src]="basePathSearch.listSrc" src="/dashboard/api/listing?path=${basepath}" items="." layout="responsive" width="100px" height="100px" class="file-list">
+  <amp-list [src]="basePathSearch.listSrc"
+    src="/dashboard/api/listing?path=${basepath}"
+    items="."
+    layout="responsive"
+    width="100px"
+    height="100px"
+    class="file-list">
+
     <div placeholder>Loading...</div>
     <div fallback>Failed to load data.</div>
+
     <template type="amp-mustache">
-      <div>
+      <div class="file-link-container">
         <a class="file-link"
           [href]="documentMode.selectModePrefix + '${basepath.substring(1)}{{.}}'">
           {{.}}
         </a>
       </div>
     </template>
+
   </amp-list>
   `;
 
