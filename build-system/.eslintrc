@@ -11,6 +11,7 @@
     "amphtml-internal/no-array-destructuring": 0,
     "amphtml-internal/no-for-of-statement": 0,
     "amphtml-internal/no-has-own-property-method": 0,
+    "amphtml-internal/no-module-exports": 0,
     "amphtml-internal/no-spread": 0,
     "require-jsdoc": 0
   }
