@@ -565,36 +565,33 @@ async function runTests() {
     log(
         red('ERROR:'),
         yellow('Karma test failed with exit code ' + processExitCode));
-    process.exitCode = 1;
+    process.exitCode = processExitCode;
   }
 
   /**
    * Runs tests in batches
-   * @return {string} processExitCode
+   * @return {number} processExitCode
    */
   async function runTestInBatches() {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
-    let processExitCode = 0;
+    const batchExitCodes = [];
 
-    log(green('Testing on ' + saucelabsBrowsers.length +
-      ' Sauce Lab browsers in total'));
+    log(green('Running tests on ' + saucelabsBrowsers.length +
+      ' Sauce Lab browser(s) in total...'));
     while (startIndex < endIndex) {
       const configBatch = Object.assign({}, c);
       configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
       log(green('Batch #' + batch + ': Running tests on ' +
         configBatch.browsers.length + ' Sauce Labs browser(s)...'));
-      const batchExitCode = await createKarmaServer(configBatch);
-      if (batchExitCode && processExitCode == 0) {
-        processExitCode = batchExitCode;
-      }
+      batchExitCodes.push(await createKarmaServer(configBatch));
       startIndex = batch * batchSize;
       batch++;
       endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
 
-    return processExitCode;
+    return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
   }
 
   /**
@@ -644,7 +641,6 @@ async function runTests() {
       // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
       if (process.env.TRAVIS) {
         setTimeout(() => {
-          log(green('Process timed out'));
           process.exit(exitCode);
         }, 5000);
       }
