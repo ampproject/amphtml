@@ -74,12 +74,22 @@ async function getMaxBundleSize() {
 }
 
 /**
- * Get the bundle size of the current build.
+ * Get the gzipped bundle size of the current build.
  *
- * @return {number} the bundle size in KB rounded to 2 decimal points;
+ * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
-function getBundleSize() {
-  return Math.round((fs.statSync(runtimeFile).size / 1024) * 1e2) / 1e2;
+function getGzippedBundleSize() {
+  const cmd = `npx bundlesize -f "${runtimeFile}"`;
+  log('Running', cyan(cmd) + '...');
+  const output = getStdout(cmd).trim();
+
+  const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
+  if (bundleSizeOutputMatches) {
+    const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
+    log('Bundle size is', cyan(`${bundleSize}KB`));
+    return bundleSize;
+  }
+  throw Error('could not infer bundle size from output.');
 }
 
 /**
@@ -147,7 +157,7 @@ function storeBundleSize() {
     return;
   }
 
-  const bundleSize = `${getBundleSize().toFixed(2)}KB`;
+  const bundleSize = `${getGzippedBundleSize()}KB`;
   const commitHash = gitCommitHash();
   const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
     path: path.join('bundle-size', commitHash),
@@ -166,8 +176,8 @@ function storeBundleSize() {
       message: `bundle-size: ${commitHash} (${bundleSize})`,
       content: Buffer.from(bundleSize).toString('base64'),
     })).then(() => {
-      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
-          'repository on GitHub');
+      log('Stored the new bundle size of', cyan(bundleSize), 'in the ',
+          'artifacts repository on GitHub');
     }).catch(error => {
       log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
           red('the build artifacts repository on GitHub!'));
@@ -309,7 +319,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequest()) {
-    const bundleSize = getBundleSize();
+    const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
