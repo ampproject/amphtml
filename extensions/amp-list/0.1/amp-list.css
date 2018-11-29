@@ -1,0 +1,24 @@
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the resizable-children attribute, the
+ * loader should be fully hidden and not take up space.
+ */
+amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
+}
+
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button]{
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible,
+amp-list[load-more] > [load-more-button].amp-visible {
+  visibility: visible;
+}
