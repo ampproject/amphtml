@@ -17,7 +17,7 @@
 export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'eventValue': '0',
-    'documentPath: '${canonicalPath}',
+    'documentPath': '${canonicalPath}',
     'documentLocation': 'SOURCE_URL',
     'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE,,_ga)',
     'dataSource': 'AMP',
