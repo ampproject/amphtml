@@ -120,21 +120,23 @@ export function getExistingServiceForDocInEmbedScope(
       /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
     return getServiceForDoc(ampdoc, id);
   }
-  // Now nodeOrDoc must be a node.
-  // First, try to resolve via local embed window.
+  // Now, nodeOrDoc must be a node.
   const document =
     /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc);
   const win = toWin(document.defaultView);
-  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-  if (local) {
-    return local;
-  }
-  // Next, node is embedded AND fallback is not allowed, return null.
-  // Otherwise, resolve via ampdoc.
+  // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != getTopWindow(win);
-  if (isEmbed && !opt_fallbackToTopWin) {
-    return null;
+  if (isEmbed) {
+    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
+    if (local) {
+      return local;
+    }
+    // Don't continue if fallback is not allowed.
+    if (!opt_fallbackToTopWin) {
+      return null;
+    }
   }
+  // If not node is not embedded, resolve via ampdoc.
   return getServiceForDocOrNullInternal(nodeOrDoc, id);
 }
 
