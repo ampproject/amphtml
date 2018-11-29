@@ -76,16 +76,18 @@ async function getMaxBundleSize() {
 /**
  * Get the gzipped bundle size of the current build.
  *
- * @return {number} the bundle size in KB rounded to 2 decimal points;
+ * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
 function getGzippedBundleSize() {
   const cmd = `npx bundlesize -f "${runtimeFile}"`;
-  log('Running ' + cyan(cmd) + '...');
+  log('Running', cyan(cmd) + '...');
   const output = getStdout(cmd).trim();
 
   const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
   if (bundleSizeOutputMatches) {
-    return parseFloat(bundleSizeOutputMatches[1]);
+    const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
+    log('Bundle size is', cyan(`${bundleSize}KB`));
+    return bundleSize;
   }
   throw Error('could not infer bundle size from output.');
 }
@@ -155,7 +157,7 @@ function storeBundleSize() {
     return;
   }
 
-  const bundleSize = `${getGzippedBundleSize().toFixed(2)}KB`;
+  const bundleSize = `${getGzippedBundleSize()}KB`;
   const commitHash = gitCommitHash();
   const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
     path: path.join('bundle-size', commitHash),
@@ -317,7 +319,7 @@ async function skipBundleSize() {
  */
 async function reportBundleSize() {
   if (isPullRequest()) {
-    const bundleSize = getGzippedBundleSize();
+    const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
