@@ -343,7 +343,6 @@ async function performBundleSizeCheck() {
   } else {
     if (argv.on_push_build) {
       await storeBundleSize();
-      await reportBundleSize();
     } else if (argv.on_pr_build) {
       await reportBundleSize();
     }
