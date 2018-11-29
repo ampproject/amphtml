@@ -746,7 +746,8 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
+    const initialPageId = this.getHistoryState_(HistoryStates.PAGE_ID) ||
+        firstPageEl.id;
 
     this.initializeSidebar_();
     this.setThemeColor_();
@@ -765,15 +766,17 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.initializeBookend_())
         .then(() => {
-          const bookendActive =
+          const bookendInHistory =
               !!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE);
-          return this.hasBookend_().then(hasBookend => {
-            if (hasBookend && bookendActive) {
-              // Ensure that when bookend is built in the switchTo_ call below,
-              // it will skip the opening animation.
-              this.openedBookend_ = true;
-            }
-          });
+          if (bookendInHistory) {
+            return this.hasBookend_().then(hasBookend => {
+              if (hasBookend) {
+                // Ensure that when bookend is built in the switchTo_ call
+                // below, it will skip the opening animation.
+                this.openedBookend_ = true;
+              }
+            });
+          }
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => {
@@ -1289,15 +1292,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    * */
   onCurrentPageIdUpdate_(pageId) {
-    this.setHistoryStatePageId_(pageId);
-  }
-
-  /**
-   * Save page id using history API.
-   * @param {string} pageId page id to be saved
-   * @private
-   */
-  setHistoryStatePageId_(pageId) {
     // Never save ad pages to history as they are unique to each visit.
     const page = this.getPageById(pageId);
     if (page.isAd()) {
@@ -1305,15 +1299,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.updateHistoryState_(HistoryStates.PAGE_ID, pageId);
-  }
-
-  /**
-   * @private
-   * @return {?string}
-   */
-  getHistoryStatePageId_() {
-    const state = getState(this.win.history);
-    return state ? state.ampStoryPageId : null;
   }
 
   /**
@@ -1663,18 +1648,8 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-    this.setHistoryBookendState_(isActive);
-  }
-
-  /**
-   * Save bookend state using history API.
-   * @param {boolean} isActive state of the bookend
-   * @private
-   */
-  setHistoryBookendState_(isActive) {
     this.updateHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
   }
-
 
   /**
    * Updates the value for a given state in the window history.
