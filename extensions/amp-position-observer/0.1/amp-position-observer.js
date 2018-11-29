@@ -190,11 +190,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       'bottom-margin': this.resolvedBottomMargin_,
     };
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
-    if (this.useAnimationWorklet_ &&
-        !this.action_.hasAction(this.element, 'enter') &&
-        !this.action_.hasAction(this.element, 'exit')) {
-      this.maybeUninstallPositionObserver_();
-    }
+    // TODO(nainar): We want to remove the position observer if the scroll
+    // event is only used by the AnimationWorklet codepath of amp-animation.
+    // This involves having amp-animation signal back to amp-position-observer
+    // that it is using AnimationWorklet AND amp-position-observer needs to
+    // ensure nothing else other than amp-animation is using scroll AND
+    // that `enter` and `exit` events are not used.
   }
 
   /**
@@ -242,9 +243,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
-      if (!this.useAnimationWorklet_) {
-        this.triggerScroll_();
-      }
+      this.triggerScroll_();
       this.triggerExit_();
       this.firstIterationComplete_ = true;
     }
@@ -256,9 +255,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send scroll progress if visible.
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
-      if (!this.useAnimationWorklet_) {
-        this.triggerScroll_();
-      }
+      this.triggerScroll_();
     }
   }
 
