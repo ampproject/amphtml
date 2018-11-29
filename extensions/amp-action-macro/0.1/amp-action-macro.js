@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 import {LayoutPriority} from '../../../src/layout';
+
 /**
 * The <amp-action-macro> element is used to define a reusable action macro.
 */
 export class AmpActionMacro extends AMP.BaseElement {
- /** @override */
- getLayoutPriority() {
-   // Loads after other content.
-   return LayoutPriority.METADATA;
- }
+
   /** @override */
- isAlwaysFixed() {
-   return true;
- }
+  getLayoutPriority() {
+    // Loads after other content.
+    return LayoutPriority.METADATA;
+  }
+
   /** @override */
- isLayoutSupported(unusedLayout) {
-   return true;
- }
+  isAlwaysFixed() {
+    return true;
+  }
+
   /** @override */
- renderOutsideViewport() {
-   // We want the macro to be available wherever it is in the document.
-   return true;
- }
+  isLayoutSupported(unusedLayout) {
+    return true;
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    // We want the macro to be available wherever it is in the document.
+    return true;
+  }
 }
