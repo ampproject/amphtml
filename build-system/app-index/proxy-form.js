@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const html = require('./html');
+/* eslint-disable amphtml-internal/html-template */
 
-module.exports = () => html`
-  <div class="block">
+const documentModes = require('./document-modes');
+const html = require('./html');
+const {KeyValueOptions} = require('./form');
+
+
+module.exports = () => html`<div class="block">
     <form id="proxy-form" action="/proxy" target="_top">
       <label for="proxy-input">
         <span>Load URL by Proxy</span>
+        <select name="mode">
+          ${KeyValueOptions(documentModes)}
+        </select>
         <input type="text"
           class="text-input"
           id="proxy-input"

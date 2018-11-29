@@ -49,8 +49,11 @@ body.scroll-locked {
 }
 #proxy-form > label > span {
   display: block;
-  padding-right: 20px;
+  margin-right: 20px;
   font-weight: bold;
+}
+#proxy-form > label > select {
+  margin-right: 20px;
 }
 #proxy-input {
   display: block;
