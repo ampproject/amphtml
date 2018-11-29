@@ -546,11 +546,6 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'video-docking.css',
-    outJs: 'video-docking.css.js',
-    outCss: 'video-docking.css',
-  },
-  {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
     outCss: 'video-autoplay.css',

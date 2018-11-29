@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {
   PlayingStates,
   VideoAttributes,
@@ -41,8 +42,6 @@ import {
   listenOnce,
   listenOncePromise,
 } from '../../../src/event-helper';
-// Source for this constant is css/video-docking.css:
-import {cssText} from '../../../build/video-docking.css.js';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
@@ -570,7 +569,7 @@ export class VideoDocking {
   installStyles_() {
     installStylesForDoc(
         this.ampdoc_,
-        cssText,
+        CSS,
         /* callback */ null,
         /* opt_isRuntimeCss */ false,
         /* opt_ext */ 'amp-video-docking');
