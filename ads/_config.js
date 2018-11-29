@@ -202,10 +202,6 @@ export const adConfig = {
     ],
   },
 
-  'baidu': {
-    prefetch: 'https://dup.baidustatic.com/js/dm.js',
-  },
-
   'adthrive': {
     prefetch: [
       'https://www.googletagservices.com/tag/js/gpt.js',
@@ -1075,6 +1071,11 @@ export const adConfig = {
       'https://k.zucks.net',
       'https://static.zucks.net.zimg.jp',
     ],
+  },
+
+  'baidu': {
+    prefetch: 'https://dup.baidustatic.com/js/dm.js',
+    renderStartImplemented: true,
   },
 
 };

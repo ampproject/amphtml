@@ -39,5 +39,14 @@ export function baidu(global, data) {
     async: true,
   });
 
-  loadScript(global, 'https://dup.baidustatic.com/js/dm.js');
+  loadScript(
+      global,
+      'https://dup.baidustatic.com/js/dm.js',
+      () => {
+        global.context.renderStart();
+      },
+      () => {
+        global.context.noContentAvailable();
+      },
+  );
 }
