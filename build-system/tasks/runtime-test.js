@@ -558,6 +558,14 @@ async function runTests() {
     processExitCode = await createKarmaServer(c);
   }
 
+  // Exit tests
+  // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+  if (process.env.TRAVIS) {
+    setTimeout(() => {
+      process.exit(processExitCode);
+    }, 5000);
+  }
+
   server.emit('kill');
   exitCtrlcHandler(handlerProcess);
 
@@ -637,12 +645,6 @@ async function runTests() {
               cyan(coverageReportUrl));
           opn(coverageReportUrl, {wait: false});
         }
-      }
-      // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-      if (process.env.TRAVIS) {
-        setTimeout(() => {
-          process.exit(exitCode);
-        }, 5000);
       }
       resolver(exitCode);
     }).on('run_start', function() {
