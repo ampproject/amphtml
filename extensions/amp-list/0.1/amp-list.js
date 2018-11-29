@@ -726,6 +726,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element|null}
    * @private
    */
   getLoadMoreLoadingElement_() {
@@ -737,6 +738,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element}
    * @private
    */
   getLoadMoreLoadingOverlay_() {
@@ -767,9 +769,6 @@ export class AmpList extends AMP.BaseElement {
       } else if (this.loadMoreButton_) {
         this.loadMoreButton_.classList.toggle('amp-load-more-loading', state);
         this.loadMoreLoadingOverlay_.classList.toggle('amp-active', !state);
-        if (this.loadMoreFailedElement_) {
-          this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
-        }
       }
     });
   }
@@ -796,6 +795,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element|null}
    * @private
    */
   getLoadMoreFailedElement_() {
@@ -806,7 +806,10 @@ export class AmpList extends AMP.BaseElement {
     return this.loadMoreFailedElement_;
   }
 
-  /** @private */
+  /**
+   * @return {!Element|null}
+   * @private
+   */
   getLoadMoreEndElement_() {
     if (!this.loadMoreEndElement_) {
       this.loadMoreEndElement_ = childElementByAttr(
