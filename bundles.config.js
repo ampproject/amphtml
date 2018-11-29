@@ -398,6 +398,7 @@ exports.extensionBundles = [
   {
     name: 'amp-video-docking',
     version: '0.1',
+    options: {hasCss: true},
     type: TYPES.MEDIA,
   },
   {
