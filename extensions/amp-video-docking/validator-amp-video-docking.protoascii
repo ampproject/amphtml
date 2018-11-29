@@ -18,12 +18,15 @@ tags: {  # amp-video-docking
   attr_lists: "common-extension-attrs"
   extension_spec: {
     name: "amp-video-docking"
+    # amp-video-docking has no associated tag which indicates usage of the
+    # extension.
+    # TODO(gregable): Implement a mechanism to associate attributes (`dock`)
+    # with extension usage and then set this to GRANDFATHERED or ERROR.
     requires_usage: NONE
     version: "0.1"
     version: "latest"
   }
   html_format: AMP
-  requires_extension: "amp-video"
-  spec_name: "amp-video-docking for amp-video"
+  spec_name: "amp-video-docking"
   tag_name: "SCRIPT"
 }
