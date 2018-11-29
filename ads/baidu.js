@@ -47,6 +47,6 @@ export function baidu(global, data) {
       },
       () => {
         global.context.noContentAvailable();
-      },
+      }
   );
 }
