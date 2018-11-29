@@ -936,3 +936,12 @@ export function domOrderComparator(element1, element2) {
   // if fe2 is following or contained by fe1, then fe1 is before fe2
   return -1;
 }
+
+/**
+ * Returns true if the document is an amp-story.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isStoryDescendant(doc) {
+  return doc.body.firstElementChild.tagName === 'AMP-STORY';
+}
