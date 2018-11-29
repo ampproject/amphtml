@@ -456,13 +456,18 @@ describes.realWin('amp-list component', {
         yield list.layoutCallback();
 
         const request = sinon.match({
-          xhrUrl: 'https://data.com/list.json',
+          xhrUrl:
+              'https://data.com/list.json?__amp_source_origin=about%3Asrcdoc',
           fetchOpt: sinon.match({
+            headers: {Accept: 'application/json'},
             method: 'GET',
+            requireAmpResponseSourceOrigin: false,
+            responseType: 'application/json',
           }),
         });
         const attrs = sinon.match({
-          ampListAttributes: sinon.match({items: 'items'}),
+          ampListAttributes: sinon.match({
+            items: 'items', maxItems: null, singleItem: false}),
         });
         expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
         expect(ssrTemplateHelper.fetchAndRenderTemplate)
