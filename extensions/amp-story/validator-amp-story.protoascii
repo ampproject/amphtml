@@ -101,6 +101,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-CONSENT"
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-SIDBAR"
     child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
@@ -466,6 +467,31 @@ tags: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: { #<amp-sidebar> not in amp-story
+  html_format: AMP
+  tag_name: "AMP-SIDEBAR"
+  # There is an alternate spec for amp-sidebar in amp-story.
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "side"
+    value: "right"
+    value: "left"
+  }
+  attrs: { name: "open" }
+  attrs: { name: "toolbar" }
+  attrs: { name: "toolbar-target" }
+  amp_layout: { supported_layouts: NODISPLAY }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
+}
+tags: { #<amp-sidebar> in amp-story
+  html_format: AMP
+  tag_name: "AMP-SIDEBAR"
+  spec_name: "amp-story >> amp-sidebar"
+  requires_extension: "amp-sidebar"
+  mandatory_ancestor: "AMP-STORY"
+  amp_layout: { supported_layouts: NODISPLAY }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"
