@@ -145,13 +145,4 @@ describes.realWin('amp-experiment', {
           .to.equal(null);
     });
   });
-
-  it('should access document from ampdoc', () => {
-    addConfigElement('script');
-    const spy = sandbox.spy(experiment, 'getAmpDoc');
-    experiment.buildCallback();
-    return Services.variantForOrNull(win).then(() => {
-      expect(spy).to.be.called;
-    });
-  });
 });
