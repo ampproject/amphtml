@@ -30,7 +30,6 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {createLoaderElement} from '../../../src/loader';
@@ -38,6 +37,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
+import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
 import {
   installPositionObserverServiceForDoc,
@@ -386,7 +386,6 @@ export class AmpList extends AMP.BaseElement {
    */
   ssrTemplate_(refresh) {
     let request;
-    assertHttpsUrl(this.element.getAttribute('src'), this.element);
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
     return requestForBatchFetch(
