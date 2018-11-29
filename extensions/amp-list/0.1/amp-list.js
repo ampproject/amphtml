@@ -47,6 +47,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {
   setupAMPCors,
+  setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 
@@ -413,6 +414,8 @@ export class AmpList extends AMP.BaseElement {
         refresh).then(r => {
       request = r;
 
+      request.xhrUrl =
+         setupInput(this.win, request.xhrUrl, request.fetchOpt);
       request.fetchOpt = setupAMPCors(
           this.win, request.xhrUrl, request.fetchOpt);
       setupJsonFetchInit(r.fetchOpt);
