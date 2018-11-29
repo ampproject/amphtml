@@ -51,6 +51,10 @@ function isBinaryConcat(node) {
   return node.type === 'BinaryExpression' && node.operator === '+'
 }
 
+/**
+ * @param {!Node} node
+ * @return {boolean}
+ */
 function isLiteralString(node) {
   return node.type === 'Literal' && typeof node.value === 'string';
 }
