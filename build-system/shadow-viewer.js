@@ -153,7 +153,7 @@ const renderShadowViewer = ({src, baseHref}) => html`<!doctype html>
       ${SCRIPT}
     </script>
   </head>
-  <body>
+  <body style="padding: 0; margin: 0">
     <amp-viewer src="http://localhost:8000/${src}"></amp-viewer>
   </body>
 </html>`;
