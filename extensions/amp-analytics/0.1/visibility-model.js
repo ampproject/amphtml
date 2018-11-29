@@ -56,7 +56,7 @@ export class VisibilityModel {
      * ready promise resolves.
      * @private @const {boolean}
      */
-    this.accumulateCounters_ = spec['reportWhen'] !== undefined;
+    this.ignoreVisibilityForReport_ = spec['reportWhen'] !== undefined;
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -308,10 +308,10 @@ export class VisibilityModel {
       return;
     }
 
-    // When accumulateCounters_ is true, we update counters but fire the event
-    // when the ready promise is resolved.
+    // When ignoreVisibilityForReport_ is true, we update counters but fire the
+    // event when the report ready promise is resolved.
     const conditionsMet =
-        this.updateCounters_(visibility) || this.accumulateCounters_;
+        this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Deferred} from '../../../../src/utils/promise';
 import {VisibilityModel} from '../visibility-model';
 
 const NO_SPEC = {};
@@ -463,9 +462,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
       let reportPromise;
       let promiseResolver;
       beforeEach(() => {
-        promiseResolver = new Deferred();
-        vh.setReportReady(() => promiseResolver.promise);
-        reportPromise = promiseResolver.promise;
+        reportPromise = new Promise(resolve => {
+          promiseResolver = resolve;
+        });
+        vh.setReportReady(() => reportPromise);
       });
 
       it('conditions met, send when report ready', () => {
@@ -474,7 +474,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         clock.tick(20);
         vh.update();
         expect(eventSpy).to.not.be.called;
-        promiseResolver.resolve();
+        promiseResolver();
         return reportPromise.then(() => {
           expect(eventSpy).to.be.calledOnce;
         });
@@ -488,7 +488,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         eventSpy.resetHistory();
         expect(eventSpy).to.not.be.called;
         clock.tick(1001);
-        promiseResolver.resolve();
+        promiseResolver();
         return reportPromise.then(() => {
           expect(eventSpy).to.not.be.called;
         });
@@ -501,12 +501,13 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
         const shouldTriggerEventTestSpecs = [
           {reportWhen: 'documentExit'},
+          {reportWhen: 'documentHidden'},
           {reportWhen: 'documentExit', totalTimeMin: 100000,
             visiblePercentageMin: 50},
         ];
 
         for (const i in shouldTriggerEventTestSpecs) {
-          it('should trigger event with forceReport,' +
+          it('should trigger event with reportWhen,' +
               `test case #${i}`, async() => {
             const vh = new VisibilityModel(
                 shouldTriggerEventTestSpecs[i], () => 0);
@@ -521,7 +522,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
             await tick();
             expect(eventSpy).to.not.be.called;
 
-            promiseResolver.resolve();
+            promiseResolver();
             await tick();
             expect(eventSpy).to.be.calledOnce;
 
