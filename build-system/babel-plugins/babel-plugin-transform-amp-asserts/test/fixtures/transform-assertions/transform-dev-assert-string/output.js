@@ -20,4 +20,4 @@ let result =
 /** @type {string} */
 ('world');
 let result2 = undefined;
-let result3 = null;
+let result3 = dev().assertString(null);

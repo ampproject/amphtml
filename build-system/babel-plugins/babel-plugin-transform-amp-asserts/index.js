@@ -28,7 +28,7 @@ const typeMap = {
   'assertString': 'string',
   'assertNumber': 'number',
   'assertBoolean': 'boolean',
-}
+};
 
 const removableDevAsserts = [
   'assert',
@@ -83,12 +83,12 @@ module.exports = function(babel) {
           // If it has no type that we can cast to, then we also won't need to
           // do type annotation.
           } else if (!/^assert/.test(property.name) || !type) {
-              path.replaceWith(args);
+            path.replaceWith(args);
           } else {
             // Special case null value argument since it's mostly used for
             // interface methods with no implementation which will most likely
             // get DCE'd by Closure Compiler since they are unused code methods.
-            if (args.value === "null" || args.type === "NullLiteral") {
+            if (args.type === 'NullLiteral') {
               return;
             } else {
               path.replaceWith(t.parenthesizedExpression(args));
