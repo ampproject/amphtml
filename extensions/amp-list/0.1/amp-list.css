@@ -13,12 +13,15 @@ amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
 
 amp-list[load-more] > [load-more-loading],
 amp-list[load-more] > [load-more-failed],
-amp-list[load-more] > [load-more-button]{
+amp-list[load-more] > [load-more-button],
+amp-list[load-more] > [load-more-end],
+{
   visibility: hidden;
 }
 
 amp-list[load-more] > [load-more-loading].amp-visible,
 amp-list[load-more] > [load-more-failed].amp-visible,
-amp-list[load-more] > [load-more-button].amp-visible {
+amp-list[load-more] > [load-more-button].amp-visible,
+amp-list[load-more] > [load-more-end].amp-visible {
   visibility: visible;
 }
