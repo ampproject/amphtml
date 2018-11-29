@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 
-import {Layout} from '../../../src/layout';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
@@ -23,9 +22,7 @@ import {
   VideoInterface,
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {VisibilityState} from '../../../src/visibility-state';
 import {htmlFor} from '../../../src/static-template';
-import {listen} from '../../../src/event-helper';
 import {
   setInitialDisplay,
   setStyles,
@@ -41,6 +38,9 @@ import {
   isFullscreenElement,
 } from '../../../src/dom';
 
+import {isLayoutSizeDefined} from '../../../src/layout';
+
+/** @implements {../../../src/video-interface.VideoInterface} */
 export class AmpWpmPlayer extends AMP.BaseElement {
 
   /**
@@ -71,6 +71,85 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @description Method that parses attributes,
+   * and ensures that all of the required parameters are present
+   * @function
+   * @private
+   *
+   * @return {Object}
+   */
+  parseOptions_() {
+    const output = {};
+    output.ampnoaudio = true;
+    output.ampcontrols = true;
+    output.target = 'playerTarget';
+    output.autoplay = this.parseAttribute_('autoplay', false, true);
+    output.adv = this.parseAttribute_('adv', false, true);
+    output.url = this.parseAttribute_('url', true);
+    output.title = this.parseAttribute_('title');
+    output.floatingplayer = this.parseAttribute_( // TODO: to wgl będzie obsługiwane?
+        'floatingplayer',
+        false,
+        true);
+    output.clip = this.parseAttribute_('clip');
+    output.forcerelated = this.parseAttribute_('forcerelated');
+    output.forceliteembed = this.parseAttribute_(
+        'forceliteembed',
+        false,
+        true);
+    output.forceautoplay = this.parseAttribute_(
+        'forceautoplay',
+        false,
+        false);
+    output.forcesound = this.parseAttribute_('forcesound', false, false);
+    output.hiderelated = this.parseAttribute_(
+        'hiderelated',
+        false,
+        false);
+    output.hideendscreen = this.parseAttribute_(
+        'hideendscreen',
+        false,
+        false);
+    output.mediaEmbed = this.parseAttribute_(
+        'mediaEmbed',
+        false,
+        'portalowy');
+    output.extendedrelated = this.parseAttribute_(
+        'extendedrelated',
+        false,
+        true);
+    output.skin = this.parseAttribute_('skin', false, null);
+    output.showlogo = this.parseAttribute_('showlogo', false, true);
+    output.watermark = this.parseAttribute_('watermark', false, false);
+    output.getAppUserInfo = this.parseAttribute_(
+        'getAppUserInfo',
+        false,
+        function() {});
+    output.qoeEventsConfig = this.parseAttribute_(
+        'qoeEventsConfig',
+        false,
+        null);
+    output.advVastDuration = this.parseAttribute_(
+        'advVastDuration',
+        false,
+        2);
+    output.vastTag = this.parseAttribute_('vastTag', false, null);
+    output.embedTrackings = this.parseAttribute_(
+        'embedTrackings',
+        false,
+        null);
+    output.destroyAfterAd = this.parseAttribute_('destroyAfterAd',
+        false,
+        false);
+    output.forceUrl4stat = this.parseAttribute_(
+        'forceUrl4stat',
+        false,
+        null);
+
+    return output;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -79,79 +158,37 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.container_ = null;
     this.element = element;
 
-    this.iframeUrl_ = 'http://localhost:8080/frame.html?wpplayer=ampnoaudio';
+    this.iframeUrl_ = 'https://std.wpcdn.pl/mbartoszewicz/frame.html?wpplayer=mobile-autoplay&disabledLiteEmbed=1&ampnoaudio=1&_aa=0';
     this.iframe_ = null;
 
-    this.options = {};
+    this.options = this.parseOptions_();
     this.toSend_ = [];
     this.playerReady_ = false;
-    this.screenshot = this.parseAttribute_('screenshot');
 
-    this.options.target = 'playerTarget';
-    this.options.autoplay = this.parseAttribute_('autoplay', false, true);
-    this.options.adv = this.parseAttribute_('adv', false, true);
     this.width = this.parseAttribute_('width', false, 'auto');
     this.height = this.parseAttribute_('height', false, 'auto');
-    this.options.url = this.parseAttribute_('url', true);
-    this.options.title = this.parseAttribute_('title');
-    this.options.floatingplayer = this.parseAttribute_(
-        'floatingplayer',
-        false,
-        true);
-    this.options.clip = this.parseAttribute_('clip');
-    this.options.forcerelated = this.parseAttribute_('forcerelated');
-    this.options.forceliteembed = this.parseAttribute_(
-        'forceliteembed',
-        false,
-        true);
-    this.options.forceautoplay = this.parseAttribute_(
-        'forceautoplay',
-        false,
-        false);
-    this.options.forcesound = this.parseAttribute_('forcesound', false, false);
-    this.options.hiderelated = this.parseAttribute_(
-        'hiderelated',
-        false,
-        false);
-    this.options.hideendscreen = this.parseAttribute_(
-        'hideendscreen',
-        false,
-        false);
-    this.options.mediaEmbed = this.parseAttribute_(
-        'mediaEmbed',
-        false,
-        'portalowy');
-    this.options.extendedrelated = this.parseAttribute_(
-        'extendedrelated',
-        false,
-        true);
-    this.options.skin = this.parseAttribute_('skin', false, null);
-    this.options.showlogo = this.parseAttribute_('showlogo', false, true);
-    this.options.watermark = this.parseAttribute_('watermark', false, false);
-    this.options.getAppUserInfo = this.parseAttribute_(
-        'getAppUserInfo',
-        false,
-        function() {});
-    this.options.qoeEventsConfig = this.parseAttribute_(
-        'qoeEventsConfig',
-        false,
-        null);
-    this.options.advVastDuration = this.parseAttribute_(
-        'advVastDuration',
-        false,
-        2);
-    this.options.vastTag = this.parseAttribute_('vastTag', false, null);
-    this.options.embedTrackings = this.parseAttribute_(
-        'embedTrackings',
-        false,
-        null);
-    this.options.destroyAfterAd = this.parseAttribute_('destroyAfterAd',
-        false,
-        false);
-    this.options.forceUrl4stat = this.parseAttribute_(
-        'forceUrl4stat',
-        false,
-        null);
+
+    if (this.options.url) {
+      this.videoId = /mid=(\d*)/g.exec(this.options.url)[1];
+    } else {
+      this.videoId = this.options.clip;
+    }
+
+    const getScreenshot = videoID => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `https://video.wp.pl/api/v1/embed/${videoID}`, false);
+      xhr.send(null);
+      if (xhr.status == 200) {
+        return JSON.parse(xhr.responseText).clip.screenshot;
+      } else {
+        return 'https://via.placeholder.com/800x500'; // TODO: uniwersalny placeholder
+      }
+    };
+
+    this.screenshot = this.parseAttribute_('screenshot');
+    if (!this.screenshot) {
+      this.screenshot = getScreenshot(this.videoId);
+    }
   }
 
   /**
@@ -205,16 +242,29 @@ export class AmpWpmPlayer extends AMP.BaseElement {
         while (that.toSend_.length) {
           that.sendCommand_(that.toSend_.shift());
         }
+
+        that.togglePlaceholder(false);
+      }
+    });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}METADATA`)) {
+        that.metadata_ = JSON.parse(data.replace(`${HEADER}METADATA`, ''));
       }
     });
 
     this.createPosterForAndroidBug_();
-    this.registerAction('asdf', () => {console.log('asdf');});
+    this.registerAction('showControls', () => {this.showControls();});
+    this.registerAction('hideControls', () => {this.hideControls();});
+    this.registerAction('getMetadata', () => {this.getMetadata();});
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    // return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
   }
 
 
@@ -238,12 +288,11 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.container_ = this.win.document.createElement('div');
 
     const iframe = this.win.document.createElement('amp-iframe');
-    // iframe.setAttribute('width', this.options.width);
-    // iframe.setAttribute('height', this.options.height);
     iframe.setAttribute('layout', 'fill');
     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     iframe.setAttribute('src', this.iframeUrl_);
     iframe.setAttribute('frameborder', 0);
+    iframe.setAttribute('allowfullscreen', true);
     // iframe.setAttribute('resizable', true);
 
     const placeholder = this.win.document.createElement('amp-img');
@@ -360,6 +409,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   */
   showControls() {
     this.sendCommand_('showControls');
+    // setTimeout(() => {this.hideControls();}, 3000);
   }
 
   /**
@@ -390,7 +440,8 @@ export class AmpWpmPlayer extends AMP.BaseElement {
 
   /** @override */
   getMetadata() {
-    this.sendCommand_('getMetadata');
+    console.log(this.metadata_);
+    return this.metadata_;
   }
 
   /** @override */
@@ -414,23 +465,11 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   * Called when video is first loaded.
   * @override
   */
-  firstLayoutCompleted() {
-    // if (!this.hideBlurryPlaceholder_()) {
-    //   this.togglePlaceholder(false);
-    // }
-  }
+  firstLayoutCompleted() {}
 }
 
-AMP.registerElement('amp-wpm-player', AmpWpmPlayer);
-//  TODO:
-/**
-  *  If this returns true then it will be assumed that the player implements
-   * a feature to enter fullscreen on device rotation internally, so that the
-   * video manager does not override it. If not, the video manager will
-   * implement this feature automatically for videos with the attribute
-   * `rotate-to-fullscreen`.
-   *
-   * @return {boolean}
-   *
-   * preimplementsAutoFullscreen
-*/
+// AMP.registerElement('amp-wpm-player', AmpWpmPlayer);
+
+AMP.extension('amp-wpm-player', '0.1', AMP => {
+  AMP.registerElement('amp-wpm-player', AmpWpmPlayer);
+});
