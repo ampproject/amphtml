@@ -22,7 +22,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viz-vega" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-action-macro" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -31,7 +31,7 @@ limitations under the License.
 </table>
  [TOC]
  ## Overview?
-The amp-action-macro component allows for the creation of reusable actions.
+The `amp-action-macro` component allows for the creation of reusable actions.
  ## Example
  ```html
 <amp-action-macro

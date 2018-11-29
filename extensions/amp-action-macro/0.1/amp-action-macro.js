@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 import {LayoutPriority} from '../../../src/layout';
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'amp-action-macro';
 
 /**
 * The <amp-action-macro> element is used to define a reusable action macro.
@@ -21,14 +26,15 @@ import {LayoutPriority} from '../../../src/layout';
 export class AmpActionMacro extends AMP.BaseElement {
 
   /** @override */
-  getLayoutPriority() {
-    // Loads after other content.
-    return LayoutPriority.METADATA;
+  buildCallback() {
+    user().assert(isExperimentOn(this.win, 'amp-action-macro'),
+        'Experiment is off');
   }
 
   /** @override */
-  isAlwaysFixed() {
-    return true;
+  getLayoutPriority() {
+    // Loads after other content.
+    return LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -42,3 +48,8 @@ export class AmpActionMacro extends AMP.BaseElement {
     return true;
   }
 }
+
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpActionMacro);
+});
