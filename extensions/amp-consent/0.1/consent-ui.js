@@ -293,7 +293,7 @@ export class ConsentUI {
      * This will avoid race conditions with the slidein transition.
      */
     this.baseInstance_.mutateElement(() => {
-      classList.remove('loading');
+      classList.remove(consentUiClasses.loading);
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
