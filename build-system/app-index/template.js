@@ -27,6 +27,7 @@ const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 const examplesDocumentModes = {
   'standard': '/',
+  'shadow': '/shadow/',
   'a4a': '/a4a/',
   'a4a-3p': '/a4a-3p/',
   'inabox': '/inabox/1/',
