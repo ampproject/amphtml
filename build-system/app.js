@@ -111,8 +111,9 @@ if (!global.AMP_TESTING) {
   });
 
   app.get('/proxy', (req, res) => {
+    const prefix = req.query.mode.replace(/\/$/, '');
     const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
-    res.redirect(`proxy/s/${sufix}`);
+    res.redirect(`${prefix}/proxy/s/${sufix}`);
   });
 }
 
