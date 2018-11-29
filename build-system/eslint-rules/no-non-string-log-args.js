@@ -47,12 +47,24 @@ const transformableMethods = [
  * @param {!Node} node
  * @return {boolean}
  */
+function isBinaryConcat(node) {
+  return node.type === 'BinaryExpression' && node.operator === '+'
+}
+
+function isLiteralString(node) {
+  return node.type === 'Literal' && typeof node.value === 'string';
+}
+
+/**
+ * @param {!Node} node
+ * @return {boolean}
+ */
 function isMessageString(node) {
   if (node.type === 'Literal') {
-    return typeof node.value === 'string';
+    return isLiteralString(node);
   }
   // Allow for string concatenation operations.
-  if (node.type === 'BinaryExpression' && node.operator === '+') {
+  if (isBinaryConcat(node)) {
     return isMessageString(node.left) && isMessageString(node.right);
   }
   return false;
@@ -71,277 +83,124 @@ const selector = transformableMethods.map(method => {
 }).join(',');
 
 
-module.exports = function(context) {
-  return {
-    [selector]: function(node) {
-      // Don't evaluate or transform log.js
-      if (context.getFilename().endsWith('src/log.js')) {
-        return;
-      }
-      // Make sure that callee is a CallExpression as well.
-      // dev().assert() // enforce rule
-      // dev.assert() // ignore
-      const callee = node.callee;
-      const calleeObject = callee.object;
-      if (!calleeObject ||
-          calleeObject.type !== 'CallExpression') {
-        return;
+module.exports = {
+  meta: {
+    fixable: 'code',
+  },
+  create(context) {
+    const source = context.getSourceCode();
+
+    const SIGIL_START = '%%%START';
+    const SIGIL_END = 'END%%%';
+    const messageRegex = new RegExp(`%s|${SIGIL_START}([^]*?)${SIGIL_END}`, 'g');
+    function buildMessage(arg) {
+      if (isLiteralString(arg)) {
+        return arg.value;
       }
 
-      // Make sure that the CallExpression is one of dev() or user().
-      if(!['dev', 'user'].includes(calleeObject.callee.name)) {
-        return;
+      if (isBinaryConcat(arg)) {
+        return buildMessage(arg.left) + buildMessage(arg.right);
       }
 
-      const methodInvokedName = callee.property.name;
-      // Find the position of the argument we care about.
-      const metadata = getMetadata(methodInvokedName);
-
-      // If there's no metadata, this is most likely a test file running
-      // private methods on log.
-      if (!metadata) {
-        return;
+      if (arg.type === 'TemplateLiteral') {
+        let quasied = '';
+        let i = 0;
+        for (; i < arg.quasis.length - 1; i++) {
+          quasied += arg.quasis[i].value.cooked;
+          quasied += buildMessage(arg.expressions[i]);
+        }
+        quasied += arg.quasis[i].value.cooked;
+        return quasied;
       }
 
-      const argToEval = node.arguments[metadata.startPos];
+      return `${SIGIL_START}${source.getText(arg)}${SIGIL_END}`;
+    };
 
-      if (!argToEval) {
-        return;
-      }
+    return {
+      [selector]: function(node) {
+        // Don't evaluate or transform log.js
+        if (context.getFilename().endsWith('src/log.js')) {
+          return;
+        }
+        // Make sure that callee is a CallExpression as well.
+        // dev().assert() // enforce rule
+        // dev.assert() // ignore
+        const callee = node.callee;
+        const calleeObject = callee.object;
+        if (!calleeObject ||
+            calleeObject.type !== 'CallExpression') {
+          return;
+        }
 
-      let errMsg = [
-        `Must use a literal string for argument[${metadata.startPos}]`,
-        `on ${metadata.name} call.`
-      ].join(' ');
+        // Make sure that the CallExpression is one of dev() or user().
+        if(!['dev', 'user'].includes(calleeObject.callee.name)) {
+          return;
+        }
 
-      if (metadata.variadic) {
-        errMsg += '\n\tIf you want to pass data to the string, use `%s` ';
-        errMsg += 'placeholders and pass additional arguments';
-      }
+        const methodInvokedName = callee.property.name;
+        // Find the position of the argument we care about.
+        const metadata = getMetadata(methodInvokedName);
 
-      if (!isMessageString(argToEval)) {
-        context.report({
-          node: argToEval,
-          message: errMsg,
-          fix: function(fixer) {
-            if (!metadata.variadic) {
-              return;
+        // If there's no metadata, this is most likely a test file running
+        // private methods on log.
+        if (!metadata) {
+          return;
+        }
+
+        const argToEval = node.arguments[metadata.startPos];
+
+        if (!argToEval) {
+          return;
+        }
+
+        let errMsg = [
+          `Must use a literal string for argument[${metadata.startPos}]`,
+          `on ${metadata.name} call.`
+        ].join(' ');
+
+        if (metadata.variadic) {
+          errMsg += '\n\tIf you want to pass data to the string, use `%s` ';
+          errMsg += 'placeholders and pass additional arguments';
+        }
+
+        if (!isMessageString(argToEval)) {
+          context.report({
+            node: argToEval,
+            message: errMsg,
+            fix: function(fixer) {
+              if (!metadata.variadic) {
+                return;
+              }
+
+              let message = '';
+              try {
+                message = buildMessage(argToEval);
+              } catch (e) {
+                return;
+              }
+
+              let args = [];
+              let argI = metadata.startPos + 1;
+              message = message.replace(messageRegex, (match, sourceText) => {
+                let arg;
+                if (match === '%s') {
+                  arg = source.getText(node.arguments[argI]);
+                  argI++;
+                } else {
+                  arg = sourceText;
+                }
+                args.push(arg);
+                return '%s';
+              });
+
+              return fixer.replaceTextRange(
+                  [argToEval.start, node.end - 1],
+                  `'${message}', ${args.join(', ')}`
+              );
             }
-            let tokens = context.getTokens(argToEval);
-            let hasStringInArg = tokens.some(x => x.type === 'String');
-            // If it doesn't have any string then it's unfixable and needs
-            // to be manually refactored to have a message.
-            if (!hasStringInArg) {
-              return;
-            }
-
-            let argFixer = new ArgFixer(tokens).parse();
-            const tokensInExpr = context.getTokens(node);
-            const lastArgToken = tokensInExpr[tokensInExpr.length - 2];
-            const nodesToPreserve = node.arguments.slice(metadata.startPos + 1);
-            let origVarArgs = '';
-            if (nodesToPreserve.length) {
-              origVarArgs = getVarArgs(context, nodesToPreserve);
-            }
-            let argsReplacement = argFixer.getSanitizedArg() + origVarArgs + ', ' +
-                argFixer.getRefsAsArgumentsString();
-            return fixer.replaceTextRange(
-                [argToEval.start, lastArgToken.end],
-                argsReplacement
-            );
-          }
-        });
-      }
-    },
-  };
+          });
+        }
+      },
+    };
+  },
 };
-
-function getVarArgs(context, args) {
-  return ',' + args.map(arg => {
-    return context.getTokens(arg).map(token => {
-      return token.value;
-    }).join('');
-  }).join(',');
-}
-
-class ArgFixer {
-  constructor(tokens) {
-    this.tokens = tokens;
-    this.cursor = 0;
-    this.sanitizedStr = '';
-    this.refs = [];
-    this.enteredParen = 0;
-    this.templateValue = '';
-    this.inTemplateEval = false;
-  }
-
-  getSanitizedArg() {
-    return '\'' + this.sanitizedStr + '\'';
-  }
-
-  appendToSanitizedStr(str) {
-    this.sanitizedStr += str;
-  }
-
-  getRefsAsArgumentsString() {
-    return this.refs.join(',');
-  }
-
-  parse() {
-    while (this.cursor < this.tokens.length) {
-      this.chomp();
-    }
-    return this;
-  }
-
-  next() {
-    this.cursor++;
-  }
-
-  cur(val = 0) {
-    return this.tokens[this.cursor + val];
-  }
-
-  chomp() {
-    if (this.isLiteralString()) {
-      this.chompString();
-    } else if (this.isTemplateStart()) {
-      this.chompTemplateValueTilEnd();
-    } else if (this.isRefStart()) {
-      this.chompRefTilPunctuatorOrEnd();
-    } else {
-      this.next();
-    }
-  }
-
-  chompString() {
-   // We remove the quotes surrounding the string.
-    let strValue = this.cur().value.slice(1, -1);
-    // If the string literal was using double quotes and there
-    // are any unescaped single quotes, we will need to escape
-    // them as we will be placing this string eventually into
-    // a single quote string literal.
-    if (this.cur().value[0] === '"') {
-      strValue = strValue.replace(/([^'\\]*(?:\\.[^'\\]*)*)'/g, "$1\\'");
-    }
-    this.appendToSanitizedStr(strValue);
-    this.next();
-  }
-
-  chompVarReference() {
-    this.refs.push(this.cur().value);
-    this.appendToSanitizedStr('%s');
-    this.next();
-  }
-
-  chompRefTilPunctuatorOrEnd() {
-    let refValue = '';
-    while (!this.isRefEnd()) {
-      refValue += this.cur().value;
-      this.next();
-    }
-
-    this.startNewRef();
-    this.addToCurRef(refValue);
-  }
-
-  isRefEnd() {
-    // This means we are at the last token.
-    if (!this.cur()) {
-      return true;
-    }
-
-    if (this.cur().type === 'Punctuator') {
-      if (this.cur().value === '(') {
-        this.enteredParen++;
-      } else if (this.cur().value === ')') {
-        this.enteredParen--;
-      }
-    }
-
-    if (this.enteredParen !== 0) {
-      return false;
-    }
-    return this.cur().type === 'Punctuator' && this.cur().value === '+';
-  }
-
-  chompTemplateValueTilEnd() {
-    while (!this.isTemplateEnd()) {
-      this.chompTemplate();
-      this.next()
-    }
-    // Consume the last template Node as well.
-    this.chompTemplate();
-    this.templateValue = '';
-    this.inTemplateEval = false;
-  }
-
-  chompTemplate() {
-    for (let i = 0; i < this.cur().value.length; i++) {
-
-      // If we're at the beginning of a Token and the first char is
-      // one of '}' or '`' then this is either a closing tick of a template
-      // or a closing of an interpolation segment.
-      if (i === 0 &&
-          (this.cur().value[i] === '}' || this.cur().value[i] === '`')) {
-        this.inTemplateEval = false;
-        continue;
-      }
-
-      // The start of an interpolation segment. It means we need to start
-      // collecting a new ref.
-      if (this.cur().value[i] === '$' && this.cur().value[i + 1] === '{') {
-        this.inTemplateEval = true;
-        this.startNewRef();
-        break;
-      }
-
-      // This is the end of an Template and we can now break out. We don't
-      // need to append the backtick.
-      if (this.isTemplateEnd() &&this.cur().value[i] === '`' &&
-          this.cur().value.length - 1 === i) {
-        this.inTemplateEval = false;
-        break;
-      }
-
-      if (!this.inTemplateEval) {
-        // Since we're going to be transforming this template string
-        // into a single quote string literal, we need to escape single quotes.
-        const str = this.cur().value[i] === '\'' ? '\\\'': this.cur().value[i];
-        this.appendToSanitizedStr(str);
-      } else {
-        this.addToCurRef(this.cur().value[i]);
-      }
-    }
-  }
-
-
-  isTemplateStart() {
-    return this.cur().type === 'Template' && this.cur().value.startsWith('`');
-  }
-
-  isTemplateEnd() {
-    return this.cur().type === 'Template' && this.cur().value.endsWith('`');
-  }
-
-  isLiteralString() {
-    return this.cur().type === 'String';
-  }
-
-  isRefStart() {
-    //const next = this.cur(1);
-    return (this.cur().type === 'Identifier'||
-            (this.cur().type === 'Keyword' && this.cur().value === 'this')) &&
-      (this.cursor === 0 ||
-       (this.cur(-1).type === 'Punctuator' && this.cur(-1).value === '+'));
-  }
-
-  startNewRef() {
-    this.appendToSanitizedStr('%s');
-    this.refs.push('');
-  }
-
-  addToCurRef(ref) {
-    this.refs[this.refs.length - 1] += ref;
-  }
-}
