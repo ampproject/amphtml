@@ -15,20 +15,22 @@
  */
 
 export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
-  "requests": {
-    "host": "https://api.retargetly.com",
-    "page": "${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}&n=${title}&ref=${documentReferrer}&ua=${userAgent}&random=${random}&bl=${browserLanguage}&source=amp"
+  'requests': {
+    'host': 'https://api.retargetly.com',
+    'page': '${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}' +
+    '&n=${title}&ref=${documentReferrer}&ua=${userAgent}' +
+    '&random=${random}&bl=${browserLanguage}&source=amp',
   },
-  "transport": {
-    "beacon": false,
-    "xhrpost": false,
-    "image": true
+  'transport': {
+    'beacon': false,
+    'xhrpost': false,
+    'image': true,
   },
-  "triggers": {
-    "trackPageview": {
-        "on": "visible",
-        "request": "page"
-    }
-  }
+  'triggers': {
+    'trackPageview': {
+      'on': 'visible',
+      'request': 'page',
+    },
+  },
 });
 
