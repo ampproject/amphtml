@@ -520,15 +520,6 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
-/**
- * The default amp-hidden changes visibility, which takes up space. In the case
- * where amp-list becomes a container via the resizable-children attribute, the
- * loader should be fully hidden and not take up space.
- */
-amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
-  display: none !important;
-}
-
 .i-amphtml-loader-line {
   position: absolute;
   top:0;
