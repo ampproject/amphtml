@@ -422,6 +422,25 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
+    it('should add linker if same domain is in destination domains', () => {
+      const config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+            destinationDomains: ['amp.source.com'],
+          },
+        },
+      };
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
     it('should not add linker if href is fragment', () => {
       return new LinkerManager(ampdoc, config, null).init().then(() => {
         const a = {

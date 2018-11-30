@@ -285,7 +285,7 @@ export class LinkerManager {
     // Don't append linker for exact domain match, relative urls, or
     // fragments.
     const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-    if (winHostname === hostname) {
+    if (!domains && winHostname === hostname) {
       return false;
     }
 
