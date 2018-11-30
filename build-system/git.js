@@ -92,9 +92,10 @@ exports.gitBranchName = function() {
  * @return {string}
  */
 exports.gitCommitHash = function() {
-  return process.env.TRAVIS_PULL_REQUEST_SHA ?
-    process.env.TRAVIS_PULL_REQUEST_SHA :
-    getStdout('git rev-parse --verify HEAD').trim();
+  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
+    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  }
+  return getStdout('git rev-parse --verify HEAD').trim();
 };
 
 /**
