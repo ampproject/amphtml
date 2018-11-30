@@ -282,15 +282,15 @@ export class LinkerManager {
       return false;
     }
 
-    // Don't append linker for exact domain match, relative urls, or
-    // fragments.
-    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-    if (!domains && winHostname === hostname) {
-      return false;
-    }
-
     // If no domains given, default to friendly domain matching.
     if (!domains) {
+      // Don't append linker for exact domain match, relative urls, or
+      // fragments.
+      const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+      if (winHostname === hostname) {
+        return false;
+      }
+
       const {sourceUrl, canonicalUrl} =
           Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
