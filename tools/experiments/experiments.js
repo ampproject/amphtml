@@ -249,12 +249,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-hold-to-pause',
-    name: 'Hold to pause an amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/18714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
