@@ -39,12 +39,14 @@ export function baidu(global, data) {
     async: true,
   });
 
+  global.addEventListener('message', () => {
+    global.context.renderStart();
+  });
+
   loadScript(
       global,
       'https://dup.baidustatic.com/js/dm.js',
-      () => {
-        global.context.renderStart();
-      },
+      () => {},
       () => {
         global.context.noContentAvailable();
       }
