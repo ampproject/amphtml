@@ -805,11 +805,8 @@ amp-list[load-more] > [load-more-loading],
 amp-list[load-more] > [load-more-failed],
 amp-list[load-more] > [load-more-button],
 amp-list[load-more] > [load-more-end],
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader
 {
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
   visibility: hidden;
 }
 
