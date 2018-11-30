@@ -637,9 +637,9 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      if (buildTargets.has('RUNTIME')) {
-        command.buildRuntimeMinified(/* extensions */ false);
-      }
+    }
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntimeMinified(/* extensions */ false);
     } else {
       // Generates a blank Percy build and skip the bundle-size check to satisfy
       // the required Github checks.
