@@ -94,9 +94,15 @@ const UserValidityState = {
   USER_INVALID: 'invalid',
 };
 
-
 /** @private @const {string} */
 const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
+
+/**
+ * Time to wait for services / async input before throwing an error.
+ * @private @const {number}
+ */
+const SUBMIT_TIMEOUT = 10000;
+
 
 
 export class AmpForm {
@@ -537,7 +543,10 @@ export class AmpForm {
       presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
     });
 
-    return this.waitOnPromisesOrTimeout_(presubmitPromises, 10000).then(
+    return this.waitOnPromisesOrTimeout_(
+        presubmitPromises,
+        SUBMIT_TIMEOUT
+    ).then(
         () => this.handlePresubmitSuccess_(trust),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
