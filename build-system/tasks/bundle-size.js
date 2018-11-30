@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitBranchPoint, gitCommitHash, gitOriginUrl} = require('../git');
+const {gitBranchPoint, gitCommitHash} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -34,7 +34,7 @@ const buildArtifactsRepoOptions = {
   owner: 'ampproject',
   repo: 'amphtml-build-artifacts',
 };
-const expectedGitHubProject = 'ampproject/amphtml';
+const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
 const {green, red, cyan, yellow} = colors;
@@ -142,11 +142,10 @@ function storeBundleSize() {
     return;
   }
 
-  const gitOriginUrlValue = gitOriginUrl();
-  if (!gitOriginUrlValue.includes(expectedGitHubProject)) {
-    log('Git origin URL is', cyan(gitOriginUrlValue));
-    log('Skipping storing the bundle size in the artifacts repository on',
-        'GitHub...');
+  if (process.env.TRAVIS_REPO_SLUG !== expectedGitHubRepoSlug) {
+    log(yellow('Skipping'), cyan('--on_push_build') + ':',
+        'this action can only be performed on Travis builds on the',
+        cyan(expectedGitHubRepoSlug), 'repository');
     return;
   }
 
