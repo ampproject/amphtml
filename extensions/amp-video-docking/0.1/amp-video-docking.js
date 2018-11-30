@@ -236,15 +236,8 @@ function complainAboutPortrait(element) {
  */
 function applyBreakpointClassname(element, width, breakpoints) {
   // sort by minWidth descending
-  breakpoints = breakpoints.sort((a, b) => {
-    if (a.minWidth < b.minWidth) {
-      return 1;
-    }
-    if (a.minWidth > b.minWidth) {
-      return -1;
-    }
-    return 0;
-  });
+  breakpoints = breakpoints.sort((a, b) => b.minWidth - a.minWidth);
+
   let maxBreakpoint = -1;
   for (let i = 0; i < breakpoints.length; i++) {
     const {className, minWidth} = breakpoints[i];
