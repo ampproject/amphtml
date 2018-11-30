@@ -44,7 +44,7 @@ describes.realWin('amp-action-macro', {
     });
   }
 
-  it('should  build if experiment is on', done => {
+  it('should build if experiment is on', done => {
     newActionMacro().then(() => {
       done();
     }, unused => {
