@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isStoryDescendant} from '../../../src/dom';
+import {isStoryDocument} from '../../../src/utils/story';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -297,7 +297,7 @@ export class SubscriptionService {
       );
 
       // Delegates the platform selection and activation call.
-      const doPlatformSelection = !isStoryDescendant(this.ampdoc_.win.document);
+      const doPlatformSelection = !isStoryDocument(this.ampdoc_.win.document);
 
       this.startAuthorizationFlow_(doPlatformSelection);
 

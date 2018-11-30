@@ -28,3 +28,12 @@ import {closestByTag} from '../dom';
 export function descendsFromStory(element) {
   return !!closestByTag(element, 'amp-story-page');
 }
+
+/**
+ * Returns true if the document is an amp-story.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isStoryDocument(doc) {
+  return doc.body.firstElementChild.tagName === 'AMP-STORY';
+}
