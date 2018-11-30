@@ -22,7 +22,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
     'track': 'https://${namespace}.amp.permutive.com/track' +
       '?k=${key}' +
       '&i=${identity}' +
-      '&it=amp', 
+      '&it=amp',
     'pageview': '${track}' +
       '&e=Pageview' +
       '&_ep_isp_info=%24ip_isp_info' +
