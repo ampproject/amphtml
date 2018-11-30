@@ -1278,7 +1278,7 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const win = this.root.ampdoc.win;
+    const {win} = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
     // Listeners are provided below for both 'unload' and 'pagehide'. Fore
