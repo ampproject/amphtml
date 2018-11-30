@@ -97,7 +97,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(/* fromMerge */ true);
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint();
   }
 }
 
