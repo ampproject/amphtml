@@ -1387,6 +1387,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
   }
+
+  /**
+   * @return {boolean} True if 'fluid' is one of the requested sizes, false
+   * otherwise.
+   */
+  isFluidRequest() {
+    return this.isFluidRequest_;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

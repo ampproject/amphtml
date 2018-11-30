@@ -37,7 +37,7 @@ export const TFCD = 'tagForChildDirectedTreatment';
 const SRA_JOINERS = [
   combineInventoryUnits, getCookieOptOut, getAdks, getSizes, getTfcd, isAdTest,
   getTargetingAndExclusions, getExperimentIds, getIdentity, getForceSafeframe,
-  getPageOffsets, getContainers];
+  getPageOffsets, getContainers, getIsFluid];
 
 /**
   * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
@@ -274,6 +274,26 @@ export function getContainers(impls) {
     hasAmpContainer = hasAmpContainer || !!containers.length;
   });
   return hasAmpContainer ? {'acts': result.join('|')} : null;
+}
+
+/**
+ * Combine fluid settings for each block via comma separator.
+ * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
+ * @return {?Object<string,string>}
+ * @visibleForTesting
+ */
+export function getIsFluid(impls) {
+  let hasFluid = false;
+  const result = [];
+  impls.forEach(impl => {
+    if (impl.isFluidRequest()) {
+      hasFluid = true;
+      result.push('height');
+    } else {
+      result.push('0');
+    }
+  });
+  return hasFluid ? {'fluid': result.join()} : null;
 }
 
 /**
