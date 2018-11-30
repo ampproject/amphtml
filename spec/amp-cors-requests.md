@@ -125,6 +125,7 @@ To ensure valid and secure requests and responses for your AMP pages, you must:
 1. [Verify the request](#verify-cors-requests).
 2. [Send the appropriate response headers](#send-cors-response-headers).
 
+If you're using Node in your backend, you can use the [AMP CORS middleware](https://www.npmjs.com/package/amp-toolbox-cors), which is part of the [AMP Toolbox](https://github.com/ampproject/amp-toolbox).
 
 ### Verify CORS requests
 
