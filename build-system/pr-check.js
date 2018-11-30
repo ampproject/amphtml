@@ -637,13 +637,14 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
+    } else {
+      // Generate a blank Percy build to satisfy the required GitHub check.
+      command.runVisualDiffTests(/* opt_mode */ 'empty');
     }
     if (buildTargets.has('RUNTIME')) {
       command.buildRuntimeMinified(/* extensions */ false);
     } else {
-      // Generates a blank Percy build and skip the bundle-size check to satisfy
-      // the required Github checks.
-      command.runVisualDiffTests(/* opt_mode */ 'empty');
+      // Skip the bundle-size check to satisfy the required GitHub check.
       command.runBundleSizeCheck(/* action */ 'skipped');
     }
     command.runPresubmitTests();
