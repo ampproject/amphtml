@@ -188,6 +188,8 @@ describe('BindValidator (allowUrlProperties=true)', () => {
           'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
       expect(val.isResultValid('AMP-IMG', 'src',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(val.isResultValid(
+          'AMP-IMG', 'src', '?__amp_source_origin=foo')).to.be.false;
 
       expect(val.isResultValid(
           'AMP-IMG',
@@ -197,6 +199,10 @@ describe('BindValidator (allowUrlProperties=true)', () => {
           'AMP-IMG',
           'srcset',
           /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
+      expect(val.isResultValid(
+          'AMP-IMG',
+          'src',
+          'http://a.com/b.jpg 1x, ?__amp_source_origin=foo 2x')).to.be.false;
     });
 
     it('should support <amp-carousel>', () => {
@@ -206,6 +212,7 @@ describe('BindValidator (allowUrlProperties=true)', () => {
     it('should support <amp-list>', () => {
       expect(val.canBind('AMP-LIST', 'src')).to.be.true;
       expect(val.canBind('AMP-LIST', 'state')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'is-layout-container')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {

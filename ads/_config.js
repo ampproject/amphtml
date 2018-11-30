@@ -689,6 +689,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'onead': {
+    prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
+    renderStartImplemented: true,
+  },
+
   'openadstream': {},
 
   'openx': {

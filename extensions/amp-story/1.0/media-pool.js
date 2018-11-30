@@ -51,7 +51,7 @@ export const MediaType = {
 /**
  * A marker type to indicate an element that originated in the document that is
  * being swapped for an element from the pool.
- * @typedef {!HTMLMediaElement}
+ * @typedef {!Element}
  */
 export let PlaceholderElementDef;
 
@@ -62,11 +62,17 @@ export let PlaceholderElementDef;
 let PoolBoundElementDef;
 
 /**
+ * An element pulled from the DOM.  It is yet to be resolved into a
+ * PlaceholderElement or a PoolBoundElement.
+ * @typedef {!PlaceholderElementDef|!PoolBoundElementDef}
+ */
+export let DomElementDef;
+
+/**
  * Represents the distance of an element from the current place in the document.
- * @typedef {function(!PoolBoundElementDef): number}
+ * @typedef {function(!DomElementDef): number}
  */
 export let ElementDistanceFnDef;
-
 
 /**
  * Represents a task to be executed on a media element.
@@ -78,7 +84,7 @@ let ElementTaskDef;
 /**
  * @const {string}
  */
-const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
+const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 
 
 /**
@@ -169,7 +175,7 @@ export class MediaPool {
      * are kept in memory when they are swapped out of the DOM.
      * @private @const {!Object<string, !PlaceholderElementDef>}
      */
-    this.domMediaEls_ = {};
+    this.placeholderEls_ = {};
 
     /**
      * Counter used to produce unique IDs for media elements.
@@ -307,8 +313,8 @@ export class MediaPool {
    * @return {string} A unique ID.
    * @private
    */
-  createDomMediaElementId_() {
-    return DOM_MEDIA_ELEMENT_ID_PREFIX + this.idCounter_++;
+  createPlaceholderElementId_() {
+    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.idCounter_++;
   }
 
   /**
@@ -347,14 +353,15 @@ export class MediaPool {
    * Retrieves the media element from the pool that matches the specified
    * element, if one exists.
    * @param {!MediaType} mediaType The type of media element to get.
-   * @param {!PlaceholderElementDef} domMediaEl The element whose matching media
+   * @param {!DomElementDef} domMediaEl The element whose matching media
    *     element should be retrieved.
    * @return {?PoolBoundElementDef} The media element in the pool that
    *     represents the specified media element
    */
   getMatchingMediaElementFromPool_(mediaType, domMediaEl) {
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
-      return domMediaEl;
+      // The media element in the DOM was already from the pool.
+      return /** @type {!PoolBoundElementDef} */ (domMediaEl);
     }
 
     const allocatedEls = this.allocated[mediaType];
@@ -465,21 +472,25 @@ export class MediaPool {
 
   /**
    * @param {!MediaType} mediaType The media type to check.
-   * @param {!PlaceholderElementDef} el The element to check.
+   * @param {!DomElementDef} domMediaEl The element to check.
    * @return {boolean} true, if the specified element has already been allocated
    *     as the specified type of media element.
    * @private
    */
-  isAllocatedMediaElement_(mediaType, el) {
-    return this.allocated[mediaType].indexOf(el) >= 0;
+  isAllocatedMediaElement_(mediaType, domMediaEl) {
+    // Since we don't know whether or not the specified domMediaEl is a
+    // placeholder or originated from the pool, we coerce it to a pool-bound
+    // element, to check against the allocated list of pool-bound elements.
+    const poolMediaEl = /** @type {!PoolBoundElementDef} */ (domMediaEl);
+    return this.allocated[mediaType].indexOf(poolMediaEl) >= 0;
   }
 
 
   /**
    * Replaces a media element that was originally in the DOM with a media
    * element from the pool.
-   * @param {!PlaceholderElementDef} domMediaEl The media element originating
-   *     from the DOM.
+   * @param {!PlaceholderElementDef} placeholderEl The placeholder element
+   *     originating from the DOM.
    * @param {!PoolBoundElementDef} poolMediaEl The media element originating
    *     from the pool.
    * @param {!Sources} sources The sources for the media element.
@@ -487,13 +498,13 @@ export class MediaPool {
    *     been successfully swapped into the DOM.
    * @private
    */
-  swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
+  swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources) {
     const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
-    const ampMediaForDomEl = ampMediaElementFor(domMediaEl);
-    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
+    const ampMediaForDomEl = ampMediaElementFor(placeholderEl);
+    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl))
+        new SwapIntoDomTask(placeholderEl))
         .then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
@@ -553,13 +564,13 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
-    const oldDomMediaElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
-    const oldDomMediaEl = /** @type {!PlaceholderElementDef} */ (
-      dev().assertElement(this.domMediaEls_[oldDomMediaElId],
+    const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (
+      dev().assertElement(this.placeholderEls_[placeholderElId],
           'No media element to put back into DOM after eviction.'));
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(oldDomMediaEl))
+        new SwapOutOfDomTask(placeholderEl))
         .then(() => {
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
         });
@@ -599,7 +610,7 @@ export class MediaPool {
   /**
    * Preloads the content of the specified media element in the DOM and returns
    * a media element that can be used in its stead for playback.
-   * @param {!PlaceholderElementDef} domMediaEl The media element, found in the
+   * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
    * @return {Promise<!PoolBoundElementDef>} A media element from the pool that
    *     can be used to replace the specified element.
@@ -615,15 +626,20 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
     if (existingPoolMediaEl) {
       // The element being loaded already has an allocated media element.
-      return Promise.resolve(existingPoolMediaEl);
+      return Promise.resolve(
+          /** @type {!PoolBoundElementDef} */ (existingPoolMediaEl));
     }
 
-    const sources = this.sources_[domMediaEl.id];
+    // Since this is not an existing pool media element, we can be certain that
+    // it is a placeholder element.
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
+
+    const sources = this.sources_[placeholderEl.id];
     dev().assert(sources instanceof Sources,
         'Cannot play unregistered element.');
 
     const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||
-        this.evictMediaElement_(mediaType, domMediaEl);
+        this.evictMediaElement_(mediaType, placeholderEl);
 
     if (!poolMediaEl) {
       // If there is no space in the pool to allocate a new element, and no
@@ -633,7 +649,8 @@ export class MediaPool {
 
     this.allocateMediaElement_(mediaType, poolMediaEl);
 
-    return this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources)
+    return this
+        .swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources)
         .then(() => poolMediaEl);
   }
 
@@ -661,7 +678,7 @@ export class MediaPool {
    * being played while not managed by the media pool.  If the media element is
    * already registered, this is a no-op.  Registering elements from within the
    * pool is not allowed, and will also be a no-op.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be
+   * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully registered, or rejected otherwise.
@@ -679,21 +696,27 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const id = domMediaEl.id || this.createDomMediaElementId_();
-    if (this.sources_[id] && this.domMediaEls_[id]) {
+    // Since this is not an existing pool media element, we can be certain that
+    // it is a placeholder element.
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
+
+    const id = placeholderEl.id || this.createPlaceholderElementId_();
+    if (this.sources_[id] && this.placeholderEls_[id]) {
       // This media element is already registered.
       return Promise.resolve();
     }
 
     // This media element has not yet been registered.
-    domMediaEl.id = id;
-    const sources = Sources.removeFrom(domMediaEl);
+    placeholderEl.id = id;
+    const sources = Sources.removeFrom(placeholderEl);
     this.sources_[id] = sources;
-    this.domMediaEls_[id] = domMediaEl;
+    this.placeholderEls_[id] = placeholderEl;
 
-    domMediaEl.muted = true;
-    domMediaEl.setAttribute('muted', '');
-    domMediaEl.pause();
+    if (placeholderEl instanceof HTMLMediaElement) {
+      placeholderEl.muted = true;
+      placeholderEl.setAttribute('muted', '');
+      placeholderEl.pause();
+    }
 
     return Promise.resolve();
   }
@@ -710,7 +733,7 @@ export class MediaPool {
 
   /**
    * Preloads the content of the specified media element in the DOM.
-   * @param {!PlaceholderElementDef} domMediaEl The media element, found in the
+   * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
    * @return {!Promise} A promise that is resolved when the specified media
    *     element has successfully started preloading.
@@ -726,7 +749,7 @@ export class MediaPool {
   /**
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be played.
+   * @param {!DomElementDef} domMediaEl The media element to be played.
    * @return {!Promise} A promise that is resolved when the specified media
    *     element has been successfully played.
    */
@@ -744,7 +767,7 @@ export class MediaPool {
 
   /**
    * Pauses the specified media element in the DOM.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be paused.
+   * @param {!DomElementDef} domMediaEl The media element to be paused.
    * @param {boolean=} rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @return {!Promise} A promise that is resolved when the specified media
@@ -772,7 +795,7 @@ export class MediaPool {
 
   /**
    * Rewinds a specified media element in the DOM to 0.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be rewound.
+   * @param {!DomElementDef} domMediaEl The media element to be rewound.
    * @return {!Promise} A promise that is resolved when the
    *     specified media element has been successfully rewound.
    */
@@ -791,7 +814,7 @@ export class MediaPool {
 
   /**
    * Mutes the specified media element in the DOM.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be muted.
+   * @param {!DomElementDef} domMediaEl The media element to be muted.
    * @return {!Promise} A promise that is resolved when the specified media
    *     element has been successfully muted.
    */
@@ -810,7 +833,7 @@ export class MediaPool {
 
   /**
    * Unmutes the specified media element in the DOM.
-   * @param {!PlaceholderElementDef} domMediaEl The media element to be unmuted.
+   * @param {!DomElementDef} domMediaEl The media element to be unmuted.
    * @return {!Promise} A promise that is resolved when the specified media
    *     element has been successfully paused.
    */

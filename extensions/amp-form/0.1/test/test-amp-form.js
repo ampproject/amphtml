@@ -213,6 +213,7 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
+        const setupInput = sandbox.spy(xhrUtils, 'setupInput');
         const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
         const fromStructuredCloneable =
             sandbox.spy(xhrUtils, 'fromStructuredCloneable');
@@ -260,6 +261,7 @@ describes.repeated('', {
                     .to.have.been.calledWith(
                         form, sinon.match.func, sinon.match.func);
                 sinon.assert.callOrder(
+                    setupInput,
                     setupAMPCors,
                     fromStructuredCloneable,
                     verifyAmpCORSHeaders);
