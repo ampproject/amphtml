@@ -59,7 +59,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.configJson_ = null;
 
-    /** @private {?./web-animations.WebAnimationRunner} */
+    /** @private {?./web-animations.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?Promise} */
