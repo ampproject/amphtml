@@ -28,6 +28,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
 const config = require('./config');
+const git = require('./git');
 const minimatch = require('minimatch');
 const path = require('path');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
@@ -544,6 +545,15 @@ function runYarnLockfileCheck() {
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+  for (const env of ['TRAVIS_COMMIT', 'TRAVIS_COMMIT_MESSAGE',
+    'TRAVIS_COMMIT_RANGE', 'TRAVIS_PULL_REQUEST', 'TRAVIS_PULL_REQUEST_BRANCH',
+    'TRAVIS_PULL_REQUEST_SHA', 'TRAVIS_PULL_REQUEST_SLUG']) {
+    console.log(env, process.env[env]);
+  }
+  console.log('gitBranchPoint', git.gitBranchPoint());
+  console.log('gitCommitHash', git.gitCommitHash());
+  process.exit(1);
+  return;
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck();
