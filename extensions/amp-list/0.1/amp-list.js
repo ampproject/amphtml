@@ -438,7 +438,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(data, append, opt_other) {
-    console.log(opt_other);
     dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
