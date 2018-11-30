@@ -64,6 +64,7 @@ import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
+import {RETARGETLY_CONFIG} from './vendors/retargetly';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
   ADOBEANALYTICS_NATIVECONFIG_CONFIG,
@@ -218,6 +219,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'rakam': RAKAM_CONFIG,
+  'retargetly': RETARGETLY_CONFIG,
   'segment': SEGMENT_CONFIG,
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,

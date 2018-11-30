@@ -329,6 +329,9 @@
     "pageview": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!pageViewName",
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
   },
+  "retargetly": {
+    "page": "https://api.retargetly.com/api?id=107&src=0&url=http%3A%2F%2Ffakesite%2Findex.amp.html&n=Simple%20Retargetly%20AMP%20Test&ref=&ua=Mozilla%2F5.0%20(Macintosh%3B%20Intel%20Mac%20OS%20X%2010_14_1)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F70.0.3538.102%20Safari%2F537.36&random=0.8909424910324348&bl=en-us&source=amp&tags=this%2Cis%2Cjust%2Can%2Cexample"
+  },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",
     "base": "?writeKey=!writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
