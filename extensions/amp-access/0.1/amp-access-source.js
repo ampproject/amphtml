@@ -24,7 +24,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  getSourceOrigin,
   parseQueryString,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';

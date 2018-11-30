@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 

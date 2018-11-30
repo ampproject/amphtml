@@ -16,10 +16,10 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
+import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
