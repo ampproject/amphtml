@@ -51,5 +51,6 @@
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
-  "hidden-mutation-observer": 1
+  "hidden-mutation-observer": 1,
+  "sandbox-ads": 1
 }
