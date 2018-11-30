@@ -242,7 +242,7 @@ with other analytics event types.
 
 This method takes an optional `vars` param that should define an object with
 custom variables to log. These are available as `VIDEO_STATE`, keyed by name
-prefixed with `custom_`, i.e. the object `{myVar: 'foo'} will be available as
+prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 `{'custom_myVar': 'foo}`.
 
 #### <a name="getIntersection"></a> `getIntersection(callback)`
