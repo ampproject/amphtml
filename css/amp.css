@@ -520,15 +520,6 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
-/**
- * The default amp-hidden changes visibility, which takes up space. In the case
- * where amp-list becomes a container via the resizable-children attribute, the
- * loader should be fully hidden and not take up space.
- */
-amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
-  display: none !important;
-}
-
 .i-amphtml-loader-line {
   position: absolute;
   top:0;
@@ -627,22 +618,6 @@ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
 }
 
 .i-amphtml-element > [overflow].amp-visible {
-  visibility: visible;
-}
-
-amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading],
-amp-list[load-more] > [load-more-failed],
-amp-list[load-more] > [load-more-button]{
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading].amp-visible,
-amp-list[load-more] > [load-more-failed].amp-visible,
-amp-list[load-more] > [load-more-button].amp-visible {
   visibility: visible;
 }
 
@@ -812,6 +787,27 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/* amp-list CSS to avoid FOUC */
+
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the resizable-children attribute, the
+ * loader should be fully hidden and not take up space.
+ */
+ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
+}
+
+/* load-more elements should be hidden by default */
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed],
+amp-list[load-more] > [load-more-button],
+amp-list[load-more] > [load-more-end],
+amp-list[load-more] > [load-more-button] > .i-amphtml-loader
+{
+  visibility: hidden;
 }
 
 /**
