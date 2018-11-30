@@ -209,6 +209,13 @@
   margin: -88px 0 0 40px;
 }
 
+.amp-video-docked-placeholder-icon.amp-small {
+  mask-size: 32px 32px;
+  width: 32px;
+  height: 32px;
+  margin: -52px 0 0 20px;
+}
+
 .amp-video-docked-placeholder-background-poster {
   width: 100%;
   height: 100%;
