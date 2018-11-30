@@ -17,7 +17,7 @@
     amp-list {
       border: 1px solid green;
     }
-    [load-more-button], [load-more-failed], [load-more-loading] {
+    [load-more-button], [load-more-failed], [load-more-loading], [load-more-end] {
       background: gray;
       color: #fff;
       cursor: pointer;
@@ -29,9 +29,14 @@
       padding: 16px;
     }
 
-    .amp-load-more-loading {
+    .amp-load-more-loading, [load-more-loading] {
+      background: blue;
+    }
+
+    [load-more-end] {
       background: red;
     }
+
     .story-entry {
       padding: 40px;
       border: 1px solid gray;
@@ -81,6 +86,9 @@
     </div>
     <div load-more-loading>
       LOADING
+    </div>
+    <div load-more-end>
+      LOAD END
     </div>
   </amp-list>
 

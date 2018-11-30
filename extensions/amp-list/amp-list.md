@@ -296,18 +296,19 @@ This attribute specifies an attribute in the returned data that will give the ur
 ```
 
 ### Additional children of `<amp-list>`
-`<amp-list>` with the `load-more` attribute expects the following additional child elements:
+`<amp-list>` with the `load-more` attribute expects the following additional child elements. All of these elements are templated. (Note that UX defaults for these are on the roadmap, thus it will not always be necessary to include these elements.)
 
 #### load-more-button (mandatory)
-An element containing the `load-more-button` attribute. Clicking on this button will trigger a fetch to load more elements from the url contained in the field of the data returned corresponding to the `load-more-bookmark` attribute.
+An element containing the `load-more-button` attribute, usually a button. Clicking on this element will trigger a fetch to load more elements from the url contained in the field of the data returned corresponding to the `load-more-bookmark` attribute.
 
-In the case of `load-more="auto"`, or infinite scroll, this button will show up if the user has reached the end of the list but the contents are still loading.
+#### load-more-loading (mandatory)
+An element containing the `load-more-loading` attribute. This element will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the amp-list are still loading).
 
-#### load-more-failed (optional)
-An element containing the `load-more-failed` attribute. This element will be displayed at the bottom of the `<amp-list>` if loading failed. If this element is not provided, the `load-more-button` element will be displayed and clicking on it will result in an attempt to re-fetch data from the last (failed) url.
+#### load-more-failed (mandatory)
+An element containing the `load-more-failed` attribute. This element will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed.
 
-#### .amp-load-more-loading (css class)
-This class is applied to the element with the `load-more-button` attribute while the data is loading. This can be used to tweak the visual appearance of the load-more-button (e.g. show a loader) when the `<amp-list>` is in the middle of loading data.
+#### load-more-end (optional)
+An element containing the `load-more-end` attribute. This element will be displayed at the bottom of the `<amp-list>` if there are no more items. This element is optional.
 
 
 ##### common attributes
