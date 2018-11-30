@@ -23,15 +23,13 @@ const {getStdout} = require('./exec');
 
 /**
  * Returns the branch point of the current branch off of master.
- * @param {boolean} fromMerge true if this is a merge commit.
  * @return {string}
  */
-exports.gitBranchPoint = function(fromMerge = false) {
-  if (fromMerge) {
-    return getStdout('git merge-base HEAD^1 HEAD^2').trim();
-  } else {
-    return getStdout('git merge-base master HEAD^').trim();
+exports.gitBranchPoint = function() {
+  if (process.env.TRAVIS_COMMIT_RANGE) {
+    return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
   }
+  return getStdout('git merge-base master HEAD^').trim();
 };
 
 /**
@@ -74,14 +72,6 @@ exports.gitDiffColor = function() {
 };
 
 /**
- * Returns the URL of the origin (upstream) repository.
- * @return {string}
- */
-exports.gitOriginUrl = function() {
-  return getStdout('git remote get-url origin').trim();
-};
-
-/**
  * Returns the name of the local branch.
  * @return {string}
  */
@@ -94,9 +84,10 @@ exports.gitBranchName = function() {
  * @return {string}
  */
 exports.gitCommitHash = function() {
-  return process.env.TRAVIS_PULL_REQUEST_SHA ?
-    process.env.TRAVIS_PULL_REQUEST_SHA :
-    getStdout('git rev-parse --verify HEAD').trim();
+  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
+    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  }
+  return getStdout('git rev-parse --verify HEAD').trim();
 };
 
 /**
