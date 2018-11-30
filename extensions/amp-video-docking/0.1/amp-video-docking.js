@@ -229,6 +229,29 @@ function complainAboutPortrait(element) {
 }
 
 
+/**
+ * @param {!Element} element
+ * @param {number} width
+ * @param {!Array<!SyntheticBreakpointDef>} breakpoints
+ */
+function applyBreakpointClassname(element, width, breakpoints) {
+  // sort by minWidth descending
+  breakpoints = breakpoints.sort((a, b) => b.minWidth - a.minWidth);
+
+  let maxBreakpoint = -1;
+  for (let i = 0; i < breakpoints.length; i++) {
+    const {className, minWidth} = breakpoints[i];
+    if (minWidth <= width &&
+        minWidth > maxBreakpoint) {
+      element.classList.add(className);
+      maxBreakpoint = minWidth;
+    } else {
+      element.classList.remove(className);
+    }
+  }
+}
+
+
 // Function should ideally be in `dom.js`, but moving it causes a bunch of ads
 // tests to fail, for some reason.
 // TODO(alanorozco): Move.
@@ -317,20 +340,43 @@ const Controls = html =>
 </div>`;
 
 
+/** @typedef {{className: string, minWidth: number}} */
+let SyntheticBreakpointDef;
+
 /**
- * Maps minimum target width to classname to be applied.
- * @private @const {!Object<string, string>}
+ * @private @const {!Array<!SyntheticBreakpointDef>}
  */
-const CONTROLS_BREAKPOINTS = {
-  '1': 'amp-small',
-  '300': 'amp-large',
-};
+const CONTROLS_BREAKPOINTS = [
+  {
+    className: 'amp-small',
+    minWidth: 0,
+  },
+  {
+    className: 'amp-large',
+    minWidth: 300,
+  },
+];
 
-// TODO(alanorozco): PLACEHOLDER_BREAKPOINTS for icon size. Currently it looks
-// a bit too large on mobile screens.
+/**
+ * @private @const {!Array<!SyntheticBreakpointDef>}
+ */
+const PLACEHOLDER_ICON_BREAKPOINTS = [
+  {
+    className: 'amp-small',
+    minWidth: 0,
+  },
+  {
+    className: 'amp-large',
+    minWidth: 420,
+  },
+];
 
-const PLACEHOLDER_ICON_WIDTH = 48;
-const PLACEHOLDER_ICON_MARGIN = 40;
+
+const PLACEHOLDER_ICON_LARGE_WIDTH = 48;
+const PLACEHOLDER_ICON_LARGE_MARGIN = 40;
+
+const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
+const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
 
 
 /** Timeout that can be postponed, repeated or cancelled. */
@@ -1376,6 +1422,9 @@ export class VideoDocking {
     const overlay = this.getOverlay_();
     const placeholderIcon = this.getPlaceholderIcon_();
 
+    applyBreakpointClassname(placeholderIcon, width,
+        PLACEHOLDER_ICON_BREAKPOINTS);
+
     // Setting explicit dimensions is needed to match the video's aspect
     // ratio. However, we only do this once to prevent jank in subsequent
     // frames.
@@ -1405,9 +1454,20 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     });
 
+    const isSmallPlaceholderIcon =
+        placeholderIcon.classList.contains('amp-small');
+
+    const placeholderIconWidth = isSmallPlaceholderIcon ?
+      PLACEHOLDER_ICON_SMALL_WIDTH :
+      PLACEHOLDER_ICON_LARGE_WIDTH;
+
+    const placeholderIconMargin = isSmallPlaceholderIcon ?
+      PLACEHOLDER_ICON_SMALL_MARGIN :
+      PLACEHOLDER_ICON_LARGE_MARGIN;
+
     // TODO(alanorozco): Place, animate and style icon for RTL.
     const placeholderIconX = step *
-        (width - PLACEHOLDER_ICON_WIDTH - PLACEHOLDER_ICON_MARGIN * 2);
+        (width - placeholderIconWidth - placeholderIconMargin * 2);
 
     this.isTransitioning_ = true;
 
@@ -1550,14 +1610,17 @@ export class VideoDocking {
    * @private
    */
   positionControlsOnVsync_(scale, x, y, width, height) {
-    this.applyControlsBreakpointClassname_(scale, width);
     const {container, dismissContainer} = this.getControls_();
     const halfScale = scale / 2;
     const centerX = x + (width * halfScale);
     const centerY = y + (height * halfScale);
+
+    applyBreakpointClassname(container, scale * width, CONTROLS_BREAKPOINTS);
+
     setImportantStyles(container, {
       'transform': translate(centerX, centerY),
     });
+
     const dismissMargin = 4;
     const dismissWidth = 40;
     const dismissX = width * halfScale - dismissMargin - dismissWidth;
@@ -1565,30 +1628,6 @@ export class VideoDocking {
     setImportantStyles(dismissContainer, {
       'transform': translate(dismissX, dismissY),
     });
-  }
-
-  /**
-   * @param {number} scale
-   * @param {number} width
-   * @private
-   */
-  applyControlsBreakpointClassname_(scale, width) {
-    const {container} = this.getControls_();
-    const renderWidth = scale * width;
-    const breakpoints = Object.keys(CONTROLS_BREAKPOINTS).sort().reverse();
-
-    let maxBreakpoint = 0;
-    for (let i = 0; i < breakpoints.length; i++) {
-      const breakpointStr = breakpoints[i];
-      const breakpointInt = parseInt(breakpointStr, 10);
-      if (breakpointInt <= renderWidth &&
-          breakpointInt > maxBreakpoint) {
-        container.classList.add(CONTROLS_BREAKPOINTS[breakpointStr]);
-        maxBreakpoint = breakpointInt;
-      } else {
-        container.classList.remove(CONTROLS_BREAKPOINTS[breakpointStr]);
-      }
-    }
   }
 
   /**
