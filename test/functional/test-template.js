@@ -196,12 +196,15 @@ describes.fakeWin('Template', {amp: true}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
+    const regexError = new RegExp(
+        'Template must be defined in a <template> or '
+            + '<script type="text/plain"> tag');
     allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template must be a "template" tag or defined in a "script" tag/); });
+    }).to.throw(regexError);});
   });
 
-  it('should require discovered "script" template with type defined', () => {
+  it('should require discovered "script" with type defined', () => {
     // Given a script template with the type not defined.
     const templateElement = doc.createElement('script');
     const id = 'template' + Math.random();
@@ -211,9 +214,12 @@ describes.fakeWin('Template', {amp: true}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
+    const regexError = new RegExp(
+        'Template must be defined in a <template> or '
+            + '<script type="text/plain"> tag');
     allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Script template type must be "template\/amp-mustache"/); });
+    }).to.throw(regexError);});
   });
 
   it('should discover template via children', () => {

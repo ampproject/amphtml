@@ -62,7 +62,6 @@ export class AmpMustache extends AMP.BaseTemplate {
       container.appendChild(content);
       this.template_ = container./*OK*/innerHTML;
     } else if (this.element.tagName == 'SCRIPT') {
-      //TODO(alabiaga): handle nested templates.
       this.template_ = this.element.textContent;
     }
 
@@ -80,30 +79,6 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (template, index) => {
-      const key = `__AMP_NESTED_TEMPLATE_${index}`;
-
-      // Store the nested template markup, keyed by index.
-      this.nestedTemplates_[key] = template./*OK*/outerHTML;
-
-      // Replace the markup with a pointer.
-      const pointer = this.element.ownerDocument.createTextNode(`{{{${key}}}}`);
-      template.parentNode.replaceChild(pointer, template);
-    });
-  }
-
-  /**
-   * Stores and replaces nested script templates with custom triple-mustach
-   * pointers.
-   *
-   * This prevents the outer-most script template from replacing variables in
-   * nested templates. Note that this constrains nested template markup to the
-   * more restrictive sanitization rules of triple-mustache.
-   *
-   * @param {!Element} content
-   */
-  processNestedScriptTemplates_(content) {
-    const templates = content.querySelectorAll('script');
     iterateCursor(templates, (template, index) => {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 

@@ -266,14 +266,10 @@ export class Templates {
     user().assert(templateElement, 'Template not found for %s', parent);
     const templateTagName = templateElement.tagName;
     user().assert(
-        templateTagName == 'TEMPLATE' || templateTagName == 'SCRIPT',
-        'Template must be a "template" tag or defined in a "script" tag %s',
-        templateElement);
-    if (templateTagName == 'SCRIPT') {
-      user().assert(
-          templateElement.getAttribute('type') == 'template/amp-mustache',
-          'Script template type must be "template/amp-mustache"');
-    }
+        templateTagName == 'TEMPLATE' || (templateTagName == 'SCRIPT'
+            && templateElement.getAttribute('type') === 'text/plain'),
+        'Template must be defined in a <template> or '
+        + '<script type="text/plain"> tag');
     return templateElement;
   }
 
@@ -281,7 +277,8 @@ export class Templates {
    * Find a specified template inside the parent. Returns null if not present.
    * The template can be specified either via "template" attribute or as a
    * child "template" element. When specified via "template" attribute,
-   * the value indicates the ID of the template element.
+   * the value indicates the ID of the template element. The template
+   * can be defined either via the <template> or <script> tag.
    * @param {!Element} parent
    * @param {string=} opt_querySelector
    * @return {?Element}
