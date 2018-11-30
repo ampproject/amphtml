@@ -266,8 +266,8 @@ export class Templates {
     user().assert(templateElement, 'Template not found for %s', parent);
     const templateTagName = templateElement.tagName;
     user().assert(
-        templateTagName == 'TEMPLATE' || (templateTagName == 'SCRIPT'
-            && templateElement.getAttribute('type') === 'text/plain'),
+        (templateTagName == 'TEMPLATE' || (templateTagName == 'SCRIPT'
+            && templateElement.getAttribute('type') === 'text/plain')),
         'Template must be defined in a <template> or '
         + '<script type="text/plain"> tag');
     return templateElement;
@@ -308,8 +308,14 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
-    const type = user().assert(element.getAttribute('type'),
-        'Type must be specified: %s', element);
+    let type;
+    const tagName = element.tagName;
+    if (tagName == 'TEMPLATE') {
+      type = element.getAttribute('type');
+    } else if (tagName == 'SCRIPT') {
+      type = element.getAttribute('template');
+    }
+    user().assert(type, 'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
     if (promise) {
