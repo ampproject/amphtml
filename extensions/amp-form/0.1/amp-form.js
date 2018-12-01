@@ -565,14 +565,17 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
+   * @return {!Promise}
    */
   handlePresubmitSuccess_(trust) {
     if (this.xhrAction_) {
-      this.handleXhrSubmit_(trust);
+      return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
+      return Promise.resolve();
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(event);
+      return Promise.resolve();
     }
   }
 
@@ -609,8 +612,9 @@ export class AmpForm {
   }
 
   /**
-   * @param {ActionTrust} trust
    * @private
+   * @param {ActionTrust} trust
+   * @return {!Promise}
    */
   handleXhrSubmit_(trust) {
     let p;
@@ -628,6 +632,8 @@ export class AmpForm {
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
+
+    return p;
   }
 
   /**
