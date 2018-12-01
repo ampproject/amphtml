@@ -309,7 +309,7 @@ export class Templates {
     }
 
     let type;
-    const tagName = element.tagName;
+    const {tagName} = element;
     if (tagName == 'TEMPLATE') {
       type = element.getAttribute('type');
     } else if (tagName == 'SCRIPT') {
