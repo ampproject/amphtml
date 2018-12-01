@@ -433,11 +433,11 @@ export class AmpList extends AMP.BaseElement {
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|?JsonObject|string|undefined} data
    * @param {boolean} append
-   * @param {JsonObject=} opt_other
+   * @param {JsonObject=} opt_payload
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(data, append, opt_other) {
+  scheduleRender_(data, append, opt_payload) {
     dev().info(TAG, 'schedule:', data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
@@ -447,11 +447,12 @@ export class AmpList extends AMP.BaseElement {
       this.renderPass_.schedule();
     }
 
-    this.renderItems_ = {data, append, resolver, rejecter, 'other': opt_other};
+    this.renderItems_ = {data, append, resolver, rejecter,
+      'payload': opt_payload};
 
     if (this.renderedItems_ && append) {
       this.renderItems_.data = this.renderedItems_.concat(data);
-      this.renderItems_.other = opt_other || {};
+      this.renderItems_.payload = opt_payload || {};
     }
 
     return promise;
@@ -490,11 +491,11 @@ export class AmpList extends AMP.BaseElement {
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);
-      const templateData = /** @type {!JsonObject} */ (current.other);
+      const payload = /** @type {!JsonObject} */ (current.payload);
       this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements, current.append))
-          .then(() => this.maybeRenderLoadMoreTemplates_(templateData))
+          .then(() => this.maybeRenderLoadMoreTemplates_(payload))
           .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
