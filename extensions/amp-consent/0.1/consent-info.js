@@ -16,15 +16,21 @@
 
 import {dev} from '../../../src/log';
 import {isEnumValue, isObject} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 
 
 /**
+ * Key values for retriving/storing consent info object.
+ * STATE: Set when user accept or reject consent.
+ * STRING: Set when a consent string is used to store more granular consent info
+ * on vendors.
+ * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
 const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
-  DIRTYBIT: 'd',
+  IS_DIRTY: 'd',
 };
 
 /**
@@ -73,23 +79,7 @@ export function getStoredConsentInfo(value) {
 
   return constructConsentInfo(consentState,
       value[STORAGE_KEY.STRING],
-      (value[STORAGE_KEY.DIRTYBIT] && value[STORAGE_KEY.DIRTYBIT] === 1));
-}
-
-/**
- * Construct the consentInfo object from values
- * @param {CONSENT_ITEM_STATE} consentState
- * @param {string=} opt_consentString
- * @param {boolean=} opt_isDirty
- * @return {!ConsentInfoDef}
- */
-export function constructConsentInfo(consentState,
-  opt_consentString, opt_isDirty) {
-  return {
-    'consentState': consentState,
-    'consentString': opt_consentString,
-    'isDirty': opt_isDirty,
-  };
+      (value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1));
 }
 
 /**
@@ -97,7 +87,7 @@ export function constructConsentInfo(consentState,
  * @param {!CONSENT_ITEM_STATE} newState
  * @param {!CONSENT_ITEM_STATE} previousState
  */
-export function normalizeConsentStateValue(newState, previousState) {
+export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
   }
@@ -116,14 +106,17 @@ export function normalizeConsentStateValue(newState, previousState) {
 /**
  * Compose the value to store to localStorage based on the consentInfo
  * @param {!ConsentInfoDef} consentInfo
+ * @param {boolean=} opt_forceNew
  * @return {?boolean|Object}
  */
-export function composeStoreValue(consentInfo) {
-  if (!consentInfo['consentString'] && consentInfo['isDirty'] === undefined) {
+export function composeStoreValue(consentInfo, opt_forceNew) {
+  if (!opt_forceNew &&
+      !consentInfo['consentString'] &&
+      consentInfo['isDirty'] === undefined) {
     // TODO: Remove after turn on amp-consent-v2
     return calculateLegacyStateValue(consentInfo['consentState']);
   }
-  const obj = Object.create(null);
+  const obj = map();
   const consentState = consentInfo['consentState'];
   if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {
     obj[STORAGE_KEY.STATE] = 1;
@@ -136,7 +129,7 @@ export function composeStoreValue(consentInfo) {
   }
 
   if (consentInfo['isDirty'] === true) {
-    obj[STORAGE_KEY.DIRTYBIT] = 1;
+    obj[STORAGE_KEY.IS_DIRTY] = 1;
   }
 
   if (Object.keys(obj) == 0) {
@@ -162,12 +155,13 @@ export function calculateLegacyStateValue(consentState) {
 }
 
 /**
- * Deep compare two consentInfo
+ * Compare two consentInfo.
+ * Return true if they can be converted to the same stored value.
  * @param {?ConsentInfoDef} infoA
  * @param {?ConsentInfoDef} infoB
  * @return {boolean}
  */
-export function consentInfoEquals(infoA, infoB) {
+export function isConsentInfoStoredValueChanged(infoA, infoB) {
   if (!infoA && !infoB) {
     return true;
   }
@@ -176,10 +170,36 @@ export function consentInfoEquals(infoA, infoB) {
         calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
         ((infoA['consentString'] || '') === (infoB['consentString'] || ''));
-    const isDirtyEqual = !!infoA['isDirty'] == !!infoB['isDirty'];
+    const isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     return stateEqual && stringEqual && isDirtyEqual;
   }
   return false;
+}
+
+/**
+ * Convert the legacy boolean stored value to consentInfo object
+ * @param {boolean} value
+ * @return {!ConsentInfoDef}
+ */
+function getLegacyStoredConsentInfo(value) {
+  const state = convertValueToState(value);
+  return constructConsentInfo(state, undefined, undefined);
+}
+
+/**
+ * Construct the consentInfo object from values
+ * @param {CONSENT_ITEM_STATE} consentState
+ * @param {string=} opt_consentString
+ * @param {boolean=} opt_isDirty
+ * @return {!ConsentInfoDef}
+ */
+export function constructConsentInfo(consentState,
+  opt_consentString, opt_isDirty) {
+  return {
+    'consentState': consentState,
+    'consentString': opt_consentString,
+    'isDirty': opt_isDirty,
+  };
 }
 
 /**
@@ -193,14 +213,4 @@ function convertValueToState(value) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
-}
-
-/**
- * Convert the legacy boolean stored value to consentInfo object
- * @param {boolean} value
- * @return {!ConsentInfoDef}
- */
-function getLegacyStoredConsentInfo(value) {
-  const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined);
 }

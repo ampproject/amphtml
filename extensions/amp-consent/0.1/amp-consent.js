@@ -219,14 +219,13 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
-      if (isExperimentOn(this.win, 'amp-consent-v2')) {
-        if (data['info'] !== undefined) {
-          if (typeof data['info'] != 'string') {
-            user().error(TAG, 'consent-response info only supports string, ' +
-                '%s, treated as undefined', data['info']);
-          }
-          consentString = data['info'];
+      if (isExperimentOn(this.win, 'amp-consent-v2') &&
+          data['info'] !== undefined) {
+        if (typeof data['info'] != 'string') {
+          user().error(TAG, 'consent-response info only supports string, ' +
+              '%s, treated as undefined', data['info']);
         }
+        consentString = data['info'];
       }
 
       const iframes = this.element.querySelectorAll('iframe');
@@ -311,9 +310,9 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Handler User action
    * @param {string} action
-   * @param {string=} str
+   * @param {string=} consentString
    */
-  handleAction_(action, str) {
+  handleAction_(action, consentString) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -332,15 +331,21 @@ export class AmpConsent extends AMP.BaseElement {
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.ACCEPTED, str);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.ACCEPTED,
+          consentString);
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED, str);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.REJECTED,
+          consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
       // dismiss
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED, str);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.DISMISSED,
+          consentString);
     }
 
     // Hide current dialog

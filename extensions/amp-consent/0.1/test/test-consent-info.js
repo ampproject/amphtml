@@ -17,10 +17,10 @@
 import {
   CONSENT_ITEM_STATE,
   composeStoreValue,
-  consentInfoEquals,
+  isConsentInfoStoredValueChanged,
   constructConsentInfo,
   getStoredConsentInfo,
-  normalizeConsentStateValue,
+  recalculateConsentStateValue,
 } from '../consent-info';
 import {dict} from '../../../../src/utils/object';
 
@@ -106,9 +106,18 @@ describes.fakeWin('ConsentInfo', {}, () => {
     });
 
     it('legacy stored value', () => {
+      //TODO(@zhouyx): Remove after turn on amp-consent-v2
       expect(composeStoreValue(consentInfo)).to.be.null;
       consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
       expect(composeStoreValue(consentInfo)).to.equal(true);
+    });
+
+    it('new format', () => {
+      expect(composeStoreValue(consentInfo, true)).to.be.null;
+      consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
+      expect(composeStoreValue(consentInfo, true)).to.deep.equal({
+        's': 1,
+      });
     });
 
     it('add field only when defined', () => {
@@ -134,44 +143,44 @@ describes.fakeWin('ConsentInfo', {}, () => {
     });
   });
 
-  it('normalizeConsentStateValue', () => {
+  it('recalculateConsentStateValue', () => {
     // Always respect reject/accept
 
     let newState, previousState;
     newState = CONSENT_ITEM_STATE.ACCEPTED;
     previousState = CONSENT_ITEM_STATE.REJECTED;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(newState);
 
     // UNKNOWN/DISMISS/NOT_REQUIRED cannot override reject/accept
     newState = CONSENT_ITEM_STATE.UNKNOWN;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(previousState);
     newState = CONSENT_ITEM_STATE.DISMISSED;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(previousState);
     newState = CONSENT_ITEM_STATE.NOT_REQUIRED;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(previousState);
 
     // UNKNOWN/DISMISS cannot override NOT_REQUIRED
     previousState = CONSENT_ITEM_STATE.NOT_REQUIRED;
     newState = CONSENT_ITEM_STATE.UNKNOWN;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(previousState);
     newState = CONSENT_ITEM_STATE.DISMISSED;
-    expect(normalizeConsentStateValue(newState, previousState))
+    expect(recalculateConsentStateValue(newState, previousState))
         .to.equal(previousState);
 
     // DISMISS is converted to UNKNOWN
-    expect(normalizeConsentStateValue(
+    expect(recalculateConsentStateValue(
         CONSENT_ITEM_STATE.DISMISSED, CONSENT_ITEM_STATE.UNKNOWN))
         .to.equal(CONSENT_ITEM_STATE.UNKNOWN);
   });
 
-  it('consentInfoEquals', () => {
-    expect(consentInfoEquals(null, null)).to.be.true;
-    expect(consentInfoEquals({}, null)).to.be.false;
+  it('isConsentInfoStoredValueChanged', () => {
+    expect(isConsentInfoStoredValueChanged(null, null)).to.be.true;
+    expect(isConsentInfoStoredValueChanged({}, null)).to.be.false;
 
     // consentInfo equals when stored value is same
     const infoA = {
@@ -180,24 +189,24 @@ describes.fakeWin('ConsentInfo', {}, () => {
     const infoB = {
       'consentState': CONSENT_ITEM_STATE.NOT_REQUIRED,
     };
-    expect(consentInfoEquals(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
 
     infoA['consentString'] = '';
-    expect(consentInfoEquals(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
 
     infoB['isDirty'] = false;
-    expect(consentInfoEquals(infoA, infoB)).to.be.true;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.true;
 
     // consentInfo not equal
     infoA['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-    expect(consentInfoEquals(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
 
     infoB['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
     infoB['consentString'] = 'test';
-    expect(consentInfoEquals(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
 
     infoA['consentString'] = 'test';
     infoB['isDirty'] = true;
-    expect(consentInfoEquals(infoA, infoB)).to.be.false;
+    expect(isConsentInfoStoredValueChanged(infoA, infoB)).to.be.false;
   });
 });

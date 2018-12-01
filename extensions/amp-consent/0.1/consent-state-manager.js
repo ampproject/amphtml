@@ -19,16 +19,17 @@ import {
   ConsentInfoDef,
   calculateLegacyStateValue,
   composeStoreValue,
-  consentInfoEquals,
   constructConsentInfo,
   getStoredConsentInfo,
-  normalizeConsentStateValue,
+  isConsentInfoStoredValueChanged,
+  recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 
 
 const TAG = 'CONSENT-STATE-MANAGER';
@@ -179,6 +180,10 @@ export class ConsentInstance {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    /** @private {boolean} */
+    this.isAmpConsentV2ExperimentOn_ =
+        isExperimentOn(ampdoc.win, 'amp-consent-v2');
+
     /** @private {string} */
     this.id_ = id;
 
@@ -204,22 +209,23 @@ export class ConsentInstance {
   /**
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
-   * @param {string=} consentStr
+   * @param {string=} consentString
    */
-  update(state, consentStr) {
+  update(state, consentString) {
     const localStateValue =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-    const normalizedState = normalizeConsentStateValue(state, localStateValue);
-    if (consentStr === undefined && localConsentStr) {
-      consentStr = localConsentStr;
+    const calculatedState =
+        recalculateConsentStateValue(state, localStateValue);
+    if (consentString === undefined && localConsentStr) {
+      consentString = localConsentStr;
     }
-    const newConsentInfo = constructConsentInfo(normalizedState, consentStr);
+    const newConsentInfo = constructConsentInfo(calculatedState, consentString);
     const oldConsentInfo = this.localConsentInfo_;
     this.localConsentInfo_ = newConsentInfo;
 
-    if (!consentInfoEquals(newConsentInfo, oldConsentInfo)) {
+    if (!isConsentInfoStoredValueChanged(newConsentInfo, oldConsentInfo)) {
       this.updateStoredValue_(newConsentInfo);
       // TODO(@zhouyx): Need force update to update timestamp
     }
@@ -231,11 +237,13 @@ export class ConsentInstance {
    */
   updateStoredValue_(consentInfo) {
     this.storagePromise_.then(storage => {
-      if (!consentInfoEquals(consentInfo, this.localConsentInfo_)) {
+      if (!isConsentInfoStoredValueChanged(
+          consentInfo, this.localConsentInfo_)) {
         // If state has changed. do not store outdated value.
         return;
       }
-      const value = composeStoreValue(consentInfo);
+      const value = composeStoreValue(
+          consentInfo, this.isAmpConsentV2ExperimentOn_);
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage
