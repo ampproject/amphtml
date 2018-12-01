@@ -74,6 +74,10 @@ describes.repeated('', {
       // Force sync mutateElement to make testing easier.
       const resources = Services.resourcesForDoc(env.ampdoc);
       sandbox.stub(resources, 'mutateElement').callsArg(1);
+
+      // This needs to be stubbed to stop the function from hanging and timing out
+      // On tests that make proper XHR requests
+      sandbox.stub(xhrUtils, 'getViewerInterceptResponse').returns(Promise.resolve(null));
     });
 
     afterEach(() => sandbox.restore());
@@ -81,7 +85,8 @@ describes.repeated('', {
     function getAmpForm(form, canonical = 'https://example.com/amps.html') {
       new AmpFormService(env.ampdoc);
       Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
-      cidServiceForDocForTesting(env.ampdoc);
+      const cidService = cidServiceForDocForTesting(env.ampdoc);
+      sandbox.stub(cidService, 'get').returns(Promise.resolve('amp-cid'));
       env.ampdoc.getBody().appendChild(form);
       const ampForm = new AmpForm(form, 'amp-form-test-id');
       sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(false);
@@ -178,8 +183,7 @@ describes.repeated('', {
       let event;
 
       beforeEach(() => {
-        console.error('hellooooo');
-        getAmpFormPromise = getAmpForm(getForm()).then(ampForm => {
+        getSsrAmpFormPromise = getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           form.id = 'registration';
           event = {
@@ -197,6 +201,7 @@ describes.repeated('', {
           sandbox.stub(form, 'submit');
           sandbox.stub(form, 'checkValidity').returns(true);
           sandbox.stub(ampForm, 'analyticsEvent_');
+          ampForm.ssrTemplateHelper_.isSupported.restore();
           sandbox.stub(ampForm.ssrTemplateHelper_, 'isSupported').returns(true);
 
           return ampForm;
@@ -207,17 +212,14 @@ describes.repeated('', {
         return getSsrAmpFormPromise.then(ampForm => {
           ampForm.xhrAction_ = null;
 
-          console.error('in the test');
-
           const errorRe =
             /Non-XHR GETs not supported./;
           expectAsyncConsoleError(errorRe);
-          // torch2424
-          return ampForm.handleSubmitEvent_(event)
-            .then(() => {console.error('yooo')})
-            .catch(error => {
-               console.error(error);
-            });
+          try {
+            return ampForm.handleSubmitEvent_(event);
+          } catch(error) {
+            return Promise.resolve();
+          }
         });
       });
 
@@ -258,7 +260,7 @@ describes.repeated('', {
           sandbox.stub(form.ssrTemplateHelper_.templates_, 'findTemplate')
               .returns(template);
           const fetchAndRenderTemplate = sandbox.stub(
-              form.ssrTemplateHelper_, 'fetchAndRenderTemplate');
+              ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
           sandbox.stub(form.templates_, 'findAndRenderTemplate')
               .onFirstCall().returns(Promise.resolve(renderedTemplate))
             .onSecondCall().returns(Promise.resolve(template));
@@ -1401,22 +1403,23 @@ describes.repeated('', {
             preventDefault: sandbox.spy(),
           };
 
-          // Submit an invalid form, no promise returned
-          const optionalPromiseResponse = ampForm.handleSubmitEvent_(event);
-          expect(optionalPromiseResponse).to.not.be.ok;
-          expect(form.checkValidity).to.be.called;
-          expect(emailInput.checkValidity).to.be.called;
-          expect(fieldset.checkValidity).to.be.called;
-          expect(form.className).to.contain('user-invalid');
-          expect(emailInput.className).to.contain('user-invalid');
-          expect(event.preventDefault).to.be.called;
-          expect(event.stopImmediatePropagation).to.be.called;
+          // Submit an invalid form
+          const invalidFormPromiseResponse = ampForm.handleSubmitEvent_(event);
+          return invalidFormPromiseResponse.then(() => {
+            expect(form.checkValidity).to.be.called;
+            expect(emailInput.checkValidity).to.be.called;
+            expect(fieldset.checkValidity).to.be.called;
+            expect(form.className).to.contain('user-invalid');
+            expect(emailInput.className).to.contain('user-invalid');
+            expect(event.preventDefault).to.be.called;
+            expect(event.stopImmediatePropagation).to.be.called;
 
-          emailInput.value = 'cool@bea.ns';
+            emailInput.value = 'cool@bea.ns';
 
-          const submitPromise = ampForm.handleSubmitEvent_(event);
-          expect(submitPromise).to.be.ok;
-          submitPromise.then(() => {
+            const submitPromise = ampForm.handleSubmitEvent_(event);
+            expect(submitPromise).to.be.ok;
+            return submitPromise;
+          }).then(() => {
             expect(form.className).to.contain('user-valid');
             expect(emailInput.className).to.contain('user-valid');
           });
@@ -1634,7 +1637,7 @@ describes.repeated('', {
         form.appendChild(selector);
 
         sandbox.stub(selector, 'whenBuilt')
-            .returns(new Promise(unusedResolve => {}));
+          .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
         const submitPromise = ampForm.actionHandler_({method: 'submit'});
@@ -1646,8 +1649,6 @@ describes.repeated('', {
           expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
           return submitPromise;
         });
-
-
       });
     });
 
