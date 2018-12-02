@@ -41,13 +41,8 @@ amp-consent.amp-hidden {
   visibility: hidden;
 }
 
-amp-consent.loading {
+amp-consent.i-amphtml-consent-loading {
   /* TODO: Finalize the placeholder design */
-  height: 30px;
-}
-
-amp-consent.consent-iframe-active {
-  height: 30vh;
 }
 
 .i-amphtml-consent-placeholder {
@@ -62,15 +57,26 @@ amp-consent.consent-iframe-active {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  height: 30vh;
   width: 100%;
 }
 
-@keyframes i-amphtml-consent-ui-in {
-  0% {transform: translateY(100%);}
-  100% {transform: translateY(0);}
+amp-consent.i-amphtml-consent-ui-iframe-active {
+  height: 100vh !important;
+  transform: translate3d(0px, 100%, 0px) !important;
 }
 
-.i-amphtml-consent-ui-in {
-  animation: i-amphtml-consent-ui-in 0.5s linear;
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
+  transition: transform 0.5s ease-out !important;
+  transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
 }
+
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
+  transform: translate3d(0px, calc(100% - 100vh), 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-fill {
+  height: 100vh !important;
+}
+
