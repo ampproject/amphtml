@@ -179,10 +179,12 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
-    this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
+    this.registerAction('accept',
+        this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
+    this.registerAction('reject',
+        this.handleAction_.bind(this, ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
-        () => this.handleAction_(ACTION_TYPE.DISMISS));
+        this.handleAction_.bind(this, ACTION_TYPE.DISMISS));
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
@@ -265,7 +267,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.vsync_.mutate(() => {
       this.currentDisplayInstance_ = instanceId;
-      this.consentUI_[this.currentDisplayInstance_].show();
+      this.getCurrentConsentUi_().show();
     });
 
     const deferred = new Deferred();
@@ -277,24 +279,21 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    if (!this.currentDisplayInstance_ ||
-        !this.consentUI_[this.currentDisplayInstance_]) {
-      dev().error(TAG, '%s no consent ui to hide',
-          this.currentDisplayInstance_);
+    const consentUi = this.getCurrentConsentUi_();
+    if (!consentUi) {
+      dev().error(TAG,
+          '%s no consent ui to hide', this.currentDisplayInstance_);
     }
 
-    const uiToHide = this.consentUI_[this.currentDisplayInstance_];
-
-    this.vsync_.mutate(() => {
-      uiToHide.hide();
-    });
-
+    consentUi.hide();
     const displayInstance = /** @type {string} */ (
       this.currentDisplayInstance_);
+
     if (this.dialogResolver_[displayInstance]) {
       this.dialogResolver_[displayInstance]();
       this.dialogResolver_[displayInstance] = null;
     }
+
     this.consentUIPendingMap_[displayInstance] = false;
     this.currentDisplayInstance_ = null;
   }
@@ -318,6 +317,7 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return;
     }
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -327,9 +327,11 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED);
     } else if (action == ACTION_TYPE.DISMISS) {
+      // dismiss
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED);
     }
+
     // Hide current dialog
     this.hide_();
   }
@@ -483,6 +485,17 @@ export class AmpConsent extends AMP.BaseElement {
         'consent with id %s not found', consentId);
     // toggle the UI for this consent
     this.scheduleDisplay_(consentId);
+  }
+
+  /**
+   * Function to return our current consent UI
+   * @return {?ConsentUI}
+   */
+  getCurrentConsentUi_() {
+    if (!this.currentDisplayInstance_) {
+      return null;
+    }
+    return this.consentUI_[this.currentDisplayInstance_];
   }
 
   /**
