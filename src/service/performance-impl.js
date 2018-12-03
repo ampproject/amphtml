@@ -120,8 +120,9 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = Services.viewerForDoc(this.win.document);
-    this.resources_ = Services.resourcesForDoc(this.win.document);
+    const {documentElement} = this.win.document;
+    this.viewer_ = Services.viewerForDoc(documentElement);
+    this.resources_ = Services.resourcesForDoc(documentElement);
 
     this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
         this.viewer_.getParam('csi') === '1';
@@ -289,7 +290,8 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    const size = Services.viewportForDoc(this.win.document).getSize();
+    const {documentElement} = this.win.document;
+    const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.getResourcesInRect(
         this.win, rect, /* isInPrerender */ true)

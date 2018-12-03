@@ -207,7 +207,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector =
       r => r.element./*OK*/querySelector(`amp-ad[type=${type}]`);
-  return Services.resourcesForDoc(win.document).getMeasuredResources(win,
+  const {documentElement} = win.document;
+  return Services.resourcesForDoc(documentElement).getMeasuredResources(win,
       r => {
         const isAmpAdType = r.element.tagName == 'AMP-AD' &&
           r.element.getAttribute('type') == type;

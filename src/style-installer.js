@@ -258,8 +258,8 @@ export function makeBodyVisible(doc) {
       }).then(services => {
         set();
         if (services.length > 0) {
-          Services.resourcesForDoc(doc)./*OK*/schedulePass(
-              1, /* relayoutAll */ true);
+          const resources = Services.resourcesForDoc(doc.documentElement);
+          resources./*OK*/schedulePass(1, /* relayoutAll */ true);
         }
         try {
           const perf = Services.performanceFor(win);
@@ -302,7 +302,7 @@ function setBodyVisibleStyles(doc) {
  */
 function renderStartedNoInline(doc) {
   try {
-    Services.resourcesForDoc(doc).renderStarted();
+    Services.resourcesForDoc(doc.documentElement).renderStarted();
   } catch (e) {
     // `makeBodyVisible` is called in the error-processing cycle and thus
     // could be triggered when runtime's initialization is incomplete which

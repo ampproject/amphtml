@@ -302,14 +302,6 @@ const forbiddenTerms = {
       'src/service/video/autoplay.js',
     ],
   },
-  'getServiceForDocDeprecated': {
-    message: 'Use getServiceForDoc() instead.',
-    whitelist: [
-      'src/chunk.js',
-      'src/service.js',
-      'src/services.js',
-    ],
-  },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
