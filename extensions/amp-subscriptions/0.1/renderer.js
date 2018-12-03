@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {childElementByTag} from '../../../src/dom';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 
@@ -75,16 +76,18 @@ export class Renderer {
    */
   addLoadingBar() {
     return this.ampdoc_.whenReady().then(() => {
-      if (!this.ampdoc_.getBody().querySelector(
-          '[subscriptions-section=loading]')) {
-        const element = createElementWithAttributes(this.ampdoc_.win.document,
+      const body = this.ampdoc_.getBody();
+      if (!body.querySelector('[subscriptions-section=loading]')) {
+        const element = createElementWithAttributes(body.ownerDocument,
             'div' ,
             dict({
               'class': 'i-amphtml-subs-progress',
               'subscriptions-section': 'loading',
             })
         );
-        this.ampdoc_.getBody().appendChild(element);
+        // The loading indicator will be either inserted right before the
+        // `<footer>` node or appended as the last child.
+        body.insertBefore(element, childElementByTag(body, 'footer'));
       }
     });
   }
