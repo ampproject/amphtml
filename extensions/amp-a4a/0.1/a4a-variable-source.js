@@ -80,7 +80,7 @@ export class A4AVariableSource extends VariableSource {
   constructor(ampdoc, embedWin) {
     super(ampdoc);
 
-    // Use the embed parent's URL replacements service.
+    // Use parent URL replacements service for fallback.
     const {documentElement} = ampdoc.win.document;
     const urlReplacements = Services.urlReplacementsForDoc(documentElement);
 
