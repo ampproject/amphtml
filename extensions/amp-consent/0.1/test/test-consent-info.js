@@ -17,9 +17,9 @@
 import {
   CONSENT_ITEM_STATE,
   composeStoreValue,
-  isConsentInfoStoredValueChanged,
   constructConsentInfo,
   getStoredConsentInfo,
+  isConsentInfoStoredValueChanged,
   recalculateConsentStateValue,
 } from '../consent-info';
 import {dict} from '../../../../src/utils/object';

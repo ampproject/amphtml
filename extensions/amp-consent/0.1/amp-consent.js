@@ -179,12 +179,17 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept',
-        this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
-    this.registerAction('reject',
-        this.handleAction_.bind(this, ACTION_TYPE.REJECT));
-    this.registerAction('dismiss',
-        this.handleAction_.bind(this, ACTION_TYPE.DISMISS));
+    this.registerAction('accept', () => {
+      this.handleAction_(ACTION_TYPE.ACCEPT);
+    });
+
+    this.registerAction('reject', () => {
+      this.handleAction_(ACTION_TYPE.REJECT);
+    });
+
+    this.registerAction('dismiss', () => {
+      this.handleAction_(ACTION_TYPE.DISMISS);
+    });
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
