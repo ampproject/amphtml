@@ -299,11 +299,23 @@ function install(win, src, element) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
-    sendAmpScriptToSwOnFirstVisit(registration, win);
-    // prefetching outgoing links should be opt in.
-    if (element.hasAttribute('data-prefetch')) {
-      prefetchOutgoingLinks(registration, win);
+    // Check if there is a new service worker installing.
+    const installingRegistration = registration.installing;
+    if (installingRegistration) {
+      // if not already active, wait till it becomes active
+      installingRegistration.addEventListener('statechange', evt => {
+        if (evt.target.state === 'activated') {
+          performServiceWorkerOptimizations(
+              installingRegistration,
+              win,
+              element
+          );
+        }
+      });
+    } else if (registration.active) {
+      performServiceWorkerOptimizations(registration, win, element);
     }
+
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
@@ -311,31 +323,37 @@ function install(win, src, element) {
 }
 
 /**
- * Whenever a new service worker is activated, controlled page will send
- * the used AMP scripts and the self's URL to service worker to be cached.
+ * Initiates AMP service worker based optimizations
  * @param {ServiceWorkerRegistration} registration
  * @param {!Window} win
+ * @param {Element} element
  */
-function sendAmpScriptToSwOnFirstVisit(registration, win) {
-  const installingServiceWorker = registration.installing;
-  if (installingServiceWorker && 'performance' in win) {
-    installingServiceWorker.addEventListener('statechange', evt => {
-      const controllerSw = win.navigator.serviceWorker.controller;
-      if (evt.target.state !== 'activated' || !controllerSw) {
-        return;
-      }
+function performServiceWorkerOptimizations(registration, win, element) {
+  sendAmpScriptToSwOnFirstVisit(win);
+  // prefetching outgoing links should be opt in.
+  if (element.hasAttribute('data-prefetch')) {
+    prefetchOutgoingLinks(registration, win);
+  }
+}
 
-      // Fetch all AMP-scripts used on the page
-      const ampScriptsUsed = win.performance.getEntriesByType('resource')
-          .filter(item => item.initiatorType === 'script' &&
-            item.name.indexOf(urls.cdn) !== -1)
-          .map(script => script.name);
-      // using convention from https://github.com/redux-utilities/flux-standard-action.
-      controllerSw.postMessage(JSON.stringify(dict({
-        'type': 'AMP__FIRST-VISIT-CACHING',
-        'payload': ampScriptsUsed,
-      })));
-    });
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {!Window} win
+ */
+function sendAmpScriptToSwOnFirstVisit(win) {
+  if ('performance' in win) {
+    // Fetch all AMP-scripts used on the page
+    const ampScriptsUsed = win.performance.getEntriesByType('resource')
+        .filter(item => item.initiatorType === 'script' &&
+          item.name.indexOf(urls.cdn) !== -1)
+        .map(script => script.name);
+    const controllerSw = win.navigator.serviceWorker.controller;
+    // using convention from https://github.com/redux-utilities/flux-standard-action.
+    controllerSw.postMessage(JSON.stringify(dict({
+      'type': 'AMP__FIRST-VISIT-CACHING',
+      'payload': ampScriptsUsed,
+    })));
   }
 }
 
@@ -356,7 +374,7 @@ function prefetchOutgoingLinks(registration, win) {
       linkTag.setAttribute('href', link);
       document.head.appendChild(linkTag);
     });
-  } else if (registration.active) {
+  } else {
     registration.active.postMessage(JSON.stringify(dict({
       'type': 'AMP__LINK-PREFETCH',
       'payload': links,
