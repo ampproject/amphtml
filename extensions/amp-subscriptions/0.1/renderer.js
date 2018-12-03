@@ -80,7 +80,7 @@ export class Renderer {
     return this.ampdoc_.whenReady().then(() => {
       const body = this.ampdoc_.getBody();
       if (!body.querySelector('[subscriptions-section=loading]')) {
-        const element = createElementWithAttributes(body.ownerDocument,
+        const element = createElementWithAttributes(this.ampdoc_.win.document,
             'div' ,
             dict({
               'class': 'i-amphtml-subs-progress',
