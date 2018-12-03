@@ -45,8 +45,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    // ensures window location == AMP cache passes
+
+    // Ensures window location == AMP cache passes.
     env.win.AMP_MODE.test = true;
+
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
@@ -57,6 +59,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     doc.body.appendChild(element);
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
+
+    // RealTimeConfigManager should be using the UrlReplacements service
+    // scoped to the A4A (FIE), but for this test just use the parent service
+    // for simplicity.
+    const urlReplacements = Services.urlReplacementsForDoc(env.ampdoc);
+    sandbox.stub(Services, 'urlReplacementsForDoc')
+        .withArgs(a4aElement.element).returns(urlReplacements);
 
     rtc = new RealTimeConfigManager(a4aElement);
     maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
