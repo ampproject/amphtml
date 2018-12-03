@@ -120,7 +120,6 @@ export class AmpSidebar extends AMP.BaseElement {
       if (descendsFromStory(element)) {
         this.side_ = isRTL(this.document_) ? 'left' : 'right';
       } else {
-        console.log("does not descend from amp story");
         this.side_ = isRTL(this.document_) ? 'right' : 'left';
       }
       element.setAttribute('side', this.side_);
