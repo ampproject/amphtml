@@ -187,7 +187,6 @@ amp-sidebar {
     max-width: 320px !important;
   }
 
-
 .i-amphtml-story-fallback amp-story-page {
   display: none !important;
 }
@@ -252,7 +251,6 @@ amp-story-page[distance="2"] {
   background-color: #000;
   z-index: 2;
   animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
-
 }
 
 .i-amphtml-sidebar-mask {

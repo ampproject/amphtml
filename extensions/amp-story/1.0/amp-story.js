@@ -300,9 +300,13 @@ export class AmpStory extends AMP.BaseElement {
     this.sidebarObserver_ = null;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @private {?Array<string>} */
     this.supportedOrientations_ = null;
 =======
+=======
+    /** @private {?Element} */
+>>>>>>> 806a895b2... formatting and comments
     this.maskElement_ = null;
 >>>>>>> d6d79806a... Implemented codereview/ offline sync changes
 
