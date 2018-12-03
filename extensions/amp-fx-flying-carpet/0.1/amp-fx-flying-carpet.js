@@ -20,7 +20,6 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
-import {toArray} from '../../../src/types';
 
 const TAG = 'amp-fx-flying-carpet';
 
@@ -52,15 +51,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.totalChildren_ = 0;
 
     /**
-     * Initial children before we build the flying carpet.
-     * This is used by amp-ad to determine if they are the
-     * Only empty child within the flying carpet.
-     * @type{!Array<!Element>}
-     * @private
-     */
-    this.initialEmptyChildren_ = [];
-
-    /**
      * A cached reference to the container, used to set its width to match
      * the flying carpet's.
      * @type {?Element}
@@ -80,20 +70,11 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
-    // Get our initial empty children
-    const emptyChildrenSelector = '*.i-amphtml-element';
-    console.log('buildCallback()', this.element, this.element.querySelectorAll(emptyChildrenSelector));
-    this.initialEmptyChildren_ = toArray(this.element.querySelectorAll(emptyChildrenSelector));
-
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
     this.children_ = this.getRealChildren();
     this.container_ = container;
-
-    // TODO (@torch2424) Remove this before merging
-    console.log('this.element', this.element);
-    console.log('this.getRealChildren()', this.getRealChildren());
 
     const childNodes = this.getRealChildNodes();
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
@@ -129,14 +110,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   /** @override */
   viewportCallback(inViewport) {
     this.updateInViewport(this.children_, inViewport);
-  }
-
-  /**
-   * Function to return our initial empty children
-   * @return {!Array<!Element>}
-   */
-  getInitialEmptyChildren() {
-    return this.initialEmptyChildren_;
   }
 
   /**

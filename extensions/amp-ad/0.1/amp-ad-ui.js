@@ -74,14 +74,16 @@ export class AmpAdUIHandler {
 
     if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
 
-      // Special case: force collapse ad if only child of a flying carpet.
+      // Special case: force collapse ad if,
+      // only child, and direct child of a flying carpet.
       const flyingCarpetElements =
         ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
       const flyingCarpetElement = flyingCarpetElements[0];
-
-      flyingCarpetElement.getImpl().then(implementation => {
-        console.log('getInitialEmptyChildren()', implementation.getInitialEmptyChildren());
-      });
+      console.log(flyingCarpetElement.childNodes);
+      if (flyingCarpetElement.childNodes.length === 1 &&
+        flyingCarpetElement.childNodes[0] === this.element) {
+        this.baseInstance_./*OK*/collapse();
+      }
       return;
     }
 
