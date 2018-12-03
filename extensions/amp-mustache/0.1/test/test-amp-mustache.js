@@ -20,8 +20,10 @@ import {AmpMustache} from '../amp-mustache';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated('amp-mustache 0.1', {
-  'template script': {templateType: 'script'},
-  'template template': {templateType: 'template'},
+  'with script[type=text/plain][template=amp-mustache':
+      {templateType: 'script'},
+  'with template[type=amp-mustache]':
+      {templateType: 'template'},
 }, (name, variant) => {
 
   let sandbox;
@@ -293,9 +295,9 @@ describes.repeated('amp-mustache 0.1', {
           'text after a template');
     });
 
-    it('should sanitize nested templates without type="amp-mustache"',
-        done => {
-          if (isTemplateType) {
+    if (isTemplateType) {
+      it('should sanitize nested templates without type="amp-mustache"',
+          () => {
             innerHtmlSetup(
                 'text before a template ' +
                 '<template>text inside template</template> ' +
@@ -304,14 +306,9 @@ describes.repeated('amp-mustache 0.1', {
             const result = template.render({});
             expect(result./*OK*/innerHTML).to.equal(
                 'text before a template  text after a template');
-            done();
-          } else {
-            done();
-          }
-        });
+          });
 
-    it('should not render variables inside a nested template', done => {
-      if (isTemplateType) {
+      it('should not render variables inside a nested template', () => {
         innerHtmlSetup(
             'outer: {{outerOnlyValue}} {{mutualValue}} ' +
             '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
@@ -326,14 +323,9 @@ describes.repeated('amp-mustache 0.1', {
             'outer: Outer Mutual ' +
             '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
             ' {{mutualValue}}</template>');
-        done();
-      } else {
-        done();
-      }
-    });
+      });
 
-    it('should compile and render nested templates when invoked', done => {
-      if (isTemplateType) {
+      it('should compile and render nested templates when invoked', () => {
         const outerTemplateElement = document.createElement('template');
         outerTemplateElement./*OK*/innerHTML =
             'outer: {{value}} ' +
@@ -350,14 +342,9 @@ describes.repeated('amp-mustache 0.1', {
           value: 'Nested',
         });
         expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
-        done();
-      } else {
-        done();
-      }
-    });
+      });
 
-    it('should sanitize the inner template when it gets rendered', done => {
-      if (isTemplateType) {
+      it('should sanitize the inner template when it gets rendered', () => {
         const outerTemplateElement = document.createElement('template');
         outerTemplateElement./*OK*/innerHTML =
             'outer: {{value}} ' +
@@ -378,16 +365,11 @@ describes.repeated('amp-mustache 0.1', {
           });
           expect(nestedResult./*OK*/innerHTML).to.equal(
               '<div>nested</div>: Nested');
-          done();
         });
-      } else {
-        done();
-      }
-    });
+      });
 
-    it('should not allow users to pass data having key that starts with ' +
-        '__AMP_NESTED_TEMPLATE_0 when there is a nested template', done => {
-      if (isTemplateType) {
+      it('should not allow users to pass data having key that starts with ' +
+          '__AMP_NESTED_TEMPLATE_0 when there is a nested template', () => {
         templateElement./*OK*/innerHTML =
         'outer: {{value}} ' +
         '<template type="amp-mustache">nested: {{value}}</template>';
@@ -399,27 +381,19 @@ describes.repeated('amp-mustache 0.1', {
         expect(result./*OK*/innerHTML).to.equal(
             'outer: Outer ' +
             '<template type="amp-mustache">nested: {{value}}</template>');
-        done();
-      } else {
-        done();
-      }
-    });
+      });
 
-    it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
-        ' there are no nested templates, even though it is not a weird name' +
-        ' for a template variable', done => {
-      if (isTemplateType) {
+      it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
+          ' there are no nested templates, even though it is not a weird name' +
+          ' for a template variable', () => {
         templateElement./*OK*/innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
         template.compileCallback();
         const result = template.render({
           __AMP_NESTED_TEMPLATE_0: '123',
         });
         expect(result./*OK*/innerHTML).to.equal('123');
-        done();
-      } else {
-        done();
-      }
-    });
+      });
+    }
 
   });
 
@@ -487,24 +461,26 @@ describes.repeated('amp-mustache 0.1', {
   });
 
   describe('tables', () => {
-    it('should not foster text nodes in script template', done => {
-      if (isTemplateTypeScript) {
-        textContentSetup(
-            '<table>' +
-              '<tbody>' +
-                '<tr>' +
-                  '<td>Comment:</td>' +
-                  '<td>{{content}}</td>' +
-                '</tr>' +
-                '{{#replies}}' +
-                '<tr>' +
-                  '<td>Reply:</td>' +
-                  '<td>{{content}}</td>' +
-                '</tr>' +
-              '{{/replies}}' +
-              '</tbody>' +
-            '</table>');
-        template.compileCallback();
+    beforeEach(() => {
+      textContentSetup(
+          '<table>' +
+            '<tbody>' +
+              '<tr>' +
+                '<td>Comment:</td>' +
+                '<td>{{content}}</td>' +
+              '</tr>' +
+              '{{#replies}}' +
+              '<tr>' +
+                '<td>Reply:</td>' +
+                '<td>{{content}}</td>' +
+              '</tr>' +
+            '{{/replies}}' +
+            '</tbody>' +
+          '</table>');
+      template.compileCallback();
+    });
+    if (isTemplateTypeScript) {
+      it('should not foster text nodes in script template', () => {
         allowConsoleError(() => {
           const result = template.render({
             'content': 'Howdy',
@@ -521,12 +497,33 @@ describes.repeated('amp-mustache 0.1', {
                   '<td>hi</td>' +
                 '</tr>' +
               '</tbody>');
-          done();
         });
-      } else {
-        done();
-      }
-    });
+      });
+    }
+    if (isTemplateTypeScript) {
+      it('should foster text nodes in template[type="amp-mustache"]'
+          + 'destroying the templating', () => {
+        allowConsoleError(() => {
+          const result = template.render({
+            'content': 'Howdy',
+            'replies': [{'content': 'hi'}],
+          });
+          // Given the mustache markup {{#replies}} is hoisted.
+          // Expect the rendered HTML not to be what's expected.
+          expect(result.innerHTML).to.equal(
+              '<tbody>' +
+                '<tr>' +
+                  '<td>Comment:</td>' +
+                  '<td>Howdy</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td>Reply:</td>' +
+                  '<td>Howdy</td>' +
+                '</tr>' +
+              '</tbody>');
+        });
+      });
+    }
   });
 
   describe('viewer can render templates', () => {
