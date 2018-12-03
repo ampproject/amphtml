@@ -476,7 +476,7 @@ describes.repeated('amp-mustache 0.2', {
     });
     if (isTemplateTypeScript) {
       it('should not foster text nodes in script template', () => {
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           const result = template.render({
             'content': 'Howdy',
             'replies': [{'content': 'hi'}],
@@ -496,7 +496,7 @@ describes.repeated('amp-mustache 0.2', {
     if (isTemplateTypeScript) {
       it('should foster text nodes in template[type="amp-mustache"]'
           + 'destroying the templating', () => {
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           const result = template.render({
             'content': 'Howdy',
             'replies': [{'content': 'hi'}],

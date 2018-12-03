@@ -466,12 +466,10 @@ describes.repeated('amp-mustache 0.1', {
           '<table>' +
             '<tbody>' +
               '<tr>' +
-                '<td>Comment:</td>' +
                 '<td>{{content}}</td>' +
               '</tr>' +
               '{{#replies}}' +
               '<tr>' +
-                '<td>Reply:</td>' +
                 '<td>{{content}}</td>' +
               '</tr>' +
             '{{/replies}}' +
@@ -481,7 +479,7 @@ describes.repeated('amp-mustache 0.1', {
     });
     if (isTemplateTypeScript) {
       it('should not foster text nodes in script template', () => {
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           const result = template.render({
             'content': 'Howdy',
             'replies': [{'content': 'hi'}],
@@ -489,11 +487,9 @@ describes.repeated('amp-mustache 0.1', {
           expect(result.innerHTML).to.equal(
               '<tbody>' +
                 '<tr>' +
-                  '<td>Comment:</td>' +
                   '<td>Howdy</td>' +
                 '</tr>' +
                 '<tr>' +
-                  '<td>Reply:</td>' +
                   '<td>hi</td>' +
                 '</tr>' +
               '</tbody>');
@@ -503,7 +499,7 @@ describes.repeated('amp-mustache 0.1', {
     if (isTemplateTypeScript) {
       it('should foster text nodes in template[type="amp-mustache"]'
           + 'destroying the templating', () => {
-        allowConsoleError(() => {
+        return allowConsoleError(() => {
           const result = template.render({
             'content': 'Howdy',
             'replies': [{'content': 'hi'}],

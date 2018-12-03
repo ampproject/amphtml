@@ -308,7 +308,7 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
-    let type;
+    let type = '';
     const {tagName} = element;
     if (tagName == 'TEMPLATE') {
       type = element.getAttribute('type');
