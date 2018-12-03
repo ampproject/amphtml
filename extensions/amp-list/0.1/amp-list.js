@@ -195,7 +195,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!Element|null}
+   * @return {?Element}
    */
   getloadMoreButton_() {
     if (!this.loadMoreButton_) {
@@ -837,7 +837,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Element|null}
+   * @return {?Element}
    * @private
    */
   getLoadMoreFailedElement_() {
@@ -849,7 +849,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Element|null}
+   * @return {?Element}
    * @private
    */
   getLoadMoreEndElement_() {
