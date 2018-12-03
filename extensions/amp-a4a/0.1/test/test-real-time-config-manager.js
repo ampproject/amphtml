@@ -792,8 +792,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         ERROR_TYPE: errorType,
         HREF: env.win.location.href,
       };
-      requestUrl = Services.urlReplacementsForDoc(a4aElement).expandUrlSync(
-          errorReportingUrl, macros, whitelist);
+
+      requestUrl = Services.urlReplacementsForDoc(a4aElement.element)
+          .expandUrlSync(errorReportingUrl, macros, whitelist);
     });
 
     it('should send error message pingback to correct url', () => {
