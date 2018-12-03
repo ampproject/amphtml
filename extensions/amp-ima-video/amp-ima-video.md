@@ -77,7 +77,7 @@ The component HTML accepts the following types of HTML nodes as children:
 
 The URL for your VAST ad document. A relative URL or a URL that uses https protocol.
 
-##### data-src  
+##### data-src
 
 The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no `<source>` children are present.
 
@@ -86,9 +86,13 @@ The URL of your video content. A relative URL or a URL that uses https protocol.
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
 
-##### data-delay-ad-request
+##### data-delay-ad-request (optional)
 
 If true, delay the ad request until either the user scrolls the page, or for 3 seconds, whichever occurs first. Defaults to false.
+
+##### data-ad-label (optional)
+
+A format string that looks like "Ad (%s of %s)", used to generate the ad disclosure when an ad is playing. The "%s" in the format string is replaced with the current ad number in the sequence and the total number of ads, respectively (e.g. Ad 2 of 3).  This allows users to support ad disclosures in different languages. If no value is given, this defaults to "Ad (%s of %s)".
 
 ##### common attributes
 
