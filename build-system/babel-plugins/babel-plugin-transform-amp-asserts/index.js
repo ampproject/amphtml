@@ -82,7 +82,7 @@ module.exports = function(babel) {
           // If is not an assert type, we won't need to do type annotation.
           // If it has no type that we can cast to, then we also won't need to
           // do type annotation.
-          } else if (!/^assert/.test(property.name) || !type) {
+          } else if (!property.name.startsWith('assert') || !type) {
             path.replaceWith(args);
           } else {
             // Special case null value argument since it's mostly used for
