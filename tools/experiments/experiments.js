@@ -148,7 +148,7 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'amp-action-micro',
+    id: 'amp-action-macro',
     name: 'AMP extension for defining action macros',
     spec: 'https://github.com/ampproject/amphtml/issues/19494',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
