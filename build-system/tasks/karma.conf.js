@@ -190,6 +190,12 @@ module.exports = {
       platform: 'Windows 10',
       version: 'latest',
     }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_Dev: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'dev',
+    }, SAUCE_TIMEOUT_CONFIG),
     SL_Safari_12: Object.assign({
       base: 'SauceLabs',
       browserName: 'safari',

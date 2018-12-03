@@ -98,7 +98,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
 
   // TODO(choumx, #9759): Seems like old browsers give up when hitting
   // expected user errors due to illegal bindings in the form's template.
-  describe.configure().ifChrome().run('with <amp-form>', () => {
+  describe.configure().ifChrome().skipChromeDev().run('with <amp-form>', () => {
     beforeEach(() => {
       // <form> is not an AMP element.
       return setupWithFixture('test/fixtures/bind-form.html', 0)
