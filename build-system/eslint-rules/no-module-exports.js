@@ -32,7 +32,8 @@ module.exports = {
   create(context) {
 
     function isModuleExports(node) {
-      return node.object.type === 'Identifier' && (/^(module.exports)$/).test(node.object.name)
+      return node.object.type === 'Identifier' && (/^(module)$/).test(node.object.name) &&
+        node.property.type === 'Identifier' && (/^(exports)$/).test(node.property.name)
     }
 
     return {
