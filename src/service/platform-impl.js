@@ -110,7 +110,7 @@ export class Platform {
     if (!this.isFirefox()) {
       return false;
     }
-    return this.getMajorVersion > latestVersion.firefox;
+    return this.getMajorVersion() > latestVersion.firefox;
   }
 
   /**
