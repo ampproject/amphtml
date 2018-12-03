@@ -296,11 +296,10 @@ export class SubscriptionService {
           }
       );
 
-      // Delegates the platform selection and activation call.
-      const doPlatformSelection = !isStoryDocument(this.ampdoc_.win.document);
-
-      this.startAuthorizationFlow_(doPlatformSelection);
-
+      isStoryDocument(this.ampdoc_.win.document).then(isStory => {
+        // Delegates the platform selection and activation call if is story.
+        this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
+      });
     });
     return this;
   }

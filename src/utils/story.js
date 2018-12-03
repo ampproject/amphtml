@@ -14,7 +14,7 @@
   * limitations under the License.
   */
 
-import {closestByTag} from '../dom';
+import {closestByTag, waitForChild} from '../dom';
 
 
 /**
@@ -32,8 +32,13 @@ export function descendsFromStory(element) {
 /**
  * Returns true if the document is an amp-story.
  * @param {!Document} doc
- * @return {boolean}
+ * @return {!Promise<boolean>}
  */
 export function isStoryDocument(doc) {
-  return doc.body.firstElementChild.tagName === 'AMP-STORY';
+  return new Promise(resolve => {
+    waitForChild(doc.documentElement,
+        () => !!(doc.body && doc.body.firstElementChild), () => {
+          resolve(doc.body.firstElementChild.tagName === 'AMP-STORY');
+        });
+  });
 }
