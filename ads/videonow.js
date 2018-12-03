@@ -29,7 +29,7 @@ export function videonow(global, data) {
   const profileId = data.pid || 1;
   const kind = data.type || 'prod';
 
-  // production version by default
+  // production version by default or get any init file by data-src attribute
   let script = (data.src && decodeURI(data.src)) ||
     ('https://static.videonow.ru/vn_init.js' +
       '?amp=1&profileId=' + profileId);
