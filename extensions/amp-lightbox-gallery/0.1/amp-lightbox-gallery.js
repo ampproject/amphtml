@@ -184,7 +184,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
       this.manager_ = manager;
       this.history_ = Services.historyForDoc(this.getAmpDoc());
-      this.action_ = Services.actionServiceForDoc(this.getAmpDoc());
+      this.action_ = Services.actionServiceForDoc(this.element);
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
