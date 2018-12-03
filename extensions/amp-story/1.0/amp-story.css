@@ -179,18 +179,14 @@ amp-story-page[active] {
 amp-sidebar {
   background-color: #ffffff !important;
   max-width: 280px !important;
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transform: translate3d(0, 100vh, 0) !important;
+  transition-delay: 0.15s !important;
 }
 
-/**
- * Tablets and desktop UI overrides.
- * Basically triggers for anything bigger than a Pixel XL / iPhone Plus.
- */
-@media (min-width: 420px) {
-  amp-sidebar {
+[desktop] amp-sidebar {
     max-width: 320px !important;
   }
-}
+
 
 .i-amphtml-story-fallback amp-story-page {
   display: none !important;
@@ -242,6 +238,25 @@ amp-story-page[distance="2"] {
   100% {
     opacity: 0.75;
   }
+}
+
+.i-amphtml-amp-story-sidebar-mask {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  opacity: 0.2;
+  /* Prevent someone from making this a full-screen image */
+  background-image: none !important;
+  background-color: #000;
+  z-index: 2;
+  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+
+}
+
+.i-amphtml-sidebar-mask {
+  display: none;
 }
 
 /**

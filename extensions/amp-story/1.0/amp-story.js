@@ -299,8 +299,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
 
+<<<<<<< HEAD
     /** @private {?Array<string>} */
     this.supportedOrientations_ = null;
+=======
+    this.maskElement_ = null;
+>>>>>>> d6d79806a... Implemented codereview/ offline sync changes
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -1465,7 +1469,9 @@ export class AmpStory extends AMP.BaseElement {
         actions.execute(this.sidebar_, 'open', /* args */ null,
         /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
+        this.openMask_()
       } else {
+        this.closeMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
@@ -1473,6 +1479,39 @@ export class AmpStory extends AMP.BaseElement {
           /* source */ null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
+    }
+  }
+
+  /**
+   * @private
+   */
+  openMask_() {
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    if (!this.maskElement_) {
+      const mask = this.win.document.createElement('div');
+      mask.classList.add('i-amphtml-amp-story-sidebar-mask');
+      mask.addEventListener('click', () => {
+      actions.execute(this.sidebar_, 'close', /* args */ null,
+        /* source */ null, /* caller */ null, /* event */ null,
+            ActionTrust.HIGH);
+      });
+      // The mask div should be added right after the sidebar.
+      const referenceNode = this.win.document.getElementsByTagName('amp-sidebar')[0];
+      referenceNode.parentNode.insertBefore(mask, referenceNode.nextSibling);
+      mask.addEventListener('touchmove', e => {
+        e.preventDefault();
+      });
+      this.maskElement_ = mask;
+    }
+    toggle(this.maskElement_, /* display */true);
+  }
+
+  /**
+   * @private
+   */
+  closeMask_() {
+    if (this.maskElement_) {
+      toggle(this.maskElement_, /* display */false);
     }
   }
 
