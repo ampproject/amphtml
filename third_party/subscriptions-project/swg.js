@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.39 */
+/** Version: 0.1.22.40 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -114,10 +114,16 @@ let ActivityRequest;
  *   redirect is used. By default, the activity request is appended to the
  *   activity URL. This option can be used if the activity request is passed
  *   to the activity by some alternative means.
+ * - disableRedirectFallback: disallows popup fallback to redirect. By default
+ *   the redirect fallback is allowed. This option has to be used very carefully
+ *   because there are many user agents that may fail to open a popup and it
+ *   won't be always possible for the opener window to even be aware of such
+ *   failures.
  *
  * @typedef {{
  *   returnUrl: (string|undefined),
  *   skipRequestInUrl: (boolean|undefined),
+ *   disableRedirectFallback: (boolean|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  * }}
@@ -413,6 +419,25 @@ function isEdgeBrowser(win) {
  */
 function throwAsync(e) {
   setTimeout(() => {throw e;});
+}
+
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isNodeConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return root && root.contains(node) || false;
 }
 
 
@@ -905,7 +930,7 @@ class ActivityIframePort {
    * @return {!Promise}
    */
   connect() {
-    if (!this.win_.document.documentElement.contains(this.iframe_)) {
+    if (!isNodeConnected(this.iframe_)) {
       throw new Error('iframe must be in DOM');
     }
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -1069,8 +1094,8 @@ class ActivityWindowPort {
     this.openTarget_ = target;
     /** @private @const {?Object} */
     this.args_ = opt_args || null;
-    /** @private @const {?ActivityOpenOptions} */
-    this.options_ = opt_options || null;
+    /** @private @const {!ActivityOpenOptions} */
+    this.options_ = opt_options || {};
 
     /** @private {?function((!ActivityResult|!Promise))} */
     this.resultResolver_ = null;
@@ -1160,9 +1185,9 @@ class ActivityWindowPort {
     // Protectively, the URL will contain the request payload, unless explicitly
     // directed not to via `skipRequestInUrl` option.
     let url = this.url_;
-    if (!(this.options_ && this.options_.skipRequestInUrl)) {
+    if (!this.options_.skipRequestInUrl) {
       const returnUrl =
-          this.options_ && this.options_.returnUrl ||
+          this.options_.returnUrl ||
           removeFragment(this.win_.location.href);
       const requestString = serializeRequest({
         requestId: this.requestId_,
@@ -1191,7 +1216,9 @@ class ActivityWindowPort {
       // Ignore.
     }
     // Then try with `_top` target.
-    if (!targetWin && openTarget != '_top') {
+    if (!targetWin &&
+        openTarget != '_top' &&
+        !this.options_.disableRedirectFallback) {
       openTarget = '_top';
       try {
         targetWin = this.win_.open(url, openTarget);
@@ -1248,13 +1275,11 @@ class ActivityWindowPort {
     const maxHeight = Math.max(availHeight - controlsHeight, availHeight * 0.5);
     let w = Math.floor(Math.min(600, maxWidth * 0.9));
     let h = Math.floor(Math.min(600, maxHeight * 0.9));
-    if (this.options_) {
-      if (this.options_.width) {
-        w = Math.min(this.options_.width, maxWidth);
-      }
-      if (this.options_.height) {
-        h = Math.min(this.options_.height, maxHeight);
-      }
+    if (this.options_.width) {
+      w = Math.min(this.options_.width, maxWidth);
+    }
+    if (this.options_.height) {
+      h = Math.min(this.options_.height, maxHeight);
     }
     const x = Math.floor((screen.width - w) / 2);
     const y = Math.floor((screen.height - h) / 2);
@@ -1404,8 +1429,7 @@ function discoverRedirectPort(win, fragment, requestId) {
   if (!fragmentParam) {
     return null;
   }
-  const response = /** @type {?Object} */ (JSON.parse(
-      decodeURIComponent(fragmentParam)));
+  const response = /** @type {?Object} */ (JSON.parse(fragmentParam));
   if (!response || response['requestId'] != requestId) {
     return null;
   }
@@ -1500,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.16';
+    this.version = '1.20';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -4298,7 +4322,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.39',
+    '_client': 'SwG 0.1.22.40',
   });
 }
 
@@ -6197,6 +6221,24 @@ class EntitlementsManager {
   }
 
   /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.win_.location.search;
+  }
+
+  /**
+   * @private
+   * @return boolean true if UTM source is google
+   */
+  isGoogleUtmSource_() {
+    // TODO(sohanirao): b/120294106
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    return (utmParams['utm_source'] == 'google');
+  }
+
+  /**
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
@@ -6207,7 +6249,8 @@ class EntitlementsManager {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
-      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS) {
+      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
+            this.isGoogleUtmSource_()) {
         this.logPaywallImpression_();
       }
       return response;
@@ -7301,6 +7344,12 @@ class LinkSaveFlow {
     /** @private {?Promise<*>} */
     this.requestPromise_ = null;
 
+    /** @private {?Promise<!Object>} */
+    this.linkedPromise_ = null;
+
+    /** @private {?Promise<boolean>} */
+    this.confirmPromise_ = null;
+
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
   }
@@ -7312,6 +7361,33 @@ class LinkSaveFlow {
   getRequestPromise() {
     return this.requestPromise_;
   }
+
+  /**
+   * @return {?Promise}
+   * @package Visible for testing.
+   */
+  whenLinked() {
+    return this.linkedPromise_;
+  }
+
+  /**
+   * @return {?Promise<boolean>}
+   * @package Visible for testing.
+   */
+  whenConfirmed() {
+    return this.confirmPromise_;
+  }
+
+  /**
+   * @private
+   */
+  complete_() {
+    this.dialogManager_.completeView(this.activityIframeView_);
+  }
+
+  /**
+   * @return {?Promise}
+   */
   /**
    * Starts the save subscription
    * @return {!Promise}
@@ -7327,7 +7403,8 @@ class LinkSaveFlow {
         this.activityPorts_,
         feUrl('/linksaveiframe'),
         feArgs(iframeArgs),
-        /* shouldFadeBody */ false
+        /* shouldFadeBody */ false,
+        /* hasLoadingIndicator */ true
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
@@ -7349,30 +7426,51 @@ class LinkSaveFlow {
           this.activityIframeView_.message(saveRequest);
         }).catch(reason => {
           // The flow is complete.
-          this.dialogManager_.completeView(this.activityIframeView_);
+          this.complete_();
           throw reason;
         });
       }
     });
+
+    this.linkedPromise_ = this.activityIframeView_.port().then(port => {
+      return acceptPortResultData(
+          port,
+          feOrigin(),
+          /* requireOriginVerified */ true,
+          /* requireSecureChannel */ true);
+    });
+
+    let linkConfirm = null;
+    this.confirmPromise_ = this.linkedPromise_.then(result => {
+      // This flow is complete
+      this.complete_();
+      if (result['linked']) {
+        this.dialogManager_.popupClosed();
+        this.deps_.callbacks().triggerFlowStarted(
+            SubscriptionFlows.LINK_ACCOUNT);
+        linkConfirm = new LinkCompleteFlow(this.deps_, result);
+        return linkConfirm.start();
+      }
+      return Promise.reject(createCancelError(this.win_, 'not linked'));
+    }).then(() => {
+      this.deps_.callbacks().triggerLinkProgress();
+      return linkConfirm.whenComplete();
+    }).then(() => {
+      return true;
+    }).catch(reason => {
+      if (isCancelError(reason)) {
+        this.deps_.callbacks().triggerFlowCanceled(
+            SubscriptionFlows.LINK_ACCOUNT);
+        return false;
+      }
+      // In case this flow wasn't complete, complete it here
+      this.complete_();
+      throw reason;
+    });
+
     /** {!Promise<boolean>} */
     return this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true).then(() => {
-          return this.activityIframeView_.port().then(port => {
-            return acceptPortResultData(
-                port,
-                feOrigin(),
-                /* requireOriginVerified */ true,
-                /* requireSecureChannel */ true);
-          }).then(result => {
-            return result['linked'];
-          }).catch(() => {
-            return false;
-          }).then(result => {
-            // The flow is complete.
-            this.dialogManager_.completeView(this.activityIframeView_);
-            return result;
-          });
-        });
+        /* hidden */ true);
   }
 }
 
