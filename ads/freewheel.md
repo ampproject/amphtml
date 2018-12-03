@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ limitations under the License.
 For details on the configuration semantics, please contact the FreeWheel support team : clientsidesdk@freewheel.tv
 
 Supported parameters:  
-
+All parameters are optional, unless otherwise stated  
 - `data-zone` [required]
 - `data-blurDisplay`
 - `data-timeline`
