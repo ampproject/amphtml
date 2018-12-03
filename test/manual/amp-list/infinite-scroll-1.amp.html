@@ -21,12 +21,12 @@
       background: gray;
       color: #fff;
       cursor: pointer;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
       z-index: 2;
       padding: 16px;
+    }
+
+    [load-more-failed] {
+      background: purple;
     }
 
     .amp-load-more-loading, [load-more-loading] {
@@ -66,7 +66,7 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=5&latency=3000"
+    src="/infinite-scroll?items=5&left=1&latency=100"
     load-more
     load-more-bookmark="next">
     <template type="amp-mustache">
@@ -75,10 +75,8 @@
         <div><a href="/link.html">{{title}}</a></div>
       </div>
     </template>
-    <div load-more-button>
-      <template type="amp-mustache">
-        {{loadMoreButtonText}}
-      </template>
+    <div load-more-button id="button">
+      SEE MORE
     </div>
     <div load-more-failed>
       FAILED
@@ -88,7 +86,7 @@
     </div>
     <div load-more-end>
       <template type="amp-mustache">
-        {{loadMoreEndText}}
+        <div>{{loadMoreEndText}}</div>
       </template>
     </div>
     <div fallback>
