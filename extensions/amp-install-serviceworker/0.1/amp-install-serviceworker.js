@@ -306,14 +306,14 @@ function install(win, src, element) {
       installingRegistration.addEventListener('statechange', evt => {
         if (evt.target.state === 'activated') {
           performServiceWorkerOptimizations(
-              installingRegistration,
+              registration.active,
               win,
               element
           );
         }
       });
     } else if (registration.active) {
-      performServiceWorkerOptimizations(registration, win, element);
+      performServiceWorkerOptimizations(registration.active, win, element);
     }
 
     return registration;
@@ -324,15 +324,15 @@ function install(win, src, element) {
 
 /**
  * Initiates AMP service worker based optimizations
- * @param {ServiceWorkerRegistration} registration
+ * @param {ServiceWorker} activeSw
  * @param {!Window} win
  * @param {Element} element
  */
-function performServiceWorkerOptimizations(registration, win, element) {
+function performServiceWorkerOptimizations(activeSw, win, element) {
   sendAmpScriptToSwOnFirstVisit(win);
   // prefetching outgoing links should be opt in.
   if (element.hasAttribute('data-prefetch')) {
-    prefetchOutgoingLinks(registration, win);
+    prefetchOutgoingLinks(activeSw, win);
   }
 }
 
@@ -360,13 +360,13 @@ function sendAmpScriptToSwOnFirstVisit(win) {
 /**
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
- * @param {ServiceWorkerRegistration} registration
+ * @param {ActiveServiceWorker} sw
  * @param {!Window} win
  */
-function prefetchOutgoingLinks(registration, win) {
+function prefetchOutgoingLinks(sw, win) {
   const {document} = win;
   const links = [].map.call(document.querySelectorAll('a[data-rel=prefetch]'),
-      link => link.getAttribute('href'));
+      link => link.href);
   if (supportsPrefetch(document)) {
     links.forEach(link => {
       const linkTag = document.createElement('link');
@@ -375,7 +375,7 @@ function prefetchOutgoingLinks(registration, win) {
       document.head.appendChild(linkTag);
     });
   } else {
-    registration.active.postMessage(JSON.stringify(dict({
+    sw.active.postMessage(JSON.stringify(dict({
       'type': 'AMP__LINK-PREFETCH',
       'payload': links,
     })));
