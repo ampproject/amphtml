@@ -1186,7 +1186,7 @@ app.get('/infinite-scroll', function(req, res) {
   }
 
   const nextUrl = '/infinite-scroll?items=' +
-    numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1) +
+    numberOfItems + '&left=' + (pagesLeft - 1) +
     '&latency=' + latency;
 
   const randomFalsy = () => {
