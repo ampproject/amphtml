@@ -67,7 +67,10 @@ export class Platform {
    * @return {boolean}
    */
   isSafariLatest() {
-    return this.isSafari() && this.getMajorVersion() > latestVersion.safari;
+    if (!this.isSafari()) {
+      return false;
+    }
+    return this.getMajorVersion() === latestVersion.safari;
   }
 
   /**
@@ -85,8 +88,10 @@ export class Platform {
    * @return {boolean}
    */
   isChromeDev() {
-    // Also true for MS Edge :)
-    this.isChrome() && this.getMajorVersion() > latestVersion.chrome;
+    if (!this.isChrome()) {
+      return false;
+    }
+    return this.getMajorVersion() > latestVersion.chrome;
   }
 
   /**
@@ -102,7 +107,10 @@ export class Platform {
    * @return {boolean}
    */
   isFirefoxDev() {
-    return this.isFirefox() && this.getMajorVersion > latestVersion.firefox;
+    if (!this.isFirefox()) {
+      return false;
+    }
+    return this.getMajorVersion > latestVersion.firefox;
   }
 
   /**
