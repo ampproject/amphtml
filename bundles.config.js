@@ -83,6 +83,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {name: 'amp-brid-player', version: '0.1', type: TYPES.MEDIA},
+  {
+    name: 'amp-delight-player',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
+  },
   {name: 'amp-brightcove', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-byside-content',
@@ -176,7 +182,12 @@ exports.extensionBundles = [
     options: {hasCss: true},
     type: TYPES.MISC,
   },
-  {name: 'amp-list', version: '0.1', type: TYPES.MISC},
+  {
+    name: 'amp-list',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
   {
     name: 'amp-live-list',
     version: '0.1',
@@ -387,7 +398,13 @@ exports.extensionBundles = [
   {
     name: 'amp-video',
     version: '0.1',
-    type: TYPES.MISC,
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-video-docking',
+    version: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-video-iframe',

@@ -44,9 +44,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let callbacks;
   let methods;
   let ackStub;
+  let element;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
+    element = env.win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    env.win.document.head.appendChild(element);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -224,15 +228,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should reauthorize on complete linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.linkComplete)();
   });
 
   it('should reauthorize on canceled linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
@@ -241,8 +243,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const promise = Promise.resolve();
     const response = new SubscribeResponse(null, null, null, null,
         () => promise);
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;

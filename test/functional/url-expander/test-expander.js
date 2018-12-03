@@ -151,6 +151,7 @@ describes.realWin('Expander', {
       ASYNCFN: arg => Promise.resolve(arg),
       BROKEN: () => undefined,
       ANCESTOR_ORIGIN: () => Promise.resolve('https://www.google.com@foo'),
+      TITLE: 'hello world ',
     };
 
     const sharedTestCases = [
@@ -238,6 +239,11 @@ describes.realWin('Expander', {
         description: 'passes undefined for omitted args',
         input: 'CONCAT(foo)',
         output: 'foo-undefined',
+      },
+      {
+        description: 'should not double encode nested macros',
+        input: 'title=TRIM(TITLE)',
+        output: 'title=hello%20world',
       },
     ];
 
@@ -457,6 +463,26 @@ describes.realWin('Expander', {
         ).expand(url))
             .to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
       });
+    });
+  });
+
+  describe('getMacroNames', () => {
+    it('should handle no names found', () => {
+      const url = 'https://www.example.com/foo/bar?a=1&b=hello';
+      expect(new Expander(variableSource).getMacroNames(url)).to
+          .eql([]);
+    });
+
+    it('should find the correct names', () => {
+      const url = 'https://www.example.com?a=1&t=TITLE&c=CLIENT_ID(foo)';
+      expect(new Expander(variableSource).getMacroNames(url)).to
+          .eql(['TITLE', 'CLIENT_ID']);
+    });
+
+    it('should find the nested names', () => {
+      const url = 'https://www.example.com?a=1&t=TITLE&c=CLIENT_ID(QUERY_PARAM(foo))';
+      expect(new Expander(variableSource).getMacroNames(url)).to
+          .eql(['TITLE', 'CLIENT_ID', 'QUERY_PARAM']);
     });
   });
 });

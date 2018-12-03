@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpVideoIntegration, adopt} from '../../src/video-iframe-integration';
+import {
+  AmpVideoIntegration,
+  adopt,
+  getVideoJs,
+} from '../../src/video-iframe-integration';
+
+
+const NOOP = () => {};
+
 
 describes.realWin('video-iframe-integration', {amp: false}, env => {
 
@@ -230,6 +238,18 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
         });
       });
 
+      function mockVideoJsPlayer() {
+        return {
+          ready(fn) {
+            fn();
+          },
+          readyState() {
+            return 0;
+          },
+          on: sandbox.spy(),
+        };
+      }
+
       describe('video.js', () => {
         it('registers all methods', () => {
 
@@ -244,12 +264,18 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
             'fullscreenexit',
           ];
 
-          const integration = new AmpVideoIntegration({videojs: {}});
+          const player = mockVideoJsPlayer();
+
+          const integration = new AmpVideoIntegration();
+
           const listenToOnce = sandbox.stub(integration, 'listenToOnce_');
           const methodSpy = sandbox.spy(integration, 'method');
           const dummyElement = env.win.document.createElement('video');
 
-          integration.listenTo('videojs', dummyElement);
+          integration.listenTo(
+              'videojs',
+              dummyElement,
+              /* initializer */ () => player);
 
           expectedMethods.forEach(method => {
             expect(methodSpy.withArgs(method, sinon.match.any))
@@ -257,6 +283,29 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           });
 
           expect(listenToOnce.callCount).to.equal(expectedMethods.length);
+        });
+
+        describe('getVideoJs', () => {
+          it('returns window global if no initializer provided', () => {
+            const initializer = NOOP;
+            const win = {
+              videojs: initializer,
+            };
+            expect(getVideoJs(win).toString())
+                .to.equal(initializer.toString());
+          });
+
+          it('returns initializer if provided', () => {
+            const win = {};
+            const initializer = NOOP;
+            expect(getVideoJs(win, initializer).toString())
+                .to.equal(initializer.toString());
+          });
+
+          it('fails if no initializer provided or Video.JS not present', () => {
+            const win = {};
+            expect(() => getVideoJs(win)).to.throw;
+          });
         });
       });
     });

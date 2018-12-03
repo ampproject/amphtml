@@ -26,6 +26,9 @@ import {tryParseJson} from './json';
 export const SandboxOptions = {
   ALLOW_SCRIPTS: 'allow-scripts',
   ALLOW_SAME_ORIGIN: 'allow-same-origin',
+  ALLOW_POPUPS_TO_ESCAPE_SANDBOX: 'allow-popups-to-escape-sandbox',
+  ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION:
+    'allow-top-navigation-by-user-activation',
 };
 
 
@@ -86,6 +89,10 @@ export function createFrameFor(video, src, opt_name, opt_sandbox) {
   if (opt_sandbox) {
     frame.setAttribute('sandbox', opt_sandbox.join(' '));
   }
+
+  // Will propagate for every component, but only validation rules will actually
+  // allow the attribute to be set.
+  video.propagateAttributes(['referrerpolicy'], frame);
 
   frame.src = Services.urlForDoc(element).assertHttpsUrl(src, element);
 

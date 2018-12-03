@@ -735,6 +735,13 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     connectedCallback() {
+      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
+        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+      }
+      if (this.isInTemplate_) {
+        return;
+      }
+
       if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
@@ -746,12 +753,6 @@ function createBaseCustomElementClass(win) {
         this.classList.add('amp-notbuilt');
       }
 
-      if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
-      }
-      if (this.isInTemplate_) {
-        return;
-      }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
@@ -1455,7 +1456,7 @@ function createBaseCustomElementClass(win) {
       if (show) {
         const placeholder = this.getPlaceholder();
         if (placeholder) {
-          placeholder.classList.remove('amp-hidden');
+          dev().assertElement(placeholder).classList.remove('amp-hidden');
         }
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');

@@ -281,7 +281,7 @@ describe('amp-next-page config', () => {
       };
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
-            .to.throw('amp-next-page hideSelector value 2 is not a string');
+            .to.throw('amp-next-page hideSelector value should be a string: 2');
       });
     });
 
@@ -293,6 +293,58 @@ describe('amp-next-page config', () => {
       allowConsoleError(() => {
         expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
             .to.throw(/amp-next-page hideSelector .+ not allowed/);
+      });
+    });
+
+    it('allows AdSense URLs which target the same origin', () => {
+      const config = {
+        pages: [{
+          ampUrl: 'https://googleads.g.doubleclick.net/aclk?adurl=https://example.com/article',
+          image: 'https://example.com/image.png',
+          title: 'Article 1',
+        }],
+      };
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrl))
+          .to.not.throw();
+    });
+
+    it('allows AdSense URLs which target the same CDN origin', () => {
+      const config = {
+        pages: [{
+          ampUrl: 'https://googleads.g.doubleclick.net/aclk?adurl=https://example-com.cdn.ampproject.org/c/s/example.com/article',
+          image: 'https://example.com/image.png',
+          title: 'Article 1',
+        }],
+      };
+      expect(() => assertConfig(/*ctx*/ null, config, documentUrlCdn))
+          .to.not.throw();
+    });
+
+    it('throws for AdSense URLs which target different origins', () => {
+
+      const config1 = {
+        pages: [{
+          ampUrl: 'https://googleads.g.doubleclick.net/aclk?adurl=https://other.com/article',
+          image: 'https://example.com/image.png',
+          title: 'Article 1',
+        }],
+      };
+      const config2 = {
+        pages: [{
+          ampUrl: 'https://googleads.g.doubleclick.net/aclk?adurl=https://other-com.cdn.ampproject.org/c/s/example.com/article',
+          image: 'https://example.com/image.png',
+          title: 'Article 1',
+        }],
+      };
+      allowConsoleError(() => {
+        expect(() => assertConfig(/*ctx*/ null, config1, documentUrl))
+            .to.throw(
+                'pages must be from the same origin as the current document');
+      });
+      allowConsoleError(() => {
+        expect(() => assertConfig(/*ctx*/ null, config2, documentUrlCdn))
+            .to.throw(
+                'pages must be from the same origin as the current document');
       });
     });
   });

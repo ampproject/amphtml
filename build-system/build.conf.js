@@ -20,9 +20,10 @@ const defaultPlugins = [
 ];
 
 module.exports = {
-  plugins: isEsmBuild => {
+  plugins: (isEsmBuild, isCommonJsModule) => {
+    let pluginsToApply = defaultPlugins;
     if (isEsmBuild) {
-      return defaultPlugins.concat([
+      pluginsToApply = pluginsToApply.concat([
         [require.resolve('babel-plugin-filter-imports'), {
           'imports': {
             './polyfills/fetch': ['installFetch'],
@@ -30,11 +31,17 @@ module.exports = {
             './polyfills/document-contains': ['installDocContains'],
             './polyfills/math-sign': ['installMathSign'],
             './polyfills/object-assign': ['installObjectAssign'],
+            './polyfills/object-values': ['installObjectValues'],
             './polyfills/promise': ['installPromise'],
           },
         }],
       ]);
     }
-    return defaultPlugins;
+    if (isCommonJsModule) {
+      pluginsToApply = pluginsToApply.concat([
+        [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
+      ]);
+    }
+    return pluginsToApply;
   },
 };

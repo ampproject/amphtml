@@ -118,6 +118,7 @@ const VIDEO_EXTENSIONS = new Set([
   'amp-3q-player',
   'amp-brid-player',
   'amp-dailymotion',
+  'amp-delight-player',
   'amp-gfycat',
   'amp-ima-video',
   'amp-nexxtv-player',
@@ -545,11 +546,6 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'video-docking.css',
-    outJs: 'video-docking.css.js',
-    outCss: 'video-docking.css',
-  },
-  {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
     outCss: 'video-autoplay.css',
@@ -888,7 +884,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 

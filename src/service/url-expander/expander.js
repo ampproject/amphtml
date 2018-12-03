@@ -62,7 +62,7 @@ export class Expander {
     this.whiteList_ = opt_whiteList;
 
     /**@const {boolean|undefined} */
-    this.noEncode_ = opt_noEncode;
+    this.encode_ = !opt_noEncode;
   }
 
 
@@ -85,6 +85,19 @@ export class Expander {
     return this.parseUrlRecursively_(url, matches);
   }
 
+  /**
+   * Return any macros that exist in the given url.
+   * @param {string} url
+   * @return {!Array}
+   */
+  getMacroNames(url) {
+    const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
+    const matches = url.match(expr);
+    if (matches) {
+      return matches;
+    }
+    return [];
+  }
 
   /**
    * Structures the regex matching into the desired format
@@ -125,7 +138,7 @@ export class Expander {
     let ignoringChars = false;
     let nextArgShouldBeRaw = false;
 
-    const evaluateNextLevel = () => {
+    const evaluateNextLevel = encode => {
       let builder = '';
       const results = [];
 
@@ -140,11 +153,12 @@ export class Expander {
               // precedence of resolution choices in #expandBinding_ later.
               name: match.name,
               prioritized: this.bindings_[match.name],
+              encode,
             };
           } else {
             // or the global source
-            binding = this.variableSource_.get(match.name);
-            binding.name = match.name;
+            binding = Object.assign({}, this.variableSource_.get(match.name),
+                {name: match.name, encode});
           }
 
           urlIndex = match.stop + 1;
@@ -159,7 +173,7 @@ export class Expander {
             if (builder.trim().length) {
               results.push(builder);
             }
-            results.push(evaluateNextLevel());
+            results.push(evaluateNextLevel(/* encode */ false));
           } else {
             if (builder.length) {
               results.push(builder);
@@ -236,7 +250,7 @@ export class Expander {
           });
     };
 
-    return evaluateNextLevel();
+    return evaluateNextLevel(this.encode_);
   }
 
 
@@ -248,7 +262,7 @@ export class Expander {
    * @param {Array=} opt_args Arguments passed to the macro.
    */
   evaluateBinding_(bindingInfo, opt_args) {
-    const {name} = bindingInfo;
+    const {encode, name} = bindingInfo;
     let binding;
     if (hasOwn(bindingInfo, 'prioritized')) {
       // If a binding is passed in through the bindings argument it always takes
@@ -265,9 +279,16 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
-    return this.sync_ ?
-      this.evaluateBindingSync_(binding, name, opt_args) :
-      this.evaluateBindingAsync_(binding, name, opt_args);
+
+    // We should only ever encode the top level resolution, or not at all.
+    const shouldEncode = encode && !NOENCODE_WHITELIST[name];
+    if (this.sync_) {
+      const result = this.evaluateBindingSync_(binding, name,opt_args);
+      return shouldEncode ? encodeURIComponent(result) : result;
+    } else {
+      return this.evaluateBindingAsync_(binding, name, opt_args)
+          .then(result => shouldEncode ? encodeURIComponent(result) : result);
+    }
   }
 
 
@@ -298,10 +319,8 @@ export class Expander {
 
         if (val == null) {
           result = '';
-        } else if (this.noEncode_ || NOENCODE_WHITELIST[name]) {
-          result = val;
         } else {
-          result = encodeURIComponent(val);
+          result = val;
         }
         return result;
       }).catch(e => {
@@ -344,8 +363,7 @@ export class Expander {
           typeof value === 'boolean') {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
-        result = NOENCODE_WHITELIST[name] ? value.toString() :
-          encodeURIComponent(/** @type {string} */ (value));
+        result = value.toString();
       } else {
         // Most likely a broken binding gets us here.
         this.maybeCollectVars_(name, '', opt_args);

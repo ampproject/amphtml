@@ -26,9 +26,6 @@ import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  getDevelopmentBootstrapBaseUrl,
-} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -135,7 +132,7 @@ export class AmpRecaptchaService {
    * Returns a Promise that resolves the recaptcha token.
    * @param {number} resourceId
    * @param {string} action
-   * @return {Promise}
+   * @return {!Promise<string>}
    */
   execute(resourceId, action) {
     if (!this.iframe_) {
@@ -255,9 +252,14 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      return tryResolve(() => {
-        return getDevelopmentBootstrapBaseUrl(this.win_, 'recaptcha');
-      });
+      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
+          .then(curlsSubdomain => {
+            return 'http://' + curlsSubdomain +
+          '.recaptcha.localhost:8000/dist.3p/' +
+          (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
+            : 'current/recaptcha.max') +
+          '.html';
+          });
     }
 
     // Need to have the curls subdomain match the original document url.
