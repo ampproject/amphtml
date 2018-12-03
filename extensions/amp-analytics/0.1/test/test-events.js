@@ -1483,7 +1483,7 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(tracker.root, 'visible', config, handler);
         expect(handler).to.have.not.been.called;
 
-        win.document.dispatchEvent(new Event('unload'));
+        win.dispatchEvent(new Event('unload'));
 
         return new Promise(resolve => {
           setTimeout(() => {
@@ -1501,7 +1501,7 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(tracker.root, 'visible', config, handler);
         expect(handler).to.have.not.been.called;
 
-        win.document.dispatchEvent(new Event('pagehide'));
+        win.dispatchEvent(new Event('pagehide'));
         return new Promise(resolve => {
           setTimeout(() => {
             expect(handler).to.be.calledOnce;
