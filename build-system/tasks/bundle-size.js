@@ -296,7 +296,7 @@ async function skipBundleSize() {
     try {
       const response = await requestPost(url.resolve(bundleSizeAppBaseUrl,
           path.join('commit', commitHash, 'skip')));
-      if (response.statusCode !== 200) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
             `${response.statusCode} ${response.statusMessage}: ` +
             response.body);
@@ -329,7 +329,7 @@ async function reportBundleSize() {
           bundleSize,
         },
       });
-      if (response.statusCode !== 200) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
             `${response.statusCode} ${response.statusMessage}: ` +
             response.body);
