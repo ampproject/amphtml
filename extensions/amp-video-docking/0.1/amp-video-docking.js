@@ -13,45 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ActionTrust} from '../../action-constants';
+import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {
   PlayingStates,
   VideoAttributes,
   VideoEvents,
-} from '../../video-interface';
+  isDockable,
+} from '../../../src/video-interface';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
-} from '../position-observer/position-observer-impl';
+} from '../../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
-} from '../position-observer/position-observer-worker';
-import {Services} from '../../services';
+} from '../../../src/service/position-observer/position-observer-worker';
+import {Services} from '../../../src/services';
 import {
   childElementByTag,
   closestBySelector,
+  escapeCssSelectorIdent,
   isRTL,
   removeElement,
-} from '../../dom';
+} from '../../../src/dom';
 import {
   createCustomEvent,
   listen,
   listenOnce,
   listenOncePromise,
-} from '../../event-helper';
-// Source for this constant is css/video-docking.css:
-import {cssText} from '../../../build/video-docking.css.js';
-import {dev, user} from '../../log';
-import {dict} from '../../utils/object';
-import {getInternalVideoElementFor} from '../../utils/video';
-import {getServiceForDoc} from '../../service';
-import {htmlFor, htmlRefs} from '../../static-template';
-import {installStylesForDoc} from '../../style-installer';
-import {isExperimentOn} from '../../experiments';
-import {isFiniteNumber} from '../../types';
-import {mapRange} from '../../utils/math';
-import {moveLayoutRect} from '../../layout-rect';
-import {once} from '../../utils/function';
+} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getInternalVideoElementFor} from '../../../src/utils/video';
+import {getServiceForDoc} from '../../../src/service';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {isExperimentOn} from '../../../src/experiments';
+import {isFiniteNumber} from '../../../src/types';
+import {mapRange} from '../../../src/utils/math';
+import {moveLayoutRect} from '../../../src/layout-rect';
+import {once} from '../../../src/utils/function';
 import {
   px,
   resetStyles,
@@ -59,8 +60,8 @@ import {
   setStyles,
   toggle,
   translate,
-} from '../../style';
-import {urls} from '../../config';
+} from '../../../src/style';
+import {urls} from '../../../src/config';
 
 
 /** @private @const {number} */
@@ -108,7 +109,7 @@ export const Actions = {DOCK: 'dock', UNDOCK: 'undock'};
 
 /**
  * @struct @typedef {{
- *   video: !../../video-interface.VideoOrBaseElementDef,
+ *   video: !../../../src/video-interface.VideoOrBaseElementDef,
  *   target: !DockTargetDef,
  *   step: number,
  *   triggeredDock: boolean,
@@ -228,6 +229,29 @@ function complainAboutPortrait(element) {
 }
 
 
+/**
+ * @param {!Element} element
+ * @param {number} width
+ * @param {!Array<!SyntheticBreakpointDef>} breakpoints
+ */
+function applyBreakpointClassname(element, width, breakpoints) {
+  // sort by minWidth descending
+  breakpoints = breakpoints.sort((a, b) => b.minWidth - a.minWidth);
+
+  let maxBreakpoint = -1;
+  for (let i = 0; i < breakpoints.length; i++) {
+    const {className, minWidth} = breakpoints[i];
+    if (minWidth <= width &&
+        minWidth > maxBreakpoint) {
+      element.classList.add(className);
+      maxBreakpoint = minWidth;
+    } else {
+      element.classList.remove(className);
+    }
+  }
+}
+
+
 // Function should ideally be in `dom.js`, but moving it causes a bunch of ads
 // tests to fail, for some reason.
 // TODO(alanorozco): Move.
@@ -316,20 +340,43 @@ const Controls = html =>
 </div>`;
 
 
+/** @typedef {{className: string, minWidth: number}} */
+let SyntheticBreakpointDef;
+
 /**
- * Maps minimum target width to classname to be applied.
- * @private @const {!Object<string, string>}
+ * @private @const {!Array<!SyntheticBreakpointDef>}
  */
-const CONTROLS_BREAKPOINTS = {
-  '1': 'amp-small',
-  '300': 'amp-large',
-};
+const CONTROLS_BREAKPOINTS = [
+  {
+    className: 'amp-small',
+    minWidth: 0,
+  },
+  {
+    className: 'amp-large',
+    minWidth: 300,
+  },
+];
 
-// TODO(alanorozco): PLACEHOLDER_BREAKPOINTS for icon size. Currently it looks
-// a bit too large on mobile screens.
+/**
+ * @private @const {!Array<!SyntheticBreakpointDef>}
+ */
+const PLACEHOLDER_ICON_BREAKPOINTS = [
+  {
+    className: 'amp-small',
+    minWidth: 0,
+  },
+  {
+    className: 'amp-large',
+    minWidth: 420,
+  },
+];
 
-const PLACEHOLDER_ICON_WIDTH = 48;
-const PLACEHOLDER_ICON_MARGIN = 40;
+
+const PLACEHOLDER_ICON_LARGE_WIDTH = 48;
+const PLACEHOLDER_ICON_LARGE_MARGIN = 40;
+
+const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
+const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
 
 
 /** Timeout that can be postponed, repeated or cancelled. */
@@ -339,7 +386,7 @@ class Timeout {
    * @param {!Function} handler
    */
   constructor(win, handler) {
-    /** @private @const {!../timer-impl.Timer} */
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
     /** @private @const {!Function} */
@@ -375,23 +422,26 @@ class Timeout {
 
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
- * {@see ../../video-interface.VideoInterface}.
+ * {@see ../../../src/video-interface.VideoInterface}.
+ * @visibleForTesting
  */
 export class VideoDocking {
 
   /**
-   * @param {!../ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../video-service-interface.VideoServiceInterface} manager
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(ampdoc, manager) {
+  constructor(ampdoc) {
 
-    /** @private @const {!../ampdoc-impl.AmpDoc} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
-    this.manager_ = manager;
+    this.manager_ = once(() => Services.videoManagerForDoc(ampdoc));
 
-    /** @private @const {!../viewport/viewport-impl.Viewport} */
+    /**
+     * @private
+     * @const {!../../../src/service/viewport/viewport-impl.Viewport}
+     */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {?DockedDef} */
@@ -400,7 +450,8 @@ export class VideoDocking {
     /** @private @const {function():!Timeout} */
     this.getDockingTimeout_ = this.lazyTimeout_(video =>
       this.onDockingTimeout_(
-          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
+          /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
+            video)));
 
     /** @private @const {function():!Timeout} */
     this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
@@ -409,7 +460,8 @@ export class VideoDocking {
     /** @private @const {function():!Timeout} */
     this.getUndockingTimeout_ = this.lazyTimeout_(video =>
       this.undock_(
-          /** @type {!../../video-interface.VideoOrBaseElementDef} */ (video)));
+          /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
+            video)));
 
     /** @private {!RelativeX} */
     // Overriden when user drags the video to a corner.
@@ -448,7 +500,7 @@ export class VideoDocking {
           once(() => dev().assertElement(
               this.getPlaceholderBackground_().lastElementChild));
 
-    /** @private {?../../video-interface.VideoOrBaseElementDef} */
+    /** @private {?../../../src/video-interface.VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
 
     /** @private {?RelativeY} */
@@ -461,7 +513,7 @@ export class VideoDocking {
     this.videoUnlisteners_ = [];
 
     /**
-     * Memoizes x, y and scale to prevent useless mutations.
+     *  Memoizes x, y and scale to prevent useless mutations.
      * @private {?{x: number, y: number, scale: number}}
      */
     this.placedAt_ = null;
@@ -481,7 +533,7 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isDragging_ = false;
 
-    /** @private {!Array<!../../video-interface.VideoOrBaseElementDef>} */
+    /** @private {!Array<!../../../src/video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
     /** @private {boolean} */
@@ -505,6 +557,27 @@ export class VideoDocking {
     /** @private */
     this.hideControlsOnTapOutsideOnce_ =
         once(() => this.hideControlsOnTapOutside_());
+
+    const dockableSelector =
+        `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
+
+    const dockableElements =
+        ampdoc.getRootNode().querySelectorAll(dockableSelector);
+
+    for (let i = 0; i < dockableElements.length; i++) {
+      const element = dockableElements[i];
+      if (element.signals &&
+          element.signals().get(VideoEvents.REGISTERED)) {
+        this.registerElement(element);
+      }
+    }
+
+    listen(ampdoc.getBody(), VideoEvents.REGISTERED, e => {
+      const target = dev().assertElement(e.target);
+      if (isDockable(target)) {
+        this.registerElement(target);
+      }
+    });
   }
 
   /**
@@ -542,7 +615,7 @@ export class VideoDocking {
   installStyles_() {
     installStylesForDoc(
         this.ampdoc_,
-        cssText,
+        CSS,
         /* callback */ null,
         /* opt_isRuntimeCss */ false,
         /* opt_ext */ 'amp-video-docking');
@@ -562,7 +635,7 @@ export class VideoDocking {
     this.observed_.forEach(video => this.updateOnResize_(video));
   }
 
-  /** @param {!../../video-interface.VideoOrBaseElementDef} video */
+  /** @param {!../../../src/video-interface.VideoOrBaseElementDef} video */
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
         '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
@@ -576,6 +649,14 @@ export class VideoDocking {
     this.getPositionObserver_().observe(element, fidelity,
         () => this.updateOnPositionChange_(video));
     this.observed_.push(video);
+  }
+
+  /**
+   * @param {!Element} element
+   * @public
+   */
+  registerElement(element) {
+    element.getImpl().then(video => this.register(video));
   }
 
   /** @private */
@@ -665,8 +746,8 @@ export class VideoDocking {
       swap(pauseButton, playButton);
     }
 
-    if (this.manager_.isMuted(
-        /** @type {!../../video-interface.VideoInterface} */
+    if (this.manager_().isMuted(
+        /** @type {!../../../src/video-interface.VideoInterface} */
         (video))) {
       swap(muteButton, unmuteButton);
     } else {
@@ -775,7 +856,7 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!../../video-interface.VideoOrBaseElementDef}
+   * @return {!../../../src/video-interface.VideoOrBaseElementDef}
    * @private
    */
   getDockedVideo_() {
@@ -797,7 +878,7 @@ export class VideoDocking {
   /**
    * Reconciles the state of a docked or potentially dockable video when
    * the viewport/position changes.
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {?DockTargetDef}
    * @private
    */
@@ -832,7 +913,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -852,7 +933,7 @@ export class VideoDocking {
   }
 
   /**
-   * @return {!../../layout-rect.LayoutRectDef}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
   getFixedSlotLayoutBox_() {
@@ -861,7 +942,7 @@ export class VideoDocking {
 
   /**
    * @param {!Element} element
-   * @return {!../../layout-rect.LayoutRectDef}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
   getFixedLayoutBox_(element) {
@@ -883,7 +964,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @private
    */
   updateOnResize_(video) {
@@ -898,7 +979,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @private
    */
   updateOnPositionChange_(video) {
@@ -910,7 +991,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number=} ratio
    * @param {number=} timeout
    * @return {boolean}
@@ -934,7 +1015,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param  {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreDueToNotPlayingManually_(video) {
@@ -942,7 +1023,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param  {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   ignoreBecauseAnotherDocked_(video) {
@@ -950,7 +1031,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param  {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -997,7 +1078,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {?RelativeY}
    * @private
    */
@@ -1055,14 +1136,15 @@ export class VideoDocking {
   }
 
   /**
-   * @param {?../../video-interface.VideoOrBaseElementDef} optVideo
+   * @param {?../../../src/video-interface.VideoOrBaseElementDef} optVideo
    * @return {boolean}
    * @private
    */
   isPlaying_(optVideo = null) {
-    const video = /** @type {!../../video-interface.VideoInterface} */ (
+    const video = /** @type {!../../../src/video-interface.VideoInterface} */ (
       optVideo || this.getDockedVideo_());
-    return this.manager_.getPlayingState(video) == PlayingStates.PLAYING_MANUAL;
+    return this.manager_().getPlayingState(video) ==
+        PlayingStates.PLAYING_MANUAL;
   }
 
   /**
@@ -1120,7 +1202,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @private
    */
@@ -1140,7 +1222,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {?number=} opt_step
    * @private
@@ -1194,20 +1276,21 @@ export class VideoDocking {
    * @private
    */
   trigger_(action) {
-    const element = this.isDockedToSlot_() ?
-      this.getSlot_() :
-      this.getDockedVideo_().element;
+    const element = dev().assertElement(
+        this.isDockedToSlot_()
+          ? this.getSlot_()
+          : this.getDockedVideo_().element
+    );
 
     const trust = ActionTrust.LOW;
     const event = createCustomEvent(this.ampdoc_.win,
         /** @type {string} */ (action), /* detail */ dict({}));
-    const actions = Services.actionServiceForDoc(this.ampdoc_);
-
-    actions.trigger(dev().assertElement(element), action, event, trust);
+    const actions = Services.actionServiceForDoc(element);
+    actions.trigger(element, action, event, trust);
   }
 
   /**
-   * @param  {!../../video-interface.VideoOrBaseElementDef} video
+   * @param  {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    * @private
    */
@@ -1304,7 +1387,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number} x
    * @param {number} y
    * @param {number} scale
@@ -1340,6 +1423,9 @@ export class VideoDocking {
     const overlay = this.getOverlay_();
     const placeholderIcon = this.getPlaceholderIcon_();
 
+    applyBreakpointClassname(placeholderIcon, width,
+        PLACEHOLDER_ICON_BREAKPOINTS);
+
     // Setting explicit dimensions is needed to match the video's aspect
     // ratio. However, we only do this once to prevent jank in subsequent
     // frames.
@@ -1369,9 +1455,20 @@ export class VideoDocking {
       'transition-timing-function': transitionTiming,
     });
 
+    const isSmallPlaceholderIcon =
+        placeholderIcon.classList.contains('amp-small');
+
+    const placeholderIconWidth = isSmallPlaceholderIcon ?
+      PLACEHOLDER_ICON_SMALL_WIDTH :
+      PLACEHOLDER_ICON_LARGE_WIDTH;
+
+    const placeholderIconMargin = isSmallPlaceholderIcon ?
+      PLACEHOLDER_ICON_SMALL_MARGIN :
+      PLACEHOLDER_ICON_LARGE_MARGIN;
+
     // TODO(alanorozco): Place, animate and style icon for RTL.
     const placeholderIconX = step *
-        (width - PLACEHOLDER_ICON_WIDTH - PLACEHOLDER_ICON_MARGIN * 2);
+        (width - placeholderIconWidth - placeholderIconMargin * 2);
 
     this.isTransitioning_ = true;
 
@@ -1416,7 +1513,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number} step
    * @return {!Promise|undefined}
    * @private
@@ -1456,7 +1553,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {!Array<!Element>}
    * @private
    */
@@ -1479,7 +1576,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    */
   setPosterImage_(video) {
     const attr = 'poster';
@@ -1514,14 +1611,17 @@ export class VideoDocking {
    * @private
    */
   positionControlsOnVsync_(scale, x, y, width, height) {
-    this.applyControlsBreakpointClassname_(scale, width);
     const {container, dismissContainer} = this.getControls_();
     const halfScale = scale / 2;
     const centerX = x + (width * halfScale);
     const centerY = y + (height * halfScale);
+
+    applyBreakpointClassname(container, scale * width, CONTROLS_BREAKPOINTS);
+
     setImportantStyles(container, {
       'transform': translate(centerX, centerY),
     });
+
     const dismissMargin = 4;
     const dismissWidth = 40;
     const dismissX = width * halfScale - dismissMargin - dismissWidth;
@@ -1529,30 +1629,6 @@ export class VideoDocking {
     setImportantStyles(dismissContainer, {
       'transform': translate(dismissX, dismissY),
     });
-  }
-
-  /**
-   * @param {number} scale
-   * @param {number} width
-   * @private
-   */
-  applyControlsBreakpointClassname_(scale, width) {
-    const {container} = this.getControls_();
-    const renderWidth = scale * width;
-    const breakpoints = Object.keys(CONTROLS_BREAKPOINTS).sort().reverse();
-
-    let maxBreakpoint = 0;
-    for (let i = 0; i < breakpoints.length; i++) {
-      const breakpointStr = breakpoints[i];
-      const breakpointInt = parseInt(breakpointStr, 10);
-      if (breakpointInt <= renderWidth &&
-          breakpointInt > maxBreakpoint) {
-        container.classList.add(CONTROLS_BREAKPOINTS[breakpointStr]);
-        maxBreakpoint = breakpointInt;
-      } else {
-        container.classList.remove(CONTROLS_BREAKPOINTS[breakpointStr]);
-      }
-    }
   }
 
   /**
@@ -1573,7 +1649,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {boolean}
    */
   isCurrentlyDocked_(video) {
@@ -1581,7 +1657,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step
    */
@@ -1655,7 +1731,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @private
    */
   onDockingTimeout_(video) {
@@ -1954,7 +2030,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @return {!TargetAreaDef}
    * @private
@@ -1966,7 +2042,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!RelativeX} posX
    * @param {!RelativeY} posY
    * @return {!TargetAreaDef}
@@ -1996,7 +2072,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!AmpElement} slot
    * @return {!TargetAreaDef}
    * @private
@@ -2040,7 +2116,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
    * @return {{x: number, y: number, scale: number}}
@@ -2069,7 +2145,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number} targetY
    * @param {number} step
    * @return {number}
@@ -2084,7 +2160,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {number=} unusedDismissDirX
    * @param {number=} unusedDismissDirY
    * @return {!Promise}
@@ -2105,7 +2181,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!../../video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @return {!Promise}
    * @private
    */
@@ -2186,3 +2262,9 @@ export class VideoDocking {
     removeElement(el);
   }
 }
+
+const TAG = 'amp-video-docking';
+
+AMP.extension(TAG, 0.1, AMP => {
+  AMP.registerServiceForDoc('video-docking', VideoDocking);
+});

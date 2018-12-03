@@ -30,7 +30,6 @@ import {
   VideoEvents,
 } from '../video-interface';
 import {Services} from '../services';
-import {VideoDocking} from './video/docking';
 import {
   VideoServiceInterface,
   VideoServiceSignals,
@@ -93,12 +92,10 @@ function userInteractedWith(video) {
  * @implements {../service.Disposable}
  */
 export class VideoManager {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
@@ -119,7 +116,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
@@ -127,9 +124,6 @@ export class VideoManager {
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
         once(() => new AutoFullscreenManager(this.ampdoc, this));
-
-    /** @private @const {function():!VideoDocking} */
-    this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -362,11 +356,6 @@ export class VideoManager {
     this.getAutoFullscreenManager_().register(entry);
   }
 
-  /** @param {!VideoEntry} entry */
-  registerForDocking(entry) {
-    this.getDocking_().register(entry.video);
-  }
-
   /**
    * @return {!AutoFullscreenManager}
    * @visibleForTesting
@@ -493,8 +482,9 @@ class VideoEntry {
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
           /* detail */ dict({}));
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
-      actions.trigger(this.video.element, firstPlay, event, trust);
+      const {element} = this.video;
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, firstPlay, event, trust);
     });
 
     this.listenForAutoplayDelegation_();
@@ -542,22 +532,10 @@ class VideoEntry {
       this.manager_.registerForAutoFullscreen(this);
     }
 
-    if (this.isDockable_()) {
-      this.manager_.registerForDocking(this);
-    }
-
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isDockable_() {
-    return this.video.element.hasAttribute(VideoAttributes.DOCK);
   }
 
   /**

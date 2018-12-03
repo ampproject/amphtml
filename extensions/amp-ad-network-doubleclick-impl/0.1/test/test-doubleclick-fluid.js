@@ -150,7 +150,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should be fluid enabled', () => {
-    expect(impl.isFluidRequest_).to.be.true;
+    expect(impl.isFluidRequest()).to.be.true;
   });
 
   it('should have a supported layout', () => {

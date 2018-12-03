@@ -33,6 +33,7 @@ const request = require('request');
 const pc = process;
 const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
+const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 app.use(bodyParser.text());
@@ -110,8 +111,10 @@ if (!global.AMP_TESTING) {
   });
 
   app.get('/proxy', (req, res) => {
-    const sufix = req.query.url.replace(/^http(s?):\/\//i, '');
-    res.redirect(`proxy/s/${sufix}`);
+    const {mode, url} = req.query;
+    const prefix = (mode || '').replace(/\/$/, '');
+    const sufix = url.replace(/^http(s?):\/\//i, '');
+    res.redirect(`${prefix}/proxy/s/${sufix}`);
   });
 }
 
@@ -1210,6 +1213,22 @@ app.get('/infinite-scroll', function(req, res) {
 });
 
 
+/**
+ * Shadow viewer
+ */
+app.use('/shadow/', (req, res) => {
+  const {url} = req;
+  const isProxyUrl = /^\/proxy\//.test(url);
+
+  const baseHref = isProxyUrl ?
+    'https://cdn.ampproject.org/' :
+    `${path.dirname(url)}/`;
+
+  res.end(renderShadowViewer({
+    src: req.url.replace(/^\//, ''),
+    baseHref,
+  }));
+});
 
 
 /**

@@ -264,9 +264,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-list/0.1/amp-list.js->' +
             'src/service/position-observer/position-observer-worker.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
@@ -408,8 +408,6 @@ exports.rules = [
       'ads/pulsepoint.js->ads/google/doubleclick.js',
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST **/
-      'ads/criteo.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
     ],
   },
