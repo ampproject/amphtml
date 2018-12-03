@@ -55,7 +55,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         });
 
     // LinkerManager uses the UrlReplacements service scoped to the element,
-    // but for this test just use the top-level ampdoc service for simplicity.
+    // but for testing stub in the top-level ampdoc service for simplicity.
     element = {};
     const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
     sandbox.stub(Services, 'urlReplacementsForDoc')

@@ -60,9 +60,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
 
-    // RealTimeConfigManager should be using the UrlReplacements service
-    // scoped to the A4A (FIE), but for this test just use the parent service
-    // for simplicity.
+    // RealTimeConfigManager uses the UrlReplacements service scoped to the A4A
+    // (FIE), but for testing stub in the parent service for simplicity.
     const urlReplacements = Services.urlReplacementsForDoc(env.ampdoc);
     sandbox.stub(Services, 'urlReplacementsForDoc')
         .withArgs(a4aElement.element).returns(urlReplacements);
