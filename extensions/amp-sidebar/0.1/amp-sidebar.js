@@ -23,6 +23,7 @@ import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {descendsFromStory} from '../../../src/utils/story';
 import {removeFragment} from '../../../src/url';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -116,7 +117,11 @@ export class AmpSidebar extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(element);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
-      this.side_ = isRTL(this.document_) ? 'right' : 'left';
+      if (descendsFromStory(element)) {
+        this.side_ = isRTL(this.document_) ? 'left' : 'right';
+      } else {
+        this.side_ = isRTL(this.document_) ? 'right' : 'left';
+      }
       element.setAttribute('side', this.side_);
     }
 
