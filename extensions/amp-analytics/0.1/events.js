@@ -1278,7 +1278,7 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const root = this.root.getRoot();
+    const {win} = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
     // Listeners are provided below for both 'unload' and 'pagehide'. Fore
@@ -1295,8 +1295,8 @@ export class VisibilityTracker extends EventTracker {
     // user presses the home button, uses the OS task switcher to switch to
     // a different app, answers an incoming call, etc.
 
-    root.addEventListener('unload', unloadListener = () => {
-      root.removeEventListener('unload', unloadListener);
+    win.addEventListener('unload', unloadListener = () => {
+      win.removeEventListener('unload', unloadListener);
       deferred.resolve();
     });
 
@@ -1307,8 +1307,8 @@ export class VisibilityTracker extends EventTracker {
     // Good, but several years old, analysis at:
     // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
     // Especially note the event table on this page.
-    root.addEventListener('pagehide', pageHideListener = () => {
-      root.removeEventListener('pagehide', pageHideListener);
+    win.addEventListener('pagehide', pageHideListener = () => {
+      win.removeEventListener('pagehide', pageHideListener);
       deferred.resolve();
     });
     return deferred.promise;
