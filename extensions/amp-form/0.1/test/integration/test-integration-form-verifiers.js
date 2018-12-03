@@ -20,7 +20,7 @@ const baseUrl = 'http://localhost:31862';
 const RENDER_TIMEOUT = 15000;
 
 const describeChrome =
-    describe.configure().ifChrome().skipSinglePass();
+    describe.configure().ifChrome().skipChromeDev().skipSinglePass();
 
 describeChrome.run('amp-form verifiers', function() {
   this.timeout(RENDER_TIMEOUT);

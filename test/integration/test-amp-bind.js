@@ -200,48 +200,49 @@ describe.configure().ifChrome().run('amp-bind', function() {
   });
 
   // TODO(choumx): Flaky on Edge/Firefox for some reason.
-  describe.configure().ifChrome().run('with <amp-carousel>', () => {
-    beforeEach(() => {
-      // One <amp-carousel> plus two <amp-img> elements.
-      return setupWithFixture('test/fixtures/bind-carousel.html', 3);
-    });
+  describe.configure().ifChrome().skipChromeDev()
+      .run('with <amp-carousel>', () => {
+        beforeEach(() => {
+          // One <amp-carousel> plus two <amp-img> elements.
+          return setupWithFixture('test/fixtures/bind-carousel.html', 3);
+        });
 
-    it('should update on carousel slide changes', () => {
-      const slideNumber = fixture.doc.getElementById('slideNumber');
-      expect(slideNumber.textContent).to.equal('0');
+        it('should update on carousel slide changes', () => {
+          const slideNumber = fixture.doc.getElementById('slideNumber');
+          expect(slideNumber.textContent).to.equal('0');
 
-      const carousel = fixture.doc.getElementById('carousel');
-      const nextSlideButton =
-          carousel.querySelector('div.amp-carousel-button-next');
-      nextSlideButton.click();
-
-      return waitForSetState().then(() => {
-        expect(slideNumber.textContent).to.equal('1');
-      });
-    });
-
-    it('should change slides when the slide attribute binding changes',
-        () => {
           const carousel = fixture.doc.getElementById('carousel');
-          const slides =
-          carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
-          const firstSlide = slides[0];
-          const secondSlide = slides[1];
-
-          expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
-          expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
-              'true');
-
-          const button = fixture.doc.getElementById('goToSlideOne');
-          button.click();
+          const nextSlideButton =
+              carousel.querySelector('div.amp-carousel-button-next');
+          nextSlideButton.click();
 
           return waitForSetState().then(() => {
-            expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
-                'false');
-            expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
+            expect(slideNumber.textContent).to.equal('1');
           });
         });
-  });
+
+        it('should change slides when the slide attribute binding changes',
+            () => {
+              const carousel = fixture.doc.getElementById('carousel');
+              const slides =
+              carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
+              const firstSlide = slides[0];
+              const secondSlide = slides[1];
+
+              expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
+              expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
+                  'true');
+
+              const button = fixture.doc.getElementById('goToSlideOne');
+              button.click();
+
+              return waitForSetState().then(() => {
+                expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
+                    'false');
+                expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
+              });
+            });
+      });
 
   describe('with <amp-img>', () => {
     beforeEach(() => {
