@@ -97,7 +97,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint(/* fromMerge */ true);
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPoint();
   }
 }
 
@@ -630,7 +630,8 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-  execOrDie('npx yarn --cwd build-system/tasks/visual-diff');
+  execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
+      {'stdio': 'ignore'});
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;

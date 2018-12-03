@@ -281,6 +281,36 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+## Experimental: Infinite Scroll (amp-list-load-more)
+We've introduced an experiment called `amp-list-load-more` as an implementation for pagination and infinite scroll in amp-list. This is an experimental feature, and final APIs may change.
+
+### Attributes
+#### load-more (mandatory)
+Adding this attribute will allow amp-list (with no value) to show a “load-more" button at the end of the amp-list. The value of this attribute can be set to “auto" to trigger automatic loading more elements three viewports down for an infinite scroll effect.
+
+#### load-more-bookmark (mandatory)
+This attribute specifies an attribute in the returned data that will give the url of the next items to load. E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
+
+```
+{ "items": [], "next": "https://url.to.load" }
+```
+
+### Additional children of `<amp-list>`
+`<amp-list>` with the `load-more` attribute expects the following additional child elements. All of these elements are templated. (Note that UX defaults for these are on the roadmap, thus it will not always be necessary to include these elements.)
+
+#### load-more-button (mandatory)
+An element containing the `load-more-button` attribute, usually a button. Clicking on this element will trigger a fetch to load more elements from the url contained in the field of the data returned corresponding to the `load-more-bookmark` attribute.
+
+#### load-more-loading (mandatory)
+An element containing the `load-more-loading` attribute. This element will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the amp-list are still loading).
+
+#### load-more-failed (mandatory)
+An element containing the `load-more-failed` attribute. This element will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed.
+
+#### load-more-end (optional)
+An element containing the `load-more-end` attribute. This element will be displayed at the bottom of the `<amp-list>` if there are no more items. This element is optional.
+
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.

@@ -249,12 +249,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-hold-to-pause',
-    name: 'Hold to pause an amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/18714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -395,6 +389,12 @@ const EXPERIMENTS = [
     name: 'Forces min-height on body (fix for #18861 and #8798)',
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
   },
 ];
 
