@@ -572,11 +572,11 @@ export class AmpForm {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
-      return Promise.resolve();
     } else if (this.method_ == 'GET') {
       this.handleNonXhrGet_(event);
-      return Promise.resolve();
     }
+
+    return Promise.resolve();
   }
 
   /**
