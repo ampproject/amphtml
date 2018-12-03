@@ -84,7 +84,6 @@ function getConfig() {
         'SL_Firefox_Dev',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
-
         //'SL_Chrome_Android_7',
         //'SL_iOS_12',
         //'SL_IE_11',
