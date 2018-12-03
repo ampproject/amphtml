@@ -300,20 +300,20 @@ function install(win, src, element) {
           registration.scope);
     }
     // Check if there is a new service worker installing.
-    const installingRegistration = registration.installing;
-    if (installingRegistration) {
+    const installingSw = registration.installing;
+    if (installingSw) {
       // if not already active, wait till it becomes active
-      installingRegistration.addEventListener('statechange', evt => {
+      installingSw.addEventListener('statechange', evt => {
         if (evt.target.state === 'activated') {
           performServiceWorkerOptimizations(
-              registration.active,
+              registration,
               win,
               element
           );
         }
       });
     } else if (registration.active) {
-      performServiceWorkerOptimizations(registration.active, win, element);
+      performServiceWorkerOptimizations(registration, win, element);
     }
 
     return registration;
@@ -324,15 +324,15 @@ function install(win, src, element) {
 
 /**
  * Initiates AMP service worker based optimizations
- * @param {ServiceWorker} activeSw
+ * @param {ServiceWorkerRegistration} registration
  * @param {!Window} win
  * @param {Element} element
  */
-function performServiceWorkerOptimizations(activeSw, win, element) {
+function performServiceWorkerOptimizations(registration, win, element) {
   sendAmpScriptToSwOnFirstVisit(win);
   // prefetching outgoing links should be opt in.
   if (element.hasAttribute('data-prefetch')) {
-    prefetchOutgoingLinks(activeSw, win);
+    prefetchOutgoingLinks(registration, win);
   }
 }
 
@@ -360,10 +360,10 @@ function sendAmpScriptToSwOnFirstVisit(win) {
 /**
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
- * @param {ServiceWorker} sw
+ * @param {ServiceWorkerRegistration} registration
  * @param {!Window} win
  */
-function prefetchOutgoingLinks(sw, win) {
+function prefetchOutgoingLinks(registration, win) {
   const {document} = win;
   const links = [].map.call(document.querySelectorAll('a[data-rel=prefetch]'),
       link => link.href);
@@ -375,7 +375,7 @@ function prefetchOutgoingLinks(sw, win) {
       document.head.appendChild(linkTag);
     });
   } else {
-    sw.active.postMessage(JSON.stringify(dict({
+    registration.active.postMessage(JSON.stringify(dict({
       'type': 'AMP__LINK-PREFETCH',
       'payload': links,
     })));

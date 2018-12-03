@@ -210,7 +210,7 @@ describes.realWin('amp-install-serviceworker', {
       document: {
         querySelectorAll: () => [
           {
-            getAttribute: () => 'https://ampproject.org/',
+            href: 'https://ampproject.org/',
           },
           {
             href: 'https://ampbyexample.com/components/amp-accordion/',
