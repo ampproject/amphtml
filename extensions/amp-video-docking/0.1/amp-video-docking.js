@@ -1276,16 +1276,17 @@ export class VideoDocking {
    * @private
    */
   trigger_(action) {
-    const element = this.isDockedToSlot_() ?
-      this.getSlot_() :
-      this.getDockedVideo_().element;
+    const element = dev().assertElement(
+        this.isDockedToSlot_()
+          ? this.getSlot_()
+          : this.getDockedVideo_().element
+    );
 
     const trust = ActionTrust.LOW;
     const event = createCustomEvent(this.ampdoc_.win,
         /** @type {string} */ (action), /* detail */ dict({}));
-    const actions = Services.actionServiceForDoc(this.ampdoc_);
-
-    actions.trigger(dev().assertElement(element), action, event, trust);
+    const actions = Services.actionServiceForDoc(element);
+    actions.trigger(element, action, event, trust);
   }
 
   /**

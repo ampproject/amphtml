@@ -22,7 +22,6 @@ import {
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   GWD_PAGEDECK_ID,
   TAG,
@@ -491,50 +490,49 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
   });
 
   describe('addAction', () => {
-    let ampdoc;
+    let element;
+    let actionService;
 
     beforeEach(() => {
-      ampdoc = new AmpDocSingle(window);
+      actionService = {setActions: sandbox.stub()};
+      element = document.createElement('div');
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .withArgs(element).returns(actionService);
     });
 
     it('should insert when no existing actions', () => {
-      const element = document.createElement('div');
-
-      addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-      expect(element.getAttribute('on')).to.equal('event1:node1.foo()');
+      const target = document.createElement('div');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(target, 'event1:node1.foo()');
     });
 
     it('should insert when actions defined for this event', () => {
-      const element = document.createElement('div');
-      element.setAttribute('on', 'event1:node2.hide;event2:node2.show');
-
-      addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-      expect(element.getAttribute('on')).to.equal(
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event1:node2.hide;event2:node2.show');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(target,
           'event1:node1.foo(),node2.hide;event2:node2.show');
     });
 
     it('should insert when actions defined for other events only', () => {
-      const element = document.createElement('div');
-      element.setAttribute('on', 'event2:node2.hide');
-
-      addAction(ampdoc, element, 'event1', 'node1.foo()');
-
-      expect(element.getAttribute('on')).to.equal(
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event2:node2.hide');
+      addAction(element, target, 'event1', 'node1.foo()');
+      expect(actionService.setActions).calledWith(target,
           'event2:node2.hide;event1:node1.foo()');
     });
 
     it('should insert in FIE', () => {
-      const element = document.createElement('div');
-      ampdoc.getBody().appendChild(element);
-      element.setAttribute('on', 'event2:node2.hide');
-
-      // Provide the element for the `nodeOrDoc` parameter used to retrieve the
-      // owner window's action service.
-      addAction(element, element, 'event1', 'node1.foo()');
-
-      expect(element.getAttribute('on')).to.equal(
+      const target = document.createElement('div');
+      target.setAttribute('on', 'event2:node2.hide');
+      // FIE should have its own ActionService.
+      const fieActionService = {setActions: sandbox.stub()};
+      Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
+      // Provide `target` as the service context to simulate FIE case.
+      addAction(target, target, 'event1', 'node1.foo()');
+      // Only the FIE's ActionService should be called.
+      expect(actionService.setActions).to.not.be.called;
+      expect(fieActionService.setActions).calledWith(target,
           'event2:node2.hide;event1:node1.foo()');
     });
   });
