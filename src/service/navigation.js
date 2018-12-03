@@ -219,7 +219,7 @@ export class Navigation {
    */
   navigateTo(
     win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
-    const urlService = Services.urlForDoc(this.ampdoc);
+    const urlService = Services.urlForDoc(this.ampdoc.getHeadNode());
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;

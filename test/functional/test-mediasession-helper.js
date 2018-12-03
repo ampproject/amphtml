@@ -57,6 +57,7 @@ const schemaTemplate = `
 
 
 describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
+  let element;
   let ampdoc;
   let favicon;
   let schema;
@@ -64,10 +65,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   let head;
 
   beforeEach(() => {
-    // Stub only to work around the fact that there's no Ampdoc, so the service
-    // cannot be retrieved.
-    // Otherwise this test would barf because `form` is detached.
-    sandbox.stub(Services, 'urlForDoc').returns({isProtocolValid});
+    element = {};
+    sandbox.stub(Services, 'urlForDoc')
+        .withArgs(element).returns({isProtocolValid});
 
     head = document.querySelector('head');
     // Favicon
@@ -138,7 +138,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': 'Some title',
     };
-    setMediaSession(ampdoc, fakeMetaData);
+    setMediaSession(element, ampdoc.win, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
@@ -153,8 +153,10 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    allowConsoleError(() => {
-      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    return allowConsoleError(() => {
+      expect(() => {
+        setMediaSession(element, ampdoc.win, fakeMetaData);
+      }).to.throw();
     });
   });
 
@@ -168,8 +170,10 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    allowConsoleError(() => {
-      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    return allowConsoleError(() => {
+      expect(() => {
+        setMediaSession(element, ampdoc.win, fakeMetaData);
+      }).to.throw();
     });
   });
 
@@ -180,8 +184,10 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artwork': 'https://NotArray',
       'title': '',
     };
-    allowConsoleError(() => {
-      expect(() => {setMediaSession(ampdoc, fakeMetaData);}).to.throw();
+    return allowConsoleError(() => {
+      expect(() => {
+        setMediaSession(element, ampdoc.win, fakeMetaData);
+      }).to.throw();
     });
   });
 });

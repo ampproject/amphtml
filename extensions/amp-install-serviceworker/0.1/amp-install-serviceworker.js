@@ -155,7 +155,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     shellUrl, winUrl.href);
 
     // Install URL rewriter.
-    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
+    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl,
+        this.element);
 
     // Cache shell.
     if (urlService.isSecure(shellUrl)) {
@@ -224,8 +225,9 @@ class UrlRewriter_ {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!RegExp} urlMatchExpr
    * @param {string} shellUrl
+   * @param {!Element} element
    */
-  constructor(ampdoc, urlMatchExpr, shellUrl) {
+  constructor(ampdoc, urlMatchExpr, shellUrl, element) {
     /** @const {!Window} */
     this.win = ampdoc.win;
 
@@ -236,7 +238,7 @@ class UrlRewriter_ {
     this.shellUrl_ = shellUrl;
 
     /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(ampdoc);
+    this.urlService_ = Services.urlForDoc(element);
 
     /** @const @private {!Location} */
     this.shellLoc_ = this.urlService_.parse(shellUrl);
