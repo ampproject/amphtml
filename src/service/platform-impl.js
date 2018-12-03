@@ -16,12 +16,6 @@
 
 import {registerServiceBuilder} from '../service';
 
-const latestVersion = {
-  chrome: 70,
-  firefox: 63,
-  safari: 12,
-};
-
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
@@ -63,18 +57,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is the latest Safari browser.
-   * @return {boolean}
-   */
-  isSafariLatest() {
-    if (!this.isSafari()) {
-      return false;
-    }
-    return this.getMajorVersion() === latestVersion.safari;
-  }
-
-  /**
-   * Whether the current browser is the latest Chrome browser.
+   * Whether the current browser is a Chrome browser.
    * @return {boolean}
    */
   isChrome() {
@@ -84,33 +67,11 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is the Chrome Dev browser.
-   * @return {boolean}
-   */
-  isChromeDev() {
-    if (!this.isChrome()) {
-      return false;
-    }
-    return this.getMajorVersion() > latestVersion.chrome;
-  }
-
-  /**
-   * Whether the current browser is the latest Firefox browser.
+   * Whether the current browser is a Firefox browser.
    * @return {boolean}
    */
   isFirefox() {
     return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
-  }
-
-  /**
-   * Whether the current browser is the Firefox Dev browser.
-   * @return {boolean}
-   */
-  isFirefoxDev() {
-    if (!this.isFirefox()) {
-      return false;
-    }
-    return this.getMajorVersion() > latestVersion.firefox;
   }
 
   /**

@@ -19,7 +19,7 @@ import {htmlFor} from '../../../../../src/static-template';
 import {poll} from '../../../../../testing/iframe';
 
 const config = describe.configure()
-    .ifNewChrome().skipChromeDev().skipSinglePass();
+    .ifChrome().skipChromeDev().skipSinglePass();
 
 config.run('amp-date-picker', function() {
   this.timeout(10000);

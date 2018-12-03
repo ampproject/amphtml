@@ -58,6 +58,13 @@ global.describes = describes;
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
+// Latest stable version numbers of browsers as of 12/3/2018
+const latestVersion = {
+  chrome: 70,
+  firefox: 63,
+  safari: 12,
+};
+
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
@@ -118,12 +125,9 @@ class TestConfig {
      * Predicate functions that determine whether to run tests on a platform.
      */
     this.runOnChrome = this.platform.isChrome.bind(this.platform);
-    this.runOnChromeDev = this.platform.isChromeDev.bind(this.platform);
     this.runOnEdge = this.platform.isEdge.bind(this.platform);
     this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
-    this.runOnFirefoxDev = this.platform.isFirefoxDev.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
-    this.runOnSafariLatest = this.platform.isSafariLatest.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
     this.runOnIe = this.platform.isIe.bind(this.platform);
 
@@ -137,14 +141,11 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipOldChrome() {
-    return this.skip(() => {
-      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
-    });
-  }
-
   skipChromeDev() {
-    return this.skip(this.runOnChromeDev);
+    return this.skip(() => {
+      return this.platform.isChrome() &&
+        this.platform.getMajorVersion() > latestVersion.chrome;
+    });
   }
 
   skipEdge() {
@@ -156,7 +157,10 @@ class TestConfig {
   }
 
   skipFirefoxDev() {
-    return this.skip(this.runOnFirefoxDev);
+    return this.skip(() => {
+      return this.platform.isFirefox() &&
+        this.platform.getMajorVersion() > latestVersion.firefox;
+    });
   }
 
   skipSafari() {
@@ -164,7 +168,10 @@ class TestConfig {
   }
 
   skipSafariLatest() {
-    return this.skip(this.runOnSafariLatest);
+    return this.skip(() => {
+      return this.platform.isSafari() &&
+        this.platform.getMajorVersion() === latestVersion.safari;
+    });
   }
 
   skipIos() {
@@ -194,10 +201,6 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
-  }
-
-  ifNewChrome() {
-    return this.ifChrome().skipOldChrome();
   }
 
   ifChrome() {

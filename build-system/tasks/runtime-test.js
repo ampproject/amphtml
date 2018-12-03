@@ -75,14 +75,14 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
-        'SL_Chrome',
-        'SL_Firefox',
-        'SL_Safari_11',
-        'SL_iOS_11',
-        'SL_Edge_17',
+        //'SL_Chrome',
+        //'SL_Firefox',
+        //'SL_Safari_11',
+        //'SL_iOS_11',
+        //'SL_Edge_17',
         'SL_Chrome_Dev',
-        'SL_Firefox_Dev',
-        'SL_Safari_12',
+        //'SL_Firefox_Dev',
+        //'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
         //'SL_iOS_12',
