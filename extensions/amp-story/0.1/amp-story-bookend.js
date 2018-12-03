@@ -513,8 +513,7 @@ export class Bookend {
     }
 
     if (target.hasAttribute('on')) {
-      const ampdoc = getAmpdoc(this.parentEl_);
-      const actionService = Services.actionServiceForDoc(ampdoc);
+      const actionService = Services.actionServiceForDoc(this.parentEl_);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }

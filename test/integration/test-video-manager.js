@@ -245,6 +245,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       sandbox = sinon.sandbox;
       klass = createFakeVideoPlayerClass(env.win);
       video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+      env.win.document.body.appendChild(video);
       impl = video.implementation_;
       installVideoManagerForDoc(env.ampdoc);
       videoManager = Services.videoManagerForDoc(env.ampdoc);

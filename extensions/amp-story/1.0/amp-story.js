@@ -559,7 +559,7 @@ export class AmpStory extends AMP.BaseElement {
     // other components registered.
     this.storeService_.subscribe(
         StateProperty.ACTIONS_WHITELIST, actionsWhitelist => {
-          const actions = Services.actionServiceForDoc(this.getAmpDoc());
+          const actions = Services.actionServiceForDoc(this.element);
           actions.setWhitelist(actionsWhitelist);
         }, true /** callToInitialize */);
 
@@ -1428,7 +1428,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
         this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {

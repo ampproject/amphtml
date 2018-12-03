@@ -83,15 +83,12 @@ export class Services {
   }
 
   /**
-   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
-   * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/action-impl.ActionService}
    */
-  static actionServiceForDoc(nodeOrDoc) {
+  static actionServiceForDoc(element) {
     return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'action'));
   }
 
   /**
