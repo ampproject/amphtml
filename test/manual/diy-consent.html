@@ -46,12 +46,13 @@ setTimeout(() => {
   }, '*');
 }, 500);
 
-function registerClickConsentMessage(querySelector, type, action) {
+function registerClickConsentMessage(querySelector, type, action, info) {
   document.querySelector(querySelector).onclick = function () {
     // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
     parent.postMessage({
       type,
-      action
+      action,
+      info
     }, '*');
   };
 }
@@ -91,6 +92,7 @@ const consentObjects = [
     querySelector: '#r',
     type: 'consent-response',
     action: 'reject',
+    info: '',
     onclick: () => {
       showConfirmation();
     }
@@ -116,7 +118,8 @@ consentObjects.forEach(consentObject => {
   registerClickConsentMessage(
     consentObject.querySelector,
     consentObject.type,
-    consentObject.action
+    consentObject.action,
+    consentObject.info
   );
 
   if (consentObject.onclick) {
