@@ -397,20 +397,21 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  */
 export function adopt(global) {
   return adoptShared(global, global => {
+    const {documentElement} = global.document;
+
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
 
-    const viewer = Services.viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(documentElement);
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = Services.resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(documentElement);
     }
 
-    const viewport = Services.viewportForDoc(global.document);
-
+    const viewport = Services.viewportForDoc(documentElement);
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);

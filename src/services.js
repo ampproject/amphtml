@@ -20,7 +20,6 @@ import {
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
-  getServiceForDocDeprecated,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -313,13 +312,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Resources is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-impl.Resources}
    */
-  static resourcesForDoc(nodeOrDoc) {
+  static resourcesForDoc(elementOrAmpDoc) {
     return /** @type {!./service/resources-impl.Resources} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'resources'));
+      getServiceForDoc(elementOrAmpDoc, 'resources'));
   }
 
   /**
@@ -558,13 +556,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Viewer is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewer-impl.Viewer}
    */
-  static viewerForDoc(nodeOrDoc) {
+  static viewerForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewer-impl.Viewer} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'viewer'));
+      getServiceForDoc(elementOrAmpDoc, 'viewer'));
   }
 
   /**
@@ -589,13 +586,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Viewport is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewport/viewport-impl.Viewport}
    */
-  static viewportForDoc(nodeOrDoc) {
+  static viewportForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'viewport'));
+      getServiceForDoc(elementOrAmpDoc, 'viewport'));
   }
 
   /**

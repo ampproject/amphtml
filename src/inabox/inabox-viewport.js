@@ -265,7 +265,7 @@ export class ViewportBindingInabox {
    * @visibleForTesting
    */
   getChildResources() {
-    return Services.resourcesForDoc(this.win.document).get();
+    return Services.resourcesForDoc(this.win.document.documentElement).get();
   }
 
   /** @private */

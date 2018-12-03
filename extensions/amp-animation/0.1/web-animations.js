@@ -276,8 +276,10 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource =
-          Services.viewportForDoc(this.win_.document).getScrollingElement();
+        const {documentElement} = this.win_.document;
+        const viewportService = Services.viewportForDoc(documentElement);
+
+        const scrollSource = viewportService.getScrollingElement();
         const elementRect = request.target./*OK*/getBoundingClientRect();
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
