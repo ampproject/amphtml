@@ -333,16 +333,18 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
-                    if (media['campaignData']) {
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                          /** @type {JsonObject} */ ({
-                            type: 'campaigns',
-                            data: media['campaignData'],
-                          }),
-                          '*'
-                      );
+                    if (this.iframe_) {
+                      this.iframe_.classList
+                          .add('i-amphtml-apester-iframe-ready');
+                      if (media['campaignData']) {
+                        this.iframe_.contentWindow./*OK*/ postMessage(
+                            /** @type {JsonObject} */ ({
+                              type: 'campaigns',
+                              data: media['campaignData'],
+                            }),
+                            '*'
+                        );
+                      }
                     }
                     this.togglePlaceholder(false);
                     this.ready_ = true;

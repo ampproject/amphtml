@@ -459,7 +459,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl),
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl),
             rewindToBeginning);
       }
     });
@@ -476,7 +476,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.play();
       } else {
         return mediaPool.play(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -492,7 +492,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         // No-op.
       } else {
         return mediaPool.preload(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -508,7 +508,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.setAttribute('muted', '');
       } else {
         return mediaPool.mute(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -524,7 +524,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.removeAttribute('muted');
       } else {
         return mediaPool.unmute(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -540,7 +540,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         // No-op.
       } else {
         return mediaPool.register(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -556,7 +556,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.currentTime = 0;
       } else {
         return mediaPool.rewindToBeginning(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }

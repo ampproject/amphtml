@@ -49,12 +49,19 @@ describes.realWin('consent-ui', {
       getAmpDoc: () => {return ampdoc;},
       element: parent,
       win,
-      getViewport: () => {return {
-        addToFixedLayer: () => {},
-        removeFromFixedLayer: () => {},
-      };
+      getViewport: () => {
+        return {
+          addToFixedLayer: () => {},
+          removeFromFixedLayer: () => {},
+        };
+      },
+      getVsync: () => {
+        return {
+          mutate: callback => {callback();},
+        };
       },
       scheduleLayout: () => {},
+      mutateElement: callback => callback(),
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
@@ -115,6 +122,5 @@ describes.realWin('consent-ui', {
       consentUI.hide();
       expect(elementByTag(parent, 'iframe')).to.be.null;
     });
-
   });
 });

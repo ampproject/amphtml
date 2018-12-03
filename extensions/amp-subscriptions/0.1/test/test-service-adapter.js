@@ -27,6 +27,17 @@ env => {
   let subscriptionService;
   let serviceAdapter;
   let pageConfig;
+  const serviceConfig = {
+    services: [
+      {
+        authorizationUrl: 'https://lipsum.com/authorize',
+        actions: {
+          subscribe: 'https://lipsum.com/subscribe',
+          login: 'https://lipsum.com/login',
+        },
+      },
+    ],
+  };
   beforeEach(() => {
     pageConfig = new PageConfig('example.org:basic', true);
     ampdoc = env.ampdoc;
@@ -35,7 +46,7 @@ env => {
     const element = win.document.createElement('script');
     element.id = 'amp-subscriptions';
     element.setAttribute('type', 'json');
-    element.innerHTML = JSON.stringify({});
+    element.innerHTML = JSON.stringify(serviceConfig);
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     serviceAdapter = new ServiceAdapter(subscriptionService);
@@ -72,10 +83,11 @@ env => {
     });
   });
 
-  describe('reAuthorizePlatform', () => {
-    it('should call reAuthorizePlatform of subscription service', () => {
-      const stub = sandbox.stub(subscriptionService, 'reAuthorizePlatform');
-      serviceAdapter.reAuthorizePlatform();
+  describe('resetPlatforms', () => {
+    it('should call initializePlatformStore_', () => {
+      const stub = sandbox.stub(
+          subscriptionService, 'resetPlatforms');
+      serviceAdapter.resetPlatforms();
       expect(stub).to.be.calledOnce;
     });
   });

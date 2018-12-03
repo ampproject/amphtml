@@ -488,6 +488,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refetches data at the `src` attribute while ignoring browser cache.</td>
+  </tr>
+</table>
+
 ### amp-user-notification
 <table>
   <tr>
