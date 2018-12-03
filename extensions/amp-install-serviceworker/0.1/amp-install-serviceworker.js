@@ -360,7 +360,7 @@ function sendAmpScriptToSwOnFirstVisit(win) {
 /**
  * Whenever a new service worker is activated, controlled page will send
  * the used AMP scripts and the self's URL to service worker to be cached.
- * @param {ActiveServiceWorker} sw
+ * @param {ServiceWorker} sw
  * @param {!Window} win
  */
 function prefetchOutgoingLinks(sw, win) {
