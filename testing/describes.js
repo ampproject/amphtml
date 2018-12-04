@@ -113,7 +113,7 @@ import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import {stubService} from './test-helper';
+import {stubService, tearDownRequests} from './test-helper';
 import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -483,6 +483,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    tearDownRequests();
   }
 }
 

@@ -144,24 +144,26 @@ export function assertScreenReaderElement(element) {
 /** @const {string} */
 const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 
-/**
- * Append user agent to request-bank deposit/withdraw IDs to avoid
- * cross-browser race conditions when testing in Saucelabs.
- * @const {string}
- */
-const userAgent = encodeURIComponent(window.navigator.userAgent);
-
-export function depositRequestUrl(path) {
-  return `${REQUEST_URL}deposit/${userAgent}-${path}/`;
+export function depositRequestUrl(id) {
+  return `${REQUEST_URL}deposit/${id}/`;
 }
 
-export function withdrawRequest(path) {
-  const url = `${REQUEST_URL}withdraw/${userAgent}-${path}/`;
+export function withdrawRequest(id) {
+  const url = `${REQUEST_URL}withdraw/${id}/`;
   return xhrServiceForTesting(window).fetchJson(url, {
     method: 'GET',
     ampCors: false,
     credentials: 'omit',
   }).then(res => res.json());
+}
+
+export function tearDownRequests() {
+  const url = `${REQUEST_URL}teardown/`;
+  return xhrServiceForTesting(window).fetchJson(url, {
+    method: 'GET',
+    ampCors: false,
+    credentials: 'omit',
+  });
 }
 
 export function createPointerEvent(type, x, y) {

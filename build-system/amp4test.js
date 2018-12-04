@@ -25,7 +25,7 @@ const app = module.exports = require('express').Router();
  * @param {*} messages
  */
 function log(...messages) {
-  if (!process.env.AMP_TEST) {
+  if (!process.env.TRAVIS) {
     console.log(messages);
   }
 }
@@ -90,7 +90,7 @@ ${req.query.body}
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
  */
-const bank = {};
+let bank = {};
 
 /**
  * Deposit a request. An ID has to be specified. Will override previous request
@@ -132,4 +132,14 @@ app.use('/request-bank/withdraw/:id/', (req, res) => {
   } else {
     bank[key] = callback;
   }
+});
+
+/**
+ * Deposit a request. An ID has to be specified. Will override previous request
+ * if the same ID already exists.
+ */
+app.use('/request-bank/teardown/', (req, res) => {
+  log('SERVER-LOG [TEARDOWN]');
+  bank = {};
+  res.end();
 });
