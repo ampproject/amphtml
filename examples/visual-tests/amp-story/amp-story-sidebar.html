@@ -27,23 +27,6 @@
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
       }
     </style>
-    <script>
-      // TODO(#17108): Remove this when getMode().test is set.
-      AMP_TEST = true;
-      /**
-       * On load, jump to the second page (to test progress bar fill).
-       */
-      document.addEventListener('ampstory:load', () => {
-        const storyEl = document.querySelector('amp-story');
-        // Automatically jump to second page.
-        const switchPageEvent = new CustomEvent('ampstory:switchpage', {
-          detail: {
-            targetPageId: 'page-2',
-          }
-        });
-        storyEl.dispatchEvent(switchPageEvent);
-      });
-    </script>
   </head>
 
   <body>

@@ -624,6 +624,7 @@ export class AmpStory extends AMP.BaseElement {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
           this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
           !this.storeService_
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
@@ -1471,11 +1472,11 @@ export class AmpStory extends AMP.BaseElement {
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
-        /* source */ null, /* caller */ null, /* event */ null,
+            /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
-        this.openMask_()
+        this.openOpacityMask_()
       } else {
-        this.closeMask_();
+        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
@@ -1489,23 +1490,18 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @private
    */
-  openMask_() {
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+  openOpacityMask_() {
     if (!this.maskElement_) {
-      const mask = this.win.document.createElement('div');
-      mask.classList.add('i-amphtml-amp-story-sidebar-mask');
-      mask.addEventListener('click', () => {
-      actions.execute(this.sidebar_, 'close', /* args */ null,
-        /* source */ null, /* caller */ null, /* event */ null,
+      const maskEl = this.win.document.createElement('div');
+      maskEl.classList.add('i-amphtml-story-opacity-mask');
+      maskEl.addEventListener('click', () => {
+        const actions = Services.actionServiceForDoc(this.getAmpDoc());
+        actions.execute(this.sidebar_, 'close', /* args */ null,
+            /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
       });
-      // The mask div should be added right after the sidebar.
-      const referenceNode = this.win.document.getElementsByTagName('amp-sidebar')[0];
-      referenceNode.parentNode.insertBefore(mask, referenceNode.nextSibling);
-      mask.addEventListener('touchmove', e => {
-        e.preventDefault();
-      });
-      this.maskElement_ = mask;
+      this.element.appendChild(maskEl);
+      this.maskElement_ = maskEl;
     }
     toggle(this.maskElement_, /* display */true);
   }
@@ -1513,7 +1509,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @private
    */
-  closeMask_() {
+  closeOpacityMask_() {
     if (this.maskElement_) {
       toggle(this.maskElement_, /* display */false);
     }
