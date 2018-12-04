@@ -9,7 +9,7 @@
   </tr>
   <tr>
     <td class="col-fourty"><strong>Status</strong></td>
-    <td>Experimental. You must turn on the `amp-video-iframe` experiment to use this component.</td>
+    <td>Experimental. You must turn on the <code>amp-video-iframe</code> experiment to use this component.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
