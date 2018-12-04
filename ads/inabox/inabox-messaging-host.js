@@ -364,7 +364,9 @@ function canInspectWindow_(win) {
   // but since we're not using the closure library I'm not sure how to do this.
   // See https://github.com/google/closure-compiler/issues/3156
   try {
-    return !!win.location.href && win['test'];
+    // win['test'] could be truthy but not true the compiler shouldn't be able
+    // to optimize this check away.
+    return !!win.location.href && (win['test'] || true);
   } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }
