@@ -1,8 +1,8 @@
-### Linker ID Receiving
-#### Overview
+## Linker ID Receiving
+### Overview
 This document illustrates in detail how the linker param is constructed, so that analytics vendors or publishers implementing their own solutions are able to ingest this parameter on the destination page.
 
-#### Format
+### Format
 The linker param will be formatted in the following structure:
 
 `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...`
@@ -53,3 +53,41 @@ You can find all the code for our implementaion in the [linker.js](./0.1/linker.
 
 #### Test Cases
 If you are implementing your own logic to verify these checksums, please ensure that you are using our test vectors located in [test-linker.js](./0.1/test/test-linker.js)
+
+
+### Receiving Linker Params on AMP Pages
+
+The `<amp-analytics>`'s `cookies` feature can be used to extract information from the document url and write to the origin domain.
+
+#### Configuration
+
+A `cookies` example configuration looks like
+```
+'cookies': {
+  'enabled': true,
+  'cookieName1': {
+    'value': 'QUERY_PARAM(example)',
+  },
+  'cookieName2': {
+    'value': 'LINKER_PARAM(exampleName, exampleValue)',
+  },
+}
+```
+
+The `enabled` value can be used to override default vendor settings.
+
+##### Cookie Names
+Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key value pair. That key should be 'value', and its value should be the macro that determines the information stored in the cookie.
+
+Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
+
+##### Cookie Values
+Each cookie to write is defined by an object, where the value is defined by the required `value` field.
+
+Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
+
+If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
+
+##### LINKER PARAM
+`LINKER_PARAM` takes two arguments, the `name` and the `value`. It will verify the checksum and read the `idName1*idValue1` key value pair from the linker param. The `value` ('idValue1' here) will be returned.
+
