@@ -559,6 +559,8 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 
 SomeBaseElementLikeClass.prototype.actionMap_;
 
+SomeBaseElementLikeClass.prototype.defaultActionAlias_;
+
 AMP.BaseTemplate;
 
 AMP.RealTimeConfigManager;

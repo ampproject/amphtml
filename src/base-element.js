@@ -155,6 +155,9 @@ export class BaseElement {
      * }>} */
     this.actionMap_ = null;
 
+    /** @private {?string} The default action alias. See #registerDefaultAction */
+    this.defaultActionAlias_ = null;
+
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
 
@@ -600,12 +603,14 @@ export class BaseElement {
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
+   * @param {ActionTrust} minTrust
    */
   registerDefaultAction(
     handler,
-    alias = DEFAULT_METHOD) {
+    alias = DEFAULT_METHOD,
+    minTrust = ActionTrust.HIGH) {
     this.registerAction_(
-        alias, handler, ActionTrust.HIGH, /* opt_isDefault */ true);
+        alias, handler, minTrust, /* opt_isDefault */ true);
   }
 
   /**
