@@ -16,7 +16,7 @@
 
 import {
   ConsentUI,
-  consentUiClasses
+  consentUiClasses,
 } from '../consent-ui';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
@@ -82,7 +82,7 @@ describes.realWin('consent-ui', {
     consentUI.show();
     consentUI.iframeReady_.resolve();
     return whenCalled(showIframeSpy).then(() => Promise.resolve(consentUI));
-  }
+  };
 
   describe('init', () => {
     it('should repsect postPromptUI if there is one', function* () {
@@ -165,7 +165,9 @@ describes.realWin('consent-ui', {
       consentUI.iframeReady_.resolve();
 
       return whenCalled(showIframeSpy).then(() => {
-        expect(parent.classList.contains(consentUiClasses.iframeActive)).to.be.true;
+        expect(
+            parent.classList.contains(consentUiClasses.iframeActive)
+        ).to.be.true;
       });
     });
   });
@@ -178,13 +180,13 @@ describes.realWin('consent-ui', {
         const enterFullscreenStub = sandbox.stub(consentUI, 'enterFullscreen_');
 
         consentUI.ui_ = {
-          contentWindow: 'mock-src'
-        }
+          contentWindow: 'mock-src',
+        };
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen'
-          }
+            type: 'consent-ui-enter-fullscreen',
+          },
         });
 
         expect(enterFullscreenStub).to.be.calledOnce;
@@ -198,14 +200,14 @@ describes.realWin('consent-ui', {
         const enterFullscreenStub = sandbox.stub(consentUI, 'enterFullscreen_');
 
         consentUI.ui_ = {
-          contentWindow: 'mock-src'
+          contentWindow: 'mock-src',
         };
         consentUI.isIframeVisible_ = false;
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen'
-          }
+            type: 'consent-ui-enter-fullscreen',
+          },
         });
 
         expect(enterFullscreenStub).to.not.be.called;
@@ -218,7 +220,9 @@ describes.realWin('consent-ui', {
         return getReadyIframeCmpConsentUi().then(consentUI => {
           consentUI.enterFullscreen_();
 
-          expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.true;
+          expect(
+              parent.classList.contains(consentUiClasses.iframeFullscreen)
+          ).to.be.true;
           expect(consentUI.isFullscreen_).to.be.true;
         });
       });
@@ -228,7 +232,9 @@ describes.realWin('consent-ui', {
           consentUI.isFullscreen_ = true;
           consentUI.enterFullscreen_();
 
-          expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.false;
+          expect(
+              parent.classList.contains(consentUiClasses.iframeFullscreen)
+          ).to.be.false;
         });
       });
     });
