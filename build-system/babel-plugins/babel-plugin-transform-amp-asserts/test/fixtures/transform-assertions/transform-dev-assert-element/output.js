@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-element;
-let result = element;
+
+/** @type {!Element} */
+(element);
+let result =
+/** @type {!Element} */
+(element);
 let result2 = undefined;
