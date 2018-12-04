@@ -34,6 +34,12 @@ const TAG = 'amp-sidebar toolbar';
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
+/** @private @const {string} */
+const LEFT = 'left';
+
+/** @private @const {string} */
+const RIGHT = 'right';
+
 /**
   * For browsers with bottom nav bars the content towards the bottom
   * end of the sidebar is cut off.
@@ -116,12 +122,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(element);
 
-    if (this.side_ != 'left' && this.side_ != 'right') {
-      if (descendsFromStory(element)) {
-        this.side_ = isRTL(this.document_) ? 'left' : 'right';
-      } else {
-        this.side_ = isRTL(this.document_) ? 'right' : 'left';
-      }
+    if (this.side_ != LEFT && this.side_ != RIGHT) {
+      this.side_ = this.setSideAttribute_(isRTL(this.document_) ? RIGHT : LEFT);
       element.setAttribute('side', this.side_);
     }
 
@@ -361,7 +363,19 @@ export class AmpSidebar extends AMP.BaseElement {
       tryFocus(this.openerElement_);
     }
   }
-
+  /**
+   * Sidebars within <amp-story> should be 'flipped'.
+   * @param {string} the current side attribute of the sidebar.
+   * @return {string}
+   * @private
+   */
+   setSideAttribute_(side){
+    if (!descendsFromStory(this.element)) {
+        return side;
+    } else {
+      return side == LEFT ? RIGHT : LEFT;
+    }
+  }
   /**
    * @private
    */
