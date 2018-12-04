@@ -41,11 +41,13 @@
 </span>
 <div>
 <amp-analytics id="analytics1">
+<!-- The second and third triggers will fire pings on documentExit even if totalVisibleTime is 0.
+     Note that ${totalVisibleTime}, etc. variables are based on visiblePercentageMin. -->
 <script type="application/json">
 {
   "transport": {"beacon": true, "xhrpost": false},
   "requests": {
-    "endpoint": "/analytics?totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}"
+    "endpoint": "/analytics?totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
   },
   "triggers": {
     "image_viewed": {
@@ -54,6 +56,18 @@
       "selector": "#target",
       "visibilitySpec": {
         "reportWhen": "documentExit"
+      }
+    },
+    "50pct_visible_time": {
+      "on": "visible",
+      "request": ["endpoint"],
+      "selector": "#target",
+      "visibilitySpec": {
+        "reportWhen": "documentExit",
+        "visiblePercentageMin": 50
+      },
+      "extraUrlParams": {
+        "50PctMin": true
       }
     }
   }

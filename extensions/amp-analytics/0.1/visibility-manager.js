@@ -322,16 +322,16 @@ export class VisibilityManager {
    */
   listen_(model, spec,
     readyPromise, createReportPromiseFunc, callback, opt_element) {
+    if (createReportPromiseFunc) {
+      model.setReportReady(createReportPromiseFunc);
+    }
+
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
       });
-    }
-
-    if (createReportPromiseFunc) {
-      model.setReportReady(createReportPromiseFunc);
     }
 
     // Process the event.
