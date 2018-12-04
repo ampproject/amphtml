@@ -344,14 +344,17 @@ function describeEnv(factory) {
 
       afterEach(() => {
         // Tear down all fixtures.
+        let teardown = Promise.resolve();
         fixtures.slice(0).reverse().forEach(fixture => {
-          fixture.teardown(env);
+          teardown = teardown.then(() => fixture.teardown(env));
         });
 
-        // Delete all other keys.
-        for (const key in env) {
-          delete env[key];
-        }
+        return teardown.then(() => {
+          // Delete all other keys.
+          for (const key in env) {
+            delete env[key];
+          }
+        });
       });
 
       describe(SUB, function() {
@@ -483,6 +486,7 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
+    return RequestBank.tearDown();
   }
 }
 
@@ -518,7 +522,6 @@ class FakeWinFixture {
     if (this.spec.mockFetch !== false) {
       fetchMock./*OK*/restore();
     }
-    RequestBank.tearDown();
   }
 }
 
