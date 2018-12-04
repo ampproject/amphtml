@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -346,7 +347,7 @@ function sendAmpScriptToSwOnFirstVisit(win) {
     // Fetch all AMP-scripts used on the page
     const ampScriptsUsed = win.performance.getEntriesByType('resource')
         .filter(item => item.initiatorType === 'script' &&
-          item.name.startsWith(urls.cdn))
+          startsWith(item.name, urls.cdn))
         .map(script => script.name);
     const controllerSw = win.navigator.serviceWorker.controller;
     // using convention from https://github.com/redux-utilities/flux-standard-action.
