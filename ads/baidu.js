@@ -48,6 +48,9 @@ export function baidu(global, data) {
       'https://dup.baidustatic.com/js/dm.js',
       () => {},
       () => {
+        // noContentAvailable should be called if parent iframe receives no message.
+        // setTimeout can work, but it's not that reliable.
+        // So, only the faliure of JS loading is dealed with for now.
         global.context.noContentAvailable();
       }
   );
