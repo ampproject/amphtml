@@ -56,7 +56,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     expect(styles.position).to.equal('fixed');
   });
 
-  it('should open content when invisible', () => {
+  it.skip('should open content when invisible', () => {
     const promise = dialog.open(content, false);
     expect(dialog.getRoot()).to.have.display('none');
     return vsync.mutatePromise(() => {}).then(() => {
