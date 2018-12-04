@@ -462,7 +462,7 @@ function runAllCommands() {
     command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    command.runBundleSizeCheck('push');
+    command.runBundleSizeCheck(/* action */ 'push');
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
     command.runSinglePassCompiledIntegrationTests();
@@ -637,15 +637,15 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      if (buildTargets.has('RUNTIME')) {
-        command.buildRuntimeMinified(/* extensions */ false);
-        command.runBundleSizeCheck('pr');
-      } else {
-        command.runBundleSizeCheck('skipped');
-      }
     } else {
-      // Generates a blank Percy build to satisfy the required Github check.
+      // Generate a blank Percy build to satisfy the required GitHub check.
       command.runVisualDiffTests(/* opt_mode */ 'empty');
+    }
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntimeMinified(/* extensions */ false);
+    } else {
+      // Skip the bundle-size check to satisfy the required GitHub check.
+      command.runBundleSizeCheck(/* action */ 'skipped');
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
@@ -660,6 +660,9 @@ function main() {
         buildTargets.has('FLAG_CONFIG') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.verifyVisualDiffTests();
+    }
+    if (buildTargets.has('RUNTIME')) {
+      command.runBundleSizeCheck(/* action */ 'pr');
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

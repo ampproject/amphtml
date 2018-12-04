@@ -21,7 +21,7 @@ This document outlines the configuration options that will determine in which co
 - `paramName` - This user defined name determines the name of the query parameter appended to the links.
 - `ids` - An object containing key-value pairs that is partially encoded and passed along in the param.
 - `proxyOnly` - (optional) Flag indicating whether the links should only be appended on pages served on a proxy origin. Defaults to `true`.
-- `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains.
+- `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains. A link matching the exact same hostname will not be decorated unless specified in this array.c
 - `enabled` - Publishers must explicity set this to `true` to opt-in to using this feature.
 
 This linker uses this configuration to generate a string in this structure: `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...` For more details see [Linker Param Format](./linker-id-receiving.md#Format)
@@ -57,7 +57,7 @@ An example of a config that grants more granular control may look like the examp
   }
 }
 ```
-In this example configuration, the parameter would be appendend to any outgoing links matching the `source` or `canonical` domains. This is because the `destinationDomains` entry has been omitted and this is the default behavior. The example has `proxyOnly` set to `false`, this overrides the default behavior and indicates that the linker should manage outgoing links in all contexts this amp page might be served in. Finally, we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
+In this example configuration, the parameter would be appendend to any outgoing links matching the `source` or `canonical` domains that are not an exact hostname match. This is because the `destinationDomains` entry has been omitted and this is the default behavior. The example has `proxyOnly` set to `false`, this overrides the default behavior and indicates that the linker should manage outgoing links in all contexts this amp page might be served in. Finally, we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
 
 #### Destination Domain Matching
 
