@@ -152,12 +152,12 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
 const userAgent = encodeURIComponent(window.navigator.userAgent);
 
 export function depositRequestUrl(path) {
-  return `${REQUEST_URL}deposit/${userAgent}/${path}`;
+  return `${REQUEST_URL}deposit/${userAgent}-${path}/`;
 }
 
-export function withdrawRequest(win, path) {
-  const url = `${REQUEST_URL}withdraw/${userAgent}/${path}`;
-  return xhrServiceForTesting(win).fetchJson(url, {
+export function withdrawRequest(path) {
+  const url = `${REQUEST_URL}withdraw/${userAgent}-${path}/`;
+  return xhrServiceForTesting(window).fetchJson(url, {
     method: 'GET',
     ampCors: false,
     credentials: 'omit',

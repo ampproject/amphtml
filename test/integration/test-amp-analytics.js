@@ -19,6 +19,14 @@ import {
   withdrawRequest,
 } from '../../testing/test-helper';
 
+const RequestId = {
+  BASIC: 'analytics-basic',
+  BATCH: 'analytics-batch',
+  USE_BODY: 'analytics-useBody',
+  BATCH_BODY: 'analytics-batch-useBody',
+  NO_REFERRER: 'analytics-no-referrer',
+};
+
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
   this.timeout(15000);
@@ -29,7 +37,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-basic')}"
+            "endpoint": "${depositRequestUrl(RequestId.BASIC)}"
           },
           "triggers": {
             "pageview": {
@@ -48,10 +56,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request', () => {
-      return withdrawRequest(
-          env.win, 'analytics-basic?a=2&b=AMP%20TEST').then(request => {
+      return withdrawRequest(RequestId.BASIC).then(request => {
+        expect(request.url).to.equal('/?a=2&b=AMP%20TEST');
         expect(request.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
@@ -65,7 +73,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl('analytics-batch')}",
+              "baseUrl": "${depositRequestUrl(RequestId.BATCH)}",
               "batchInterval": 1
             }
           },
@@ -95,10 +103,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request in batch', () => {
-      return withdrawRequest(env.win,
-          'analytics-batch?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
+      return withdrawRequest(RequestId.BATCH).then(req => {
+        expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
+      });
     });
   });
 
@@ -108,7 +117,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-useBody')}"
+            "endpoint": "${depositRequestUrl(RequestId.USE_BODY)}"
           },
           "triggers": {
             "pageview": {
@@ -132,10 +141,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request use POST body payload', () => {
-      return withdrawRequest(
-          env.win, 'analytics-useBody').then(request => {
+      return withdrawRequest(RequestId.USE_BODY).then(request => {
+        expect(request.url).to.equal('/');
         expect(request.body).to.equal('{"a":2,"b":"AMP TEST"}');
       });
     });
@@ -148,7 +157,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl('analytics-batch-useBody')}",
+              "baseUrl": "${depositRequestUrl(RequestId.BATCH_BODY)}",
               "batchInterval": 1
             }
           },
@@ -179,10 +188,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send batch request use POST body payload', () => {
-      return withdrawRequest(
-          env.win, 'analytics-batch-useBody').then(request => {
+      return withdrawRequest(RequestId.BATCH_BODY).then(request => {
+        expect(request.url).to.equal('/');
         expect(request.body).to
             .equal('[{"a":1,"b":"AMP TEST"},{"a":1,"b":"AMP TEST"}]');
       });
@@ -195,7 +204,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           <script type="application/json">
           {
             "requests": {
-              "endpoint": "${depositRequestUrl('analytics-no-referrer')}"
+              "endpoint": "${depositRequestUrl(RequestId.NO_REFERRER)}"
             },
             "triggers": {
               "pageview": {
@@ -210,10 +219,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'analytics-no-referrer')
+      return withdrawRequest(RequestId.NO_REFERRER)
           .then(request => {
+            expect(request.url).to.equal('/');
             expect(request.headers.referer).to.not.be.ok;
           });
     });
