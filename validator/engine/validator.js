@@ -4076,8 +4076,8 @@ function validateAttributes(
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
       missingAttrs.push(
-            context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
-                mandatory));
+          context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
+              mandatory));
     }
   }
   // Sort this list for stability across implementations.
@@ -4086,7 +4086,7 @@ function validateAttributes(
     context.addError(
         amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
-        /* params */ [ missingAttr, getTagSpecName(spec) ],
+        /* params */ [missingAttr, getTagSpecName(spec)],
         getTagSpecUrl(spec), result);
   }
   // Extension specs mandate the 'src' attribute.
