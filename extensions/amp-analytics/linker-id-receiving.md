@@ -61,7 +61,7 @@ The `<amp-analytics>`'s `cookies` feature can be used to extract information fro
 
 #### Configuration
 
-The `cookies` example configuration looks like
+A `cookies` example configuration looks like
 ```
 'cookies': {
   'enabled': true,
@@ -77,17 +77,17 @@ The `cookies` example configuration looks like
 The `enabled` value can be used to override default vendor settings.
 
 ##### Cookie Names
-Each key value within the `cookies` config object defines the cookie key, where its value needs to be an object.
+Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key value pair. That key should be 'value', and its value should be the macro that determines the information stored in the cookie.
 
-Note: The following key values are reserved, and cannot be used as cookie keys. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
+Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
 
 ##### Cookie Values
 Each cookie to write is defined by an object, where the value is defined by the required `value` field.
 
-Two Macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
+Two macros are supported for the `value` field. [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](#linker-param).
 
-When there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
+If there's error resoving the value, or the value is resolved to empty string. Nothing will be written to the cookie.
 
 ##### LINKER PARAM
-`LINKER_PARAM` takes two params, the `name` and the `value`. It will verify the checksum and read the `idName1*idValue1` key value pair from linker param. The `value` ('idValue1' here) will be returned.
+`LINKER_PARAM` takes two arguments, the `name` and the `value`. It will verify the checksum and read the `idName1*idValue1` key value pair from the linker param. The `value` ('idValue1' here) will be returned.
 

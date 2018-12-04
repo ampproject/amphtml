@@ -697,7 +697,7 @@ If you need to ingest this paramter, information on how this parameter is create
 
 #### Cookies
 
-The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from AMP proxy domain to AMP pages on the publisher domain.
+The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's domain.
 
 Details on setting up the `cookies` configuration can be found at [Receiving Linker Params on AMP Pages](./linker-id-receiving.md#receiving-linker-params-on-amp-pages)
 
