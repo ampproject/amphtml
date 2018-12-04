@@ -171,26 +171,65 @@ describes.realWin('consent-ui', {
   });
 
   describe('fullscreen', () => {
+
     it('should respond to the fullscreen event', () => {
-      // TODO:
-      expect(true).to.be.true;
-    });
 
-    it('enterFullscreen_(): should add fullscreen classes and set fullscreen state', () => {
       return getReadyIframeCmpConsentUi().then(consentUI => {
-        consentUI.enterFullscreen_();
+        const enterFullscreenStub = sandbox.stub(consentUI, 'enterFullscreen_');
 
-        expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.true;
-        expect(consentUI.isFullscreen_).to.be.true;
+        consentUI.ui_ = {
+          contentWindow: 'mock-src'
+        }
+        consentUI.handleIframeMessages_({
+          source: 'mock-src',
+          data: {
+            type: 'consent-ui-enter-fullscreen'
+          }
+        });
+
+        expect(enterFullscreenStub).to.be.calledOnce;
       });
     });
 
-    it('enterFullscreen_(): should not enter fullscreen if already fullscreen', () => {
-      return getReadyIframeCmpConsentUi().then(consentUI => {
-        consentUI.isFullscreen_ = true;
-        consentUI.enterFullscreen_();
+    it('should not handle the fullscreen event, ' +
+      'if the iframe wasn\'t visible', () => {
 
-        expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.false;
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+        const enterFullscreenStub = sandbox.stub(consentUI, 'enterFullscreen_');
+
+        consentUI.ui_ = {
+          contentWindow: 'mock-src'
+        };
+        consentUI.isIframeVisible_ = false;
+        consentUI.handleIframeMessages_({
+          source: 'mock-src',
+          data: {
+            type: 'consent-ui-enter-fullscreen'
+          }
+        });
+
+        expect(enterFullscreenStub).to.not.be.called;
+      });
+    });
+
+
+    describe('enterFullscreen', () => {
+      it('should add fullscreen classes and set fullscreen state', () => {
+        return getReadyIframeCmpConsentUi().then(consentUI => {
+          consentUI.enterFullscreen_();
+
+          expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.true;
+          expect(consentUI.isFullscreen_).to.be.true;
+        });
+      });
+
+      it('should not enter fullscreen if already fullscreen', () => {
+        return getReadyIframeCmpConsentUi().then(consentUI => {
+          consentUI.isFullscreen_ = true;
+          consentUI.enterFullscreen_();
+
+          expect(parent.classList.contains(consentUiClasses.iframeFullscreen)).to.be.false;
+        });
       });
     });
 
