@@ -15,48 +15,55 @@
  */
 
 import {AmpPixel} from '../../builtins/amp-pixel';
+import {RequestBank} from '../../testing/test-helper';
 import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
-import {
-  depositRequestUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
+
+const RequestId = {
+  MACRO: 'pixel-macro',
+  HAS_REFERRER: 'pixel-has-referrer',
+  NO_REFERRER: 'pixel-no-referrer',
+};
 
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);
 
-  describes.integration('amp-pixel referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
-  }, env => {
-    it('should keep referrer if no referrerpolicy specified', () => {
-      return withdrawRequest(env.win, 'has-referrer').then(request => {
-        expect(request.headers.referer).to.be.ok;
-      });
-    });
-  });
-
   describes.integration('amp-pixel macro integration test', {
-    body: `<amp-pixel src="${depositRequestUrl(
-        'hello-world&title=TITLE&qp=QUERY_PARAM(a)')}">`,
+    body: `<amp-pixel src="${RequestBank.getUrl(
+        RequestId.MACRO)}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
     params: {
       a: 123,
     },
-  }, env => {
+  }, () => {
     it('should expand the TITLE macro', () => {
-      return withdrawRequest(env.win, 'hello-world&title=AMP%20TEST&qp=123')
-          .then(request => {
-            expect(request.headers.host).to.be.ok;
+      return RequestBank.withdraw(RequestId.MACRO)
+          .then(req => {
+            expect(req.url)
+                .to.equal('/hello-world?title=AMP%20TEST&qp=123');
+            expect(req.headers.host).to.be.ok;
           });
     });
   });
 
+  describes.integration('amp-pixel referrer integration test', {
+    body: `<amp-pixel src="${RequestBank.getUrl(RequestId.HAS_REFERRER)}">`,
+  }, () => {
+    it('should keep referrer if no referrerpolicy specified', () => {
+      return RequestBank.withdraw(RequestId.HAS_REFERRER).then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.be.ok;
+      });
+    });
+  });
+
   describes.integration('amp-pixel no-referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
+    body: `<amp-pixel src="${RequestBank.getUrl(RequestId.NO_REFERRER)}"
              referrerpolicy="no-referrer">`,
-  }, env => {
+  }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'no-referrer').then(request => {
-        expect(request.headers.referer).to.not.be.ok;
+      return RequestBank.withdraw(RequestId.NO_REFERRER).then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.not.be.ok;
       });
     });
   });

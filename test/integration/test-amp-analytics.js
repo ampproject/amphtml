@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  depositRequestUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
+import {RequestBank} from '../../testing/test-helper';
+
+const RequestId = {
+  BASIC: 'analytics-basic',
+  BATCH: 'analytics-batch',
+  USE_BODY: 'analytics-use-body',
+  BATCH_BODY: 'analytics-batch-use-body',
+  NO_REFERRER: 'analytics-no-referrer',
+};
 
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
@@ -29,7 +34,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-basic')}"
+            "endpoint": "${RequestBank.getUrl(RequestId.BASIC)}"
           },
           "triggers": {
             "pageview": {
@@ -48,11 +53,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request', () => {
-      return withdrawRequest(
-          env.win, 'analytics-basic?a=2&b=AMP%20TEST').then(request => {
-        expect(request.headers.referer,
+      return RequestBank.withdraw(RequestId.BASIC).then(req => {
+        expect(req.url).to.equal('/?a=2&b=AMP%20TEST');
+        expect(req.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
     });
@@ -65,7 +70,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl('analytics-batch')}",
+              "baseUrl": "${RequestBank.getUrl(RequestId.BATCH)}",
               "batchInterval": 1
             }
           },
@@ -95,10 +100,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request in batch', () => {
-      return withdrawRequest(env.win,
-          'analytics-batch?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
+      return RequestBank.withdraw(RequestId.BATCH).then(req => {
+        expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
+      });
     });
   });
 
@@ -108,7 +114,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-useBody')}"
+            "endpoint": "${RequestBank.getUrl(RequestId.USE_BODY)}"
           },
           "triggers": {
             "pageview": {
@@ -132,11 +138,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send request use POST body payload', () => {
-      return withdrawRequest(
-          env.win, 'analytics-useBody').then(request => {
-        expect(request.body).to.equal('{"a":2,"b":"AMP TEST"}');
+      return RequestBank.withdraw(RequestId.USE_BODY).then(req => {
+        expect(req.url).to.equal('/');
+        expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
       });
     });
   });
@@ -148,7 +154,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl('analytics-batch-useBody')}",
+              "baseUrl": "${RequestBank.getUrl(RequestId.BATCH_BODY)}",
               "batchInterval": 1
             }
           },
@@ -179,12 +185,15 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should send batch request use POST body payload', () => {
-      return withdrawRequest(
-          env.win, 'analytics-batch-useBody').then(request => {
-        expect(request.body).to
-            .equal('[{"a":1,"b":"AMP TEST"},{"a":1,"b":"AMP TEST"}]');
+      return RequestBank.withdraw(RequestId.BATCH_BODY).then(req => {
+        expect(req.url).to.equal('/');
+        expect(JSON.parse(req.body)).to.deep.equal([{
+          a: 1, b: 'AMP TEST',
+        }, {
+          a: 1, b: 'AMP TEST',
+        }]);
       });
     });
   });
@@ -195,7 +204,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           <script type="application/json">
           {
             "requests": {
-              "endpoint": "${depositRequestUrl('analytics-no-referrer')}"
+              "endpoint": "${RequestBank.getUrl(RequestId.NO_REFERRER)}"
             },
             "triggers": {
               "pageview": {
@@ -210,11 +219,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, env => {
+  }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return withdrawRequest(env.win, 'analytics-no-referrer')
-          .then(request => {
-            expect(request.headers.referer).to.not.be.ok;
+      return RequestBank.withdraw(RequestId.NO_REFERRER)
+          .then(req => {
+            expect(req.url).to.equal('/');
+            expect(req.headers.referer).to.not.be.ok;
           });
     });
   });
