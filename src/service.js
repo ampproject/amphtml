@@ -111,22 +111,33 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-  nodeOrDoc, id, opt_fallbackToTopWin) {
-  // First, try to resolve via local (embed) window.
-  if (nodeOrDoc.nodeType) {
-    // If a node is passed, try to resolve via this node.
-    const win = toWin(/** @type {!Document} */ (
-      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+  nodeOrDoc, id, opt_fallbackToTopWin)
+{
+  const isAmpDoc = !nodeOrDoc.nodeType;
+  // If an ampdoc is passed, resolve via ampdoc.
+  if (isAmpDoc) {
+    const ampdoc =
+      /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
+    return getServiceForDoc(ampdoc, id);
+  }
+  // Now, nodeOrDoc must be a node.
+  const document =
+    /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc);
+  const win = toWin(document.defaultView);
+  // First, try to resolve via local embed window (if applicable).
+  const isEmbed = win != getTopWindow(win);
+  if (isEmbed) {
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
     }
+    // Don't continue if fallback is not allowed.
+    if (!opt_fallbackToTopWin) {
+      return null;
+    }
   }
-  // If an ampdoc is passed or fallback is allowed, continue resolving.
-  if (!nodeOrDoc.nodeType || opt_fallbackToTopWin) {
-    return getServiceForDocDeprecated(nodeOrDoc, id);
-  }
-  return null;
+  // If not node is not embedded, resolve via ampdoc.
+  return getServiceForDocOrNullInternal(nodeOrDoc, id);
 }
 
 /**
@@ -263,7 +274,7 @@ export function getServicePromiseOrNull(win, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * Expects service `id` to be registered.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {T}
  * @template T
@@ -272,6 +283,23 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
   const ampdoc = getAmpdoc(elementOrAmpDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   return getServiceInternal(holder, id);
+}
+
+
+/**
+ * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
+ * If service `id` is not registered, returns null.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ */
+function getServiceForDocOrNullInternal(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  if (isServiceRegistered(holder, id)) {
+    return getServiceInternal(holder, id);
+  } else {
+    return null;
+  }
 }
 
 
@@ -653,15 +681,14 @@ export function adoptServiceForEmbed(embedWin, serviceId) {
  * @return {boolean}
  */
 export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
-  const frameElement = /** @type {!Node} */ (dev().assert(
-      embedWin.frameElement,
-      'frameElement not found for embed'));
+  const frameElement = dev().assertElement(embedWin.frameElement,
+      'frameElement not found for embed');
   const ampdoc = getAmpdoc(frameElement);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (!isServiceRegistered(holder, serviceId)) {
     return false;
   }
-  const service = getServiceForDocDeprecated(frameElement, serviceId);
+  const service = getServiceForDoc(frameElement, serviceId);
   if (!isEmbeddable(service)) {
     return false;
   }

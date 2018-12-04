@@ -60,6 +60,7 @@ import {
 import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
 import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
+import {PERMUTIVE_CONFIG} from './vendors/permutive';
 import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
@@ -215,6 +216,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'oracleInfinityAnalytics': ORACLEINFINITYANALYTICS_CONFIG,
   'parsely': PARSELY_CONFIG,
   'piStats': PISTATS_CONFIG,
+  'permutive': PERMUTIVE_CONFIG,
   'piano': PIANO_CONFIG,
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,

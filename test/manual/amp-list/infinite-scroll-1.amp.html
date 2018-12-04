@@ -17,7 +17,7 @@
     amp-list {
       border: 1px solid green;
     }
-    [load-more-button], [load-more-failed], [load-more-loading] {
+    [load-more-button], [load-more-failed], [load-more-loading], [load-more-end] {
       background: gray;
       color: #fff;
       cursor: pointer;
@@ -29,9 +29,14 @@
       padding: 16px;
     }
 
-    .amp-load-more-loading {
+    .amp-load-more-loading, [load-more-loading] {
+      background: blue;
+    }
+
+    [load-more-end] {
       background: red;
     }
+
     .story-entry {
       padding: 40px;
       border: 1px solid gray;
@@ -61,8 +66,8 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3"
-    load-more="auto"
+    src="/infinite-scroll?items=5&left=5&latency=3000"
+    load-more
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -71,16 +76,23 @@
       </div>
     </template>
     <div load-more-button>
-      SEE MORE
+      <template type="amp-mustache">
+        {{loadMoreButtonText}}
+      </template>
     </div>
     <div load-more-failed>
-      LOAD FAILED
-    </div>
-    <div fallback>
-      FALLBACK
+      FAILED
     </div>
     <div load-more-loading>
       LOADING
+    </div>
+    <div load-more-end>
+      <template type="amp-mustache">
+        {{loadMoreEndText}}
+      </template>
+    </div>
+    <div fallback>
+        FALLBACK
     </div>
   </amp-list>
 

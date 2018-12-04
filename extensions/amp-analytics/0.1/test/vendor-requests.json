@@ -303,6 +303,12 @@
     "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview",
     "heartbeat": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=heartbeat&tt=_total_engaged_time_&inc=_incremental_engaged_time_"
   },
+  "permutive": {
+    "track": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
+    "pageview": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=Pageview&_ep_isp_info=%24ip_isp_info&_ep_geo_info=%24ip_geo_info&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
+    "engagement": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_engaged_time=5&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
+    "completion": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_completion=0.25&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_"
+  },
   "piStats": {
     "host": "https://events.pi-stats.com",
     "basePrefix": "https://events.pi-stats.com/eventsamp/?e=PageLoad&pid=!property&url=_ampdoc_url_&cnt=!cntId&lang=!language&ref=_document_referrer_&id=_client_id_&ua=_user_agent_&ctype=web&blang=_browser_language_&v=2.0&dist=Javascript",

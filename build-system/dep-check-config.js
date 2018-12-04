@@ -409,8 +409,6 @@ exports.rules = [
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
-      'ads/criteo.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST **/
     ],
   },
 ];
