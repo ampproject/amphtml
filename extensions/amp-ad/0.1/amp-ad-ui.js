@@ -74,7 +74,15 @@ export class AmpAdUIHandler {
 
     if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
 
-      // Special case: force collapse ad if only child of a flying carpet.
+      /**
+       * Special case: Force collapse the ad if it is the,
+       * only and direct child of a flying carpet.
+       * Also, this will not handle
+       * the amp-layout case for now, as it could be
+       * inefficient. And we have not seen an amp-layout
+       * used with flying carpet and ads yet.
+       */
+
       const flyingCarpetElements =
         ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
       const flyingCarpetElement = flyingCarpetElements[0];
