@@ -62,7 +62,7 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
         return [{
           getImpl: () => Promise.resolve({
-            getChildren: () => [adElement]
+            getChildren: () => [adElement],
           }),
         }];
       });

@@ -187,7 +187,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /**
    * Returns our discovered children
-   * @returns {!Array<!Element>}
+   * @return {!Array<!Element>}
    */
   getChildren() {
     return this.children_;
