@@ -34,8 +34,16 @@ const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version') ;
+
 
 const argv = minimist(process.argv.slice(2));
+// Point sourcemap to fetch files from correct GitHub tag.
+let sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
+    internalRuntimeVersion + '/';
+if (argv.fortesting) {
+  sourceMapBase = 'http://localhost:8000/';
+}
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
   argv.single_pass_dest : './dist/';
 
@@ -94,7 +102,7 @@ exports.getFlags = function(config) {
     parse_inline_source_maps: true,
     apply_input_source_maps: true,
     source_map_location_mapping: [
-      '|/',
+      '|' + sourceMapBase,
     ],
     //new_type_inf: true,
     language_in: 'ES6',
@@ -216,7 +224,7 @@ exports.getBundleFlags = function(g) {
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return (w.replace('<%= contents %>', '%s')
-        /*+ '\n//# sourceMappingURL=%basename%.map\n'*/);
+        + '\n//# sourceMappingURL=%basename%.map\n');
       }
       // We need to post wrap the main bundles. We can't wrap v0.js either
       // since it would have the wrapper already when we read it and prepend
@@ -543,11 +551,12 @@ function wrapMainBinaries() {
   // Cache the v0 file so we can prepend it to alternative binaries.
   const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
   jsFilesToWrap.forEach(x => {
-    const path = `dist/${x}.js`;
-    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
-    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
-    fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
-        `${fs.readFileSync(path).toString()}${suffix}`);
+    const sourceMapStr = `\n//# sourceMappingURL=${path.basename(x)}.js.map`;
+    const filepath = `dist/${x}.js`;
+    const bootstrapCode = filepath === 'dist/v0.js' ? '' : mainFile;
+    const isAmpAltstring = filepath === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
+    fs.writeFileSync(filepath, `${isAmpAltstring}${prefix}${bootstrapCode}` +
+        `${fs.readFileSync(filepath).toString()}${suffix}${sourceMapStr}`);
   });
 }
 
