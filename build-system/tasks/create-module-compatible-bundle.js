@@ -16,6 +16,9 @@
 
 const $$ = require('gulp-load-plugins')();
 const gulp = $$.help(require('gulp'));
+const babel = require('gulp-babel');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 /* Copy source to source-nomodule.js and
  * make it compatible with `<script type=module`.
@@ -28,10 +31,17 @@ const gulp = $$.help(require('gulp'));
  *
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
-exports.createModuleCompatibleES5Bundle = function(src) {
-  return gulp.src('dist/' + src)
+exports.createModuleCompatibleBundle = function() {
+  return new Promise(resolve => {
+    const {green} = colors;
+    log(green("Starting babel process, post closure compiler"));
+    gulp.src('dist/**/*.js')
       .pipe($$.sourcemaps.init({loadMaps: true}))
-      .pipe($$.regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
+      .pipe(babel({
+        plugins: [require.resolve('../babel-plugins/babel-plugin-transform-module-compatible-global/index.js')]
+      }))
       .pipe($$.sourcemaps.write('./'))
-      .pipe(gulp.dest('dist'));
+      .pipe(gulp.dest('dist-esm'))
+      .on('end', resolve);
+  })
 };
