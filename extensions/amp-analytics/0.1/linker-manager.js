@@ -156,8 +156,8 @@ export class LinkerManager {
           Object.assign({}, defaultConfig, config[name]);
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(TAG, `linker config for ${name} is not enabled and ` +
-            'will be ignored.');
+        user().info(TAG, 'linker config for %s is not enabled and ' +
+            'will be ignored.', name);
         return;
       }
 
@@ -284,6 +284,13 @@ export class LinkerManager {
 
     // If no domains given, default to friendly domain matching.
     if (!domains) {
+      // Don't append linker for exact domain match, relative urls, or
+      // fragments.
+      const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+      if (winHostname === hostname) {
+        return false;
+      }
+
       const {sourceUrl, canonicalUrl} =
           Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;

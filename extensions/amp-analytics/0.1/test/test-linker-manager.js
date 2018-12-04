@@ -64,6 +64,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface.getLocation.returns({
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
+    windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableService(win);
   });
 
@@ -256,7 +257,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       expect(canonicalDomainUrl).to.contain('testLinker1=');
       expect(canonicalDomainUrl).to.not.contain('testLinker2=');
 
-      const sourceDomainUrl = clickAnchor('https://amp.source.com/path');
+      const sourceDomainUrl = clickAnchor('https://www.source.com/path');
       expect(sourceDomainUrl).to.contain('testLinker1=');
       expect(sourceDomainUrl).to.not.contain('testLinker2=');
 
@@ -383,6 +384,83 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       const a = clickAnchor('https://www.source.com');
       expect(a).to.not.contain('testLinker1=');
       expect(a).to.contain('testLinker2=');
+    });
+  });
+
+  describe('same domain matching', () => {
+    let config;
+
+    beforeEach(() => {
+      windowInterface.getLocation.returns({
+        origin: 'https://amp.source.com',
+      });
+      windowInterface.getHostname.returns('amp.source.com');
+      config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+    });
+
+    it('should not add linker if same domain', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.not.contain('testLinker');
+      });
+    });
+
+    it('should add linker if subdomain is different but friendly', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://m.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should add linker if same domain is in destination domains', () => {
+      const config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+            destinationDomains: ['amp.source.com'],
+          },
+        },
+      };
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is fragment', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '#hello',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is relative', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '/foo',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
     });
   });
 
