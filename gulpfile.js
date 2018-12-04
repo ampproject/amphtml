@@ -998,11 +998,15 @@ function dist() {
           });
         }
       }).then(() => {
-        return createModuleCompatibleES5Bundle('v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('shadow-v0.js');
+        if (argv.esm) {
+          return Promise.all([
+            createModuleCompatibleES5Bundle('v0.js'),
+            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+            createModuleCompatibleES5Bundle('shadow-v0.js'),
+          ]);
+        } else {
+          return Promise.resolve();
+        }
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
