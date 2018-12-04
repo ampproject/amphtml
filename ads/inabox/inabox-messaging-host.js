@@ -359,9 +359,12 @@ export class InaboxMessagingHost {
  * @private
  */
 function canInspectWindow_(win) {
+  // TODO: this is not reliable.  The compiler assumes that property reads are
+  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
+  // but since we're not using the closure library I'm not sure how to do this.
+  // See https://github.com/google/closure-compiler/issues/3156
   try {
-    const unused = !!win.location.href && win['test']; // eslint-disable-line no-unused-vars
-    return true;
+    return !!win.location.href && win['test'];
   } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }
