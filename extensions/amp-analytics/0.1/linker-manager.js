@@ -38,8 +38,9 @@ export class LinkerManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} config
    * @param {?string} type
+   * @param {!Element} element
    */
-  constructor(ampdoc, config, type) {
+  constructor(ampdoc, config, type, element) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -51,6 +52,9 @@ export class LinkerManager {
 
     /** @private {?string} */
     this.type_ = type;
+
+    /** @const @private {!Element} */
+    this.element_ = element;
 
     /** @private {!Array<Promise>} */
     this.allLinkerPromises_ = [];

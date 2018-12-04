@@ -486,7 +486,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   initializeLinker_() {
     const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
-        this.config_, type);
+        this.config_, type, this.element);
     this.linkerManager_.init();
   }
 

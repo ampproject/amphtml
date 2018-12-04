@@ -522,7 +522,7 @@ export class Services {
   /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
