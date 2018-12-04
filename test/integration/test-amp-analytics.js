@@ -26,7 +26,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${RequestBank.getUrl(1)}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
@@ -47,7 +47,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/?a=2&b=AMP%20TEST');
         expect(req.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
@@ -62,7 +62,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${RequestBank.getUrl(1)}",
+              "baseUrl": "${RequestBank.getUrl()}",
               "batchInterval": 1
             }
           },
@@ -94,7 +94,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request in batch', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
       });
     });
@@ -106,7 +106,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${RequestBank.getUrl(1)}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
@@ -132,7 +132,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request use POST body payload', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
       });
@@ -146,7 +146,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${RequestBank.getUrl(1)}",
+              "baseUrl": "${RequestBank.getUrl()}",
               "batchInterval": 1
             }
           },
@@ -179,7 +179,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send batch request use POST body payload', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(JSON.parse(req.body)).to.deep.equal([{
           a: 1, b: 'AMP TEST',
@@ -196,7 +196,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           <script type="application/json">
           {
             "requests": {
-              "endpoint": "${RequestBank.getUrl(1)}"
+              "endpoint": "${RequestBank.getUrl()}"
             },
             "triggers": {
               "pageview": {
@@ -213,7 +213,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.not.be.ok;
       });

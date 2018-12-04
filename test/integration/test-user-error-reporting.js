@@ -29,7 +29,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(1)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -46,7 +46,7 @@ describe.configure().skipIfPropertiesObfuscated()
                `,
       }, () => {
         it('should ping correct host with amp-pixel user().assert err', () => {
-          return RequestBank.withdraw(1);
+          return RequestBank.withdraw();
         });
       });
 
@@ -66,7 +66,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(1)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -79,7 +79,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with amp-img user().error err', () => {
-          return RequestBank.withdraw(1);
+          return RequestBank.withdraw();
         });
       });
 
@@ -100,7 +100,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(1)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -113,7 +113,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with 3p error message', () => {
-          return RequestBank.withdraw(1);
+          return RequestBank.withdraw();
         });
       });
     });

@@ -152,11 +152,11 @@ export class RequestBank {
   /**
    * Returns the URL for depositing a request.
    *
-   * @param {number} id an unique identifier of the request in a test case.
+   * @param {number|string|undefined} requestId
    * @returns {string}
    */
-  static getUrl(id) {
-    return `${REQUEST_URL}/deposit/${id}/`;
+  static getUrl(requestId) {
+    return `${REQUEST_URL}/deposit/${requestId}/`;
   }
 
   /**
@@ -167,11 +167,11 @@ export class RequestBank {
    *   headers: JsonObject
    *   body: string
    * }
-   * @param {number} id
+   * @param {number|string|undefined} requestId
    * @returns {Promise<JsonObject>}
    */
-  static withdraw(id) {
-    const url = `${REQUEST_URL}/withdraw/${id}/`;
+  static withdraw(requestId) {
+    const url = `${REQUEST_URL}/withdraw/${requestId}/`;
     return xhrServiceForTesting(window).fetchJson(url, {
       method: 'GET',
       ampCors: false,

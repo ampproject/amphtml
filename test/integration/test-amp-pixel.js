@@ -23,14 +23,14 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(1000);
 
   describes.integration('amp-pixel macro integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(
-        1)}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
+    body: `<amp-pixel
+    src="${RequestBank.getUrl()}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
     params: {
       a: 123,
     },
   }, () => {
     it('should expand the TITLE macro', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url)
             .to.equal('/hello-world?title=AMP%20TEST&qp=123');
         expect(req.headers.host).to.be.ok;
@@ -39,10 +39,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel referrer integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(1)}">`,
+    body: `<amp-pixel src="${RequestBank.getUrl()}">`,
   }, () => {
     it('should keep referrer if no referrerpolicy specified', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.be.ok;
       });
@@ -50,11 +50,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel no-referrer integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(1)}"
+    body: `<amp-pixel src="${RequestBank.getUrl()}"
              referrerpolicy="no-referrer">`,
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(1).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.not.be.ok;
       });
