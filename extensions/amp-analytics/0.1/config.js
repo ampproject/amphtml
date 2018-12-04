@@ -78,10 +78,10 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
-    const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
     const configRewriterUrl = this.getConfigRewriter_(inlineConfig)['url'];
 
+    const config = dict({});
+    const inlineConfig = this.getInlineConfigNoInline();
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
     mergeObjects(this.remoteConfig_, config);
