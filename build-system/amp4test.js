@@ -96,9 +96,8 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/deposit/:id/', (req, res) => {
+  const key = req.params.id;
   log('SERVER-LOG [DEPOSIT]: ', key);
   if (typeof bank[key] === 'function') {
     bank[key](req);
@@ -113,9 +112,8 @@ app.use('/request-bank/deposit/', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/withdraw/:id/', (req, res) => {
+  const key = req.params.id;
   log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[key];
   if (typeof result === 'function') {
@@ -125,6 +123,7 @@ app.use('/request-bank/withdraw/', (req, res) => {
     res.json({
       headers: result.headers,
       body: result.body,
+      url: result.url,
     });
     delete bank[key];
   };

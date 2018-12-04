@@ -135,14 +135,9 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-/////////////////
-// Request Bank
-// A server side temporary request storage which is useful for testing
-// browser sent HTTP requests.
-/////////////////
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank';
 
 /**
  * Append user agent to request-bank deposit/withdraw IDs to avoid
@@ -151,17 +146,47 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
  */
 const userAgent = encodeURIComponent(window.navigator.userAgent);
 
-export function depositRequestUrl(path) {
-  return `${REQUEST_URL}deposit/${userAgent}/${path}`;
-}
+/**
+ * A server side temporary request storage which is useful for testing
+ * browser sent HTTP requests.
+ */
+export class RequestBank {
 
-export function withdrawRequest(win, path) {
-  const url = `${REQUEST_URL}withdraw/${userAgent}/${path}`;
-  return xhrServiceForTesting(win).fetchJson(url, {
-    method: 'GET',
-    ampCors: false,
-    credentials: 'omit',
-  }).then(res => res.json());
+  /**
+   * Returns the URL for depositing a request.
+   *
+   * @param id an unique identifier of the request.
+   * @returns {string}
+   */
+  static getUrl(id) {
+    if (id.indexOf('/') >= 0) {
+      throw new Error('ID "' + id + '" should not contain "/"');
+    }
+    return `${REQUEST_URL}/deposit/${userAgent}-${id}/`;
+  }
+
+  /**
+   * Returns a Promise that resolves when the request of given ID is deposited.
+   * The returned promise resolves to an JsonObject contains the request info:
+   * {
+   *   url: string
+   *   headers: JsonObject
+   *   body: string
+   * }
+   * @param id
+   * @returns {Promise<JsonObject>}
+   */
+  static withdraw(id) {
+    if (id.indexOf('/') >= 0) {
+      throw new Error('ID "' + id + '" should not contain "/"');
+    }
+    const url = `${REQUEST_URL}/withdraw/${userAgent}-${id}/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    }).then(res => res.json());
+  }
 }
 
 export function createPointerEvent(type, x, y) {
