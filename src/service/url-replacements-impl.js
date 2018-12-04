@@ -113,8 +113,6 @@ export class GlobalVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    const {win} = this.ampdoc;
-
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
@@ -156,7 +154,7 @@ export class GlobalVariableSource extends VariableSource {
             const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
                 .hostname;
             const currentHostname =
-                WindowInterface.getHostname(win);
+                WindowInterface.getHostname(this.ampdoc.win);
             return referrerHostname === currentHostname ? null : referrer;
           });
     }));
@@ -165,25 +163,26 @@ export class GlobalVariableSource extends VariableSource {
     this.set('TITLE', () => {
       // The environment may override the title and set originalTitle. Prefer
       // that if available.
-      const doc = win.document;
-      return doc['originalTitle'] || doc.title;
+      return this.ampdoc.win.document['originalTitle'] ||
+          this.ampdoc.win.document.title;
     });
 
     // Returns the URL for this AMP document.
     this.set('AMPDOC_URL', () => {
       return removeFragment(
-          this.addReplaceParamsIfMissing_(win.location.href));
+          this.addReplaceParamsIfMissing_(
+              this.ampdoc.win.location.href));
     });
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = parseUrlDeprecated(win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrlDeprecated(win.location.href);
+      const url = parseUrlDeprecated(this.ampdoc.win.location.href);
       return url && url.hostname;
     });
 
@@ -357,7 +356,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the IANA timezone code
     this.set('TIMEZONE_CODE', () => {
       let tzCode;
-      if ('Intl' in win && 'DateTimeFormat' in win.Intl) {
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
         // It could be undefined (i.e. IE11)
         tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
       }
@@ -383,7 +383,8 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the viewport width.
     this.set('VIEWPORT_WIDTH', () => viewport.getWidth());
 
-    const {screen} = win;
+
+    const {screen} = this.ampdoc.win;
     // Returns screen.width.
     this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
@@ -401,20 +402,21 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns document characterset.
     this.set('DOCUMENT_CHARSET', () => {
-      const doc = win.document;
+      const doc = this.ampdoc.win.document;
       return doc.characterSet || doc.charset;
     });
 
     // Returns the browser language.
     this.set('BROWSER_LANGUAGE', () => {
-      const nav = win.navigator;
+      const nav = this.ampdoc.win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
     });
 
     // Returns the user agent.
     this.set('USER_AGENT', () => {
-      return win.navigator.userAgent;
+      const nav = this.ampdoc.win.navigator;
+      return nav.userAgent;
     });
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
@@ -495,7 +497,7 @@ export class GlobalVariableSource extends VariableSource {
       user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataSync(
-          win,
+          this.ampdoc.win,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     });
@@ -503,17 +505,17 @@ export class GlobalVariableSource extends VariableSource {
       user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return getTimingDataAsync(
-          win,
+          this.ampdoc.win,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
     });
 
     this.set('NAV_TYPE', () => {
-      return getNavigationData(win, 'type');
+      return getNavigationData(this.ampdoc.win, 'type');
     });
 
     this.set('NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(win, 'redirectCount');
+      return getNavigationData(this.ampdoc.win, 'redirectCount');
     });
 
     // returns the AMP version number
@@ -541,23 +543,21 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return tryResolve(() =>
-        Services.performanceFor(win).getFirstContentfulPaint());
+        Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint());
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
       return tryResolve(() =>
-        Services.performanceFor(win).getFirstViewportReady());
+        Services.performanceFor(this.ampdoc.win).getFirstViewportReady());
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
       return tryResolve(() =>
-        Services.performanceFor(win).getMakeBodyVisible());
+        Services.performanceFor(this.ampdoc.win).getMakeBodyVisible());
     });
 
     this.setAsync('AMP_STATE', key => {
-      // This is safe since AMP_STATE is not an A4A whitelisted variable.
-      const {documentElement} = win.document;
-      return Services.bindForDocOrNull(documentElement).then(bind => {
+      return Services.bindForDocOrNull(this.ampdoc).then(bind => {
         if (!bind) {
           return '';
         }

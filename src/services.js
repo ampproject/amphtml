@@ -158,13 +158,13 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(element) {
+  static bindForDocOrNull(elementOrAmpDoc) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          element, 'bind', 'amp-bind'));
+          elementOrAmpDoc, 'bind', 'amp-bind'));
   }
 
   /**
