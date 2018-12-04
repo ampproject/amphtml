@@ -87,6 +87,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
 import {
@@ -113,7 +114,6 @@ import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import {stubService} from './test-helper';
 import fetchMock from 'fetch-mock';
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -518,6 +518,7 @@ class FakeWinFixture {
     if (this.spec.mockFetch !== false) {
       fetchMock./*OK*/restore();
     }
+    RequestBank.tearDown();
   }
 }
 
