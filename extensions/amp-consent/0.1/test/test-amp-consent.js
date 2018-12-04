@@ -270,10 +270,26 @@ describes.realWin('amp-consent', {
       event.data = {
         'type': 'consent-response',
         'action': 'accept',
+        'info': 'accept-string',
       };
       event.source = iframe.contentWindow;
       win.dispatchEvent(event);
-      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT,
+          'accept-string');
+    });
+
+    it('ignore info w/o amp-consent-v2 flag', () => {
+      // TODO(@zhouyx): Remove with amp-consent-v2 flag
+      toggleExperiment(win, 'amp-consent-v2', false);
+      event.data = {
+        'type': 'consent-response',
+        'action': 'accept',
+        'info': 'accept-string',
+      };
+      event.source = iframe.contentWindow;
+      win.dispatchEvent(event);
+      expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT,
+          undefined);
     });
 
     it('ignore msg from incorrect source', () => {
