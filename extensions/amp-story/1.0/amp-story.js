@@ -1495,10 +1495,12 @@ export class AmpStory extends AMP.BaseElement {
       const maskEl = this.win.document.createElement('div');
       maskEl.classList.add('i-amphtml-story-opacity-mask');
       maskEl.addEventListener('click', () => {
-        const actions = Services.actionServiceForDoc(this.getAmpDoc());
-        actions.execute(this.sidebar_, 'close', /* args */ null,
-            /* source */ null, /* caller */ null, /* event */ null,
-            ActionTrust.HIGH);
+        const actions = Services.actionServiceForDoc(this.element);
+        if (this.sidebar_) {
+          actions.execute(this.sidebar_, 'close', /* args */ null,
+              /* source */ null, /* caller */ null, /* event */ null,
+              ActionTrust.HIGH);
+        }
       });
       this.element.appendChild(maskEl);
       this.maskElement_ = maskEl;
