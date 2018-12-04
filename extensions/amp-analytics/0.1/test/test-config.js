@@ -15,7 +15,12 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {AnalyticsConfig, expandConfigRequest, mergeObjects, readDefaultConfiguration} from '../config';
+import {
+  AnalyticsConfig,
+  expandConfigRequest,
+  mergeObjects,
+  readDefaultConfiguration,
+} from '../config';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
@@ -559,20 +564,20 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('readDefaultConfiguration', () => {
     it('readDefaultConfiguration function', () => {
-      let config = {
+      const config = {
         'key1': 'value1',
         'key2': true,
         'key3': 0,
         'override1': {
-          'override1Key': 'value'
+          'override1Key': 'value',
         },
         'override2': {
-          'override2Key': 'value'
+          'override2Key': 'value',
         },
       };
       const defaultConfig = {};
       expect(readDefaultConfiguration(config, defaultConfig)).to.eql(
-        ['override1', 'override2']);
+          ['override1', 'override2']);
       expect(defaultConfig).to.eql({
         'key1': 'value1',
         'key2': true,
@@ -581,20 +586,20 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('readDefaultConfiguration function merges with default config', () => {
-      let config = {
+      const config = {
         'key1': 'value1',
         'key2': true,
         'key3': 0,
         'override1': {
-          'override1Key': 'value'
+          'override1Key': 'value',
         },
         'override2': {
-          'override2Key': 'value'
+          'override2Key': 'value',
         },
       };
-      const defaultConfig = {'key0': 'KEEP', 'key1': 'REPLACE',};
+      const defaultConfig = {'key0': 'KEEP', 'key1': 'REPLACE'};
       expect(readDefaultConfiguration(config, defaultConfig)).to.eql(
-        ['override1', 'override2']);
+          ['override1', 'override2']);
       expect(defaultConfig).to.eql({
         'key0': 'KEEP',
         'key1': 'value1',
@@ -604,7 +609,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('readDefaultConfiguration no overrides available', () => {
-      let config = {
+      const config = {
         'key1': 'value1',
         'key2': true,
         'key3': 0,

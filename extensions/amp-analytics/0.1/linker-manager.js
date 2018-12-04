@@ -24,8 +24,8 @@ import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
-import {user} from '../../../src/log';
 import {readDefaultConfiguration} from './config';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';

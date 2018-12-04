@@ -346,14 +346,14 @@ export function expandConfigRequest(config) {
  */
 export function readDefaultConfiguration(config, defaultConfig) {
   return Object.keys(config).filter(
-    key => {
-      const value = config[key];
-      const isOverrideConfiguration = isObject(value);
-      if (!isOverrideConfiguration) {
-        defaultConfig[key] = value;
-      }
-      return isOverrideConfiguration;
-    });
+      key => {
+        const value = config[key];
+        const isOverrideConfiguration = isObject(value);
+        if (!isOverrideConfiguration) {
+          defaultConfig[key] = value;
+        }
+        return isOverrideConfiguration;
+      });
 }
 
 /**
