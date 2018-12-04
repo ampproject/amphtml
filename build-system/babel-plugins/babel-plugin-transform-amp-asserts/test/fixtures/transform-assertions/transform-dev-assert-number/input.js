@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+let num = 5;
+dev().assertNumber(num);
 dev().assertNumber(1 + 1);
 let result = dev().assertNumber(3, 'hello', 'world');
 let result2 = dev().assertNumber();

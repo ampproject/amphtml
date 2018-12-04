@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'hello';
-let result = 'world';
+let str = 'foo';
+
+/** @type {string} */
+(str);
+
+/** @type {string} */
+('hello');
+let result =
+/** @type {string} */
+('world');
 let result2 = undefined;
+let result3 = dev().assertString(null);

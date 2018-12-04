@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const falsey = false;
+dev().assertBoolean(falsey);
 dev().assertBoolean(true);
 let result = dev().assertBoolean(false, 'hello', 'world');
 let result2 = dev().assertBoolean();
