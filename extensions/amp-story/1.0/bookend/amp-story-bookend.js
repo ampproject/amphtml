@@ -338,7 +338,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
       this.getShadowRoot().removeAttribute('desktop-fullbleed');
 
       switch (uiState) {
-        case UIType.DESKTOP:
+        case UIType.DESKTOP_PANELS:
           this.getShadowRoot().setAttribute('desktop', '');
           break;
         case UIType.DESKTOP_FULLBLEED:

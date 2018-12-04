@@ -277,7 +277,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             // Keep DESKTOP_STATE for compatiblity with v0.1.
-            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
+            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
             [StateProperty.UI_STATE]: data,
           }));
     case Action.SET_CONSENT_ID:

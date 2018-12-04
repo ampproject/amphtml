@@ -195,7 +195,7 @@ export class AmpStoryTooltip {
   onUIStateUpdate_(uiState) {
     this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
         () => {
-          uiState === UIType.DESKTOP ?
+          uiState === UIType.DESKTOP_PANELS ?
             this.tooltipOverlayEl_.setAttribute('desktop', '') :
             this.tooltipOverlayEl_.removeAttribute('desktop');
         });

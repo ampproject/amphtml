@@ -139,6 +139,7 @@ const Attributes = {
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  SUPPORTED_ORIENTATIONS: 'supported-orientations',
 };
 
 /**
@@ -774,7 +775,8 @@ export class AmpStory extends AMP.BaseElement {
    */
   whenPagesLoaded_(timeoutMs = 0) {
     const pagesToWaitFor =
-        this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP ?
+        this.storeService_.get(StateProperty.UI_STATE) ===
+            UIType.DESKTOP_PANELS ?
           [this.pages_[0], this.pages_[1]] :
           [this.pages_[0]];
 
@@ -960,7 +962,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   performTapNavigation_(direction) {
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+    if (this.storeService_.get(StateProperty.UI_STATE) ===
+        UIType.DESKTOP_PANELS) {
       this.next_();
       return;
     }
@@ -1014,7 +1017,8 @@ export class AmpStory extends AMP.BaseElement {
       () => {
         oldPage && oldPage.element.removeAttribute('active');
 
-        if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+        if (this.storeService_.get(StateProperty.UI_STATE) ===
+            UIType.DESKTOP_PANELS) {
           this.setDesktopPositionAttributes_(targetPage);
         }
 
@@ -1195,7 +1199,8 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.platform_.isSafari() && !this.platform_.isIos()) {
       return;
     }
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+    if (this.storeService_.get(StateProperty.UI_STATE) ===
+        UIType.DESKTOP_PANELS) {
       // Force repaint is only needed when transitioning from invisible to
       // visible
       return;
@@ -1341,7 +1346,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.removeAttribute('desktop-fullbleed');
         });
         break;
-      case UIType.DESKTOP:
+      case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
@@ -1384,7 +1389,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // Three panels desktop UI (default).
-    return UIType.DESKTOP;
+    return UIType.DESKTOP_PANELS;
   }
 
   /**
@@ -1575,7 +1580,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   toggleElementsOnBookend_(isActive) {
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !==
+        UIType.DESKTOP_PANELS) {
       return;
     }
 

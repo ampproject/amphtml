@@ -298,7 +298,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.stopListeningToVideoEvents_();
     this.togglePlayMessage_(false);
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+
+    if (this.storeService_.get(StateProperty.UI_STATE) ===
+        UIType.DESKTOP_PANELS) {
       // The rewinding is delayed on desktop so that it happens at a lower
       // opacity instead of immediately jumping to the first frame. See #17985.
       this.pauseAllMedia_(false /** rewindToBeginning */);

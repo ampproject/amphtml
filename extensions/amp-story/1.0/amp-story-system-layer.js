@@ -521,12 +521,12 @@ export class SystemLayer {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    if (uiState === UIType.DESKTOP) {
+    if (uiState === UIType.DESKTOP_PANELS) {
       this.buildSharePill_();
     }
 
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP ?
+      uiState === UIType.DESKTOP_PANELS ?
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
     });
