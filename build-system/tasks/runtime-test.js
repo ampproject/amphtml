@@ -60,8 +60,26 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
-  if (argv.chrome_canary) {
+  if (argv.chrome_canary && !argv.chrome_flags) {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
+  }
+  if (argv.chrome_flags) {
+    const flagList = argv.chrome_flags.split(',');
+    const formattedFlagList = [];
+    flagList.forEach(flag => {
+      formattedFlagList.push('--'.concat(flag));
+    });
+    const config = Object.assign({}, karmaDefault, {
+      browsers: ['Chrome_flags'],
+      customLaunchers: {
+        /* eslint "google-camelcase/google-camelcase": 0*/
+        Chrome_flags: {
+          base: argv.chrome_canary ? 'ChromeCanary' : 'Chrome',
+          flags: formattedFlagList,
+        },
+      },
+    });
+    return config;
   }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
@@ -177,6 +195,7 @@ function printArgvMessages() {
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
     'chrome_canary': 'Running tests on Chrome Canary.',
+    'chrome_flags': 'Flags to pass to Chrome',
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
@@ -724,6 +743,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
     'chrome_canary': 'Running tests on Chrome Canary.',
+    'chrome_flags': 'Flags to pass to Chrome',
     'local-changes': '  Run unit tests directly affected by the files ' +
         'changed in the local branch',
   },
