@@ -78,10 +78,10 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_()['url'];
-
     const config = dict({});
     const inlineConfig = this.getInlineConfigNoInline();
+    const configRewriterUrl = this.getConfigRewriter_(inlineConfig)['url'];
+
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
     mergeObjects(this.remoteConfig_, config);
@@ -333,6 +333,27 @@ export function expandConfigRequest(config) {
     }
   }
   return config;
+}
+
+/**
+ * Reads default configuration object, excluding available overrides. Returns
+ * list of available overrides.
+ *
+ * @param {!JsonObject} config
+ * @param {!Object<string, *>} defaultConfig Stores default configuration with
+ * all overrides removed.
+ * @return {!Array<string>} availableOverrides
+ */
+export function readDefaultConfiguration(config, defaultConfig) {
+  return Object.keys(config).filter(
+    key => {
+      const value = config[key];
+      const isOverrideConfiguration = isObject(value);
+      if (!isOverrideConfiguration) {
+        defaultConfig[key] = value;
+      }
+      return isOverrideConfiguration;
+    });
 }
 
 /**

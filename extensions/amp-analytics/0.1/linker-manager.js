@@ -25,6 +25,7 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
+import {readDefaultConfiguration} from './config';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
@@ -139,14 +140,8 @@ export class LinkerManager {
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
-    const linkerNames = Object.keys(config).filter(key => {
-      const value = config[key];
-      const isLinkerConfig = isObject(value);
-      if (!isLinkerConfig) {
-        defaultConfig[key] = value;
-      }
-      return isLinkerConfig;
-    });
+
+    const linkerNames = readDefaultConfiguration(config, defaultConfig);
 
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin =
