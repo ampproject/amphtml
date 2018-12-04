@@ -365,7 +365,7 @@ export class AmpSidebar extends AMP.BaseElement {
   }
   /**
    * Sidebars within <amp-story> should be 'flipped'.
-   * @param {string} the current side attribute of the sidebar.
+   * @param {string} side
    * @return {string}
    * @private
    */
