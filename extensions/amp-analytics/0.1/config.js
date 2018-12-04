@@ -337,7 +337,7 @@ export function expandConfigRequest(config) {
 
 /**
  * Reads default configuration object, excluding available overrides. Returns
- * list of available overrides.
+ * list of names of available overrides.
  *
  * @param {!JsonObject} config
  * @param {!Object<string, *>} defaultConfig Stores default configuration with
