@@ -152,13 +152,10 @@ export class RequestBank {
   /**
    * Returns the URL for depositing a request.
    *
-   * @param id an unique identifier of the request.
+   * @param {number} id an unique identifier of the request in a test case.
    * @returns {string}
    */
   static getUrl(id) {
-    if (id.indexOf('/') >= 0) {
-      throw new Error('ID "' + id + '" should not contain "/"');
-    }
     return `${REQUEST_URL}/deposit/${id}/`;
   }
 
@@ -170,13 +167,10 @@ export class RequestBank {
    *   headers: JsonObject
    *   body: string
    * }
-   * @param id
+   * @param {number} id
    * @returns {Promise<JsonObject>}
    */
   static withdraw(id) {
-    if (id.indexOf('/') >= 0) {
-      throw new Error('ID "' + id + '" should not contain "/"');
-    }
     const url = `${REQUEST_URL}/withdraw/${id}/`;
     return xhrServiceForTesting(window).fetchJson(url, {
       method: 'GET',
