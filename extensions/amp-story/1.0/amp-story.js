@@ -1474,7 +1474,7 @@ export class AmpStory extends AMP.BaseElement {
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
-        this.openOpacityMask_()
+        this.openOpacityMask_();
       } else {
         this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
