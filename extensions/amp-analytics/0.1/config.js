@@ -78,7 +78,7 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   processConfigs_() {
-    const configRewriterUrl = this.getConfigRewriter_(inlineConfig)['url'];
+    const configRewriterUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
     const inlineConfig = this.getInlineConfigNoInline();
