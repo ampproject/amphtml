@@ -121,6 +121,9 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -341,6 +344,10 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.loadPromise_) {
+      return this.loadPromise_;
+    }
+
     user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
 
@@ -356,7 +363,8 @@ export class AmpIframe extends AMP.BaseElement {
 
     if (!this.iframeSrc) {
       // This failed already, lets not signal another error.
-      return Promise.resolve();
+      this.loadPromise_ = Promise.resolve();
+      return this.loadPromise_;
     }
 
     if (this.isTrackingFrame_) {
@@ -416,7 +424,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
-    return this.loadPromise(iframe).then(() => {
+    this.loadPromise_ = this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
@@ -428,6 +436,8 @@ export class AmpIframe extends AMP.BaseElement {
         }, 1000);
       }
     });
+
+    return this.loadPromise_;
   }
 
   /** @override */
@@ -442,6 +452,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    this.loadPromise_ = null;
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {

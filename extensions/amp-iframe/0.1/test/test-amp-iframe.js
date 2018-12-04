@@ -174,6 +174,21 @@ describes.realWin('amp-iframe', {
       expect(ranJs).to.equal(0);
     });
 
+    it('should render iframe only once', function* () {
+      const ampIframe = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 100,
+        height: 100,
+      });
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = ampIframe.implementation_;
+      let iframe = ampIframe.querySelectorAll('iframe');
+      expect(iframe.length).to.equal(1);
+      impl.layoutCallback();
+      iframe = ampIframe.querySelectorAll('iframe');
+      expect(iframe.length).to.equal(1);
+    });
+
     it('should only propagate supported attributes', function* () {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
