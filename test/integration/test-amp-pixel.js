@@ -37,10 +37,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   }, () => {
     it('should expand the TITLE macro', () => {
       return RequestBank.withdraw(RequestId.MACRO)
-          .then(request => {
-            expect(request.url)
+          .then(req => {
+            expect(req.url)
                 .to.equal('/hello-world?title=AMP%20TEST&qp=123');
-            expect(request.headers.host).to.be.ok;
+            expect(req.headers.host).to.be.ok;
           });
     });
   });
@@ -49,9 +49,9 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     body: `<amp-pixel src="${RequestBank.getUrl(RequestId.HAS_REFERRER)}">`,
   }, () => {
     it('should keep referrer if no referrerpolicy specified', () => {
-      return RequestBank.withdraw(RequestId.HAS_REFERRER).then(request => {
-        expect(request.url).to.equal('/');
-        expect(request.headers.referer).to.be.ok;
+      return RequestBank.withdraw(RequestId.HAS_REFERRER).then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.be.ok;
       });
     });
   });
@@ -61,9 +61,9 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
              referrerpolicy="no-referrer">`,
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(RequestId.NO_REFERRER).then(request => {
-        expect(request.url).to.equal('/');
-        expect(request.headers.referer).to.not.be.ok;
+      return RequestBank.withdraw(RequestId.NO_REFERRER).then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.not.be.ok;
       });
     });
   });
