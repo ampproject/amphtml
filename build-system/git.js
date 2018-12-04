@@ -25,11 +25,20 @@ const {getStdout} = require('./exec');
  * Returns the branch point of the current branch off of master.
  * @return {string}
  */
-exports.gitBranchPoint = function() {
+exports.gitBranchPointFromMaster = function() {
+  return getStdout('git merge-base master HEAD^').trim();
+};
+
+/**
+ * When running on Travis, this returns the branch point of the current branch
+ * off of master, as merged by Travis. When not running on Travis, falls back to
+ * gitBranchPointFromMaster.
+ */
+exports.gitTravisCommitRangeStart = function() {
   if (process.env.TRAVIS_COMMIT_RANGE) {
     return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
   }
-  return getStdout('git merge-base master HEAD^').trim();
+  return exports.gitBranchPointFromMaster();
 };
 
 /**
@@ -38,7 +47,7 @@ exports.gitBranchPoint = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -48,7 +57,7 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
@@ -58,7 +67,7 @@ exports.gitDiffStatMaster = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
