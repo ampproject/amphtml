@@ -193,7 +193,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.manager_.maybeInit();
       this.buildMask_();
       this.registerDefaultAction(
-          invocation => this.open(invocation),
+          invocation => this.open_(invocation),
           'open');
     });
   }
@@ -742,8 +742,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *  // Opens the element referenced by elementId
    *  on="tap:myLightboxGallery.open(id='<elementId>')
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
    */
-  open(invocation) {
+  open_(invocation) {
     let target = invocation.caller;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
@@ -751,7 +752,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       user().assert(target,
           'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
-    this.open_(dev().assertElement(target)).then(() => {
+    this.openLightboxGallery_(dev().assertElement(target)).then(() => {
       return this.history_.push(this.close_.bind(this));
     }).then(historyId => {
       this.historyId_ = historyId;
@@ -764,7 +765,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  open_(element) {
+  openLightboxGallery_(element) {
     this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
