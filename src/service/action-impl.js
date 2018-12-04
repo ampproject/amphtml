@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
+import {
+  ActionTrust,
+  DEFAULT_METHOD,
+  RAW_OBJECT_ARGS_KEY,
+} from '../action-constants';
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
@@ -31,6 +35,7 @@ import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
+
 /** @const {string} */
 const TAG_ = 'Action';
 
@@ -42,9 +47,6 @@ const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
 const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
-
-/** @const {string} */
-const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
@@ -733,22 +735,30 @@ export class ActionService {
   }
 }
 
-
 /**
  * Returns `true` if the given action invocation is whitelisted in the given
- * whitelist.
+ * whitelist. Default actions' alias, 'activate', are automatically
+ * whitelisted if their corresponding registered alias is whitelisted.
  * @param {!ActionInvocation} invocation
  * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
  * @return {boolean}
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
+  const tagOrTargetRegex = new RegExp('^' + invocation.tagOrTarget + '$', 'i');
+  let invocationMethodRegex = new RegExp('^' + invocation.method + '$', 'i');
+  const component = invocation.node.implementation_;
+  if (invocation.method == DEFAULT_METHOD && component
+      && component.defaultActionAlias_) {
+    invocationMethodRegex = new RegExp(
+        '^' + component.defaultActionAlias_ + '$', 'i');
+  }
+
   return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*' || tagOrTarget === invocation.tagOrTarget) &&
-        method === invocation.method;
+    return (tagOrTarget === '*' || tagOrTargetRegex.test(tagOrTarget)) &&
+        (invocationMethodRegex.test(method));
   });
 }
-
 
 /**
  * A clone of an event object with its function properties replaced.
@@ -840,7 +850,7 @@ export function parseActionMap(s, context) {
             toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
 
         // Method: ".method". Method is optional.
-        let method = DEFAULT_METHOD_;
+        let method = DEFAULT_METHOD;
         let args = null;
 
         peek = toks.peek();

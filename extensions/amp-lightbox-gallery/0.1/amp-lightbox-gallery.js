@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -193,7 +192,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
       this.buildMask_();
-      this.registerAction('open', invocation => this.activate(invocation));
+      this.registerDefaultAction(
+          invocation => this.open(invocation),
+          'open');
     });
   }
 
@@ -740,10 +741,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *
    *  // Opens the element referenced by elementId
    *  on="tap:myLightboxGallery.open(id='<elementId>')
-   * @override
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
-  activate(invocation) {
+  open(invocation) {
     let target = invocation.caller;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];

@@ -969,7 +969,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element.enqueAction(inv);
         expect(handler).to.be.calledOnce;
         expect(handler.getCall(0).args[0]).to.equal(inv);
-        expect(handler.getCall(0).args[1]).to.equal(false);
+        expect(handler.getCall(0).args[2]).to.equal(false);
       });
     });
 

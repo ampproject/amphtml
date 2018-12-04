@@ -170,7 +170,9 @@ class AmpLightbox extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
 
-    this.registerAction('open', this.activate.bind(this));
+    this.registerDefaultAction(
+        invocation => this.open_(invocation),
+        'open');
     this.registerAction('close', this.close.bind(this));
   }
 
@@ -252,8 +254,11 @@ class AmpLightbox extends AMP.BaseElement {
     return Promise.resolve();
   }
 
-  /** @override */
-  activate() {
+  /**
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @private
+   */
+  open_(opt_invocation) {
     if (this.active_) {
       return;
     }
@@ -271,7 +276,7 @@ class AmpLightbox extends AMP.BaseElement {
     const open = mutations['open'];
     if (open !== undefined) {
       if (open) {
-        this.activate();
+        this.open_();
       } else {
         this.close();
       }
