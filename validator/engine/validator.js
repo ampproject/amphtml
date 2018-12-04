@@ -596,6 +596,7 @@ class ParsedTagSpec {
     }
     sortAndUniquify(this.mandatoryOneofs_);
     sortAndUniquify(this.mandatoryAnyofs_);
+    sortAndUniquify(this.mandatoryAttrIds_);
 
     if (tagSpec.extensionSpec !== null) {
       this.expandExtensionSpec();
@@ -4071,19 +4072,22 @@ function validateAttributes(
       }
     }
   }
+  let missingAttrs = [];
   for (const mandatory of parsedTagSpec.getMandatoryAttrIds()) {
     if (!mandatoryAttrsSeen.hasOwnProperty(mandatory)) {
-      context.addError(
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          context.getLineCol(),
-          /* params */
-          [
+      missingAttrs.push(
             context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
-                mandatory),
-            getTagSpecName(spec),
-          ],
-          getTagSpecUrl(spec), result);
+                mandatory));
     }
+  }
+  // Sort this list for stability across implementations.
+  missingAttrs.sort();
+  for (const missingAttr of missingAttrs) {
+    context.addError(
+        amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+        context.getLineCol(),
+        /* params */ [ missingAttr, getTagSpecName(spec) ],
+        getTagSpecUrl(spec), result);
   }
   // Extension specs mandate the 'src' attribute.
   if (spec.extensionSpec !== null && !seenExtensionSrcAttr) {
