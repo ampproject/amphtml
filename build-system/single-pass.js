@@ -36,8 +36,9 @@ const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
 
 const argv = minimist(process.argv.slice(2));
+const tempDir = tempy.directory();
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
-  argv.single_pass_dest : './dist/';
+  argv.single_pass_dest : `${tempDir}/dist/`;
 
 if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
@@ -169,7 +170,7 @@ exports.getBundleFlags = function(g) {
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     bundle.modules.forEach(function(js) {
-      flagsArray.push('--js', `${g.tmp}/${js}`);
+      flagsArray.push('--js', `${tempDir}/${js}`);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -235,8 +236,8 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
-  flagsArray.push('--js_module_root', `${g.tmp}/`);
+  flagsArray.push('--js_module_root', `${tempDir}/node_modules/`);
+  flagsArray.push('--js_module_root', `${tempDir}/`);
   return flagsArray;
 };
 
@@ -267,7 +268,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: tempy.directory(),
+    tmp: tempDir,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -419,7 +420,7 @@ function isCommonJsModule(file) {
  */
 function transformPathsToTempDir(graph, config) {
   if (!process.env.TRAVIS) {
-    log('Writing transforms to', colors.cyan(graph.tmp));
+    log('Writing transforms to', colors.cyan(tempDir));
   }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -428,7 +429,7 @@ function transformPathsToTempDir(graph, config) {
     // because we now no longer use the process_common_js_modules flag for
     // closure compiler.
     if (f.startsWith('node_modules/') && !isCommonJsModule(f)) {
-      fs.copySync(f, `${graph.tmp}/${f}`);
+      fs.copySync(f, `${tempDir}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins(
@@ -436,7 +437,7 @@ function transformPathsToTempDir(graph, config) {
             /* isCommonJsModule */ isCommonJsModule(f)),
         retainLines: true,
       });
-      fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${tempDir}/${f}`, code);
     }
   });
 }
@@ -511,14 +512,14 @@ exports.singlePassCompile = function(entryModule, options) {
     hideWarningsFor: options.hideWarningsFor,
   }).then(compile).then(function() {
     // Move things into place as AMP expects them.
-    fs.ensureDirSync(`${singlePassDest}/v0`);
+    fs.ensureDirSync(`${singlePassDest}v0`);
     return Promise.all([
       // Move all files that need to live in /v0/. ex. _base files
       // all extensions.
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
-        return move('dist/v0/amp4ads*', 'dist');
+      move(`${singlePassDest}amp*`, `${singlePassDest}v0`).then(() => {
+        return move(`${singlePassDest}v0/amp4ads*`, singlePassDest);
       }),
-      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
+      move(`${singlePassDest}_base*`, `${singlePassDest}v0`),
     ]);
   }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
@@ -541,11 +542,11 @@ function wrapMainBinaries() {
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
+  const mainFile = fs.readFileSync(`${singlePassDest}v0.js`, 'utf8');
   jsFilesToWrap.forEach(x => {
-    const path = `dist/${x}.js`;
-    const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
-    const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
+    const path = `${singlePassDest}${x}.js`;
+    const bootstrapCode = path === `${singlePassDest}v0.js` ? '' : mainFile;
+    const isAmpAltstring = path === `${singlePassDest}v0.js` ? '' : 'self.IS_AMP_ALT=1;';
     fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
         `${fs.readFileSync(path).toString()}${suffix}`);
   });
@@ -564,7 +565,7 @@ function postProcessConcat() {
       return x.name === extension.name;
     });
     // We assume its in v0 unless its an alternative main binary.
-    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+    const srcTargetDir = isAltMainBundle ? singlePassDest : `${singlePassDest}v0/`;
 
     function createFullPath(version) {
       return `${srcTargetDir}${extension.name}-${version}.js`;
