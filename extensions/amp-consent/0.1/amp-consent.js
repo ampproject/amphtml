@@ -35,8 +35,8 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-
 import {isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -179,12 +179,17 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept',
-        this.handleAction_.bind(this, ACTION_TYPE.ACCEPT));
-    this.registerAction('reject',
-        this.handleAction_.bind(this, ACTION_TYPE.REJECT));
-    this.registerAction('dismiss',
-        this.handleAction_.bind(this, ACTION_TYPE.DISMISS));
+    this.registerAction('accept', () => {
+      this.handleAction_(ACTION_TYPE.ACCEPT);
+    });
+
+    this.registerAction('reject', () => {
+      this.handleAction_(ACTION_TYPE.REJECT);
+    });
+
+    this.registerAction('dismiss', () => {
+      this.handleAction_(ACTION_TYPE.DISMISS);
+    });
 
     this.registerAction('prompt', invocation => {
       const {args} = invocation;
@@ -208,6 +213,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
 
+      let consentString;
       const data = getData(event);
 
       if (!data || data['type'] != 'consent-response') {
@@ -218,13 +224,21 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
+      if (isExperimentOn(this.win, 'amp-consent-v2') &&
+          data['info'] !== undefined) {
+        if (typeof data['info'] != 'string') {
+          user().error(TAG, 'consent-response info only supports string, ' +
+              '%s, treated as undefined', data['info']);
+        }
+        consentString = data['info'];
+      }
 
       const iframes = this.element.querySelectorAll('iframe');
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
-          this.handleAction_(action);
+          this.handleAction_(action, consentString);
           return;
         }
       }
@@ -301,8 +315,9 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Handler User action
    * @param {string} action
+   * @param {string=} consentString
    */
-  handleAction_(action) {
+  handleAction_(action, consentString) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -321,15 +336,21 @@ export class AmpConsent extends AMP.BaseElement {
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.ACCEPTED);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.ACCEPTED,
+          consentString);
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.REJECTED,
+          consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
       // dismiss
       this.consentStateManager_.updateConsentInstanceState(
-          this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED);
+          this.currentDisplayInstance_,
+          CONSENT_ITEM_STATE.DISMISSED,
+          consentString);
     }
 
     // Hide current dialog
@@ -509,8 +530,9 @@ export class AmpConsent extends AMP.BaseElement {
         new ConsentUI(this, config);
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceState(instanceId)
-        .then(state => {
+    return this.consentStateManager_.getConsentInstanceInfo(instanceId)
+        .then(info => {
+          const state = info['consentState'];
           if (state == CONSENT_ITEM_STATE.ACCEPTED ||
               state == CONSENT_ITEM_STATE.REJECTED) {
             // Need to display post prompt ui if user previous made a decision
