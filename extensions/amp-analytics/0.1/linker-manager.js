@@ -191,7 +191,7 @@ export class LinkerManager {
     return variableServiceFor(this.ampdoc_.win)
         .expandTemplate(template, expansionOptions)
         .then(expanded => Services.urlReplacementsForDoc(
-            this.ampdoc_).expandUrlAsync(expanded));
+            this.element_).expandUrlAsync(expanded));
   }
 
 
