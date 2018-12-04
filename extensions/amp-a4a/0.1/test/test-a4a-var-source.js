@@ -99,4 +99,9 @@ describe('A4AVariableSource', () => {
   // Access data.
   undefinedVariable('ACCESS_READER_ID');
   undefinedVariable('AUTHDATA');
+
+  // amp-bind state.
+  // AMP_STATE() is not scoped to the FIE so this cannot be safely removed
+  // without refactoring the implementation in url-replacements-impl.js.
+  undefinedVariable('AMP_STATE');
 });
