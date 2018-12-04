@@ -1174,10 +1174,6 @@ app.get('/infinite-scroll', function(req, res) {
   const pagesLeft = query['left'] || 1;
   const latency = query['latency'] || 0;
 
-  if (pagesLeft == 0) {
-    res.json({items: []});
-  }
-
   for (let i = 0; i < numberOfItems; i++) {
     const imageUrl = 'http://picsum.photos/200?' +
         Math.floor(Math.random() * Math.floor(50));
@@ -1190,7 +1186,8 @@ app.get('/infinite-scroll', function(req, res) {
   }
 
   const nextUrl = '/infinite-scroll?items=' +
-    numberOfItems + '&left=' + JSON.stringify(pagesLeft - 1);
+    numberOfItems + '&left=' + (pagesLeft - 1) +
+    '&latency=' + latency;
 
   const randomFalsy = () => {
     const rand = Math.floor(Math.random() * Math.floor(3));
@@ -1203,7 +1200,11 @@ app.get('/infinite-scroll', function(req, res) {
   };
 
   const next = pagesLeft == 0 ? randomFalsy() : nextUrl;
-  const results = next === false ? {items} : {items, next};
+  const results = next === false ? {items}
+    : {items, next,
+      'loadMoreButtonText': 'test',
+      'loadMoreEndText': 'end',
+    };
 
   if (latency) {
     setTimeout(() => res.json(results), latency);
