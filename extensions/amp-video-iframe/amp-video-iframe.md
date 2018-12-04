@@ -126,7 +126,7 @@ function onAmpIntegrationReady(ampIntegration) {
 }
 ```
 
-**Never play the video inside the frame automatically.** Instead, you should support the integration script and the `amp-video-iframe` tag with the `autoplay` attribute will send the necessary signals for your video to autoplay for a better user experience.
+**Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will autoamtically send the necessary signals to your iframe to autoplay for a better user experience.
 
 ### Custom integrations
 
