@@ -186,6 +186,14 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /**
+   * Returns our discovered children
+   * @returns {!Array<!Element>}
+   */
+  getChildren() {
+    return this.children_;
+  }
+
+  /**
    * Determines the child nodes that are "visible". We purposefully ignore Text
    * nodes that only contain whitespace since they do not contribute anything
    * visually, only their surrounding Elements or non-whitespace Texts do.

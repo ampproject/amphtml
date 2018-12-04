@@ -55,13 +55,14 @@ describes.realWin('amp-ad-ui handler', {
     });
 
     it('should force collapse ad inside flying carpet', function* () {
+      adContainer = 'AMP-FX-FLYING-CARPET';
       const attemptCollapseSpy = sandbox.spy(adImpl, 'attemptCollapse');
       const collapseSpy = sandbox.stub(adImpl, 'collapse').callsFake(() => {});
 
       sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
         return [{
           getImpl: () => Promise.resolve({
-            children_: [''],
+            getChildren: () => [adElement]
           }),
         }];
       });
