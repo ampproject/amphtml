@@ -15,15 +15,15 @@
  */
 
 import {
-  depositRequestUrl,
+  getDepositUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
 
 const RequestId = {
   BASIC: 'analytics-basic',
   BATCH: 'analytics-batch',
-  USE_BODY: 'analytics-useBody',
-  BATCH_BODY: 'analytics-batch-useBody',
+  USE_BODY: 'analytics-use-body',
+  BATCH_BODY: 'analytics-batch-use-body',
   NO_REFERRER: 'analytics-no-referrer',
 };
 
@@ -37,7 +37,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl(RequestId.BASIC)}"
+            "endpoint": "${getDepositUrl(RequestId.BASIC)}"
           },
           "triggers": {
             "pageview": {
@@ -73,7 +73,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl(RequestId.BATCH)}",
+              "baseUrl": "${getDepositUrl(RequestId.BATCH)}",
               "batchInterval": 1
             }
           },
@@ -117,7 +117,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl(RequestId.USE_BODY)}"
+            "endpoint": "${getDepositUrl(RequestId.USE_BODY)}"
           },
           "triggers": {
             "pageview": {
@@ -157,7 +157,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${depositRequestUrl(RequestId.BATCH_BODY)}",
+              "baseUrl": "${getDepositUrl(RequestId.BATCH_BODY)}",
               "batchInterval": 1
             }
           },
@@ -204,7 +204,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           <script type="application/json">
           {
             "requests": {
-              "endpoint": "${depositRequestUrl(RequestId.NO_REFERRER)}"
+              "endpoint": "${getDepositUrl(RequestId.NO_REFERRER)}"
             },
             "triggers": {
               "pageview": {

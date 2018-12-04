@@ -18,7 +18,7 @@ import {AmpPixel} from '../../builtins/amp-pixel';
 import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 import {
-  depositRequestUrl,
+  getDepositUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
 
@@ -32,7 +32,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   this.timeout(15000);
 
   describes.integration('amp-pixel macro integration test', {
-    body: `<amp-pixel src="${depositRequestUrl(
+    body: `<amp-pixel src="${getDepositUrl(
         RequestId.MACRO)}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
     params: {
       a: 123,
@@ -49,7 +49,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl(RequestId.HAS_REFERRER)}">`,
+    body: `<amp-pixel src="${getDepositUrl(RequestId.HAS_REFERRER)}">`,
   }, () => {
     it('should keep referrer if no referrerpolicy specified', () => {
       return withdrawRequest(RequestId.HAS_REFERRER).then(request => {
@@ -60,7 +60,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel no-referrer integration test', {
-    body: `<amp-pixel src="${depositRequestUrl(RequestId.NO_REFERRER)}"
+    body: `<amp-pixel src="${getDepositUrl(RequestId.NO_REFERRER)}"
              referrerpolicy="no-referrer">`,
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {

@@ -142,7 +142,7 @@ export function assertScreenReaderElement(element) {
 /////////////////
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank';
 
 /**
  * Append user agent to request-bank deposit/withdraw IDs to avoid
@@ -151,12 +151,18 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
  */
 const userAgent = encodeURIComponent(window.navigator.userAgent);
 
-export function depositRequestUrl(path) {
-  return `${REQUEST_URL}deposit/${userAgent}-${path}/`;
+export function getDepositUrl(id) {
+  if (id.indexOf('/') >= 0) {
+    throw new Error('ID "' + id + '" should not contain "/"');
+  }
+  return `${REQUEST_URL}/deposit/${userAgent}-${id}/`;
 }
 
-export function withdrawRequest(path) {
-  const url = `${REQUEST_URL}withdraw/${userAgent}-${path}/`;
+export function withdrawRequest(id) {
+  if (id.indexOf('/') >= 0) {
+    throw new Error('ID "' + id + '" should not contain "/"');
+  }
+  const url = `${REQUEST_URL}/withdraw/${userAgent}-${id}/`;
   return xhrServiceForTesting(window).fetchJson(url, {
     method: 'GET',
     ampCors: false,

@@ -15,7 +15,7 @@
  */
 
 import {
-  depositRequestUrl,
+  getDepositUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
 
@@ -38,7 +38,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${depositRequestUrl(RequestId.PIXEL)}"
+                "error": "${getDepositUrl(RequestId.PIXEL)}"
               },
               "triggers": {
                 "userError": {
@@ -75,7 +75,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${depositRequestUrl(RequestId.IMG)}"
+                "error": "${getDepositUrl(RequestId.IMG)}"
               },
               "triggers": {
                 "userError": {
@@ -109,7 +109,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${depositRequestUrl(RequestId.THIRD_PARTY)}"
+                "error": "${getDepositUrl(RequestId.THIRD_PARTY)}"
               },
               "triggers": {
                 "userError": {
