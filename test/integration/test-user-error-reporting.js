@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  getDepositUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
+import {RequestBank} from '../../testing/test-helper';
 
 const RequestId = {
   PIXEL: 'user-error-amp-pixel',
@@ -38,7 +35,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${getDepositUrl(RequestId.PIXEL)}"
+                "error": "${RequestBank.getUrl(RequestId.PIXEL)}"
               },
               "triggers": {
                 "userError": {
@@ -55,7 +52,7 @@ describe.configure().skipIfPropertiesObfuscated()
                `,
       }, () => {
         it('should ping correct host with amp-pixel user().assert err', () => {
-          return withdrawRequest(RequestId.PIXEL);
+          return RequestBank.withdraw(RequestId.PIXEL);
         });
       });
 
@@ -75,7 +72,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${getDepositUrl(RequestId.IMG)}"
+                "error": "${RequestBank.getUrl(RequestId.IMG)}"
               },
               "triggers": {
                 "userError": {
@@ -88,7 +85,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with amp-img user().error err', () => {
-          return withdrawRequest(RequestId.IMG);
+          return RequestBank.withdraw(RequestId.IMG);
         });
       });
 
@@ -109,7 +106,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${getDepositUrl(RequestId.THIRD_PARTY)}"
+                "error": "${RequestBank.getUrl(RequestId.THIRD_PARTY)}"
               },
               "triggers": {
                 "userError": {
@@ -122,7 +119,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with 3p error message', () => {
-          return withdrawRequest(RequestId.THIRD_PARTY);
+          return RequestBank.withdraw(RequestId.THIRD_PARTY);
         });
       });
     });
