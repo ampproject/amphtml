@@ -1591,10 +1591,9 @@ class TagStack {
    * @return {boolean} true if this within <style amp-custom>. Else false.
    */
   isStyleAmpCustomChild() {
-    return (this.parentStackEntry_().tagName === 'STYLE') &&
-        (this.parentStackEntry_().tagSpec !== null) &&
-        (this.parentStackEntry_().tagSpec.getSpec().specName ===
-         'style amp-custom');
+    return (this.parentStackEntry_().tagSpec !== null) &&
+        (this.parentStackEntry_().tagSpec.getSpec().namedId ===
+         amp.validator.TagSpec.NamedId.STYLE_AMP_CUSTOM);
   }
 
   /**
@@ -1898,32 +1897,12 @@ class CdataMatcher {
       if (!context.getRules()
           .getFullMatchRegex(this.tagSpec_.cdata.cdataRegex)
           .test(cdata)) {
-        // Special Case Hack! The deprecated amp-boilerplate is a <style> tag
-        // with no attributes on it in the document head. The valid
-        // implementation looks like:
-        //
-        // <style>body ?{opacity: ?0}</style>
-        //
-        // If we find ourselves here, it means that we saw a style tag, with the
-        // incorrect CDATA contents. This is *far* more likely to be caused by
-        // the user intending to use <style amp-custom>, so we override the
-        // error selected here.
-        if (this.tagSpec_.specName !== null &&
-            this.tagSpec_.specName ===
-                'head > style[amp-boilerplate] - old variant') {
-          context.addError(
-              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-              context.getLineCol(),
-              /* params */['amp-custom', 'style amp-custom'],
-              context.getRules().getStylesSpecUrl(), validationResult);
-        } else {
-          context.addError(
-              amp.validator.ValidationError.Code
-                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-              context.getLineCol(),
-              /* params */[getTagSpecName(this.tagSpec_)],
-              getTagSpecUrl(this.tagSpec_), validationResult);
-        }
+        context.addError(
+            amp.validator.ValidationError.Code
+                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+            context.getLineCol(),
+            /* params */[getTagSpecName(this.tagSpec_)],
+            getTagSpecUrl(this.tagSpec_), validationResult);
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
