@@ -60,6 +60,9 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
+  if (argv.chrome_canary) {
+    return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
+  }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
         {browsers: ['Chrome_no_extensions_headless']});
@@ -173,6 +176,7 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
@@ -719,6 +723,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'a4a': '  Runs all A4A tests',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     'local-changes': '  Run unit tests directly affected by the files ' +
         'changed in the local branch',
   },
