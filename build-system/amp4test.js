@@ -21,11 +21,11 @@ const app = module.exports = require('express').Router();
 
 /**
  * Logs the given messages to the console in local dev mode, but not while
- * running automated tests.
+ * running on Travis.
  * @param {*} messages
  */
 function log(...messages) {
-  if (!process.env.AMP_TEST) {
+  if (!process.env.TRAVIS) {
     console.log(messages);
   }
 }
