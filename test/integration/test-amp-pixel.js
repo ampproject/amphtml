@@ -30,12 +30,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     },
   }, () => {
     it('should expand the TITLE macro', () => {
-      return RequestBank.withdraw(1)
-          .then(req => {
-            expect(req.url)
-                .to.equal('/hello-world?title=AMP%20TEST&qp=123');
-            expect(req.headers.host).to.be.ok;
-          });
+      return RequestBank.withdraw(1).then(req => {
+        expect(req.url)
+            .to.equal('/hello-world?title=AMP%20TEST&qp=123');
+        expect(req.headers.host).to.be.ok;
+      });
     });
   });
 

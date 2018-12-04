@@ -213,11 +213,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(1)
-          .then(req => {
-            expect(req.url).to.equal('/');
-            expect(req.headers.referer).to.not.be.ok;
-          });
+      return RequestBank.withdraw(1).then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.not.be.ok;
+      });
     });
   });
 });
