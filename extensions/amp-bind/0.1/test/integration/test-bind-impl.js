@@ -134,7 +134,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describes.realWin('in FIE', {
+  describes.realWin.skip('in FIE', {
     amp: {
       ampdoc: 'fie',
       runtimeOn: false,
@@ -217,7 +217,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
   }); // in FIE
 
-  describes.realWin('in shadow ampdoc', {
+  describes.realWin.skip('in shadow ampdoc', {
     amp: {
       ampdoc: 'shadow',
       runtimeOn: false,
