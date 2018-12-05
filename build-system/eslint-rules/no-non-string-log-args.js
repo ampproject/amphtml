@@ -88,9 +88,9 @@ const selector = transformableMethods.map(method => {
 
 
 module.exports = {
-  meta: {
-    fixable: 'code',
-  },
+  //meta: {
+    //fixable: 'code',
+  //},
   create(context) {
     const source = context.getSourceCode();
 
