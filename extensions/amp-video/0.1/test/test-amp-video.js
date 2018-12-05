@@ -435,6 +435,7 @@ describes.realWin('amp-video', {
     });
   });
 
+  // TODO: unskip the tests in this file #19664
   it.skip('should forward certain events from video to the amp element', () => {
     return getVideo({
       src: '/examples/av/ForBiggerJoyrides.mp4',
