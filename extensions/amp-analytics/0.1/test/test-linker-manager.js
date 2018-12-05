@@ -387,6 +387,29 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should only add the linker param once', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        destinationDomains: ['foo.com'],
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const fooDomainUrl = clickAnchor('https://foo.com/path');
+      expect(fooDomainUrl).to.contain('testLinker1=');
+
+      const fooDomainUrlSecondClick = clickAnchor('https://foo.com/path');
+      const splitResult = fooDomainUrlSecondClick.split('testLinker1');
+      expect(splitResult.length).to.be.equal(2);
+    });
+  });
+
   describe('same domain matching', () => {
     let config;
 
