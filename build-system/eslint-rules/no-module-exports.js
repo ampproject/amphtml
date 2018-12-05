@@ -30,17 +30,10 @@ module.exports = {
   },
 
   create(context) {
-
-    function isModuleExports(node) {
-      return node.object.type === 'Identifier' && (/^(module.exports)$/).test(node.object.name)
-    }
-
     return {
-      MemberExpression(node) {
-        if (isModuleExports(node)) {
-            context.report({ node, messageId: "unexpected"});
-        }
-      }
+      "MemberExpression[object.name=module][property.name=exports]": function(node) {
+        context.report({ node, messageId: "unexpected"});
+      }      
     };
   }
 };
