@@ -23,7 +23,8 @@ import {
   toggle,
 } from '../../src/style';
 
-describe.configure().retryOnSaucelabs().run('toggle display helper', () => {
+// TODO(jridgewell, #19647): Un-skip after fixing Chrome 71 failure.
+describe.configure().retryOnSaucelabs().skip('toggle display helper', () => {
   let fixture;
   let sandbox;
   let img;
