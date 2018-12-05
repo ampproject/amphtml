@@ -15,13 +15,13 @@
  */
 
 const $$ = require('gulp-load-plugins')();
+const MagicString = require('magic-string');
 const colors = require('ansi-colors');
 const gulp = $$.help(require('gulp'));
 const log = require('fancy-log');
-const MagicString = require('magic-string');
 const parser = require('@babel/parser');
+const through = require('through2');
 const traverse = require('@babel/traverse').default;
-const {Transform} = require('stream');
 
 /**
  * Takes the file given by gulp and parses its ast to find ternary condition,
@@ -77,9 +77,7 @@ function transform(file, encoding, callback) {
  * Enables the `.pipe` functionality for the gulp process.
  */
 function transformTopLevelGlobalScope() {
-  const transformStream = new Transform({objectMode: true});
-  transformStream._transform = transform
-  return transformStream;
+  return through.obj(transform);
 }
 
 /**
