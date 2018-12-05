@@ -999,7 +999,7 @@ function dist() {
         }
       }).then(() => {
         if (argv.esm) {
-          return createModuleCompatibleBundle();
+          return createModuleCompatibleBundle('dist/**/*.js');
         } else {
           return Promise.resolve();
         }

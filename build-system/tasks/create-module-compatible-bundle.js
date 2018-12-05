@@ -16,9 +16,38 @@
 
 const $$ = require('gulp-load-plugins')();
 const gulp = $$.help(require('gulp'));
-const babel = require('gulp-babel');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
+const through = require('through2');
+const parser = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
+const MagicString = require('magic-string');
+
+function transformTopLevelGlobalScope() {
+  function transform (file, encoding, callback) {
+    const code = file.contents.toString('utf8');
+    const ast = parser.parse(code);
+    const magicString = new MagicString(code);
+
+    traverse(ast, {
+      enter(path) {
+        if (path.node.type !== "ConditionalExpression")
+        return;
+        const {node} = path;
+        let {consequent, alternate} = node;
+        if (consequent.type !== "MemberExpression") return;
+        if (alternate.type !== "ThisExpression") return;
+        const {object, property} = consequent;
+        if (object.name !== "window" && property.name!=="global") return;
+        magicString.overwrite(alternate.start, alternate.end, 'self');
+      }
+    });
+    file.contents = new Buffer(magicString.toString());
+    callback(null, file);
+  }
+
+  return through.obj(transform);
+};
 
 /* Copy source to source-nomodule.js and
  * make it compatible with `<script type=module`.
@@ -31,17 +60,15 @@ const log = require('fancy-log');
  *
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
-exports.createModuleCompatibleBundle = function() {
+exports.createModuleCompatibleBundle = function(srcGlob) {
   return new Promise(resolve => {
     const {green} = colors;
     log(green("Starting babel process, post closure compiler"));
-    gulp.src('dist/**/*.js')
+    gulp.src(srcGlob)
       .pipe($$.sourcemaps.init({loadMaps: true}))
-      .pipe(babel({
-        plugins: [require.resolve('../babel-plugins/babel-plugin-transform-module-compatible-global/index.js')]
-      }))
+      .pipe(transformTopLevelGlobalScope())
       .pipe($$.sourcemaps.write('./'))
-      .pipe(gulp.dest('dist-esm'))
+      .pipe(gulp.dest('dist'))
       .on('end', resolve);
   })
 };

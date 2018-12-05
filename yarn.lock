@@ -397,6 +397,11 @@
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.1.6.tgz#16e97aca1ec1062324a01c5a6a7d0df8dd189854"
   integrity sha512-dWP6LJm9nKT6ALaa+bnL247GHHMWir3vSlZ2+IHgHgktZQx0L3Uvq2uAWcuzIe+fujRsYWBW2q622C5UvGK9iQ==
 
+"@babel/parser@^7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.2.0.tgz#02d01dbc330b6cbf36b76ac93c50752c69027065"
+  integrity sha512-M74+GvK4hn1eejD9lZ7967qAwvqTZayQa3g10ag4s9uewgR7TKjeaT0YMyoq+gVfKYABiWZ4MQD701/t5e1Jhg==
+
 "@babel/plugin-proposal-async-generator-functions@^7.1.0":
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.1.0.tgz#41c1a702e10081456e23a7b74d891922dd1bb6ce"
@@ -13830,14 +13835,6 @@ through2@2.X, through2@^2.0.0, through2@^2.0.1, through2@^2.0.3:
     readable-stream "^2.1.5"
     xtend "~4.0.1"
 
-through2@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/through2/-/through2-3.0.0.tgz#468b461df9cd9fcc170f22ebf6852e467e578ff2"
-  integrity sha512-8B+sevlqP4OiCjonI1Zw03Sf8PuV1eRsYQgLad5eonILOdyeRsY27A/2Ze8IlvlMvq31OH+3fz/styI7Ya62yQ==
-  dependencies:
-    readable-stream "2 || 3"
-    xtend "~4.0.1"
-
 through2@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/through2/-/through2-0.4.2.tgz#dbf5866031151ec8352bb6c4db64a2292a840b9b"
@@ -13861,6 +13858,14 @@ through2@^0.6.1, through2@^0.6.3:
   dependencies:
     readable-stream ">=1.0.33-1 <1.1.0-0"
     xtend ">=4.0.0 <4.1.0-0"
+
+through2@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/through2/-/through2-3.0.0.tgz#468b461df9cd9fcc170f22ebf6852e467e578ff2"
+  integrity sha512-8B+sevlqP4OiCjonI1Zw03Sf8PuV1eRsYQgLad5eonILOdyeRsY27A/2Ze8IlvlMvq31OH+3fz/styI7Ya62yQ==
+  dependencies:
+    readable-stream "2 || 3"
+    xtend "~4.0.1"
 
 "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@~2.3.4:
   version "2.3.8"
