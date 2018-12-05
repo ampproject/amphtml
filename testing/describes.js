@@ -583,7 +583,7 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win, class {});
+          installCustomElements(win);
         }
 
         // Intercept event listeners
