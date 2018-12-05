@@ -18,7 +18,7 @@ import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
-import {addParamToUrl, addMissingParamsToUrl} from '../../../src/url';
+import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
