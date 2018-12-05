@@ -83,7 +83,7 @@ export function maybeTrackImpression(win) {
     dev().warn('IMPRESSION', error);
   });
 
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
   const isTrustedReferrerPromise = viewer.getReferrerUrl().then(
       referrer => isTrustedReferrer(referrer));
@@ -128,7 +128,7 @@ export function doNotTrackImpression() {
  * @return {!Promise}
  */
 function handleReplaceUrl(win) {
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
 
   // ReplaceUrl substitution doesn't have to wait until the document is visible
   if (!viewer.getParam('replaceUrl')) {
@@ -176,11 +176,10 @@ export function isTrustedReferrer(referrer) {
  * @return {!Promise}
  */
 function handleClickUrl(win) {
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
+
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
-
-
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -261,7 +260,7 @@ function applyResponse(win, response) {
       return;
     }
 
-    const viewer = Services.viewerForDoc(win.document);
+    const viewer = Services.viewerForDoc(win.document.documentElement);
     const currentHref = win.location.href;
     const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);
