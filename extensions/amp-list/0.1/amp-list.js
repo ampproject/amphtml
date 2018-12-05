@@ -496,7 +496,7 @@ export class AmpList extends AMP.BaseElement {
           .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements, current.append))
           .then(() => this.maybeRenderLoadMoreTemplates_(payload))
-          .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
+          .then(() => this.maybeSetLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
   }
@@ -507,6 +507,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   maybeRenderLoadMoreTemplates_(data) {
+    if (!this.loadMoreEnabled_) {
+      return Promise.resolve();
+    }
     const promises = [];
     promises.push(this.maybeRenderLoadMoreElement_(this.loadMoreButton_, data));
     promises.push(this.maybeRenderLoadMoreElement_(
@@ -524,7 +527,7 @@ export class AmpList extends AMP.BaseElement {
     if (elem && this.templates_.hasTemplate(elem)) {
       return this.templates_.findAndRenderTemplate(elem, data)
           .then(newContents => {
-            this.mutateElement(() => {
+            return this.mutateElement(() => {
               removeChildren(dev().assertElement(elem));
               elem.appendChild(newContents);
             });
@@ -601,6 +604,9 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
+        if (this.loadMoreEnabled_) {
+          this.moveButtonsToBottom_(container);
+        }
       }
 
       const event = createCustomEvent(this.win,
@@ -717,31 +723,54 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Promise}
    * @private
    */
-  setLoadMore_() {
-    // Done loading, nothing more to load.
-    if (!this.loadMoreSrc_) {
-      return this.mutateElement(() => {
-        this.loadMoreButton_.classList.toggle('amp-visible', false);
-        this.loadMoreEndElement_.classList.toggle('amp-visible', true);
-      });
+  maybeSetLoadMore_() {
+    const shouldSetLoadMore = this.loadMoreEnabled_ && this.loadMoreSrc_;
+    if (!shouldSetLoadMore) {
+      return Promise.resolve();
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
     if (triggerOnScroll) {
       this.maybeSetupLoadMoreAuto_();
     }
     if (this.loadMoreButton_) {
-      this.mutateElement(() => {
+      return this.mutateElement(() => {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
         this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
             () => this.loadMoreCallback_());
+        // Guarantees that the height accounts for the newly visible button
+        this.attemptToFit_(dev().assertElement(this.container_));
       });
     }
     if (!this.loadMoreButton_ && !triggerOnScroll) {
       user().error(TAG,
           'load-more is specified but no means of paging (overflow or ' +
           'load-more=auto) is available', this);
+    }
+    return Promise.resolve();
+  }
+
+
+  /**
+   * Moves all the load-more visual elements to the bottom of the list
+   * after newly appended items.
+   * @param {!Element} container
+   * @private
+   */
+  moveButtonsToBottom_(container) {
+    if (this.loadMoreButton_) {
+      container.appendChild(this.loadMoreButton_);
+    }
+    if (this.loadMoreEndElement_) {
+      container.appendChild(this.loadMoreEndElement_);
+    }
+    if (this.loadMoreFailedElement_) {
+      container.appendChild(this.loadMoreFailedElement_);
+    }
+    if (this.loadMoreLoadingElement_) {
+      container.appendChild(this.loadMoreLoadingElement_);
     }
   }
 
@@ -759,7 +788,11 @@ export class AmpList extends AMP.BaseElement {
     this.toggleLoadMoreLoading_(true);
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
-          this.toggleLoadMoreLoading_(false);
+          if (this.loadMoreSrc_) {
+            this.toggleLoadMoreLoading_(false);
+          } else {
+            this.setLoadMoreEnded_();
+          }
           if (this.unlistenLoadMore_) {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
@@ -793,6 +826,20 @@ export class AmpList extends AMP.BaseElement {
     return this.loadMoreLoadingOverlay_;
   }
 
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  setLoadMoreEnded_() {
+    return this.mutateElement(() => {
+      this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+      this.loadMoreButton_.classList.toggle('amp-visible', false);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
+      if (this.loadMoreEndElement_) {
+        this.loadMoreEndElement_.classList.toggle('amp-visible', true);
+      }
+    });
+  }
   /**
    * Toggles the visibility of the load-more-loading element, the
    * amp-load-more-loading CSS class, and the active state of the loader.
