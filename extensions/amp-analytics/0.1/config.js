@@ -336,15 +336,28 @@ export function expandConfigRequest(config) {
 }
 
 /**
- * Reads default configuration object, excluding available overrides. Returns
- * list of names of available overrides.
+ * Merges default configuration with sub-configurations. For example:
+ * If original configuration looks like:
+ * {
+ *   url: 'xxx',
+ *   subconfig1: {'s1': 's1'},
+ *   subconfig2: {'s2': 's2'},
+ * }
+ * will produce:
+ * {
+ *   subconfig1: {url: 'xxx', s1: 's1'},
+ *   subconfig2: {url: 'xxx', s1: 's2'}
+ * }
+ *
+ * Method also accepts default configuration that is used as merging base for
+ * all merges.
  *
  * @param {!JsonObject} config
  * @param {!Object<string, *>} defaultConfig
- * @return {!Object<string, !Object>} availableOverrides
+ * @return {!Object<string, !Object>} Merged configurations.
  */
 export function mergeDefaultConfig(config, defaultConfig) {
-  // Make a copy to prevent argument modification.
+  // Make a copy to avoid changing original object.
   defaultConfig = Object.assign({}, defaultConfig);
   return Object.keys(config).filter(
       key => {
