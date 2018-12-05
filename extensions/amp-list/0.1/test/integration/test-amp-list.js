@@ -103,7 +103,8 @@ describe('amp-list', function() {
       '</template>' +
     '</amp-list>';
 
-  describes.integration('with bindable is-layout-container', {
+  // TODO(#19647): Unskip tests
+  describes.integration.skip('with bindable is-layout-container', {
     body: body3, extensions,
     experiments: ['amp-list-resizable-children']},
   env => {
