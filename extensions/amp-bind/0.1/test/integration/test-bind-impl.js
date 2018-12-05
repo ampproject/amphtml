@@ -129,12 +129,13 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().ifNewChrome().run('Bind', function() {
+// TODO(#19647): Unskip tests
+describe.configure().ifNewChrome().skip('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  describes.realWin.skip('in FIE', {
+  describes.realWin('in FIE', {
     amp: {
       ampdoc: 'fie',
       runtimeOn: false,
@@ -217,7 +218,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
   }); // in FIE
 
-  describes.realWin.skip('in shadow ampdoc', {
+  describes.realWin('in shadow ampdoc', {
     amp: {
       ampdoc: 'shadow',
       runtimeOn: false,
