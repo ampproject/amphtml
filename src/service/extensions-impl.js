@@ -690,7 +690,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
   if (isExperimentOn(parentWin, 'custom-elements-v1')) {
-    installCustomElements(childWin, class {});
+    installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
   }
