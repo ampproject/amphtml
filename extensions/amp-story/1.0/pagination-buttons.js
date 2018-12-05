@@ -17,6 +17,7 @@ import {
   Action,
   StateProperty,
   getStoreService,
+  State,
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
 import {dev} from '../../../src/log';
@@ -198,24 +199,32 @@ export class PaginationButtons {
   }
 
   /**
-    * @param {function():Promise<boolean>} hasBookend
+   * @param {function():Promise<boolean>} hasBookend
    */
   initializeListeners_(hasBookend) {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX,
         pageIndex => {
           const totalPages = this.storeService_.get(StateProperty.TOTAL_PAGES);
+          const bookendActive =
+              this.storeService_.get(StateProperty.BOOKEND_STATE);
 
-          this.backButton_.updateState(
-              pageIndex === 0 ?
-                BackButtonStates.HIDDEN :
-                BackButtonStates.PREVIOUS_PAGE);
+          if (pageIndex === 0) {
+            this.backButton_.updateState(BackButtonStates.HIDDEN);
+          }
 
-          this.forwardButton_.updateState(
-              pageIndex === totalPages - 1 ?
-                ForwardButtonStates.SHOW_BOOKEND :
-                ForwardButtonStates.NEXT_PAGE);
+          if (pageIndex > 0 && !bookendActive) {
+            this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
+          }
 
-          if (pageIndex == totalPages - 1) {
+          if (pageIndex < totalPages - 1) {
+            this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
+          }
+
+          if (pageIndex === totalPages - 1 && !bookendActive) {
+            this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
+          }
+
+          if (pageIndex === totalPages - 1) {
             hasBookend().then(hasBookend => {
               if (!hasBookend) {
                 this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
