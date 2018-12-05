@@ -845,7 +845,7 @@ export class AmpStory extends AMP.BaseElement {
     if (toRemoveChildren.length === 0) {
       return;
     }
-    dev().error(TAG, `amp-consent only allows tags: ${allowedTags}`);
+    dev().error(TAG, 'amp-consent only allows tags: %s', allowedTags);
     toRemoveChildren.forEach(el => consentEl.removeChild(el));
   }
 
@@ -912,14 +912,17 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializePages_() {
+    const storyPages = this.element.querySelectorAll('amp-story-page');
     const pageImplPromises = Array.prototype.map.call(
         this.element.querySelectorAll('amp-story-page'),
+        storyPages,
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
           });
         });
 
+    this.storeService_.dispatch(Action.SET_TOTAL_PAGES, storyPages.length);
     return Promise.all(pageImplPromises);
   }
 
@@ -1775,7 +1778,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageIndex = findIndex(this.pages_, page => page.element.id === id);
     if (pageIndex < 0) {
       user().error(TAG,
-          `Story refers to page "${id}", but no such page exists.`);
+          'Story refers to page "%s", but no such page exists.', id);
     }
 
     return pageIndex;
@@ -1789,7 +1792,7 @@ export class AmpStory extends AMP.BaseElement {
   getPageById(id) {
     const pageIndex = this.getPageIndexById(id);
     return dev().assert(this.pages_[pageIndex],
-        `Page at index ${pageIndex} exists, but is missing from the array.`);
+        'Page at index %s exists, but is missing from the array.', pageIndex);
   }
 
   /**
