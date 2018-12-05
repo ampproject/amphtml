@@ -727,7 +727,9 @@ export class AmpList extends AMP.BaseElement {
     // Done loading, nothing more to load.
     if (!this.loadMoreSrc_) {
       return this.mutateElement(() => {
-        this.loadMoreEndElement_.classList.toggle('amp-visible', true);
+        if (this.loadMoreEndElement_) {
+          this.loadMoreEndElement_.classList.toggle('amp-visible', true);
+        }
         this.loadMoreButton_.classList.toggle('amp-visible', false);
       });
     }
