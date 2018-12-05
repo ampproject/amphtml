@@ -132,7 +132,7 @@ export function getLojsonData({loc, title, pubId, atConfig, referrer, ampDoc}) {
     'skipb': 1,
     'sr': service,
   });
-};
+}
 
 /**
  * @param {!LojsonDataDef} props
@@ -146,4 +146,4 @@ export function callLojson(props) {
     endpoint,
     data,
   });
-};
+}
