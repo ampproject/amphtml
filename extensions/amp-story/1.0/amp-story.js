@@ -1295,7 +1295,8 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
-    if (uiState !== UIType.MOBILE) {
+    if (uiState !== UIType.MOBILE ||
+        this.getSupportedOrientations_().includes('landscape')) {
       this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
       return;
     }
