@@ -602,7 +602,7 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
-        if (opt_append) {
+        if (this.loadMoreEnabled_) {
           this.moveButtonsToBottom_(container);
         }
       }
@@ -740,6 +740,7 @@ export class AmpList extends AMP.BaseElement {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
         this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
             () => this.loadMoreCallback_());
+        // Guarantees that the height accounts for the newly visible button
         this.attemptToFit_(dev().assertElement(this.container_));
       });
     }
