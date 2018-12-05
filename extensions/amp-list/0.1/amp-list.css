@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-amp-list[load-more] > [load-more-loading].amp-visible,
-amp-list[load-more] > [load-more-failed].amp-visible,
-amp-list[load-more] > [load-more-button].amp-visible,
-amp-list[load-more] > [load-more-end].amp-visible {
-  visibility: visible;
+amp-list[load-more] [load-more-loading].amp-visible,
+amp-list[load-more] [load-more-failed].amp-visible,
+amp-list[load-more] [load-more-button].amp-visible,
+amp-list[load-more] [load-more-end].amp-visible {
+  display: block;
+  width: 100%;
 }
