@@ -16,14 +16,6 @@
 
 import {RequestBank} from '../../testing/test-helper';
 
-const RequestId = {
-  BASIC: 'analytics-basic',
-  BATCH: 'analytics-batch',
-  USE_BODY: 'analytics-use-body',
-  BATCH_BODY: 'analytics-batch-use-body',
-  NO_REFERRER: 'analytics-no-referrer',
-};
-
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
   this.timeout(15000);
@@ -34,7 +26,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${RequestBank.getUrl(RequestId.BASIC)}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
@@ -55,7 +47,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request', () => {
-      return RequestBank.withdraw(RequestId.BASIC).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/?a=2&b=AMP%20TEST');
         expect(req.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
@@ -70,7 +62,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${RequestBank.getUrl(RequestId.BATCH)}",
+              "baseUrl": "${RequestBank.getUrl()}",
               "batchInterval": 1
             }
           },
@@ -102,7 +94,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request in batch', () => {
-      return RequestBank.withdraw(RequestId.BATCH).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
       });
     });
@@ -114,7 +106,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${RequestBank.getUrl(RequestId.USE_BODY)}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
@@ -140,7 +132,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send request use POST body payload', () => {
-      return RequestBank.withdraw(RequestId.USE_BODY).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
       });
@@ -154,7 +146,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         {
           "requests": {
             "endpoint": {
-              "baseUrl": "${RequestBank.getUrl(RequestId.BATCH_BODY)}",
+              "baseUrl": "${RequestBank.getUrl()}",
               "batchInterval": 1
             }
           },
@@ -187,7 +179,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should send batch request use POST body payload', () => {
-      return RequestBank.withdraw(RequestId.BATCH_BODY).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(JSON.parse(req.body)).to.deep.equal([{
           a: 1, b: 'AMP TEST',
@@ -204,7 +196,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           <script type="application/json">
           {
             "requests": {
-              "endpoint": "${RequestBank.getUrl(RequestId.NO_REFERRER)}"
+              "endpoint": "${RequestBank.getUrl()}"
             },
             "triggers": {
               "pageview": {
@@ -221,11 +213,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(RequestId.NO_REFERRER)
-          .then(req => {
-            expect(req.url).to.equal('/');
-            expect(req.headers.referer).to.not.be.ok;
-          });
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.not.be.ok;
+      });
     });
   });
 });
