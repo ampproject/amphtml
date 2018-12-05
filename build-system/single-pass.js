@@ -431,9 +431,11 @@ function transformPathsToTempDir(graph, config) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins(
-            /* isEsmBuild */ config.define.indexOf['ESM_BUILD=true'] !== -1,
-            /* isCommonJsModule */ isCommonJsModule(f)),
+        plugins: conf.plugins({
+          isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
+          isCommonJsModule: isCommonJsModule(f),
+          isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+        }),
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);

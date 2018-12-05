@@ -22,7 +22,11 @@ const defaultPlugins = [
 ];
 
 module.exports = {
-  plugins: (isEsmBuild, isCommonJsModule) => {
+  plugins: ({
+    isEsmBuild,
+    isCommonJsModule,
+    isForTesting,
+  }) => {
     let pluginsToApply = defaultPlugins;
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
@@ -42,6 +46,11 @@ module.exports = {
     if (isCommonJsModule) {
       pluginsToApply = pluginsToApply.concat([
         [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
+      ]);
+    }
+    if (isForTesting) {
+      pluginsToApply = pluginsToApply.concat([
+        [require.resolve('./babel-plugins/babel-plugin-amp-constant-transformer')],
       ]);
     }
     return pluginsToApply;
