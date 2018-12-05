@@ -21,8 +21,10 @@ import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.repeated('amp-list', {
-  'template type script': {templateType: 'script'},
-  'template type': {templateType: 'template'},
+  'with script[type=text/plain][template=amp-mustache]':
+      {templateType: 'script'},
+  'with template[type=amp-mustache]':
+      {templateType: 'template'},
 }, (name, variant) => {
 
   describes.realWin('amp-list component', {

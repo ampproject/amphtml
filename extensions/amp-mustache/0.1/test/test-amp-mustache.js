@@ -20,7 +20,7 @@ import {AmpMustache} from '../amp-mustache';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated('amp-mustache 0.1', {
-  'with script[type=text/plain][template=amp-mustache':
+  'with script[type=text/plain][template=amp-mustache]':
       {templateType: 'script'},
   'with template[type=amp-mustache]':
       {templateType: 'template'},
@@ -496,8 +496,8 @@ describes.repeated('amp-mustache 0.1', {
         });
       });
     }
-    if (isTemplateTypeScript) {
-      it('should foster text nodes in template[type="amp-mustache"]'
+    if (isTemplateType) {
+      it('should foster text nodes in template[type="amp-mustache"] '
           + 'destroying the templating', () => {
         return allowConsoleError(() => {
           const result = template.render({
