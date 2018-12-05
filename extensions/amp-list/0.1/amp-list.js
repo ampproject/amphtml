@@ -775,7 +775,9 @@ export class AmpList extends AMP.BaseElement {
     this.toggleLoadMoreLoading_(true);
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
-          this.toggleLoadMoreLoading_(false);
+          if (this.loadMoreSrc_) {
+            this.toggleLoadMoreLoading_(false);
+          }
           if (this.unlistenLoadMore_) {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
