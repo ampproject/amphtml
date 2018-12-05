@@ -179,12 +179,16 @@ amp-story-page[active] {
 amp-sidebar {
   background-color: #ffffff !important;
   max-width: 280px !important;
-  transform: translate3d(0, 100vh, 0) !important;
-  transition-delay: 0.15s !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+amp-sidebar[hidden] {
+  transform: translate3d(100%, 0, 0) !important;
+  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 [desktop] amp-sidebar {
-    max-width: 320px !important;
+  max-width: 320px !important;
   }
 
 .i-amphtml-story-fallback amp-story-page {
@@ -245,16 +249,18 @@ amp-story-page[distance="2"] {
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  opacity: 0.2 !important;
+  opacity: 0.55 !important;
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
   z-index: 2 !important;
   animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
 }
-
+.i-amphtml-story-opacity-mask[hidden] {
+  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) backwards !important;
+}
 .i-amphtml-sidebar-mask {
-  display: none;
+  display: none !important;
 }
 
 /**
