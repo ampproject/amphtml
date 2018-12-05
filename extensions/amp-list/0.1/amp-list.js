@@ -848,9 +848,12 @@ export class AmpList extends AMP.BaseElement {
    */
   toggleLoadMoreLoading_(state) {
     this.mutateElement(() => {
-      // If it's loading, then it's no longer failed
+      // If it's loading, then it's no longer failed or ended
       if (this.loadMoreFailedElement_) {
         this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+      }
+      if (this.loadMoreEndElement_) {
+        this.loadMoreEndElement_.classList.toggle('amp-visible', false);
       }
       if (this.loadMoreLoadingElement_) {
         this.loadMoreButton_.classList.toggle('amp-visible', !state);
