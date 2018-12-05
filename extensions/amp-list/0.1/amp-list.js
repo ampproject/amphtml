@@ -495,9 +495,8 @@ export class AmpList extends AMP.BaseElement {
       this.templates_.findAndRenderTemplateArray(this.element, array)
           .then(results => this.updateBindings_(results))
           .then(elements => this.render_(elements, current.append))
-          .then(() => this.loadMoreEnabled_
-              && this.maybeRenderLoadMoreTemplates_(payload))
-          .then(() => this.loadMoreEnabled_ && this.setLoadMore_())
+          .then(() => this.maybeRenderLoadMoreTemplates_(payload))
+          .then(() => this.maybeSetLoadMore_())
           .then(onFulfilledCallback, onRejectedCallback);
     }
   }
@@ -508,6 +507,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   maybeRenderLoadMoreTemplates_(data) {
+    if (!this.loadMoreEnabled_) {
+      return Promise.resolve();
+    }
     const promises = [];
     promises.push(this.maybeRenderLoadMoreElement_(this.loadMoreButton_, data));
     promises.push(this.maybeRenderLoadMoreElement_(
@@ -721,19 +723,20 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Promise}
    * @private
    */
-  setLoadMore_() {
-    // Done loading, nothing more to load.
-    if (!this.loadMoreSrc_) {
-      return;
+  maybeSetLoadMore_() {
+    const shouldSetLoadMore = this.loadMoreEnabled_ && this.loadMoreSrc_;
+    if (!shouldSetLoadMore) {
+      return Promise.resolve();
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
     if (triggerOnScroll) {
       this.maybeSetupLoadMoreAuto_();
     }
     if (this.loadMoreButton_) {
-      this.mutateElement(() => {
+      return this.mutateElement(() => {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
         this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
             () => this.loadMoreCallback_());
@@ -746,6 +749,7 @@ export class AmpList extends AMP.BaseElement {
           'load-more is specified but no means of paging (overflow or ' +
           'load-more=auto) is available', this);
     }
+    return Promise.resolve();
   }
 
 
@@ -831,6 +835,9 @@ export class AmpList extends AMP.BaseElement {
       this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
       this.loadMoreButton_.classList.toggle('amp-visible', false);
       this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
+      if (this.loadMoreEndElement_) {
+        this.loadMoreEndElement_.classList.toggle('amp-visible', true);
+      }
     });
   }
   /**
