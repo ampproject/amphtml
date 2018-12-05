@@ -690,12 +690,10 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.paginationButtons_ = PaginationButtons.create(this.win);
+    this.paginationButtons_ =
+        PaginationButtons.create(this.win, () => this.hasBookend_());
 
     this.paginationButtons_.attach(this.element);
-
-    this.navigationState_.observe(e =>
-      this.paginationButtons_.onNavigationStateChange(e));
   }
 
   /** @visibleForTesting */
@@ -912,6 +910,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializePages_() {
+    const storyPages = this.element.querySelectorAll('amp-story-page');
     const pageImplPromises = Array.prototype.map.call(
         this.element.querySelectorAll('amp-story-page'),
         pageEl => pageEl.getImpl());
