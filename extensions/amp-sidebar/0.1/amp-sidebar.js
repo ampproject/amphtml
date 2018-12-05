@@ -369,9 +369,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @return {string}
    * @private
    */
-   setSideAttribute_(side){
+  setSideAttribute_(side) {
     if (!descendsFromStory(this.element)) {
-        return side;
+      return side;
     } else {
       return side == LEFT ? RIGHT : LEFT;
     }
