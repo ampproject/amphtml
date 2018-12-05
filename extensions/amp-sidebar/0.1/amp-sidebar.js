@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * CopySide.RIGHT 2017 The AMP HTML Authors. All Side.RIGHTs Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ const TAG = 'amp-sidebar toolbar';
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
-/** @private @const {string} */
-const LEFT = 'left';
-
-/** @private @const {string} */
-const RIGHT = 'right';
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
 
 /**
   * For browsers with bottom nav bars the content towards the bottom
@@ -122,8 +122,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(element);
 
-    if (this.side_ != LEFT && this.side_ != RIGHT) {
-      this.side_ = this.setSideAttribute_(isRTL(this.document_) ? RIGHT : LEFT);
+    if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
+      this.side_ = this.setSideAttribute_(isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
       element.setAttribute('side', this.side_);
     }
 
@@ -365,15 +365,15 @@ export class AmpSidebar extends AMP.BaseElement {
   }
   /**
    * Sidebars within <amp-story> should be 'flipped'.
-   * @param {string} side
-   * @return {string}
+   * @param {!Side} side
+   * @return {Side}
    * @private
    */
   setSideAttribute_(side) {
     if (!descendsFromStory(this.element)) {
       return side;
     } else {
-      return side == LEFT ? RIGHT : LEFT;
+      return side == Side.LEFT ? Side.RIGHT : Side.LEFT;
     }
   }
   /**
