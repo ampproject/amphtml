@@ -123,7 +123,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(element);
 
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
-      this.side_ = this.setSideAttribute_(isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
+      this.side_ = this.setSideAttribute_(
+        isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
       element.setAttribute('side', this.side_);
     }
 
