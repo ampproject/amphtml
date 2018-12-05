@@ -124,7 +124,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
-        isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
+          isRTL(this.document_) ? Side.RIGHT : Side.LEFT);
       element.setAttribute('side', this.side_);
     }
 
