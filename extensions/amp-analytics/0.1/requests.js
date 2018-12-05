@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -366,12 +366,10 @@ function expandExtraUrlParams(variableService, urlReplacements, params,
                 value, bindings, opt_whitelist))
           .then(value => parent[key] = value);
       requestPromises.push(request);
-    } else if (typeof value === 'object' && value !== null) {
-      if (isArray(value)) {
-        value.forEach((_, index) => expandObject(value, index));
-      } else {
-        Object.keys(value).forEach(key => expandObject(value, key));
-      }
+    } else if (isArray(value)) {
+      value.forEach((_, index) => expandObject(value, index));
+    } else if (isObject(value) && value !== null) {
+      Object.keys(value).forEach(key => expandObject(value, key));
     }
   };
 
