@@ -296,8 +296,8 @@ export class GlobalVariableSource extends VariableSource {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:%s',
-            experiment);
+            'The value passed to VARIANT() is not a valid experiment name:' +
+                experiment);
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
       }, 'VARIANT');
@@ -321,7 +321,7 @@ export class GlobalVariableSource extends VariableSource {
       return this.getGeo_(geos => {
         if (geoType) {
           user().assert(geoType === 'ISOCountry',
-              'The value passed to AMP_GEO() is not valid name:%s', geoType);
+              'The value passed to AMP_GEO() is not valid name:' + geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
         return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
