@@ -60,7 +60,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Latest stable version numbers of browsers as of 12/3/2018
 const latestVersion = {
-  chrome: 70,
+  chrome: 71,
   firefox: 63,
   safari: 12,
 };

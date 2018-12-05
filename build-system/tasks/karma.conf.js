@@ -178,7 +178,7 @@ module.exports = {
     }, SAUCE_TIMEOUT_CONFIG),
     SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      appiumVersion: '1.8.1',
+      appiumVersion: '1.9.1',
       deviceName: 'iPhone X Simulator',
       browserName: 'Safari',
       platformName: 'iOS',
