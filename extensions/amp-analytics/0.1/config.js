@@ -222,7 +222,7 @@ export class AnalyticsConfig {
             ' <script> child.');
       }
     } catch (er) {
-      user().error(TAG, er.message);
+      user().error(TAG, '%s', er.message);
     }
     return /** @type {!JsonObject} */ (inlineConfig);
   }
@@ -340,11 +340,12 @@ export function expandConfigRequest(config) {
  * list of names of available overrides.
  *
  * @param {!JsonObject} config
- * @param {!Object<string, *>} defaultConfig Stores default configuration with
- * all overrides removed.
- * @return {!Array<string>} availableOverrides
+ * @param {!Object<string, *>} defaultConfig
+ * @return {!Object<string, !Object>} availableOverrides
  */
-export function readDefaultConfiguration(config, defaultConfig) {
+export function mergeDefaultConfig(config, defaultConfig) {
+  // Make a copy to prevent argument modification.
+  defaultConfig = Object.assign({}, defaultConfig);
   return Object.keys(config).filter(
       key => {
         const value = config[key];
@@ -353,7 +354,10 @@ export function readDefaultConfiguration(config, defaultConfig) {
           defaultConfig[key] = value;
         }
         return isOverrideConfiguration;
-      });
+      }).reduce((merged, key) => {
+    merged[key] = Object.assign({}, defaultConfig, config[key]);
+    return merged;
+  }, {});
 }
 
 /**

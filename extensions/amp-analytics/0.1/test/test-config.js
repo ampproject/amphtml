@@ -18,8 +18,8 @@ import {ANALYTICS_CONFIG} from '../vendors';
 import {
   AnalyticsConfig,
   expandConfigRequest,
+  mergeDefaultConfig,
   mergeObjects,
-  readDefaultConfiguration,
 } from '../config';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
@@ -562,8 +562,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
   });
 
-  describe('readDefaultConfiguration', () => {
-    it('readDefaultConfiguration function', () => {
+  describe('mergeDefaultConfig', () => {
+    it('mergeDefaultConfig function', () => {
       const config = {
         'key1': 'value1',
         'key2': true,
@@ -576,16 +576,23 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
       const defaultConfig = {};
-      expect(readDefaultConfiguration(config, defaultConfig)).to.eql(
-          ['override1', 'override2']);
-      expect(defaultConfig).to.eql({
-        'key1': 'value1',
-        'key2': true,
-        'key3': 0,
-      });
+      expect(mergeDefaultConfig(config, defaultConfig)).to.eql(
+          {
+            'override1': {
+              'key1': 'value1',
+              'key2': true,
+              'key3': 0,
+              'override1Key': 'value',
+            }, 'override2': {
+              'key1': 'value1',
+              'key2': true,
+              'key3': 0,
+              'override2Key': 'value',
+            },
+          });
     });
 
-    it('readDefaultConfiguration function merges with default config', () => {
+    it('mergeDefaultConfig function merges with default config', () => {
       const config = {
         'key1': 'value1',
         'key2': true,
@@ -598,29 +605,55 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
       const defaultConfig = {'key0': 'KEEP', 'key1': 'REPLACE'};
-      expect(readDefaultConfiguration(config, defaultConfig)).to.eql(
-          ['override1', 'override2']);
-      expect(defaultConfig).to.eql({
-        'key0': 'KEEP',
-        'key1': 'value1',
-        'key2': true,
-        'key3': 0,
-      });
+      expect(mergeDefaultConfig(config, defaultConfig)).to.eql(
+          {
+            'override1': {
+              'key0': 'KEEP',
+              'key1': 'value1',
+              'key2': true,
+              'key3': 0,
+              'override1Key': 'value',
+            }, 'override2': {
+              'key0': 'KEEP',
+              'key1': 'value1',
+              'key2': true,
+              'key3': 0,
+              'override2Key': 'value',
+            },
+          });
     });
 
-    it('readDefaultConfiguration no overrides available', () => {
+    it('mergeDefaultConfig function merges nested values', () => {
+      const config = {
+        'url': 'URL',
+        'f1': {
+          'vars': {'k1': 'v1'},
+        },
+        'f2': {
+          'vars': {'k2': 'v2'},
+        },
+      };
+      const defaultConfig = {};
+      expect(mergeDefaultConfig(config, defaultConfig)).to.eql(
+          {
+            'f1': {
+              'url': 'URL',
+              'vars': {'k1': 'v1'},
+            }, 'f2': {
+              'url': 'URL',
+              'vars': {'k2': 'v2'},
+            },
+          });
+    });
+
+    it('mergeDefaultConfig no overrides available', () => {
       const config = {
         'key1': 'value1',
         'key2': true,
         'key3': 0,
       };
       const defaultConfig = {};
-      expect(readDefaultConfiguration(config, defaultConfig)).to.eql([]);
-      expect(defaultConfig).to.eql({
-        'key1': 'value1',
-        'key2': true,
-        'key3': 0,
-      });
+      expect(mergeDefaultConfig(config, defaultConfig)).to.eql({});
     });
   });
 

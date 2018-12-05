@@ -24,7 +24,7 @@ import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
-import {readDefaultConfiguration} from './config';
+import {mergeDefaultConfig} from './config';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -141,18 +141,16 @@ export class LinkerManager {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
 
-    const linkerNames = readDefaultConfiguration(config, defaultConfig);
+    const mergedConfigs = mergeDefaultConfig(config, defaultConfig);
 
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin =
         this.urlService_.isProxyOrigin(location);
-    linkerNames.forEach(name => {
-      const mergedConfig =
-          Object.assign({}, defaultConfig, config[name]);
-
+    Object.keys(mergedConfigs).forEach(name => {
+      const mergedConfig = mergedConfigs[name];
       if (mergedConfig['enabled'] !== true) {
-        user().info(TAG, `linker config for ${name} is not enabled and ` +
-            'will be ignored.');
+        user().info(TAG,
+          'linker config for %s is not enabled and will be ignored.', name);
         return;
       }
 
