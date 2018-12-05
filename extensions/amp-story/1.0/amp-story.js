@@ -180,6 +180,11 @@ const TAG = 'amp-story';
 const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
+/**
+ * The default light gray for chrome supported theme color.
+ * @const {string}
+ */
+const DEFAULT_THEME_COLOR = '#F1F3F4';
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -348,6 +353,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
+    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -416,6 +422,25 @@ export class AmpStory extends AMP.BaseElement {
           .replace(/([\d.]+)vmin/gmi, 'calc($1 * var(--i-amphtml-story-vmin))')
           .replace(/([\d.]+)vmax/gmi, 'calc($1 * var(--i-amphtml-story-vmax))');
     });
+  }
+
+  /**
+  * @private
+  */
+  setThemeColor_() {
+    // Don't override the publisher's tag.
+    if (this.win.document.querySelector('meta[name=theme-color]')) {
+      return;
+    }
+    // The theme color should be copied from the story's primary accent color
+    // if possible, with the fall back being default light gray.
+    const meta = this.win.document.createElement('meta');
+    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
+    const styles = computedStyle(this.win, ampStoryEl);
+    meta.name = 'theme-color';
+    meta.content = styles.getPropertyValue('--primary-color') ||
+        DEFAULT_THEME_COLOR;
+    this.win.document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
   /**
@@ -534,7 +559,7 @@ export class AmpStory extends AMP.BaseElement {
     // other components registered.
     this.storeService_.subscribe(
         StateProperty.ACTIONS_WHITELIST, actionsWhitelist => {
-          const actions = Services.actionServiceForDoc(this.getAmpDoc());
+          const actions = Services.actionServiceForDoc(this.element);
           actions.setWhitelist(actionsWhitelist);
         }, true /** callToInitialize */);
 
@@ -661,6 +686,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
+    if (this.paginationButtons_) {
+      return;
+    }
+
     this.paginationButtons_ = PaginationButtons.create(this.win);
 
     this.paginationButtons_.attach(this.element);
@@ -695,10 +724,6 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
-
-    if (!this.paginationButtons_) {
-      this.buildPaginationButtons_();
-    }
 
     this.initializeBookend_();
     this.initializeSidebar_();
@@ -1319,6 +1344,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP:
         this.setDesktopPositionAttributes_(this.activePage_);
+        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.removeAttribute('desktop-fullbleed');
@@ -1333,6 +1359,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.shareMenu_.build();
+        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop-fullbleed', '');
           this.element.removeAttribute('desktop');
@@ -1401,7 +1428,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
-    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
         this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {

@@ -38,6 +38,8 @@ describes.realWin('amp-addthis', {
   const configManager = getConfigManager();
   const pubId = 'ra-5988ef04ee1db125';
   const widgetId = '29nf';
+  const floatingPubId = 'ra-5b2947993c86010c';
+  const floatingWidgetId = '4hvd';
   let doc;
   let registerStub;
   let unregisterStub;
@@ -108,15 +110,19 @@ describes.realWin('amp-addthis', {
   });
 
   it('requires data-pub-id', () => {
-    expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
-        /The data\-pub\-id attribute is required for/
-    );
+    allowConsoleError(() => {
+      expect(getAT({pubId: '', widgetId})).to.be.rejectedWith(
+          /The data\-pub\-id attribute is required for/
+      );
+    });
   });
 
   it('requires data-widget-id', () => {
-    expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
-        /The data\-widget\-id attribute is required for/
-    );
+    allowConsoleError(() => {
+      expect(getAT({pubId, widgetId: ''})).to.be.rejectedWith(
+          /The data\-widget\-id attribute is required for/
+      );
+    });
   });
 
   it('removes the iframe after unlayoutCallback', () => {
@@ -370,5 +376,15 @@ describes.realWin('amp-addthis', {
     const lastYear = new Date();
     lastYear.setFullYear(lastYear.getFullYear() - 1);
     expect(isDateInFuture(lastYear)).to.equal(false);
+  });
+
+  it('gives id for iframe if floating tool loaded', () => {
+    return getAT({pubId: floatingPubId, widgetId: floatingWidgetId}).then(
+        ({at}) => {
+          testIframe(at.querySelector('iframe'));
+          const iframe = at.querySelector('iframe');
+          expect(iframe.getAttribute('id')).to.equal(floatingWidgetId);
+        }
+    );
   });
 });

@@ -49,7 +49,7 @@ import {
 } from '../../../src/transition';
 import {
   prepareImageAnimation,
-} from '@ampproject/animations/dist/animations';
+} from '@ampproject/animations/dist/animations.mjs';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -184,7 +184,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return lightboxManagerForDoc(this.getAmpDoc()).then(manager => {
       this.manager_ = manager;
       this.history_ = Services.historyForDoc(this.getAmpDoc());
-      this.action_ = Services.actionServiceForDoc(this.getAmpDoc());
+      this.action_ = Services.actionServiceForDoc(this.element);
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
@@ -482,8 +482,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (isInStandardMode && descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
-        toggle(dev().assertElement(this.navControls_), false);
-        toggle(dev().assertElement(this.topBar_), false);
+        toggle(user().assertElement(this.navControls_,
+            'E#19457 this.navControls_'), false);
+        toggle(user().assertElement(this.topBar_, 'E#19457 this.topBar_'),
+            false);
       } else if (isInOverflowMode) {
         this.clearDescOverflowState_();
       }
@@ -499,8 +501,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_./*OK*/scrollTop = 0;
     this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
     this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
-    toggle(dev().assertElement(this.navControls_), true);
-    toggle(dev().assertElement(this.topBar_), true);
+    toggle(user().assertElement(this.navControls_,
+        'E#19457 this.navControls_'), true);
+    toggle(user().assertElement(this.topBar_,
+        'E#19457 this.topBar_'), true);
   }
 
   /**

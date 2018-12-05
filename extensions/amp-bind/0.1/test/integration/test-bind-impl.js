@@ -129,7 +129,8 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().ifNewChrome().run('Bind', function() {
+// TODO(#19647): Unskip tests
+describe.configure().ifNewChrome().skip('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);

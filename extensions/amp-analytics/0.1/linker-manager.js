@@ -156,8 +156,8 @@ export class LinkerManager {
           Object.assign({}, defaultConfig, config[name]);
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(TAG, `linker config for ${name} is not enabled and ` +
-            'will be ignored.');
+        user().info(TAG, 'linker config for %s is not enabled and ' +
+            'will be ignored.', name);
         return;
       }
 
@@ -198,10 +198,6 @@ export class LinkerManager {
    * @private
    */
   isLegacyOptIn_() {
-    if (!isExperimentOn(this.ampdoc_.win, 'linker-meta-opt-in')) {
-      return false;
-    }
-
     const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
         'meta[name="amp-google-client-id-api"][content="googleanalytics"]');
     if (!optInMeta || optInMeta.hasAttribute(LINKER_CREATED) ||
@@ -227,10 +223,11 @@ export class LinkerManager {
    * Called on click on any anchor element. Adds linker param if a match for
    * given linker configuration.
    * @param {!Element} element
+   * @param {!Event} event
    * @private
    */
-  handleAnchorMutation_(element) {
-    if (!element.href) {
+  handleAnchorMutation_(element, event) {
+    if (!element.href || event.type !== 'click') {
       return;
     }
 
@@ -258,22 +255,25 @@ export class LinkerManager {
 
     const /** @type {Array} */ domains = config['destinationDomains'];
 
-    if (this.isDomainMatch_(hostname, domains)) {
+    if (this.isDomainMatch_(hostname, name, domains)) {
       const linkerValue = createLinker(/* version */ '1',
           this.resolvedIds_[name]);
-      el.href = addParamToUrl(href, name, linkerValue);
+      if (linkerValue) {
+        el.href = addParamToUrl(href, name, linkerValue);
+      }
     }
   }
 
   /**
    * Check to see if the url is a match for the given set of domains.
    * @param {string} hostname
+   * @param {string} name Name given in linker config.
    * @param {?Array} domains
    */
-  isDomainMatch_(hostname, domains) {
+  isDomainMatch_(hostname, name, domains) {
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
-      user().warn(TAG, `${name} destinationDomains must be an array.`);
+      user().warn(TAG, '%s destinationDomains must be an array.', name);
       return false;
     }
 
@@ -284,6 +284,13 @@ export class LinkerManager {
 
     // If no domains given, default to friendly domain matching.
     if (!domains) {
+      // Don't append linker for exact domain match, relative urls, or
+      // fragments.
+      const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+      if (winHostname === hostname) {
+        return false;
+      }
+
       const {sourceUrl, canonicalUrl} =
           Services.documentInfoForDoc(this.ampdoc_);
       const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
@@ -338,7 +345,7 @@ export class LinkerManager {
           form.getAttribute('action');
       const {hostname} = this.urlService_.parse(url);
 
-      if (this.isDomainMatch_(hostname, domains)) {
+      if (this.isDomainMatch_(hostname, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }

@@ -546,11 +546,6 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'video-docking.css',
-    outJs: 'video-docking.css.js',
-    outCss: 'video-docking.css',
-  },
-  {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
     outCss: 'video-autoplay.css',
@@ -889,7 +884,8 @@ function enableLocalTesting(targetFile) {
   return removeConfig(targetFile).then(() => {
     return applyConfig(
         config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
+        /* opt_localDev */ true, /* opt_localBranch */ true,
+        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
   });
 }
 
@@ -1002,11 +998,15 @@ function dist() {
           });
         }
       }).then(() => {
-        return createModuleCompatibleES5Bundle('v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('amp4ads-v0.js');
-      }).then(() => {
-        return createModuleCompatibleES5Bundle('shadow-v0.js');
+        if (argv.esm) {
+          return Promise.all([
+            createModuleCompatibleES5Bundle('v0.js'),
+            createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+            createModuleCompatibleES5Bundle('shadow-v0.js'),
+          ]);
+        } else {
+          return Promise.resolve();
+        }
       }).then(() => {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);

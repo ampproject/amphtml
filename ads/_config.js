@@ -252,6 +252,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'adyoulike': {
+    consentHandlingOverride: true,
+    prefetch: 'https://pixels.omnitagjs.com/amp.js',
+    renderStartImplemented: true,
+  },
+
   'adzerk': {},
 
   'affiliateb': {
@@ -453,6 +459,11 @@ export const adConfig = {
       'https://s.sh.adingo.jp',
       'https://i.adingo.jp',
     ],
+  },
+
+  'freewheel': {
+    prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
+    renderStartImplemented: true,
   },
 
   'fusion': {
@@ -680,6 +691,11 @@ export const adConfig = {
 
   'nokta': {
     prefetch: 'https://static.virgul.com/theme/mockups/noktaamp/ampjs.js',
+    renderStartImplemented: true,
+  },
+
+  'onead': {
+    prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
     renderStartImplemented: true,
   },
 

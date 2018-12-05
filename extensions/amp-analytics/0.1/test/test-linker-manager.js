@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as experiments from '../../../../src/experiments';
 import {LinkerManager, areFriendlyDomains} from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
@@ -65,10 +64,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface.getLocation.returns({
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
+    windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableService(win);
-
-    // TODO(ccordry): remove this with linker-meta-opt-in experiment.
-    sandbox.stub(experiments, 'isExperimentOn').returns(true);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {
@@ -187,6 +184,27 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should not add params where linker value is empty', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            gclid: '',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      expect(handlers.length).to.equal(1);
+      expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
+          'https://www.source.com/dest?a=1'
+      );
+    });
+  });
+
   it('should generate a param valid for ingestion 5 min later', () => {
     const clock = sandbox.useFakeTimers(1533329483292);
     sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
@@ -239,7 +257,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       expect(canonicalDomainUrl).to.contain('testLinker1=');
       expect(canonicalDomainUrl).to.not.contain('testLinker2=');
 
-      const sourceDomainUrl = clickAnchor('https://amp.source.com/path');
+      const sourceDomainUrl = clickAnchor('https://www.source.com/path');
       expect(sourceDomainUrl).to.contain('testLinker1=');
       expect(sourceDomainUrl).to.not.contain('testLinker2=');
 
@@ -369,6 +387,83 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  describe('same domain matching', () => {
+    let config;
+
+    beforeEach(() => {
+      windowInterface.getLocation.returns({
+        origin: 'https://amp.source.com',
+      });
+      windowInterface.getHostname.returns('amp.source.com');
+      config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+    });
+
+    it('should not add linker if same domain', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.not.contain('testLinker');
+      });
+    });
+
+    it('should add linker if subdomain is different but friendly', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://m.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should add linker if same domain is in destination domains', () => {
+      const config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+            destinationDomains: ['amp.source.com'],
+          },
+        },
+      };
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is fragment', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '#hello',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is relative', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '/foo',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+  });
+
   describe('when CID API enabled', () => {
 
     beforeEach(() => {
@@ -483,9 +578,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   function clickAnchor(url) {
     const a = doc.createElement('a');
+    const event = {
+      type: 'click',
+    };
     a.href = url;
     doc.body.appendChild(a);
-    handlers.forEach(handler => handler(a));
+    handlers.forEach(handler => handler(a, event));
     return a.href;
   }
 

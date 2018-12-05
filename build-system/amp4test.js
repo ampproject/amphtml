@@ -19,6 +19,17 @@ const app = module.exports = require('express').Router();
 
 /*eslint "max-len": 0*/
 
+/**
+ * Logs the given messages to the console in local dev mode, but not while
+ * running automated tests.
+ * @param {*} messages
+ */
+function log(...messages) {
+  if (!process.env.AMP_TEST) {
+    console.log(messages);
+  }
+}
+
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
@@ -85,10 +96,9 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
-  console.log('SERVER-LOG [DEPOSIT]: ', key);
+app.use('/request-bank/deposit/:id/', (req, res) => {
+  const key = req.params.id;
+  log('SERVER-LOG [DEPOSIT]: ', key);
   if (typeof bank[key] === 'function') {
     bank[key](req);
   } else {
@@ -102,10 +112,9 @@ app.use('/request-bank/deposit/', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
-  console.log('SERVER-LOG [WITHDRAW]: ' + key);
+app.use('/request-bank/withdraw/:id/', (req, res) => {
+  const key = req.params.id;
+  log('SERVER-LOG [WITHDRAW]: ' + key);
   const result = bank[key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
@@ -114,6 +123,7 @@ app.use('/request-bank/withdraw/', (req, res) => {
     res.json({
       headers: result.headers,
       body: result.body,
+      url: result.url,
     });
     delete bank[key];
   };

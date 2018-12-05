@@ -225,30 +225,36 @@ export class AnimationWorkletRunner extends AnimationRunner {
         this.topRatio = options['top-ratio'];
         this.bottomRatio = options['bottom-ratio'];
         this.height = options['element-height'];
-        this.prevPos = 0;
       }
       animate(currentTime, effect) {
         if (currentTime == NaN) {
           return;
         }
+
+        // This function mirrors updateVisibility_ in amp-position-observer
         const currentScrollPos =
         ((currentTime / this.timeRange) *
         (this.endOffset - this.startOffset)) +
         this.startOffset;
-        const scrollingUpwards = this.prevPos < currentScrollPos;
-        if (scrollingUpwards) {
-          if ((currentScrollPos - this.bottomRatio * this.height) <=
-          this.endOffset) {
-            effect.localTime = currentTime;
-            this.prevPos = currentScrollPos;
-          }
+        const halfViewport = (this.startOffset + this.endOffset) / 2;
+        const relativePositionTop = currentScrollPos > halfViewport;
+
+        const ratioToUse = relativePositionTop ?
+        this.topRatio : this.bottomRatio;
+        const offset = this.height * ratioToUse;
+        let isVisible = false;
+
+        if (relativePositionTop) {
+          isVisible =
+          currentScrollPos + this.height >= (this.startOffset + offset);
         } else {
-          if ((currentScrollPos - this.topRatio * this.height) <=
-          this.startOffset) {
-            effect.localTime = currentTime;
-            this.prevPos = currentScrollPos;
-          }
+          isVisible =
+          currentScrollPos <= (this.endOffset - offset);
         }
+        if (isVisible) {
+          effect.localTime = currentTime;
+        }
+  
       }
     });
     `;
@@ -270,18 +276,18 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource =
-          Services.viewportForDoc(this.win_.document).getScrollingElement();
+        const {documentElement} = this.win_.document;
+        const viewportService = Services.viewportForDoc(documentElement);
+
+        const scrollSource = viewportService.getScrollingElement();
         const elementRect = request.target./*OK*/getBoundingClientRect();
-        const viewportRect =
-          Services.viewportForDoc(this.win_.document).getRect();
-        const adjustedViewportRect = this.applyMargins_(viewportRect);
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
           timeRange: request.timing.duration,
-          startScrollOffset: `${adjustedViewportRect['top']}px`,
-          endScrollOffset: `${adjustedViewportRect['bottom']}px`,
+          startScrollOffset: `${this.topMargin_}px`,
+          endScrollOffset: `${this.bottomMargin_}px`,
+          fill: request.timing.fill,
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
@@ -289,8 +295,8 @@ export class AnimationWorkletRunner extends AnimationRunner {
             [keyframeEffect],
             scrollTimeline, {
               'time-range': request.timing.duration,
-              'start-offset': adjustedViewportRect['top'],
-              'end-offset': adjustedViewportRect['bottom'],
+              'start-offset': this.topMargin_,
+              'end-offset': this.bottomMargin_,
               'top-ratio': this.topRatio_,
               'bottom-ratio': this.bottomRatio_,
               'element-height': elementRect.height,
