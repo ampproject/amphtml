@@ -406,7 +406,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       const fooDomainUrlSecondClick = clickAnchor('https://foo.com/path');
       const splitResult = fooDomainUrlSecondClick.split('testLinker1');
-      console.error(splitResult);
       expect(splitResult.length).to.be.equal(2);
     });
   });
