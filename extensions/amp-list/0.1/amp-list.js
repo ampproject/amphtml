@@ -726,12 +726,7 @@ export class AmpList extends AMP.BaseElement {
   setLoadMore_() {
     // Done loading, nothing more to load.
     if (!this.loadMoreSrc_) {
-      return this.mutateElement(() => {
-        if (this.loadMoreEndElement_) {
-          this.loadMoreEndElement_.classList.toggle('amp-visible', true);
-        }
-        this.loadMoreButton_.classList.toggle('amp-visible', false);
-      });
+      return;
     }
     const triggerOnScroll = this.element.getAttribute('load-more') === 'auto';
     if (triggerOnScroll) {
@@ -791,6 +786,8 @@ export class AmpList extends AMP.BaseElement {
         .then(() => {
           if (this.loadMoreSrc_) {
             this.toggleLoadMoreLoading_(false);
+          } else {
+            this.setLoadMoreEnded_();
           }
           if (this.unlistenLoadMore_) {
             this.unlistenLoadMore_();
@@ -825,6 +822,17 @@ export class AmpList extends AMP.BaseElement {
     return this.loadMoreLoadingOverlay_;
   }
 
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  setLoadMoreEnded_() {
+    return this.mutateElement(() => {
+      this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
+      this.loadMoreButton_.classList.toggle('amp-visible', false);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
+    });
+  }
   /**
    * Toggles the visibility of the load-more-loading element, the
    * amp-load-more-loading CSS class, and the active state of the loader.
