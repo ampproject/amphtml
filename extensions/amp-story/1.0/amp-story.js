@@ -921,7 +921,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         });
 
-    this.storeService_.dispatch(Action.SET_TOTAL_PAGES, storyPages.length);
+    this.storeService_.dispatch(Action.SET_PAGES_COUNT, storyPages.length);
     return Promise.all(pageImplPromises);
   }
 

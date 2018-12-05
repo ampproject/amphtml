@@ -140,7 +140,7 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setpagesCount',
+  SET_PAGES_COUNT: 'setPagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
