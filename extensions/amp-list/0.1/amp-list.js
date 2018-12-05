@@ -602,19 +602,8 @@ export class AmpList extends AMP.BaseElement {
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
-
-        // Move all buttons to the bottom of the list
-        if (this.loadMoreButton_) {
-          container.appendChild(this.loadMoreButton_);
-        }
-        if (this.loadMoreEndElement_) {
-          container.appendChild(this.loadMoreEndElement_);
-        }
-        if (this.loadMoreFailedElement_) {
-          container.appendChild(this.loadMoreFailedElement_);
-        }
-        if (this.loadMoreLoadingElement_) {
-          container.appendChild(this.loadMoreLoadingElement_);
+        if (opt_append) {
+          this.moveButtonsToBottom_(container);
         }
       }
 
@@ -758,6 +747,28 @@ export class AmpList extends AMP.BaseElement {
       user().error(TAG,
           'load-more is specified but no means of paging (overflow or ' +
           'load-more=auto) is available', this);
+    }
+  }
+
+
+  /**
+   * Moves all the load-more visual elements to the bottom of the list
+   * after newly appended items.
+   * @param {!Element} container
+   * @private
+   */
+  moveButtonsToBottom_(container) {
+    if (this.loadMoreButton_) {
+      container.appendChild(this.loadMoreButton_);
+    }
+    if (this.loadMoreEndElement_) {
+      container.appendChild(this.loadMoreEndElement_);
+    }
+    if (this.loadMoreFailedElement_) {
+      container.appendChild(this.loadMoreFailedElement_);
+    }
+    if (this.loadMoreLoadingElement_) {
+      container.appendChild(this.loadMoreLoadingElement_);
     }
   }
 
