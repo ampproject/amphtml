@@ -912,17 +912,17 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializePages_() {
-    const storyPages = this.element.querySelectorAll('amp-story-page');
     const pageImplPromises = Array.prototype.map.call(
-        storyPages,
+        this.element.querySelectorAll('amp-story-page'),
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
           });
         });
 
-    this.storeService_.dispatch(Action.SET_PAGES_COUNT, storyPages.length);
-    return Promise.all(pageImplPromises);
+    return Promise.all(pageImplPromises).then(() => {
+      this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.pages_.length);
+    });
   }
 
   /**
