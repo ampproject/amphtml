@@ -1141,6 +1141,7 @@ describe('ValidatorRulesMakeSense', () => {
           if (attrSpec.name === 'type' && attrSpec.valueCasei.length > 0) {
             for (const value of attrSpec.valueCasei) {
               if (value === 'application/ld+json' ||
+                  value === 'application/schema+json' ||
                   value === 'application/json') {
                 hasJson = true;
               }

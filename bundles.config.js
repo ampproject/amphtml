@@ -170,6 +170,7 @@ exports.extensionBundles = [
   },
   {name: 'amp-install-serviceworker', version: '0.1', type: TYPES.MISC},
   {name: 'amp-izlesene', version: '0.1', type: TYPES.MEDIA},
+  {name: 'amp-json-schema', version: '0.1', type: TYPES.MISC},
   {name: 'amp-jwplayer', version: '0.1', type: TYPES.MEDIA},
   {
     name: 'amp-lightbox',

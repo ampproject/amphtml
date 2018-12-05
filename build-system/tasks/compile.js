@@ -258,6 +258,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/react-dates/bundle.js',
       'third_party/amp-toolbox-cache-url/**/*.js',
       'third_party/inputmask/**/*.js',
+      'node_modules/ajv/dist/ajv.min.js',
       'node_modules/dompurify/dist/purify.es.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/set-dom/src/**/*.js',
