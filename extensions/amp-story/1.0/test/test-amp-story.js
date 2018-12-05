@@ -385,7 +385,7 @@ describes.realWin('amp-story', {
 
   it('should detect fullbleed desktop mode', () => {
     createPages(story.element, 4, ['cover', '1', '2', '3']);
-    story.element.setAttribute('desktop-mode', 'fullbleed');
+    story.element.setAttribute('supported-orientations', 'portrait, laNdsCApe');
 
     // Don't do this at home. :(
     story.desktopMedia_ = {matches: true};

@@ -187,6 +187,9 @@ const HIDE_ON_BOOKEND_SELECTOR =
  */
 const DEFAULT_THEME_COLOR = '#F1F3F4';
 
+/** @const {!Array<string>} */
+const VALID_ORIENTATIONS = ['portrait', 'landscape'];
+
 /**
  * @implements {./media-pool.MediaPoolRoot}
  */
@@ -298,6 +301,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
+
+    /** @private {?Array<string>} */
+    this.supportedOrientations_ = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -1386,9 +1392,7 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.MOBILE;
     }
 
-    const supportedOrientations =
-        this.element.getAttribute(Attributes.SUPPORTED_ORIENTATIONS)
-            .split(',').map(orientation => orientation.trim().toLowerCase());
+    const supportedOrientations = this.getSupportedOrientations_();
 
     if (supportedOrientations.includes('landscape')) {
       return UIType.DESKTOP_FULLBLEED;
@@ -1413,6 +1417,33 @@ export class AmpStory extends AMP.BaseElement {
    */
   isStandalone_() {
     return this.element.hasAttribute(Attributes.STANDALONE);
+  }
+
+  /**
+   * Returns an array of the supported orientations configured by the publisher.
+   * Defaults to ['portrait'].
+   * @return {!Array<string>}
+   * @private
+   */
+  getSupportedOrientations_() {
+    if (this.supportedOrientations_) {
+      return this.supportedOrientations_;
+    }
+
+    const supportedOrientationsAttribute =
+        this.element.getAttribute(Attributes.SUPPORTED_ORIENTATIONS);
+
+    if (!supportedOrientationsAttribute) {
+      return ['portrait'];
+    }
+
+    this.supportedOrientations_ =
+        supportedOrientationsAttribute
+            .split(',')
+            .map(orientation => orientation.trim().toLowerCase())
+            .filter(orientation => VALID_ORIENTATIONS.includes(orientation));
+
+    return this.supportedOrientations_;
   }
 
   /**
