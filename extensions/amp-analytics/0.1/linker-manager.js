@@ -18,7 +18,7 @@ import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
-import {addParamToUrl} from '../../../src/url';
+import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
@@ -259,7 +259,9 @@ export class LinkerManager {
       const linkerValue = createLinker(/* version */ '1',
           this.resolvedIds_[name]);
       if (linkerValue) {
-        el.href = addParamToUrl(href, name, linkerValue);
+        const params = dict();
+        params[name] = linkerValue;
+        el.href = addMissingParamsToUrl(href, params);
       }
     }
   }
