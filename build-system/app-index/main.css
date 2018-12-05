@@ -160,7 +160,7 @@ a.find-icon:hover {
 }
 code,
 .code,
-.file-list .file-link {
+.file-list .file-link, .file-list-fuzzy-search  {
   font-family: 'Fira Code', 'Inconsolata', Menlo, Consolas, monospace;
 }
 a {
@@ -184,12 +184,7 @@ a.underlined::before {
   position: absolute;
   right: 0;
 }
-.push-right-after-heading {
-  display: flex;
-  float: right;
-  margin-top: -70px;
-  line-height: 20px;
-}
+
 #examples-mode-select {
   margin: 0 20px 0 10px;
 }
@@ -210,22 +205,79 @@ a.underlined::before {
   border-color: #0389ff;
   outline: none;
 }
+
+.file-list-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+  align-items: center;
+
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.file-list-heading #basepath {
+  padding: 0;
+}
+
+.file-list-right-section {
+  margin-left: auto;
+ }
+
+.file-list-fuzzy-search {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  position: relative;
+  top: -12px;
+  padding-left: 5px;
+  padding-top: 20px;
+  width: 285px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: solid #000 2px;
+}
+
+.file-list-fuzzy-search::placeholder {
+  font-size: 14px;
+  font-weight: normal;
+}
+
 .file-list {
   padding: 0 0 40px;
-  margin: 0;
-  column-count: 3;
-  column-gap: 20px;
 }
+
+.file-list div[role="list"] {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: start;
+}
+
+.file-list .list-overflow[overflow] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.file-list .file-link-container {
+  margin: 10px;
+}
+
 .file-list .file-link {
   padding: 0;
   margin: 0 0 10px;
   display: inline-block;
-  width: 300px;
+  width: 200px;
   display: block;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
+
 .file-list .file-link:hover {
   text-decoration: underline;
   color: #333;
@@ -260,9 +312,11 @@ header li.divider {
   padding-right: 20px;
   border-right: 1px solid #ddd;
 }
-@media (max-width: 1000px) {
-  .file-list {
-    column-count: 2;
+@media (max-width: 900px) {
+  .file-list-right-section {
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 0px;
   }
 }
 @media (max-width: 580px) {
@@ -272,8 +326,7 @@ header li.divider {
     flex: 0 0 100%;
     margin-bottom: 20px;
   }
-  .file-list {
-    column-count: 1;
+  .file-list div[role="list"] {
   }
   .file-list .file-link {
     display: block;

@@ -110,7 +110,9 @@ const BasePathSearch = (basepath) => html`
       </script>
     </amp-state>
     <input type="text"
-      placeholder="Fuzzy Find in File List"
+      class="file-list-fuzzy-search"
+      placeholder="Fuzzy search in current file list"
+      pattern="[a-zA-Z0-9-]+"
       on="input-debounced:AMP.setState({basePathSearch: {listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value}})">
     </input>
   `;
@@ -167,9 +169,9 @@ const FileList = (basepath) => html`
   <amp-list [src]="basePathSearch.listSrc"
     src="/dashboard/api/listing?path=${basepath}"
     items="."
-    layout="responsive"
-    width="100px"
-    height="100px"
+    layout="fixed-height"
+    width="auto"
+    height="568px"
     class="file-list">
 
     <div placeholder>Loading...</div>
@@ -183,6 +185,13 @@ const FileList = (basepath) => html`
         </a>
       </div>
     </template>
+
+    <div overflow
+      role="button"
+      aria-label="Show more"
+      class="list-overflow">
+      Show more
+    </div>
 
   </amp-list>
   `;
@@ -243,12 +252,14 @@ const renderTemplate = ({
     </div>
     <div class="file-list-container">
       <div class="wrap">
-        <h3 class="code" id="basepath">
-          ${BasePathSearch(basepath)}
-        </h3>
-        <div class="push-right-after-heading">
-          ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
-          <a href="/~" class="underlined">List root directory</a>
+        <div class="file-list-heading">
+          <h3 class="code" id="basepath">
+            ${BasePathSearch(basepath)}
+          </h3>
+          <div class="file-list-right-section">
+            ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
+            <a href="/~" class="underlined">List root directory</a>
+          </div>
         </div>
         ${FileList(basepath)}
       </div>
