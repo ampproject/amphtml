@@ -78,7 +78,6 @@ function getConfig() {
         'SL_Chrome',
         'SL_Firefox',
         'SL_Safari_11',
-        'SL_iOS_11',
         'SL_Edge_17',
       ]
       // TODO(amp-infra): Evaluate and add more platforms here.
@@ -86,6 +85,7 @@ function getConfig() {
       //'SL_Chrome_Android_7',
       //'SL_Safari_12',
       //'SL_iOS_12'
+      //'SL_iOS_11',
       //'SL_IE_11'
       : [
       // With --saucelabs_lite, a subset of the unit tests are run.
