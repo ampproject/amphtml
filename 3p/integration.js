@@ -112,6 +112,7 @@ import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
+import {baidu} from '../ads/baidu';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
@@ -251,7 +252,6 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-import {baidu} from '../ads/baidu';
 
 
 /**
@@ -331,6 +331,7 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('baidu', baidu);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
 register('bodymovinanimation', bodymovinanimation);
@@ -482,7 +483,6 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
-register('baidu', baidu);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
