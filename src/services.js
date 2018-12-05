@@ -20,7 +20,6 @@ import {
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
-  getServiceForDocDeprecated,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -84,15 +83,12 @@ export class Services {
   }
 
   /**
-   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
-   * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/action-impl.ActionService}
    */
-  static actionServiceForDoc(nodeOrDoc) {
+  static actionServiceForDoc(element) {
     return /** @type {!./service/action-impl.ActionService} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'action', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'action'));
   }
 
   /**
@@ -162,13 +158,13 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element} element
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(elementOrAmpDoc) {
+  static bindForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          elementOrAmpDoc, 'bind', 'amp-bind'));
+          element, 'bind', 'amp-bind'));
   }
 
   /**
@@ -313,13 +309,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Resources is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-impl.Resources}
    */
-  static resourcesForDoc(nodeOrDoc) {
+  static resourcesForDoc(elementOrAmpDoc) {
     return /** @type {!./service/resources-impl.Resources} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'resources'));
+      getServiceForDoc(elementOrAmpDoc, 'resources'));
   }
 
   /**
@@ -558,13 +553,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Viewer is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewer-impl.Viewer}
    */
-  static viewerForDoc(nodeOrDoc) {
+  static viewerForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewer-impl.Viewer} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'viewer'));
+      getServiceForDoc(elementOrAmpDoc, 'viewer'));
   }
 
   /**
@@ -589,13 +583,12 @@ export class Services {
   }
 
   /**
-   * Uses getServiceForDocDeprecated() since Viewport is a startup service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/viewport/viewport-impl.Viewport}
    */
-  static viewportForDoc(nodeOrDoc) {
+  static viewportForDoc(elementOrAmpDoc) {
     return /** @type {!./service/viewport/viewport-impl.Viewport} */ (
-      getServiceForDocDeprecated(nodeOrDoc, 'viewport'));
+      getServiceForDoc(elementOrAmpDoc, 'viewport'));
   }
 
   /**
