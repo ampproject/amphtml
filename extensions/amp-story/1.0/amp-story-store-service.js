@@ -87,7 +87,7 @@ export const UIType = {
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    totalPages: number,
+ *    pagesCount: number,
  * }}
  */
 export let State;
@@ -131,7 +131,7 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  TOTAL_PAGES: 'totalPages',
+  PAGES_COUNT: 'pagesCount',
 };
 
 
@@ -140,7 +140,7 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_TOTAL_PAGES: 'setTotalPages',
+  SET_PAGES_COUNT: 'setpagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -289,9 +289,9 @@ const actions = (state, action, data) => {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
           }));
-    case Action.SET_TOTAL_PAGES:
+    case Action.SET_PAGES_COUNT:
       return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.TOTAL_PAGES]: data}));
+          {}, state, {[StateProperty.PAGES_COUNT]: data}));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -414,7 +414,7 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      [StateProperty.TOTAL_PAGES]: 0,
+      [StateProperty.PAGES_COUNT]: 0,
     });
   }
 
