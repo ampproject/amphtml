@@ -37,6 +37,7 @@ reference.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
 1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/analytics/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
 1. Update your service's usage documentation and inform your customers.
+1. It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 
 
 
