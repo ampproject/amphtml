@@ -47,12 +47,12 @@ export const getStoreService = win => {
 
 /**
  * Different UI experiences to display the story.
- * @const @enum {string}
+ * @const @enum {number}
  */
 export const UIType = {
-  MOBILE: 'mobile',
-  DESKTOP: 'desktop',
-  DESKTOP_FULLBLEED: 'fullbleed',
+  MOBILE: 0,
+  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
 

@@ -354,8 +354,8 @@ export class SystemLayer {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, isDesktop => {
-      this.onUIStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
@@ -527,8 +527,8 @@ export class SystemLayer {
 
     this.vsync_.mutate(() => {
       uiState === UIType.DESKTOP_PANELS ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+        this.getShadowRoot().classList.add('i-amphtml-story-desktop-panels') :
+        this.getShadowRoot().classList.remove('i-amphtml-story-desktop-panels');
     });
   }
 

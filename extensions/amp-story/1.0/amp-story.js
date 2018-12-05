@@ -1343,7 +1343,8 @@ export class AmpStory extends AMP.BaseElement {
         this.shareMenu_.build();
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
-          this.element.removeAttribute('desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         break;
       case UIType.DESKTOP_PANELS:
@@ -1351,7 +1352,8 @@ export class AmpStory extends AMP.BaseElement {
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.removeAttribute('desktop-fullbleed');
+          this.element.classList.add('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         if (!this.background_) {
           this.background_ = new AmpStoryBackground(this.win, this.element);
@@ -1365,8 +1367,9 @@ export class AmpStory extends AMP.BaseElement {
         this.shareMenu_.build();
         this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
-          this.element.setAttribute('desktop-fullbleed', '');
-          this.element.removeAttribute('desktop');
+          this.element.setAttribute('desktop', '');
+          this.element.classList.add('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-panels');
         });
         break;
     }
@@ -1383,8 +1386,11 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.MOBILE;
     }
 
-    if (this.element.getAttribute('desktop-mode') ===
-        UIType.DESKTOP_FULLBLEED) {
+    const supportedOrientations =
+        this.element.getAttribute(Attributes.SUPPORTED_ORIENTATIONS)
+            .split(',').map(orientation => orientation.trim().toLowerCase());
+
+    if (supportedOrientations.includes('landscape')) {
       return UIType.DESKTOP_FULLBLEED;
     }
 
