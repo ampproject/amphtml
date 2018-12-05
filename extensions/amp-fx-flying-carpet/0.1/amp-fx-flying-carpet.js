@@ -69,6 +69,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
@@ -182,6 +183,14 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
         return this.attemptCollapse().catch(() => {});
       }
     }
+  }
+
+  /**
+   * Returns our discovered children
+   * @return {!Array<!Element>}
+   */
+  getChildren() {
+    return this.children_;
   }
 
   /**
