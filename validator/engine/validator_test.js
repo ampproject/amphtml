@@ -18,6 +18,7 @@ goog.provide('amp.validator.ValidatorTest');
 
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.HtmlFormat');
+goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
@@ -830,6 +831,7 @@ describe('ValidatorRulesMakeSense', () => {
 
   // tag_specs
   const specNameIsUnique = {};
+  const namedIdIsUnique = {};
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
@@ -869,6 +871,13 @@ describe('ValidatorRulesMakeSense', () => {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
+      }
+    });
+    it('unique named_id if present', () => {
+      if (tagSpec.namedId !== null &&
+          tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {
+        expect(namedIdIsUnique.hasOwnProperty(tagSpec.namedId)).toBe(false);
+        namedIdIsUnique[tagSpec.namedId] = 0;
       }
     });
     // Verify AMP4ADS extensions are whitelisted.
