@@ -56,8 +56,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     expect(styles.position).to.equal('fixed');
   });
 
-  // (TODO, #19625): test is flakey
-  it.skip('should open content when invisible', () => {
+  it('should open content when invisible', () => {
     const promise = dialog.open(content, false);
     expect(dialog.getRoot()).to.have.display('none');
     return vsync.mutatePromise(() => {}).then(() => {
@@ -68,7 +67,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
       const styles = getComputedStyle(dialog.getRoot());
       expect(styles.transform).to.contain('17');
       return promise;
-    }).then(() => {
+    }).then(() => vsync.mutatePromise(() => {})).then(() => {
       expect(dialog.getRoot()).to.have.display('block');
       const styles = getComputedStyle(dialog.getRoot());
       expect(styles.transform).to.not.contain('17');
@@ -82,9 +81,10 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     const content2 = createElementWithAttributes(doc, 'div', {
       style: 'height:21px',
     });
-    return dialog.open(content, false).then(() => {
-      expect(content.parentNode).to.equal(dialog.getRoot());
-      return dialog.open(content2, false);
+    const promise = dialog.open(content2, false);
+    return vsync.mutatePromise(() => {}).then(() => {
+      expect(content2.parentNode).to.equal(dialog.getRoot());
+      return promise;
     }).then(() => {
       expect(content2.parentNode).to.equal(dialog.getRoot());
       expect(content.parentNode).to.be.null;
