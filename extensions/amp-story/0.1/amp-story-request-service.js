@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
@@ -67,7 +66,7 @@ export class AmpStoryRequestService {
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
+    return Services.urlReplacementsForDoc(this.storyElement_)
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => this.xhr_.fetchJson(url, opts))
         .then(response => {

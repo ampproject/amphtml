@@ -121,7 +121,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
-    const replacements = Services.urlReplacementsForDoc(this.getAmpDoc());
+    const replacements = Services.urlReplacementsForDoc(this.element);
     const whitelist = {
       'RANDOM': true,
       'CLICK_X': true,

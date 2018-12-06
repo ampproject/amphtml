@@ -81,7 +81,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return Services.urlReplacementsForDoc(this.getAmpDoc())
+    return Services.urlReplacementsForDoc(this.element)
         .expandUrlAsync(user().assertString(this.configUrl_))
         .then(url => fetch_(this.win, url))
         .then(data => {
