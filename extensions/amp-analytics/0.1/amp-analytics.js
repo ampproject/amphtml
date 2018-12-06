@@ -570,7 +570,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(this.getAmpDoc(), msg, this.config_['extraUrlParams'],
-        trigger, expansionOptions)
+        trigger, expansionOptions, this.element)
         .then(message => {
           if (isIframed(this.win)) {
             // Only post message with explict `parentPostMessage` to inabox host

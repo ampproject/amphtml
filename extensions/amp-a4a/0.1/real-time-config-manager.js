@@ -136,8 +136,8 @@ export class RealTimeConfigManager {
       ERROR_TYPE: errorType,
       HREF: this.win_.location.href,
     };
-    const url = Services.urlReplacementsForDoc(this.ampDoc_).expandUrlSync(
-        errorReportingUrl, macros, whitelist);
+    const service = Services.urlReplacementsForDoc(this.a4aElement_.element);
+    const url = service.expandUrlSync(errorReportingUrl, macros, whitelist);
     new this.win_.Image().src = url;
   }
 
@@ -373,7 +373,7 @@ export class RealTimeConfigManager {
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(Services.timerFor(this.win_).timeoutPromise(
         timeoutMillis,
-        Services.urlReplacementsForDoc(this.ampDoc_).expandUrlAsync(
+        Services.urlReplacementsForDoc(this.a4aElement_.element).expandUrlAsync(
             url, macros, whitelist)).then(url => {
       checkStillCurrent();
       timeoutMillis -= (urlReplacementStartTime - Date.now());
