@@ -481,10 +481,8 @@ describe('Logging', () => {
     });
 
     it('should fail with non boolean', () => {
-      expect(() => log.assertBoolean({})).to.throw(
-          'Boolean expected: ');
-      expect(() => log.assertBoolean([])).to.throw(
-          'Boolean expected: ');
+      expect(() => log.assertBoolean({})).to.throw('Boolean expected: ');
+      expect(() => log.assertBoolean([])).to.throw('Boolean expected: ');
       expect(() => log.assertBoolean('hello')).to.throw('Boolean expected: hello');
       expect(() => log.assertBoolean(1)).to.throw('Boolean expected: 1');
       expect(() => log.assertBoolean(0)).to.throw('Boolean expected: 0');
