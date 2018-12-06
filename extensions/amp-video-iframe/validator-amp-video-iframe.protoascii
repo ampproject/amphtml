@@ -37,6 +37,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
     name: "implements-media-session"
     value: ""
   }
