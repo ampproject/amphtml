@@ -47,10 +47,11 @@ function actionService() {
 }
 
 
-function createExecElement(id, enqueAction) {
+function createExecElement(id, enqueAction, defaultActionAlias) {
   const execElement = document.createElement('amp-element');
   execElement.setAttribute('id', id);
   execElement.enqueAction = enqueAction;
+  execElement.getDefaultActionAlias = defaultActionAlias;
   return execElement;
 }
 
@@ -645,6 +646,7 @@ describe('Action hasAction', () => {
 describe('Action method', () => {
   let sandbox;
   let action;
+  let getDefaultActionAlias;
   let onEnqueue;
   let targetElement, parent, child, execElement;
 
@@ -652,6 +654,7 @@ describe('Action method', () => {
     sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
+    getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -661,7 +664,7 @@ describe('Action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement = createExecElement(id, onEnqueue);
+    execElement = createExecElement(id, onEnqueue, getDefaultActionAlias);
     parent.appendChild(execElement);
   });
 
@@ -784,6 +787,7 @@ describe('installActionHandler', () => {
 describe('Multiple handlers action method', () => {
   let sandbox;
   let action;
+  let getDefaultActionAlias;
   let onEnqueue1, onEnqueue2;
   let targetElement, parent, child, execElement1, execElement2;
 
@@ -792,6 +796,7 @@ describe('Multiple handlers action method', () => {
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
+    getDefaultActionAlias = sandbox.spy();
     targetElement = document.createElement('target');
     targetElement.setAttribute('on', 'tap:foo.method1,bar.method2');
     parent = document.createElement('parent');
@@ -800,8 +805,8 @@ describe('Multiple handlers action method', () => {
     targetElement.appendChild(child);
     document.body.appendChild(parent);
 
-    execElement1 = createExecElement('foo', onEnqueue1);
-    execElement2 = createExecElement('bar', onEnqueue2);
+    execElement1 = createExecElement('foo', onEnqueue1, getDefaultActionAlias);
+    execElement2 = createExecElement('bar', onEnqueue2, getDefaultActionAlias);
 
     parent.appendChild(execElement1);
     parent.appendChild(execElement2);
@@ -1348,9 +1353,11 @@ describes.realWin('Action whitelisting', {
   let action;
   let target;
   let spy;
+  let getDefaultActionAlias;
   beforeEach(() => {
     spy = env.sandbox.spy();
-    target = createExecElement('foo', spy);
+    getDefaultActionAlias = env.sandbox.stub();
+    target = createExecElement('foo', spy, getDefaultActionAlias);
   });
   describe('with non-empty whitelist', () => {
     beforeEach(() => {
@@ -1373,7 +1380,7 @@ describes.realWin('Action whitelisting', {
     it('should whitelist default actions if alias is registered default',
         () => {
           // Given that 'defaultAction' is a registered default action.
-          target.implementation_ = {defaultActionAlias_: 'defaultAction'};
+          getDefaultActionAlias.returns('defaultAction');
           const i = new ActionInvocation(target, 'activate', /* args */ null,
               'source', 'caller', 'event', ActionTrust.HIGH, 'tap', null);
           action.invoke_(i);
