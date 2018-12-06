@@ -32,7 +32,7 @@ limitations under the License.
 
 [TOC]
  
-## Overview?
+## Overview
 
 The `amp-action-macro` component allows for the creation of reusable actions.
 
@@ -56,6 +56,7 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 Used to uniquely identify the action. This is referenced in an action invokation.
  
 ##### action
+
 The action to invoke. Any valid amp action is allowed here. <a href="https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events">See Actions and events in AMP.</a>
 
 e.g.
