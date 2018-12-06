@@ -485,10 +485,6 @@ export class SubscriptionService {
     this.platformStore_ = this.platformStore_.resetPlatformStore();
     this.renderer_.toggleLoading(true);
 
-    this.platformConfig_['services'].forEach(service => {
-      this.initializeLocalPlatforms_(service);
-    });
-
     this.platformStore_.getAvailablePlatforms().forEach(
         subscriptionPlatform => {
           this.fetchEntitlements_(subscriptionPlatform);
