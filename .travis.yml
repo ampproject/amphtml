@@ -14,7 +14,7 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome-stable
+  - export CHROME_BIN=google-chrome-beta
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
