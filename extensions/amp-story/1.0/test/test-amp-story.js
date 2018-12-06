@@ -409,7 +409,7 @@ describes.realWin('amp-story', {
   });
 
   describe('amp-story consent', () => {
-    it('should pause the story if there is a consent', () => {
+    it.skip('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
@@ -447,7 +447,7 @@ describes.realWin('amp-story', {
           });
     });
 
-    it('should play the story after the consent is resolved', () => {
+    it.skip('should play the story after the consent is resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
@@ -493,7 +493,7 @@ describes.realWin('amp-story', {
           });
     });
 
-    it('should play the story if the consent was already resolved', () => {
+    it.skip('should play the story if the consent was already resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
