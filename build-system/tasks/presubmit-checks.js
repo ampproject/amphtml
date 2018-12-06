@@ -858,6 +858,7 @@ const forbiddenTermsSrcInclusive = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/storage-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   '(cdn|3p)\\.ampproject\\.': {

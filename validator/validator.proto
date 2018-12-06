@@ -415,7 +415,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 33
+// NEXT AVAILABLE TAG: 34
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -435,6 +435,19 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
+
+  // NamedId's are used to uniquely identify specific TagSpecs in the
+  // validator rules in a stable manner. Most TagSpecs have no set NamedId.
+  // If a TagSpec has a NamedId it must be unique. In other words, no two
+  // TagSpec's may have the same NamedId except for the NOT_SET (0) value.
+  // NEXT AVAILABLE TAG: 3
+  enum NamedId {
+    NOT_SET = 0;
+    // By convention, the first "word" in the Id should be the tag_name.
+    LINK_FONT_STYLESHEET = 1;
+    STYLE_AMP_CUSTOM = 2;
+  }
+  optional NamedId named_id = 33 [default = NOT_SET];
 
   // If provided, this is a SCRIPT tag defining an amp custom element
   // extension. The other fields, such as expected attributes, will be
