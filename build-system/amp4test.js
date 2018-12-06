@@ -149,6 +149,9 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
   res.end();
 });
 
+/**
+ * Serves a fake ad for test-amp-ad-fake.js
+ */
 app.get('/a4a/:bid', (req, res) => {
   const sourceOrigin = req.query['__amp_source_origin'];
   if (sourceOrigin) {
@@ -169,12 +172,22 @@ app.get('/a4a/:bid', (req, res) => {
     <script type="application/json">
     {
       "requests": {
-        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar?cid=\${clientId(a)}"
+        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
       },
       "triggers": {
         "pageview": {
           "on": "visible",
-          "request": "pageview"
+          "request": "pageview",
+          "extraUrlParams": {
+            "title": "\${title}",
+            "ampdocUrl": "\${ampdocUrl}",
+            "canonicalUrl": "\${canonicalUrl}",
+            "cid": "\${clientId(a)}",
+            "img": "\${htmlAttr(amp-img,src)}",
+            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
+            "adNavType": "\${adNavType}",
+            "adRedirectCount": "\${adRedirectCount}"
+          }
         }
       }
     }

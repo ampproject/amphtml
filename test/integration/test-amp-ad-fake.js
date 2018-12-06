@@ -17,11 +17,10 @@
 import {RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe.configure().skipIfPropertiesObfuscated().run('A4A amp' +
-    '-analytics', function() {
+describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
   this.timeout(15000);
 
-  describes.integration('amp-analytics basic request', {
+  describes.integration('AMPHTML ads rendered on AMP page', {
     body: `
       <amp-ad width="300" height="400"
           id="i-amphtml-demo-id"
@@ -33,7 +32,8 @@ describe.configure().skipIfPropertiesObfuscated().run('A4A amp' +
       `,
     extensions: ['amp-ad'],
   }, () => {
-    it('should send request', () => {
+    it('should layout amp-img, amp-pixel, amp-analytics', () => {
+      // See amp4test.js for creative content
       return Promise.all([
         RequestBank.withdraw('image'),
         RequestBank.withdraw('pixel'),
@@ -44,7 +44,19 @@ describe.configure().skipIfPropertiesObfuscated().run('A4A amp' +
         const analyticsReq = reqs[2];
         expect(imageReq.url).to.equal('/');
         expect(pixelReq.url).to.equal('/foo?cid=');
-        expect(analyticsReq.url).to.equal('/bar?cid=');
+        expect(analyticsReq.url).to.match(/^\/bar\?/);
+        const queries =
+            parseQueryString(analyticsReq.url.substr('/bar'.length));
+        expect(queries).to.include({
+          title: 'AMP TEST', // ${title},
+          cid: '', // ${clientId(a)}
+          adNavTiming: '0', // ${adNavTiming(requestStart,requestStart)}
+          adNavType: '0', // ${adNavType}
+          adRedirectCount: '0', // ${adRedirectCount}
+        });
+        expect(queries['ampdocUrl']).to.contain('http://localhost:9876/amp4test/compose-doc?');
+        expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
+        expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
       });
     });
   });
