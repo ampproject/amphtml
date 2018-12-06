@@ -536,6 +536,11 @@ class ParsedTagSpec {
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
     /**
+     * @type {boolean}
+     * @private
+     */
+    this.attrsCanSatisfyExtension_ = false;
+    /**
      * ParsedAttributes keyed by name.
      * @type {!Object<string, number>}
      * @private
@@ -667,6 +672,9 @@ class ParsedTagSpec {
       if (spec.valueUrl) {
         this.containsUrl_ = true;
       }
+      if (spec.requiresExtension.length > 0) {
+        this.attrsCanSatisfyExtension_ = true;
+      }
     }
   }
 
@@ -793,6 +801,11 @@ class ParsedTagSpec {
   /** @return {!ParsedReferencePoints} */
   getReferencePoints() {
     return this.referencePoints_;
+  }
+
+  /** @return {boolean} */
+  attrsCanSatisfyExtension() {
+    return this.attrsCanSatisfyExtension_;
   }
 
   /**
@@ -2183,6 +2196,16 @@ class ExtensionsContext {
   }
 
   /**
+   * Records extensions that are used within the document.
+   * @param {!Array<string>} extensions
+   */
+  recordUsedExtensions(extensions) {
+    for (const extension of extensions) {
+      this.extensionsUsed_[extension] = true;
+    }
+  }
+
+  /**
    * Returns a list of unused extensions which produce validation errors
    * when unused.
    * @return {!Array<string>}
@@ -2235,8 +2258,7 @@ class ExtensionsContext {
 
     // Record presence of a tag, such as <amp-foo> which requires the usage
     // of an amp extension.
-    for (const requiredExtension of tagSpec.requiresExtension)
-    {this.extensionsUsed_[requiredExtension] = true;}
+    this.recordUsedExtensions(tagSpec.requiresExtension);
   }
 }
 
@@ -2441,8 +2463,44 @@ class Context {
         encounteredTag, referencePointResult, tagResult, this.getRules(),
         this.getLineCol());
 
+    this.recordAttrRequiresExtension_(encounteredTag, referencePointResult);
+    this.recordAttrRequiresExtension_(encounteredTag, tagResult);
     this.updateFromTagResult_(referencePointResult);
     this.updateFromTagResult_(tagResult);
+  }
+
+  /**
+   * Record when an encountered tag's attribute that requires an extension
+   * that it also satisfies that the requied extension is used.
+   * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+   * @param {!ValidateTagResult} tagResult
+   * @private
+   */
+  recordAttrRequiresExtension_(encounteredTag, tagResult) {
+    if (tagResult.bestMatchTagSpec === null) {
+      return;
+    }
+    const parsedTagSpec = tagResult.bestMatchTagSpec;
+    if (!parsedTagSpec.attrsCanSatisfyExtension()) {
+      return;
+    }
+    const attrsByName = parsedTagSpec.getAttrsByName();
+    const extensionsCtx = this.extensions_;
+    for (const attr of encounteredTag.attrs()) {
+      if (attr.name in attrsByName) {
+        const attrId = attrsByName[attr.name];
+        // negative attr ids are simple attrs (only name set).
+        if (attrId < 0) {
+          continue;
+        }
+        const parsedAttrSpec =
+            this.rules_.getParsedAttrSpecs().getByAttrSpecId(attrId);
+        if (parsedAttrSpec.getSpec().requiresExtension.length > 0) {
+          extensionsCtx.recordUsedExtensions(
+              parsedAttrSpec.getSpec().requiresExtension);
+        }
+      }
+    }
   }
 
   /**
