@@ -29,18 +29,18 @@ let LogMethodMetadataDef;
  */
 const transformableMethods = [
   {name: 'assert', variadic: true, startPos: 1},
-  {name: 'assertString', variadic: false, startPos: 1},
-  {name: 'assertNumber', variadic: false, startPos: 1},
-  {name: 'assertBoolean', variadic: false, startPos: 1},
-  {name: 'assertEnumValue', variadic: false, startPos: 2},
-  {name: 'assertElement', variadic: false, startPos: 1},
-  {name: 'createExpectedError', variadic: true, startPos: 0},
+  {name: 'assertString', variadic: true, startPos: 1},
+  {name: 'assertNumber', variadic: true, startPos: 1},
+  {name: 'assertBoolean', variadic: true, startPos: 1},
+  {name: 'assertEnumValue', variadic: true, startPos: 2},
+  {name: 'assertElement', variadic: true, startPos: 1},
   {name: 'fine', variadic: true, startPos: 1},
   {name: 'info', variadic: true, startPos: 1},
   {name: 'warn', variadic: true, startPos: 1},
   {name: 'error', variadic: true, startPos: 1},
-  {name: 'expectedError', variadic: true, startPos: 1},
-  {name: 'createError', variadic: true, startPos: 0},
+  //{name: 'createExpectedError', variadic: true, startPos: 0},
+  //{name: 'expectedError', variadic: true, startPos: 1},
+  //{name: 'createError', variadic: true, startPos: 0},
 ];
 
 /**
