@@ -187,8 +187,11 @@ const HIDE_ON_BOOKEND_SELECTOR =
  */
 const DEFAULT_THEME_COLOR = '#F1F3F4';
 
-/** @const {!Array<string>} */
-const VALID_ORIENTATIONS = ['portrait', 'landscape'];
+/** @enum {string} */
+const ScreenOrientations = {
+  PORTRAIT: 'portrait',
+  LANDSCAPE: 'landscape',
+};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -1296,7 +1299,8 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
     if (uiState !== UIType.MOBILE ||
-        this.getSupportedOrientations_().includes('landscape')) {
+        this.getSupportedOrientations_()
+            .includes(ScreenOrientations.LANDSCAPE)) {
       this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
       return;
     }
@@ -1395,7 +1399,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const supportedOrientations = this.getSupportedOrientations_();
 
-    if (supportedOrientations.includes('landscape')) {
+    if (supportedOrientations.includes(ScreenOrientations.LANDSCAPE)) {
       return UIType.DESKTOP_FULLBLEED;
     }
 
@@ -1435,14 +1439,13 @@ export class AmpStory extends AMP.BaseElement {
         this.element.getAttribute(Attributes.SUPPORTED_ORIENTATIONS);
 
     if (!supportedOrientationsAttribute) {
-      return ['portrait'];
+      return [ScreenOrientations.PORTRAIT];
     }
 
     this.supportedOrientations_ =
         supportedOrientationsAttribute
             .split(',')
-            .map(orientation => orientation.trim().toLowerCase())
-            .filter(orientation => VALID_ORIENTATIONS.includes(orientation));
+            .map(orientation => orientation.trim().toLowerCase());
 
     return this.supportedOrientations_;
   }
