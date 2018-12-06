@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /**
+/**
   * Changes the values of IS_DEV to false and IS_MINIFIED to true.
   * The above said variables are in src/mode.js file.
   */
@@ -22,22 +22,22 @@ module.exports = function({types: t}) {
   return {
     visitor: {
       VariableDeclarator(path) {
-        let {node} = path;
+        const {node} = path;
         const {id, init} = node;
-        if (id.name == "IS_DEV"
-            && init.type === "BooleanLiteral"
+        if (id.name == 'IS_DEV'
+            && init.type === 'BooleanLiteral'
             && init.value === true) {
           init.value = !t.booleanLiteral(true);
           return;
         }
-        if (id.name == "IS_MINIFIED"
-            && init.type === "BooleanLiteral"
+        if (id.name == 'IS_MINIFIED'
+            && init.type === 'BooleanLiteral'
             && init.value === false) {
           init.value = t.booleanLiteral(true);
           return;
         }
         return;
-      }
-    }
-  }
-}
+      },
+    },
+  };
+};
