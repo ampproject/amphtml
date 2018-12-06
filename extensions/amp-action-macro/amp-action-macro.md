@@ -29,26 +29,39 @@ limitations under the License.
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.amp.html">amp-action-macro.amp.html</a></td>
   </tr>
 </table>
- [TOC]
- ## Overview?
+
+[TOC]
+ 
+## Overview
+
 The `amp-action-macro` component allows for the creation of reusable actions.
- ## Example
- ```html
+
+## Example
+ 
+```html
 <amp-action-macro
     id="closeNavigations"
     action="AMP.setState({nav1: 'close', nav2: 'close})"></amp-action-macro>
 ```
- ```html
+
+```html
  <button on="tap:closeNavigations">Close all</button>
  <div on="tap:closeNavigations">Close all</div>
 ```
- ## Attributes
- ##### id
- Used to uniquely identify the action. This is referenced in an action invokation.
- ##### action
- The action to invoke. Any valid amp action is allowed here. <a href="https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events">See Actions and events in AMP.</a>
- ```html
- e.g.
+
+## Attributes
+ 
+##### id
+ 
+Used to uniquely identify the action. This is referenced in an action invokation.
+ 
+##### action
+
+The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+
+e.g.
+
+```html
  <amp-action-macro
     id="action1"
     action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
