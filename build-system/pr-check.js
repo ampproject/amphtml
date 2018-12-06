@@ -375,7 +375,9 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --headless --coverage');
+        // TODO(choumx, #19658): --headless disabled for integration tests on
+        // Travis until Chrome 72.
+        timedExecOrDie(cmd + ' --coverage');
       } else {
         startSauceConnect();
         timedExecOrDie(cmd + ' --saucelabs');

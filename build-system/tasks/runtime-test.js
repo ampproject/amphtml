@@ -60,11 +60,10 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
-  // TODO(choumx, #19658): --headless disabled until Chrome 72.
-  // if (argv.headless) {
-  //   return Object.assign({}, karmaDefault,
-  //       {browsers: ['Chrome_no_extensions_headless']});
-  // }
+  if (argv.headless) {
+    return Object.assign({}, karmaDefault,
+        {browsers: ['Chrome_no_extensions_headless']});
+  }
   if (argv.saucelabs || argv.saucelabs_lite) {
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
@@ -194,11 +193,10 @@ function printArgvMessages() {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
-    // TODO(choumx, #19658): --headless disabled until Chrome 72.
-    // if (!argv.headless) {
-    //   log(green('⤷ Use'), cyan('--headless'),
-    //       green('to run tests in a headless Chrome window.'));
-    // }
+    if (!argv.headless) {
+      log(green('⤷ Use'), cyan('--headless'),
+          green('to run tests in a headless Chrome window.'));
+    }
     if (!argv.compiled) {
       log(green('Running tests against unminified code.'));
     }
