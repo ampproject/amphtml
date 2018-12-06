@@ -95,7 +95,8 @@ const REWIND_TIMEOUT_MS = 350;
  */
 const buildPlayMessageElement = element =>
   htmlFor(element)`
-      <button role="button" class="i-amphtml-story-page-play-button">
+      <button role="button"
+          class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
         <span class="i-amphtml-story-page-play-label"></span>
         <span class='i-amphtml-story-page-play-icon'></span>
       </button>`;
