@@ -62,7 +62,7 @@ function getConfig() {
   }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
-        {browsers: ['Chrome_no_extensions']});
+        {browsers: ['Chrome_no_extensions_headless']});
   }
   if (argv.saucelabs || argv.saucelabs_lite) {
     if (!process.env.SAUCE_USERNAME) {
