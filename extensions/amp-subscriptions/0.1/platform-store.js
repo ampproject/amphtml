@@ -115,6 +115,11 @@ export class PlatformStore {
    * @return {PlatformStore}
    */
   resetPlatformStore() {
+    // Reset individual platforms to ensure their UX clears.
+    for (const platformKey in this.subscriptionPlatforms_) {
+      this.subscriptionPlatforms_[platformKey].reset();
+    }
+    // Then create new platform store withe the newply reset platforms in it.
     return new PlatformStore(
         this.serviceIds_,
         this.scoreConfig_,
