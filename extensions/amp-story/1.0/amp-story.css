@@ -283,7 +283,7 @@ amp-story-grid-layer > * {
 }
 
 .i-amphtml-story-grid-layer-z-index amp-story-grid-layer * {
-  z-index: initial !important;
+  z-index: auto !important;
 }
 
 .i-amphtml-story-grid-template-with-full-bleed-animation {

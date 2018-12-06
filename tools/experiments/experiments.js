@@ -254,7 +254,7 @@ const EXPERIMENTS = [
         'its children.',
     spec: 'https://github.com/ampproject/amphtml/issues/19213',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19697',
-  }
+  },
   {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
