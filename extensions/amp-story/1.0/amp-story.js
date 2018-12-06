@@ -396,6 +396,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeStyles_() {
+    if (isExperimentOn(this.win, 'amp-story-grid-layer-z-index')) {
+      this.element.classList.add('i-amphtml-story-grid-layer-z-index');
+    }
+    
     const styleEl = document.querySelector('style[amp-custom]');
     if (!styleEl) {
       return;

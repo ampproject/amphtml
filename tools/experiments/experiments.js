@@ -249,6 +249,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
   },
   {
+    id: 'amp-story-grid-layer-z-index',
+    name: 'Reset z-index in amp-story-grid layer and set it to initial for ' +
+        'its children.',
+    spec: 'https://github.com/ampproject/amphtml/issues/19213',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19697',
+  }
+  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',

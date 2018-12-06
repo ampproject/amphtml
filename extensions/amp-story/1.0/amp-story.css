@@ -277,6 +277,15 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
+/** Grid layer zindex experiment. */
+.i-amphtml-story-grid-layer-z-index amp-story-grid-layer {
+  z-index: auto !important;
+}
+
+.i-amphtml-story-grid-layer-z-index amp-story-grid-layer * {
+  z-index: initial !important;
+}
+
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
