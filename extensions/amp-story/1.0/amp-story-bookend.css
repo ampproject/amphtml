@@ -78,7 +78,8 @@
 }
 
 .i-amphtml-story-bookend-inner > div {
-  margin: 0 24px !important;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
 }
 
 .i-amphtml-story-bookend-consent:last-child {
