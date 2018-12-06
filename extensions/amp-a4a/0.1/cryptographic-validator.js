@@ -73,7 +73,7 @@ export class CryptographicValidator extends Validator {
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
               user().error(TAG,
-                  `Signature verification failed with status ${status}.`);
+                  'Signature verification failed with status %s.', status);
               return this.createOutput_(false, unvalidatedBytes);
           }
         });

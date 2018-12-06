@@ -377,7 +377,7 @@ export class AmpA4A extends AMP.BaseElement {
     };
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
     dev().info(TAG,
-        `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);
+        'upgradeDelay %s: %s', this.element.getAttribute('type'), upgradeDelayMs);
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
@@ -548,8 +548,7 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
-      user().warn(TAG, `<${this.element.tagName}> is not allowed to be ` +
-        `placed in elements with position:fixed: ${this.element}`);
+      user().warn(TAG, '<%s> is not allowed to be placed in elements with position:fixed: %s', this.element.tagName, this.element);
       return false;
     }
     // OnLayoutMeasure can be called when page is in prerender so delay until
@@ -558,8 +557,7 @@ export class AmpA4A extends AMP.BaseElement {
     // its element ancestry.
     if (!this.isValidElement()) {
       // TODO(kjwright): collapse?
-      user().warn(TAG, this.element.getAttribute('type'),
-          'Amp ad element ignored as invalid', this.element);
+      user().warn(TAG, '%s', this.element.getAttribute('type'));
       return false;
     }
     return true;
@@ -680,7 +678,7 @@ export class AmpA4A extends AMP.BaseElement {
             const match = /(?:\?|&)a4a_feat_exp=([^&]+)/.exec(
                 this.win.location.search);
             if (match && match[1]) {
-              dev().info(TAG, `Using debug exp features: ${match[1]}`);
+              dev().info(TAG, 'Using debug exp features: %s', match[1]);
               this.populatePostAdResponseExperimentFeatures_(
                   tryDecodeUriComponent(match[1]));
             }
@@ -846,8 +844,7 @@ export class AmpA4A extends AMP.BaseElement {
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
               user().error(
-                  TAG, this.element.getAttribute('type'),
-                  'Signature verification failed');
+                  TAG, '%s', this.element.getAttribute('type'));
             case VerificationStatus.UNVERIFIED:
           }
           if (this.isSinglePageStoryAd && !result) {
@@ -871,7 +868,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       const parts = line.split('=');
       if (parts.length != 2 || !parts[0]) {
-        dev().warn(TAG, `invalid experiment feature ${line}`);
+        dev().warn(TAG, 'invalid experiment feature %s', line);
         return;
       }
       this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
@@ -957,9 +954,9 @@ export class AmpA4A extends AMP.BaseElement {
     assignAdUrlToError(/** @type {!Error} */(error), this.adUrl_);
 
     if (getMode().development || getMode().localDev || getMode().log) {
-      user().error(TAG, error);
+      user().error(TAG, '%s', error);
     } else {
-      user().warn(TAG, error);
+      user().warn(TAG, '%s', error);
       // Report with 1% sampling as an expected dev error.
       if (Math.random() < 0.01) {
         dev().expectedError(TAG, error);
@@ -1014,8 +1011,7 @@ export class AmpA4A extends AMP.BaseElement {
             checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
-            user().warn(TAG, this.element.getAttribute('type'),
-                'Error injecting creative in friendly frame', err);
+            user().warn(TAG, '%s', this.element.getAttribute('type'));
             return this.renderNonAmpCreative();
           });
     }).catch(error => {
@@ -1183,7 +1179,7 @@ export class AmpA4A extends AMP.BaseElement {
     const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
-      user().error(TAG, `Invalid size header: ${headerValue}`);
+      user().error(TAG, 'Invalid size header: %s', headerValue);
       return null;
     }
     return /** @type {?SizeInfoDef} */ (
@@ -1230,8 +1226,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @visibleForTesting
    */
   onCrossDomainIframeCreated(iframe) {
-    dev().info(TAG, this.element.getAttribute('type'),
-        `onCrossDomainIframeCreated ${iframe}`);
+    dev().info(TAG, '%s', this.element.getAttribute('type'));
   }
 
   /** @return {boolean} whether html creatives should be sandboxed. */
@@ -1310,8 +1305,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderNonAmpCreative(throttleApplied) {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
-      user().warn(TAG, this.element.getAttribute('type'),
-          'fallback to 3p disabled');
+      user().warn(TAG, '%s', this.element.getAttribute('type'));
       return Promise.resolve(false);
     }
     // TODO(keithwrightbos): remove when no longer needed.
@@ -1333,8 +1327,7 @@ export class AmpA4A extends AMP.BaseElement {
       // Ad URL may not exist if buildAdUrl throws error or returns empty.
       // If error occurred, it would have already been reported but let's
       // report to user in case of empty.
-      user().warn(TAG, this.element.getAttribute('type'),
-          'No creative or URL available -- A4A can\'t render any ad');
+      user().warn(TAG, '%s', this.element.getAttribute('type'));
     }
     if (!throttleApplied && !this.inNonAmpPreferenceExp()) {
       incrementLoadingAds(this.win, renderPromise);
@@ -1405,8 +1398,7 @@ export class AmpA4A extends AMP.BaseElement {
               friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
       protectFunctionWrapper(this.onCreativeRender, this, err => {
-        dev().error(TAG, this.element.getAttribute('type'),
-            'Error executing onCreativeRender', err);
+        dev().error(TAG, '%s', this.element.getAttribute('type'));
       })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
       // It's enough to wait for "ini-load" signal because in a FIE case
       // we know that the embed no longer consumes significant resources
@@ -1455,8 +1447,7 @@ export class AmpA4A extends AMP.BaseElement {
     const frameLoadPromise =
         this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
-      dev().error(TAG, this.element.getAttribute('type'),
-          'Error executing onCreativeRender', err);
+      dev().error(TAG, '%s', this.element.getAttribute('type'));
     })(null);
     return frameLoadPromise;
   }
@@ -1567,16 +1558,13 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev().warn(TAG, this.element.getAttribute('type'),
-          'Could not locate start index for amp meta data in: %s', creative);
+      dev().warn(TAG, '%s', this.element.getAttribute('type'));
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev().warn(TAG, this.element.getAttribute('type'),
-          'Could not locate closing script tag for amp meta data in: %s',
-          creative);
+      dev().warn(TAG, '%s', this.element.getAttribute('type'));
       return null;
     }
     try {
@@ -1639,8 +1627,7 @@ export class AmpA4A extends AMP.BaseElement {
       return metaData;
     } catch (err) {
       dev().warn(
-          TAG, this.element.getAttribute('type'), 'Invalid amp metadata: %s',
-          creative.slice(metadataStart + metadataString.length, metadataEnd));
+          TAG, '%s', this.element.getAttribute('type'));
       if (this.isSinglePageStoryAd) {
         throw err;
       }
@@ -1713,8 +1700,7 @@ export class AmpA4A extends AMP.BaseElement {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     } else if (this.element.getAttribute('rtc-config')) {
-      user().error(TAG, 'RTC not supported for ad network ' +
-                   `${this.element.getAttribute('type')}`);
+      user().error(TAG, 'RTC not supported for ad network %s', this.element.getAttribute('type'));
 
     }
   }
@@ -1745,7 +1731,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (headerValue) {
       if (!isEnumValue(XORIGIN_MODE, headerValue)) {
         dev().error(
-            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+            'AMP-A4A', 'cross-origin render mode header %s', headerValue);
       } else {
         return headerValue;
       }

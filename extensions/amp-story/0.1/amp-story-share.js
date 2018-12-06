@@ -138,7 +138,7 @@ function buildProviderParams(opt_params) {
 function buildProvider(doc, shareType, opt_params) {
   const shareProviderLocalizedStringId = dev().assert(
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-      `No localized string to display name for share type ${shareType}.`);
+      'No localized string to display name for share type %s.', shareType);
 
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([
@@ -379,8 +379,7 @@ export class ShareWidget {
       }
 
       user().warn('AMP-STORY',
-          `Invalid share providers configuration for "${type}" in bookend. ` +
-          'Value must be `true` or a params object.');
+          'Invalid share providers configuration for "%s" in bookend. Value must be `true` or a params object.', type);
     });
   }
 

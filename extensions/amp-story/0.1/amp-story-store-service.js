@@ -161,7 +161,7 @@ const actions = (state, action, data) => {
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
           }));
     default:
-      dev().error(TAG, `Unknown action ${action}.`);
+      dev().error(TAG, 'Unknown action %s.', action);
       return state;
   }
 };
@@ -193,7 +193,7 @@ export class AmpStoryStoreService {
    */
   get(key) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Unknown state ${key}.`);
+      dev().error(TAG, 'Unknown state %s.', key);
       return;
     }
     return this.state_[key];
@@ -208,7 +208,7 @@ export class AmpStoryStoreService {
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
+      dev().error(TAG, 'Can\'t subscribe to unknown state %s.', key);
       return;
     }
     if (!this.listeners_[key]) {

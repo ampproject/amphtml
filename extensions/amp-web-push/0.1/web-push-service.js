@@ -160,9 +160,7 @@ export class WebPushService {
         .then(() => {
           dev().fine(
               TAG,
-              `Helper frame ${this.config_['helper-iframe-url']} ` +
-            'DOM loaded. Connecting to the frame via postMessage()...'
-          );
+              'Helper frame %s DOM loaded. Connecting to the frame via postMessage()...', this.config_['helper-iframe-url']);
           return this.frameMessenger_.connect(
               this.iframe_.getDomElement().contentWindow,
               parseUrlDeprecated(this.config_['helper-iframe-url']).origin

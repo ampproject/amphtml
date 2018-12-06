@@ -189,8 +189,7 @@ export class Expander {
             ignoringChars = true;
             nextArgShouldBeRaw = true;
             user().assert(builder.trim() === '',
-                `The substring "${builder}" was lost during url-replacement. ` +
-                'Please ensure the url syntax is correct');
+                'The substring "%s" was lost during url-replacement. Please ensure the url syntax is correct', builder);
             builder = '';
           } else {
             ignoringChars = false;

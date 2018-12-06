@@ -92,12 +92,12 @@ export class Crypto {
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
                 if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
-                  user().error(TAG, FALLBACK_MSG, e);
+                  user().error(TAG, '%s', FALLBACK_MSG);
                 }
                 return this.loadPolyfill_().then(() => this.sha384(input));
               });
     } catch (e) {
-      dev().error(TAG, FALLBACK_MSG, e);
+      dev().error(TAG, '%s', FALLBACK_MSG);
       return this.loadPolyfill_().then(() => this.sha384(input));
     }
   }

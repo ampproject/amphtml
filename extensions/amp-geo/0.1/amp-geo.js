@@ -158,7 +158,7 @@ export class AmpGeo extends AMP.BaseElement {
   assertWithErrorReturn_(shouldBeTrueish, opt_message) {
     if (!shouldBeTrueish) {
       geoDeferred.resolve(null);
-      return user().assert(shouldBeTrueish, opt_message);
+      return user().assert(shouldBeTrueish, '%s', opt_message);
     }
     return shouldBeTrueish;
   }

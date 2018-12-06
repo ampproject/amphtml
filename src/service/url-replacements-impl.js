@@ -296,8 +296,7 @@ export class GlobalVariableSource extends VariableSource {
       return this.getVariantsValue_(variants => {
         const variant = variants[/** @type {string} */(experiment)];
         user().assert(variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
-                experiment);
+            'The value passed to VARIANT() is not a valid experiment name:%s', experiment);
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : /** @type {string} */(variant);
       }, 'VARIANT');
@@ -321,7 +320,7 @@ export class GlobalVariableSource extends VariableSource {
       return this.getGeo_(geos => {
         if (geoType) {
           user().assert(geoType === 'ISOCountry',
-              'The value passed to AMP_GEO() is not valid name:' + geoType);
+              'The value passed to AMP_GEO() is not valid name:%s', geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
         return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
@@ -527,7 +526,7 @@ export class GlobalVariableSource extends VariableSource {
       const root = this.ampdoc.getRootNode();
       const video = user().assertElement(
           root.getElementById(/** @type {string} */ (id)),
-          `Could not find an element with id="${id}" for VIDEO_STATE`);
+          'Could not find an element with id="%s" for VIDEO_STATE', id);
       return Services.videoManagerForDoc(this.ampdoc)
           .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');

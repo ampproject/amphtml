@@ -169,8 +169,7 @@ export class CookieWriter {
     // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
     const {name} = getNameArgs(str);
     if (!EXPAND_WHITELIST[name]) {
-      user().error(TAG, `cookie value ${str} not supported. ` +
-        'Only QUERY_PARAM and LINKER_PARAM is supported');
+      user().error(TAG, 'cookie value %s not supported. Only QUERY_PARAM and LINKER_PARAM is supported', str);
       return false;
     }
 

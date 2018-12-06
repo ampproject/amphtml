@@ -48,9 +48,7 @@ export class ArticleComponent {
         !requiredFields.some(field => !(field in articleJson));
     user().assert(
         hasAllRequiredFields,
-        'Small article component must contain ' +
-            requiredFields.map(field => '`' + field + '`').join(', ') +
-            ' fields, skipping invalid.');
+        'Small article component must contain %s fields, skipping invalid.', requiredFields.map(field => '`' + field + '`').join(', '));
 
     userAssertValidProtocol(element, articleJson['url']);
 

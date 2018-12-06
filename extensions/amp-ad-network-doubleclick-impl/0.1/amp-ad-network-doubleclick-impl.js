@@ -240,8 +240,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.forceSafeframe = false;
     if ('forceSafeframe' in this.element.dataset) {
       if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
-        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
-            this.element.dataset['forceSafeframe']);
+        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: %s', this.element.dataset['forceSafeframe']);
       } else {
         this.forceSafeframe = true;
       }
@@ -388,10 +387,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @private */
   maybeDeprecationWarn_() {
     const warnDeprecation = feature => user().warn(
-        TAG, `${feature} is no longer supported for DoubleClick.` +
-          'Please refer to ' +
-          'https://github.com/ampproject/amphtml/issues/11834 ' +
-          'for more information');
+        TAG, '%s is no longer supported for DoubleClick.Please refer to https://github.com/ampproject/amphtml/issues/11834 for more information', feature);
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
     const hasUSDRD = usdrd in this.element.dataset ||
           (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
@@ -565,7 +561,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return Promise.resolve('');
     }
     if (this.iframe && !this.isRefreshing) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
+      dev().warn(TAG, 'Frame already exists, sra: %s', this.useSra);
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
@@ -694,7 +690,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           parseInt(opt_timeout, 10)),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn('TAG', 'Invalid attribute %s', name);
         } else {
           return this.element.getAttribute(name);
         }
@@ -1006,9 +1002,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (!this.iframe || !this.iframe.contentWindow ||
           !this.iframe.contentWindow.document ||
           !this.iframe.contentWindow.document.body) {
-        dev().error(TAG, 'Attempting to expand fluid creative without ' +
-            'a properly set up friendly frame. Slot id: ' +
-            this.element.getAttribute('data-amp-slot-index'));
+        dev().error(TAG, 'Attempting to expand fluid creative without a properly set up friendly frame. Slot id: %s', this.element.getAttribute('data-amp-slot-index'));
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.attemptChangeHeight(
@@ -1070,7 +1064,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initiateSraRequests().then(() => {
       checkStillCurrent();
       if (!this.sraDeferred) {
-        dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
+        dev().warn(TAG, 'SRA failed to include element %s', this.ifi_);
         if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
           this.getAmpDoc().getBody().appendChild(createElementWithAttributes(
               this.win.document, 'amp-pixel', dict({'src':
@@ -1101,7 +1095,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     impressions.split(',').forEach(url => {
       try {
         if (!Services.urlForDoc(this.getAmpDoc()).isSecure(url)) {
-          dev().warn(TAG, `insecure impression url: ${url}`);
+          dev().warn(TAG, 'insecure impression url: %s', url);
           return;
         }
         // Create amp-pixel and append to document to send impression.
@@ -1188,7 +1182,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // promise which results in sending as non-SRA request (benefit
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
-                dev().info(TAG, `single block in network ${networkId}`);
+                dev().info(TAG, 'single block in network %s', networkId);
                 // Ensure deferred exists, may not if getAdUrl did not yet
                 // execute.
                 typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
@@ -1274,7 +1268,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   warnOnError(message, error) {
-    dev().warn(TAG, message, error);
+    dev().warn(TAG, '%s', message);
   }
 
   /** @override */

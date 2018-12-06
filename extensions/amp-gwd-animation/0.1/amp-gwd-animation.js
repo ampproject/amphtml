@@ -136,7 +136,7 @@ export class GwdAnimation extends AMP.BaseElement {
     // switched from the old page to the new.
     const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
-      user().assert(this.element.id, `The ${TAG} element must have an id.`);
+      user().assert(this.element.id, 'The %s element must have an id.', TAG);
 
       const setCurrentPageAction =
           `${this.element.id}.setCurrentPage(index=event.index)`;

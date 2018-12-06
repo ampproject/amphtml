@@ -61,8 +61,8 @@ export function getAmpAdRenderOutsideViewport(element) {
       'Value of data-loading-strategy should be a float number in range ' +
       'of [0, 3], but got ' + rawValue;
   const viewportNumber =
-      user().assertNumber(parseFloat(rawValue), errorMessage);
-  user().assert(viewportNumber >= 0 && viewportNumber <= 3, errorMessage);
+      user().assertNumber(parseFloat(rawValue), '%s', errorMessage);
+  user().assert(viewportNumber >= 0 && viewportNumber <= 3, '%s', errorMessage);
   return viewportNumber;
 }
 

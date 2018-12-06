@@ -79,7 +79,7 @@ export class JankMeter {
     this.totalFrameCnt_++;
     if (paintLatency > 16) {
       this.badFrameCnt_++;
-      dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
+      dev().info('JANK', 'Paint latency: %sms', paintLatency);
     }
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.
@@ -164,10 +164,10 @@ export class JankMeter {
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
             user().info(
-                'LONGTASK', `from child frame ${entries[i].duration}ms`);
+                'LONGTASK', 'from child frame %sms', entries[i].duration);
           } else {
             this.longTaskSelf_ += span;
-            dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
+            dev().info('LONGTASK', 'from self frame %sms', entries[i].duration);
           }
         }
       }

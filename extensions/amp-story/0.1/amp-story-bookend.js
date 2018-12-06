@@ -670,7 +670,7 @@ export class Bookend {
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
       user().assert(isProtocolValid(jsonLd['image']),
-          `Unsupported protocol for story image URL ${jsonLd['image']}`);
+          'Unsupported protocol for story image URL %s', jsonLd['image']);
       metadata.imageUrl = jsonLd['image'][0];
     }
 

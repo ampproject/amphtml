@@ -56,8 +56,7 @@ export class InaboxHost {
     setReportError(reportError);
 
     if (win[INABOX_IFRAMES] && !Array.isArray(win[INABOX_IFRAMES])) {
-      dev().info(TAG, `Invalid ${INABOX_IFRAMES}`,
-          win[INABOX_IFRAMES]);
+      dev().info(TAG, 'Invalid %s', INABOX_IFRAMES);
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
@@ -65,7 +64,7 @@ export class InaboxHost {
     if (win.AMP[INABOX_UNREGISTER_IFRAME]) {
       // It's already defined; log a debug message and assume the existing
       // implmentation is good.
-      dev().info(TAG, `win.AMP[${INABOX_UNREGISTER_IFRAME}] already defined}`);
+      dev().info(TAG, 'win.AMP[%s] already defined}', INABOX_UNREGISTER_IFRAME);
     } else {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
@@ -88,7 +87,7 @@ export class InaboxHost {
           processMessageFn(message);
         });
       } else {
-        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+        dev().info(TAG, 'Invalid %s', PENDING_MESSAGES);
       }
     }
     // Empty and ensure that future messages are no longer stored in the array.
@@ -109,8 +108,7 @@ function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
     user().error(TAG,
-        'Missing message.source. message.data='
-        + JSON.stringify(getData(message)));
+        'Missing message.source. message.data=%s', JSON.stringify(getData(message)));
   }
   return valid;
 }

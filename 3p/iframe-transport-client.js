@@ -40,20 +40,18 @@ export class IframeTransportClient {
 
     /** @private {string} */
     this.vendor_ = dev().assertString(parsedFrameName['type'],
-        'Parent frame must supply vendor name as type in ' +
-        this.win_.location.href);
+        'Parent frame must supply vendor name as type in %s', this.win_.location.href);
     // Note: amp-ad-exit will validate the vendor name before performing
     // variable substitution, so if the vendor name is not a valid one from
     // vendors.js, then its response messages will have no effect.
-    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in ' +
-        this.win_.location.href);
+    dev().assert(this.vendor_.length, 'Vendor name cannot be empty in %s', this.win_.location.href);
 
     /** @protected {!IframeMessagingClient} */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setHostWindow(this.win_.parent);
     this.iframeMessagingClient_.setSentinel(dev().assertString(
         parsedFrameName['sentinel'],
-        'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
+        'Invalid/missing sentinel on iframe name attribute%s', this.win_.name));
     this.iframeMessagingClient_.makeRequest(
         MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
         MessageType.IFRAME_TRANSPORT_EVENTS,
@@ -65,13 +63,13 @@ export class IframeTransportClient {
            */
           (eventData['events']);
           dev().assert(events,
-              'Received malformed events list in ' + this.win_.location.href);
+              'Received malformed events list in %s', this.win_.location.href);
           dev().assert(events.length,
-              'Received empty events list in ' + this.win_.location.href);
+              'Received empty events list in %s', this.win_.location.href);
           events.forEach(event => {
             try {
               dev().assert(event.creativeId,
-                  'Received malformed event in ' + this.win_.location.href);
+                  'Received malformed event in %s', this.win_.location.href);
               this.contextFor_(event.creativeId).dispatch(event.message);
             } catch (e) {
               user().error(TAG_,
@@ -129,7 +127,7 @@ export class IframeTransportContext {
 
     user().assert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
-    'Must implement onNewContextInstance in ' + win.location.href);
+    'Must implement onNewContextInstance in %s', win.location.href);
     win['onNewContextInstance'](this);
   }
 

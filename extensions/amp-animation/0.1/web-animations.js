@@ -866,15 +866,15 @@ export class MeasureScanner extends Scanner {
   /** @override */
   onCompAnimation(spec) {
     user().assert(this.path_.indexOf(spec.animation) == -1,
-        `Recursive animations are not allowed: "${spec.animation}"`);
+        'Recursive animations are not allowed: "%s"', spec.animation);
     const newPath = this.path_.concat(spec.animation);
     const animationElement = user().assertElement(
         this.css_.getElementById(spec.animation),
-        `Animation not found: "${spec.animation}"`);
+        'Animation not found: "%s"', spec.animation);
     // Currently, only `<amp-animation>` supplies animations. In the future
     // this could become an interface.
     user().assert(animationElement.tagName == 'AMP-ANIMATION',
-        `Element is not an animation: "${spec.animation}"`);
+        'Element is not an animation: "%s"', spec.animation);
     const otherSpecPromise = animationElement.getImpl().then(impl => {
       return impl.getAnimationSpec();
     });
@@ -924,7 +924,7 @@ export class MeasureScanner extends Scanner {
       // Keyframes name to be extracted from `<style>`.
       const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
       user().assert(keyframes,
-          `Keyframes not found in stylesheet: "${specKeyframes}"`);
+          'Keyframes not found in stylesheet: "%s"', specKeyframes);
       specKeyframes = keyframes;
     }
 
@@ -1066,7 +1066,7 @@ export class MeasureScanner extends Scanner {
           'Both "selector" and "target" are not allowed');
       targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
-        user().warn(TAG, `Target not found: "${spec.selector}"`);
+        user().warn(TAG, 'Target not found: "%s"', spec.selector);
       }
     } else if (spec.target) {
       if (typeof spec.target == 'string') {
@@ -1077,7 +1077,7 @@ export class MeasureScanner extends Scanner {
           typeof spec.target == 'string' ?
             this.css_.getElementById(spec.target) :
             spec.target,
-          `Target not found: "${spec.target}"`);
+          'Target not found: "%s"', spec.target);
       targets = [target];
     } else if (this.target_) {
       targets = [this.target_];
@@ -1239,8 +1239,7 @@ export class MeasureScanner extends Scanner {
     // time is fractional.
     if (newValue != null && Math.floor(value) != value && value < 1) {
       user().warn(TAG,
-          `"${field}" is fractional.`
-          + ' Note that all times are in milliseconds.');
+          '"%s" is fractional. Note that all times are in milliseconds.', field);
     }
   }
 }
@@ -1525,7 +1524,7 @@ class CssContextImpl {
   getVar(varName) {
     user().assert(
         this.varPath_.indexOf(varName) == -1,
-        `Recursive variable: "${varName}"`);
+        'Recursive variable: "%s"', varName);
     this.varPath_.push(varName);
     const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
       this.vars_[varName] :
@@ -1533,7 +1532,7 @@ class CssContextImpl {
         this.measure(this.currentTarget_, varName) :
         null;
     if (rawValue == null || rawValue === '') {
-      user().warn(TAG, `Variable not found: "${varName}"`);
+      user().warn(TAG, 'Variable not found: "%s"', varName);
     }
     // No need to normalize vars - they will be normalized later.
     const result = this.resolveAsNode_(rawValue, /* normalize */ false);
@@ -1621,7 +1620,7 @@ class CssContextImpl {
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
-    return user().assertElement(element, `Element not found: ${selector}`);
+    return user().assertElement(element, 'Element not found: %s', selector);
   }
 
   /**

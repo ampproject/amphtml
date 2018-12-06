@@ -84,7 +84,7 @@ function selectExperiments(win, element) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
     dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        TAG, 'url experiment selection %s: %s.', urlExperimentId, experimentId);
   }
 
   // If not in the unconditioned canonical experiment, attempt to

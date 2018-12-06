@@ -90,7 +90,7 @@ export class AmpAdExit extends AMP.BaseElement {
    */
   exit({args, event}) {
     const target = this.targets_[args['target']];
-    user().assert(target, `Exit target not found: '${args['target']}'`);
+    user().assert(target, 'Exit target not found: \'%s\'', args['target']);
     user().assert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
@@ -175,9 +175,7 @@ export class AmpAdExit extends AMP.BaseElement {
                 `IFRAME_TRANSPORT_SIGNAL${vendorResponse}`) {
               // No substitution occurred, so format string in amp-ad-exit
               // config was invalid
-              dev().error(TAG, 'Invalid IFRAME_TRANSPORT_SIGNAL format:' +
-                  vendorResponse +
-                  ' (perhaps there is a space after a comma?)');
+              dev().error(TAG, 'Invalid IFRAME_TRANSPORT_SIGNAL format:%s (perhaps there is a space after a comma?)', vendorResponse);
             } else if (vendorResponse != '') {
               // Caveat: If the vendor's response *is* the empty string, then
               // this will cause the arg/default value to be returned.
@@ -206,7 +204,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @param {string} url
    */
   pingTrackingUrl_(url) {
-    user().fine(TAG, `pinging ${url}`);
+    user().fine(TAG, 'pinging %s', url);
     if (this.transport_.beacon &&
         this.win.navigator.sendBeacon &&
         this.win.navigator.sendBeacon(url, '')) {
@@ -229,7 +227,7 @@ export class AmpAdExit extends AMP.BaseElement {
   filter_(filters, event) {
     return filters.every(filter => {
       const result = filter.filter(event);
-      user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
+      user().info(TAG, 'Filter \'%s\': %s', filter.name, result ? 'pass' : 'fail');
       return result;
     });
   }
@@ -395,8 +393,7 @@ export class AmpAdExit extends AMP.BaseElement {
     const vendorURL = parseUrlDeprecated(assertVendor(
         responseMessage['vendor']));
     user().assert(vendorURL && vendorURL.origin == eventOrigin,
-        'Invalid origin for vendor ' +
-        `${responseMessage['vendor']}: ${eventOrigin}`);
+        'Invalid origin for vendor %s: %s', responseMessage['vendor'], eventOrigin);
   }
 
   /** @override */

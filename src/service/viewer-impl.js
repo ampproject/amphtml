@@ -308,9 +308,7 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            dev().error(TAG_, 'Untrusted viewer url override: ' +
-                viewerUrlOverride + ' at ' +
-                this.messagingOrigin_);
+            dev().error(TAG_, 'Untrusted viewer url override: %s at %s', viewerUrlOverride, this.messagingOrigin_);
           }
           resolve(this.resolvedViewerUrl_);
         });
@@ -331,7 +329,7 @@ export class Viewer {
         }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
-        dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
+        dev().fine(TAG_, 'replace fragment:%s', this.win.location.href);
       }
     }
 
@@ -1082,7 +1080,7 @@ export class Viewer {
           getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
         this.win.history.replaceState({}, '', replaceUrl.href);
         this.win.location.originalHref = url.href;
-        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+        dev().fine(TAG_, 'replace url:%s', replaceUrl.href);
       }
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);

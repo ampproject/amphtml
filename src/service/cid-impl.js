@@ -304,7 +304,7 @@ export class Cid {
             apiKeyMap[scope] = API_KEYS[clientName];
           } else {
             user().error(TAG_,
-                `Unsupported client for Google CID API: ${clientName}`);
+                'Unsupported client for Google CID API: %s', clientName);
           }
         }
       });

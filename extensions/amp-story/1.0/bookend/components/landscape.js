@@ -60,9 +60,7 @@ export class LandscapeComponent {
         !requiredFields.some(field => !(field in landscapeJson));
     user().assert(
         hasAllRequiredFields,
-        'Landscape component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
-        ' fields, skipping invalid.');
+        'Landscape component must contain %s fields, skipping invalid.', requiredFields.map(field => '`' + field + '`').join(', '));
 
     userAssertValidProtocol(element, landscapeJson['url']);
     userAssertValidProtocol(element, landscapeJson['image']);

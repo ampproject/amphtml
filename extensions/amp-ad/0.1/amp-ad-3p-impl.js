@@ -188,14 +188,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
-    dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
+    dev().info(TAG_3P_IMPL, 'upgradeDelay %s: %s', this.type_, upgradeDelayMs);
 
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
     this.config = adConfig[this.type_];
     user().assert(
-        this.config, `Type "${this.type_}" is not supported in amp-ad`);
+        this.config, 'Type "%s" is not supported in amp-ad', this.type_);
 
     this.uiHandler = new AmpAdUIHandler(this);
 
@@ -420,10 +420,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     return this.attemptChangeSize(height, width).then(
         () => {
-          dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
+          dev().info(TAG_3P_IMPL, 'Size change accepted: %sx%s', width, height);
         },
         () => {
-          dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
+          dev().info(TAG_3P_IMPL, 'Size change rejected: %sx%s', width, height);
         }
     );
   }

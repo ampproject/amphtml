@@ -84,7 +84,7 @@ export function safeframeListener(event) {
   const sentinel = data[MESSAGE_FIELDS.SENTINEL] || payload['sentinel'];
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
-    dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
+    dev().warn(TAG, 'Safeframe Host for sentinel: %s not found.', sentinel);
     return;
   }
   if (!safeframeHost.channel) {
@@ -354,7 +354,7 @@ export class SafeframeHostApi {
         newGeometry: formattedGeom,
         uid: this.uid_,
       }, SERVICE.GEOMETRY_UPDATE);
-    }).catch(err => dev().error(TAG, err));
+    }).catch(err => dev().error(TAG, '%s', err));
   }
 
   /**
@@ -620,7 +620,7 @@ export class SafeframeHostApi {
         'expand_l': this.currentGeometry_['allowedExpansion_l'],
         push: true,
       }, messageType);
-    }).catch(err => dev().error(TAG, err));
+    }).catch(err => dev().error(TAG, '%s', err));
   }
 
   /**
@@ -661,10 +661,10 @@ export class SafeframeHostApi {
       }
     }).catch(err => {
       if (err.message == 'CANCELLED') {
-        dev().error(TAG, err);
+        dev().error(TAG, '%s', err);
         return;
       }
-      dev().error(TAG, `Resizing failed: ${err}`);
+      dev().error(TAG, 'Resizing failed: %s', err);
       this.sendResizeResponse(false, messageType);
     });
   }
@@ -687,7 +687,7 @@ export class SafeframeHostApi {
           this.onFluidResize_(newHeight);
         }).catch(err => {
           if (err.message == 'CANCELLED') {
-            dev().error(TAG, err);
+            dev().error(TAG, '%s', err);
             return;
           }
           // TODO(levitzky) Add more error handling here

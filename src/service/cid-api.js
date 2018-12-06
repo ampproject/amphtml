@@ -119,10 +119,10 @@ export class GoogleCidApi {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             if (e && e.response) {
               e.response.json().then(res => {
-                dev().error(TAG, JSON.stringify(res));
+                dev().error(TAG, '%s', JSON.stringify(res));
               });
             } else {
-              dev().error(TAG, e);
+              dev().error(TAG, '%s', e);
             }
             return null;
           });

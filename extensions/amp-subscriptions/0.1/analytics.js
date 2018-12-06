@@ -72,7 +72,7 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} opt_vars
    */
   event(eventType, opt_vars) {
-    user().info(TAG, eventType, opt_vars || '');
+    user().info(TAG, '%s', eventType);
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || dict({}));
   }
 }

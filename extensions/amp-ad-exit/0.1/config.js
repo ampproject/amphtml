@@ -127,7 +127,7 @@ export function assertConfig(config) {
 function assertTransport(transport) {
   for (const t in transport) {
     user().assert(t == TransportMode.BEACON || t == TransportMode.IMAGE,
-        `Unknown transport option: '${t}'`);
+        'Unknown transport option: \'%s\'', t);
     user().assert(typeof transport[t] == 'boolean');
   }
 }
@@ -146,7 +146,7 @@ function assertFilters(filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
     user().assert(validFilters.indexOf(filters[name].type) != -1,
-        'Supported filters: ' + validFilters.join(', '));
+        'Supported filters: %s', validFilters.join(', '));
   }
 }
 
@@ -198,6 +198,5 @@ function assertTarget(name, target, config) {
  */
 export function assertVendor(vendor) {
   return user().assertString(IFRAME_TRANSPORTS[vendor],
-      `Unknown or invalid vendor ${vendor}, ` +
-      'note that vendor must use transport: iframe');
+      'Unknown or invalid vendor %s, note that vendor must use transport: iframe', vendor);
 }

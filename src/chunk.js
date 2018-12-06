@@ -398,7 +398,7 @@ class Chunks {
     resolved.then(() => {
       this.schedule_();
     });
-    dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
+    dev().fine(TAG, '%s', t.getName_());
     return true;
   }
 

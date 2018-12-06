@@ -73,7 +73,7 @@ export function gltfViewer(global) {
         }));
       },
       onerror: err => {
-        user().error('3DGLTF', err);
+        user().error('3DGLTF', '%s', err);
         /** @suppress {deprecated} */
         nonSensitiveDataPostMessage('error', dict({
           'error': (err || '').toString(),

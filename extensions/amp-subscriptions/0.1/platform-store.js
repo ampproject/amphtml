@@ -148,7 +148,7 @@ export class PlatformStore {
    */
   getPlatform(serviceId) {
     const platform = this.subscriptionPlatforms_[serviceId];
-    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
+    dev().assert(platform, 'Platform for id %s is not resolved', serviceId);
     return platform;
   }
 
@@ -216,7 +216,7 @@ export class PlatformStore {
    */
   getResolvedEntitlementFor(serviceId) {
     dev().assert(this.entitlements_[serviceId],
-        `Platform ${serviceId} has not yet resolved with entitlements`);
+        'Platform %s has not yet resolved with entitlements', serviceId);
     return this.entitlements_[serviceId];
   }
 
@@ -227,7 +227,7 @@ export class PlatformStore {
    */
   getEntitlementPromiseFor(serviceId) {
     dev().assert(this.entitlementDeferredMap_[serviceId],
-        `Platform ${serviceId} is not declared`);
+        'Platform %s is not declared', serviceId);
     return this.entitlementDeferredMap_[serviceId].promise;
   }
 

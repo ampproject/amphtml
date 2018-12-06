@@ -129,7 +129,7 @@ export class StandardActions {
               win, args['url'], `AMP.${method}`,
               {target: args['target'], opener: args['opener']});
         }, /* onrejected */ e => {
-          user().error(TAG, e.message);
+          user().error(TAG, '%s', e.message);
         });
 
       case 'scrollTo':

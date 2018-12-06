@@ -215,15 +215,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const width = this.element.getAttribute('width');
       if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
         user().warn(TAG,
-            `Specified height ${height} in <amp-ad> tag is not equal to the ` +
-            `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
-            'responsive AdSense ad units.');
+            'Specified height %s in <amp-ad> tag is not equal to the required height of %s for responsive AdSense ad units.', height, ADSENSE_RSPV_WHITELISTED_HEIGHT);
         return false;
       }
       if (width != '100vw') {
         user().warn(TAG,
-            `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
-            'Width must be 100vw.');
+            'Invalid width %s for full-width responsive <amp-ad> tag. Width must be 100vw.', width);
         return false;
       }
     }

@@ -269,7 +269,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       default:
-        dev().warn(TAG, `PageState ${state} does not exist`);
+        dev().warn(TAG, 'PageState %s does not exist', state);
         break;
     }
   }

@@ -84,13 +84,13 @@ function parseLinkerParamValue(value) {
     // Format <version>*<checksum>*<key1>*<value1>
     // Note: linker makes sure there's at least one pair of non empty key value
     // Make sure there is at least three delimiters.
-    user().error(TAG, `Invalid linker_param value ${value}`);
+    user().error(TAG, 'Invalid linker_param value %s', value);
     return null;
   }
 
   const version = Number(parts.shift());
   if (version !== VALID_VERSION) {
-    user().error(TAG, `Invalid version number ${version}`);
+    user().error(TAG, 'Invalid version number %s', version);
     return null;
   }
 
@@ -161,7 +161,7 @@ function serialize(pairs) {
       .filter(key => {
         const valid = KEY_VALIDATOR.test(key);
         if (!valid) {
-          user().error(TAG, 'Invalid linker key: ' + key);
+          user().error(TAG, 'Invalid linker key: %s', key);
         }
         return valid;
       })
@@ -181,7 +181,7 @@ function deserialize(serializedIds) {
     const key = params[i];
     const valid = KEY_VALIDATOR.test(key);
     if (!valid) {
-      user().error(TAG, `Invalid linker key ${key}, value ignored`);
+      user().error(TAG, 'Invalid linker key %s, value ignored', key);
       continue;
     }
     const value = decode(params[i + 1]);

@@ -367,14 +367,11 @@ export function verifyAmpCORSHeaders(win, response, init) {
     // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
     // ensure that it's equal to the current source origin.
     user().assert(allowSourceOriginHeader == sourceOrigin,
-        `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
-          ` equal to the current: ${allowSourceOriginHeader}` +
-          ` vs ${sourceOrigin}`);
+        'Returned %s is not equal to the current: %s vs %s', ALLOW_SOURCE_ORIGIN_HEADER, allowSourceOriginHeader, sourceOrigin);
   } else if (init.requireAmpResponseSourceOrigin) {
     // If the `AMP-Access-Control-Allow-Source-Origin` header is not
     // returned but required, return error.
-    user().assert(false, 'Response must contain the' +
-        ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+    user().assert(false, 'Response must contain the %s header', ALLOW_SOURCE_ORIGIN_HEADER);
   }
   return response;
 }

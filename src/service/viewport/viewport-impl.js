@@ -1100,9 +1100,7 @@ export class Viewport {
       velocity = (newScrollTop - referenceTop) /
           (now - referenceTime);
     }
-    dev().fine(TAG_, 'scroll: ' +
-        'scrollTop=' + newScrollTop + '; ' +
-        'velocity=' + velocity);
+    dev().fine(TAG_, 'scroll: scrollTop=%s; velocity=%s', newScrollTop, velocity);
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;

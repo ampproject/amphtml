@@ -85,7 +85,7 @@ export class ClickLocationFilter extends Filter {
         const relativeElement = win.document.querySelector(
             this.relativeTo_);
         user().assert(relativeElement,
-            `relativeTo element ${this.relativeTo_} not found.`);
+            'relativeTo element %s not found.', this.relativeTo_);
         const rect = relativeElement./*OK*/getBoundingClientRect();
         this.allowedRect_.left = rect.left;
         this.allowedRect_.top = rect.top;

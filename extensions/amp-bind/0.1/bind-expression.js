@@ -179,8 +179,7 @@ function generateFunctionWhitelist() {
     Object.keys(functionsForType).forEach(name => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
-            `"${name}" doesn't match name property "${func.name}".`);
+        dev().assert(!func.name || name === func.name, 'Listed function name "%s" doesn\'t match name property "%s".', name, func.name);
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
@@ -365,8 +364,7 @@ export class BindExpression {
           }
         } else {
           if (caller === null) {
-            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
-                'returning null.');
+            user().warn(TAG, 'Cannot invoke method %s on null; returning null.', method);
             return null;
           }
           const callerType = Object.prototype.toString.call(caller);

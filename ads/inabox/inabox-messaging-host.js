@@ -46,7 +46,7 @@ class NamedObservable {
    */
   listen(key, callback) {
     if (key in this.map_) {
-      dev().fine(TAG, `Overriding message callback [${key}]`);
+      dev().fine(TAG, 'Overriding message callback [%s]', key);
     }
     this.map_[key] = callback;
   }
@@ -178,7 +178,7 @@ export class InaboxMessagingHost {
    * @param {?JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
-    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    dev().fine(TAG, 'Sent position data to [%s]', request.sentinel);
     source./*OK*/postMessage(
         serializeMessage(MessageType.POSITION, request.sentinel, data),
         origin);

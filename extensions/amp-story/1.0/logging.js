@@ -159,11 +159,11 @@ const LogType = {
  */
 function getLogType(logTypeKey) {
   const logType = LogType[logTypeKey];
-  dev().assert(logType, `There is no log type "${logTypeKey}".`);
+  dev().assert(logType, 'There is no log type "%s".', logTypeKey);
   dev().assert(logType.message,
-      `Log type "${logTypeKey}" has no associated message.`);
+      'Log type "%s" has no associated message.', logTypeKey);
   dev().assert(logType.level,
-      `Log type "${logTypeKey}" has no associated log level.`);
+      'Log type "%s" has no associated log level.', logTypeKey);
 
   return logType;
 }

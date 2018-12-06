@@ -85,7 +85,7 @@ export function getMultiSizeDimensions(
 
     // Make sure that each size is specified in the form WxH.
     if (size.length != 2) {
-      user().error('AMP-AD', `Invalid multi-size data format '${sizeStr}'.`);
+      user().error('AMP-AD', 'Invalid multi-size data format \'%s\'.', sizeStr);
       continue;
     }
 
@@ -166,7 +166,7 @@ function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
     badParams.push({dim: 'height', val: height});
   }
   if (badParams.length) {
-    user().warn('AMP-AD', errorBuilder(badParams));
+    user().warn('AMP-AD', '%s', errorBuilder(badParams));
   }
   return !badParams.length;
 }

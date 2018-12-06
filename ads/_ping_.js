@@ -71,22 +71,21 @@ export function _ping_(global, data) {
     if (data.enableIo) {
       global.context.observeIntersection(function(changes) {
         changes.forEach(function(c) {
-          dev().info('AMP-AD', 'Intersection: (WxH)' +
-              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+          dev().info('AMP-AD', 'Intersection: (WxH)%sx%s', c.intersectionRect.width, c.intersectionRect.height);
         });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
       });
     }
     global.context.getHtml('a', ['href'], function(html) {
-      dev().info('GET-HTML', html);
+      dev().info('GET-HTML', '%s', html);
     });
     global.context.getConsentState(function(consentState) {
-      dev().info('GET-CONSENT-STATE', consentState);
+      dev().info('GET-CONSENT-STATE', '%s', consentState);
     });
     if (global.context.consentSharedData) {
       const TAG = 'consentSharedData';
-      dev().info(TAG, global.context.consentSharedData);
+      dev().info(TAG, '%s', global.context.consentSharedData);
     }
   } else {
     global.setTimeout(() => {

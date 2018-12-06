@@ -426,7 +426,7 @@ function isPositionValid(anchorElement, position) {
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
   return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
     if (closestByTag(elementToCheck, tagName)) {
-      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside blacklisted ancestor: %s', tagName);
       return true;
     }
     return false;

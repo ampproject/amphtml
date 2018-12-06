@@ -491,7 +491,7 @@ export class UserNotificationManager {
   get(id) {
     this.managerReadyPromise_.then(() => {
       if (this.ampdoc.getElementById(id) == null) {
-        user().warn(TAG, `Did not find amp-user-notification element ${id}.`);
+        user().warn(TAG, 'Did not find amp-user-notification element %s.', id);
       }
     });
     return this.getOrCreateDeferById_(id).promise;

@@ -27,7 +27,6 @@ export function requireExternal(module) {
   if (AMP.require) {
     return AMP.require(module);
   } else {
-    dev().error(TAG, `Could not require external module '${module}'.` +
-        ' Did you import the bundle in the extension?');
+    dev().error(TAG, 'Could not require external module \'%s\'. Did you import the bundle in the extension?', module);
   }
 }

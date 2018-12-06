@@ -146,7 +146,7 @@ function buildProviderParams(opt_params) {
 function buildProvider(doc, shareType, opt_params) {
   const shareProviderLocalizedStringId = dev().assert(
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-      `No localized string to display name for share type ${shareType}.`);
+      'No localized string to display name for share type %s.', shareType);
 
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([

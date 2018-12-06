@@ -208,7 +208,7 @@ export class AnalyticsRoot {
     if (selector == ':host') {
       return new Promise(resolve => {
         resolve(user().assertElement(
-            this.getHostElement(), `Element "${selector}" not found`));
+            this.getHostElement(), 'Element "%s" not found', selector));
       });
     }
 
@@ -226,7 +226,7 @@ export class AnalyticsRoot {
           found = this.getRoot().querySelector(selector);
         }
       } catch (e) {
-        user().assert(false, `Invalid query selector ${selector}`);
+        user().assert(false, 'Invalid query selector %s', selector);
       }
 
       // DOM search can "look" outside the boundaries of the root, thus make
@@ -235,7 +235,7 @@ export class AnalyticsRoot {
         result = found;
       }
       return user().assertElement(
-          result, `Element "${selector}" not found`);
+          result, 'Element "%s" not found', selector);
     });
   }
 

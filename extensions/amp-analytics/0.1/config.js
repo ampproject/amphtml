@@ -222,7 +222,7 @@ export class AnalyticsConfig {
             ' <script> child.');
       }
     } catch (er) {
-      user().error(TAG, er.message);
+      user().error(TAG, '%s', er.message);
     }
     return /** @type {!JsonObject} */ (inlineConfig);
   }

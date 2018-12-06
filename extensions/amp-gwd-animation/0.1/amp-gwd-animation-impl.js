@@ -261,7 +261,7 @@ export class AmpGwdRuntimeService {
     if (newPageEl) {
       this.activatePage_(newPageEl);
     } else {
-      user().error(LOG_ID, 'Could not find page with index ' + index + '.');
+      user().error(LOG_ID, 'Could not find page with index %s.', index);
     }
   }
 
@@ -410,7 +410,7 @@ export class AmpGwdRuntimeService {
    */
   gotoAndPlayNTimes(id, label, maxCount, eventName) {
     if (maxCount <= 0) {
-      user().error(LOG_ID, `Invalid maxCount parameter: ${maxCount}`);
+      user().error(LOG_ID, 'Invalid maxCount parameter: %s', maxCount);
       return;
     }
 
@@ -455,7 +455,7 @@ export class AmpGwdRuntimeService {
     if (receiver && receiver.classList) {
       return receiver;
     } else {
-      user().error(LOG_ID, `Could not get receiver with id ${id}.`);
+      user().error(LOG_ID, 'Could not get receiver with id %s.', id);
       return null;
     }
   }

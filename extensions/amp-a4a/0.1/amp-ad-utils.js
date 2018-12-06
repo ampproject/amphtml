@@ -64,7 +64,7 @@ export function getAmpAdMetadata(creative) {
   if (metadataStart < 0) {
     // Couldn't find a metadata blob.
     dev().warn(
-        TAG, `Could not locate start index for amp meta data in: ${creative}`);
+        TAG, 'Could not locate start index for amp meta data in: %s', creative);
     return null;
   }
   const metadataEnd = creative.lastIndexOf('</script>');

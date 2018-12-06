@@ -59,7 +59,7 @@ export class AmpAd extends AMP.BaseElement {
     return consent.then(() => {
       const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
-          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+          || hasOwn(a4aRegistry, type), 'Unknown ad type "%s"', type);
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {

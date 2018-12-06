@@ -32,7 +32,7 @@ const errors = {
  * @param {string} message
  */
 function assertSkimOption(condition, message) {
-  user().assert(condition, `<amp-skimlinks> Invalid option => ${message}`);
+  user().assert(condition, '<amp-skimlinks> Invalid option => %s', message);
 }
 
 /**

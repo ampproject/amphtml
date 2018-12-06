@@ -195,7 +195,7 @@ export class AccessService {
         const namespace = contentArray[i]['namespace'];
         user().assert(!!namespace, 'Namespace required');
         user().assert(!configMap[namespace],
-            'Namespace already used: ' + namespace);
+            'Namespace already used: %s', namespace);
         configMap[namespace] = contentArray[i];
       }
     } else {

@@ -198,12 +198,11 @@ export class ActionInvocation {
   satisfiesTrust(minimumTrust) {
     // Sanity check.
     if (!isFiniteNumber(this.trust)) {
-      dev().error(TAG_, `Invalid trust for '${this.method}': ${this.trust}`);
+      dev().error(TAG_, 'Invalid trust for \'%s\': %s', this.method, this.trust);
       return false;
     }
     if (this.trust < minimumTrust) {
-      user().error(TAG_, `"${this.actionEventType}" is not allowed to invoke ` +
-          `"${this.tagOrTarget}.${this.method}".`);
+      user().error(TAG_, '"%s" is not allowed to invoke "%s.%s".', this.actionEventType, this.tagOrTarget, this.method);
       return false;
     }
     return true;
@@ -405,7 +404,7 @@ export class ActionService {
     'AMP element or a whitelisted target element is expected: %s', debugId);
 
     if (target[ACTION_HANDLER_]) {
-      dev().error(TAG_, `Action handler already installed for ${target}`);
+      dev().error(TAG_, 'Action handler already installed for %s', target);
       return;
     }
 
@@ -522,7 +521,7 @@ export class ActionService {
       reportError(e, opt_element);
       throw e;
     } else {
-      user().error(TAG_, message);
+      user().error(TAG_, '%s', message);
     }
   }
 

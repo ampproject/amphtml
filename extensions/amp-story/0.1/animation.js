@@ -501,10 +501,7 @@ export class AnimationManager {
 
       user().assertElement(
           this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
-          `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
-              `'${el.tagName}' is set to the invalid value ` +
-              `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
-              `exist with id ${dependencyId}.`);
+          'The attribute \'%s\' in tag \'%s\' is set to the invalid value \'%s\'. No children of parenting \'amp-story-page\' exist with id %s.', ANIMATE_IN_AFTER_ATTRIBUTE_NAME, el.tagName, dependencyId, dependencyId);
 
       animationDef.startAfterId =
           el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);

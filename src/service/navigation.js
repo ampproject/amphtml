@@ -221,12 +221,12 @@ export class Navigation {
     win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
     const urlService = Services.urlForDoc(this.ampdoc);
     if (!urlService.isProtocolValid(url)) {
-      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      user().error(TAG, 'Cannot navigate to invalid protocol: %s', url);
       return;
     }
 
     user().assert(
-        VALID_TARGETS.includes(target), `Target '${target}' not supported.`);
+        VALID_TARGETS.includes(target), 'Target \'%s\' not supported.', target);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
@@ -568,7 +568,7 @@ export class Navigation {
         this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
     } else {
       dev().warn(TAG,
-          `failed to find element with id=${hash} or a[name=${hash}]`);
+          'failed to find element with id=%s or a[name=%s]', hash, hash);
     }
   }
 

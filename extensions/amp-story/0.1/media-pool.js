@@ -212,7 +212,7 @@ export class MediaPool {
       }
 
       const ctor = dev().assert(this.mediaFactory_[type],
-          `Factory for media type \`${type}\` unset.`);
+          'Factory for media type `%s` unset.', type);
 
       // Cloning nodes is faster than building them.
       // Construct a seed media element as a small optimization.
@@ -253,7 +253,7 @@ export class MediaPool {
       case MediaType.VIDEO:
         return new Sources(BLANK_VIDEO_SRC);
       default:
-        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+        dev().error('AMP-STORY', 'No default media for type %s.', mediaType);
         return new Sources();
     }
   }
@@ -821,7 +821,7 @@ export class MediaPool {
 
     const executionFn = () => {
       task.execute(mediaEl)
-          .catch(reason => dev().error('AMP-STORY', reason))
+          .catch(reason => dev().error('AMP-STORY', '%s', reason))
           .then(() => {
             // Run regardless of success or failure of task execution.
             queue.shift();

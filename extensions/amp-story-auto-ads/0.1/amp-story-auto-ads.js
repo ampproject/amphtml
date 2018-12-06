@@ -214,7 +214,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
       const ampStoryElement = this.element.parentElement;
       user().assert(ampStoryElement.tagName === 'AMP-STORY',
-          `<${TAG}> should be child of <amp-story>`);
+          '<%s> should be child of <amp-story>', TAG);
 
       const ampdoc = this.getAmpDoc();
       const extensionService = Services.extensionsFor(this.win);
@@ -273,8 +273,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const child = this.element.children[0];
     user().assert(
         isJsonScriptTag(child),
-        `The <${TAG}> config should ` +
-        'be inside a <script> tag with type="application/json"');
+        'The <%s> config should be inside a <script> tag with type="application/json"', TAG);
 
     this.config_ = parseJson(child.textContent);
     this.validateConfig_();
@@ -304,12 +303,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   validateConfig_() {
     const adAttributes = this.config_['ad-attributes'];
-    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
-      'Top level JSON should have an "ad-attributes" key');
+    user().assert(adAttributes, '<%s>: Error reading config.Top level JSON should have an "ad-attributes" key', TAG);
 
     const {type} = adAttributes;
-    user().assert(type, `<${TAG}>: Error reading config.` +
-      'Missing ["ad-attribues"]["type"] key');
+    user().assert(type, '<%s>: Error reading config.Missing ["ad-attribues"]["type"] key', TAG);
   }
 
 
@@ -425,13 +422,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     ['height', 'width', 'layout'].forEach(attr => {
       if (configAttrs[attr] !== undefined) {
-        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
         delete configAttrs[attr];
       }
     });
 
-    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
-      `"${configAttrs.type}" ad type is not supported`);
+    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], '%s: "%s" ad type is not supported', TAG, configAttrs.type);
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         configAttrs, requiredAttrs));

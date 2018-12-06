@@ -161,7 +161,7 @@ export class A4AVariableSource extends VariableSource {
       return '[]';
     }
     if (attributeNames.length > HTML_ATTR_MAX_ATTRS) {
-      user().error(TAG, `At most ${HTML_ATTR_MAX_ATTRS} may be requested.`);
+      user().error(TAG, 'At most %s may be requested.', HTML_ATTR_MAX_ATTRS);
       return '[]';
     }
     cssSelector = decodeURI(cssSelector);
@@ -169,12 +169,11 @@ export class A4AVariableSource extends VariableSource {
     try {
       elements = this.win_.document.querySelectorAll(cssSelector);
     } catch (e) {
-      user().error(TAG, `Invalid selector: ${cssSelector}`);
+      user().error(TAG, 'Invalid selector: %s', cssSelector);
       return '[]';
     }
     if (elements.length > HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE) {
-      user().error(TAG, 'CSS selector may match at most ' +
-          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`);
+      user().error(TAG, 'CSS selector may match at most %s elements.', HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE);
       return '[]';
     }
     const result = [];

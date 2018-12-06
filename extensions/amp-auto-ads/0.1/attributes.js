@@ -52,13 +52,13 @@ function parseAttributes(attributeObject) {
   const attributes = dict();
   for (const key in attributeObject) {
     if (!NON_DATA_ATTRIBUTE_WHITELIST[key] && !startsWith(key, 'data-')) {
-      user().warn(TAG, 'Attribute not whitlisted: ' + key);
+      user().warn(TAG, 'Attribute not whitlisted: %s', key);
       continue;
     }
     const valueType = (typeof attributeObject[key]);
     if (valueType != 'number' && valueType != 'string' &&
         valueType != 'boolean') {
-      user().warn(TAG, 'Attribute type not supported: ' + valueType);
+      user().warn(TAG, 'Attribute type not supported: %s', valueType);
       continue;
     }
     attributes[key] = String(attributeObject[key]);

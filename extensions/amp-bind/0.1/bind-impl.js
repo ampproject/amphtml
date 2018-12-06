@@ -504,9 +504,7 @@ export class Bind {
         }
       });
       if (ignoredKeys.length > 0) {
-        user().warn(TAG, 'Some state keys could not be premutated ' +
-              'because they are missing the overridable attribute: ' +
-              ignoredKeys.join(', '));
+        user().warn(TAG, 'Some state keys could not be premutated because they are missing the overridable attribute: %s', ignoredKeys.join(', '));
       }
       return this.setState(data['state']);
     });
@@ -915,11 +913,7 @@ export class Bind {
         mismatches[`${tagName}[${property}]${expected}:${actual}`] = true;
 
         if (warn) {
-          user().warn(TAG, `Default value (${actual}) does not match first `
-            + `result (${expected}) for <${tagName} [${property}]="`
-            + `${expressionString}">. We recommend writing expressions with `
-            + 'matching default values, but this can be safely ignored if '
-            + 'intentional.');
+          user().warn(TAG, 'Default value (%s) does not match first result (%s) for <%s [%s]="%s">. We recommend writing expressions with matching default values, but this can be safely ignored if intentional.', actual, expected, tagName, property, expressionString);
         }
       });
     });
@@ -1356,7 +1350,7 @@ export class Bind {
     try {
       return parseJson(JSON.stringify(o));
     } catch (e) {
-      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+      dev().error(TAG, 'Failed to copy JSON (%s) with error: %s', o, e);
     }
     return null;
   }
@@ -1370,7 +1364,7 @@ export class Bind {
     if (opt_elementOrExpr) {
       if (typeof opt_elementOrExpr == 'string') {
         const value = getValueForExpr(this.state_, opt_elementOrExpr);
-        user().info(TAG, value);
+        user().info(TAG, '%s', value);
       } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
@@ -1380,7 +1374,7 @@ export class Bind {
             'AMP.printState($0) after selecting an element.');
       }
     } else {
-      user().info(TAG, this.state_);
+      user().info(TAG, '%s', this.state_);
     }
   }
 
@@ -1411,7 +1405,7 @@ export class Bind {
         const {property} = boundProperty;
         output[property] = results[i];
       });
-      user().info(TAG, output);
+      user().info(TAG, '%s', output);
     });
   }
 
@@ -1420,7 +1414,7 @@ export class Bind {
    */
   debugEvaluate_(expression) {
     this.evaluateExpression_(expression, this.state_).then(result => {
-      user().info(TAG, result);
+      user().info(TAG, '%s', result);
     });
   }
 

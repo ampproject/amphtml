@@ -77,8 +77,7 @@ export class WebPushConfig extends AMP.BaseElement {
       const value = WebPushConfigAttributes[attribute];
       user().assert(
           this.element.getAttribute(value),
-          `The ${value} attribute is required for <${CONFIG_TAG}>`
-      );
+          'The %s attribute is required for <%s>', value, CONFIG_TAG);
       config[value] = this.element.getAttribute(value);
     }
 

@@ -120,8 +120,7 @@ export function getRGBFromCssColorValue(cssValue) {
   const regexPattern = /rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/;
 
   if (!cssValue.match(regexPattern)) {
-    user().error('UTILS', 'getRGBFromCssColorValue expects a parameter in ' +
-        `the form of 'rgba(0, 0, 0, 1)' or 'rgb(0, 0, 0)' but got ${cssValue}`);
+    user().error('UTILS', 'getRGBFromCssColorValue expects a parameter in the form of \'rgba(0, 0, 0, 1)\' or \'rgb(0, 0, 0)\' but got %s', cssValue);
     // Returns a fallback value, to fail 'gracefully' in case a browser we don't
     // know about gave an unexpected value.
     return {r: 0, g: 0, b: 0};

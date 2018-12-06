@@ -93,7 +93,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   onFailure(failure, recovery) {
     if (this.recoveryModes_[failure]) {
       dev().warn(TAG,
-          `Recovery mode for failure type ${failure} already registered!`);
+          'Recovery mode for failure type %s already registered!', failure);
     }
     this.recoveryModes_[failure] = recovery;
   }
@@ -105,7 +105,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   registerValidator(validator, type = 'default') {
     if (this.validators_[type]) {
-      dev().warn(TAG, `${type} validator already registered.`);
+      dev().warn(TAG, '%s validator already registered.', type);
     }
     this.validators_[type] = validator;
   }
@@ -117,7 +117,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   registerRenderer(renderer, type) {
     if (this.renderers_[type]) {
-      dev().warn(TAG, `Rendering mode already registered for type '${type}'`);
+      dev().warn(TAG, 'Rendering mode already registered for type \'%s\'', type);
     }
     this.renderers_[type] = renderer;
   }
@@ -198,7 +198,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   handleFailure_(failureType, error) {
     const recoveryMode = this.recoveryModes_[failureType];
     if (error) {
-      dev().warn(TAG, error);
+      dev().warn(TAG, '%s', error);
     }
     switch (recoveryMode) {
       case RecoveryModeType.COLLAPSE:

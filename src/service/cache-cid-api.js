@@ -129,10 +129,10 @@ export class CacheCidApi {
     }).catch(e => {
       if (e && e.response) {
         e.response.json().then(res => {
-          dev().error(TAG_, JSON.stringify(res));
+          dev().error(TAG_, '%s', JSON.stringify(res));
         });
       } else {
-        dev().error(TAG_, e);
+        dev().error(TAG_, '%s', e);
       }
       return null;
     });

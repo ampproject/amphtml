@@ -80,14 +80,14 @@ export class AmpNextPage extends AMP.BaseElement {
 
       const type = element.getAttribute('type');
       if (type) {
-        user().assert(type === 'adsense', `${TAG} only supports type=adsense`);
+        user().assert(type === 'adsense', '%s only supports type=adsense', TAG);
         const client = element.getAttribute('data-client');
         const slot = element.getAttribute('data-slot');
 
         user().assert(/^ca-pub-\d+$/.test(client),
-            `${TAG} AdSense client should be of the format 'ca-pub-123456'`);
+            '%s AdSense client should be of the format \'ca-pub-123456\'', TAG);
         user().assert(/^\d+$/.test(slot),
-            `${TAG} AdSense slot should be a number`);
+            '%s AdSense slot should be a number', TAG);
 
         const consentPolicyId = this.getConsentPolicy();
         const consent = consentPolicyId ?
@@ -143,11 +143,10 @@ export class AmpNextPage extends AMP.BaseElement {
       return null;
     }
     user().assert(scriptElements.length === 1,
-        `${TAG} should contain at most one <script> child`);
+        '%s should contain at most one <script> child', TAG);
     const scriptElement = scriptElements[0];
     user().assert(isJsonScriptTag(scriptElement),
-        `${TAG} config should ` +
-        'be inside a <script> tag with type="application/json"');
+        '%s config should be inside a <script> tag with type="application/json"', TAG);
     return tryParseJson(scriptElement.textContent, error => {
       user().error(TAG, 'failed to parse config', error);
     });

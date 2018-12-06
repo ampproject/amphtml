@@ -288,8 +288,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     user().assert(
         storyConsentScript && isJsonScriptTag(storyConsentScript),
-        `${TAG} config should be put in a <script> tag with ` +
-        'type="application/json"');
+        '%s config should be put in a <script> tag with type="application/json"', TAG);
 
     this.storyConsentConfig_ =
         Object.assign(
@@ -298,16 +297,16 @@ export class AmpStoryConsent extends AMP.BaseElement {
             /** @type {Object} */ (parseJson(storyConsentScript.textContent)));
 
     user().assertString(
-        this.storyConsentConfig_.title, `${TAG}: config requires a title`);
+        this.storyConsentConfig_.title, '%s: config requires a title', TAG);
     user().assertString(
-        this.storyConsentConfig_.message, `${TAG}: config requires a message`);
+        this.storyConsentConfig_.message, '%s: config requires a message', TAG);
     user().assert(
         this.storyConsentConfig_.vendors &&
             isArray(this.storyConsentConfig_.vendors),
-        `${TAG}: config requires an array of vendors`);
+        '%s: config requires an array of vendors', TAG);
     user().assertBoolean(
         this.storyConsentConfig_.onlyAccept,
-        `${TAG}: config requires "onlyAccept" to be a boolean`);
+        '%s: config requires "onlyAccept" to be a boolean', TAG);
 
     // Runs the validation if any of the title or link are provided, since
     // both have to be provided for the external link to be displayed.
@@ -315,10 +314,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentConfig_.externalLink.title) {
       user().assertString(
           this.storyConsentConfig_.externalLink.title,
-          `${TAG}: config requires "externalLink.title" to be a string`);
+          '%s: config requires "externalLink.title" to be a string', TAG);
       user().assertString(
           this.storyConsentConfig_.externalLink.href,
-          `${TAG}: config requires "externalLink.href" to be an absolute URL`);
+          '%s: config requires "externalLink.href" to be an absolute URL', TAG);
       assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink.href);
     }
   }

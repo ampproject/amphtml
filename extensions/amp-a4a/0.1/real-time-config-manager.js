@@ -115,7 +115,7 @@ export class RealTimeConfigManager {
    */
   buildErrorResponse_(
     error, callout, errorReportingUrl, opt_rtcTime) {
-    dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
+    dev().warn(TAG, 'RTC callout to %s caused %s', callout, error);
     if (errorReportingUrl) {
       this.sendErrorMessage(error, errorReportingUrl);
     }
@@ -202,14 +202,12 @@ export class RealTimeConfigManager {
             CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
           return true;
         } else if (!CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
-          dev().warn(TAG, 'Invalid RTC consent state given: ' +
-                     `${sendRegardlessOfConsentState[i]}`);
+          dev().warn(TAG, 'Invalid RTC consent state given: %s', sendRegardlessOfConsentState[i]);
         }
       }
       return false;
     }
-    user().warn(TAG, 'Invalid value for sendRegardlessOfConsentState:' +
-                `${sendRegardlessOfConsentState}`);
+    user().warn(TAG, 'Invalid value for sendRegardlessOfConsentState:%s', sendRegardlessOfConsentState);
     return !!optIsGloballyValid;
   }
 
@@ -273,7 +271,7 @@ export class RealTimeConfigManager {
       } else if (typeof urlObj == 'string') {
         url = urlObj;
       } else {
-        dev().warn(TAG, `Invalid url: ${urlObj}`);
+        dev().warn(TAG, 'Invalid url: %s', urlObj);
       }
       this.inflateAndSendRtc_(url,
           customMacros,
@@ -309,7 +307,7 @@ export class RealTimeConfigManager {
       const validVendorMacros = {};
       Object.keys(vendorMacros).forEach(macro => {
         if (!(vendorObject.macros && vendorObject.macros.includes(macro))) {
-          user().error(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
+          user().error(TAG, 'Unknown macro: %s for vendor: %s', macro, vendor);
         } else {
           const value = vendorMacros[macro];
           validVendorMacros[macro] = isObject(value) || isArray(value) ?
@@ -484,17 +482,15 @@ export class RealTimeConfigManager {
           case 'timeoutMillis':
             timeout = parseInt(rtcConfig[key], 10);
             if (isNaN(timeout)) {
-              user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
-                          `using default timeout ${defaultTimeoutMillis}ms`);
+              user().warn(TAG, 'Invalid RTC timeout is NaN, using default timeout %sms', defaultTimeoutMillis);
               timeout = undefined;
             } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
-              user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
-                          `using default timeout ${defaultTimeoutMillis}ms`);
+              user().warn(TAG, 'Invalid RTC timeout: %sms, using default timeout %sms', timeout, defaultTimeoutMillis);
               timeout = undefined;
             }
             break;
           default:
-            user().warn(TAG, `Unknown RTC Config key: ${key}`);
+            user().warn(TAG, 'Unknown RTC Config key: %s', key);
             break;
         }
       });
@@ -506,7 +502,7 @@ export class RealTimeConfigManager {
         const errorUrl = urlObj['errorReportingUrl'];
         if (errorUrl && !Services.urlForDoc(
             this.a4aElement_.getAmpDoc()).isSecure(errorUrl)) {
-          dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorUrl}`);
+          dev().warn(TAG, 'Insecure RTC errorReportingUrl: %s', errorUrl);
           urlObj['errorReportingUrl'] = undefined;
         }
       };

@@ -60,7 +60,7 @@ function buildArticleFromJson_(articleJson) {
 
   const articleUrl = dev().assert(articleJson['url']);
   user().assert(isProtocolValid(articleUrl),
-      `Unsupported protocol for article URL ${articleUrl}`);
+      'Unsupported protocol for article URL %s', articleUrl);
 
   let domain;
   try {
@@ -78,7 +78,7 @@ function buildArticleFromJson_(articleJson) {
 
   if (articleJson['image']) {
     user().assert(isProtocolValid(articleJson['image']),
-        `Unsupported protocol for article image URL ${articleJson['image']}`);
+        'Unsupported protocol for article image URL %s', articleJson['image']);
     article.image = dev().assert(articleJson['image']);
   }
 
@@ -120,11 +120,9 @@ export function parseArticlesToClassicApi(bookendComponents) {
     if (component['type'] == 'small') {
       articleSet.articles.push(buildArticleFromJson_(component));
     } else if (NEW_COMPONENTS.includes(component['type'])) {
-      user().warn(TAG, component['type'] + ' is not supported in ' +
-      'amp-story-0.1, upgrade to v1.0 to use this feature.');
+      user().warn(TAG, '%s is not supported in amp-story-0.1, upgrade to v1.0 to use this feature.', component['type']);
     } else {
-      user().warn(TAG, component['type'] + ' is not valid, ' +
-      'skipping invalid.');
+      user().warn(TAG, '%s is not valid, skipping invalid.', component['type']);
     }
   });
 

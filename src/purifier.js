@@ -422,8 +422,7 @@ export function addPurifyHooks(purifier, diffing) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
-      user().error(TAG, `Removing "${attrName}" attribute with invalid `
-          + `value in <${tagName} ${attrName}="${attrValue}">.`);
+      user().error(TAG, 'Removing "%s" attribute with invalid value in <%s %s="%s">.', attrName, tagName, attrName, attrValue);
       data.keepAttr = false;
     }
 

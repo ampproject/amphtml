@@ -446,14 +446,14 @@ function getAmpdocService(win) {
  */
 function getServiceInternal(holder, id) {
   dev().assert(isServiceRegistered(holder, id),
-      `Expected service ${id} to be registered`);
+      'Expected service %s to be registered', id);
   const services = getServices(holder);
   const s = services[id];
   if (!s.obj) {
-    dev().assert(s.ctor, `Service ${id} registered without ctor nor impl.`);
-    dev().assert(s.context, `Service ${id} registered without context.`);
+    dev().assert(s.ctor, 'Service %s registered without ctor nor impl.', id);
+    dev().assert(s.context, 'Service %s registered without context.', id);
     s.obj = new s.ctor(s.context);
-    dev().assert(s.obj, `Service ${id} constructed to null.`);
+    dev().assert(s.obj, 'Service %s constructed to null.', id);
     s.ctor = null;
     s.context = null;
     // The service may have been requested already, in which case we have a
@@ -668,8 +668,7 @@ export function isEmbeddable(service) {
  */
 export function adoptServiceForEmbed(embedWin, serviceId) {
   const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
-      'or doesn\'t implement EmbeddableService.');
+  dev().assert(adopted, 'Service %s not found on parent or doesn\'t implement EmbeddableService.', serviceId);
 }
 
 

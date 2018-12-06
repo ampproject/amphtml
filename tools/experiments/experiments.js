@@ -406,8 +406,7 @@ const EXPERIMENTS = [
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
-        ' have a `cleanupIssue` field.');
+    dev().assert(experiment.cleanupIssue, 'experiment %s must have a `cleanupIssue` field.', experiment.name);
   });
 }
 

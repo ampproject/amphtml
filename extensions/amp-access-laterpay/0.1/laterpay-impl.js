@@ -272,8 +272,7 @@ export class LaterpayVendor {
     const dialogContainer = this.ampdoc.getElementById(id);
     return user().assertElement(
         dialogContainer,
-        'No element found with id ' + id
-    );
+        'No element found with id %s', id);
   }
 
   /**

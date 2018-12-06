@@ -54,8 +54,7 @@ export class AmpPixel extends BaseElement {
       // iframe based trick to remove referrer, which apparently can
       // only do "no-referrer".
       user().assert(this.referrerPolicy_ == 'no-referrer',
-          `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
-          + ' Only "no-referrer" is supported');
+          '%s: invalid "referrerpolicy" value "%s". Only "no-referrer" is supported', TAG, this.referrerPolicy_);
     }
     if (this.element.hasAttribute('i-amphtml-ssr') &&
         this.element.querySelector('img')) {
@@ -102,8 +101,7 @@ export class AmpPixel extends BaseElement {
   assertSource_(src) {
     user().assert(
         /^(https\:\/\/|\/\/)/i.test(src),
-        'The <amp-pixel> src attribute must start with ' +
-        '"https://" or "//". Invalid value: ' + src);
+        'The <amp-pixel> src attribute must start with "https://" or "//". Invalid value: %s', src);
     return /** @type {string} */ (src);
   }
 }
