@@ -234,7 +234,7 @@ export class AmpStory extends AMP.BaseElement {
     /** Instantiates the viewport warning layer. */
     new ViewportWarningLayer(this.win, this.element);
 
-    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    /** @private {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
 
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
