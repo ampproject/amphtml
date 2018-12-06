@@ -436,7 +436,7 @@ describe('Logging', () => {
         log.assertElement(null);
       }).to.throw(/Element expected: null/);
       expect(() => {
-        log.assertElement(null, 'custom error');
+        log.assertElement(null, 'custom error: %s', null);
       }).to.throw(/custom error: null/);
     });
   });
@@ -465,6 +465,32 @@ describe('Logging', () => {
     });
   });
 
+  describe('assertBoolean', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should pass `true`', () => {
+      expect(log.assertBoolean(true)).to.equal(true);
+    });
+
+    it('should pass `false`', () => {
+      expect(log.assertBoolean(true)).to.equal(true);
+    });
+
+    it('should fail with non boolean', () => {
+      expect(() => log.assertBoolean({})).to.throw(
+          'Boolean expected: ');
+      expect(() => log.assertBoolean([])).to.throw(
+          'Boolean expected: ');
+      expect(() => log.assertBoolean('hello')).to.throw('Boolean expected: hello');
+      expect(() => log.assertBoolean(1)).to.throw('Boolean expected: 1');
+      expect(() => log.assertBoolean(0)).to.throw('Boolean expected: 0');
+    });
+  });
+
   describe('assertNumber', () => {
     let log;
 
@@ -486,9 +512,9 @@ describe('Logging', () => {
 
     it('should fail with on non number', () => {
       expect(() => log.assertNumber({})).to.throw('Number expected: ');
-      expect(() => log.assertNumber('a')).to.throw('Number expected: ');
-      expect(() => log.assertNumber(null)).to.throw('Number expected: ');
-      expect(() => log.assertNumber(undefined)).to.throw('Number expected: ');
+      expect(() => log.assertNumber('a')).to.throw('Number expected: a');
+      expect(() => log.assertNumber(null)).to.throw('Number expected: null');
+      expect(() => log.assertNumber(undefined)).to.throw('Number expected: undefined');
       expect(() => log.assertNumber([])).to.throw('Number expected: ');
     });
   });

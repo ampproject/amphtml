@@ -352,20 +352,42 @@ export class Log {
   }
 
   /**
+   * Helper for assert methods.
+   *
+   * @param {*} shouldBeTrueish
+   * @param {*} target item that should be of assertion type
+   * @param {string} ofType the type of the target
+   * @param {string=} opt_message The assertion message
+   * @param {...*} var_args
+   * eslint "google-camelcase/google-camelcase": 2
+   */
+  assertHelper_(shouldBeTrueish, target, ofType, opt_message, var_args) {
+    if (!opt_message) {
+      var_args.unshift(target);
+      opt_message = `${ofType} expected: %s`;
+    }
+    this.assert.apply(this,
+        [shouldBeTrueish, opt_message].concat(var_args));
+  }
+
+  /**
    * Throws an error if the first argument isn't an Element
    *
    * Otherwise see `assert` for usage
    *
    * @param {*} shouldBeElement
    * @param {string=} opt_message The assertion message
+   * @param {...*} var_args
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
    * eslint "google-camelcase/google-camelcase": 2
    */
-  assertElement(shouldBeElement, opt_message) {
+  assertElement(shouldBeElement, opt_message, var_args) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
-        shouldBeElement);
+    // Since we don't allow spread operation
+    var_args = Array.prototype.slice.call(arguments, 2);
+    this.assertHelper_(shouldBeTrueish, shouldBeElement, 'Element', opt_message,
+        var_args);
     return /** @type {!Element} */ (shouldBeElement);
   }
 
@@ -377,12 +399,15 @@ export class Log {
    *
    * @param {*} shouldBeString
    * @param {string=} opt_message The assertion message
+   * @param {...*} var_args
    * @return {string} The string value. Can be an empty string.
    * eslint "google-camelcase/google-camelcase": 2
    */
-  assertString(shouldBeString, opt_message) {
-    this.assert(typeof shouldBeString == 'string',
-        (opt_message || 'String expected') + ': %s', shouldBeString);
+  assertString(shouldBeString, opt_message, var_args) {
+    const shouldBeTrueish = typeof shouldBeString == 'string';
+    var_args = Array.prototype.slice.call(arguments, 2);
+    this.assertHelper_(shouldBeTrueish, shouldBeString, 'String', opt_message,
+        var_args);
     return /** @type {string} */ (shouldBeString);
   }
 
@@ -394,12 +419,15 @@ export class Log {
    *
    * @param {*} shouldBeNumber
    * @param {string=} opt_message The assertion message
+   * @param {...*} var_args
    * @return {number} The number value. The allowed values include `0`
    *   and `NaN`.
    */
-  assertNumber(shouldBeNumber, opt_message) {
-    this.assert(typeof shouldBeNumber == 'number',
-        (opt_message || 'Number expected') + ': %s', shouldBeNumber);
+  assertNumber(shouldBeNumber, opt_message, var_args) {
+    const shouldBeTrueish = typeof shouldBeNumber == 'number';
+    var_args = Array.prototype.slice.call(arguments, 2);
+    this.assertHelper_(shouldBeTrueish, shouldBeNumber, 'Number', opt_message,
+        var_args);
     return /** @type {number} */ (shouldBeNumber);
   }
 
@@ -410,11 +438,14 @@ export class Log {
    *
    * @param {*} shouldBeBoolean
    * @param {string=} opt_message The assertion message
+   * @param {...*} var_args
    * @return {boolean} The boolean value.
    */
-  assertBoolean(shouldBeBoolean, opt_message) {
-    this.assert(!!shouldBeBoolean === shouldBeBoolean,
-        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+  assertBoolean(shouldBeBoolean, opt_message, var_args) {
+    const shouldBeTrueish = !!shouldBeBoolean === shouldBeBoolean;
+    var_args = Array.prototype.slice.call(arguments, 2);
+    this.assertHelper_(shouldBeTrueish, shouldBeBoolean, 'Boolean', opt_message,
+        var_args);
     return /** @type {boolean} */ (shouldBeBoolean);
   }
 
