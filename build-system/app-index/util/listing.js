@@ -61,5 +61,5 @@ module.exports = {
   isMaliciousPath,
   getListing,
   isMainPageFromUrl,
-  formatBasepath
-}
+  formatBasepath,
+};

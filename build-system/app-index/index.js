@@ -18,15 +18,14 @@
 const BBPromise = require('bluebird');
 const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
-const {join, normalize} = require('path');
-const {renderTemplate} = require('./template');
 const {
-  isMaliciousPath,
   getListing,
   isMainPageFromUrl,
-  formatBasepath
+  formatBasepath,
 } = require('./util/listing');
 const {handleApiRequest} = require('./api/api');
+const {join} = require('path');
+const {renderTemplate} = require('./template');
 
 const pc = process;
 

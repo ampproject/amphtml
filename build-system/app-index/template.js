@@ -44,7 +44,7 @@ const headerLinks = [
   },
   {
     'name': 'Find File',
-    'href': 'https://github.com/ampproject/amphtml/find/master'
+    'href': 'https://github.com/ampproject/amphtml/find/master',
   },
   {
     'name': 'Travis',
@@ -63,7 +63,7 @@ const requiredExtensions = [
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
   {name: 'amp-mustache', version: '0.2'},
-  {name: 'amp-list'}
+  {name: 'amp-list'},
 ];
 
 
@@ -100,7 +100,7 @@ const Header = ({isMainPage, links}) => html`
     </ul>
   </header>`;
 
-const BasePathSearch = (basepath) => html`
+const BasePathSearch = basepath => html`
     ${basepath}
     <amp-state id="basePathSearch">
       <script type="application/json">
@@ -113,13 +113,18 @@ const BasePathSearch = (basepath) => html`
       class="file-list-fuzzy-search"
       placeholder="Fuzzy search in current file list"
       pattern="[a-zA-Z0-9-]+"
-      on="input-debounced:AMP.setState({basePathSearch: {listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value}})">
+      on="input-debounced:AMP.setState({
+        basePathSearch: {
+          listSrc: '/dashboard/api/listing?path=${basepath}&search=' +
+          event.value
+        }
+      })">
     </input>
   `;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
-const ExamplesDocumentModeSelect = ({selectModePrefix}) => html`
+const ExamplesDocumentModeSelect = () => html`
   <label for="examples-mode-select">
     Document mode:
     <select id="examples-mode-select"
@@ -138,7 +143,7 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
     selectModePrefix,
   });
 
-const FileList = (basepath) => html`
+const FileList = basepath => html`
   <amp-list [src]="basePathSearch.listSrc"
     src="/dashboard/api/listing?path=${basepath}"
     items="."
@@ -153,7 +158,8 @@ const FileList = (basepath) => html`
     <template type="amp-mustache">
       <div class="file-link-container">
         <a class="file-link"
-          [href]="(documentMode.selectModePrefix || '') + '${basepath.substring(1)}{{.}}'">
+          [href]="(documentMode.selectModePrefix || '') +
+          '${basepath.substring(1)}{{.}}'">
           {{.}}
         </a>
       </div>
@@ -178,7 +184,6 @@ const selectModePrefix = '/';
 const renderTemplate = ({
   basepath,
   css,
-  fileSet,
   isMainPage,
   serveMode}) => html`
 

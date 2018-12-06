@@ -15,19 +15,16 @@
  */
 'use strict';
 
-const {
-  isMaliciousPath,
-  getListing,
-  isMainPageFromUrl,
-  formatBasepath
-} = require('../util/listing');
 const Fuse = require('fuse.js');
+const {
+  getListing,
+} = require('../util/listing');
 
 async function badRequest(res) {
   res.status(400).end();
 }
 
-async function searchListing(root, req, res, next) {
+async function searchListing(root, req, res) {
 
   if (!req.query || !req.query.path) {
     badRequest(res);
@@ -50,7 +47,7 @@ async function searchListing(root, req, res, next) {
   // Fuzzy find from the file set
   const fuse = new Fuse(fileSet, {
     shouldSort: true,
-    threshold: 0.4
+    threshold: 0.4,
   });
   const foundFileIndexes = fuse.search(req.query.search);
 
@@ -64,15 +61,12 @@ async function searchListing(root, req, res, next) {
   res.status(200).json(response);
 }
 
-
-/**
- * Function to handle API Requests
- * Returns true if handled, false otherwise
- */
+// Function to handle API Requests
+// Returns true is handled, false otherwise
 async function handleApiRequest(root, req, res, next) {
 
   if (req.path.includes('listing')) {
-    await searchListing(root, req, res, next);
+    await searchListing(root, req, res);
     return;
   }
 
@@ -80,5 +74,5 @@ async function handleApiRequest(root, req, res, next) {
 }
 
 module.exports = {
-  handleApiRequest
-}
+  handleApiRequest,
+};
