@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  HtmlLiteralTagDef,
-  htmlFor,
-  htmlRefs,
-} from '../../../src/static-template';
+import {HtmlLiteralTagDef} from './html';
 import {
   PlayingStates,
   VideoEvents,
@@ -33,6 +29,7 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {once} from '../../../src/utils/function';
 import {
   resetStyles,

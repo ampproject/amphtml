@@ -16,10 +16,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
-import {
-  HtmlLiteralTagDef,
-  htmlFor,
-} from '../../../src/static-template';
+import {HtmlLiteralTagDef} from './html';
 import {
   PlayingStates,
   VideoAttributes,
@@ -53,6 +50,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
+import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';

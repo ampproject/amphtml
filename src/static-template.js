@@ -20,15 +20,11 @@ import {map} from './utils/object.js';
 let container;
 
 
-/** @typedef {function(!Array<string>):!Element} */
-export let HtmlLiteralTagDef;
-
-
 /**
  * Creates the html helper for the doc.
  *
  * @param {!Element|!Document} nodeOrDoc
- * @return {!HtmlLiteralTagDef}
+ * @return {function(!Array<string>):!Element}
  */
 export function htmlFor(nodeOrDoc) {
   const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
