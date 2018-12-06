@@ -48,7 +48,7 @@ module.exports = {
         [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
       ]);
     }
-    if (isForTesting) {
+    if (!isForTesting) {
       pluginsToApply = pluginsToApply.concat([
         [require.resolve('./babel-plugins/babel-plugin-amp-constant-transformer')],
       ]);
