@@ -110,10 +110,9 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const ampdoc = this.getAmpDoc();
-    const deferred = new Deferred();
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
   }

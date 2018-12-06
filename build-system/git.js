@@ -23,15 +23,22 @@ const {getStdout} = require('./exec');
 
 /**
  * Returns the branch point of the current branch off of master.
- * @param {boolean} fromMerge true if this is a merge commit.
  * @return {string}
  */
-exports.gitBranchPoint = function(fromMerge = false) {
-  if (fromMerge) {
-    return getStdout('git merge-base HEAD^1 HEAD^2').trim();
-  } else {
-    return getStdout('git merge-base master HEAD^').trim();
+exports.gitBranchPointFromMaster = function() {
+  return getStdout('git merge-base master HEAD^').trim();
+};
+
+/**
+ * When running on Travis, this returns the branch point of the current branch
+ * off of master, as merged by Travis. When not running on Travis, falls back to
+ * gitBranchPointFromMaster.
+ */
+exports.gitTravisCommitRangeStart = function() {
+  if (process.env.TRAVIS_COMMIT_RANGE) {
+    return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
   }
+  return exports.gitBranchPointFromMaster();
 };
 
 /**
@@ -40,7 +47,7 @@ exports.gitBranchPoint = function(fromMerge = false) {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -50,7 +57,7 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
@@ -60,7 +67,7 @@ exports.gitDiffStatMaster = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = exports.gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
@@ -71,14 +78,6 @@ exports.gitDiffAddedNameOnlyMaster = function() {
  */
 exports.gitDiffColor = function() {
   return getStdout('git -c color.ui=always diff').trim();
-};
-
-/**
- * Returns the URL of the origin (upstream) repository.
- * @return {string}
- */
-exports.gitOriginUrl = function() {
-  return getStdout('git remote get-url origin').trim();
 };
 
 /**
@@ -94,6 +93,9 @@ exports.gitBranchName = function() {
  * @return {string}
  */
 exports.gitCommitHash = function() {
+  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
+    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  }
   return getStdout('git rev-parse --verify HEAD').trim();
 };
 

@@ -33,6 +33,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   let doc;
   let windowInterface;
   let handlers;
+  let element;
   let beforeSubmitStub;
 
   beforeEach(() => {
@@ -53,6 +54,13 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
+    // LinkerManager uses the UrlReplacements service scoped to the element,
+    // but for testing stub in the top-level ampdoc service for simplicity.
+    element = {};
+    const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+    sandbox.stub(Services, 'urlReplacementsForDoc')
+        .withArgs(element).returns(urlReplacements);
+
     handlers = [];
     sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
@@ -64,6 +72,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface.getLocation.returns({
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
+    windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableService(win);
   });
 
@@ -77,18 +86,18 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       },
-    }, null).init();
+    }, /* type */ null, element).init();
 
     expect(handlers.length).to.equal(1);
   });
 
   it('does not register anchor mutator if no linkers config', () => {
-    new LinkerManager(ampdoc, {}, null).init();
+    new LinkerManager(ampdoc, {}, /* type */ null, element).init();
     expect(handlers.length).to.equal(0);
   });
 
   it('does not register anchor mutator if empty linkers config', () => {
-    new LinkerManager(ampdoc, {linkers: {}}, null).init();
+    new LinkerManager(ampdoc, {linkers: {}}, /* type */ null, element).init();
     expect(handlers.length).to.equal(0);
   });
 
@@ -106,7 +115,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       },
-    }, null).init();
+    }, /* type */ null, element).init();
     expect(handlers.length).to.equal(0);
   });
 
@@ -123,7 +132,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       },
-    }, null).init();
+    }, /* type */ null, element).init();
     expect(handlers.length).to.equal(0);
   });
 
@@ -141,7 +150,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       },
-    }, null).init();
+    }, /* type */ null, element).init();
     expect(handlers.length).to.equal(1);
   });
 
@@ -173,7 +182,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       expect(handlers.length).to.equal(1);
       expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
           'https://www.source.com/dest' +
@@ -196,7 +206,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       expect(handlers.length).to.equal(1);
       expect(clickAnchor('https://www.source.com/dest?a=1')).to.equal(
           'https://www.source.com/dest?a=1'
@@ -218,7 +229,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       clock.tick(1000 * 60 * 5); // 5 minutes.
       const linkerUrl = clickAnchor('https://www.source.com/dest?a=1');
 
@@ -249,14 +261,15 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       // testLinker1 should apply to both canonical and source
       // testLinker2 should not
       const canonicalDomainUrl = clickAnchor('https://www.canonical.com/path');
       expect(canonicalDomainUrl).to.contain('testLinker1=');
       expect(canonicalDomainUrl).to.not.contain('testLinker2=');
 
-      const sourceDomainUrl = clickAnchor('https://amp.source.com/path');
+      const sourceDomainUrl = clickAnchor('https://www.source.com/path');
       expect(sourceDomainUrl).to.contain('testLinker1=');
       expect(sourceDomainUrl).to.not.contain('testLinker2=');
 
@@ -291,7 +304,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       const fooDomainUrl = clickAnchor('https://foo.com/path');
       const barDomainUrl = clickAnchor('https://bar.com/path');
 
@@ -314,7 +328,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       const url1 = clickAnchor('https://www.source.com/path');
       const url2 = clickAnchor('https://amp.www.source.com/path');
       const url3 = clickAnchor('https://canonical.com/path');
@@ -351,7 +366,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       const a = clickAnchor('https://www.source.com/path');
       expect(a).to.contain('testLinker1=');
       expect(a).to.not.contain('testLinker2=');
@@ -379,10 +395,111 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       const a = clickAnchor('https://www.source.com');
       expect(a).to.not.contain('testLinker1=');
       expect(a).to.contain('testLinker2=');
+    });
+  });
+
+  it('should only add the linker param once', () => {
+    const config = {
+      linkers: {
+        enabled: true,
+        destinationDomains: ['foo.com'],
+        testLinker1: {
+          ids: {
+            id: '111',
+          },
+        },
+      },
+    };
+
+    return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const fooDomainUrl = clickAnchor('https://foo.com/path');
+      expect(fooDomainUrl).to.contain('testLinker1=');
+
+      const fooDomainUrlSecondClick = clickAnchor('https://foo.com/path');
+      const splitResult = fooDomainUrlSecondClick.split('testLinker1');
+      expect(splitResult.length).to.be.equal(2);
+    });
+  });
+
+  describe('same domain matching', () => {
+    let config;
+
+    beforeEach(() => {
+      windowInterface.getLocation.returns({
+        origin: 'https://amp.source.com',
+      });
+      windowInterface.getHostname.returns('amp.source.com');
+      config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+          },
+        },
+      };
+    });
+
+    it('should not add linker if same domain', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.not.contain('testLinker');
+      });
+    });
+
+    it('should add linker if subdomain is different but friendly', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://m.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should add linker if same domain is in destination domains', () => {
+      const config = {
+        linkers: {
+          testLinker: {
+            enabled: true,
+            proxyOnly: false,
+            ids: {
+              foo: 'bar',
+            },
+            destinationDomains: ['amp.source.com'],
+          },
+        },
+      };
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const url = clickAnchor('https://amp.source.com/');
+        expect(url).to.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is fragment', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '#hello',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
+    it('should not add linker if href is relative', () => {
+      return new LinkerManager(ampdoc, config, null).init().then(() => {
+        const a = {
+          href: '/foo',
+          hostname: 'amp.source.com',
+        };
+        handlers.forEach(handler => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
     });
   });
 
@@ -404,12 +521,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       };
-
-      return new LinkerManager(ampdoc, config, 'googleanalytics')
-          .init().then(() => {
-            const a = clickAnchor('https://www.source.com/path');
-            expect(a).to.contain('testLinker1=');
-          });
+      const lm = new LinkerManager(ampdoc, config, 'googleanalytics', element);
+      return lm.init().then(() => {
+        const a = clickAnchor('https://www.source.com/path');
+        expect(a).to.contain('testLinker1=');
+      });
     });
 
     it('should only add one linker for auto opt-in', () => {
@@ -424,8 +540,10 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       };
-      const p1 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
-      const p2 = new LinkerManager(ampdoc, config, 'googleanalytics').init();
+      const p1 =
+          new LinkerManager(ampdoc, config, 'googleanalytics', element).init();
+      const p2 =
+          new LinkerManager(ampdoc, config, 'googleanalytics', element).init();
       return Promise.all([p1, p2]).then(() => {
         const a = clickAnchor('https://www.source.com/path');
         expect(a).to.not.match(/(testLinker1=.*){2}/);
@@ -445,7 +563,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       };
 
-      new LinkerManager(ampdoc, config, 'somevendor');
+      new LinkerManager(ampdoc, config, 'somevendor', element);
       expect(handlers.length).to.equal(0);
     });
 
@@ -461,7 +579,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       };
 
-      new LinkerManager(ampdoc, config, 'googleanalytics');
+      new LinkerManager(ampdoc, config, 'googleanalytics', element);
       expect(handlers.length).to.equal(0);
     });
 
@@ -493,7 +611,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       };
 
-      new LinkerManager(ampdoc, config, 'googleanalytics');
+      new LinkerManager(ampdoc, config, 'googleanalytics', element);
       expect(handlers.length).to.equal(0);
     });
   });
@@ -534,7 +652,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
             },
           },
         },
-      }, null);
+      }, /* type */ null, element);
 
       return linkerManager.init().then(() => {
         expect(beforeSubmitStub.calledOnce).to.be.true;
@@ -554,7 +672,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
           destinationDomains: ['www.ampproject.com'],
         },
-      }, null);
+      }, /* type */ null, element);
 
       return linkerManager.init().then(() => {
         const form = createForm();
@@ -584,7 +702,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
           destinationDomains: ['www.ampproject.com'],
         },
-      }, null);
+      }, /* type */ null, element);
 
       return linkerManager.init().then(() => {
         const form = createForm();
@@ -613,7 +731,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
           destinationDomains: ['www.ampproject.com'],
         },
-      }, null);
+      }, /* type */ null, element);
 
       return linkerManager.init().then(() => {
         const form = createForm();
@@ -643,7 +761,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
           destinationDomains: ['www.ampproject.com'],
         },
-      }, null);
+      }, /* type */ null, element);
 
       return linkerManager.init().then(() => {
         const form = createForm();
@@ -670,7 +788,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
             },
           },
         },
-      }, null);
+      }, /* type */ null, element);
 
       const manager2 = new LinkerManager(ampdoc, {
         linkers: {
@@ -682,7 +800,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
             },
           },
         },
-      }, null);
+      }, /* type */ null, element);
 
       const p1 = manager1.init();
       const p2 = manager2.init();

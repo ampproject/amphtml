@@ -96,14 +96,16 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/:bid/deposit/:id/', (req, res) => {
+  if (!bank[req.params.bid]) {
+    bank[req.params.bid] = {};
+  }
+  const key = req.params.id;
   log('SERVER-LOG [DEPOSIT]: ', key);
-  if (typeof bank[key] === 'function') {
-    bank[key](req);
+  if (typeof bank[req.params.bid][key] === 'function') {
+    bank[req.params.bid][key](req);
   } else {
-    bank[key] = req;
+    bank[req.params.bid][key] = req;
   }
   res.end();
 });
@@ -113,11 +115,13 @@ app.use('/request-bank/deposit/', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
+  if (!bank[req.params.bid]) {
+    bank[req.params.bid] = {};
+  }
+  const key = req.params.id;
   log('SERVER-LOG [WITHDRAW]: ' + key);
-  const result = bank[key];
+  const result = bank[req.params.bid][key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }
@@ -125,12 +129,22 @@ app.use('/request-bank/withdraw/', (req, res) => {
     res.json({
       headers: result.headers,
       body: result.body,
+      url: result.url,
     });
-    delete bank[key];
+    delete bank[req.params.bid][key];
   };
   if (result) {
     callback(result);
   } else {
-    bank[key] = callback;
+    bank[req.params.bid][key] = callback;
   }
+});
+
+/**
+ * Clean up all pending withdraw & deposit requests.
+ */
+app.use('/request-bank/:bid/teardown/', (req, res) => {
+  bank[req.params.bid] = {};
+  log('SERVER-LOG [TEARDOWN]');
+  res.end();
 });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
 export class AmpAdUIHandler {
@@ -65,9 +66,34 @@ export class AmpAdUIHandler {
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
   applyNoContentUI() {
-    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+    if (getAdContainer(this.element_) === 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
       this.baseInstance_./*OK*/collapse();
+      return;
+    }
+
+    if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
+
+      /**
+       * Special case: Force collapse the ad if it is the,
+       * only and direct child of a flying carpet.
+       * Also, this will not handle
+       * the amp-layout case for now, as it could be
+       * inefficient. And we have not seen an amp-layout
+       * used with flying carpet and ads yet.
+       */
+
+      const flyingCarpetElements =
+        ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
+      const flyingCarpetElement = flyingCarpetElements[0];
+
+      flyingCarpetElement.getImpl().then(implementation => {
+        const children = implementation.getChildren();
+
+        if (children.length === 1 && children[0] === this.element_) {
+          this.baseInstance_./*OK*/collapse();
+        }
+      });
       return;
     }
 
