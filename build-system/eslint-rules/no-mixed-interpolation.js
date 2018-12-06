@@ -48,7 +48,7 @@ const transformableMethods = [
  * @return {boolean}
  */
 function isBinaryConcat(node) {
-  return node.type === 'BinaryExpression' && node.operator === '+'
+  return node.type === 'BinaryExpression' && node.operator === '+';
 }
 
 /**
@@ -63,14 +63,16 @@ function isLiteralString(node) {
  * @param {!Node} node
  * @return {boolean}
  */
-function isMessageString(node) {
-  if (node.type === 'Literal') {
-    return isLiteralString(node);
+function hasTemplateLiteral(node) {
+  if (node.type === 'TemplateLiteral') {
+    return true;
   }
+
   // Allow for string concatenation operations.
   if (isBinaryConcat(node)) {
-    return isMessageString(node.left) && isMessageString(node.right);
+    return hasTemplateLiteral(node.left) && hasTemplateLiteral(node.right);
   }
+
   return false;
 }
 
@@ -88,38 +90,7 @@ const selector = transformableMethods.map(method => {
 
 
 module.exports = {
-  //meta: {
-    //fixable: 'code',
-  //},
   create(context) {
-    const source = context.getSourceCode();
-
-    const SIGIL_START = '%%%START';
-    const SIGIL_END = 'END%%%';
-    const messageRegex = new RegExp(`%s|${SIGIL_START}([^]*?)${SIGIL_END}`, 'g');
-    function buildMessage(arg) {
-      if (isLiteralString(arg)) {
-        return arg.value;
-      }
-
-      if (isBinaryConcat(arg)) {
-        return buildMessage(arg.left) + buildMessage(arg.right);
-      }
-
-      if (arg.type === 'TemplateLiteral') {
-        let quasied = '';
-        let i = 0;
-        for (; i < arg.quasis.length - 1; i++) {
-          quasied += arg.quasis[i].value.cooked;
-          quasied += buildMessage(arg.expressions[i]);
-        }
-        quasied += arg.quasis[i].value.cooked;
-        return quasied;
-      }
-
-      return `${SIGIL_START}${source.getText(arg)}${SIGIL_END}`;
-    };
-
     return {
       [selector]: function(node) {
         // Don't evaluate or transform log.js
@@ -131,8 +102,7 @@ module.exports = {
         // dev.assert() // ignore
         const callee = node.callee;
         const calleeObject = callee.object;
-        if (!calleeObject ||
-            calleeObject.type !== 'CallExpression') {
+        if (!calleeObject || calleeObject.type !== 'CallExpression') {
           return;
         }
 
@@ -158,51 +128,23 @@ module.exports = {
         }
 
         let errMsg = [
-          `Must use a literal string for argument[${metadata.startPos}]`,
-          `on ${metadata.name} call.`
+          'Mixing Template Strings and %s interpolation for log methods is',
+          `not supported on ${metadata.name} call. Please either use template `,
+          'literals or use the log strformat(%s) style interpolation ',
+          'exclusively',
         ].join(' ');
 
-        if (metadata.variadic) {
-          errMsg += '\n\tIf you want to pass data to the string, use `%s` ';
-          errMsg += 'placeholders and pass additional arguments';
+        // If method is not variadic we don't need to check.
+        if (!metadata.variadic) {
+         return;
         }
 
-        if (!isMessageString(argToEval)) {
+        const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];
+
+        if (hasVariadicInterpolation && hasTemplateLiteral(argToEval)) {
           context.report({
             node: argToEval,
             message: errMsg,
-            fix: function(fixer) {
-              if (!metadata.variadic) {
-                return;
-              }
-
-              let message = '';
-              try {
-                message = buildMessage(argToEval);
-              } catch (e) {
-                return;
-              }
-
-              let args = [];
-              let argI = metadata.startPos + 1;
-              message = message.replace(messageRegex, (match, sourceText) => {
-                let arg;
-                if (match === '%s') {
-                  arg = source.getText(node.arguments[argI]);
-                  argI++;
-                } else {
-                  arg = sourceText;
-                }
-                args.push(arg);
-                return '%s';
-              });
-
-              message = message.replace(/'/g, '\\\'');
-              return fixer.replaceTextRange(
-                  [argToEval.start, node.end - 1],
-                  `'${message}', ${args.join(', ')}`
-              );
-            }
           });
         }
       },
