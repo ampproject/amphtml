@@ -448,7 +448,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     this.renderItems_ = {data, append, resolver, rejecter,
-      'payload': opt_payload};
+      payload: opt_payload};
 
     if (this.renderedItems_ && append) {
       this.renderItems_.data = this.renderedItems_.concat(data);
