@@ -77,7 +77,7 @@
   overflow: hidden !important;
 }
 
-.i-amphtml-story-bookend-inner > div {
+.i-amphtml-story-bookend-top-level {
   margin-left: 24px !important;
   margin-right: 24px !important;
 }
