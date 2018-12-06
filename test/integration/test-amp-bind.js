@@ -17,10 +17,9 @@ import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
-import {createFixtureIframe} from '../../testing/iframe';
+import {createFixtureIframe, poll} from '../../testing/iframe';
 
-// TODO(#19647): Unskip tests
-describe.configure().ifNewChrome().skip('amp-bind', function() {
+describe.configure().ifNewChrome().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -50,12 +49,21 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       // Most fixtures have a single AMP element that will be laid out.
-      const loadStartsToExpect =
+      const numberOfAmpComponents =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
-      return Promise.all([
+      const promises = [
         fixture.awaitEvent(BindEvents.INITIALIZE, 1),
-        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
-      ]);
+      ];
+      if (numberOfAmpComponents > 0) {
+        promises.push(
+            poll('All AMP components are laid out', () => {
+              const laidOutElements =
+                  fixture.doc.querySelectorAll('.i-amphtml-layout').length;
+              return laidOutElements === numberOfAmpComponents;
+            })
+        );
+      }
+      return Promise.all(promises);
     });
   }
 

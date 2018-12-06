@@ -143,7 +143,9 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
+      // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+      flags: ['--no-sandbox --remote-debugging-port=9222']
+          .concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
