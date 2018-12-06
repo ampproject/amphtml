@@ -418,7 +418,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       },
     };
 
-    return new LinkerManager(ampdoc, config, null).init().then(() => {
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(() => {
       const fooDomainUrl = clickAnchor('https://foo.com/path');
       expect(fooDomainUrl).to.contain('testLinker1=');
 
@@ -450,14 +451,16 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
 
     it('should not add linker if same domain', () => {
-      return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
         const url = clickAnchor('https://amp.source.com/');
         expect(url).to.not.contain('testLinker');
       });
     });
 
     it('should add linker if subdomain is different but friendly', () => {
-      return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
         const url = clickAnchor('https://m.source.com/');
         expect(url).to.contain('testLinker');
       });
@@ -476,14 +479,16 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           },
         },
       };
-      return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
         const url = clickAnchor('https://amp.source.com/');
         expect(url).to.contain('testLinker');
       });
     });
 
     it('should not add linker if href is fragment', () => {
-      return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
         const a = {
           href: '#hello',
           hostname: 'amp.source.com',
@@ -494,7 +499,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
 
     it('should not add linker if href is relative', () => {
-      return new LinkerManager(ampdoc, config, null).init().then(() => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
         const a = {
           href: '/foo',
           hostname: 'amp.source.com',
@@ -506,7 +512,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   });
 
   describe('when CID API enabled', () => {
-
     beforeEach(() => {
       addCidApiMeta();
     });
