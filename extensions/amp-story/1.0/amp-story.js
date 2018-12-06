@@ -914,14 +914,11 @@ export class AmpStory extends AMP.BaseElement {
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
         this.element.querySelectorAll('amp-story-page'),
-        (pageEl, index) => {
-          return pageEl.getImpl().then(pageImpl => {
-            this.pages_[index] = pageImpl;
-          });
-        });
+        pageEl => pageEl.getImpl());
 
-    return Promise.all(pageImplPromises).then(() => {
-      this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.pages_.length);
+    return Promise.all(pageImplPromises).then(pages => {
+      this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
+      this.pages_ = pages;
     });
   }
 
