@@ -19,7 +19,6 @@ import {map} from './utils/object.js';
 
 let container;
 
-
 /**
  * Creates the html helper for the doc.
  *
