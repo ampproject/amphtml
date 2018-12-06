@@ -14,8 +14,8 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome-stable
-  - export DISPLAY=:99.0
+  # - export CHROME_BIN=google-chrome-stable
+  # - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
   - curl -o- -L https://yarnpkg.com/install.sh | bash
