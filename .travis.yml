@@ -33,6 +33,7 @@ branches:
     - /^amp-release-.*$/
 addons:
   chrome: beta
+  firefox: latest
   hosts:
     - ads.localhost
     - iframe.localhost
