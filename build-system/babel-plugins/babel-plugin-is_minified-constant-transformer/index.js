@@ -26,12 +26,6 @@ module.exports = function(babelTypes) {
       VariableDeclarator(path) {
         const {node} = path;
         const {id, init} = node;
-        if (id.name == 'IS_DEV'
-            && init.type === 'BooleanLiteral'
-            && init.value === true) {
-          init.value = !t.booleanLiteral(true);
-          return;
-        }
         if (id.name == 'IS_MINIFIED'
             && init.type === 'BooleanLiteral'
             && init.value === false) {

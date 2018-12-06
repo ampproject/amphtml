@@ -19,6 +19,8 @@ const defaultPlugins = [
       './babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve(
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
+  require.resolve(
+      './babel-plugins/babel-plugin-is_minified-constant-transformer'),
 ];
 
 module.exports = {
@@ -52,7 +54,7 @@ module.exports = {
       pluginsToApply = pluginsToApply.concat([
         [
           require.resolve(
-              './babel-plugins/babel-plugin-amp-constant-transformer'
+              './babel-plugins/babel-plugin-is_dev-constant-transformer'
           ),
         ],
       ]);
