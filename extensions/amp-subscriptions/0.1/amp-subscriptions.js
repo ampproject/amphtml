@@ -296,7 +296,7 @@ export class SubscriptionService {
           }
       );
 
-      isStoryDocument(this.ampdoc_.win.document).then(isStory => {
+      isStoryDocument(this.ampdoc_).then(isStory => {
         // Delegates the platform selection and activation call if is story.
         this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
       });

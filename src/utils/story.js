@@ -31,14 +31,16 @@ export function descendsFromStory(element) {
 
 /**
  * Returns true if the document is an amp-story.
- * @param {!Document} doc
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
  */
-export function isStoryDocument(doc) {
+export function isStoryDocument(ampdoc) {
   return new Promise(resolve => {
-    waitForChild(doc.documentElement,
-        () => !!(doc.body && doc.body.firstElementChild), () => {
-          resolve(doc.body.firstElementChild.tagName === 'AMP-STORY');
-        });
+    ampdoc.whenBodyAvailable().then(() => {
+      const body = ampdoc.getBody();
+      waitForChild(body, () => !!body.firstElementChild, () => {
+        resolve(body.firstElementChild.tagName === 'AMP-STORY');
+      });
+    });
   });
 }
