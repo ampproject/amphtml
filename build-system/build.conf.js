@@ -50,7 +50,11 @@ module.exports = {
     }
     if (!isForTesting) {
       pluginsToApply = pluginsToApply.concat([
-        [require.resolve('./babel-plugins/babel-plugin-amp-constant-transformer')],
+        [
+          require.resolve(
+              './babel-plugins/babel-plugin-amp-constant-transformer'
+          ),
+        ],
       ]);
     }
     return pluginsToApply;
