@@ -77,7 +77,7 @@ A `cookies` example configuration looks like
 The `enabled` value can be used to override default vendor settings.
 
 ##### Cookie Names
-Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key value pair. That key should be 'value', and its value should be the macro that determines the information stored in the cookie.
+Each key within the `cookies` config object defines the cookie name. It's value needs to be an object containing a single key-value pair. That key should be named `value`, and its value should be the macro that determines the information stored in the cookie.
 
 Note: The following key values are reserved, and cannot be used as cookie names. They are ['`referrerDomains`', '`enabled`', '`cookiePath`', '`cookieMaxAge`', '`cookieSecure`', '`cookieDomain`'].
 
