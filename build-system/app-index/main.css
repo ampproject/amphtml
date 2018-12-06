@@ -160,7 +160,7 @@ a.find-icon:hover {
 }
 code,
 .code,
-.file-list .file-link, .file-list-fuzzy-search  {
+.file-list .file-link, .file-list-search  {
   font-family: 'Fira Code', 'Inconsolata', Menlo, Consolas, monospace;
 }
 a {
@@ -203,6 +203,8 @@ a.underlined::before {
 }
 .text-input:focus {
   border-color: #0389ff;
+  border-bottom-width: 2px;
+  margin-bottom: -7px;
   outline: none;
 }
 
@@ -224,24 +226,25 @@ a.underlined::before {
   margin-left: auto;
  }
 
-.file-list-fuzzy-search {
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-
-  position: relative;
-  top: -12px;
-  padding-left: 5px;
-  padding-top: 20px;
-  width: 285px;
+.file-list-search {
+  flex: 1;
   font-size: 18px;
-  font-weight: bold;
-  border-bottom: solid #000 2px;
+  padding: 4px 0;
+  font-weight: normal;
+  border: none;
+  border-bottom: solid #ddd 1px;
+  background: transparent;
+  margin: 0 20px 0 8px;
 }
 
-.file-list-fuzzy-search::placeholder {
-  font-size: 14px;
+.file-list-search:focus {
+  outline: none;
+  border-color: #0389ff;
+  border-bottom-width: 2px;
+  margin-bottom: -1px;
+}
+
+.file-list-search::placeholder {
   font-weight: normal;
 }
 
@@ -325,8 +328,6 @@ header li.divider {
     padding-right: 0;
     flex: 0 0 100%;
     margin-bottom: 20px;
-  }
-  .file-list div[role="list"] {
   }
   .file-list .file-link {
     display: block;

@@ -100,27 +100,23 @@ const Header = ({isMainPage, links}) => html`
     </ul>
   </header>`;
 
-const BasePathSearch = basepath => html`
-    ${basepath}
-    <amp-state id="basePathSearch">
-      <script type="application/json">
-        {
-          "listSrc": "/dashboard/api/listing?path=${basepath}"
-        }
-      </script>
-    </amp-state>
-    <input type="text"
-      class="file-list-fuzzy-search"
-      placeholder="Fuzzy search in current file list"
-      pattern="[a-zA-Z0-9-]+"
-      on="input-debounced:AMP.setState({
-        basePathSearch: {
-          listSrc: '/dashboard/api/listing?path=${basepath}&search=' +
-          event.value
-        }
-      })">
-    </input>
-  `;
+const BasePathSearch = ({basepath}) =>
+  html`<amp-state id="basePathSearch">
+    <script type="application/json">
+      {
+        "listSrc": "/dashboard/api/listing?path=${basepath}"
+      }
+    </script>
+  </amp-state>
+  <input type="text"
+    class="file-list-search"
+    placeholder="Fuzzy Search"
+    pattern="[a-zA-Z0-9-]+"
+    on="input-debounced: AMP.setState({
+      basePathSearch: {
+        listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value
+      }
+    })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
@@ -212,8 +208,9 @@ const renderTemplate = ({
       <div class="wrap">
         <div class="file-list-heading">
           <h3 class="code" id="basepath">
-            ${BasePathSearch(basepath)}
+            ${basepath}
           </h3>
+          ${BasePathSearch({basepath})}
           <div class="file-list-right-section">
             <amp-state id="documentMode">
               <script type="application/json">
