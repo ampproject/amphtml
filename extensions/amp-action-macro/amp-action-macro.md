@@ -57,9 +57,10 @@ Used to uniquely identify the action. This is referenced in an action invokation
  
 ##### action
 The action to invoke. Any valid amp action is allowed here. <a href="https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events">See Actions and events in AMP.</a>
- 
+
+e.g.
+
 ```html
- e.g.
  <amp-action-macro
     id="action1"
     action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
