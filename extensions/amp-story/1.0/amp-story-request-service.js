@@ -16,10 +16,10 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
+import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
@@ -89,7 +89,7 @@ export class AmpStoryRequestService {
       return Promise.resolve(null);
     }
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
+    return Services.urlReplacementsForDoc(this.storyElement_)
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => this.xhr_.fetchJson(url, opts))
         .then(response => {

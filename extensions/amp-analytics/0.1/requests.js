@@ -135,7 +135,8 @@ export class RequestHandler {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
-        this.ampdoc_, params, expansionOption, bindings, this.whiteList_)
+        this.variableService_, this.urlReplacementService_, params,
+        expansionOption, bindings, this.whiteList_)
         .then(params => {
           return dict({
             'trigger': trigger['on'],
@@ -299,12 +300,14 @@ export class RequestHandler {
  * @param {?JsonObject} configParams
  * @param {!JsonObject} trigger
  * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Element} element
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  ampdoc, msg, configParams, trigger, expansionOption) {
+  ampdoc, msg, configParams, trigger, expansionOption, element)
+{
   const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+  const urlReplacementService = Services.urlReplacementsForDoc(element);
 
   const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
@@ -321,7 +324,8 @@ export function expandPostMessage(
   return basePromise.then(expandedMsg => {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     //return base url with the appended extra url params;
-    return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
+    return expandExtraUrlParams(variableService, urlReplacementService, params,
+        expansionOption, bindings)
         .then(extraUrlParams => {
           return defaultSerializer(expandedMsg, [
             dict({'extraUrlParams': extraUrlParams}),
@@ -332,7 +336,8 @@ export function expandPostMessage(
 
 /**
  * Function that handler extraUrlParams from config and trigger.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./variables.VariableService} variableService
+ * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
  * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
@@ -340,11 +345,9 @@ export function expandPostMessage(
  * @return {!Promise<!Object>}
  * @private
  */
-function expandExtraUrlParams(
-  ampdoc, params, expansionOption, bindings, opt_whitelist) {
-  const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-
+function expandExtraUrlParams(variableService, urlReplacements, params,
+  expansionOption, bindings, opt_whitelist)
+{
   const requestPromises = [];
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.

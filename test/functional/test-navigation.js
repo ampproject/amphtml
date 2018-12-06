@@ -60,19 +60,26 @@ describes.sandboxed('Navigation', {}, () => {
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      const {documentElement} = doc;
 
       handler = Services.navigationForDoc(doc);
       handler.isIframed_ = true;
+
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
+
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
+
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
+
       win.open = function() {};
       winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
         return {};
       });
+
       const viewport = Services.viewportForDoc(doc);
       scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
+
       const history = Services.historyForDoc(doc);
       replaceStateForTargetPromise = Promise.resolve();
       replaceStateForTargetStub = sandbox.stub(
@@ -83,6 +90,10 @@ describes.sandboxed('Navigation', {}, () => {
       anchor.href = 'https://www.google.com/other';
       doc.body.appendChild(anchor);
       event.target = anchor;
+
+      const urlReplacements = Services.urlReplacementsForDoc(documentElement);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(anchor).returns(urlReplacements);
 
       elementWithId = doc.createElement('div');
       elementWithId.id = 'test';
@@ -660,6 +671,13 @@ describes.sandboxed('Navigation', {}, () => {
         anchor.href = 'http://ads.localhost:8000/example';
         doc.body.appendChild(anchor);
         event.target = anchor;
+
+        // Navigation uses the UrlReplacements service scoped to the event
+        // target, but for testing stub in the top-level service for simplicity.
+        const {documentElement} = parentWin.document;
+        const urlReplacements = Services.urlReplacementsForDoc(documentElement);
+        sandbox.stub(Services, 'urlReplacementsForDoc')
+            .withArgs(anchor).returns(urlReplacements);
 
         elementWithId = doc.createElement('div');
         elementWithId.id = 'test';
