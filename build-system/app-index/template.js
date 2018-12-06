@@ -117,16 +117,9 @@ const BasePathSearch = (basepath) => html`
     </input>
   `;
 
-
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
-
 const ExamplesDocumentModeSelect = ({selectModePrefix}) => html`
-  <amp-state id="documentMode">
-    <script type="application/json">
-    ${JSON.stringify({selectModePrefix})}
-    </script>
-  </amp-state>
   <label for="examples-mode-select">
     Document mode:
     <select id="examples-mode-select"
@@ -145,26 +138,6 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
     selectModePrefix,
   });
 
-
-const FileListItem = ({name, href, selectModePrefix}) => {
-  if (!/^\/examples/.test(href) || !/\.html$/.test(href)) {
-    return html`<li>
-      <a class="file-link" href="${href}">${name}</a>
-    </li>`;
-  }
-
-  const hrefSufix = href.replace(/^\//, '');
-
-  return html`<li>
-    <a class="file-link"
-      [href]="documentMode.selectModePrefix + '${hrefSufix}'"
-      href="${selectModePrefix + hrefSufix}">
-      ${name}
-    </a>
-  </li>`;
-};
-
-
 const FileList = (basepath) => html`
   <amp-list [src]="basePathSearch.listSrc"
     src="/dashboard/api/listing?path=${basepath}"
@@ -180,7 +153,7 @@ const FileList = (basepath) => html`
     <template type="amp-mustache">
       <div class="file-link-container">
         <a class="file-link"
-          [href]="documentMode.selectModePrefix + '${basepath.substring(1)}{{.}}'">
+          [href]="(documentMode.selectModePrefix || '') + '${basepath.substring(1)}{{.}}'">
           {{.}}
         </a>
       </div>
@@ -196,29 +169,9 @@ const FileList = (basepath) => html`
   </amp-list>
   `;
 
-
-const getFileSet = ({basepath, fileSet, selectModePrefix}) => {
-  // Set at top-level so RegEx is compiled once per call.
-  const documentLinkRegex = /\.html$/;
-  const examplesLinkRegex = /^\/examples\//;
-
-  return fileSet.map(name => {
-    const isExamplesDocument = examplesLinkRegex.test(basepath) &&
-      documentLinkRegex.test(name);
-
-    const prefix = isExamplesDocument ?
-      basepath.replace(/^\//, selectModePrefix) :
-      basepath;
-
-    return {name, href: prefix + name};
-  });
-};
-
-
 const ProxyFormOptional = ({isMainPage}) => {
   return isMainPage ? ProxyForm() : '';
 };
-
 
 const selectModePrefix = '/';
 
@@ -257,6 +210,11 @@ const renderTemplate = ({
             ${BasePathSearch(basepath)}
           </h3>
           <div class="file-list-right-section">
+            <amp-state id="documentMode">
+              <script type="application/json">
+              ${JSON.stringify({selectModePrefix})}
+              </script>
+            </amp-state>
             ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
             <a href="/~" class="underlined">List root directory</a>
           </div>

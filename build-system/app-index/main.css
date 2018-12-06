@@ -253,7 +253,7 @@ a.underlined::before {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: start;
+  justify-content: space-between;
 }
 
 .file-list .list-overflow[overflow] {
