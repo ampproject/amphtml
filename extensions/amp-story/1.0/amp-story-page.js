@@ -39,6 +39,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
+import {LocalizedStringId} from './localization';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
@@ -95,7 +96,7 @@ const REWIND_TIMEOUT_MS = 350;
 const buildPlayMessageElement = element =>
   htmlFor(element)`
       <button role="button" class="i-amphtml-story-page-play-button">
-        Play video
+        <span class="i-amphtml-story-page-play-label"></span>
         <span class='i-amphtml-story-page-play-icon'></span>
       </button>`;
 
@@ -871,7 +872,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
+    const localizationService = Services.localizationService(this.win);
+
     this.playMessageEl_ = buildPlayMessageElement(this.element);
+    const labelEl =
+        this.playMessageEl_.querySelector('.i-amphtml-story-page-play-label');
+    labelEl.textContent = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
@@ -880,7 +887,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           .then(() => this.playAllMedia_());
     });
 
-    this.element.appendChild(this.playMessageEl_);
+    this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
   }
 
   /**
@@ -890,7 +897,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   togglePlayMessage_(isActive) {
     if (!isActive) {
-      this.playMessageEl_ && toggle(this.playMessageEl_, false);
+      this.playMessageEl_ &&
+          this.mutateElement(() =>
+            toggle(dev().assertElement(this.playMessageEl_), false));
       return;
     }
 
@@ -898,7 +907,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.buildAndAppendPlayMessage_();
     }
 
-    toggle(dev().assertElement(this.playMessageEl_), true);
+    this.mutateElement(() =>
+      toggle(dev().assertElement(this.playMessageEl_), true));
   }
 
   /**
