@@ -100,21 +100,14 @@ const Header = ({isMainPage, links}) => html`
     </ul>
   </header>`;
 
-const BasePathSearch = ({basepath}) =>
-  html`<amp-state id="basePathSearch">
-    <script type="application/json">
-      {
-        "listSrc": "/dashboard/api/listing?path=${basepath}"
-      }
-    </script>
-  </amp-state>
-  <input type="text"
+const FileListSearch = ({basepath}) =>
+  html`<input type="text"
     class="file-list-search"
     placeholder="Fuzzy Search"
     pattern="[a-zA-Z0-9-]+"
     on="input-debounced: AMP.setState({
-      basePathSearch: {
-        listSrc: '/dashboard/api/listing?path=${basepath}&search=' + event.value
+      fileListState: {
+        src: '/dashboard/api/listing?path=${basepath}&search=' + event.value
       }
     })">`;
 
@@ -139,8 +132,13 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
     selectModePrefix,
   });
 
-const FileList = basepath => html`
-  <amp-list [src]="basePathSearch.listSrc"
+const FileList = ({basepath}) =>
+  html`<amp-state id="fileListState">
+    <script type="application/json">
+      {"src": "/dashboard/api/listing?path=${basepath}"}
+    </script>
+  </amp-state>
+  <amp-list [src]="filelistState.src"
     src="/dashboard/api/listing?path=${basepath}"
     items="."
     layout="fixed-height"
@@ -167,9 +165,7 @@ const FileList = basepath => html`
       class="list-overflow">
       Show more
     </div>
-
-  </amp-list>
-  `;
+  </amp-list>`;
 
 const ProxyFormOptional = ({isMainPage}) => {
   return isMainPage ? ProxyForm() : '';
@@ -210,7 +206,7 @@ const renderTemplate = ({
           <h3 class="code" id="basepath">
             ${basepath}
           </h3>
-          ${BasePathSearch({basepath})}
+          ${FileListSearch({basepath})}
           <div class="file-list-right-section">
             <amp-state id="documentMode">
               <script type="application/json">
@@ -221,7 +217,7 @@ const renderTemplate = ({
             <a href="/~" class="underlined">List root directory</a>
           </div>
         </div>
-        ${FileList(basepath)}
+        ${FileList({basepath})}
       </div>
     </div>
     <div class="center">
