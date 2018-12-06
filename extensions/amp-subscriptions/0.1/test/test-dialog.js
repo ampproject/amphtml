@@ -82,7 +82,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     const content2 = createElementWithAttributes(doc, 'div', {
       style: 'height:21px',
     });
-    dialog.open(content, false)
+    dialog.open(content, false);
     return vsync.mutatePromise(() => {}).then(() => {
       expect(content.parentNode).to.equal(dialog.getRoot());
       return dialog.open(content2, false);
