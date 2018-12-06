@@ -57,7 +57,7 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   });
 
   // (TODO, #19625): test is flakey
-  it.skip('should open content when invisible', () => {
+  it('should open content when invisible', () => {
     const promise = dialog.open(content, false);
     expect(dialog.getRoot()).to.have.display('none');
     return vsync.mutatePromise(() => {}).then(() => {
@@ -82,7 +82,8 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     const content2 = createElementWithAttributes(doc, 'div', {
       style: 'height:21px',
     });
-    return dialog.open(content, false).then(() => {
+    dialog.open(content, false)
+    return vsync.mutatePromise(() => {}).then(() => {
       expect(content.parentNode).to.equal(dialog.getRoot());
       return dialog.open(content2, false);
     }).then(() => {
