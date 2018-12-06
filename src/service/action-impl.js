@@ -745,19 +745,28 @@ export class ActionService {
  * @private
  */
 function isActionWhitelisted_(invocation, whitelist) {
-  const tagOrTargetRegex = new RegExp('^' + invocation.tagOrTarget + '$', 'i');
-  let invocationMethodRegex = new RegExp('^' + invocation.method + '$', 'i');
-  const component = invocation.node.implementation_;
-  if (invocation.method == DEFAULT_METHOD && component
-      && component.defaultActionAlias_) {
-    invocationMethodRegex = new RegExp(
-        '^' + component.defaultActionAlias_ + '$', 'i');
+  const {method, node, tagOrTarget} = invocation;
+  const tagOrTargetRegex = caseInsensitiveMatch(tagOrTarget);
+  let invocationMethodRegex = caseInsensitiveMatch(method);
+  const defaultActionAlias = node.getDefaultActionAlias();
+  if (method == DEFAULT_METHOD && (node
+      && defaultActionAlias)) {
+    invocationMethodRegex = caseInsensitiveMatch(defaultActionAlias);
   }
 
   return whitelist.some(({tagOrTarget, method}) => {
     return (tagOrTarget === '*' || tagOrTargetRegex.test(tagOrTarget)) &&
         (invocationMethodRegex.test(method));
   });
+}
+
+/**
+ * Generate a case insensitive regex with the provided string.
+ * @param {string} toMatch
+ * @return {RegExp}
+ */
+function caseInsensitiveMatch(toMatch) {
+  return new RegExp('^' + toMatch + '$', 'i');
 }
 
 /**

@@ -184,6 +184,14 @@ export class BaseElement {
   }
 
   /**
+   * The element's default action alias.
+   * @return {?string}
+   */
+  getDefaultActionAlias() {
+    return this.defaultActionAlias_;
+  }
+
+  /**
   * This is the priority of loading elements (layoutCallback). Used only to
   * determine layout timing and preloading priority. Does not affect build time,
   * etc.
