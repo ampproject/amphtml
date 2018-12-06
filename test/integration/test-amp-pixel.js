@@ -19,37 +19,30 @@ import {RequestBank} from '../../testing/test-helper';
 import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
-const RequestId = {
-  MACRO: 'pixel-macro',
-  HAS_REFERRER: 'pixel-has-referrer',
-  NO_REFERRER: 'pixel-no-referrer',
-};
-
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
-  this.timeout(15000);
+  this.timeout(1000);
 
   describes.integration('amp-pixel macro integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(
-        RequestId.MACRO)}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
+    body: `<amp-pixel
+    src="${RequestBank.getUrl()}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
     params: {
       a: 123,
     },
   }, () => {
     it('should expand the TITLE macro', () => {
-      return RequestBank.withdraw(RequestId.MACRO)
-          .then(req => {
-            expect(req.url)
-                .to.equal('/hello-world?title=AMP%20TEST&qp=123');
-            expect(req.headers.host).to.be.ok;
-          });
+      return RequestBank.withdraw().then(req => {
+        expect(req.url)
+            .to.equal('/hello-world?title=AMP%20TEST&qp=123');
+        expect(req.headers.host).to.be.ok;
+      });
     });
   });
 
   describes.integration('amp-pixel referrer integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(RequestId.HAS_REFERRER)}">`,
+    body: `<amp-pixel src="${RequestBank.getUrl()}">`,
   }, () => {
     it('should keep referrer if no referrerpolicy specified', () => {
-      return RequestBank.withdraw(RequestId.HAS_REFERRER).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.be.ok;
       });
@@ -57,11 +50,11 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   });
 
   describes.integration('amp-pixel no-referrer integration test', {
-    body: `<amp-pixel src="${RequestBank.getUrl(RequestId.NO_REFERRER)}"
+    body: `<amp-pixel src="${RequestBank.getUrl()}"
              referrerpolicy="no-referrer">`,
   }, () => {
     it('should remove referrer if referrerpolicy=no-referrer', () => {
-      return RequestBank.withdraw(RequestId.NO_REFERRER).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.not.be.ok;
       });
