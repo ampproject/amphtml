@@ -16,12 +16,6 @@
 
 import {RequestBank} from '../../testing/test-helper';
 
-const RequestId = {
-  PIXEL: 'user-error-amp-pixel',
-  IMG: 'user-error-amp-img',
-  THIRD_PARTY: 'user-error-3p',
-};
-
 describe.configure().skipIfPropertiesObfuscated()
     .skipSafari().skipEdge().run('user-error', function() {
       //TODO(zhouyx, #11459): Unskip the test on safari.
@@ -35,7 +29,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(RequestId.PIXEL)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -52,7 +46,7 @@ describe.configure().skipIfPropertiesObfuscated()
                `,
       }, () => {
         it('should ping correct host with amp-pixel user().assert err', () => {
-          return RequestBank.withdraw(RequestId.PIXEL);
+          return RequestBank.withdraw();
         });
       });
 
@@ -72,7 +66,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(RequestId.IMG)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -85,7 +79,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with amp-img user().error err', () => {
-          return RequestBank.withdraw(RequestId.IMG);
+          return RequestBank.withdraw();
         });
       });
 
@@ -106,7 +100,7 @@ describe.configure().skipIfPropertiesObfuscated()
           <script type="application/json">
             {
               "requests": {
-                "error": "${RequestBank.getUrl(RequestId.THIRD_PARTY)}"
+                "error": "${RequestBank.getUrl()}"
               },
               "triggers": {
                 "userError": {
@@ -119,7 +113,7 @@ describe.configure().skipIfPropertiesObfuscated()
         </amp-analytics>`,
       }, () => {
         it('should ping correct host with 3p error message', () => {
-          return RequestBank.withdraw(RequestId.THIRD_PARTY);
+          return RequestBank.withdraw();
         });
       });
     });
