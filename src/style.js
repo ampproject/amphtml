@@ -156,6 +156,24 @@ export function setStyles(element, styles) {
 
 
 /**
+ * Asserts that the style is not the `display` style.
+ * This is the only possible way to pass a dynamic style to setStyle.
+ *
+ * If you wish to set `display`, use the `toggle` helper instead. This is so
+ * changes to display can trigger necessary updates. See #17475.
+ *
+ * @param {string} style
+ * @return {string}
+ */
+export function assertNotDisplay(style) {
+  if (style === 'display') {
+    dev().error('STYLE', '`display` style detected. You must use toggle ' +
+      'instead.');
+  }
+  return style;
+}
+
+/**
  * Asserts that the styles does not contain the `display` style.
  * This is the only possible way to pass a dynamic styles object to setStyles
  * and setImportantStyles.
@@ -174,6 +192,23 @@ export function assertDoesNotContainDisplay(styles) {
   return styles;
 }
 
+/**
+ * Sets the initial display style of an element. This is a last resort. If you
+ * can set the initial display using CSS, YOU MUST.
+ * DO NOT USE THIS TO ARBITRARILY SET THE DISPLAY STYLE AFTER INITIAL SETUP.
+ *
+ * @param {!Element} el
+ * @param {string} value
+ */
+export function setInitialDisplay(el, value) {
+  const {style} = el;
+  dev().assert(value !== '' && value !== 'none', 'Initial display value must ' +
+    'not be "none". Use toggle instead.');
+  dev().assert(!style['display'], 'setInitialDisplay MUST NOT be used for ' +
+    'resetting the display style. If you are looking for display:none ' +
+    'toggling, use toggle instead.');
+  style['display'] = value;
+}
 
 
 /**
@@ -183,9 +218,13 @@ export function assertDoesNotContainDisplay(styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = getStyle(element, 'display') == 'none';
+    opt_display = element.hasAttribute('hidden');
   }
-  setStyle(element, 'display', opt_display ? '' : 'none');
+  if (opt_display) {
+    element.removeAttribute('hidden');
+  } else {
+    element.setAttribute('hidden', '');
+  }
 }
 
 /**

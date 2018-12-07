@@ -78,6 +78,19 @@ const validEvents = [
   'unmuted',
 ];
 
+/**
+ * @param {function()} win
+ * @param {*} opt_initializer
+ * @return {function()}
+ * @visibleForTesting
+ */
+export function getVideoJs(win, opt_initializer) {
+  return userAssert(
+      opt_initializer || /** @type (function()) */ (win.videojs),
+      'Video.JS not imported or initializer undefined.');
+}
+
+
 /** @visibleForTesting */
 export class AmpVideoIntegration {
 
@@ -182,14 +195,19 @@ export class AmpVideoIntegration {
   /**
    * @param {string} type
    * @param {*} obj
+   * @param {function()=} opt_initializer For VideoJS, this optionally takes a
+   *    reference to the `videojs` function. If not provided, this reference
+   *    will be taken from the `window` object.
    */
-  listenTo(type, obj) {
+  listenTo(type, obj, opt_initializer) {
     switch (type.toLowerCase()) {
       case 'jwplayer':
+        userAssert(!opt_initializer,
+            'jwplayer integration does not take an initializer');
         this.listenToJwPlayer_(obj);
         break;
       case 'videojs':
-        this.listenToVideoJs_(obj);
+        this.listenToVideoJs_(obj, opt_initializer);
         break;
       default:
         userAssert(false, `Invalid listener type ${type}.`);
@@ -238,30 +256,39 @@ export class AmpVideoIntegration {
 
   /**
    * @param {!Element} element
+   * @param {function()=} opt_initializer
    * @private
    */
-  listenToVideoJs_(element) {
-    userAssert(this.win_.videojs, 'Video.JS not imported.');
+  listenToVideoJs_(element, opt_initializer) {
+    const initializer = getVideoJs(this.win_, opt_initializer);
+    const player = initializer(element);
 
-    // Retrieve lazily.
-    const player = once(() =>
-      this.win_.videojs.getPlayer(element));
+    player.ready(() => {
+      const canplay = 'canplay';
 
-    ['canplay', 'playing', 'pause', 'ended'].forEach(e => {
-      listen(element, e, () => this.postEvent(e));
+      ['playing', 'pause', 'ended'].forEach(e => {
+        player.on(e, () => this.postEvent(e));
+      });
+
+      // in case `canplay` fires before this script loads
+      if (player.readyState() >= /* HAVE_FUTURE_DATA */ 3) {
+        this.postEvent(canplay);
+      } else {
+        player.on(canplay, () => this.postEvent(canplay));
+      }
+
+      listen(element, 'volumechange', () =>
+        this.onVolumeChange_(player.volume()));
+
+      this.method('play', () => player.play());
+      this.method('pause', () => player.pause());
+      this.method('mute', () => player.muted(true));
+      this.method('unmute', () => player.muted(false));
+      this.method('showcontrols', () => player.controls(true));
+      this.method('hidecontrols', () => player.controls(false));
+      this.method('fullscreenenter', () => player.requestFullscreen());
+      this.method('fullscreenexit', () => player.exitFullscreen());
     });
-
-    listen(element, 'volumechange', () =>
-      this.onVolumeChange_(player().volume()));
-
-    this.method('play', () => player().play());
-    this.method('pause', () => player().pause());
-    this.method('mute', () => player().muted(true));
-    this.method('unmute', () => player().muted(false));
-    this.method('showcontrols', () => player().controls(true));
-    this.method('hidecontrols', () => player().controls(false));
-    this.method('fullscreenenter', () => player().requestFullscreen());
-    this.method('fullscreenexit', () => player().exitFullscreen());
   }
 
   /**
@@ -301,6 +328,21 @@ export class AmpVideoIntegration {
   postEvent(event) {
     userAssert(validEvents.indexOf(event) > -1, `Invalid event ${event}`);
     this.postToParent_(dict({'event': event}));
+  }
+
+  /**
+   * Posts a custom analytics event.
+   * @param {string} eventType
+   * @param {!Object<string, string>=} opt_vars
+   */
+  postAnalyticsEvent(eventType, opt_vars) {
+    this.postToParent_(dict({
+      'event': 'analytics',
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
+    }));
   }
 
   /**
@@ -347,7 +389,14 @@ export class AmpVideoIntegration {
  * @param {function(!JsonObject)} onMessage
  */
 function listenTo(win, onMessage) {
-  listen(win, 'message', e => onMessage(tryParseJson(getData(e))));
+  listen(win, 'message', e => {
+    const message = tryParseJson(getData(e));
+    if (!message) {
+      // only process valid JSON.
+      return;
+    }
+    onMessage(message);
+  });
 }
 
 /**

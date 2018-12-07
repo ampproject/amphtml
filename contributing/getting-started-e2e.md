@@ -173,6 +173,11 @@ Now that you have all of the files copied locally you can actually build the cod
   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
 * Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
+  * Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
+
+  ```
+  export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+  ```
 
 * If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
@@ -340,44 +345,30 @@ Note that you *can* add changes into an existing commit but that opens up some a
 
 # Testing your changes
 
-Before sending your code changes for review, you will want to make sure that all of the existing tests still pass and you may be expected to add/modify some tests as well.
+Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
+
+{% call callout('Note', type='note') %}
+Automatically run most checks on `git push` by enabling our pre-push hook. Run `./build-system/enable-git-pre-push.sh`
+{% endcall %}
 
 ## Running tests locally
 
-Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
+To run the tests that are affected by the changes on your feature branch:
 
 ```
-gulp test
+gulp test --local-changes
 ```
 
-You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
+By default, all tests are run on Chrome. Pass `--firefox` or `--safari` to run tests in Firefox and Safari, respectively.
 
-By default `gulp test` runs tests on Chrome.  Depending on what your tests affect (e.g. if you're fixing a bug in a different browser), you may need to run `gulp test --firefox` or `gulp test --safari` to run in other browsers.
+If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
-If the tests have failed you will need to determine whether the failure is related to your change.
+## Running Travis CI checks locally
 
-If the failing test looks completely unrelated to your change, it *might* be due to bad code/tests that have made it into the amphtml repository.  You can check the latest [amphtml test run on Travis](https://travis-ci.org/ampproject/amphtml/builds).  If it's green (meaning the tests pass) then it's more likely the failure is a problem with your change.  If it's red, you can click through to see if the failing tests are the same as the ones you see locally.
-
-Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
-
-## Running all the Travis CI checks locally
-
-Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
+To avoid repeatedly waiting for Travis to run all pull-request checks, you can run them locally:
 
 ```
 gulp pr-check
-```
-
-To run all Travis CI checks, but skip the `gulp build` step, you can run:
-
-```
-gulp pr-check --nobuild
-```
-
-To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
-
-```
-gulp pr-check --files=<test-files-path-glob>
 ```
 
 Notes:
@@ -385,25 +376,26 @@ Notes:
 * This will force a clean build and run all the PR checks one by one.
 * Just like on Travis, a failing check will prevent subsequent checks from being run.
 * The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
-* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
+* Unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
 
-## Adding tests for your change
+## Adding tests
 
-If your change was not already covered by existing tests, you will generally be expected to add some tests that show your new code works correctly and to prevent other people from breaking your code in the future.
+The `amphtml` testing framework uses the [Mocha](https://mochajs.org/), [Chai](http://chaijs.com/) and [Sinon](http://sinonjs.org/) libraries. You will generally be expected to add tests to verify correctness and to prevent regressions.
 
-The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](../extensions/amp-video/amp-video.md) component has [tests](../extensions/amp-video/0.1/test/test-amp-video.js).
+Existing components will usually have existing tests that you can follow as an example. For example, the [amp-video](../extensions/amp-video/amp-video.md) component has tests in [test/test-amp-video.js](../extensions/amp-video/0.1/test/test-amp-video.js).
 
-You can run the tests in a single file by running `gulp test --files=<file to test>`, e.g. for amp-video:
+To run tests in a single file, use `gulp test --files=<path>`:
 
 ```
 gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
 
-Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
+Testing tips:
 
-To make running the tests more convenient you can also use the `--watch` flag in any `gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
+- Use Mocha's [`.only()`](https://mochajs.org/#exclusive-tests) feature to exclusively run certain test-cases or suites.
+- Add `--watch` to your `gulp test` command to automatically re-run tests on code changes.
 
-If you are not sure how to create these tests you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
+For more help, see [How to get help](#how-to-get-help).
 
 # Push your changes to your GitHub fork
 
@@ -477,7 +469,7 @@ On the Pull Request page you can see that a few checks are running:
 
 * Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
-* Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml). (To access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform), and your request should be approved soon.)
+* Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml).
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 

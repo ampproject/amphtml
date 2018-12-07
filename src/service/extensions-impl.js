@@ -19,11 +19,15 @@ import {Services} from '../services';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
+  getAmpdoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
-import {calculateExtensionScriptUrl} from './extension-location';
+import {
+  calculateExtensionScriptUrl,
+  parseExtensionUrl,
+} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -259,7 +263,8 @@ export class Extensions {
     }
     oldScriptElement.removeAttribute('custom-element');
     oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    return this.preloadExtension(extensionId);
+    const urlParts = parseExtensionUrl(oldScriptElement.src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
@@ -362,6 +367,8 @@ export class Extensions {
         this.ampdocService_.hasAmpDocShell())) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
+      // Note that this won't trigger for FIE extensions that are not present
+      // in the parent doc.
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
         factory(ampdoc);
       }
@@ -450,6 +457,20 @@ export class Extensions {
 
       // Install CSS.
       const promise = this.preloadExtension(extensionId).then(extension => {
+        // An extension element/service that's declared in an FIE but _not_
+        // in the parent is not immediately installed. See addDocFactory().
+        // This is a problem for adoptServiceForEmbedIfEmbeddable(), which
+        // requires a service to be registered on an AmpDoc before adoption by
+        // the embed window.
+        // To fix this, make sure the extension is installed in the AmpDoc.
+        // Ideally, we'd be able to install a service in the FIE _without_
+        // installing it in the AmpDoc. See #19344.
+        const frameElement = /** @type {!Node} */ (dev().assert(
+            childWin.frameElement, 'frameElement not found for embed'));
+        const ampdoc = getAmpdoc(frameElement);
+        this.installExtensionInDoc_(ampdoc, extensionId);
+        return extension;
+      }).then(extension => {
         // Adopt embeddable extension services.
         extension.services.forEach(service => {
           adoptServiceForEmbedIfEmbeddable(childWin, service);
@@ -668,8 +689,8 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
-    installCustomElements(childWin, class {});
+  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+    installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
   }

@@ -55,6 +55,9 @@ export class BaseTemplate {
     /** @public @const {!Window} */
     this.win = element.ownerDocument.defaultView || win;
 
+    /** @private @const */
+    this.viewer_ = getServiceForDoc(this.element, 'viewer');
+
     this.compileCallback();
   }
 
@@ -64,6 +67,16 @@ export class BaseTemplate {
    */
   compileCallback() {
     // Subclasses may override.
+  }
+
+  /**
+   * Bypasses template rendering and directly sets HTML. Should only be used
+   * for server-side rendering case. To be implemented by subclasses.
+   * @param {string} unusedData
+   * @return {!Element}
+   */
+  setHtml(unusedData) {
+    throw new Error('Not implemented');
   }
 
   /**
@@ -114,8 +127,7 @@ export class BaseTemplate {
    * @return {boolean}
    */
   viewerCanRenderTemplates() {
-    return getServiceForDoc(this.element, 'viewer')
-        .hasCapability('viewerRenderTemplate');
+    return this.viewer_.hasCapability('viewerRenderTemplate');
   }
 }
 
@@ -140,6 +152,18 @@ export class Templates {
      * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
+  }
+
+  /**
+   * Inserts the specified template element.
+   * @param {!Element} templateElement
+   * @param {string} html
+   * @return {!Promise<!Element>}
+   */
+  setHtmlForTemplate(templateElement, html) {
+    return this.getImplementation_(templateElement).then(impl => {
+      return this.setHtml_(impl, html);
+    });
   }
 
   /**
@@ -186,6 +210,21 @@ export class Templates {
     return this.renderTemplate(
         this.findTemplate(parent, opt_querySelector),
         data);
+  }
+
+  /**
+   * Discovers the already rendered template for the specified parent and
+   * inserts it in the DOM. The template can be specified either via "template"
+   * attribute  or as a child "template" element. When specified via "template"
+   * attribute, the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @param {string} html
+   * @param {string=} opt_querySelector
+   * @return {!Promise<!Element>}
+   */
+  findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
+    return this.setHtmlForTemplate(
+        this.findTemplate(parent, opt_querySelector), html);
   }
 
   /**
@@ -340,6 +379,16 @@ export class Templates {
    */
   render_(impl, data) {
     return impl.render(data);
+  }
+
+  /**
+   * @param {!BaseTemplate} impl
+   * @param {string} html
+   * @return {!Element}
+   * @private
+   */
+  setHtml_(impl, html) {
+    return impl.setHtml(html);
   }
 }
 

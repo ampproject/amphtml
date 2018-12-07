@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, getStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {startsWith} from '../string';
@@ -29,8 +29,7 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return getStyle(element, 'display') == 'none'
-      || element.hasAttribute('hidden');
+  return element.hasAttribute('hidden');
 }
 
 /** @const {string} */
@@ -55,7 +54,7 @@ export class StandardActions {
     this.ampdoc = ampdoc;
 
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -68,7 +67,8 @@ export class StandardActions {
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+    const {documentElement} = embedWin.document;
+    this.installActions_(Services.actionServiceForDoc(documentElement));
   }
 
   /**
@@ -107,8 +107,9 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const ampdoc = getAmpdoc(node);
-        return Services.bindForDocOrNull(ampdoc).then(bind => {
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
@@ -125,10 +126,20 @@ export class StandardActions {
         }
         return permission.then(() => {
           Services.navigationForDoc(this.ampdoc).navigateTo(
-              win, args['url'], `AMP.${method}`);
+              win, args['url'], `AMP.${method}`,
+              {target: args['target'], opener: args['opener']});
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
+
+      case 'scrollTo':
+        user().assert(args['id'],
+            'AMP.scrollTo must provide element ID');
+        invocation.node = dev().assertElement(
+            getAmpdoc(node).getElementById(args['id']),
+            'scrollTo element ID must exist on page'
+        );
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -249,7 +260,6 @@ export class StandardActions {
         target./*OK*/expand();
       } else {
         toggle(target, true);
-        target.removeAttribute('hidden');
       }
     });
 

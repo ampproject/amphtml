@@ -26,10 +26,10 @@ const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const Mocha = require('mocha');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
-const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {exec, getStdout} = require('../exec');
@@ -39,9 +39,10 @@ const {green, yellow, cyan, red, bold} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
-const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
+const batchSize = 4; // Number of Sauce Lab browsers
 
+let saucelabsBrowsers = [];
 /**
  * Read in and process the configuration settings for karma
  * @return {!Object} Karma configuration
@@ -70,26 +71,32 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
+
+    saucelabsBrowsers = argv.saucelabs ?
+    // With --saucelabs, integration tests are run on this set of browsers.
+      [
+        'SL_Chrome',
+        'SL_Firefox',
+        'SL_Safari_11',
+        'SL_Edge_17',
+      ]
+      // TODO(amp-infra): Evaluate and add more platforms here.
+      //'SL_Chrome_Dev',
+      //'SL_Chrome_Android_7',
+      //'SL_Safari_12',
+      //'SL_iOS_12'
+      //'SL_iOS_11',
+      //'SL_IE_11'
+      : [
+      // With --saucelabs_lite, a subset of the unit tests are run.
+      // Only browsers that support chai-as-promised may be included below.
+      // TODO(rsimha-amp): Add more browsers to this list. #6039.
+        'SL_Safari_11',
+      ];
+
     return Object.assign({}, karmaDefault, {
       reporters: ['super-dots', 'saucelabs', 'karmaSimpleReporter'],
-      browsers: argv.saucelabs ? [
-        // With --saucelabs, integration tests are run on this set of browsers.
-        'SL_Chrome_67',
-        'SL_Firefox_61',
-        'SL_Safari_11',
-        // TODO(rsimha, #16687): Enable after Sauce disconnects are resolved.
-        // 'SL_Chrome_Android_7',
-        // 'SL_Chrome_45',
-        // 'SL_Android_6',
-        // 'SL_iOS_11',
-        // 'SL_Edge_17',
-        // 'SL_IE_11',
-      ] : [
-        // With --saucelabs_lite, a subset of the unit tests are run.
-        // Only browsers that support chai-as-promised may be included below.
-        // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_11',
-      ],
+      browsers: saucelabsBrowsers,
     });
   }
   return karmaDefault;
@@ -158,6 +165,7 @@ function printArgvMessages() {
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration: 'Running only the integration tests. Prerequisite: ' +
         cyan('gulp build'),
+    'dev_dashboard': 'Only running tests for the Dev Dashboard.',
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -174,7 +182,7 @@ function printArgvMessages() {
     log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a &&
-        !argv['local-changes']) {
+        !argv['local-changes'] && !argv.dev_dashboard) {
       log(green('Running all tests.'));
       log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
@@ -198,41 +206,6 @@ function printArgvMessages() {
         log(yellow('--' + arg + ':'), green(message));
       }
     });
-  }
-}
-
-/**
- * Applies the prod or canary AMP config to the AMP runtime.
- * @return {Promise}
- */
-function applyAmpConfig() {
-  if (argv.unit || argv.a4a) {
-    return Promise.resolve();
-  }
-  if (!process.env.TRAVIS) {
-    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
-  }
-  return writeConfig('dist/amp.js').then(() => {
-    return writeConfig('dist/v0.js');
-  });
-}
-
-/**
- * Writes the prod or canary AMP config to file.
- * @param {string} targetFile File to which the config is to be written.
- * @return {Promise}
- */
-function writeConfig(targetFile) {
-  const configFile =
-      'build-system/global-configs/' + ampConfig + '-config.json';
-  if (fs.existsSync(targetFile)) {
-    return removeConfig(targetFile).then(() => {
-      return applyConfig(
-          ampConfig, targetFile, configFile,
-          /* opt_localDev */ true, /* opt_localBranch */ true);
-    });
-  } else {
-    return Promise.resolve();
   }
 }
 
@@ -408,7 +381,35 @@ function unitTestsToRun() {
 /**
  * Runs all the tests.
  */
-function runTests() {
+async function runTests() {
+
+  if (argv.dev_dashboard) {
+
+    const mocha = new Mocha();
+
+    // Add our files
+    const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
+    allDevDashboardTests.forEach(file => {
+      mocha.addFile(file);
+    });
+
+    // Create our deffered
+    let resolver;
+    const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+
+    // Listen for Ctrl + C to cancel testing
+    const handlerProcess = createCtrlcHandler('test');
+
+    // Run the tests.
+    mocha.run(function(failures) {
+      if (failures) {
+        process.exit(1);
+      }
+      resolver();
+    });
+    return deferred.then(() => exitCtrlcHandler(handlerProcess));
+  }
+
   if (!argv.integration && process.env.AMPSAUCE_REPO) {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
@@ -500,7 +501,6 @@ function runTests() {
     c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
-        compact: false,
         plugins: [
           ['babel-plugin-istanbul', {
             exclude: [
@@ -523,6 +523,7 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
+  process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 31862,
     host: 'localhost',
@@ -548,109 +549,152 @@ function runTests() {
   const sectionMarker =
       (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
-  let resolver;
-  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
-  new Karma(c, function(exitCode) {
-    if (shouldCollapseSummary) {
-      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+  // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
+  // Sauce Labs environment.
+  let processExitCode;
+  if (argv.saucelabs || argv.saucelabs_lite) {
+    processExitCode = await runTestInBatches();
+  } else {
+    processExitCode = await createKarmaServer(c);
+  }
+
+  // Exit tests
+  // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+  if (process.env.TRAVIS) {
+    setTimeout(() => {
+      process.exit(processExitCode);
+    }, 5000);
+  }
+
+  server.emit('kill');
+  exitCtrlcHandler(handlerProcess);
+
+  if (processExitCode != 0) {
+    log(
+        red('ERROR:'),
+        yellow('Karma test failed with exit code ' + processExitCode));
+    process.exitCode = processExitCode;
+  }
+
+  /**
+   * Runs tests in batches
+   * @return {number} processExitCode
+   */
+  async function runTestInBatches() {
+    let batch = 1;
+    let startIndex = 0;
+    let endIndex = batchSize;
+    const batchExitCodes = [];
+
+    log(green('Running tests on ' + saucelabsBrowsers.length +
+      ' Sauce Lab browser(s) in total...'));
+    while (startIndex < endIndex) {
+      const configBatch = Object.assign({}, c);
+      configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
+      log(green('Batch #' + batch + ': Running tests on ' +
+        configBatch.browsers.length + ' Sauce Labs browser(s)...'));
+      batchExitCodes.push(await createKarmaServer(configBatch));
+      startIndex = batch * batchSize;
+      batch++;
+      endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
     }
-    server.emit('kill');
-    if (exitCode) {
-      log(
-          red('ERROR:'),
-          yellow('Karma test failed with exit code ' + exitCode));
-    }
-    if (argv.coverage) {
-      if (process.env.TRAVIS) {
-        const codecovCmd =
-            './node_modules/.bin/codecov --file=test/coverage/lcov.info';
-        let flags = '';
-        if (argv.unit) {
-          flags = ' --flags=unit_tests';
-        } else if (argv.integration) {
-          flags = ' --flags=integration_tests';
-        }
-        log(green('INFO: ') + 'Uploading code coverage report to ' +
-            cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
-            cyan(codecovCmd + flags) + '...');
-        const output = getStdout(codecovCmd + flags);
-        const viewReportPrefix = 'View report at: ';
-        const viewReport = output.match(viewReportPrefix + '.*');
-        if (viewReport && viewReport.length > 0) {
-          log(green('INFO: ') + viewReportPrefix +
-              cyan(viewReport[0].replace(viewReportPrefix, '')));
+
+    return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
+  }
+
+  /**
+   * Creates and starts karma server
+   * @param {!Object} configBatch
+   * @return {!Promise<number>}
+   */
+  function createKarmaServer(configBatch) {
+    let resolver;
+    const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+    new Karma(configBatch, function(exitCode) {
+      if (shouldCollapseSummary) {
+        console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+      }
+      if (argv.coverage) {
+        if (process.env.TRAVIS) {
+          const codecovCmd =
+              './node_modules/.bin/codecov --file=test/coverage/lcov.info';
+          let flags = '';
+          if (argv.unit) {
+            flags = ' --flags=unit_tests';
+          } else if (argv.integration) {
+            flags = ' --flags=integration_tests';
+          }
+          log(green('INFO: ') + 'Uploading code coverage report to ' +
+              cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+              cyan(codecovCmd + flags) + '...');
+          const output = getStdout(codecovCmd + flags);
+          const viewReportPrefix = 'View report at: ';
+          const viewReport = output.match(viewReportPrefix + '.*');
+          if (viewReport && viewReport.length > 0) {
+            log(green('INFO: ') + viewReportPrefix +
+                cyan(viewReport[0].replace(viewReportPrefix, '')));
+          } else {
+            log(yellow('WARNING: ') +
+                'Code coverage report upload may have failed:\n' +
+                yellow(output));
+          }
         } else {
-          log(yellow('WARNING: ') +
-              'Code coverage report upload may have failed:\n' +
-              yellow(output));
+          const coverageReportUrl =
+              'file://' + path.resolve('test/coverage/index.html');
+          log(green('INFO: ') + 'Generated code coverage report at ' +
+              cyan(coverageReportUrl));
+          opn(coverageReportUrl, {wait: false});
         }
-      } else {
-        const coverageReportUrl =
-            'file://' + path.resolve('test/coverage/index.html');
-        log(green('INFO: ') + 'Generated code coverage report at ' +
-            cyan(coverageReportUrl));
-        opn(coverageReportUrl, {wait: false});
       }
-    }
-    // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
-    if (process.env.TRAVIS) {
-      setTimeout(() => {
-        process.exit(exitCode);
-      }, 5000);
-    } else {
-      process.exitCode = exitCode;
-    }
-    resolver();
-  }).on('run_start', function() {
-    if (argv.saucelabs || argv.saucelabs_lite) {
-      log(green('Running tests on ' + c.browsers.length +
-          ' Sauce Labs browser(s)...'));
-    } else {
-      log(green('Running tests locally...'));
-    }
-  }).on('run_complete', function() {
-    if (shouldCollapseSummary) {
-      console./* OK*/log(bold(red('Console errors:')),
-          'Expand this section and fix all errors printed by your tests.');
-      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
-    }
-  }).on('browser_complete', function(browser) {
-    const result = browser.lastResult;
-    // Prevent cases where Karma detects zero tests and still passes. #16851.
-    if (result.total == 0) {
-      log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
-      if (!argv.watch) {
-        process.exit(1);
+      resolver(exitCode);
+    }).on('run_start', function() {
+      if (!argv.saucelabs && !argv.saucelabs_lite) {
+        log(green('Running tests locally...'));
       }
-    }
-    if (shouldCollapseSummary) {
-      let message = browser.name + ': ';
-      message += 'Executed ' + (result.success + result.failed) +
-          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
-      if (result.failed === 0) {
-        message += green('SUCCESS');
-      } else {
-        message += red(result.failed + ' FAILED');
+    }).on('run_complete', function() {
+      if (shouldCollapseSummary) {
+        console./* OK*/log(bold(red('Console errors:')),
+            'Expand this section and fix all errors printed by your tests.');
+        console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
       }
-      message += '\n';
-      console./* OK*/log('\n');
-      log(message);
-    }
-  }).start();
-  return deferred.then(() => exitCtrlcHandler(handlerProcess));
+    }).on('browser_complete', function(browser) {
+      const result = browser.lastResult;
+      // Prevent cases where Karma detects zero tests and still passes. #16851.
+      if (result.total == 0) {
+        log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
+        if (!argv.watch) {
+          process.exit(1);
+        }
+      }
+      if (shouldCollapseSummary) {
+        let message = browser.name + ': ';
+        message += 'Executed ' + (result.success + result.failed) +
+            ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+        if (result.failed === 0) {
+          message += green('SUCCESS');
+        } else {
+          message += red(result.failed + ' FAILED');
+        }
+        message += '\n';
+        console./* OK*/log('\n');
+        log(message);
+      }
+    }).start();
+    return deferred;
+  }
 }
 
 /**
  * Run tests after applying the prod / canary AMP config to the runtime.
  */
 gulp.task('test', 'Runs tests', preTestTasks, function() {
+  // TODO(alanorozco): Come up with a more elegant check?
+  global.AMP_TESTING = true;
+
   if (!argv.nohelp) {
     printArgvMessages();
   }
-
-  return applyAmpConfig().then(() => {
-    return runTests();
-  });
+  return runTests();
 }, {
   options: {
     'verbose': '  With logging enabled',
@@ -665,13 +709,14 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'ie': '  Runs tests on IE',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
+    'dev_dashboard': ' Run only the dev dashboard tests. ' +
+        'Reccomend using with --nobuild',
     'compiled': '  Changes integration tests to use production JS ' +
         'binaries for execution',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
-    'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
     'local-changes': '  Run unit tests directly affected by the files ' +

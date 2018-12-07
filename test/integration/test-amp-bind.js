@@ -17,7 +17,7 @@ import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
-import {createFixtureIframe} from '../../testing/iframe';
+import {createFixtureIframe, poll} from '../../testing/iframe';
 
 describe.configure().ifNewChrome().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
@@ -49,12 +49,21 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       // Most fixtures have a single AMP element that will be laid out.
-      const loadStartsToExpect =
+      const numberOfAmpComponents =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
-      return Promise.all([
+      const promises = [
         fixture.awaitEvent(BindEvents.INITIALIZE, 1),
-        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
-      ]);
+      ];
+      if (numberOfAmpComponents > 0) {
+        promises.push(
+            poll('All AMP components are laid out', () => {
+              const laidOutElements =
+                  fixture.doc.querySelectorAll('.i-amphtml-layout').length;
+              return laidOutElements === numberOfAmpComponents;
+            })
+        );
+      }
+      return Promise.all(promises);
     });
   }
 
@@ -617,5 +626,32 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
                 .to.equal('https://www.google.com/bind/first/source');
           });
         });
+  });
+
+  // The only difference in amp4email is that URL attributes cannot be bound.
+  describe('amp4email', () => {
+    beforeEach(() => {
+      return setupWithFixture('test/fixtures/bind-amp4email.html');
+    });
+
+    it('should NOT allow mutation of a[href]', () => {
+      const button = fixture.doc.getElementById('changeHrefButton');
+      const a = fixture.doc.getElementById('anchorElement');
+      expect(a.getAttribute('href')).to.equal('https://foo.com');
+      button.click();
+      return waitForSetState().then(() => {
+        expect(a.getAttribute('href')).to.equal('https://foo.com');
+      });
+    });
+
+    it('should NOT allow mutation of img[src]', () => {
+      const button = fixture.doc.getElementById('changeImgSrcButton');
+      const img = fixture.doc.getElementById('image');
+      expect(img.getAttribute('src')).to.equal('https://foo.com/foo.jpg');
+      button.click();
+      return waitForSetState().then(() => {
+        expect(img.getAttribute('src')).to.equal('https://foo.com/foo.jpg');
+      });
+    });
   });
 });

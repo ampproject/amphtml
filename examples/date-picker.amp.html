@@ -47,7 +47,7 @@
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -95,7 +95,7 @@
     </template>
   </amp-date-picker>
 
-  <h2>external <code>src</code> static</h2>
+  <h2>external <code>src</code> static single</h2>
   <input id="externalSrc-static" type="tel" placeholder="Pick a date">
   <amp-date-picker
     type="single"
@@ -107,6 +107,25 @@
     height="360"
     format="DD/MM/YYYY"
     input-selector="#externalSrc-static"
+  >
+    <template type="amp-mustache" date-template id="spooky">
+      🙀
+    </template>
+  </amp-date-picker>
+  <h2>external <code>src</code> static range</h2>
+  <input id="externalSrc-static-start" type="tel" placeholder="Pick a date">
+  <input id="externalSrc-static-end" type="tel" placeholder="Pick a date">
+  <amp-date-picker
+    type="range"
+    number-of-months="2"
+    mode="static"
+    src="date-picker.json"
+    layout="fixed-height"
+    first-day-of-week="1"
+    height="360"
+    format="DD/MM/YYYY"
+    start-input-selector="#externalSrc-static-start"
+    end-input-selector="#externalSrc-static-end"
   >
     <template type="amp-mustache" date-template id="spooky">
       🙀
@@ -265,6 +284,19 @@
 <button on="tap: trp.startToday(offset=7),trp.endToday(offset=14)">Select next week</button>
 <button on="tap: trp.clear">Clear</button>
 <amp-date-picker id="trp" type="range" layout="fixed-height" height="360"></amp-date-picker>
+
+<h2>amp-bind</h2>
+<h3>min</h3>
+<amp-state id="min"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="min">2018-10-10</span></div>
+<label>min: <input on="change:AMP.setState({min: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" min="2018-10-10" [min]="min"></amp-date-picker>
+
+<h3>max</h3>
+<amp-state id="max"><script type="application/json">"2018-10-10"</script></amp-state>
+<div><span [text]="max">2018-10-10</span></div>
+<label>max: <input on="change:AMP.setState({max: event.value})" value="2018-10-10"></label>
+<amp-date-picker mode="static" layout="fixed-height" height="360" max="2018-10-10" [max]="max"></amp-date-picker>
 
 <div class="spacer"></div>
 </body>

@@ -400,7 +400,7 @@ describe('amp-img', () => {
         el.getPlaceholder = sandbox.stub();
       }
       if (addBlurClass) {
-        img.classList.add('i-amphtml-blur');
+        img.classList.add('i-amphtml-blurry-placeholder');
       }
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);

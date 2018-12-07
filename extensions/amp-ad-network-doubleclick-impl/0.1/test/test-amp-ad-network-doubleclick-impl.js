@@ -276,6 +276,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(setPageviewStateTokenSpy.withArgs('DUMMY_TOKEN')).to.be
               .calledOnce;
         });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -394,6 +411,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           {
             getUpgradeDelayMs: () => 1,
           });
+
+      // Make sure the ad iframe (FIE) has a local URL replacements service.
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(a).returns(urlReplacements);
+
       impl.buildCallback();
       impl.size_ = {width: 123, height: 456};
       impl.onCreativeRender({customElementExtensions: []});
@@ -431,6 +454,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       button.dispatchEvent(ev1);
       expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
       expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should set iframe id and data-google-query-id attribute', () => {
+      impl.buildCallback();
+      impl.ifi_ = 3;
+      impl.qqid_ = 'abc';
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender(null);
+      expect(impl.element.getAttribute('data-google-query-id')).to.equal('abc');
+      expect(impl.iframe.id).to.equal('google_ads_iframe_3');
     });
   });
 
@@ -517,7 +551,28 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
+          /(\?|&)bdt=[1-9][0-9]*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
+      });
+    });
+
+    it('includes psts param when there are pageview tokens', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/);
+        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*abc(%2C[^&]+)*(&|$)/);
+      });
+    });
+
+    it('does not include psts param when there are no pageview tokens', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      return impl.getAdUrl().then(url => {
+        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*abc(%2C[^&]+)*(&|$)/);
       });
     });
 
@@ -633,6 +688,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
+    it('has correct sz with fluid as multi-size', () => {
+      element.setAttribute('width', '300');
+      element.setAttribute('height', '250');
+      element.setAttribute('data-multi-size', 'fluid');
+      new AmpAd(element).upgradeCallback();
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.getAdUrl().then(url =>
+        expect(url).to.match(/sz=300x250%7C320x50&/));
+    });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -1345,6 +1410,11 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return 12 if no experiment header', () => {
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
         });
+
+        it('should return renderOutsideViewport boolean', () => {
+          sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
       });
 
       describe('idle renderNonAmpCreative', () => {
@@ -1418,9 +1488,12 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
 
       describe('#setPageLevelExperiments', () => {
         let randomlySelectUnsetExperimentsStub;
+        let extractUrlExperimentIdStub;
         beforeEach(() => {
           randomlySelectUnsetExperimentsStub =
             sandbox.stub(impl, 'randomlySelectUnsetExperiments_');
+          extractUrlExperimentIdStub =
+            sandbox.stub(impl, 'extractUrlExperimentId_');
           sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
           sandbox.stub(impl, 'getAmpDoc').returns({});
           sandbox.stub(Services, 'viewerForDoc').returns(
@@ -1446,9 +1519,16 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should select SRA experiments', () => {
           randomlySelectUnsetExperimentsStub.returns(
               {doubleclickSraExp: '117152667'});
+          extractUrlExperimentIdStub.returns(undefined);
           impl.buildCallback();
           expect(impl.experimentIds.includes('117152667')).to.be.true;
           expect(impl.useSra).to.be.true;
+        });
+
+        it('should force-select SRA experiment from URL experiment ID', () => {
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments('8');
+          expect(impl.experimentIds.includes('117152667')).to.be.true;
         });
 
         describe('should properly limit SRA traffic', () => {

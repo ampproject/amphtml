@@ -22,14 +22,16 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
-import {parseQueryString} from '../../../src/url';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
@@ -103,14 +105,8 @@ export class AccessSource {
     /** @const {!AccessTypeAdapterDef} */
     this.adapter_ = this.createAdapter_(configJson);
 
-    /** @const @private {!string} */
-    this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
-
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(accessElement);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);

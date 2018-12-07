@@ -29,6 +29,7 @@ import {
 } from '../runtime';
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
+import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
@@ -43,11 +44,11 @@ import {
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
-import {registerIniLoadListener} from './utils';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
+getMode(self).a4aId = getA4AId(self);
 
 // TODO(lannka): only install the necessary services.
 
@@ -79,8 +80,7 @@ startupChunk(self.document, function initial() {
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   const fullCss = cssText
-      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}'
-      + 'html.i-amphtml-inabox>body{position:initial!important}';
+      + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(ampdoc, fullCss, () => {
     startupChunk(self.document, function services() {
       // Core services.

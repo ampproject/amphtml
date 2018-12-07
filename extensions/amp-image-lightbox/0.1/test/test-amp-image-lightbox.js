@@ -20,7 +20,7 @@ import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
-import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
 
@@ -190,7 +190,7 @@ describes.realWin('amp-image-lightbox component', {
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
       impl.activate({caller: ampImage});
-      impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
+      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly

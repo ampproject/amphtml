@@ -19,13 +19,18 @@ import {
   Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
-import {Entitlement, GrantReason} from '../../../amp-subscriptions/0.1/entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '../../../amp-subscriptions/0.1/entitlement';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
 } from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
+import {SubscriptionsScoreFactor}
+  from '../../../amp-subscriptions/0.1/score-factors.js';
 
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
@@ -39,9 +44,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let callbacks;
   let methods;
   let ackStub;
+  let element;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
+    element = env.win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    env.win.document.head.appendChild(element);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -54,6 +63,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLoginRequest'),
       linkComplete:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLinkComplete'),
+      flowCanceled:
+          sandbox.stub(ConfiguredRuntime.prototype, 'setOnFlowCanceled'),
       subscribeRequest:
           sandbox.stub(ConfiguredRuntime.prototype,
               'setOnNativeSubscribeRequest'),
@@ -78,6 +89,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   function callback(stub) {
     return stub.args[0][0];
   }
+
+  it('should reset runtime on platform reset', () => {
+    expect(methods.reset).to.not.be.called;
+    platform.reset();
+    expect(methods.reset).to.be.calledOnce.calledWithExactly();
+  });
 
   it('should listen on callbacks', () => {
     expect(callbacks.loginRequest).to.be.calledOnce;
@@ -211,27 +228,26 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should reauthorize on complete linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.linkComplete)();
-    expect(methods.reset).to.be.calledOnce.calledWithExactly();
+  });
+
+  it('should reauthorize on canceled linking', () => {
+    serviceAdapterMock.expects('resetPlatforms')
+        .once();
+    callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
   it('should reauthorize on complete subscribe', () => {
     const promise = Promise.resolve();
-    const response = new SubscribeResponse(null, null, null, () => promise);
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    const response = new SubscribeResponse(null, null, null, null,
+        () => promise);
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;
-    return promise.then(() => {
-      // Skip microtask.
-      return Promise.resolve();
-    }).then(() => {
-      expect(methods.reset).to.be.calledOnce.calledWithExactly();
-    });
+    return promise;
   });
 
   it('should delegate native subscribe request', () => {
@@ -332,6 +348,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should link accounts if login action is delegated', () => {
+    const executeStub = platform.runtime_.linkAccount;
+    platform.executeAction('login');
+    expect(executeStub).to.be.calledWith();
+  });
+
   describe('getEntitlements', () => {
     it('should convert granted entitlements to internal shape', () => {
       const entitlementResponse = {
@@ -372,6 +394,99 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
       return platform.getEntitlements().then(entitlement => {
         expect(entitlement).to.be.equal(null);
+      });
+    });
+  });
+
+  describe('isReadyToPay', () => {
+    // #TODO(jpettitt) remove fake entitlements when swj.js
+    // isRadyToPay is available
+    /**
+     * return a fake entitlements object
+     * @param {boolean} isReadyToPay
+     * @return {Object}
+     */
+    function fakeEntitlements(isReadyToPay) {
+      return {
+        isReadyToPay,
+        entitlements: {},
+        getEntitlementForThis: () => {},
+      };
+    }
+
+    it('should treat missing isReadyToPay as false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
+      });
+    });
+
+    it('should handle isReadyToPay true', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: true,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(true));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(1);
+      });
+    });
+
+    it('should handle isReadyToPay false', () => {
+      const entitlementResponse = {
+        source: 'google',
+        products: ['example.org:basic'],
+        subscriptionToken: 'tok1',
+      };
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              isReadyToPay: false,
+              entitlements: entitlementResponse,
+            });
+          },
+        });
+      });
+      //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
+      sandbox.stub(platform.runtime_, 'getEntitlements')
+          .resolves(fakeEntitlements(false));
+
+      return platform.getEntitlements().then(() => {
+        expect(platform
+            .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
+            .to.equal(0);
       });
     });
   });

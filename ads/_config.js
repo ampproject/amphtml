@@ -24,6 +24,7 @@
  *   consentHandlingOverride: (boolean|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
+ *   mcFullWidthHeightRatio: (number|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -59,6 +60,12 @@ let AdNetworkConfigDef;
  *   // If absent, it means the network does not support full width ad units.
  *   // Example value: 1.2
  *   fullWidthHeightRatio: number
+ *
+ *   // The width / height ratio for matched content full width ad units.
+ *   // If absent, it means the network does not support matched content full
+ *   // width ad unit.
+ *   // Example value: 0.27
+ *   mcFullWidthHeightRatio: number
  * }
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
@@ -81,7 +88,7 @@ export const adConfig = {
   },
 
   'a9': {
-    prefetch: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+    prefetch: 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US',
   },
 
   'accesstrade': {
@@ -166,6 +173,7 @@ export const adConfig = {
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
+    mcFullWidthHeightRatio: 0.27,
     consentHandlingOverride: true,
   },
 
@@ -241,6 +249,12 @@ export const adConfig = {
   'adverticum': {},
 
   'advertserve': {
+    renderStartImplemented: true,
+  },
+
+  'adyoulike': {
+    consentHandlingOverride: true,
+    prefetch: 'https://pixels.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
@@ -445,6 +459,11 @@ export const adConfig = {
       'https://s.sh.adingo.jp',
       'https://i.adingo.jp',
     ],
+  },
+
+  'freewheel': {
+    prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
+    renderStartImplemented: true,
   },
 
   'fusion': {
@@ -675,6 +694,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'onead': {
+    prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
+    renderStartImplemented: true,
+  },
+
   'openadstream': {},
 
   'openx': {
@@ -719,6 +743,10 @@ export const adConfig = {
 
   'postquare': {},
 
+  'pressboard': {
+    renderStartImplemented: true,
+  },
+
   'pubexchange': {},
 
   'pubguru': {
@@ -758,6 +786,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'recomad': {
+    renderStartImplemented: true,
+  },
+
   'relap': {
     renderStartImplemented: true,
   },
@@ -784,6 +816,11 @@ export const adConfig = {
   },
 
   'rubicon': {},
+
+  'runative': {
+    prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
+    renderStartImplemented: true,
+  },
 
   'sekindo': {
     renderStartImplemented: true,
@@ -865,10 +902,9 @@ export const adConfig = {
   'taboola': {},
 
   'teads': {
-    prefetch: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1015,6 +1051,14 @@ export const adConfig = {
 
   'zedo': {
     prefetch: 'https://ss3.zedo.com/gecko/tag/Gecko.amp.min.js',
+    renderStartImplemented: true,
+  },
+
+  'zen': {
+    prefetch: 'https://zen.yandex.ru/widget-loader',
+    preconnect: [
+      'https://yastatic.net/',
+    ],
     renderStartImplemented: true,
   },
 

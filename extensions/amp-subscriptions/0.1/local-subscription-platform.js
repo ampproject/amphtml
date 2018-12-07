@@ -16,7 +16,9 @@
 
 import {Actions} from './actions';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
@@ -161,11 +163,16 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+    this.renderer_.reset();
+  }
+
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
       if (result) {
-        this.serviceAdapter_.reAuthorizePlatform(this);
+        this.serviceAdapter_.resetPlatforms();
       }
       return !!result;
     });
@@ -212,8 +219,8 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

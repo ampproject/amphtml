@@ -208,15 +208,19 @@ describes.realWin('amp-date-picker', {
     it('should always render Unix epoch seconds in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'X'});
       const date = moment();
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600');
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600');
+      });
     });
 
     it('should always render Unix epoch millis in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'x'});
       const date = moment();
-      const formattedDate = picker.getFormattedDate_(date);
-      expect(formattedDate).to.equal('1514793600000');
+      return picker.buildCallback().then(() => {
+        const formattedDate = picker.getFormattedDate_(date);
+        expect(formattedDate).to.equal('1514793600000');
+      });
     });
   });
 
@@ -235,7 +239,8 @@ describes.realWin('amp-date-picker', {
     });
 
     describe('src templates', () => {
-      it('should parse RRULE and date templates', () => {
+      it('should parse RRULE and date templates', function() {
+        this.timeout(4000);
         const template = createDateTemplate('{{val}}', {
           dates: '2018-01-01',
           id: 'srcTemplate',
@@ -389,6 +394,26 @@ describes.realWin('amp-date-picker', {
         allowConsoleError(() => {
           expect(layoutCallback()).to.be.rejectedWith(
               'another #start-date input exists');
+        });
+      });
+    });
+
+    describe('src attribute', () => {
+      it('should set highlighted and blocked dates', () => {
+        const {element} = createDatePicker({
+          src: 'http://localhost:9876/date-picker/src-data/get',
+        });
+
+        const impl = element.implementation_;
+
+        sandbox.stub(impl, 'fetchSrc_').resolves({
+          blocked: ['2018-01-03'],
+          highlighted: ['2018-01-04'],
+        });
+
+        return impl.setupSrcAttributes_().then(() => {
+          expect(impl.blocked_.contains('2018-01-03')).to.be.true;
+          expect(impl.highlighted_.contains('2018-01-04')).to.be.true;
         });
       });
     });

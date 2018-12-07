@@ -25,9 +25,21 @@ const {getStdout} = require('./exec');
  * Returns the branch point of the current branch off of master.
  * @return {string}
  */
-function gitBranchPoint() {
-  return getStdout('git merge-base master HEAD').trim();
-}
+exports.gitBranchPointFromMaster = function() {
+  return getStdout('git merge-base master HEAD^').trim();
+};
+
+/**
+ * When running on Travis, this returns the branch point of the current branch
+ * off of master, as merged by Travis. When not running on Travis, falls back to
+ * gitBranchPointFromMaster.
+ */
+exports.gitTravisCommitRangeStart = function() {
+  if (process.env.TRAVIS_COMMIT_RANGE) {
+    return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
+  }
+  return exports.gitBranchPointFromMaster();
+};
 
 /**
  * Returns the list of files changed on the local branch relative to the branch
@@ -35,7 +47,7 @@ function gitBranchPoint() {
  * @return {!Array<string>}
  */
 exports.gitDiffNameOnlyMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only ${branchPoint}`).trim().split('\n');
 };
 
@@ -45,7 +57,7 @@ exports.gitDiffNameOnlyMaster = function() {
  * @return {string}
  */
 exports.gitDiffStatMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git -c color.ui=always diff --stat ${branchPoint}`);
 };
 
@@ -55,7 +67,7 @@ exports.gitDiffStatMaster = function() {
  * @return {!Array<string>}
  */
 exports.gitDiffAddedNameOnlyMaster = function() {
-  const branchPoint = gitBranchPoint();
+  const branchPoint = exports.gitBranchPointFromMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
       .trim().split('\n');
 };
@@ -77,9 +89,39 @@ exports.gitBranchName = function() {
 };
 
 /**
+ * Returns the commit hash of the latest commit.
+ * @return {string}
+ */
+exports.gitCommitHash = function() {
+  if (process.env.TRAVIS_PULL_REQUEST_SHA) {
+    return process.env.TRAVIS_PULL_REQUEST_SHA;
+  }
+  return getStdout('git rev-parse --verify HEAD').trim();
+};
+
+/**
  * Returns the email of the author of the latest commit on the local branch.
  * @return {string}
  */
 exports.gitCommitterEmail = function() {
   return getStdout('git log -1 --pretty=format:"%ae"').trim();
+};
+
+/**
+ * Returns the timestamp of the latest commit on the local branch.
+ * @return {number}
+ */
+exports.gitCommitFormattedTime = function() {
+  return getStdout(
+      'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S')
+      .trim();
+};
+
+/**
+ * Returns machine parsable list of uncommitted changed files, or an empty
+ * string if no files were changed.
+ * @return {string}
+ */
+exports.gitStatusPorcelain = function() {
+  return getStdout('git status --porcelain').trim();
 };

@@ -22,6 +22,7 @@ import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
 import {setParentWindow} from '../../src/service';
+import {toggle} from '../../src/style';
 import {user} from '../../src/log';
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -50,13 +51,13 @@ describes.sandboxed('StandardActions', {}, () => {
   function expectElementToHaveBeenHidden(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element.style.display).to.equal('none');
+    expect(element).to.have.attribute('hidden');
   }
 
   function expectElementToHaveBeenShown(element) {
     expect(mutateElementStub).to.be.calledOnce;
     expect(mutateElementStub.firstCall.args[0]).to.equal(element);
-    expect(element.style.display).to.not.equal('none');
+    expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
 
@@ -116,9 +117,9 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"show" action', () => {
-    it('should handle normal element (inline css)', () => {
+    it('should handle normal element (toggle)', () => {
       const element = createElement();
-      element.style.display = 'none';
+      toggle(element, false);
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectElementToHaveBeenShown(element);
@@ -132,9 +133,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToHaveBeenShown(element);
     });
 
-    it('should handle AmpElement (inline css)', () => {
+    it('should handle AmpElement (toggle)', () => {
       const element = createAmpElement();
-      element.style.display = 'none';
+      toggle(element, false);
+      const invocation = {node: element, satisfiesTrust: () => true};
+      standardActions.handleShow(invocation);
+      expectAmpElementToHaveBeenShown(element);
+    });
+
+    it('should handle AmpElement (hidden attribute)', () => {
+      const element = createAmpElement();
+      element.setAttribute('hidden', '');
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleShow(invocation);
       expectAmpElementToHaveBeenShown(element);
@@ -143,9 +152,9 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggle" action', () => {
-    it('should show normal element when hidden (inline css)', () => {
+    it('should show normal element when hidden (toggle)', () => {
       const element = createElement();
-      element.style.display = 'none';
+      toggle(element, false);
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectElementToHaveBeenShown(element);
@@ -166,9 +175,17 @@ describes.sandboxed('StandardActions', {}, () => {
       expectElementToHaveBeenHidden(element);
     });
 
-    it('should show AmpElement when hidden (inline css)', () => {
+    it('should show AmpElement when hidden (toggle)', () => {
       const element = createAmpElement();
-      element.style.display = 'none';
+      toggle(element, false);
+      const invocation = {node: element, satisfiesTrust: () => true};
+      standardActions.handleToggle(invocation);
+      expectAmpElementToHaveBeenShown(element);
+    });
+
+    it('should show AmpElement when hidden (hidden attribute)', () => {
+      const element = createAmpElement();
+      element.setAttribute('hidden', '');
       const invocation = {node: element, satisfiesTrust: () => true};
       standardActions.handleToggle(invocation);
       expectAmpElementToHaveBeenShown(element);
@@ -341,7 +358,7 @@ describes.sandboxed('StandardActions', {}, () => {
         return standardActions.handleAmpTarget(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
-              win, 'http://bar.com', 'AMP.navigateTo');
+              win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
         });
       });
 
@@ -352,7 +369,21 @@ describes.sandboxed('StandardActions', {}, () => {
         return standardActions.handleAmpTarget(invocation).then(() => {
           expect(navigator.navigateTo).to.be.calledOnce;
           expect(navigator.navigateTo).to.be.calledWithExactly(
-              win, 'http://bar.com', 'AMP.navigateTo');
+              win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
+        });
+      });
+
+      it('should pass if node does not have throwIfCannotNavigate(), ' +
+        'given target', () => {
+        invocation.caller.tagName = 'AMP-FOO';
+        invocation.caller.getImpl = () => Promise.resolve({});
+        invocation.args['target'] = '_blank';
+        invocation.args['opener'] = true;
+
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigator.navigateTo).to.be.calledOnce;
+          expect(navigator.navigateTo).to.be.calledWithExactly(
+              win, 'http://bar.com', 'AMP.navigateTo', {target: '_blank', opener: true});
         });
       });
 
@@ -366,7 +397,7 @@ describes.sandboxed('StandardActions', {}, () => {
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledOnce;
         expect(navigator.navigateTo).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+            win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
 
         // Should succeed if throwIfCannotNavigate() returns null.
         invocation.caller.getImpl = () => Promise.resolve({
@@ -375,7 +406,7 @@ describes.sandboxed('StandardActions', {}, () => {
         yield standardActions.handleAmpTarget(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
         expect(navigator.navigateTo.getCall(1)).to.be.calledWithExactly(
-            win, 'http://bar.com', 'AMP.navigateTo');
+            win, 'http://bar.com', 'AMP.navigateTo', {target: undefined, opener: undefined});
 
         // Should fail if throwIfCannotNavigate() throws an error.
         invocation.caller.getImpl = () => Promise.resolve({
@@ -468,6 +499,24 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
+    });
+
+    it('should implement scrollTo with element target', () => {
+      invocation.method = 'scrollTo';
+      invocation.args = {
+        id: 'testIdElement',
+      };
+      invocation.node = ampdoc;
+      const element = createElement();
+      const elStub = sandbox.stub(ampdoc, 'getElementById')
+          .returns(element);
+      const scrollStub = sandbox.stub(standardActions, 'handleScrollTo')
+          .returns('scrollToResponsePromise');
+      const result = standardActions.handleAmpTarget(invocation);
+      expect(elStub).to.be.calledWith('testIdElement');
+      invocation.node = element;
+      expect(scrollStub).to.be.calledWith(invocation);
+      expect(result).to.eql('scrollToResponsePromise');
     });
   });
 

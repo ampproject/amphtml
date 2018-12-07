@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {computedStyle, px, setImportantStyles} from '../../../src/style';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+  toggle,
+} from '../../../src/style';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
@@ -144,7 +152,8 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {
-      const container = dev().assertElement(this.container_);
+      const container = user().assertElement(this.container_,
+          'E#19457 this.container_');
       this.scheduleLayout(container);
       this.scheduleResume(container);
     }, 500);
@@ -298,19 +307,15 @@ class AmpLightbox extends AMP.BaseElement {
     this.eventCounter_++;
 
     if (this.isScrollable_) {
-      st.setStyle(element, 'webkitOverflowScrolling', 'touch');
+      setStyle(element, 'webkitOverflowScrolling', 'touch');
     }
 
     // This should be in a mutateElement block, but focus on iOS won't work
     // if triggered asynchronously inside a callback.
-    st.setStyles(element, dict({
-      // TODO(dvoytenko): use new animations support instead.
-      'transition': transition,
-    }));
+    setStyle(element, 'transition', transition);
 
-    st.setStyles(element, closedStyle);
-
-    st.resetStyles(element, ['display']);
+    setStyles(element, assertDoesNotContainDisplay(closedStyle));
+    toggle(element, true);
 
     this.mutateElement(() => {
       element./*OK*/scrollTop = 0;
@@ -321,7 +326,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     // TODO (jridgewell): expose an API accomodating this per PR #14676
     this.mutateElement(() => {
-      st.setStyles(element, openStyle);
+      setStyles(element, assertDoesNotContainDisplay(openStyle));
     });
 
     const container = dev().assertElement(this.container_);
@@ -391,7 +396,8 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == KeyCodes.ESCAPE) {
+    if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }
@@ -404,7 +410,7 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     if (this.isScrollable_) {
-      st.setStyle(this.element, 'webkitOverflowScrolling', '');
+      setStyle(this.element, 'webkitOverflowScrolling', '');
     }
     if (this.closeButtonHeader_) {
       removeElement(this.closeButtonHeader_);
@@ -432,14 +438,15 @@ class AmpLightbox extends AMP.BaseElement {
 
     // Disable transition for ads since the frame gets immediately collapsed.
     if (this.isInAd_()) {
-      st.resetStyles(element, ['transition']);
+      resetStyles(element, ['transition']);
       collapseAndReschedule();
     } else {
       element.addEventListener('transitionend', collapseAndReschedule);
       element.addEventListener('animationend', collapseAndReschedule);
     }
 
-    st.setStyles(element, this.getAnimationPresetDef_().closedStyle);
+    setStyles(element, assertDoesNotContainDisplay(
+        this.getAnimationPresetDef_().closedStyle));
 
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -487,13 +494,13 @@ class AmpLightbox extends AMP.BaseElement {
   waitForScroll_(startingScrollTop) {
     this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'slow scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.scrollTimerId_ = null;
         this.update_(this.pos_);
       } else {
-        dev().fine(TAG, 'fast scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'fast scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.waitForScroll_(this.pos_);
       }
     }, 100);

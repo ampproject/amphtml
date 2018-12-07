@@ -206,7 +206,6 @@ To reduce the number of request pings, you can specify batching behaviors in the
 
 The batching properties are:
   - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
-  - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
 For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 ```javascript
@@ -421,6 +420,7 @@ The element visibility trigger can be configured for any AMP element or a docume
 Notice that selector can be used to only specify a single element, not a collection. The element can be either an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags) or a document root.
 
 The element visibility trigger waits for the signal specified by the `waitFor` property in `visibilitySpec` before tracking element visibility. If `waitFor` is not specified, it waits for element's [`ini-load`](#initial-load-trigger) signal. See `waitFor` docs for more details.
+If `reportWhen` is specified, the trigger waits for that signal before sending the event. This is useful, for example, in sending analytics events when the page is closed.
 
 
 ##### Error trigger (In experiment)
@@ -442,10 +442,11 @@ NOTE: There is a [known issue](https://github.com/ampproject/amphtml/issues/1089
 
 The `visibilitySpec` is a set of conditions and properties that can be applied to `visible` or `hidden` triggers to change when they fire. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
   - `waitFor`: This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
+  - `reportWhen`: This property indicates that the visibility trigger should wait for a certain signal before sending the trigger. The only supported value is `documentExit`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec. Note that when `reportWhen` is specified, the report will be sent at the time of the signal even if visibility requirements are not met at that time or have not been met previously. Any relevant variables (`totalVisibleTime`, etc.) will be populated according to the visibility requirements in this `visibilitySpec`.
   - `continuousTimeMin` and `continuousTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax`: These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger fires when the element is not visible. If both bounds are set to 100, the trigger fires when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. The default values for `visiblePercentageMin` and `visiblePercentageMax` are  0 and 100, respectively.
-  - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`.
+  - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
 
 ```javascript
 visibilitySpec: {
@@ -506,6 +507,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
     "selector": "#ad1",
     "visibilitySpec": {
       "waitFor": "ini-load",
+      "reportWhen": "documentExit",
       "visiblePercentageMin": 20,
       "totalTimeMin": 500,
       "continuousTimeMin": 200
@@ -684,6 +686,20 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
   "referrerPolicy": "no-referrer"
 }
 ```
+
+#### Linkers
+
+The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
+
+Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
+
+If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
+
+#### Cookies
+
+The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's domain.
+
+Details on setting up the `cookies` configuration can be found at [Receiving Linker Params on AMP Pages](./linker-id-receiving.md#receiving-linker-params-on-amp-pages)
 
 ## Validation
 

@@ -15,11 +15,15 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {FakeMutationObserver} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
+import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {toggle} from '../../src/style';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
-
 
 describes.sandboxed('FixedLayer', {}, () => {
   let documentApi;
@@ -32,7 +36,9 @@ describes.sandboxed('FixedLayer', {}, () => {
   let element3;
   let element4;
   let element5;
+  let element6;
   let allRules;
+  let timer;
 
   beforeEach(() => {
     allRules = {};
@@ -46,11 +52,13 @@ describes.sandboxed('FixedLayer', {}, () => {
     element3 = createElement('element3');
     element4 = createElement('element4');
     element5 = createElement('element5');
+    element6 = createElement('element6');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
     docBody.appendChild(element4);
     docBody.appendChild(element5);
+    docBody.appendChild(element6);
 
     const invalidRule = createValidRule('#invalid', 'fixed',
         [element1, element3]);
@@ -133,10 +141,16 @@ describes.sandboxed('FixedLayer', {}, () => {
         return (!!elem.parentElement);
       },
       defaultView: {
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
+        Promise: window.Promise,
+        MutationObserver: FakeMutationObserver,
         getComputedStyle: elem => {
           return elem.computedStyle;
         },
         navigator: window.navigator,
+        location: window.location,
+        cookie: '',
       },
       createElement: name => {
         return createElement(name);
@@ -147,6 +161,8 @@ describes.sandboxed('FixedLayer', {}, () => {
     documentApi.defaultView.document = documentApi;
     ampdoc = new AmpDocSingle(documentApi.defaultView);
     installPlatformService(documentApi.defaultView);
+    installTimerService(documentApi.defaultView);
+    timer = Services.timerFor(documentApi.defaultView);
 
     vsyncTasks = [];
     vsyncApi = {
@@ -161,12 +177,12 @@ describes.sandboxed('FixedLayer', {}, () => {
   });
 
   function createElement(id) {
-    const attrs = {};
     const children = [];
     const elem = {
       id,
       ownerDocument: documentApi,
       autoTop: '',
+      tagName: id,
       toString: () => {
         return id;
       },
@@ -261,20 +277,45 @@ describes.sandboxed('FixedLayer', {}, () => {
       },
       matches: () => true,
       compareDocumentPosition: other => {
-        if (id < other.id) {
-          return 0x0A;
+        if (other.id > id) {
+          return Node.DOCUMENT_POSITION_FOLLOWING;
         }
-        return 0;
+        return Node.DOCUMENT_POSITION_PRECEDING;
       },
-      hasAttribute: name => {
-        return !!attrs[name];
+      hasAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return true;
+          }
+        }
+        return false;
       },
-      setAttribute: (name, value) => {
-        attrs[name] = value;
+      getAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return this.attributes[i].value;
+          }
+        }
+        return null;
       },
-      removeAttribute: name => {
-        delete attrs[name];
+      setAttribute(name, value) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes[i].value = value;
+            return;
+          }
+        }
+        this.attributes.push({name, value});
       },
+      removeAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes.splice(i, 1);
+            return;
+          }
+        }
+      },
+      attributes: [],
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
@@ -309,7 +350,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(html.trim()).to.equal(
             '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
-        this.firstElementChild.style.display = 'none';
+        toggle(this.firstElementChild, false);
       },
     };
     return elem;
@@ -439,30 +480,45 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(fixedLayer.elements_).to.have.length(5);
 
       // Add.
-      fixedLayer.addElement(element3, '*');
+      fixedLayer.addElement(element6);
       expect(updateStub).to.be.calledOnce;
       expect(fixedLayer.elements_).to.have.length(6);
       const fe = fixedLayer.elements_[5];
       expect(fe.id).to.equal('F5');
-      expect(fe.element).to.equal(element3);
+      expect(fe.element).to.equal(element6);
       expect(fe.selectors).to.deep.equal(['*']);
+      expect(fe.forceTransfer).to.be.undefined;
 
       // Remove.
-      fixedLayer.removeElement(element3);
+      fixedLayer.removeElement(element6);
       expect(fixedLayer.elements_).to.have.length(5);
 
-      // Add with forceTransfer.
-      fixedLayer.addElement(element3, '*', true);
+      // Add with forceTransfer=true.
+      fixedLayer.addElement(element6, true);
       expect(updateStub).to.have.callCount(2);
       expect(fixedLayer.elements_).to.have.length(6);
       const fe1 = fixedLayer.elements_[5];
       expect(fe1.id).to.equal('F6');
-      expect(fe1.element).to.equal(element3);
+      expect(fe1.element).to.equal(element6);
       expect(fe1.selectors).to.deep.equal(['*']);
       expect(fe1.forceTransfer).to.be.true;
 
       // Remove.
-      fixedLayer.removeElement(element3);
+      fixedLayer.removeElement(element6);
+      expect(fixedLayer.elements_).to.have.length(5);
+
+      // Add with forceTransfer=false.
+      fixedLayer.addElement(element6, false);
+      expect(updateStub).to.have.callCount(3);
+      expect(fixedLayer.elements_).to.have.length(6);
+      const fe2 = fixedLayer.elements_[5];
+      expect(fe2.id).to.equal('F7');
+      expect(fe2.element).to.equal(element6);
+      expect(fe2.selectors).to.deep.equal(['*']);
+      expect(fe2.forceTransfer).to.be.false;
+
+      // Remove.
+      fixedLayer.removeElement(element6);
       expect(fixedLayer.elements_).to.have.length(5);
     });
 
@@ -919,11 +975,11 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(fixedLayer.elements_).to.have.length(5);
 
       // Add.
-      fixedLayer.addElement(element3, '*');
+      fixedLayer.addElement(element6, '*');
       expect(fixedLayer.elements_).to.have.length(6);
       const fe = fixedLayer.elements_[5];
       expect(fe.id).to.equal('F5');
-      expect(fe.element).to.equal(element3);
+      expect(fe.element).to.equal(element6);
       expect(fe.selectors).to.deep.equal(['*']);
       fixedLayer.mutateElement_(fe, 1, {
         fixed: true,
@@ -938,9 +994,9 @@ describes.sandboxed('FixedLayer', {}, () => {
           callback();
         },
       };
-      fixedLayer.removeElement(element3);
+      fixedLayer.removeElement(element6);
       expect(fixedLayer.elements_).to.have.length(5);
-      expect(element3.style.top).to.equal('');
+      expect(element6.style.top).to.equal('');
     });
 
     it('should reset sticky top upon being removed from fixedlayer', () => {
@@ -1039,6 +1095,44 @@ describes.sandboxed('FixedLayer', {}, () => {
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch('FixedLayer',
           /not supported yet for fixed or sticky elements/);
+    });
+
+    describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
+      it('should trigger an update', () => {
+        element1.computedStyle['position'] = 'fixed';
+        element1.offsetWidth = 10;
+        element1.offsetHeight = 10;
+        element1.computedStyle['display'] = 'none';
+
+        expect(vsyncTasks).to.have.length(1);
+        const state = {};
+        vsyncTasks[0].measure(state);
+
+        expect(state['F0'].fixed).to.be.false;
+
+        element1.computedStyle['display'] = '';
+
+        sandbox.stub(timer, 'delay').callsFake(callback => {
+          callback();
+        });
+        return fixedLayer.mutationObserver_.__mutate({
+          attributeName: 'hidden',
+        }).then(() => {
+          expect(vsyncTasks).to.have.length(2);
+          const state = {};
+          vsyncTasks[0].measure(state);
+
+          expect(state['F0'].fixed).to.be.true;
+          expect(state['F0'].top).to.equal('');
+          expect(state['F0'].zIndex).to.equal('');
+        });
+      });
     });
   });
 
@@ -1162,6 +1256,31 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(state['F0'].transferrable).to.be.true;
     });
 
+    it('should disregard element if it has forceTransfer=false', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
+      element5.computedStyle['position'] = 'sticky';
+
+      expect(vsyncTasks).to.have.length(1);
+      let state = {};
+      vsyncTasks[0].measure(state);
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].transferrable).to.be.true;
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].transferrable).to.be.false;
+
+      // Add.
+      state = {};
+      fixedLayer.setupElement_(element1, '*', 'fixed', false);
+      expect(vsyncTasks).to.have.length(1);
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].transferrable).to.be.false;
+    });
+
     it('should collect turn on transferrable with bottom != 0', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
@@ -1209,7 +1328,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.placeholder).to.exist;
-      expect(fe.placeholder.style['display']).to.equal('none');
+      expect(fe.placeholder).to.have.attribute('hidden');
 
       expect(fixedLayer.transferLayer_).to.exist;
       const layer = fixedLayer.transferLayer_.layer_;
@@ -1317,6 +1436,82 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(userError).calledWithMatch('FixedLayer',
           /not supported yet for fixed or sticky elements/);
     });
+
+    describe('hidden toggle', () => {
+      beforeEach(() => {
+        toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
+            true);
+        fixedLayer.observeHiddenMutations();
+      });
+
+      it('should trigger an update', () => {
+        element1.computedStyle['position'] = 'fixed';
+        element1.offsetWidth = 10;
+        element1.offsetHeight = 10;
+        element1.computedStyle['display'] = 'none';
+
+        expect(vsyncTasks).to.have.length(1);
+        const state = {};
+        vsyncTasks[0].measure(state);
+
+        expect(state['F0'].fixed).to.be.false;
+
+        element1.computedStyle['display'] = '';
+
+        sandbox.stub(timer, 'delay').callsFake(callback => {
+          callback();
+        });
+        return fixedLayer.mutationObserver_.__mutate({
+          attributeName: 'hidden',
+        }).then(() => {
+          expect(vsyncTasks).to.have.length(2);
+          const state = {};
+          vsyncTasks[0].measure(state);
+
+          expect(state['F0'].fixed).to.be.true;
+          expect(state['F0'].top).to.equal('');
+          expect(state['F0'].zIndex).to.equal('');
+        });
+      });
+    });
+
+    it('should sync attributes between body and layer', () => {
+      const {body} = ampdoc.win.document;
+
+      // Necessary to create the fixed layer
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
+      fixedLayer.vsync_ = {
+        runPromise({measure, mutate}, state) {
+          measure(state);
+          mutate(state);
+          return Promise.resolve();
+        },
+      };
+
+      body.setAttribute('test', 'hello');
+      fixedLayer.update();
+      expect(fixedLayer.transferLayer_).to.exist;
+      const layer = fixedLayer.transferLayer_.layer_;
+      expect(layer.getAttribute('test')).to.equal('hello');
+
+      body.removeAttribute('test');
+      body.setAttribute('test1', 'hello1');
+      body.setAttribute('test2', 'hello2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal('hello1');
+      expect(layer.getAttribute('test2')).to.equal('hello2');
+
+      body.removeAttribute('test1');
+      body.removeAttribute('test2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal(null);
+      expect(layer.getAttribute('test2')).to.equal(null);
+    });
   });
 });
 
@@ -1325,12 +1520,21 @@ describes.realWin('FixedLayer', {}, env => {
   let win, doc;
   let ampdoc;
   let fixedLayer;
-  let vsyncApi;
-  let vsyncTasks;
   let transferLayer;
   let root;
   let shadowRoot;
   let container;
+
+  const vsyncTasks = [];
+  const vsyncApi = {
+    runPromise: task => {
+      vsyncTasks.push(task);
+      return Promise.resolve();
+    },
+    mutate: mutator => {
+      vsyncTasks.push({mutate: mutator});
+    },
+  };
 
   // Can only test when Shadow DOM is available.
   describe.configure().if(() => Element.prototype.attachShadow).run('shadow ' +
@@ -1338,17 +1542,9 @@ describes.realWin('FixedLayer', {}, env => {
     beforeEach(function() {
       win = env.win;
       doc = win.document;
-      vsyncTasks = [];
-      vsyncApi = {
-        runPromise: task => {
-          vsyncTasks.push(task);
-          return Promise.resolve();
-        },
-        mutate: mutator => {
-          vsyncTasks.push({mutate: mutator});
-        },
-      };
+
       installPlatformService(win);
+      installTimerService(win);
       ampdoc = new AmpDocSingle(win);
       shadowRoot = win.document.body.attachShadow({mode: 'open'});
       fixedLayer = new FixedLayer(ampdoc, vsyncApi,

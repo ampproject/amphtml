@@ -78,7 +78,6 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
-
   }
 
   /**
@@ -140,7 +139,6 @@ class AmpMowplayer extends AMP.BaseElement {
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
     this.iframe_ = iframe;
-
     this.unlistenMessage_ = listen(
         this.win,
         'message',
@@ -152,7 +150,6 @@ class AmpMowplayer extends AMP.BaseElement {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
-
     return loaded;
   }
 
@@ -217,7 +214,7 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
     const eventData = getData(event);
-
+	
     if (!isJsonOrObj(eventData)) {
       return;
     }
@@ -268,11 +265,13 @@ class AmpMowplayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
+
     this.sendCommand_('listening', {
       href: window.location.href,
       origin: window.location.origin,
       isAmp: true,
     });
+
   }
 
   /** @override */

@@ -175,6 +175,27 @@ describes.realWin('extension-analytics', {
       const reporter = builder.track('test', 'fake.com').build();
       expect(reporter.trigger).to.exist;
     });
+
+    it('Should allow to specify transport config', () => {
+      parent.getResourceId = () => { return 1; };
+      parent.signals = () => {
+        return {
+          whenSignal: () => { return Promise.resolve(); },
+        };
+      };
+      builder.setTransportConfig({
+        'beacon': true,
+        'image': true,
+        'xhrpost': false,
+      });
+
+      const reporter = builder.build();
+      expect(reporter.config_.transport).to.jsonEqual({
+        'beacon': true,
+        'image': true,
+        'xhrpost': false,
+      });
+    });
   });
 
   describe('CustomEventReporter test', () => {

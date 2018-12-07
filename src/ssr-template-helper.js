@@ -17,9 +17,9 @@
 import {dict} from './utils/object';
 import {
   fromStructuredCloneable,
+  toStructuredCloneable,
   verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
-import {toStructuredCloneable} from './utils/xhr-utils';
 
 /**
  * @typedef {{
@@ -47,19 +47,25 @@ export class SsrTemplateHelper {
     /** @private @const */
     this.templates_ = templates;
 
-    /** @private @const {!XMLSerializer} */
-    this.xmls_ = new XMLSerializer();
-
     /** @private @const */
     this.sourceComponent_ = sourceComponent;
   }
 
   /**
-   * Whether the viewer can render templates.
+   * Whether the viewer can render templates. A doc-level opt in as
+   * trusted viewers must set this capability explicitly, as a security
+   * measure for potential abuse of feature.
    * @return {boolean}
    */
   isSupported() {
-    return this.viewer_.hasCapability('viewerRenderTemplate');
+    const {ampdoc} = this.viewer_;
+    if (ampdoc.isSingleDoc()) {
+      const htmlElement = ampdoc.getRootNode().documentElement;
+      if (htmlElement.hasAttribute('allow-viewer-render-template')) {
+        return this.viewer_.hasCapability('viewerRenderTemplate');
+      }
+    }
+    return false;
   }
 
   /**
@@ -76,13 +82,7 @@ export class SsrTemplateHelper {
     element, request, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
     if (!opt_templates) {
-      const template = this.templates_.maybeFindTemplate(element);
-      if (template) {
-        // The document fragment can't be used in the message channel API thus
-        // serializeToString for a string representation of the dom tree.
-        mustacheTemplate = this.xmls_.serializeToString(
-            this.templates_.findTemplate(element));
-      }
+      mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
     return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
@@ -96,7 +96,7 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!FetchRequestDef} request
-   * @param {string|undefined} mustacheTemplate
+   * @param {?Element|undefined} mustacheTemplate
    * @param {?SsrTemplateDef=} opt_templates
    * @param {!Object=} opt_attributes
    * @return {!JsonObject}
@@ -104,33 +104,39 @@ export class SsrTemplateHelper {
    */
   buildPayload_(
     request, mustacheTemplate, opt_templates, opt_attributes = {}) {
-    const ampComponent = dict({
-      'type': this.sourceComponent_,
-      'successTemplate': {
+    const ampComponent = dict({'type': this.sourceComponent_});
+
+    const successTemplateKey = 'successTemplate';
+    const successTemplate =
+      (opt_templates && opt_templates[successTemplateKey])
+        ? opt_templates[successTemplateKey] : mustacheTemplate;
+    if (successTemplate) {
+      ampComponent[successTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': opt_templates
-          ? this.xmls_.serializeToString(opt_templates['successTemplate'])
-          : mustacheTemplate,
-      },
-      'errorTemplate': {
+        'payload': successTemplate./*REVIEW*/innerHTML,
+      };
+    }
+
+    const errorTemplateKey = 'errorTemplate';
+    const errorTemplate =
+      (opt_templates && opt_templates[errorTemplateKey])
+        ? opt_templates[errorTemplateKey] : null;
+    if (errorTemplate) {
+      ampComponent[errorTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': opt_templates
-          ? this.xmls_.serializeToString(
-              opt_templates['errorTemplate']) : null,
-      },
-    });
+        'payload': errorTemplate./*REVIEW*/innerHTML,
+      };
+    }
+
+    if (opt_attributes) {
+      Object.assign(ampComponent, opt_attributes);
+    }
+
     const data = dict({
       'originalRequest':
-          toStructuredCloneable(request.xhrUrl, request.fetchOpt),
+        toStructuredCloneable(request.xhrUrl, request.fetchOpt),
       'ampComponent': ampComponent,
     });
-
-    const additionalAttr = opt_attributes && Object.keys(opt_attributes);
-    if (additionalAttr) {
-      Object.keys(opt_attributes).forEach(key => {
-        data[key] = opt_attributes[key];
-      });
-    }
 
     return data;
   }

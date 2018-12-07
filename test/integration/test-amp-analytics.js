@@ -14,71 +14,209 @@
  * limitations under the License.
  */
 
-import {
-  depositRequestUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
+import {RequestBank} from '../../testing/test-helper';
 
-describe.configure()
-    .skipIfPropertiesObfuscated().run('amp-analytics', function() {
-      this.timeout(15000);
+describe.configure().skipIfPropertiesObfuscated().run('amp' +
+    '-analytics', function() {
+  this.timeout(15000);
 
-      describes.integration('amp-analytics integration test', {
-        body:
-    `<amp-analytics>
+  describes.integration('amp-analytics basic request', {
+    body:
+      `<amp-analytics>
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-has-referrer')}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
               "on": "visible",
-              "request": "endpoint"
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
             }
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}"
           }
         }
         </script>
-    </amp-analytics>
-    `,
-        extensions: ['amp-analytics'],
-      }, env => {
-        it('should keep referrer if no referrerpolicy specified', () => {
-          return withdrawRequest(env.win,
-              'analytics-has-referrer').then(request => {
-            expect(request.headers.referer).to.be.ok;
-          });
-        });
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should send request', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/?a=2&b=AMP%20TEST');
+        expect(req.headers.referer,
+            'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
+    });
+  });
 
-      describes.integration('amp-analytics integration test', {
-        body:
-    `<amp-analytics>
+  describes.integration('amp-analytics batch', {
+    body:
+      `<amp-analytics>
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${depositRequestUrl('analytics-no-referrer')}"
+            "endpoint": {
+              "baseUrl": "${RequestBank.getUrl()}",
+              "batchInterval": 1
+            }
           },
           "triggers": {
-            "pageview": {
+            "pageview1": {
               "on": "visible",
-              "request": "endpoint"
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            },
+            "pageview2": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
             }
           },
           "transport": {
-            "referrerPolicy": "no-referrer"
+            "beacon": false,
+            "xhrpost": true
           }
         }
         </script>
-    </amp-analytics>
-    `,
-        extensions: ['amp-analytics'],
-      }, env => {
-        it('should remove referrer if referrerpolicy=no-referrer', () => {
-          return withdrawRequest(env.win, 'analytics-no-referrer')
-              .then(request => {
-                expect(request.headers.referer).to.not.be.ok;
-              });
-        });
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should send request in batch', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
       });
     });
+  });
+
+  describes.integration('amp-analytics useBody', {
+    body:
+      `<amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
+            }
+          },
+          "transport": {
+            "beacon": false,
+            "xhrpost": true,
+            "useBody": true
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}"
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should send request use POST body payload', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/');
+        expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
+      });
+    });
+  });
+
+  describes.integration('amp-analytics batch useBody', {
+    body:
+      `<amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": {
+              "baseUrl": "${RequestBank.getUrl()}",
+              "batchInterval": 1
+            }
+          },
+          "triggers": {
+            "pageview1": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            },
+            "pageview2": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 1,
+                "b": "\${title}"
+              }
+            }
+          },
+          "transport": {
+            "beacon": false,
+            "xhrpost": true,
+            "useBody": true
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should send batch request use POST body payload', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/');
+        expect(JSON.parse(req.body)).to.deep.equal([{
+          a: 1, b: 'AMP TEST',
+        }, {
+          a: 1, b: 'AMP TEST',
+        }]);
+      });
+    });
+  });
+
+  describes.integration('amp-analytics referrerPolicy', {
+    body:
+      `<amp-analytics>
+          <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "${RequestBank.getUrl()}"
+            },
+            "triggers": {
+              "pageview": {
+                "on": "visible",
+                "request": "endpoint"
+              }
+            },
+            "transport": {
+              "referrerPolicy": "no-referrer"
+            }
+          }
+          </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should remove referrer if referrerpolicy=no-referrer', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.headers.referer).to.not.be.ok;
+      });
+    });
+  });
+});

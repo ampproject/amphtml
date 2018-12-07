@@ -51,6 +51,9 @@
   <amp-video rotate-to-fullscreen layout=fill width=300 height=500
     loop preload="metadata" controls></amp-video>
 
+  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+  <amp-video dock layout=fill width=300 height=500 controls></amp-video>
+
   <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
   <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
     loop preload="metadata" controls></amp-video>

@@ -37,7 +37,7 @@ export const TFCD = 'tagForChildDirectedTreatment';
 const SRA_JOINERS = [
   combineInventoryUnits, getCookieOptOut, getAdks, getSizes, getTfcd, isAdTest,
   getTargetingAndExclusions, getExperimentIds, getIdentity, getForceSafeframe,
-  getPageOffsets, getContainers];
+  getPageOffsets, getContainers, getIsFluid];
 
 /**
   * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
@@ -277,6 +277,26 @@ export function getContainers(impls) {
 }
 
 /**
+ * Combine fluid settings for each block via comma separator.
+ * @param {!Array<!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>} impls
+ * @return {?Object<string,string>}
+ * @visibleForTesting
+ */
+export function getIsFluid(impls) {
+  let hasFluid = false;
+  const result = [];
+  impls.forEach(impl => {
+    if (impl.isFluidRequest()) {
+      hasFluid = true;
+      result.push('height');
+    } else {
+      result.push('0');
+    }
+  });
+  return hasFluid ? {'fluid': result.join()} : null;
+}
+
+/**
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
  * @return {?string}
@@ -313,7 +333,7 @@ function serializeItem_(key, value) {
  * @param {string} creative
  * @param {!Object<string,string>} headersObj
  * @param {boolean} done
- * @param {!Array<function(?../../../src/utils/xhr-utils.FetchResponse)>} sraRequestAdUrlResolvers
+ * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
  */
 export function sraBlockCallbackHandler(
@@ -337,7 +357,7 @@ export function sraBlockCallbackHandler(
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =
-/** @type {?../../../src/utils/xhr-utils.FetchResponseHeaders} */
+/** @type {?Headers} */
 ({
   get: name => {
     // TODO(keithwrightbos) - fix upstream so response writes
@@ -351,7 +371,7 @@ export function sraBlockCallbackHandler(
   has: name => !!headersObj[name.toLowerCase()],
 });
   const fetchResponse =
-/** @type {?../../../src/utils/xhr-utils.FetchResponse} */
+/** @type {?Response} */
 ({
   headers,
   arrayBuffer: () => tryResolve(() => utf8Encode(creative)),

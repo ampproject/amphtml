@@ -17,8 +17,7 @@
 
 /**
  * Compares if two arrays contains exactly same elements of same number
- * of same order.
- * Notice that it does NOT handle NaN case as expected
+ * of same order. Note that it does NOT handle NaN case as expected.
  *
  * @param {!Array<T>} arr1
  * @param {!Array<T>} arr2
@@ -29,45 +28,36 @@ export function areEqualOrdered(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
   }
-
   for (let i = 0; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) {
       return false;
     }
   }
-
   return true;
 }
 
 /**
- * A bit like Array#filter, but removes elements that filter false from the
- * array. Returns the filtered items.
+ * Removes elements that shouldRemove returns true for from the array.
  *
  * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} filter
- * @return {!Array<T>}
+ * @param {function(T, number, !Array<T>):boolean} shouldRemove
  * @template T
  */
-export function filterSplice(array, filter) {
-  const splice = [];
+export function remove(array, shouldRemove) {
   let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (filter(item, i, array)) {
+    if (!shouldRemove(item, i, array)) {
       if (index < i) {
         array[index] = item;
       }
       index++;
-    } else {
-      splice.push(item);
     }
   }
 
   if (index < array.length) {
     array.length = index;
   }
-
-  return splice;
 }
 
 /**

@@ -52,7 +52,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
     // cdn.ampproject.org as an iframe viewer or even possibly compiling
     // it as an AMP element.
-    let src = 'https://storage.googleapis.com/vrview/index.html';
+    let src = 'https://storage.googleapis.com/vrview/2.0/index.html';
     src = addParamToUrl(src, 'image', this.imageSrc_);
     if (this.element.hasAttribute('stereo')) {
       src = addParamToUrl(src, 'is_stereo', 'true');

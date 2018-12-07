@@ -175,7 +175,7 @@ export const VideoAttributes = {
    * Whether the developer has configured autoplay on the component.
    * This is normally done by setting `autoplay` attribute on the component.
    *
-   * AMP runtime manages autoplay behaviour itself using methods such as `play`,
+   * AMP runtime manages autoplay behavior itself using methods such as `play`,
    * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
@@ -247,6 +247,15 @@ export const VideoEvents = {
    * @event load
    */
   LOAD: 'load',
+
+  /**
+   * loadedmetadata
+   *
+   * Fired when the video's metadata becomes available (e.g. duration).
+   *
+   * @event loadedmetadata
+   */
+  LOADEDMETADATA: 'loadedmetadata',
 
   /**
    * playing
@@ -436,24 +445,25 @@ export const VideoAnalyticsEvents = {
    * @event video-session-visible
    */
   SECONDS_PLAYED: 'video-seconds-played',
+
+  /**
+   * video-hosted-custom
+   *
+   * Indicates that a custom event incoming from a 3p frame is to be logged.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  CUSTOM: 'video-hosted-custom',
+
+  /**
+   * video-percentage-played
+   *
+   * Indicates that a percentage interval has been played.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-custom
+   */
+  PERCENTAGE_PLAYED: 'video-percentage-played',
 };
-
-
-/**
- * @typedef {{
- *   autoplay: boolean,
- *   currentTime: number,
- *   duration: number,
- *   height: number,
- *   id: string,
- *   playedRangesJson: string,
- *   playedTotal: number,
- *   muted: boolean,
- *   state: string,
- *   width: number
- * }}
- */
-export let VideoAnalyticsDetailsDef;
 
 
 /**
@@ -466,3 +476,12 @@ export let VideoAnalyticsDetailsDef;
  * @typedef {!VideoInterface|!./base-element.BaseElement}
  */
 export let VideoOrBaseElementDef;
+
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isDockable(element) {
+  return element.hasAttribute(VideoAttributes.DOCK);
+}

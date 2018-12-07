@@ -20,7 +20,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   closest,
@@ -28,12 +27,11 @@ import {
   copyChildren,
   removeChildren,
 } from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles} from '../../../src/style';
-import {user} from '../../../src/log';
 
 
 /** @const {string} */
@@ -89,9 +87,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
 
     /** @private {?Element} */
     this.containerEl_ = null;
@@ -293,16 +288,21 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     }
 
+    const actions = [];
+
     accessConfig.forEach(config => {
       const {login, namespace} = /** @type {{login, namespace}} */ (config);
 
       if (isObject(login)) {
         const types = Object.keys(login);
-        types.forEach(type => this.whitelistAction_(namespace, type));
+        types.forEach(
+            type => actions.push(this.getActionObject_(namespace, type)));
       } else {
-        this.whitelistAction_(namespace);
+        actions.push(this.getActionObject_(namespace));
       }
     });
+
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
   /**
@@ -311,8 +311,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @param {string=} type
    * @private
    */
-  whitelistAction_(namespace = undefined, type = undefined) {
+  getActionObject_(namespace = undefined, type = undefined) {
     const method = ['login', namespace, type].filter(s => !!s).join('-');
-    this.actions_.addToWhitelist('SCRIPT', method);
+    return {tagOrTarget: 'SCRIPT', method};
   }
 }

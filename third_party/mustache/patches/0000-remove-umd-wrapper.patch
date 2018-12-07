@@ -1,0 +1,32 @@
+diff --git a/third_party/mustache/mustache.js b/third_party/mustache/mustache.js
+index fcc0fe678..869e4f36f 100644
+--- a/third_party/mustache/mustache.js
++++ b/third_party/mustache/mustache.js
+@@ -5,16 +5,7 @@
+
+ /*global define: false Mustache: true*/
+
+-(function defineMustache (global, factory) {
+-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
+-    factory(exports); // CommonJS
+-  } else if (typeof define === 'function' && define.amd) {
+-    define(['exports'], factory); // AMD
+-  } else {
+-    global.Mustache = {};
+-    factory(Mustache); // script, wsh, asp
+-  }
+-}(this, function mustacheFactory (mustache) {
++function mustacheFactory (mustache) {
+
+   var objectToString = Object.prototype.toString;
+   var isArray = Array.isArray || function isArrayPolyfill (object) {
+@@ -649,4 +640,8 @@
+   mustache.Context = Context;
+   mustache.Writer = Writer;
+
+-}));
++};
++
++const Mustache = {};
++mustacheFactory(Mustache);
++export default Mustache;

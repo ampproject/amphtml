@@ -28,7 +28,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
@@ -138,7 +138,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     this.elementId_ = user().assert(this.element.id,
@@ -396,7 +396,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   show() {
-    setStyle(this.element, 'display', '');
+    toggle(this.element, true);
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;

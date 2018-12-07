@@ -16,9 +16,13 @@
 import {Action, StateProperty} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
-import {DEPRECATED_SHARE_PROVIDERS_KEY, SHARE_PROVIDERS_KEY, ScrollableShareWidget} from './amp-story-share';
+import {
+  DEPRECATED_SHARE_PROVIDERS_KEY,
+  SHARE_PROVIDERS_KEY,
+  ScrollableShareWidget,
+} from './amp-story-share';
 import {EventType, dispatch} from './events';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -28,9 +32,11 @@ import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
-import {isProtocolValid} from '../../../src/url';
-import {parseArticlesToClassicApi, relatedArticlesFromJson} from './related-articles';
-import {parseUrlDeprecated} from '../../../src/url';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
+import {
+  parseArticlesToClassicApi,
+  relatedArticlesFromJson,
+} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -354,7 +360,7 @@ export class Bookend {
       if (!this.isActive_()) {
         return;
       }
-      if (event.keyCode == KeyCodes.ESCAPE) {
+      if (event.key == Keys.ESCAPE) {
         event.preventDefault();
         this.close_();
       }
@@ -507,8 +513,7 @@ export class Bookend {
     }
 
     if (target.hasAttribute('on')) {
-      const ampdoc = getAmpdoc(this.parentEl_);
-      const actionService = Services.actionServiceForDoc(ampdoc);
+      const actionService = Services.actionServiceForDoc(this.parentEl_);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
   }

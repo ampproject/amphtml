@@ -66,6 +66,7 @@ Command                                                                 | Descri
 `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
 `gulp build --extensions_from=examples/foo.amp.html`                    | Builds the AMP library, with only the extensions needed to load the listed examples.
 `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
+`gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
 `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
 `gulp clean`                                                            | Removes build output.
 `gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
@@ -104,14 +105,15 @@ Command                                                                 | Descri
 `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
-`gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
+`gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
 `gulp visual-diff --nobuild`                                            | Same as above, but without re-build.
-`gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode.
 `gulp visual-diff --chrome_debug --webserver_debug`                     | Same as above, with additional logging. Debug flags can be used independently.
 `gulp visual-diff --grep=<regular-expression-pattern>`                  | Same as above, but executes only those tests whose name matches the regular expression pattern.
 `gulp firebase`                                                         | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.
 `gulp firebase --file path/to/file`                                     | Same as above, but copies over the file specified as `firebase/index.html`.
 `gulp firebase --min`                                                   | Same as `gulp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.
+`gulp firebase --nobuild`                                               | Same as `gulp firebase`, but skips the `gulp build` step.
+
 ## Manual testing
 
 For manual testing build AMP and start the Node.js server by running `gulp`.
@@ -223,8 +225,6 @@ To run the tests on Sauce Labs:
 
 ## Visual Diff Tests
 
-**NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
-
 In addition to building the AMP runtime and running `gulp test`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
 The technology stack used is:
@@ -232,7 +232,7 @@ The technology stack used is:
 - [Percy](https://percy.io/), a visual regression testing service for webpages
 - [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
 - [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
-- [(Headless) Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome browser, optionally in headless mode
+- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
@@ -251,12 +251,7 @@ gulp visual-diff --nobuild
 ```
 Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
 
-The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome. You can see the results at `https://percy.io/<org>/<project>`.
-
-To run Chrome in headless mode, use:
-```
- gulp visual-diff --headless
-```
+The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
 
 To see debugging info during Percy runs, you can run:
 ```
@@ -295,17 +290,21 @@ is done through
 `heroku config:set AMP_TESTING_HOST=my-heroku-subdomain.herokuapp.com`)
 
 ### Testing with Firebase
-For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory, setting the `public` folder to `firebase` (a `firebase` folder can be generated with the command, `gulp firebase`).
+For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory* (a `firebase` folder can be generated with the command, `gulp firebase`).
 ```
 npm install -g firebase-tools
 firebase login
 firebase init
-gulp build # or gulp dist
 gulp firebase
 firebase deploy
 ```
+* When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
+- "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
+- "What do you want to use as your public directory?" enter `firebase`.
+- "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
-`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). It assumes that you have already run `gulp build` or `gulp dist` prior to running `gulp firebase` (use `gulp build` with `gulp firebase` and `gulp dist` with `gulp firebase --min`).  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
+
+`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`).  When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 
 ```
 {

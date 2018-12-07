@@ -44,6 +44,13 @@ export class SubscriptionPlatform {
   activate(unusedEntitlement) {}
 
   /**
+   * Reset the platform and renderer.
+   * This should clear dialogs and toasts originating
+   * from the platform.
+   */
+  reset() {}
+
+  /**
    * Returns if pingback is enabled for this platform.
    * @return {boolean}
    */
@@ -57,10 +64,11 @@ export class SubscriptionPlatform {
   pingback(unusedSelectedPlatform) {}
 
   /**
-   * Tells if this platform supports the current viewer.
-   * @return {boolean}
+   * Tells if the platform supports a score factor
+   * @param {string} unusedFactor
+   * @return {number}
    */
-  supportsCurrentViewer() {}
+  getSupportedScoreFactor(unusedFactor) {}
 
   /**
    * Executes action for the local platform.

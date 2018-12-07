@@ -148,11 +148,24 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
       '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
+  },
+  {
+    id: 'ios-embed-sd-notransfer',
+    name: 'Disables transfer mode for the new iOS embedded viewport model',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -167,8 +180,8 @@ const EXPERIMENTS = [
   },
   {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
@@ -230,37 +243,21 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
+  },
+  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-navigation-performance',
-    name: 'amp-story page to page navigation performance improvements',
-    spec: 'https://github.com/ampproject/amphtml/issues/17017',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17018',
-  },
-  {
-    id: 'amp-story-scroll',
-    name: 'Scrollable experience for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/16465',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
-  },
-  {
-    id: 'url-replacement-v2',
-    name: 'new parsing engine for url variables',
-    spec: 'https://github.com/ampproject/amphtml/issues/12119',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
-  },
-  {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
   },
   {
     id: 'amp-live-list-sorting',
@@ -280,6 +277,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -292,21 +295,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
-  },
-  {
     id: 'layers',
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
-    id: 'amp-image-slider',
-    name: 'Enables the experimental amp-image-slider for image comparison',
-    spec: 'TODO',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17165',
   },
   {
     id: 'blurry-placeholder',
@@ -315,10 +307,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'faster-bind-scan',
-    name: 'Enables faster scanning of dynamic markup for bindings',
-    spec: 'https://github.com/ampproject/amphtml/pull/17229',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17230',
+    id: 'amp-list-diffing',
+    name: 'Enables DOM diffing of amp-list renders via set-dom',
+    spec: 'https://github.com/ampproject/amphtml/pull/17000',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
   },
   {
     id: 'no-initial-intersection',
@@ -334,19 +326,81 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
   },
   {
-    id: 'amp-carousel-scroll-snap',
-    name: 'Enables scroll snap on carousel across all browsers/OSes',
+    id: 'amp-carousel-chrome-scroll-snap',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'amp-carousel-new-arrows',
-    name: 'Enables new AMP carousel navigation arrows',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17510',
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
   },
   {
-    id: 'linker-meta-opt-in',
-    name: 'Opts-in users that have included the GA client-id meta tag ',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
+  },
+  {
+    id: 'linker-form',
+    name: 'Enables form support in linker',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
+  },
+  {
+    id: 'fie-metadata-extension',
+    name: 'Use version supporting extension field in amp-ad-metadata.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
+  {
+    id: 'amp-script',
+    name: 'Enables <amp-script>.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
+  },
+  {
+    id: 'amp-list-resizable-children',
+    name: 'Experiment for allowing amp-list to resize when its children resize',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'scroll-height-minheight',
+    name: 'Forces min-height on body (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
   },
 ];
 
