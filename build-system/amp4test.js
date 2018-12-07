@@ -86,6 +86,22 @@ ${req.query.body}
 `);
 });
 
+app.use('/compose-html', function(req, res) {
+  res.setHeader('X-XSS-Protection', '0');
+  res.send(`
+<!doctype html>
+<html>
+<head>
+  <title>NON-AMP TEST</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+</head>
+<body>
+${req.query.body}
+</body>
+</html>
+  `);
+});
+
 /**
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
@@ -152,7 +168,7 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
 /**
  * Serves a fake ad for test-amp-ad-fake.js
  */
-app.get('/a4a/:bid', (req, res) => {
+app.get(['/a4a/:bid', '/inabox/:bid'], (req, res) => {
   const sourceOrigin = req.query['__amp_source_origin'];
   if (sourceOrigin) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
@@ -179,6 +195,7 @@ app.get('/a4a/:bid', (req, res) => {
           "on": "visible",
           "request": "pageview",
           "extraUrlParams": {
+            "timestamp": "\${timestamp}",
             "title": "\${title}",
             "ampdocUrl": "\${ampdocUrl}",
             "canonicalUrl": "\${canonicalUrl}",

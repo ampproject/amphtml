@@ -462,7 +462,9 @@ class IntegrationFixture {
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
 
-    let url = '/amp4test/compose-doc';
+    let url = this.spec.amp === false
+      ? '/amp4test/compose-html'
+      : '/amp4test/compose-doc';
     if (this.spec.params) {
       url = addParamsToUrl(url, this.spec.params);
     }
