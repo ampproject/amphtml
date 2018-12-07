@@ -2711,7 +2711,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@3.5.2, bluebird@^3.0.0, bluebird@^3.1.1, bluebird@^3.3.0:
+bluebird@3.5.2, bluebird@^3.0.0, bluebird@^3.3.0:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.2.tgz#1be0908e054a751754549c270489c1505d4ab15a"
   integrity sha512-dhHTWMI7kMx5whMQntl7Vr9C6BvV10lFXDAasnqnrMYhXVCzzk6IO9Fo2L75jXHT07WrOngL1WDXOp+yYS91Yg==
@@ -3079,13 +3079,6 @@ buffer@^5.0.2, buffer@^5.1.0:
   dependencies:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
-
-bufferstreams@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/bufferstreams/-/bufferstreams-1.0.1.tgz#cfb1ad9568d3ba3cfe935ba9abdd952de88aab2a"
-  integrity sha1-z7GtlWjTujz+k1upq92VLeiKqyo=
-  dependencies:
-    readable-stream "^1.0.33"
 
 builtin-modules@^1.0.0:
   version "1.1.1"
@@ -3889,13 +3882,6 @@ console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha1-PXz0Rk22RG6mRL9LOVB/mFEAjo4=
-
-consolidate@^0.14.1:
-  version "0.14.5"
-  resolved "https://registry.yarnpkg.com/consolidate/-/consolidate-0.14.5.tgz#5a25047bc76f73072667c8cb52c989888f494c63"
-  integrity sha1-WiUEe8dvcwcmZ8jLUsmJiI9JTGM=
-  dependencies:
-    bluebird "^3.1.1"
 
 consolidated-events@^1.1.0:
   version "1.1.1"
@@ -5017,11 +5003,6 @@ es6-map@^0.1.3:
     es6-symbol "~3.1.1"
     event-emitter "~0.3.5"
 
-es6-promise@^3.1.2:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-3.3.1.tgz#a08cdde84ccdbf34d027a1451bc91d4bcd28a613"
-  integrity sha1-oIzd6EzNvzTQJ6FFG8kdS80ophM=
-
 es6-promise@^4.0.3:
   version "4.2.5"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.5.tgz#da6d0d5692efb461e082c14817fe2427d8f5d054"
@@ -6090,13 +6071,6 @@ fs-minipass@^1.2.5:
   dependencies:
     minipass "^2.2.1"
 
-fs-readfile-promise@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/fs-readfile-promise/-/fs-readfile-promise-2.0.1.tgz#80023823981f9ffffe01609e8be668f69ae49e70"
-  integrity sha1-gAI4I5gfn//+AWCei+Zo9prknnA=
-  dependencies:
-    graceful-fs "^4.1.2"
-
 fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
@@ -6784,22 +6758,6 @@ gulp-webserver@0.9.1:
     through2 "^0.5.1"
     tiny-lr "0.1.4"
     watch "^0.11.0"
-
-gulp-wrap@0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/gulp-wrap/-/gulp-wrap-0.14.0.tgz#15a5c2048e2721e70539a61baf1c34a0bc5f2729"
-  integrity sha1-FaXCBI4nIecFOaYbrxw0oLxfJyk=
-  dependencies:
-    consolidate "^0.14.1"
-    es6-promise "^3.1.2"
-    fs-readfile-promise "^2.0.1"
-    js-yaml "^3.2.6"
-    lodash "^4.11.1"
-    node.extend "^1.1.2"
-    plugin-error "^0.1.2"
-    through2 "^2.0.1"
-    tryit "^1.0.1"
-    vinyl-bufferstream "^1.0.1"
 
 gulp@3.9.1:
   version "3.9.1"
@@ -8717,7 +8675,7 @@ js-tokens@^3.0.0, js-tokens@^3.0.2:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@^3.10.0, js-yaml@^3.12.0, js-yaml@^3.2.6, js-yaml@^3.7.0, js-yaml@^3.9.0, js-yaml@^3.9.1:
+js-yaml@^3.10.0, js-yaml@^3.12.0, js-yaml@^3.7.0, js-yaml@^3.9.0, js-yaml@^3.9.1:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.12.0.tgz#eaed656ec8344f10f527c6bfa1b6e2244de167d1"
   integrity sha512-PIt2cnwmPfL4hKNwqeiuz4bKfnzHTBv6HyVgjahA6mPLwPDzjDWrplJBMjHUFxku/N3FlmrbyPclad+I+4mJ3A==
@@ -9561,7 +9519,7 @@ lodash@^3.8.0:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
-lodash@^4.1.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.16.6, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.0:
+lodash@^4.1.1, lodash@^4.13.1, lodash@^4.16.6, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.0:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
@@ -10370,7 +10328,7 @@ node-releases@^1.0.0-alpha.15:
   dependencies:
     semver "^5.3.0"
 
-node.extend@^1.0.10, node.extend@^1.1.2:
+node.extend@^1.0.10:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/node.extend/-/node.extend-1.1.6.tgz#a7b882c82d6c93a4863a5504bd5de8ec86258b96"
   integrity sha1-p7iCyC1sk6SGOlUEvV3o7IYli5Y=
@@ -12067,7 +12025,7 @@ read-pkg@^3.0.0:
     normalize-package-data "^2.3.2"
     path-type "^3.0.0"
 
-readable-stream@1.1.x, readable-stream@^1.0.33, readable-stream@~1.1.8, readable-stream@~1.1.9:
+readable-stream@1.1.x, readable-stream@~1.1.8, readable-stream@~1.1.9:
   version "1.1.14"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-1.1.14.tgz#7cf4c54ef648e3813084c636dd2079e166c081d9"
   integrity sha1-fPTFTvZI44EwhMY23SB54WbAgdk=
@@ -14000,11 +13958,6 @@ try-resolve@^1.0.0:
   resolved "https://registry.yarnpkg.com/try-resolve/-/try-resolve-1.0.1.tgz#cfde6fabd72d63e5797cfaab873abbe8e700e912"
   integrity sha1-z95vq9ctY+V5fPqrhzq76OcA6RI=
 
-tryit@^1.0.1:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
-  integrity sha1-OTvnMKlEb9Hq1tpZoBQwjzbCics=
-
 tsickle@0.34.0:
   version "0.34.0"
   resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.34.0.tgz#10187fa6401a288a65efb93a60bf28b2ff95f90b"
@@ -14467,13 +14420,6 @@ vinyl-buffer@1.0.1:
   dependencies:
     bl "^1.2.1"
     through2 "^2.0.3"
-
-vinyl-bufferstream@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/vinyl-bufferstream/-/vinyl-bufferstream-1.0.1.tgz#0537869f580effa4ca45acb47579e4b9fe63081a"
-  integrity sha1-BTeGn1gO/6TKRay0dXnkuf5jCBo=
-  dependencies:
-    bufferstreams "1.0.1"
 
 vinyl-file@^2.0.0:
   version "2.0.0"
