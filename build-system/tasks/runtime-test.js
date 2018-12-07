@@ -176,6 +176,9 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
+    'chrome_flags': 'Running tests on version of Chrome with the flags ' +
+      'passed in.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -194,8 +197,6 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    'chrome_canary': 'Running tests on Chrome Canary.',
-    'chrome_flags': 'Flags to pass to Chrome',
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
@@ -730,6 +731,8 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'firefox': '  Runs tests on Firefox',
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
+    'chrome_canary': 'Runs tests on Chrome Canary.',
+    'chrome_flags': 'Runs tests on version of Chrome with the flags passed in.',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +
@@ -742,8 +745,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'a4a': '  Runs all A4A tests',
     'coverage': '  Run tests in code coverage mode',
     'headless': '  Run tests in a headless Chrome window',
-    'chrome_canary': 'Running tests on Chrome Canary.',
-    'chrome_flags': 'Flags to pass to Chrome',
     'local-changes': '  Run unit tests directly affected by the files ' +
         'changed in the local branch',
   },
