@@ -1377,10 +1377,18 @@ describes.realWin('Action whitelisting', {
       expect(spy).to.be.calledWithExactly(i);
     });
 
+    it('should allow whitelisted actions case insensitive', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'TAP', 'amp');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
     it('should whitelist default actions if alias is registered default',
         () => {
           // Given that 'defaultAction' is a registered default action.
           getDefaultActionAlias.returns('defaultAction');
+          // Expect the 'activate' call to invoke it.
           const i = new ActionInvocation(target, 'activate', /* args */ null,
               'source', 'caller', 'event', ActionTrust.HIGH, 'tap', null);
           action.invoke_(i);
