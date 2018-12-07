@@ -1,21 +1,26 @@
-ctr = 0;
+let ctr = 0;
+
+function convertFromBase10ToBase16(str){
+    const num = parseInt(str, 10);
+    return num.toString(16);
+}
 /**
  * @type {!Array<LogMethodMetadataDef>}
  */
 const transformableMethods = [
-  { name: "assert", variadic: true, startPos: 1 },
-  { name: "assertString", variadic: false, startPos: 1 },
-  { name: "assertNumber", variadic: false, startPos: 1 },
-  { name: "assertBoolean", variadic: false, startPos: 1 },
-  { name: "assertEnumValue", variadic: false, startPos: 2 },
-  { name: "assertElement", variadic: false, startPos: 1 },
-  { name: "fine", variadic: true, startPos: 1 },
-  { name: "info", variadic: true, startPos: 1 },
-  { name: "warn", variadic: true, startPos: 1 }
-  //{name: 'createExpectedError', variadic: true, startPos: 0},
-  //{name: 'error', variadic: true, startPos: 1},
-  //{name: 'expectedError', variadic: true, startPos: 1},
-  //{name: 'createError', variadic: true, startPos: 0},
+  {name: "assert", variadic: true, startPos: 1},
+  {name: "assertString", variadic: false, startPos: 1},
+  {name: "assertNumber", variadic: false, startPos: 1},
+  {name: "assertBoolean", variadic: false, startPos: 1},
+  {name: "assertEnumValue", variadic: false, startPos: 2},
+  {name: "assertElement", variadic: false, startPos: 1},
+  {name: "fine", variadic: true, startPos: 1 },
+  {name: "info", variadic: true, startPos: 1 },
+  {name: "warn", variadic: true, startPos: 1 },
+  {name: 'createExpectedError', variadic: true, startPos: 0},
+  {name: 'error', variadic: true, startPos: 1},
+  {name: 'expectedError', variadic: true, startPos: 1},
+  {name: 'createError', variadic: true, startPos: 0},
 ];
 
 function isTransformableMethod(t, node, methods) {
@@ -68,13 +73,13 @@ function isMessageString(node) {
 }
 
 module.exports = function(babel) {
-  const { types: t } = babel;
+  const {types: t} = babel;
   return {
     visitor: {
-      CallExpression(path) {
-        const { node } = path;
-        const { callee } = node;
-        const { parenthesized } = node.extra || {};
+      CallExpression(path, state) {
+        const {node} = path;
+        const {callee} = node;
+        const {parenthesized} = node.extra || {};
 
         // Test to see if it looks like a method().call()
         const isMemberAndCallExpression =
@@ -101,6 +106,12 @@ module.exports = function(babel) {
         // This is the message argument that we want to extract and replace.
         const messageArg = path.node.arguments[metadata.startPos];
 
+        // If there is actually no message argument then bail out on the whole
+        // transformation.
+        if (!messageArg) {
+          return;
+        }
+
         // Other arguments are template expressions in template literals.
         const otherArgs = [];
 
@@ -115,7 +126,10 @@ module.exports = function(babel) {
           t.callExpression(t.identifier(logCallee.name), []),
           t.identifier("getLogUrl")
         );
-        const getLogUrlArgs = [t.numericLiteral(ctr++), ...interpolateArgs, ...otherArgs];
+        console.log('ctr', ctr)
+        const hex = convertFromBase10ToBase16(ctr++);
+        console.log('hex', hex);
+        const getLogUrlArgs = [t.stringLiteral(hex), t.arrayExpression([...interpolateArgs, ...otherArgs])];
         newArgs[metadata.startPos] = t.callExpression(newCall, getLogUrlArgs);
 
         path.node.arguments.length = 0;

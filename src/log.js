@@ -469,6 +469,14 @@ export class Log {
       error.message = error.message.replace(USER_ERROR_SENTINEL, '');
     }
   }
+
+  /**
+   * @param {string} id
+   * @param {...*} var_args
+   */
+  getLogUrl(id, var_args) {
+    return '';
+  }
 }
 
 /**
