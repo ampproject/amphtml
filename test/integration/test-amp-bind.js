@@ -79,7 +79,8 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
-  describe('with [text] and [class]', () => {
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
+  describe.skip('with [text] and [class]', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
