@@ -381,8 +381,8 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
-      if (opt_append && this.loadMoreFailedElement_) {
-        this.setLoadMoreFailed_();
+      if (opt_append) {
+        throw error;
       } else {
         this.showFallback_(error);
       }
@@ -797,6 +797,8 @@ export class AmpList extends AMP.BaseElement {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
           }
+        }).catch(() => {
+          this.setLoadMoreFailed_();
         });
   }
 
@@ -849,10 +851,10 @@ export class AmpList extends AMP.BaseElement {
   toggleLoadMoreLoading_(state) {
     this.mutateElement(() => {
       // If it's loading, then it's no longer failed or ended
-      if (this.loadMoreFailedElement_) {
+      if (this.loadMoreFailedElement_ && state) {
         this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
       }
-      if (this.loadMoreEndElement_) {
+      if (this.loadMoreEndElement_ && state) {
         this.loadMoreEndElement_.classList.toggle('amp-visible', false);
       }
       if (this.loadMoreLoadingElement_) {
@@ -880,9 +882,8 @@ export class AmpList extends AMP.BaseElement {
         this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
             () => this.loadMoreCallback_());
       }
-      if (this.loadMoreButton_) {
-        this.loadMoreButton_.classList.toggle('amp-visible', false);
-      }
+      this.loadMoreButton_.classList.toggle('amp-visible', false);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
     });
   }
 
