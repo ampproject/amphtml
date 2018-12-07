@@ -149,6 +149,10 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/' + browserId;
  */
 export class RequestBank {
 
+  static getBrowserId() {
+    return browserId;
+  }
+
   /**
    * Returns the URL for depositing a request.
    *
