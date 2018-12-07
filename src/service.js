@@ -102,27 +102,15 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  *
- * Unlike most service getters, passing `Node` is necessary for some FIE-scope
- * services since sometimes we only have the FIE Document for context.
- *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id
  * @param {boolean=} opt_fallbackToTopWin
- * @return {Object} The service.
+ * @return {?Object}
  */
 export function getExistingServiceForDocInEmbedScope(
-  nodeOrDoc, id, opt_fallbackToTopWin)
+  element, id, opt_fallbackToTopWin)
 {
-  const isAmpDoc = !nodeOrDoc.nodeType;
-  // If an ampdoc is passed, resolve via ampdoc.
-  if (isAmpDoc) {
-    const ampdoc =
-      /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
-    return getServiceForDoc(ampdoc, id);
-  }
-  // Now, nodeOrDoc must be a node.
-  const document =
-    /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc);
+  const document = element.ownerDocument;
   const win = toWin(document.defaultView);
   // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != getTopWindow(win);
@@ -137,7 +125,7 @@ export function getExistingServiceForDocInEmbedScope(
     }
   }
   // If not node is not embedded, resolve via ampdoc.
-  return getServiceForDocOrNullInternal(nodeOrDoc, id);
+  return getServiceForDocOrNullInternal(element, id);
 }
 
 /**
@@ -327,7 +315,7 @@ export function getServiceForDocDeprecated(nodeOrDoc, id) {
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {!Promise<!Object>}
  */
@@ -340,7 +328,7 @@ export function getServicePromiseForDoc(elementOrAmpDoc, id) {
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {?Promise<!Object>}
  */
