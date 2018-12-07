@@ -231,7 +231,8 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
       });
     });
 
-    it('should change slides when the slide attribute binding changes',
+    // TODO(choumx, #19647): Times out on SL Chrome 71.
+    it.skip('should change slides when the slide attribute binding changes',
         () => {
           const carousel = fixture.doc.getElementById('carousel');
           const slides =
