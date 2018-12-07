@@ -657,8 +657,8 @@ Video analytics provides several triggers (`"on": "video-*"`) that publishers ca
 The `transport` configuration object specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
-  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) can be used to transmit the request. This will send a POST request with credentials.
-  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials.
+  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
+  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request with credentials. The request will be sent with an empty body unless `useBody` is true. See [Use Body for Extra URL Params](#use-body-for-extra-url-params) for more information about `useBody`.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request. To suppress console warnings due to empty responses or request failures, set `"image": {"suppressWarnings": true}`.
 
 MRC-accredited vendors may utilize a fourth transport mechanism, "iframe transport", by adding a URL string to iframe-transport-vendors.js. This indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `iframe-transport-vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration.
