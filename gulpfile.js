@@ -1265,13 +1265,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   // We don't need an explicit function wrapper like we do for `gulp dist`
   // because Babel handles that for you.
   const wrapper = options.wrapper || wrappers.none;
+  const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
+      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true})
       .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe($$.wrap, wrapper)
-      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
+      .pipe($$.regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
 
   const lazywrite = lazypipe()
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
