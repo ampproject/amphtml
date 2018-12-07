@@ -126,9 +126,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
             "a": 1,
             "b": "\${title}",
             "c": {
-              "d": "\${title}"
+              "d": "\${title}",
+              "e": {
+                "f": ["\${title}", "\${title}"]
+              }
             },
-            "e": ["\${title}", "\${title}"]
+            "g": ["\${title}", "\${title}"]
           }
         }
         </script>
@@ -139,8 +142,8 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.body).to.equal(
-            '{"a":2,"b":"AMP TEST","c":{"d":"AMP TEST"},' +
-        '"e":["AMP TEST","AMP TEST"]}'
+            '{"a":2,"b":"AMP TEST","c":{"d":"AMP TEST",' +
+        '"e":{"f":["AMP TEST","AMP TEST"]}},"g":["AMP TEST","AMP TEST"]}'
         );
       });
     });
