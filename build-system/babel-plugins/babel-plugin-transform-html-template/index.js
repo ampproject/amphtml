@@ -18,7 +18,7 @@ const {minify} = require('html-minifier');
 
 function optimizeLiteralOutput(templateLiteral) {
   if (templateLiteral.quasis.length !== 1) {
-    console.log('Improperly formatted `html` tagged template literal' +
+    console/* OK */.log('Improperly formatted `html` tagged template literal' +
       ', more than one template element present.');
     return null;
   }
