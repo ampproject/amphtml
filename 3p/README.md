@@ -62,6 +62,8 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 - If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as "https://cdn.ampproject.org" and "https://amp.cloudflare.com".
 
 # Adding proper integration tests
-AMP is continuously improving its test coverage and release process to prevent production regression. However, having all types of tests in AMP repo is unrealistic and hard to maintain, especially when the desired test is an end-to-end black box test for a 3rd party integration.
- It's highly recommended for any 3rd party integrating with AMP to have a proper automated integration test at their side to prevent bugs entering production. A good integration test should cover the most basic use case of the targeting 3rd party extension, and also some important but easy to break features. The test should be run against both AMP production and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-dev-channel) environments.
- Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
+You should ensure there are integration tests for your extension. These should be added to the AMP
+repo where it makes sense. In some cases this won't be possible because it relies on bringing up
+third-party infrastructure. In these cases you should maintain testing for the extension on your
+infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-dev-channel).
+Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
