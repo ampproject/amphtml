@@ -20,8 +20,6 @@ import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
-  this.timeout(1000);
-
   describes.integration('amp-pixel macro integration test', {
     body: `<amp-pixel
     src="${RequestBank.getUrl()}hello-world?title=TITLE&qp=QUERY_PARAM(a)">`,
