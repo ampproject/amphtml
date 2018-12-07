@@ -56,17 +56,6 @@ The endpoint approach is the same as the standard approach detailed in the previ
 
 To take this approach, review the documentation for publishers' integration with AMP Analytics.
 
-## Add Batch Plugin
-Batch plugin provides an easy way to construct batched requests on client side. Follow the instructions below to add a batch plugin.
-1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding the batch plugin to your analytics service AMP HTML's runtime.
-1. Develop a patch that implements the following:
-    1. Add new plugin function in [batching-plugins.js](./0.1/batching-plugins.js)
-    1. Add test coverage to your plugin function
-    1. Test your example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
-1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
-
-Please note that every new plugin will be reviewed by AMP team on a case by case basis. The idea is to avoid a plugin as much as possible if there is a more generic approach.
-
 ## Further Resources
 * Deep Dive: [Why not just use an iframe?](why-not-iframe.md)
 * Deep Dive: [Managing non-authenticated user state with AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md)
