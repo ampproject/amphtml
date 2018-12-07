@@ -79,26 +79,6 @@ export class EmbeddableService {
 
 
 /**
- * Returns a service with the given id. Assumes that it has been registered
- * already.
- * @param {!Window} win
- * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
- * @return {Object} The service.
- */
-export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
-  // First, try to resolve via local (embed) window.
-  const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-  if (local) {
-    return local;
-  }
-  if (opt_fallbackToTopWin) {
-    return getService(win, id);
-  }
-  return null;
-}
-
-/**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  *
@@ -115,9 +95,11 @@ export function getExistingServiceForDocInEmbedScope(
   // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != getTopWindow(win);
   if (isEmbed) {
-    const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
-    if (local) {
-      return local;
+    if (isServiceRegistered(win, id)) {
+      const embedService = getServiceInternal(win, id);
+      if (embedService) {
+        return embedService;
+      }
     }
     // Don't continue if fallback is not allowed.
     if (!opt_fallbackToTopWin) {
@@ -127,6 +109,7 @@ export function getExistingServiceForDocInEmbedScope(
   // Resolve via the element's ampdoc. This falls back to the top-level service.
   return getServiceForDocOrNullInternal(element, id);
 }
+
 
 /**
  * Installs a service override on amp-doc level.
@@ -138,28 +121,12 @@ export function installServiceInEmbedScope(embedWin, id, service) {
   const topWin = getTopWindow(embedWin);
   dev().assert(embedWin != topWin,
       'Service override can only be installed in embed window: %s', id);
-  dev().assert(!getLocalExistingServiceForEmbedWinOrNull(embedWin, id),
+  dev().assert(!isServiceRegistered(embedWin, id),
       'Service override has already been installed: %s', id);
   registerServiceInternal(embedWin, embedWin, id, () => service);
   getServiceInternal(embedWin, id); // Force service to build.
 }
 
-/**
- * @param {!Window} embedWin
- * @param {string} id
- * @return {?Object}
- */
-function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
-  // Note that this method currently only resolves against the given window.
-  // It does not try to go all the way up the parent window chain. We can change
-  // this in the future, but for now this gives us a better performance.
-  const topWin = getTopWindow(embedWin);
-  if (embedWin != topWin && isServiceRegistered(embedWin, id)) {
-    return getServiceInternal(embedWin, id);
-  } else {
-    return null;
-  }
-}
 
 /**
  * Registers a service given a class to be used as implementation.

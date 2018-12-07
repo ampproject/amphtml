@@ -20,7 +20,6 @@ import {
   assertDisposable,
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceInEmbedScope,
   getExistingServiceOrNull,
   getParentWindowFrameElement,
   getService,
@@ -224,61 +223,6 @@ describe('service', () => {
       setParentWindow(grandchild, child);
       expect(getService(grandchild, 'c')).to.equal(c);
       expect(getExistingServiceOrNull(grandchild, 'c')).to.equal(c);
-    });
-
-    describe('embed service', () => {
-      let childWin, grandchildWin;
-      let topService;
-
-      beforeEach(() => {
-        // A child.
-        childWin = {};
-        setParentWindow(childWin, window);
-
-        // A grandchild.
-        grandchildWin = {};
-        setParentWindow(grandchildWin, childWin);
-
-        registerServiceBuilder(window, 'c', factory);
-        topService = getService(window, 'c');
-      });
-
-      it('should not fall back to top window service by default', () => {
-        const service = getExistingServiceInEmbedScope(window, 'c');
-        expect(service).to.be.null;
-      });
-
-      it('should fall back top window service', () => {
-        const service = getExistingServiceInEmbedScope(
-            window, 'c', /* opt_fallbackToTopWin */ true);
-        expect(service).to.equal(topService);
-      });
-
-      it('should fall back to top service when not overriden', () => {
-        const childService = getExistingServiceInEmbedScope(
-            childWin, 'c', /* opt_fallbackToTopWin */ true);
-        expect(childService).to.equal(topService);
-
-        const grandchildService = getExistingServiceInEmbedScope(
-            grandchildWin, 'c', /* opt_fallbackToTopWin */ true);
-        expect(grandchildService).to.equal(topService);
-      });
-
-      it('should return overriden service', () => {
-        const overridenService = {};
-        installServiceInEmbedScope(childWin, 'c', overridenService);
-        expect(getExistingServiceInEmbedScope(childWin, 'c'))
-            .to.equal(overridenService);
-        // Top-level service doesn't change.
-        expect(getExistingServiceOrNull(window, 'c'))
-            .to.equal(topService);
-
-        // Notice that only direct overrides are allowed for now. This is
-        // arbitrary can change in the future to allow hierarchical lookup
-        // up the window chain.
-        expect(getExistingServiceOrNull(grandchildWin, 'c'))
-            .to.equal(topService);
-      });
     });
   });
 
