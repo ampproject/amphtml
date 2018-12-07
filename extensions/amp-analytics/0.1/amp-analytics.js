@@ -115,10 +115,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   isAlwaysFixed() {
-    if (isInFie(this.element)) {
-      return false;
-    }
-    return true;
+    return !isInFie(this.element);
   }
 
   /** @override */
