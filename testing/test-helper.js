@@ -189,6 +189,20 @@ export class RequestBank {
   }
 }
 
+export class BrowserHandle {
+  constructor(win) {
+    this.win_ = win;
+    this.doc_ = this.win_.document;
+  }
+
+  click(selector) {
+    const element = this.doc_.querySelector(selector);
+    if (element) {
+      element.dispatchEvent(new CustomEvent('click', {bubbles: true}));
+    }
+  }
+}
+
 export function createPointerEvent(type, x, y) {
   const event = new /*OK*/CustomEvent(type, {bubbles: true});
   event.clientX = x;

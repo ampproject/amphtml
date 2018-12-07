@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {RequestBank} from '../../testing/test-helper';
+import {BrowserHandle, RequestBank} from '../../testing/test-helper';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
@@ -52,6 +52,54 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         expect(req.headers.referer,
             'should keep referrer if no referrerpolicy specified').to.be.ok;
       });
+    });
+  });
+
+  describes.integration('amp-analytics click trigger', {
+    body: `
+      <a href="javascript:;"
+          data-vars-foo-bar="hello world"
+          data-vars-bar-foo="2">
+        Anchor
+      </a>
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "click": {
+              "on": "click",
+              "selector": "a",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "f": "\${fooBar}",
+                "b": "\${barFoo}"
+              }
+            }
+          },
+          "vars": {
+            "barFoo": 1
+          }
+        }
+        </script>
+      </amp-analytics>
+      `,
+    extensions: ['amp-analytics'],
+  }, env => {
+    let browser;
+
+    beforeEach(() => {
+      browser = new BrowserHandle(env.win);
+    });
+
+    it('should send request', () => {
+      const reqPromise = RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/?f=hello%20world&b=2');
+      });
+      browser.click('a');
+      return reqPromise;
     });
   });
 
