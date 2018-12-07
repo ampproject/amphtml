@@ -17,6 +17,8 @@
 console.log(html`html usage`);
 console.log(html`html usage
 multiline`);
+console.log(html`<p active="true">Attribute Quote Removal</p>`);
+console.log(html`<p data-order-state="new 'thing'">Impossible to Remove Quotes</p>`);
 console.log(html`<p>
   <span>html usage</span>
   <span>more spans</span>
@@ -50,6 +52,8 @@ console.log(html`<p>
 console.log(htmlFor(element)`html usage`);
 console.log(htmlFor(element)`html usage
 multiline`);
+console.log(htmlFor(element)`<p active="true">Attribute Quote Removal</p>`);
+console.log(htmlFor(element)`<p data-order-state="new 'thing'">Impossible to Remove Quotes</p>`);
 console.log(htmlFor(element)`<p>
   <span>html usage</span>
   <span>more spans</span>
