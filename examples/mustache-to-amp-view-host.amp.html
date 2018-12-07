@@ -7,7 +7,7 @@
 -->
 <!-- -->
 <!doctype html>
-<html ⚡>
+<html ⚡ allow-viewer-render-template>
 <head>
   <meta charset="utf-8">
   <title>amp-mustache</title>
@@ -63,33 +63,21 @@
   <!--
     Variables are interpolated when the variable name is surrounded in double curly brackets (`{{varname}}`)
   -->
-  <amp-state id="remoteAnimals"
-  [src]="remoteAnimalUrl">
-  <script type="application/json">
-    {
-      "currentAnimal": "dog",
-      "dog": {
-        "imageUrl": "/img/clock.jpg",
-        "style": "greenBackground"
+  <amp-state id="data">
+      <script type="application/json">
+      {
+        "foo": "Data for amp-bind"
       }
-    }
-  </script>
-  </amp-state>
+      </script>
+    </amp-state>
 
-  <amp-list src="cart.json" layout="fixed-height" height="56">
-    <template type="amp-mustache">
-      {{title}}
-      <p style="position:absolute;top:120px;" [text]="'This is a ' + remoteAnimals.currentAnimal + {{title}}'.'">This is a dog.</p>
-      <button class="ampstart-btn caps m1" style="position:absolute;top:50px;"
-        on="tap:AMP.setState({'remoteAnimals': {'currentAnimal': 'cat'}})">
-        Set to Bird direct assignment
-      </button>
-      <button class="ampstart-btn caps m1" style="position:absolute;top:50px;"
-        on="tap:AMP.setState({'remoteAnimals': {'currentAnimal': 'cat'}})">
-        Set to Bird via remote url
-      </button>
-    </template>
-  </amp-list>
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+      <template type="amp-mustache" id="amp-template-id">
+        <div>
+          <a href="{{url}}">{{title}}</a>
+        </div>
+      </template>
+    </amp-list>
 
 </body>
 </html>

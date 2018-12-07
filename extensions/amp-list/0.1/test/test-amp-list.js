@@ -444,6 +444,7 @@ describes.realWin('amp-list component', {
       it('should delegate template rendering to viewer', function*() {
         sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
             .returns(Promise.resolve({html: '<p>foo</p>'}));
+        sandbox.spy(list, 'updateBindings_');
 
         // Expects mutate/measure and hiding of loading/placeholder indicators.
         expectRender();
@@ -472,7 +473,7 @@ describes.realWin('amp-list component', {
         expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
         expect(ssrTemplateHelper.fetchAndRenderTemplate)
             .to.be.calledWithExactly(element, request, null, attrs);
-
+        expect(list.updateBindings_).to.be.calledOnce;
         expect(list.container_.contains(rendered)).to.be.true;
       });
     });
