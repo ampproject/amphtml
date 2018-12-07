@@ -124,7 +124,7 @@ export function getExistingServiceForDocInEmbedScope(
       return null;
     }
   }
-  // If not node is not embedded, resolve via ampdoc.
+  // Resolve via the element's ampdoc. This falls back to the top-level service.
   return getServiceForDocOrNullInternal(element, id);
 }
 
@@ -277,37 +277,17 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * If service `id` is not registered, returns null.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id
  */
-function getServiceForDocOrNullInternal(nodeOrDoc, id) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
+function getServiceForDocOrNullInternal(element, id) {
+  const ampdoc = getAmpdoc(element);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (isServiceRegistered(holder, id)) {
     return getServiceInternal(holder, id);
   } else {
     return null;
   }
-}
-
-
-/**
- * tl;dr -- Use getServiceForDoc() instead of this.
- *
- * Privileged variant of getServiceForDoc() that accepts non-element params,
- * e.g. window.document. This is currently necessary for doc-level services
- * used in startup, e.g. Chunks. Eventually we want to remove this function
- * and have callers find the appropriate AmpDoc and use getServiceForDoc().
- *
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @param {string} id
- * @return {T}
- * @template T
- */
-export function getServiceForDocDeprecated(nodeOrDoc, id) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
-  const holder = getAmpdocServiceHolder(ampdoc);
-  return getServiceInternal(holder, id);
 }
 
 
