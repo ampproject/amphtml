@@ -506,6 +506,8 @@ describe('amp-a4a', () => {
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.buildCallback();
       a4a.onLayoutMeasure();
+      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded').callsFake(
+          () => Promise.resolve());
       return a4a.layoutCallback().then(() => {
         verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
