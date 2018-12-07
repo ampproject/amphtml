@@ -20,7 +20,37 @@ import {parseQueryString} from '../../src/url';
 describe.configure().skipIfPropertiesObfuscated().run('inabox', function() {
   this.timeout(15000);
 
-  describes.integration('AMPHTML ads rendered on non-AMP page', {
+  describes.integration('AMPHTML ads rendered on non-AMP page ATF', {
+    amp: false,
+    body: `
+      <iframe
+      src="//ads.localhost:9876/amp4test/inabox/${RequestBank.getBrowserId()}"
+          scrolling="no"
+          width="300" height="250">
+      </iframe>
+      <script src="/examples/inabox-tag-integration.js"></script>
+      `,
+  }, () => {
+    it('should layout amp-img, amp-pixel, amp-analytics', () => {
+      // See amp4test.js for creative content
+
+      const imgPromise = RequestBank.withdraw('image').then(req => {
+        expect(req.url).to.equal('/');
+      });
+      const pixelPromise = RequestBank.withdraw('pixel').then(req => {
+        expect(req.url).to.equal('/foo?cid=');
+      });
+      const analPromise = RequestBank.withdraw('analytics').then(req => {
+        expect(req.url).to.match(/^\/bar\?/);
+        const queries =
+            parseQueryString(req.url.substr('/bar'.length));
+        expect(queries['cid']).to.equal('');
+      });
+      return Promise.all([imgPromise, pixelPromise, analPromise]);
+    });
+  });
+
+  describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
     amp: false,
     body: `
       <div style="height: 100vh"></div>
@@ -38,18 +68,18 @@ describe.configure().skipIfPropertiesObfuscated().run('inabox', function() {
       // The iframe starts BTF. "visible" trigger should be after scroll.
       // We will record scrolling time for comparison.
       let scrollTime = Infinity;
-      const imgPromise = RequestBank.withdraw('image').then(imgReq => {
+      const imgPromise = RequestBank.withdraw('image').then(req => {
         expect(Date.now()).to.be.below(scrollTime);
-        expect(imgReq.url).to.equal('/');
+        expect(req.url).to.equal('/');
       });
-      const pixelPromise = RequestBank.withdraw('pixel').then(pixelReq => {
+      const pixelPromise = RequestBank.withdraw('pixel').then(req => {
         expect(Date.now()).to.be.below(scrollTime);
-        expect(pixelReq.url).to.equal('/foo?cid=');
+        expect(req.url).to.equal('/foo?cid=');
       });
-      const analPromise = RequestBank.withdraw('analytics').then(analReq => {
-        expect(analReq.url).to.match(/^\/bar\?/);
+      const analPromise = RequestBank.withdraw('analytics').then(req => {
+        expect(req.url).to.match(/^\/bar\?/);
         const queries =
-            parseQueryString(analReq.url.substr('/bar'.length));
+            parseQueryString(req.url.substr('/bar'.length));
         expect(queries['cid']).to.equal('');
         expect(parseInt(queries['timestamp'], 10)).to.be.above(scrollTime);
         expect(Date.now()).to.be.above(scrollTime);
