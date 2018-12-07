@@ -20,7 +20,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
   this.timeout(15000);
 
-  describes.integration('amp-analytics basic request', {
+  describes.integration('basic pageview', {
     body:
       `<amp-analytics>
         <script type="application/json">
@@ -55,7 +55,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     });
   });
 
-  describes.integration('amp-analytics click trigger', {
+  describes.integration('click trigger', {
     body: `
       <a href="javascript:;"
           data-vars-foo-bar="hello world"
@@ -99,6 +99,117 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         expect(req.url).to.equal('/?f=hello%20world&b=2');
       });
       browser.click('a');
+      return reqPromise;
+    });
+  });
+
+  describes.integration('scroll trigger', {
+    body: `
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "scroll": {
+              "on": "scroll",
+              "request": "endpoint",
+              "scrollSpec": {
+                "verticalBoundaries": [70]
+              },
+              "extraUrlParams": {
+                "scrollTop": "\${scrollTop}",
+                "scrollHeight": "\${scrollHeight}"
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>
+      <div class="block" style="height: 100vh; background: red">
+        1st viewport
+      </div>
+      <div class="block" style="height: 100vh; background: blue">
+        2nd viewport
+      </div>
+      `,
+    extensions: ['amp-analytics'],
+  }, env => {
+    let browser;
+
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+    });
+
+    it('should trigger on scroll', () => {
+      const reqPromise = RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/?scrollTop=75&scrollHeight=300');
+      });
+      // verticalBoundaries is set to 70%
+      // (windowHeight + scrollTop) / scrollHeight = (150 + 75) / 300 = 75%
+      // so scrolling 75px guarantees a triggering
+      browser.scroll(75);
+      return reqPromise;
+    });
+  });
+
+  describes.integration('element visible trigger', {
+    body: `
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "visible": {
+              "on": "visible",
+              "request": "endpoint",
+              "visibilitySpec": {
+                "selector": "amp-img",
+                "selectionMethod": "scope",
+                "visiblePercentageMin": 10
+              },
+              "extraUrlParams": {
+                "timestamp": "\${timestamp}",
+                "loadTimeVisibility": "\${loadTimeVisibility}",
+                "maxVisiblePercentage": "\${maxVisiblePercentage}",
+                "totalVisibleTime": "\${totalVisibleTime}"
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>
+      <div class="block" style="height: 100vh; background: red">
+        1st viewport
+      </div>
+      <amp-img layout="fixed" width="300" height="500"
+          src="/examples/img/bigbuckbunny.jpg"></amp-img>
+      `,
+    extensions: ['amp-analytics'],
+  }, env => {
+    let browser;
+
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+    });
+
+    it('should trigger when image visible', () => {
+      let scrollTime = Infinity;
+      const reqPromise = RequestBank.withdraw().then(req => {
+        expect(Date.now()).to.be.not.below(scrollTime);
+        expect(req.url).to.equal('/?scrollTop=75&scrollHeight=300');
+      });
+      browser.wait(1000)
+          .then(() => {
+            browser.scroll(40);
+          }).then(() => browser.wait(1000))
+          .then(() => {
+            scrollTime = Date.now();
+            browser.scroll(50);
+          });
       return reqPromise;
     });
   });

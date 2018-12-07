@@ -205,6 +205,16 @@ export class BrowserController {
       element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
     }
   }
+
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
+  scroll(px) {
+    this.win_.scrollTo(0, px);
+  }
 }
 
 export function createPointerEvent(type, x, y) {
