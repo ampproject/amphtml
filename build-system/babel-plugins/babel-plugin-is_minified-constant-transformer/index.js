@@ -24,15 +24,16 @@ module.exports = function(babelTypes) {
   return {
     visitor: {
       VariableDeclarator(path) {
-        const {node} = path;
-        const {id, init} = node;
-        if (id.name == 'IS_MINIFIED'
-            && init.type === 'BooleanLiteral'
-            && init.value === false) {
-          init.value = t.booleanLiteral(true);
-          return;
+        const {id, init} = path.node;
+        if (t.isIdentifier(id, {name: 'IS_MINIFIED'})
+            && t.isBooleanLiteral(init, {value: false})) {
+          path.replaceWith(
+              t.variableDeclarator(
+                  t.identifier('IS_MINIFIED'),
+                  t.booleanLiteral(true)
+              )
+          );
         }
-        return;
       },
     },
   };
