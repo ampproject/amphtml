@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
@@ -35,6 +36,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
+
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     progressBarRoot = win.document.createElement('div');
 
