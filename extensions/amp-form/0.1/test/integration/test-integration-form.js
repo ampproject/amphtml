@@ -164,7 +164,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-POST', function() {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit xhr-POST', function() {
     this.timeout(RENDER_TIMEOUT);
 
     it('should submit and render success', () => {
@@ -228,7 +229,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-GET', function() {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit xhr-GET', function() {
     this.timeout(RENDER_TIMEOUT);
 
     it('should submit and render success', () => {
@@ -294,7 +296,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit result message', () => {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit result message', () => {
     it('should render messages with or without a template', () => {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
