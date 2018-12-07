@@ -780,8 +780,13 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-      new Expander(this.variableSource_, opt_bindings, opt_collectVars,
-          /* opt_sync */ true, opt_whiteList)./*OK*/expand(source));
+      new Expander(
+          this.variableSource_,
+          opt_bindings,
+          opt_collectVars,
+          /* opt_sync */ true,
+          opt_whiteList,
+          /* opt_noEncode */ true)./*OK*/expand(source));
   }
 
   /**

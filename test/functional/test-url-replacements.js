@@ -1749,6 +1749,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
     });
 
+    it('should not encode values returned by expandStringSync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+      const expanded = urlReplacements.expandStringSync(
+          'title=TITLE',
+          {'TITLE': 'test with spaces'});
+      expect(expanded).to.equal('title=test with spaces');
+    });
+
     it('should not check protocol changes with expandStringAsync', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
