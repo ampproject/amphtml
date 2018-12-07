@@ -197,10 +197,20 @@ export class AmpList extends AMP.BaseElement {
    * @private
    * @return {?Element}
    */
-  getloadMoreButton_() {
+ getloadMoreButton_() {
     if (!this.loadMoreButton_) {
       this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
+
+      if(!this.loadMoreButton_) {
+        this.loadMoreButton_ = this.win.document.createElement('div');
+        this.loadMoreButton_.setAttributeNode(this.win.document.createAttribute('load-more-button'));
+
+        let innerButton = this.win.document.createElement('div');
+        innerButton.classList.add('i-amphtml-amp-list-load-more-button');
+        innerButton.appendChild(this.win.document.createTextNode('See More'));
+        this.loadMoreButton_.appendChild(innerButton);
+      }
     }
     return this.loadMoreButton_;
   }
@@ -807,6 +817,15 @@ export class AmpList extends AMP.BaseElement {
     if (!this.loadMoreLoadingElement_) {
       this.loadMoreLoadingElement_ = childElementByAttr(
           this.element, 'load-more-loading');
+
+      if(!this.loadMoreLoadingElement_) {
+        this.loadMoreLoadingElement_ = this.win.document.createElement('div');
+        this.loadMoreLoadingElement_.setAttributeNode(this.win.document.createAttribute('load-more-loading'));
+
+        let spinnerWrapper = this.win.document.createElement('div');
+        spinnerWrapper.classList.add('i-amphtml-amp-list-load-more-spinner');
+        this.loadMoreLoadingElement_.appendChild(spinnerWrapper);
+      }
     }
     return this.loadMoreLoadingElement_;
   }
