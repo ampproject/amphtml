@@ -37,7 +37,7 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
   buildCallback() {
     user().assert(
         this.element.getAttribute('value'),
-        `The value attribute is required for <${TAG}> ${this.element}`);
+        'The value attribute is required for <%s>', TAG, this.element);
   }
 
   /** @override */

@@ -325,8 +325,8 @@ export class WindowMessenger {
       // Set new incoming message data on existing message
       existingMessage.message = message['data'];
       if (this.debug_) {
-        dev().fine(TAG, `Received reply for topic '${message['topic']}': ` +
-            `${message['data']}`);
+        dev().fine(TAG, 'Received reply for topic \'%s\': %s',
+            message['topic'], message['data']);
       }
       promiseResolver([
         message['data'],
@@ -433,7 +433,7 @@ export class WindowMessenger {
       data,
     };
     if (this.debug_) {
-      dev().fine(TAG, `Sending ${topic}: ${data}`);
+      dev().fine(TAG, 'Sending %s: %s', topic, data);
     }
     this.messagePort_./*OK*/postMessage(payload);
 
