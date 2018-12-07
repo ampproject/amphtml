@@ -16,8 +16,18 @@
 console.log(html(["html usage"]));
 console.log(html(["html usage multiline"]));
 console.log(html(["<p><span>html usage</span> <span>more spans</span></p>"]));
+console.log(html(["<p><span>html usage</span> <span>whitespace before entry tag</span></p>"]));
+console.log(html(["<p><span>html usage</span> <span>whitespace after entry tag</span></p>"]));
+console.log(html(["<p><span>html usage</span> <span>whitespace before and after entry tag</span></p>"]));
+console.log(html(["<p><span>html usage</span> <span>comment before entry tag</span></p>"]));
+console.log(html(["<p><span>html usage</span> <span>comment after entry tag</span></p>"]));
 console.log(html(["<p><span>html usage</span> <span>with comment sibling</span></p>"]));
 console.log(htmlFor(element)(["html usage"]));
 console.log(htmlFor(element)(["html usage multiline"]));
 console.log(htmlFor(element)(["<p><span>html usage</span> <span>more spans</span></p>"]));
+console.log(htmlFor(element)(["<p><span>html usage</span> <span>whitespace before entry tag</span></p>"]));
+console.log(htmlFor(element)(["<p><span>html usage</span> <span>whitespace after entry tag</span></p>"]));
+console.log(htmlFor(element)(["<p><span>html usage</span> <span>whitespace before and after entry tag</span></p>"]));
+console.log(htmlFor(element)(["<p><span>html usage</span> <span>comment before entry tag</span></p>"]));
+console.log(htmlFor(element)(["<p><span>html usage</span> <span>comment after entry tag</span></p>"]));
 console.log(htmlFor(element)(["<p><span>html usage</span> <span>with comment sibling</span></p>"]));

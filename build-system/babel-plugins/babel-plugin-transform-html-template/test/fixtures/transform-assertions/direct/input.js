@@ -21,6 +21,27 @@ console.log(html`<p>
   <span>html usage</span>
   <span>more spans</span>
 </p>`);
+console.log(html` <p>
+  <span>html usage</span>
+  <span>whitespace before entry tag</span>
+</p>`);
+console.log(html`<p>
+  <span>html usage</span>
+  <span>whitespace after entry tag</span>
+</p>  `);
+console.log(html` <p>
+  <span>html usage</span>
+  <span>whitespace before and after entry tag</span>
+</p>  `);
+console.log(html`<!-- Test Comment to Remove -->
+<p>
+  <span>html usage</span>
+  <span>comment before entry tag</span>
+</p>`);
+console.log(html`<p>
+  <span>html usage</span>
+  <span>comment after entry tag</span>
+</p><!-- Test Comment to Remove -->`);
 console.log(html`<p>
   <!-- Test Comment to Remove -->
   <span>html usage</span>
@@ -33,6 +54,27 @@ console.log(htmlFor(element)`<p>
   <span>html usage</span>
   <span>more spans</span>
 </p>`);
+console.log(htmlFor(element)` <p>
+  <span>html usage</span>
+  <span>whitespace before entry tag</span>
+</p>`);
+console.log(htmlFor(element)`<p>
+  <span>html usage</span>
+  <span>whitespace after entry tag</span>
+</p>  `);
+console.log(htmlFor(element)` <p>
+  <span>html usage</span>
+  <span>whitespace before and after entry tag</span>
+</p>  `);
+console.log(htmlFor(element)`<!-- Test Comment to Remove -->
+<p>
+  <span>html usage</span>
+  <span>comment before entry tag</span>
+</p>`);
+console.log(htmlFor(element)`<p>
+  <span>html usage</span>
+  <span>comment after entry tag</span>
+</p><!-- Test Comment to Remove -->`);
 console.log(htmlFor(element)`<p>
   <!-- Test Comment to Remove -->
   <span>html usage</span>
