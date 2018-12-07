@@ -180,7 +180,8 @@ export class BookendComponent {
   static buildContainer(element, doc) {
     const html = htmlFor(doc);
     const containerTemplate =
-      html`<div class="i-amphtml-story-bookend-component-set"></div>`;
+      html`<div class="i-amphtml-story-bookend-component-set
+          i-amphtml-story-bookend-top-level"></div>`;
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }
