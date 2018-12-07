@@ -356,15 +356,15 @@ function expandExtraUrlParams(variableService, urlReplacements, params,
       expansionOption.iterations,
       true /* noEncode */);
 
-  const expandObject = (parent, key) => {
-    const value = parent[key];
+  const expandObject = (params, key) => {
+    const value = params[key];
 
     if (typeof value === 'string') {
       const request = variableService.expandTemplate(value, option)
           .then(value =>
             urlReplacements.expandStringAsync(
                 value, bindings, opt_whitelist))
-          .then(value => parent[key] = value);
+          .then(value => params[key] = value);
       requestPromises.push(request);
     } else if (isArray(value)) {
       value.forEach((_, index) => expandObject(value, index));
