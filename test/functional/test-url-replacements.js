@@ -679,18 +679,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace SCROLL_TOP', () => {
-    return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
-      expect(res).to.match(/scrollTop=\d+/);
-    });
-  });
-
-  it('should replace SCROLL_LEFT', () => {
-    return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
-      expect(res).to.match(/scrollLeft=\d+/);
-    });
-  });
-
   it('should replace SCROLL_HEIGHT', () => {
     return expandUrlAsync('?scrollHeight=SCROLL_HEIGHT').then(res => {
       expect(res).to.match(/scrollHeight=\d+/);

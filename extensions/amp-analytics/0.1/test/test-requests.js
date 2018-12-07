@@ -16,7 +16,7 @@
 
 import * as ResourceTiming from '../resource-timing';
 import * as lolex from 'lolex';
-import {ExpansionOptions, installVariableService} from '../variables';
+import {ExpansionOptions, installVariableServiceForDoc} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {macroTask} from '../../../../testing/yield';
 
@@ -28,8 +28,8 @@ describes.realWin('Requests', {amp: 1}, env => {
   let analyticsElement;
 
   beforeEach(() => {
-    installVariableService(env.win);
     ampdoc = env.ampdoc;
+    installVariableServiceForDoc(ampdoc);
     ampdoc.defaultView = env.win;
     clock = lolex.install({target: ampdoc.win});
     preconnectSpy = sandbox.spy();

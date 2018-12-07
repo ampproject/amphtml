@@ -20,16 +20,18 @@ import {
   VariableService,
   encodeVars,
   getNameArgsForTesting,
-  installVariableService,
-  variableServiceFor,
+  installVariableServiceForDoc,
+  variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
 
-describe('amp-analytics.VariableService', function() {
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
+  let ampdoc;
   let variables;
 
   beforeEach(() => {
-    variables = new VariableService({});
+    ampdoc = env.ampdoc;
+    variables = new VariableService(ampdoc);
   });
 
   describe('encodeVars', () => {
@@ -160,16 +162,12 @@ describe('amp-analytics.VariableService', function() {
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
-    let win;
-    let ampdoc;
+  describe('macros', () => {
     let urlReplacementService;
 
     beforeEach(() => {
-      ampdoc = env.ampdoc;
-      win = env.win;
-      installVariableService(win);
-      variables = variableServiceFor(win);
+      installVariableServiceForDoc(ampdoc);
+      variables = variableServiceForDoc(ampdoc);
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
     });
 

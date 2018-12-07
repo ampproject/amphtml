@@ -87,8 +87,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
-    /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceForDoc(element);
+    /** @private {?./variables.VariableService} */
+    this.variableService_ = null;
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = Services.cryptoFor(this.win);
@@ -124,6 +124,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
+    this.variableService_ = variableServiceForDoc(this.getAmpDoc());
+
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
