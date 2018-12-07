@@ -31,6 +31,7 @@ import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -409,7 +410,7 @@ describes.realWin('amp-story', {
   });
 
   describe('amp-story consent', () => {
-    it.skip('should pause the story if there is a consent', () => {
+    it('should pause the story if there is a consent', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
@@ -447,7 +448,7 @@ describes.realWin('amp-story', {
           });
     });
 
-    it.skip('should play the story after the consent is resolved', () => {
+    it('should play the story after the consent is resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
@@ -493,7 +494,7 @@ describes.realWin('amp-story', {
           });
     });
 
-    it.skip('should play the story if the consent was already resolved', () => {
+    it('should play the story if the consent was already resolved', () => {
       sandbox.stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
@@ -886,8 +887,6 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            sandbox.stub(story.element, 'querySelectorAll').returns([]);
-
             const expected = {
               [MediaType.AUDIO]: 2,
               [MediaType.VIDEO]: 2,
@@ -901,13 +900,15 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            const qsStub = sandbox.stub(story.element, 'querySelectorAll');
-            qsStub.withArgs('amp-audio, [background-audio]').returns(['el']);
-            qsStub.withArgs('amp-video').returns(['el', 'el']);
+            const ampVideoEl = win.document.createElement('amp-video');
+            const ampAudoEl = createElementWithAttributes(win.document,
+                'amp-audio', {'background-audio': ''});
+            story.element.appendChild(ampVideoEl);
+            story.element.appendChild(ampAudoEl);
 
             const expected = {
               [MediaType.AUDIO]: 3,
-              [MediaType.VIDEO]: 4,
+              [MediaType.VIDEO]: 3,
             };
             expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
           });
@@ -918,11 +919,16 @@ describes.realWin('amp-story', {
 
       return story.layoutCallback()
           .then(() => {
-            const qsStub = sandbox.stub(story.element, 'querySelectorAll');
-            qsStub.withArgs('amp-audio, [background-audio]')
-                .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el']);
-            qsStub.withArgs('amp-video')
-                .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el', 'el']);
+            for (let i = 0; i < 7; i++) {
+              const el = createElementWithAttributes(win.document,
+                  'amp-audio', {'background-audio': ''});
+              story.element.appendChild(el);
+            }
+
+            for (let i = 0; i < 8; i++) {
+              const el = win.document.createElement('amp-video');
+              story.element.appendChild(el);
+            }
 
             const expected = {
               [MediaType.AUDIO]: 4,
