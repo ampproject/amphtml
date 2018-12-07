@@ -138,8 +138,8 @@ export function getElementServiceIfAvailableForDoc(
 
 /**
  * Returns a promise for service for the given id in the embed scope of
- * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
- * the given node is in the top-level window.
+ * a given element, if it exists. Falls back to ampdoc scope if the element
+ * is not embedded.
  *
  * @param {!Element|!ShadowRoot} element
  * @param {string} id of the service.
@@ -156,13 +156,11 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   }
   const win = toWin(element.ownerDocument.defaultView);
   const topWin = getTopWindow(win);
-  // In embeds, doc-scope services are window-scope. But make sure to
-  // only do this for embeds (not the top window), otherwise we'd grab
-  // a promise from the wrong service holder which would never resolve.
+  // In embeds, doc services are stored on the embed window.
   if (win !== topWin) {
     return getElementServicePromiseOrNull(win, id, extension);
   } else {
-    // Fallback to ampdoc IFF the given node is _not_ FIE.
+    // Only fallback to element's ampdoc (top-level) if not embedded.
     return getElementServiceIfAvailableForDoc(element, id, extension);
   }
 }
