@@ -45,6 +45,8 @@ export class SubscriptionPlatform {
 
   /**
    * Reset the platform and renderer.
+   * This should clear dialogs and toasts originating
+   * from the platform.
    */
   reset() {}
 

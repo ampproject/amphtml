@@ -18,12 +18,12 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
+import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {installPerformanceService} from
   '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-
 
 describes.fakeWin('AccessService', {
   amp: true,
@@ -1695,8 +1695,8 @@ describes.fakeWin('AccessService multiple sources', {
     const authorizationStub =
       sandbox.stub(sourceBeer, 'runAuthorization').callsFake(
           () => Promise.resolve());
-    const broadcastStub = sandbox.stub(sourceBeer.viewer_,
-        'broadcast');
+    const viewer = Services.viewerForDoc(ampdoc);
+    const broadcastStub = sandbox.stub(viewer, 'broadcast');
     const sourceBeerMock = sandbox.mock(sourceBeer);
     sourceBeerMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
@@ -1727,8 +1727,8 @@ describes.fakeWin('AccessService multiple sources', {
     const authorizationStub =
       sandbox.stub(sourceDonuts, 'runAuthorization').callsFake(
           () => Promise.resolve());
-    const broadcastStub = sandbox.stub(sourceDonuts.viewer_,
-        'broadcast');
+    const viewer = Services.viewerForDoc(ampdoc);
+    const broadcastStub = sandbox.stub(viewer, 'broadcast');
     const sourceDonutsMock = sandbox.mock(sourceDonuts);
     sourceDonutsMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
