@@ -15,6 +15,7 @@
  */
 
 import {RequestBank} from '../../testing/test-helper';
+import {parseQueryString} from '../../src/url';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
@@ -288,6 +289,75 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.headers.referer).to.not.be.ok;
+      });
+    });
+  });
+
+  describes.integration('amp-analytics type=googleanalytics', {
+    body: `
+      <script>
+        // initialize with a valid _ga cookie
+        document.cookie='_ga=GA1.2.1427830804.1524174812';
+      </script>
+      <amp-analytics type="googleanalytics">
+        <script type="application/json">
+        {
+          "vars": {
+            "account": "UA-67833617-1"
+          },
+          "requests": {
+            "host": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "pageview"
+            },
+            "performanceTiming": {
+              "enabled": false
+            },
+            "adwordsTiming": {
+              "enabled": false
+            }
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    afterEach(() => {
+      // clean up written _ga cookie
+      document.cookie = '_ga=;expires=' + new Date(0).toUTCString();
+    });
+
+    it('should send request', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.match(/^\/r\/collect\?/);
+        const queries = parseQueryString(req.url.substr('/r/collect'.length));
+        // see vendors/googleanalytics.js "pageview" request for config
+        expect(queries).to.include({
+          _v: 'a1',
+          _r: '1',
+          v: '1',
+          cid: '1427830804.1524174812',
+          dr: '',
+          ds: 'AMP',
+          dt: 'AMP TEST',
+          tid: 'UA-67833617-1',
+          t: 'pageview',
+        });
+        const isNumber = /^\d+$/;
+        const isRandomNumber = /^0\.\d+$/;
+        expect(queries['dl']).to.contain('/amp4test/compose-doc?'); // ${documentLocation}
+        expect(queries['_s']).to.match(isNumber); // ${requestCount}
+        expect(queries['_utmht']).to.match(isNumber); // ${timestamp}
+        expect(queries['sr']).to.match(/^\d+x\d+$/); // ${screenWidth}x${screenHeight}
+        expect(queries['sd']).to.match(isNumber); // ${screenColorDepth}
+        expect(queries['ul']).to.be.ok; // ${browserLanguage}
+        expect(queries['de']).to.be.ok; // ${documentCharset}
+        expect(queries['jid']).to.match(isRandomNumber); // ${random}
+        expect(queries['a']).to.match(isNumber); // ${pageViewId}
+        expect(queries['z']).to.match(isRandomNumber); // ${random}
       });
     });
   });
