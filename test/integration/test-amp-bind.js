@@ -107,7 +107,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
 
   // TODO(choumx, #9759): Seems like old browsers give up when hitting
   // expected user errors due to illegal bindings in the form's template.
-  // TODO(choumx, #19647): Broken on SL Chrome 71.
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
   describe.configure().ifChrome().skip('with <amp-form>', () => {
     beforeEach(() => {
       // <form> is not an AMP element.
@@ -549,7 +549,8 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
     });
   });
 
-  describe('with <amp-list>', () => {
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
+  describe.skip('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html', 1);
     });
