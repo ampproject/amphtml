@@ -206,7 +206,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         <script type="application/json">
         {
           "requests": {
-            "endpoint": "${RequestBank.getUrl(RequestId.USE_BODY)}"
+            "endpoint": "${RequestBank.getUrl()}"
           },
           "triggers": {
             "pageview": {
@@ -240,7 +240,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     extensions: ['amp-analytics'],
   }, () => {
     it('should only replace params for top-level keys', () => {
-      return RequestBank.withdraw(RequestId.USE_BODY).then(req => {
+      return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
         expect(req.body).to.equal(
             '{"_c_a":2,"_c_b":{"context.c":"AMP TEST",' +
