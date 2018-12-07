@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
  */
 
 /**
- * TODO(choumx, #19657): Remove/replace with DOM polling in integration tests.
- * @enum {string}
+ * See `src/static-template.js`.
+ * @typedef {function(!Array<string>):!Element}
  */
-export const BindEvents = {
-  INITIALIZE: 'amp:bind:initialize',
-  RESCAN_TEMPLATE: 'amp:bind:rescan-template',
-  SET_STATE: 'amp:bind:setState',
-};
+export let HtmlLiteralTagDef;

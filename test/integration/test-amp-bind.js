@@ -17,10 +17,9 @@ import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
-import {createFixtureIframe} from '../../testing/iframe';
+import {createFixtureIframe, poll} from '../../testing/iframe';
 
-// TODO(#19647): Unskip tests
-describe.configure().ifNewChrome().skip('amp-bind', function() {
+describe.configure().ifNewChrome().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -50,12 +49,21 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
     return createFixtureIframe(fixtureLocation).then(f => {
       fixture = f;
       // Most fixtures have a single AMP element that will be laid out.
-      const loadStartsToExpect =
+      const numberOfAmpComponents =
           (opt_numberOfAmpElements === undefined) ? 1 : opt_numberOfAmpElements;
-      return Promise.all([
+      const promises = [
         fixture.awaitEvent(BindEvents.INITIALIZE, 1),
-        fixture.awaitEvent(AmpEvents.LOAD_START, loadStartsToExpect),
-      ]);
+      ];
+      if (numberOfAmpComponents > 0) {
+        promises.push(
+            poll('All AMP components are laid out', () => {
+              const laidOutElements =
+                  fixture.doc.querySelectorAll('.i-amphtml-layout').length;
+              return laidOutElements === numberOfAmpComponents;
+            })
+        );
+      }
+      return Promise.all(promises);
     });
   }
 
@@ -71,7 +79,8 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
     return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
-  describe('with [text] and [class]', () => {
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
+  describe.skip('with [text] and [class]', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-basic.html');
     });
@@ -99,7 +108,8 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
 
   // TODO(choumx, #9759): Seems like old browsers give up when hitting
   // expected user errors due to illegal bindings in the form's template.
-  describe.configure().ifChrome().run('with <amp-form>', () => {
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
+  describe.configure().ifChrome().skip('with <amp-form>', () => {
     beforeEach(() => {
       // <form> is not an AMP element.
       return setupWithFixture('test/fixtures/bind-form.html', 0)
@@ -221,7 +231,8 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
       });
     });
 
-    it('should change slides when the slide attribute binding changes',
+    // TODO(choumx, #19647): Times out on SL Chrome 71.
+    it.skip('should change slides when the slide attribute binding changes',
         () => {
           const carousel = fixture.doc.getElementById('carousel');
           const slides =
@@ -540,7 +551,8 @@ describe.configure().ifNewChrome().skip('amp-bind', function() {
     });
   });
 
-  describe('with <amp-list>', () => {
+  // TODO(choumx, #19647): Times out on SL Chrome 71.
+  describe.skip('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html', 1);
     });

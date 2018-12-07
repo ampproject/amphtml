@@ -375,7 +375,9 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --headless --coverage');
+        // TODO(choumx, #19658): --headless disabled for integration tests on
+        // Travis until Chrome 72.
+        timedExecOrDie(cmd + ' --coverage');
       } else {
         startSauceConnect();
         timedExecOrDie(cmd + ' --saucelabs');
@@ -388,7 +390,9 @@ const command = {
   runSinglePassCompiledIntegrationTests: function() {
     timedExecOrDie('rm -R dist');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
-    timedExecOrDie('gulp test --integration --nobuild --headless '
+    // TODO(choumx, #19658): --headless disabled for integration tests on
+    // Travis until Chrome 72.
+    timedExecOrDie('gulp test --integration --nobuild '
         + '--compiled --single_pass');
     timedExecOrDie('rm -R dist');
   },
