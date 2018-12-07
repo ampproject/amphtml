@@ -20,8 +20,8 @@ import {AnalyticsEventType} from './events';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
-  installVariableService,
-  variableServiceFor,
+  installVariableServiceForDoc,
+  variableServiceForDoc,
 } from './variables';
 import {
   InstrumentationService,
@@ -88,7 +88,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ = null;
 
     /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceFor(this.win);
+    this.variableService_ = variableServiceForDoc(element);
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = Services.cryptoFor(this.win);
@@ -704,7 +704,7 @@ AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(
       'amp-analytics-instrumentation', InstrumentationService);
   AMP.registerServiceForDoc('activity', Activity);
-  installVariableService(AMP.win);
+  installVariableServiceForDoc(AMP.ampdoc);
   installLinkerReaderService(AMP.win);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);

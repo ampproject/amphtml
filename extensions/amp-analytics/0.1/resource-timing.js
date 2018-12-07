@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {findIndex} from '../../../src/utils/array';
 import {isObject} from '../../../src/types';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -240,7 +240,7 @@ function serialize(entries, resourceTimingSpec, win) {
   const resources = resourceTimingSpec['resources'];
   const encoding = resourceTimingSpec['encoding'];
 
-  const variableService = variableServiceFor(win);
+  const variableService = variableServiceForDoc(win);
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 

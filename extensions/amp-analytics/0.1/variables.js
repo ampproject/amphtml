@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 
@@ -73,8 +73,6 @@ export class ExpansionOptions {
     return value;
   }
 }
-
-
 
 /**
  * @param {string} str
@@ -132,16 +130,20 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
  */
 export class VariableService {
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
 
-    /** @private {!Window} */
-    this.win_ = window;
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @const @private */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!Object<string, *>} */
     this.macros_ = {};
 
+    // Template Macros
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', value => value.trim());
@@ -153,6 +155,12 @@ export class VariableService {
     this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
     this.register_('$REPLACE', replaceMacro);
+
+    // Url Macros
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () => this.viewport_.getScrollTop());
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () => this.viewport_.getScrollLeft());
   }
 
   /**
@@ -271,18 +279,18 @@ export function getNameArgs(key) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installVariableService(win) {
-  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
+export function installVariableServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'amp-analytics-variables', VariableService);
 }
 
 /**
- * @param {!Window} win
+ *  @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!VariableService}
  */
-export function variableServiceFor(win) {
-  return getService(win, 'amp-analytics-variables');
+export function variableServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
 }
 
 /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
@@ -188,7 +188,7 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    return variableServiceFor(this.ampdoc_.win)
+    return variableServiceForDoc(this.ampdoc_)
         .expandTemplate(template, expansionOptions)
         .then(expanded => {
           const urlReplacements = Services.urlReplacementsForDoc(this.element_);
