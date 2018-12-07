@@ -15,6 +15,8 @@
  */
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
+import {Controls} from './controls';
+import {HtmlLiteralTagDef} from './html';
 import {
   PlayingStates,
   VideoAttributes,
@@ -29,9 +31,11 @@ import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
+import {Timeout} from './timeout';
+import {VideoDockingEvents} from './events';
+import {applyBreakpointClassname} from './breakpoints';
 import {
   childElementByTag,
-  closestBySelector,
   escapeCssSelectorIdent,
   isRTL,
   removeElement,
@@ -46,7 +50,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
@@ -59,7 +63,6 @@ import {
   setImportantStyles,
   setStyles,
   toggle,
-  translate,
 } from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -78,12 +81,6 @@ const MIN_VIEWPORT_WIDTH = 320;
 
 /** @private @const {number} */
 const DOCKING_TIMEOUT = 100;
-
-/** @private @const {number} */
-const CONTROLS_TIMEOUT = 1600;
-
-/** @private @const {number} */
-const CONTROLS_TIMEOUT_AFTER_IX = 1000;
 
 /** @private @const {number} */
 const FLOAT_TOLERANCE = 0.02;
@@ -118,21 +115,6 @@ export const Actions = {DOCK: 'dock', UNDOCK: 'undock'};
 let DockedDef;
 
 
-/**
- * @struct @typedef {{
- *   container: !Element,
- *   dismissButton: !Element,
- *   playButton: !Element,
- *   pauseButton: !Element,
- *   muteButton: !Element,
- *   unmuteButton: !Element,
- *   fullscreenButton: !Element,
- *   dismissContainer: !Element,
- * }}
- */
-let ControlsDef;
-
-
 /** @typedef {{posX: !RelativeX, posY: !RelativeY}|!Element} */
 let DockTargetDef;
 
@@ -156,16 +138,6 @@ let TargetAreaDef;
  */
 const transform = (x, y, scale) => `translate(${x}px, ${y}px) scale(${scale})`;
 
-
-/**
- * @param {!Element} a
- * @param {!Element} b
- * @private
- */
-function swap(a, b) {
-  toggle(a, false);
-  toggle(b, true);
-}
 
 
 /**
@@ -229,27 +201,7 @@ function complainAboutPortrait(element) {
 }
 
 
-/**
- * @param {!Element} element
- * @param {number} width
- * @param {!Array<!SyntheticBreakpointDef>} breakpoints
- */
-function applyBreakpointClassname(element, width, breakpoints) {
-  // sort by minWidth descending
-  breakpoints = breakpoints.sort((a, b) => b.minWidth - a.minWidth);
 
-  let maxBreakpoint = -1;
-  for (let i = 0; i < breakpoints.length; i++) {
-    const {className, minWidth} = breakpoints[i];
-    if (minWidth <= width &&
-        minWidth > maxBreakpoint) {
-      element.classList.add(className);
-      maxBreakpoint = minWidth;
-    } else {
-      element.classList.remove(className);
-    }
-  }
-}
 
 
 // Function should ideally be in `dom.js`, but moving it causes a bunch of ads
@@ -265,28 +217,12 @@ export function isElement(obj) {
 
 
 /**
- * See `src/static-template.js`.
- * @typedef {function(!Array<string>):!Element}
- */
-let HtmlLiteralTagDef;
-
-
-/**
  * @param {!HtmlLiteralTagDef} html
  * @return {!Element}
  * @private
  */
 const ShadowLayer = html =>
   html`<div class="amp-video-docked-shadow" hidden></div>`;
-
-
-/**
- * @param {!HtmlLiteralTagDef} html
- * @return {!Element}
- * @private
- */
-const DockedOverlay = html =>
-  html`<div class="i-amphtml-video-docked-overlay" hidden></div>`;
 
 
 /**
@@ -304,61 +240,7 @@ const PlaceholderBackground = html =>
 
 
 /**
- * @param {!HtmlLiteralTagDef} html
- * @return {!Element}
- * @private
- */
-const Controls = html =>
-  // This currently bloats the resulting binary with
-  // 1. some whitespace and 2. duplicate declarations of equal strings.
-  // Upcoming fixes: #14657, #14658.
-  // TODO(alanorozco): Cleanup markup for readability once fixes land.
-  html`<div class="amp-video-docked-controls" hidden>
-  <div class="amp-video-docked-main-button-group">
-    <div class="amp-video-docked-button-group">
-      <div role="button" ref="playButton" class="amp-video-docked-play">
-      </div>
-      <div role="button" ref="pauseButton" class="amp-video-docked-pause">
-      </div>
-    </div>
-    <div class="amp-video-docked-button-group">
-      <div role="button" ref="muteButton" class="amp-video-docked-mute">
-      </div>
-      <div role="button" ref="unmuteButton" class="amp-video-docked-unmute">
-      </div>
-    </div>
-    <div class="amp-video-docked-button-group">
-      <div role="button" ref="fullscreenButton"
-          class="amp-video-docked-fullscreen">
-      </div>
-    </div>
-  </div>
-  <div class="amp-video-docked-button-dismiss-group" ref="dismissContainer">
-    <div role="button" ref="dismissButton" class="amp-video-docked-dismiss">
-    </div>
-  </div>
-</div>`;
-
-
-/** @typedef {{className: string, minWidth: number}} */
-let SyntheticBreakpointDef;
-
-/**
- * @private @const {!Array<!SyntheticBreakpointDef>}
- */
-const CONTROLS_BREAKPOINTS = [
-  {
-    className: 'amp-small',
-    minWidth: 0,
-  },
-  {
-    className: 'amp-large',
-    minWidth: 300,
-  },
-];
-
-/**
- * @private @const {!Array<!SyntheticBreakpointDef>}
+ * @private @const {!Array<!./breakpoints.SyntheticBreakpointDef>}
  */
 const PLACEHOLDER_ICON_BREAKPOINTS = [
   {
@@ -378,46 +260,6 @@ const PLACEHOLDER_ICON_LARGE_MARGIN = 40;
 const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
 const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
 
-
-/** Timeout that can be postponed, repeated or cancelled. */
-class Timeout {
-  /**
-   * @param {!Window} win
-   * @param {!Function} handler
-   */
-  constructor(win, handler) {
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win);
-
-    /** @private @const {!Function} */
-    this.handler_ = handler;
-
-    /** @private {?number|?string} */
-    this.id_ = null;
-  }
-
-  /**
-   * @param {number} time
-   * @param {...*} args
-   */
-  trigger(time, ...args) {
-    this.cancel();
-    this.id_ = this.timer_.delay(() => this.handler_.apply(null, args), time);
-  }
-
-  /** @public */
-  cancel() {
-    if (this.id_ !== null) {
-      this.timer_.cancel(this.id_);
-      this.id_ = null;
-    }
-  }
-
-  /** @return {boolean} */
-  isWaiting() {
-    return this.id_ !== null;
-  }
-}
 
 
 /**
@@ -454,10 +296,6 @@ export class VideoDocking {
             video)));
 
     /** @private @const {function():!Timeout} */
-    this.getHideControlsTimeout_ = this.lazyTimeout_(() =>
-      this.hideControls_(/* respectSticky */ true));
-
-    /** @private @const {function():!Timeout} */
     this.getUndockingTimeout_ = this.lazyTimeout_(video =>
       this.undock_(
           /** @type {!../../../src/video-interface.VideoOrBaseElementDef} */ (
@@ -482,14 +320,8 @@ export class VideoDocking {
      */
     this.getShadowLayer_ = once(() => this.append_(ShadowLayer(html)));
 
-    /**
-     * Returns an overlay to be used to capture different user events.
-     * @private @const {function():!Element}
-     */
-    this.getOverlay_ = once(() => this.installOverlay_(DockedOverlay(html)));
-
-    /** @private @const {function():!ControlsDef} */
-    this.getControls_ = once(() => this.installControls_(Controls(html)));
+    /** @private @const {function():!Controls} */
+    this.getControls_ = once(() => this.installControls_());
 
     /** @private @const {function():!Element} */
     this.getPlaceholderBackground_ =
@@ -507,13 +339,7 @@ export class VideoDocking {
     this.lastDismissedPosY_ = null;
 
     /**
-     * Unlisteners for the currently minimized video.
-     * @private {!Array<!UnlistenDef>}
-     */
-    this.videoUnlisteners_ = [];
-
-    /**
-     *  Memoizes x, y and scale to prevent useless mutations.
+     * Memoizes x, y and scale to prevent useless mutations.
      * @private {?{x: number, y: number, scale: number}}
      */
     this.placedAt_ = null;
@@ -528,16 +354,10 @@ export class VideoDocking {
     this.lastScrollTop_ = this.viewport_.getScrollTop();
 
     /** @private {boolean} */
-    this.stickyControls_ = false;
-
-    /** @private {boolean} */
     this.isDragging_ = false;
 
     /** @private {!Array<!../../../src/video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
-
-    /** @private {boolean} */
-    this.isTransitioning_ = false;
 
     /** @private @const {!function()} */
     // Lazily invoked.
@@ -553,10 +373,6 @@ export class VideoDocking {
 
     /** @private @const {function():?Element} */
     this.getSlot_ = once(() => this.querySlot_());
-
-    /** @private */
-    this.hideControlsOnTapOutsideOnce_ =
-        once(() => this.hideControlsOnTapOutside_());
 
     const dockableSelector =
         `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
@@ -688,89 +504,6 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!Element} overlay
-   * * @return {!Element}
-   * @private
-   */
-  installOverlay_(overlay) {
-    this.append_(overlay);
-    return this.installShowControlsOnTapOrHover_(
-        this.addDragListeners_(overlay));
-  }
-
-  /** @private */
-  enterFullscreen_() {
-    const video = this.getDockedVideo_();
-    video.fullscreenEnter();
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {!Element}
-   * @private
-   */
-  installShowControlsOnTapOrHover_(element) {
-    const onTapOrHover = () => this.showControlsOnTapOrHover_();
-
-    listen(element, 'mouseup', onTapOrHover);
-    listen(element, 'mouseover', onTapOrHover);
-
-    return element;
-  }
-
-  /** @private */
-  showControlsOnTapOrHover_() {
-    if (this.isDragging_) {
-      return;
-    }
-    if (this.isTransitioning_) {
-      return;
-    }
-    const video = this.getDockedVideo_();
-    const {
-      container,
-      playButton,
-      pauseButton,
-      muteButton,
-      unmuteButton,
-    } = this.getControls_();
-    const overlay = this.getOverlay_();
-
-    toggle(container, true);
-    container.classList.add('amp-video-docked-controls-shown');
-    overlay.classList.add('amp-video-docked-controls-bg');
-
-    if (this.isPlaying_()) {
-      swap(playButton, pauseButton);
-    } else {
-      swap(pauseButton, playButton);
-    }
-
-    if (this.manager_().isMuted(
-        /** @type {!../../../src/video-interface.VideoInterface} */
-        (video))) {
-      swap(muteButton, unmuteButton);
-    } else {
-      swap(unmuteButton, muteButton);
-    }
-
-    this.hideControlsOnTimeout_();
-  }
-
-  /** @private */
-  hideControlsOnTapOutside_() {
-    listen(this.ampdoc_.getRootNode(), 'mousedown', e => {
-      if (!this.currentlyDocked_) {
-        return;
-      }
-      if (this.isControlsEventTarget_(dev().assertElement(e.target))) {
-        return;
-      }
-      this.hideControls_(/* respectSticky */ true);
-    });
-  }
-
-  /**
    * @param {!Element} element
    * @return {!Element}
    * @private
@@ -785,73 +518,29 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!Element} container
-   * @return {!ControlsDef}
+   * @return {!Controls}
    * @private
    */
-  installControls_(container) {
-    const controls = htmlRefs(container);
+  installControls_() {
+    const controls = new Controls(this.ampdoc_);
+    const {container, overlay} = controls;
 
-    const {
-      dismissButton,
-      playButton,
-      pauseButton,
-      unmuteButton,
-      muteButton,
-      fullscreenButton,
-    } = controls;
-
-    Object.assign(controls, {container});
-
-    this.listenWhenNotDragging_(dismissButton, 'click', () => {
+    listen(container, VideoDockingEvents.DISMISS_ON_TAP, () => {
       this.dismissOnTap_();
     });
 
-    this.listenWhenNotDragging_(playButton, 'click', () => {
-      this.getDockedVideo_().play(/* auto */ false);
-    });
-
-    this.listenWhenNotDragging_(pauseButton, 'click', () => {
-      this.getDockedVideo_().pause();
-    });
-
-    this.listenWhenNotDragging_(muteButton, 'click', () => {
-      this.getDockedVideo_().mute();
-    });
-
-    this.listenWhenNotDragging_(unmuteButton, 'click', () => {
-      this.getDockedVideo_().unmute();
-    });
-
-    this.listenWhenNotDragging_(fullscreenButton, 'click', () => {
-      this.enterFullscreen_();
-    });
-
-    listen(container, 'mouseup', () =>
-      this.hideControlsOnTimeout_(CONTROLS_TIMEOUT_AFTER_IX));
-
     this.addDragListeners_(container);
+    this.addDragListeners_(overlay);
+
     this.append_(container);
+    this.append_(overlay);
 
-    return /** @type {!ControlsDef} */ (controls);
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {string} eventType
-   * @param {function(!Event)} handler
-   */
-  listenWhenNotDragging_(element, eventType, handler) {
-    listen(element, eventType, e => {
-      if (this.isDragging_) {
-        return;
-      }
-      handler(e);
-    });
+    return controls;
   }
 
   /** @private */
   dismissOnTap_() {
+    this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
     this.undock_(this.getDockedVideo_());
   }
 
@@ -1420,7 +1109,7 @@ export class VideoDocking {
 
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
-    const overlay = this.getOverlay_();
+    const {overlay} = this.getControls_();
     const placeholderIcon = this.getPlaceholderIcon_();
 
     applyBreakpointClassname(placeholderIcon, width,
@@ -1470,7 +1159,7 @@ export class VideoDocking {
     const placeholderIconX = step *
         (width - placeholderIconWidth - placeholderIconMargin * 2);
 
-    this.isTransitioning_ = true;
+    this.getControls_().disable();
 
     video.mutateElement(() => {
       internalElement.classList.add(BASE_CLASS_NAME);
@@ -1504,12 +1193,14 @@ export class VideoDocking {
 
       setOpacity(shadowLayer);
 
-      this.positionControlsOnVsync_(scale, x, y, width, height);
+      this.getControls_().positionOnVsync(scale, x, y, width, height);
     });
 
     return listenOncePromise(internalElement, 'transitionend')
         .then(() => this.maybeUpdateStaleYAfterScroll_(video, step))
-        .then(() => this.isTransitioning_ = false);
+        .then(() => {
+          this.getControls_().enable();
+        });
   }
 
   /**
@@ -1561,7 +1252,7 @@ export class VideoDocking {
     return [
       getInternalVideoElementFor(video.element),
       this.getShadowLayer_(),
-      this.getOverlay_(),
+      this.getControls_().overlay,
     ];
   }
 
@@ -1603,35 +1294,6 @@ export class VideoDocking {
   }
 
   /**
-   * @param {number} scale
-   * @param {number} x
-   * @param {number} y
-   * @param {number} width
-   * @param {number} height
-   * @private
-   */
-  positionControlsOnVsync_(scale, x, y, width, height) {
-    const {container, dismissContainer} = this.getControls_();
-    const halfScale = scale / 2;
-    const centerX = x + (width * halfScale);
-    const centerY = y + (height * halfScale);
-
-    applyBreakpointClassname(container, scale * width, CONTROLS_BREAKPOINTS);
-
-    setImportantStyles(container, {
-      'transform': translate(centerX, centerY),
-    });
-
-    const dismissMargin = 4;
-    const dismissWidth = 40;
-    const dismissX = width * halfScale - dismissMargin - dismissWidth;
-    const dismissY = -(height * halfScale - dismissMargin - dismissWidth);
-    setImportantStyles(dismissContainer, {
-      'transform': translate(dismissX, dismissY),
-    });
-  }
-
-  /**
    * @param  {number} width
    * @param  {number} height
    * @return {boolean}
@@ -1662,56 +1324,9 @@ export class VideoDocking {
    * @param {number} step
    */
   setCurrentlyDocked_(video, target, step) {
-    if (!this.isCurrentlyDocked_(video)) {
-      this.updateControlsBasedOn_(video.element);
-    }
-
     const {triggeredDock} = this.currentlyDocked_ || {triggeredDock: false};
     this.currentlyDocked_ = {video, target, step, triggeredDock};
-
-    this.hideControlsOnTapOutsideOnce_();
-  }
-
-  /**
-   * @param {!Element} video
-   * @private
-   */
-  updateControlsBasedOn_(video) {
-    while (this.videoUnlisteners_.length) {
-      this.videoUnlisteners_.pop().call();
-    }
-    this.videoUnlisteners_ = [
-      listen(video, VideoEvents.PLAYING, () => this.onPlay_()),
-      listen(video, VideoEvents.PAUSE, () => this.onPause_()),
-      listen(video, VideoEvents.MUTED, () => this.onMute_()),
-      listen(video, VideoEvents.UNMUTED, () => this.onUnmute_()),
-    ];
-  }
-
-  /** @private */
-  onPlay_() {
-    const {playButton, pauseButton} = this.getControls_();
-    this.stickyControls_ = false;
-    swap(playButton, pauseButton);
-  }
-
-  /** @private */
-  onPause_() {
-    const {pauseButton, playButton} = this.getControls_();
-    this.stickyControls_ = true;
-    swap(pauseButton, playButton);
-  }
-
-  /** @private */
-  onMute_() {
-    const {muteButton, unmuteButton} = this.getControls_();
-    swap(muteButton, unmuteButton);
-  }
-
-  /** @private */
-  onUnmute_() {
-    const {unmuteButton, muteButton} = this.getControls_();
-    swap(unmuteButton, muteButton);
+    this.getControls_().setVideo(video);
   }
 
   /**
@@ -1870,8 +1485,9 @@ export class VideoDocking {
     e.preventDefault();
     e.stopPropagation();
 
-    this.hideControls_();
+    this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
     this.isDragging_ = true;
+    this.getControls_().disable();
     this.offset_(offset.x, offset.y);
     this.updateDismissalAreaStyling_(offset.x, offset.y);
   }
@@ -1890,7 +1506,7 @@ export class VideoDocking {
     video.mutateElement(() => {
       const className = 'amp-video-docked-almost-dismissed';
       internalElement.classList.toggle(className, inDismissalArea);
-      this.getOverlay_().classList.toggle(className, inDismissalArea);
+      this.getControls_().overlay.classList.toggle(className, inDismissalArea);
     });
   }
 
@@ -1918,6 +1534,8 @@ export class VideoDocking {
     unlisteners.forEach(unlisten => unlisten.call());
 
     this.isDragging_ = false;
+
+    this.getControls_().enable();
 
     if (this.dismissOnDragEnd_(offset.x, offset.y)) {
       return;
@@ -2018,15 +1636,6 @@ export class VideoDocking {
     const {x, y, scale} = this.getDims_(video, target, step);
 
     this.placeAt_(video, x, y, scale, step, /* optTransitionDurationMs */ 200);
-  }
-
-  /**
-   * @param {!Element} target
-   * @return {boolean}
-   * @private
-   */
-  isControlsEventTarget_(target) {
-    return !!closestBySelector(target, '.amp-video-docked-controls');
   }
 
   /**
@@ -2190,25 +1799,26 @@ export class VideoDocking {
     const internalElement = getInternalVideoElementFor(element);
 
     return video.mutateElement(() => {
-      this.hideControls_();
       video.showControls();
       internalElement.classList.remove(BASE_CLASS_NAME);
       const shadowLayer = this.getShadowLayer_();
-      const overlay = this.getOverlay_();
+      const {overlay} = this.getControls_();
       const almostDismissed = 'amp-video-docked-almost-dismissed';
       const placeholderIcon = this.getPlaceholderIcon_();
       const placeholderBackground = this.getPlaceholderBackground_();
+
+      // TODO(alanorozco): Remove weird flick-to-dismiss.
       internalElement.classList.remove(almostDismissed);
       overlay.classList.remove(almostDismissed);
 
       toggle(shadowLayer, false);
-      toggle(overlay, false);
+
+      this.getControls_().reset();
 
       [
         element,
         internalElement,
         shadowLayer,
-        overlay,
         placeholderBackground,
         placeholderIcon,
       ].forEach(el => {
@@ -2226,28 +1836,6 @@ export class VideoDocking {
       this.sizedAt_ = null;
       this.currentlyDocked_ = null;
     });
-  }
-
-  /**
-   * @param {boolean=} respectSticky
-   * @private
-   */
-  hideControls_(respectSticky = false) {
-    if (respectSticky && this.stickyControls_) {
-      return;
-    }
-    const {container} = this.getControls_();
-    const overlay = this.getOverlay_();
-    overlay.classList.remove('amp-video-docked-controls-bg');
-    container.classList.remove('amp-video-docked-controls-shown');
-  }
-
-  /**
-   * @param {number=} time
-   * @private
-   */
-  hideControlsOnTimeout_(time = CONTROLS_TIMEOUT) {
-    this.getHideControlsTimeout_().trigger(time);
   }
 
   /**
