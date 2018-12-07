@@ -122,7 +122,7 @@ export class Controls {
     this.ampdoc_ = ampdoc;
 
     // TODO(alanorozco): `htmlFor` should work with `ShadowRoot`
-    const html = htmlFor(dev().assertElement(ampdoc.getRootNode()));
+    const html = htmlFor(dev().assertElement(ampdoc.getBody()));
 
     /** @public @const {!Element}  */
     this.container = renderControls(html);
