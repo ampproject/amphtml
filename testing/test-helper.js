@@ -189,7 +189,7 @@ export class RequestBank {
   }
 }
 
-export class BrowserHandle {
+export class BrowserController {
   constructor(win) {
     this.win_ = win;
     this.doc_ = this.win_.document;
@@ -198,7 +198,7 @@ export class BrowserHandle {
   click(selector) {
     const element = this.doc_.querySelector(selector);
     if (element) {
-      element.dispatchEvent(new CustomEvent('click', {bubbles: true}));
+      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
     }
   }
 }

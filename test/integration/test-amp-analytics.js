@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserHandle, RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '../../testing/test-helper';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
@@ -91,7 +91,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     let browser;
 
     beforeEach(() => {
-      browser = new BrowserHandle(env.win);
+      browser = new BrowserController(env.win);
     });
 
     it('should send request', () => {
