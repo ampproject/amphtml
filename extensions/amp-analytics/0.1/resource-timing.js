@@ -233,14 +233,14 @@ function filterEntries(entries, resourceDefs) {
  * single string.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!JsonObject} resourceTimingSpec
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<string>}
  */
-function serialize(entries, resourceTimingSpec, win) {
+function serialize(entries, resourceTimingSpec, ampdoc) {
   const resources = resourceTimingSpec['resources'];
   const encoding = resourceTimingSpec['encoding'];
 
-  const variableService = variableServiceForDoc(win);
+  const variableService = variableServiceForDoc(ampdoc);
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
@@ -255,11 +255,12 @@ function serialize(entries, resourceTimingSpec, win) {
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-function serializeResourceTiming(win, resourceTimingSpec) {
+function serializeResourceTiming(ampdoc, resourceTimingSpec) {
+  const win = ampdoc.win;
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
@@ -287,19 +288,19 @@ function serializeResourceTiming(win, resourceTimingSpec) {
     return Promise.resolve('');
   }
   // Yield the thread in case iterating over all resources takes a long time.
-  return yieldThread(() => serialize(entries, resourceTimingSpec, win));
+  return yieldThread(() => serialize(entries, resourceTimingSpec, ampdoc));
 }
 
 /**
- * @param {!Window} win resource timing spec.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject|undefined} spec resource timing spec.
  * @param {number} startTime start timestamp.
  * @return {!Promise<string>}
  */
-export function getResourceTiming(win, spec, startTime) {
+export function getResourceTiming(ampdoc, spec, startTime) {
   // Only allow collecting timing within 1s
   if (spec && (Date.now() < (startTime + 60 * 1000))) {
-    return serializeResourceTiming(win, spec);
+    return serializeResourceTiming(ampdoc, spec);
   } else {
     return Promise.resolve('');
   }

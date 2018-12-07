@@ -120,7 +120,7 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
-        this.win, trigger['resourceTimingSpec'], this.startTime_);
+        this.ampdoc_, trigger['resourceTimingSpec'], this.startTime_);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
