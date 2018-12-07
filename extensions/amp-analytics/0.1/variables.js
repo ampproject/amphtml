@@ -17,7 +17,10 @@
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {dev, user} from '../../../src/log';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../../../src/service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 
@@ -136,6 +139,9 @@ export class VariableService {
 
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+
+    /** @private @const {!Window} */
+    this.win_ = this.ampdoc_.win;
 
     /** @const @private */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
@@ -282,7 +288,11 @@ export function getNameArgs(key) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installVariableServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'amp-analytics-variables', VariableService);
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'amp-analytics-variables',
+      VariableService
+  );
 }
 
 /**

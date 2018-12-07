@@ -260,7 +260,7 @@ function serialize(entries, resourceTimingSpec, ampdoc) {
  * @return {!Promise<string>}
  */
 function serializeResourceTiming(ampdoc, resourceTimingSpec) {
-  const win = ampdoc.win;
+  const {win} = ampdoc;
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
