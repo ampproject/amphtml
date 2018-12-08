@@ -662,14 +662,9 @@ amp-instagram {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
+amp-analytics:not(.i-amphtml-element),
+amp-story-auto-ads:not(.i-amphtml-element){
+  display: none !important;
 }
 
 /**
