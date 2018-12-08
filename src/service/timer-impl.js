@@ -170,11 +170,9 @@ export class Timer {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
-    installServiceInEmbedScope(embedWin, TAG,
-        new Timer(embedWin));
+  static installInEmbedWindow(embedWin, unusedAmpDoc) {
+    installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
   }
-
 }
 
 /**

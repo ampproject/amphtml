@@ -160,9 +160,9 @@ export class Navigation {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, TAG,
-        new Navigation(this.ampdoc, embedWin.document));
+        new Navigation(ampdoc, embedWin.document));
   }
 
   /**

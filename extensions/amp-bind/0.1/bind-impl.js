@@ -196,9 +196,9 @@ export class Bind {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+        embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**

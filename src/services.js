@@ -17,6 +17,7 @@
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
+  getExistingServiceInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
@@ -89,6 +90,15 @@ export class Services {
   static actionServiceForDoc(element) {
     return /** @type {!./service/action-impl.ActionService} */ (
       getExistingServiceForDocInEmbedScope(element, 'action'));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/standard-actions-impl.StandardActions}
+   */
+  static standardActionsForDoc(element) {
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (
+      getExistingServiceForDocInEmbedScope(element, 'standard-actions'));
   }
 
   /**
@@ -470,7 +480,7 @@ export class Services {
    */
   static timerFor(window) {
     return /** @type {!./service/timer-impl.Timer} */ (
-      getService(window, 'timer'));
+      getExistingServiceInEmbedScope(window, 'timer'));
   }
 
   /**

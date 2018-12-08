@@ -264,9 +264,9 @@ export class ActionService {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
-        new ActionService(this.ampdoc, embedWin.document));
+        new ActionService(ampdoc, embedWin.document));
   }
 
   /**

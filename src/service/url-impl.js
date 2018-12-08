@@ -54,9 +54,9 @@ export class Url {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, SERVICE,
-        new Url(this.ampdoc_, embedWin.document));
+        new Url(ampdoc, embedWin.document));
   }
 
   /**

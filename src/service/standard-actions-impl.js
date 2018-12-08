@@ -66,7 +66,7 @@ export class StandardActions {
   }
 
   /** @override */
-  adoptEmbedWindow(embedWin) {
+  static installInEmbedWindow(embedWin, unusedAmpDoc) {
     const {documentElement} = embedWin.document;
     this.installActions_(Services.actionServiceForDoc(documentElement));
   }
