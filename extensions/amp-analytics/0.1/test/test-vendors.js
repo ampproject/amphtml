@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
-import {ExpansionOptions} from '../variables';
+import {ExpansionOptions, variableServiceForDoc} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
@@ -25,7 +25,7 @@ import {
 import {Services} from '../../../../src/services';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-import {variableServiceForDoc} from '../variables';
+
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
