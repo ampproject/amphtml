@@ -138,15 +138,14 @@ const FileList = ({basepath}) =>
       {"src": "/dashboard/api/listing?path=${basepath}"}
     </script>
   </amp-state>
-  <amp-list [src]="filelistState.src"
+  <amp-list [src]="fileListState.src"
     src="/dashboard/api/listing?path=${basepath}"
     items="."
     layout="fixed-height"
     width="auto"
     height="568px"
-    class="file-list">
+    class="file-list custom-loader">
 
-    <div placeholder>Loading...</div>
     <div fallback>Failed to load data.</div>
 
     <template type="amp-mustache">
@@ -165,6 +164,8 @@ const FileList = ({basepath}) =>
       class="list-overflow">
       Show more
     </div>
+
+    <div placeholder>Loading...</div>
   </amp-list>`;
 
 const ProxyFormOptional = ({isMainPage}) => {

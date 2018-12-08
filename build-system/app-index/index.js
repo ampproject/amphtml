@@ -65,7 +65,6 @@ function serveIndex({root, mapBasepath}) {
 
     return (async() => {
 
-      console.log(req.path);
       if (req.path.startsWith('/dashboard/api')) {
         handleApiRequest(root, req, res, next);
         return;
