@@ -208,10 +208,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       browser = new BrowserController(env.win);
     });
 
-    it('should trigger when image visible', () => {
+    it('should trigger when image being 50% visible for 0.5s', () => {
       let scrollTime = Infinity;
       const reqPromise = RequestBank.withdraw().then(req => {
-        const q = parseQueryString(req.url);
+        const q = parseQueryString(req.url.substr(1));
         expect(Date.now()).to.be.not.below(scrollTime + 500);
         expect(parseInt(q['timestamp'], 10)).to.be.not.below(scrollTime + 500);
         expect(q['loadTimeVisibility']).to.equal('0');
@@ -228,6 +228,50 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
             // keep visible for 0.5s to fire a ping
           });
       return reqPromise;
+    });
+  });
+
+  describes.integration('timer trigger', {
+    body: `
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "visible": {
+              "on": "timer",
+              "request": "endpoint",
+              "timerSpec": {
+                "interval": 1,
+                "maxTimerLength": 2,
+                "immediate": false
+              },
+              "extraUrlParams": {
+                "timestamp": "\${timestamp}",
+                "timerStart": "\${timerStart}",
+                "timerDuration": "\${timerDuration}"
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>
+      `,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should trigger 1s after amp-analytics starts', () => {
+      const startTime = Date.now();
+      return RequestBank.withdraw().then(req => {
+        const q = parseQueryString(req.url.substr(1));
+        const timerStart = parseFloat(q['timerStart']);
+        expect(timerStart + 1000).to.be.at.most(Date.now());
+        expect(timerStart + 1000).to.be.at.most(parseInt(q['timestamp'], 10));
+        // Verify that timerStart is about current time
+        expect(timerStart - startTime).to.be.above(-1000).and.below(1000);
+        expect(parseFloat(q['timerDuration'])).to.be.at.least(1000).below(1100);
+      });
     });
   });
 
