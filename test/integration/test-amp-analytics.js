@@ -160,7 +160,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       // verticalBoundaries is set to 70%
       // (windowHeight + scrollTop) / scrollHeight = (150 + 75) / 300 = 75%
       // so scrolling 75px guarantees a triggering
-      browser.scroll(75);
+      browser.scrollTo(75);
       return reqPromise;
     });
   });
@@ -180,7 +180,8 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
               "visibilitySpec": {
                 "selector": "amp-img",
                 "selectionMethod": "scope",
-                "visiblePercentageMin": 10
+                "visiblePercentageMin": 50,
+                "totalTimeMin": 500
               },
               "extraUrlParams": {
                 "timestamp": "\${timestamp}",
@@ -196,7 +197,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       <div class="block" style="height: 100vh; background: red">
         1st viewport
       </div>
-      <amp-img layout="fixed" width="300" height="500"
+      <amp-img layout="fixed" width="300" height="150"
           src="/examples/img/bigbuckbunny.jpg"></amp-img>
       `,
     extensions: ['amp-analytics'],
@@ -210,16 +211,21 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     it('should trigger when image visible', () => {
       let scrollTime = Infinity;
       const reqPromise = RequestBank.withdraw().then(req => {
-        expect(Date.now()).to.be.not.below(scrollTime);
-        expect(req.url).to.equal('/?scrollTop=75&scrollHeight=300');
+        const q = parseQueryString(req.url);
+        expect(Date.now()).to.be.not.below(scrollTime + 500);
+        expect(parseInt(q['timestamp'], 10)).to.be.not.below(scrollTime + 500);
+        expect(q['loadTimeVisibility']).to.equal('0');
+        expect(parseFloat(q['maxVisiblePercentage'])).to.be.above(50);
+        expect(parseFloat(q['totalVisibleTime'])).to.be.not.below(500);
       });
-      browser.wait(1000)
-          .then(() => {
-            browser.scroll(40);
-          }).then(() => browser.wait(1000))
+
+      browser.wait(1000) // wait for amp-analytics to start so loadTimeVisibility=0
+          .then(() => browser.scrollTo(50)) // image 50/150 visible
+          .then(() => browser.wait(1000)) // wait for a 1s to make sure no trigger
           .then(() => {
             scrollTime = Date.now();
-            browser.scroll(50);
+            browser.scrollTo(80); // image 80/150 visible
+            // keep visible for 0.5s to fire a ping
           });
       return reqPromise;
     });

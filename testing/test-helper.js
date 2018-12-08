@@ -199,6 +199,12 @@ export class BrowserController {
     this.doc_ = this.win_.document;
   }
 
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
   click(selector) {
     const element = this.doc_.querySelector(selector);
     if (element) {
@@ -206,13 +212,7 @@ export class BrowserController {
     }
   }
 
-  wait(duration) {
-    return new Promise(resolve => {
-      setTimeout(resolve, duration);
-    });
-  }
-
-  scroll(px) {
+  scrollTo(px) {
     this.win_.scrollTo(0, px);
   }
 }
