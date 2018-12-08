@@ -32,7 +32,7 @@ import {setStyles, toggle} from '../../../src/style';
 const TAG = 'amp-consent-ui';
 
 // Classes for consent UI
-const consentUiClasses = {
+export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
