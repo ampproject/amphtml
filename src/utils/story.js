@@ -14,7 +14,7 @@
   * limitations under the License.
   */
 
-import {closestByTag} from '../dom';
+import {closestByTag, waitForChild} from '../dom';
 
 
 /**
@@ -27,4 +27,20 @@ import {closestByTag} from '../dom';
  */
 export function descendsFromStory(element) {
   return !!closestByTag(element, 'amp-story-page');
+}
+
+/**
+ * Returns true if the document is an amp-story.
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ */
+export function isStoryDocument(ampdoc) {
+  return new Promise(resolve => {
+    ampdoc.whenBodyAvailable().then(() => {
+      const body = ampdoc.getBody();
+      waitForChild(body, () => !!body.firstElementChild, () => {
+        resolve(body.firstElementChild.tagName === 'AMP-STORY');
+      });
+    });
+  });
 }

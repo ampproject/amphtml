@@ -37,6 +37,7 @@ import {getMode} from '../../../src/mode';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {isStoryDocument} from '../../../src/utils/story';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -294,8 +295,11 @@ export class SubscriptionService {
             this.fetchEntitlements_(subscriptionPlatform);
           }
       );
-      this.startAuthorizationFlow_();
 
+      isStoryDocument(this.ampdoc_).then(isStory => {
+        // Delegates the platform selection and activation call if is story.
+        this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
+      });
     });
     return this;
   }
@@ -375,15 +379,15 @@ export class SubscriptionService {
   }
 
   /**
-   * Renders and opens the dialog using the cached entitlements.
+   * Selects and activates a platform.
    */
-  renderDialogForSelectedPlatform() {
+  maybeSelectAndActivatePlatform() {
     this.initialize_().then(() => {
       if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
         return;
       }
 
-      this.selectAndActivatePlatform_(false /** sendAnalyticsEvents */);
+      this.selectAndActivatePlatform_();
     });
   }
 
@@ -404,11 +408,10 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {boolean=} sendAnalyticsEvents
    * @return {!Promise}
    * @private
    */
-  selectAndActivatePlatform_(sendAnalyticsEvents = true) {
+  selectAndActivatePlatform_() {
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
       this.platformStore_.selectPlatform(),
@@ -420,10 +423,6 @@ export class SubscriptionService {
           selectedPlatform.getServiceId());
 
       selectedPlatform.activate(selectedEntitlement);
-
-      if (sendAnalyticsEvents === false) {
-        return;
-      }
 
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
