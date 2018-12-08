@@ -42,6 +42,7 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {extensionBundles, aliasBundles} = require('./bundles.config');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {thirdPartyFrames} = require('./build-system/config');
 const {transpileTs} = require('./build-system/typescript');
 const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
 
@@ -501,28 +502,19 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           }));
     }
 
-    promises.push(
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify),
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html', shouldMinify),
-        thirdPartyBootstrap(
-            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify)
-
-    );
+    thirdPartyFrames.forEach(frameObject => {
+      promises.push(
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify)
+      );
+    });
 
     if (watch) {
-      $$.watch('3p/nameframe.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/nameframe.max.html', 'nameframe.html', shouldMinify);
-      });
-      $$.watch('3p/frame.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/frame.max.html', 'frame.html', shouldMinify);
-      });
-      $$.watch('3p/recaptcha.max.html', function() {
-        thirdPartyBootstrap(
-            '3p/recaptcha.max.html', 'recaptcha.html', shouldMinify);
+      thirdPartyFrames.forEach(frameObject => {
+        $$.watch(frameObject.max, function() {
+          thirdPartyBootstrap(
+              frameObject.max, frameObject.min, shouldMinify);
+        });
       });
     }
 
