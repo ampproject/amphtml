@@ -188,11 +188,13 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    return variableServiceForDoc(this.ampdoc_)
+    const variableService = variableServiceForDoc(this.ampdoc_);
+    const bindings = variableService.getMacros();
+    return variableService
         .expandTemplate(template, expansionOptions)
         .then(expanded => {
           const urlReplacements = Services.urlReplacementsForDoc(this.element_);
-          return urlReplacements.expandUrlAsync(expanded);
+          return urlReplacements.expandUrlAsync(expanded, bindings);
         });
   }
 

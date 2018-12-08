@@ -249,6 +249,37 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
+  describe('macros (migrated from url-replacement-impl)', () => {
+    let urlReplacementService;
+
+    beforeEach(() => {
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        getScrollTop: () => 0,
+        getScrollLeft: () => 0,
+      });
+
+      installVariableServiceForDoc(ampdoc);
+      variables = variableServiceForDoc(ampdoc);
+      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+    });
+
+    function match(input, regex) {
+      const macros = variables.getMacros();
+      const expanded = urlReplacementService.expandUrlAsync(input, macros);
+      return expanded.then(res => {
+        expect(res).to.match(regex);
+      });
+    }
+
+    it('replaces SCROLL_TOP', () => {
+      return match('scrollTop=SCROLL_TOP', /scrollTop=\d+/);
+    });
+
+    it('replaces SCROLL_LEFT', () => {
+      return match('scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/);
+    });
+  });
+
   describe('getNameArgs:', () => {
 
     function check(input, name, argList) {

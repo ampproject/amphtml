@@ -22,6 +22,8 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {variableServiceForDoc} from './variables';
+
 
 const TAG = 'amp-analytics/config';
 
@@ -104,8 +106,11 @@ export class AnalyticsConfig {
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }
+
+    const bindings = variableServiceForDoc(this.element_).getMacros();
+
     return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(configRewriterUrl)
+        .expandUrlAsync(configRewriterUrl, bindings)
         .then(expandedUrl => {
           return Services.xhrFor(toWin(this.win_)).fetchJson(
               expandedUrl, fetchConfig);
@@ -140,8 +145,11 @@ export class AnalyticsConfig {
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }
+
+    const bindings = variableServiceForDoc(this.element_).getMacros();
+
     return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(remoteConfigUrl)
+        .expandUrlAsync(remoteConfigUrl, bindings)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return Services.xhrFor(toWin(this.win_)).fetchJson(
