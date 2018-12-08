@@ -28,9 +28,9 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <!-- Invalid: extension without player extension -->
 |    <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-latest.js"></script>
->>   ^~~~~~~~~
-amp-video-docking/0.1/test/validator-amp-video-docking-no-player.html:29:2 The tag 'amp-video-docking for amp-video' requires including the 'amp-video' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-video-docking) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </head>
 |  <body>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-video-docking/0.1/test/validator-amp-video-docking-no-player.html:33:6 The extension 'amp-video-docking' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]

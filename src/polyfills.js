@@ -40,7 +40,7 @@ installDocContains(self);
 installArrayIncludes(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
-  installCustomElements(self, class {});
+  installCustomElements(self);
 } else {
   installRegisterElement(self, 'auto');
 }
