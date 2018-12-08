@@ -17,10 +17,11 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {installVariableServiceForDoc} from '../variables';
 import {map} from '../../../../src/utils/object';
 import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
 
-describes.realWin('AnalyticsConfig', {amp: false}, env => {
+describes.realWin('AnalyticsConfig', {amp: true}, env => {
 
   let win;
   let doc;
@@ -30,6 +31,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     win = env.win;
     doc = win.document;
     sandbox = env.sandbox;
+
+    installVariableServiceForDoc(env.ampdoc);
   });
 
   afterEach(() => {

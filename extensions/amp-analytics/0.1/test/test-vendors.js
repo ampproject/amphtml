@@ -25,6 +25,7 @@ import {
 import {Services} from '../../../../src/services';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
+import {variableServiceForDoc} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -131,7 +132,9 @@ describes.realWin('amp-analytics', {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
-                Services.urlReplacementsForDoc(ampdoc);
+                  Services.urlReplacementsForDoc(ampdoc);
+            const variableService = variableServiceForDoc(ampdoc);
+
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
                 function(name) {
@@ -141,6 +144,11 @@ describes.realWin('amp-analytics', {
                     sync: () => defaultValue,
                   };
                 });
+
+            Object.keys(variableService.macros_).forEach(macroKey => {
+              variableService.macros_[macroKey] =
+                sandbox.stub().returns(`_${macroKey.toLowerCase()}_`);
+            });
 
             sandbox.stub(ExpansionOptions.prototype, 'getVar').callsFake(
                 function(name) {
