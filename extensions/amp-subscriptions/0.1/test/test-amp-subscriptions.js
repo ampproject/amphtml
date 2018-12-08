@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as utilsStory from '../../../../src/utils/story';
 import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
@@ -38,6 +39,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   let subscriptionService;
   let configResolver;
   let analyticsEventStub;
+  let isStory;
 
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
@@ -84,6 +86,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         subscriptionService.subscriptionAnalytics_,
         'event'
     );
+    // isStoryDocument needs to resolve synchronously because of how some of the
+    // tests are built.
+    isStory = false;
+    sandbox.stub(utilsStory, 'isStoryDocument')
+        .returns({then: fn => fn(isStory)});
   });
 
   it('should call `initialize_` on start', () => {
@@ -169,6 +176,24 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.initialize_().then(() => {
         expect(authFlowStub.withArgs(false)).to.be.calledOnce;
         expect(delegateStub).to.be.calledOnce;
+        expect(processStateStub).to.not.be.called;
+      });
+    });
+
+    it('should delay the platform selection and activation if story', () => {
+      isStory = true;
+
+      const processStateStub = sandbox.stub(subscriptionService,
+          'processGrantState_');
+      const authFlowStub = sandbox.stub(subscriptionService,
+          'startAuthorizationFlow_');
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateAuthToViewer_');
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(authFlowStub.withArgs(false /** doPlatformActivation*/))
+            .to.be.calledOnce;
+        expect(delegateStub).to.not.be.called;
         expect(processStateStub).to.not.be.called;
       });
     });
