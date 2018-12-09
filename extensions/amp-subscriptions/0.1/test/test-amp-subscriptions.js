@@ -318,12 +318,43 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   describe('selectAndActivatePlatform_', () => {
-    it('should wait for grantStatus and selectPlatform promise', () => {
+    function resolveRequiredPromises(entitlementSpec, grantEntitlementSpec) {
+      entitlementSpec = Object.assign({
+        service: 'local',
+        source: 'local',
+        raw: 'raw',
+      }, entitlementSpec);
+      if (!grantEntitlementSpec && entitlementSpec.granted) {
+        grantEntitlementSpec = entitlementSpec;
+      }
+      const entitlement = new Entitlement(entitlementSpec);
+      const grantEntitlement = grantEntitlementSpec ?
+        new Entitlement(grantEntitlementSpec) : null;
+      const granted = !!grantEntitlementSpec;
+      const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform();
+      sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
+          .callsFake(() => Promise.resolve(granted));
+      sandbox.stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+          .callsFake(() => Promise.resolve(grantEntitlement));
+      subscriptionService.platformStore_.resolveEntitlement(
+          entitlementSpec.source,
+          entitlement);
+      sandbox.stub(
+          subscriptionService.platformStore_,
+          'selectPlatform'
+      ).callsFake(() => Promise.resolve(localPlatform));
+    }
+
+    it('should wait for grantStatus/ent and selectPlatform promise', () => {
       sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
+        resolveRequiredPromises({
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
         const selectPlatformStub =
@@ -332,6 +363,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         expect(localPlatform).to.be.not.null;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
+          expect(activateStub.firstCall.args[0].source).to.equal('local');
+          expect(activateStub.firstCall.args[1].source).to.equal('local');
           expect(selectPlatformStub).to.be.called;
           expect(analyticsEventStub).to.be.calledWith(
               SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
@@ -351,12 +384,57 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     });
 
+    it('should activate with a different grant entitlement', () => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      return subscriptionService.initialize_().then(() => {
+        resolveRequiredPromises({
+          granted: false,
+        }, {
+          service: 'other',
+          source: 'other',
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
+        const localPlatform =
+            subscriptionService.platformStore_.getLocalPlatform();
+        const selectPlatformStub =
+            subscriptionService.platformStore_.selectPlatform;
+        const activateStub = sandbox.stub(localPlatform, 'activate');
+        expect(localPlatform).to.be.not.null;
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(activateStub).to.be.calledOnce;
+          expect(activateStub.firstCall.args[0].source).to.equal('local');
+          expect(activateStub.firstCall.args[1].source).to.equal('other');
+          expect(selectPlatformStub).to.be.called;
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+              {
+                'serviceId': 'local',
+              }
+          );
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+              {
+                'serviceId': 'other',
+              }
+          );
+          expect(analyticsEventStub).to.not.be.calledWith(
+              SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED);
+        });
+      });
+    });
+
     it('should call selectPlatform with preferViewerSupport config', () => {
       sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService, /* subscriber */ true);
+        resolveRequiredPromises({
+          granted: true,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
@@ -371,7 +449,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
-        resolveRequiredPromises(subscriptionService, /* subscriber */ false);
+        resolveRequiredPromises({granted: false});
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
         sandbox.stub(localPlatform, 'activate');
@@ -395,25 +473,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         });
       });
     });
-
-    function resolveRequiredPromises(subscriptionService, subscriber) {
-      const entitlement = new Entitlement({
-        source: 'local',
-        raw: 'raw',
-        granted: subscriber,
-        grantReason: subscriber ? GrantReason.SUBSCRIBER : null,
-      });
-      const localPlatform =
-        subscriptionService.platformStore_.getLocalPlatform();
-      sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
-          .callsFake(() => Promise.resolve());
-      subscriptionService.platformStore_.resolveEntitlement('local',
-          entitlement);
-      sandbox.stub(
-          subscriptionService.platformStore_,
-          'selectPlatform'
-      ).callsFake(() => Promise.resolve(localPlatform));
-    }
   });
 
   describe('startAuthorizationFlow_', () => {
