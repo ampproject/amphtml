@@ -415,14 +415,17 @@ export class SubscriptionService {
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
       this.platformStore_.selectPlatform(),
+      this.platformStore_.getGrantEntitlement(),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
       const selectedPlatform = resolvedValues[1];
+      const grantEntitlement = resolvedValues[2];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
+      const bestEntitlement = grantEntitlement || selectedEntitlement;
 
-      selectedPlatform.activate(selectedEntitlement);
+      selectedPlatform.activate(selectedEntitlement, grantEntitlement);
 
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
@@ -431,10 +434,10 @@ export class SubscriptionService {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
           selectedPlatform.getServiceId());
-      if (selectedEntitlement.granted) {
+      if (bestEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.ACCESS_GRANTED,
-            selectedPlatform.getServiceId());
+            bestEntitlement.service);
       } else {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
