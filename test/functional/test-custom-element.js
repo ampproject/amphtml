@@ -1039,7 +1039,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2.style.width).to.equal('50vw');
     });
 
-    it('should apply heights condition', () => {
+    // TODO(alabiaga, 19752): flaky on Chrome 71
+    it.skip('should apply heights condition', () => {
       const element1 = new ElementClass();
       element1.sizerElement = doc.createElement('div');
       element1.setAttribute('layout', 'responsive');
