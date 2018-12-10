@@ -230,14 +230,15 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-/** @const {!JsonObject} */
-const PURIFY_CONFIG = dict({
-  'USE_PROFILES': {
-    'html': true,
-    'svg': true,
-    'svgFilters': true,
+/** @type {DomPurifyConfigObject.USE_PROFILES} */
+const PURIFY_CONFIG = {
+  USE_PROFILES: {
+    html: true,
+    svg: true,
+    svgFilters: true,
   },
-});
+};
+
 
 /**
  * Monotonically increasing counter used for keying nodes.
@@ -262,18 +263,18 @@ export function purifyHtml(dirty, diffing = false) {
 /**
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
- * @return {!JsonObject}
+ * @return {!DomPurifyConfigObject}
  */
 export function purifyConfig() {
   const config = Object.assign({}, PURIFY_CONFIG, {
-    'ADD_ATTR': WHITELISTED_ATTRS,
-    'FORBID_TAGS': Object.keys(BLACKLISTED_TAGS),
+    ADD_ATTR: WHITELISTED_ATTRS,
+    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
-    'FORCE_BODY': true,
+    FORCE_BODY: true,
     // Avoid need for serializing to/from string by returning Node directly.
-    'RETURN_DOM': true,
+    RETURN_DOM: true,
   });
-  return /** @type {!JsonObject} */ (config);
+  return config;
 }
 
 /**
