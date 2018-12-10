@@ -211,8 +211,7 @@ Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
     });
     ```
 
-Example configs: [Google Ad Manager](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js#L80)
-and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
+Example configs: [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
 Usage of Google Ad Manager and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
 
 #### Create documentation
