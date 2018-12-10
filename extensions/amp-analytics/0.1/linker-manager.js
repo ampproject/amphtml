@@ -63,7 +63,7 @@ export class LinkerManager {
     this.resolvedIds_ = dict();
 
     /** @const @private {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(this.ampdoc_);
+    this.urlService_ = Services.urlForDoc(this.element_);
 
     /** @const @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
     this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);

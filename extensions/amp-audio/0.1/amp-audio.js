@@ -224,8 +224,8 @@ export class AmpAudio extends AMP.BaseElement {
     };
 
     // Update the media session
-    setMediaSession(
-        this.getAmpDoc(), this.metadata_, playHandler, pauseHandler);
+    setMediaSession(this.element, this.win, this.metadata_,
+        playHandler, pauseHandler);
   }
 }
 

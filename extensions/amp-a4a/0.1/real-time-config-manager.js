@@ -151,8 +151,8 @@ export class RealTimeConfigManager {
    * @return {string}
    */
   getCalloutParam_(url) {
-    const parsedUrl = Services.urlForDoc(
-        this.a4aElement_.getAmpDoc()).parse(url);
+    const urlService = Services.urlForDoc(this.a4aElement_.element);
+    const parsedUrl = urlService.parse(url);
     return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
   }
 
@@ -351,7 +351,7 @@ export class RealTimeConfigManager {
             callout, errorReportingUrl);
       }
       if (!Services.urlForDoc(
-          this.a4aElement_.getAmpDoc()).isSecure(url)) {
+          this.a4aElement_.element).isSecure(url)) {
         return this.buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
             callout, errorReportingUrl);
       }
@@ -505,7 +505,7 @@ export class RealTimeConfigManager {
       const validateErrorReportingUrl = urlObj => {
         const errorUrl = urlObj['errorReportingUrl'];
         if (errorUrl && !Services.urlForDoc(
-            this.a4aElement_.getAmpDoc()).isSecure(errorUrl)) {
+            this.a4aElement_.element).isSecure(errorUrl)) {
           dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorUrl}`);
           urlObj['errorReportingUrl'] = undefined;
         }

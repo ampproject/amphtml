@@ -519,13 +519,12 @@ export class Services {
   /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-impl.Url}
    */
-  static urlForDoc(nodeOrDoc) {
+  static urlForDoc(element) {
     return /** @type {!./service/url-impl.Url} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url'));
   }
 
   /**
