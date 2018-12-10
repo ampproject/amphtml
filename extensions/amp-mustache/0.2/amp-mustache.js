@@ -53,14 +53,28 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
-    const content = templateContentClone(this.element);
-    this.processNestedTemplates_(content);
-    const container = this.element.ownerDocument.createElement('div');
-    container.appendChild(content);
-
     /** @private @const {string} */
-    this.template_ = container./*OK*/innerHTML;
+    this.template_ = this.initTemplateString_();
+
     mustache.parse(this.template_, /* tags */ undefined);
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  initTemplateString_() {
+    if (this.element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(this.element);
+      this.processNestedTemplates_(content);
+      const container = this.element.ownerDocument.createElement('div');
+      container.appendChild(content);
+      return container./*OK*/innerHTML;
+    } else if (this.element.tagName == 'SCRIPT') {
+      return this.element.textContent;
+    }
+
+    return '';
   }
 
   /**

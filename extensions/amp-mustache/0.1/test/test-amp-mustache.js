@@ -19,40 +19,76 @@ import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 import mustache from '../../../../third_party/mustache/mustache';
 
-describe('amp-mustache 0.1', () => {
+describes.repeated('amp-mustache 0.1', {
+  'with script[type=text/plain][template=amp-mustache]':
+      {templateType: 'script'},
+  'with template[type=amp-mustache]':
+      {templateType: 'template'},
+}, (name, variant) => {
+
   let sandbox;
-  let templateElement;
-  let template;
   let viewerCanRenderTemplates = false;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    templateElement = document.createElement('template');
     const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
     getServiceForDocStub.returns({
-      hasCapability: unused => viewerCanRenderTemplates});
-    template = new AmpMustache(templateElement);
+      hasCapability: unused => viewerCanRenderTemplates,
+    });
   });
 
   afterEach(() => sandbox.restore());
 
+  let innerHtmlSetup;
+  let template;
+  let templateElement;
+  let textContentSetup;
+  let isTemplateType;
+  let isTemplateTypeScript;
+
+  beforeEach(() => {
+    const {templateType} = variant;
+    templateElement = document.createElement(templateType);
+    if (templateType == 'script') {
+      templateElement.setAttribute('type', 'amp-mustache');
+    }
+    template = new AmpMustache(templateElement);
+    isTemplateTypeScript = templateType == 'script';
+    isTemplateType = templateType == 'template';
+    textContentSetup = contents => {
+      if (isTemplateType) {
+        templateElement.content.textContent = contents;
+      } else if (isTemplateTypeScript) {
+        templateElement.textContent = contents;
+      }
+    };
+    innerHtmlSetup = html => {
+      if (isTemplateType) {
+        templateElement./*OK*/innerHTML = html;
+      } else if (isTemplateTypeScript) {
+        templateElement.textContent = html;
+      }
+    };
+  });
+
+  afterEach(() => viewerCanRenderTemplates = false);
+
   it('should render', () => {
-    templateElement.content.textContent = 'value = {{value}}';
+    textContentSetup('value = {{value}}');
     template.compileCallback();
     const result = template.render({value: 'abc'});
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should render {{.}} from string', () => {
-    templateElement.content.textContent = 'value = {{.}}';
+    textContentSetup('value = {{.}}');
     template.compileCallback();
     const result = template.render('abc');
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should sanitize output', () => {
-    templateElement./*OK*/innerHTML =
-        'value = <a href="{{value}}">abc</a>';
+    innerHtmlSetup('value = <a href="{{value}}">abc</a>');
     template.compileCallback();
     allowConsoleError(() => {
       const result = template.render({
@@ -64,22 +100,20 @@ describe('amp-mustache 0.1', () => {
   });
 
   it('should sanitize templated tag names', () => {
-    templateElement./*OK*/innerHTML =
-        'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>';
+    innerHtmlSetup(
+        'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>');
     template.compileCallback();
     const result = template.render({
       value: 'a',
     });
     expect(result./*OK*/innerHTML).to.not
         .equal('<a href="javascript:alert(0)">abc</a>');
-    expect(result.firstElementChild).to.be.null;
   });
 
   describe('Sanitizing data- attributes', () => {
-
     it('should sanitize templated attribute names', () => {
-      templateElement./*OK*/innerHTML =
-          'value = <a {{value}}="javascript:alert(0)">abc</a>';
+      innerHtmlSetup(
+          'value = <a {{value}}="javascript:alert(0)">abc</a>');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -91,8 +125,7 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should sanitize templated bind attribute names', () => {
-      templateElement./*OK*/innerHTML =
-          'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
+      innerHtmlSetup('value = <p [{{value}}]="javascript:alert()">ALERT</p>');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -106,8 +139,8 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should parse data-&style=value output correctly', () => {
-      templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +
-          ' data-&style="color:red;">abc</a>';
+      innerHtmlSetup('value = <a href="{{value}}"' +
+          ' data-&style="color:red;">abc</a>');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -119,8 +152,7 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should parse data-&attr=value output correctly', () => {
-      templateElement./*OK*/innerHTML =
-          'value = <a data-&href="{{value}}">abc</a>';
+      innerHtmlSetup('value = <a data-&href="{{value}}">abc</a>');
       template.compileCallback();
       const result = template.render({
         value: 'https://google.com/',
@@ -130,8 +162,9 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should allow for data-attr=value to output correctly', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<a data-my-attr="{{invalidValue}}" data-my-id="{{value}}">abc</a>';
+      innerHtmlSetup('value = ' +
+          '<a data-my-attr="{{invalidValue}}"' +
+          'data-my-id="{{value}}">abc</a>');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -146,8 +179,9 @@ describe('amp-mustache 0.1', () => {
 
   describe('Rendering Form Fields', () => {
     it('should allow rendering inputs', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<input value="{{value}}" type="text" onchange="{{invalidValue}}">';
+      innerHtmlSetup('value = ' +
+          '<input value="{{value}}"' +
+          'type="text" onchange="{{invalidValue}}">');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -160,8 +194,7 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should allow rendering textarea', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<textarea>{{value}}</textarea>';
+      innerHtmlSetup('value = <textarea>{{value}}</textarea>');
       template.compileCallback();
       const result = template.render({
         value: 'Cool story bro.',
@@ -171,8 +204,8 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should not allow image/file input types rendering', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<input value="{{value}}" type="{{type}}">';
+      innerHtmlSetup('value = ' +
+          '<input value="{{value}}" type="{{type}}">');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -208,8 +241,8 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should allow text input type rendering', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<input value="{{value}}" type="{{type}}">';
+      innerHtmlSetup('value = ' +
+          '<input value="{{value}}" type="{{type}}">');
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -220,11 +253,11 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should sanitize form-related attrs properly', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
+      innerHtmlSetup('value = ' +
           '<input value="{{value}}" ' +
           'formaction="javascript:javascript:alert(1)" ' +
           'formmethod="get" form="form1" formtarget="blank" formnovalidate ' +
-          'formenctype="">';
+          'formenctype="">');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -236,8 +269,8 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should not sanitize form tags', () => {
-      templateElement./*OK*/innerHTML = 'value = ' +
-          '<form><input value="{{value}}"></form><input value="hello">';
+      innerHtmlSetup('value = ' +
+          '<form><input value="{{value}}"></form><input value="hello">');
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -250,10 +283,10 @@ describe('amp-mustache 0.1', () => {
   describe('Nested templates', () => {
 
     it('should not sanitize nested amp-mustache templates', () => {
-      templateElement./*OK*/innerHTML =
+      innerHtmlSetup(
           'text before a template ' +
           '<template type="amp-mustache">text inside template</template> ' +
-          'text after a template';
+          'text after a template');
       template.compileCallback();
       const result = template.render({});
       expect(result./*OK*/innerHTML).to.equal(
@@ -262,108 +295,111 @@ describe('amp-mustache 0.1', () => {
           'text after a template');
     });
 
-    it('should sanitize nested templates without type="amp-mustache"', () => {
-      templateElement./*OK*/innerHTML =
-          'text before a template ' +
-          '<template>text inside template</template> ' +
-          'text after a template';
-      template.compileCallback();
-      const result = template.render({});
-      expect(result./*OK*/innerHTML).to.equal(
-          'text before a template  text after a template');
-    });
+    if (isTemplateType) {
+      it('should sanitize nested templates without type="amp-mustache"',
+          () => {
+            innerHtmlSetup(
+                'text before a template ' +
+                '<template>text inside template</template> ' +
+                'text after a template');
+            template.compileCallback();
+            const result = template.render({});
+            expect(result./*OK*/innerHTML).to.equal(
+                'text before a template  text after a template');
+          });
 
-    it('should not render variables inside a nested template', () => {
-      templateElement./*OK*/innerHTML =
-          'outer: {{outerOnlyValue}} {{mutualValue}} ' +
-          '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
-          ' {{mutualValue}}</template>';
-      template.compileCallback();
-      const result = template.render({
-        outerOnlyValue: 'Outer',
-        mutualValue: 'Mutual',
-        nestedOnlyValue: 'Nested',
+      it('should not render variables inside a nested template', () => {
+        innerHtmlSetup(
+            'outer: {{outerOnlyValue}} {{mutualValue}} ' +
+            '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
+            ' {{mutualValue}}</template>');
+        template.compileCallback();
+        const result = template.render({
+          outerOnlyValue: 'Outer',
+          mutualValue: 'Mutual',
+          nestedOnlyValue: 'Nested',
+        });
+        expect(result./*OK*/innerHTML).to.equal(
+            'outer: Outer Mutual ' +
+            '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
+            ' {{mutualValue}}</template>');
       });
-      expect(result./*OK*/innerHTML).to.equal(
-          'outer: Outer Mutual ' +
-          '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
-          ' {{mutualValue}}</template>');
-    });
 
-    it('should compile and render nested templates when invoked', () => {
-      const outerTemplateElement = document.createElement('template');
-      outerTemplateElement./*OK*/innerHTML =
-          'outer: {{value}} ' +
-          '<template type="amp-mustache">nested: {{value}}</template>';
-      const outerTemplate = new AmpMustache(outerTemplateElement);
-      outerTemplate.compileCallback();
-      const outerResult = outerTemplate.render({
-        value: 'Outer',
-      });
-      const nestedTemplateElement = outerResult.querySelector('template');
-      const nestedTemplate = new AmpMustache(nestedTemplateElement);
-      nestedTemplate.compileCallback();
-      const nestedResult = nestedTemplate.render({
-        value: 'Nested',
-      });
-      expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
-    });
-
-    it('should sanitize the inner template when it gets rendered', () => {
-      const outerTemplateElement = document.createElement('template');
-      outerTemplateElement./*OK*/innerHTML =
-          'outer: {{value}} ' +
-          '<template type="amp-mustache">' +
-          '<div onclick="javascript:alert(\'I am evil\')">nested</div>: ' +
-          '{{value}}</template>';
-      const outerTemplate = new AmpMustache(outerTemplateElement);
-      outerTemplate.compileCallback();
-      const outerResult = outerTemplate.render({
-        value: 'Outer',
-      });
-      const nestedTemplateElement = outerResult.querySelector('template');
-      const nestedTemplate = new AmpMustache(nestedTemplateElement);
-      nestedTemplate.compileCallback();
-      allowConsoleError(() => {
+      it('should compile and render nested templates when invoked', () => {
+        const outerTemplateElement = document.createElement('template');
+        outerTemplateElement./*OK*/innerHTML =
+            'outer: {{value}} ' +
+            '<template type="amp-mustache">nested: {{value}}</template>';
+        const outerTemplate = new AmpMustache(outerTemplateElement);
+        outerTemplate.compileCallback();
+        const outerResult = outerTemplate.render({
+          value: 'Outer',
+        });
+        const nestedTemplateElement = outerResult.querySelector('template');
+        const nestedTemplate = new AmpMustache(nestedTemplateElement);
+        nestedTemplate.compileCallback();
         const nestedResult = nestedTemplate.render({
           value: 'Nested',
         });
-        expect(nestedResult./*OK*/innerHTML).to.equal(
-            '<div>nested</div>: Nested');
+        expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
       });
-    });
 
-    it('should not allow users to pass data having key that starts with ' +
-        '__AMP_NESTED_TEMPLATE_0 when there is a nested template', () => {
-      templateElement./*OK*/innerHTML =
-          'outer: {{value}} ' +
-          '<template type="amp-mustache">nested: {{value}}</template>';
-      template.compileCallback();
-      const result = template.render({
-        __AMP_NESTED_TEMPLATE_0: 'MUST NOT RENDER THIS',
-        value: 'Outer',
+      it('should sanitize the inner template when it gets rendered', () => {
+        const outerTemplateElement = document.createElement('template');
+        outerTemplateElement./*OK*/innerHTML =
+            'outer: {{value}} ' +
+            '<template type="amp-mustache">' +
+            '<div onclick="javascript:alert(\'I am evil\')">nested</div>: ' +
+            '{{value}}</template>';
+        const outerTemplate = new AmpMustache(outerTemplateElement);
+        outerTemplate.compileCallback();
+        const outerResult = outerTemplate.render({
+          value: 'Outer',
+        });
+        const nestedTemplateElement = outerResult.querySelector('template');
+        const nestedTemplate = new AmpMustache(nestedTemplateElement);
+        nestedTemplate.compileCallback();
+        allowConsoleError(() => {
+          const nestedResult = nestedTemplate.render({
+            value: 'Nested',
+          });
+          expect(nestedResult./*OK*/innerHTML).to.equal(
+              '<div>nested</div>: Nested');
+        });
       });
-      expect(result./*OK*/innerHTML).to.equal(
-          'outer: Outer ' +
-          '<template type="amp-mustache">nested: {{value}}</template>');
-    });
 
-    it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
-        ' there are no nested templates, even though it is not a weird name' +
-        ' for a template variable', () => {
-      templateElement./*OK*/innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
-      template.compileCallback();
-      const result = template.render({
-        __AMP_NESTED_TEMPLATE_0: '123',
+      it('should not allow users to pass data having key that starts with ' +
+          '__AMP_NESTED_TEMPLATE_0 when there is a nested template', () => {
+        templateElement./*OK*/innerHTML =
+        'outer: {{value}} ' +
+        '<template type="amp-mustache">nested: {{value}}</template>';
+        template.compileCallback();
+        const result = template.render({
+          __AMP_NESTED_TEMPLATE_0: 'MUST NOT RENDER THIS',
+          value: 'Outer',
+        });
+        expect(result./*OK*/innerHTML).to.equal(
+            'outer: Outer ' +
+            '<template type="amp-mustache">nested: {{value}}</template>');
       });
-      expect(result./*OK*/innerHTML).to.equal('123');
-    });
+
+      it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
+          ' there are no nested templates, even though it is not a weird name' +
+          ' for a template variable', () => {
+        templateElement./*OK*/innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
+        template.compileCallback();
+        const result = template.render({
+          __AMP_NESTED_TEMPLATE_0: '123',
+        });
+        expect(result./*OK*/innerHTML).to.equal('123');
+      });
+    }
 
   });
 
   describe('triple-mustache', () => {
     it('should sanitize text formatting elements', () => {
-      templateElement.content.textContent = 'value = {{{value}}}';
+      textContentSetup('value = {{{value}}}');
       template.compileCallback();
       const result = template.render({
         value: '<b>abc</b><img><div>def</div>'
@@ -374,15 +410,15 @@ describe('amp-mustache 0.1', () => {
       });
       expect(result./*OK*/innerHTML).to.equal(
           'value = <b>abc</b><div>def</div>'
-           + '<br><code></code><del></del><em></em>'
-           + '<i></i><ins></ins><mark></mark><s></s>'
-           + '<small></small><strong></strong><sub></sub>'
-           + '<sup></sup><time></time><u></u>'
+            + '<br><code></code><del></del><em></em>'
+            + '<i></i><ins></ins><mark></mark><s></s>'
+            + '<small></small><strong></strong><sub></sub>'
+            + '<sup></sup><time></time><u></u>'
       );
     });
 
     it('should sanitize table related elements and anchor tags', () => {
-      templateElement.content.textContent = 'value = {{{value}}}';
+      textContentSetup('value = {{{value}}}');
       template.compileCallback();
       const result = template.render({
         value: '<table class="valid-class">'
@@ -411,7 +447,7 @@ describe('amp-mustache 0.1', () => {
     });
 
     it('should sanitize tags, removing unsafe attributes', () => {
-      templateElement.content.textContent = 'value = {{{value}}}';
+      textContentSetup('value = {{{value}}}');
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -422,6 +458,68 @@ describe('amp-mustache 0.1', () => {
             'value = <a target="_top">test</a>');
       });
     });
+  });
+
+  describe('tables', () => {
+    beforeEach(() => {
+      textContentSetup(
+          '<table>' +
+            '<tbody>' +
+              '<tr>' +
+                '<td>{{content}}</td>' +
+              '</tr>' +
+              '{{#replies}}' +
+              '<tr>' +
+                '<td>{{content}}</td>' +
+              '</tr>' +
+            '{{/replies}}' +
+            '</tbody>' +
+          '</table>');
+      template.compileCallback();
+    });
+    if (isTemplateTypeScript) {
+      it('should not foster text nodes in script template', () => {
+        return allowConsoleError(() => {
+          const result = template.render({
+            'content': 'Howdy',
+            'replies': [{'content': 'hi'}],
+          });
+          expect(result.innerHTML).to.equal(
+              '<tbody>' +
+                '<tr>' +
+                  '<td>Howdy</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td>hi</td>' +
+                '</tr>' +
+              '</tbody>');
+        });
+      });
+    }
+    if (isTemplateType) {
+      it('should foster text nodes in template[type="amp-mustache"] '
+          + 'destroying the templating', () => {
+        return allowConsoleError(() => {
+          const result = template.render({
+            'content': 'Howdy',
+            'replies': [{'content': 'hi'}],
+          });
+          // Given the mustache markup {{#replies}} is hoisted.
+          // Expect the rendered HTML not to be what's expected.
+          expect(result.innerHTML).to.equal(
+              '<tbody>' +
+                '<tr>' +
+                  '<td>Comment:</td>' +
+                  '<td>Howdy</td>' +
+                '</tr>' +
+                '<tr>' +
+                  '<td>Reply:</td>' +
+                  '<td>Howdy</td>' +
+                '</tr>' +
+              '</tbody>');
+        });
+      });
+    }
   });
 
   describe('viewer can render templates', () => {
@@ -445,10 +543,11 @@ describe('amp-mustache 0.1', () => {
   });
 
   it('should unwrap output', () => {
-    templateElement./*OK*/innerHTML = '<a>abc</a>';
+    innerHtmlSetup('<a>abc</a>');
     template.compileCallback();
     const result = template.render({});
     expect(result.tagName).to.equal('A');
     expect(result./*OK*/innerHTML).to.equal('abc');
   });
+
 });
