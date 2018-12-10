@@ -689,8 +689,8 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1')) {
-    installCustomElements(childWin, class {});
+  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+    installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
   }

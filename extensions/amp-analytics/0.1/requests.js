@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -135,7 +135,8 @@ export class RequestHandler {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
-        this.ampdoc_, params, expansionOption, bindings, this.whiteList_)
+        this.variableService_, this.urlReplacementService_, params,
+        expansionOption, bindings, this.whiteList_)
         .then(params => {
           return dict({
             'trigger': trigger['on'],
@@ -299,12 +300,14 @@ export class RequestHandler {
  * @param {?JsonObject} configParams
  * @param {!JsonObject} trigger
  * @param {!./variables.ExpansionOptions} expansionOption
+ * @param {!Element} element
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  ampdoc, msg, configParams, trigger, expansionOption) {
+  ampdoc, msg, configParams, trigger, expansionOption, element)
+{
   const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+  const urlReplacementService = Services.urlReplacementsForDoc(element);
 
   const bindings = variableService.getMacros();
   expansionOption.freezeVar('extraUrlParams');
@@ -321,7 +324,8 @@ export function expandPostMessage(
   return basePromise.then(expandedMsg => {
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
     //return base url with the appended extra url params;
-    return expandExtraUrlParams(ampdoc, params, expansionOption, bindings)
+    return expandExtraUrlParams(variableService, urlReplacementService, params,
+        expansionOption, bindings)
         .then(extraUrlParams => {
           return defaultSerializer(expandedMsg, [
             dict({'extraUrlParams': extraUrlParams}),
@@ -332,7 +336,8 @@ export function expandPostMessage(
 
 /**
  * Function that handler extraUrlParams from config and trigger.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./variables.VariableService} variableService
+ * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
  * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
@@ -340,11 +345,9 @@ export function expandPostMessage(
  * @return {!Promise<!Object>}
  * @private
  */
-function expandExtraUrlParams(
-  ampdoc, params, expansionOption, bindings, opt_whitelist) {
-  const variableService = variableServiceFor(ampdoc.win);
-  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-
+function expandExtraUrlParams(variableService, urlReplacements, params,
+  expansionOption, bindings, opt_whitelist)
+{
   const requestPromises = [];
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
@@ -352,15 +355,27 @@ function expandExtraUrlParams(
       expansionOption.vars,
       expansionOption.iterations,
       true /* noEncode */);
-  // Add any given extraUrlParams as query string param
-  for (const k in params) {
-    if (typeof params[k] == 'string') {
-      const request = variableService.expandTemplate(params[k], option)
-          .then(v =>
-            urlReplacements.expandStringAsync(v, bindings, opt_whitelist))
-          .then(value => params[k] = value);
+
+  const expandObject = (params, key) => {
+    const value = params[key];
+
+    if (typeof value === 'string') {
+      const request = variableService.expandTemplate(value, option)
+          .then(value =>
+            urlReplacements.expandStringAsync(
+                value, bindings, opt_whitelist))
+          .then(value => params[key] = value);
       requestPromises.push(request);
+    } else if (isArray(value)) {
+      value.forEach((_, index) => expandObject(value, index));
+    } else if (isObject(value) && value !== null) {
+      Object.keys(value).forEach(key => expandObject(value, key));
     }
-  }
+  };
+
+  Object.keys(params).forEach(key =>
+    expandObject(params, key)
+  );
+
   return Promise.all(requestPromises).then(() => params);
 }

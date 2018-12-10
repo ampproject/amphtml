@@ -402,6 +402,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/16252',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
   },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
+  },
 ];
 
 if (getMode().localDev) {
