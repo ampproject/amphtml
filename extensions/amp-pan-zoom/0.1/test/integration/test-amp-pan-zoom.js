@@ -18,7 +18,7 @@ import {AmpEvents} from '../../../../../src/amp-events';
 import {createFixtureIframe} from '../../../../../testing/iframe';
 import {toggleExperiment} from '../../../../../src/experiments';
 
-describe.configure().ifNewChrome().run('amp-pan-zoom', function() {
+describe.configure().ifChrome().run('amp-pan-zoom', function() {
   this.timeout(100000);
   let fixture;
   beforeEach(() => {

@@ -17,7 +17,7 @@
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe.configure().retryOnSaucelabs().ifNewChrome();
+const config = describe.configure().retryOnSaucelabs().ifChrome();
 config.skip('amp-inputmask', () => {
   describes.integration('attributes', {
     body: `
