@@ -274,10 +274,10 @@ export class AmpStory extends AMP.BaseElement {
     this.mediaPool_ = MediaPool.for(this);
 
     /** @private {boolean} */
-    this.areAccessAuthorizationsCompleted_ = false;
+    this.arePaywallAuthorizationsCompleted_ = false;
 
     /** @private */
-    this.navigateToPageAfterAccess_ = null;
+    this.navigateToPageAfterPaywall_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -610,7 +610,7 @@ export class AmpStory extends AMP.BaseElement {
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
           this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
-          this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          this.storeService_.get(StateProperty.PAYWALL_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
           !this.storeService_
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
@@ -734,6 +734,7 @@ export class AmpStory extends AMP.BaseElement {
 
           this.handleConsentExtension_();
           this.initializeStoryAccess_();
+          this.initializeStorySubscriptions_();
 
           this.pages_.forEach((page, index) => {
             page.setState(PageState.NOT_ACTIVE);
@@ -858,7 +859,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.areAccessAuthorizationsCompleted_ =
+      this.arePaywallAuthorizationsCompleted_ =
           accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(
           () => this.onAccessApplyAuthorizations_());
@@ -883,21 +884,64 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onAccessApplyAuthorizations_() {
-    this.areAccessAuthorizationsCompleted_ = true;
+    this.arePaywallAuthorizationsCompleted_ = true;
 
-    const nextPage = this.navigateToPageAfterAccess_;
+    const nextPage = this.navigateToPageAfterPaywall_;
 
     // Step out if the next page is still hidden by the access extension.
-    if (nextPage && nextPage.element.hasAttribute('amp-access-hide')) {
+    if (nextPage && !nextPage.isPaywallProtected()) {
+      this.navigateToPageAfterPaywall_ = null;
+      this.switchTo_(nextPage.element.id);
+      this.storeService_.dispatch(Action.TOGGLE_PAYWALL, false);
+    }
+  }
+
+  /**
+   * @private
+   */
+  initializeStorySubscriptions_() {
+    Services.subscriptionsServiceForDocOrNull(this.getAmpDoc()).then(
+        subscriptionsService => {
+          if (!subscriptionsService) {
+            return;
+          }
+
+          const bodyEl = this.win.document.body;
+
+          this.arePaywallAuthorizationsCompleted_ =
+              bodyEl.classList.contains('i-amphtml-subs-grant-no') ||
+              bodyEl.classList.contains('i-amphtml-subs-grant-yes');
+
+          const bodyObserver =
+              new this.win.MutationObserver(
+                  () => this.onBodyAttributesChanged_());
+          bodyObserver.observe(bodyEl, {attributes: true});
+        });
+  }
+
+  /**
+   * @private
+   */
+  onBodyAttributesChanged_() {
+    const bodyClassList = this.win.document.body.classList;
+
+    this.arePaywallAuthorizationsCompleted_ =
+        bodyClassList.contains('i-amphtml-subs-grant-no') ||
+        bodyClassList.contains('i-amphtml-subs-grant-yes');
+
+    // Dont try to navigate again if the document is not authorized yet.
+    if (!this.arePaywallAuthorizationsCompleted_) {
       return;
     }
 
-    if (nextPage) {
-      this.navigateToPageAfterAccess_ = null;
-      this.switchTo_(nextPage.element.id);
-    }
+    const nextPage = this.navigateToPageAfterPaywall_;
 
-    this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+    // Navigate to the next page if it's no longer paywall protected.
+    if (nextPage && !nextPage.isPaywallProtected()) {
+      this.navigateToPageAfterPaywall_ = null;
+      this.switchTo_(nextPage.element.id);
+      this.storeService_.dispatch(Action.TOGGLE_PAYWALL, false);
+    }
   }
 
   /** @override */
@@ -986,20 +1030,20 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // If the next page might be paywall protected, and the access
+    // If the next page might be paywall protected, and the paywall
     // authorizations did not resolve yet, wait before navigating.
     // TODO(gmajoulet): implement a loading state.
-    if (targetPage.element.hasAttribute('amp-access') &&
-        !this.areAccessAuthorizationsCompleted_) {
-      this.navigateToPageAfterAccess_ = targetPage;
+    if (!this.arePaywallAuthorizationsCompleted_ &&
+        targetPage.hasPaywallAttributes()) {
+      this.navigateToPageAfterPaywall_ = targetPage;
       return Promise.resolve();
     }
 
-    // If the next page is paywall protected, display the access UI and wait for
-    // the document to be reauthorized.
-    if (targetPage.element.hasAttribute('amp-access-hide')) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
-      this.navigateToPageAfterAccess_ = targetPage;
+    // If the next page is paywall protected, display the paywall UI and wait
+    // for the document to be reauthorized.
+    if (targetPage.isPaywallProtected()) {
+      this.storeService_.dispatch(Action.TOGGLE_PAYWALL, true);
+      this.navigateToPageAfterPaywall_ = targetPage;
       return Promise.resolve();
     }
 

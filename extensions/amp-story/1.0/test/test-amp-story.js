@@ -1008,8 +1008,8 @@ describes.realWin('amp-story', {
             return story.switchTo_('page-1');
           })
           .then(() => {
-            expect(
-                story.storeService_.get(StateProperty.ACCESS_STATE)).to.be.true;
+            expect(story.storeService_.get(StateProperty.PAYWALL_STATE))
+                .to.be.true;
           });
     });
 
@@ -1080,7 +1080,7 @@ describes.realWin('amp-story', {
                 .element.removeAttribute('amp-access-hide');
             authorizedCallback();
 
-            expect(story.storeService_.get(StateProperty.ACCESS_STATE))
+            expect(story.storeService_.get(StateProperty.PAYWALL_STATE))
                 .to.be.false;
           });
     });
@@ -1133,7 +1133,7 @@ describes.realWin('amp-story', {
           .then(() => {
             authorizedCallback();
 
-            expect(story.storeService_.get(StateProperty.ACCESS_STATE))
+            expect(story.storeService_.get(StateProperty.PAYWALL_STATE))
                 .to.be.true;
           });
     });
@@ -1183,6 +1183,137 @@ describes.realWin('amp-story', {
           })
           .then(() => {
             authorizedCallback();
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+  });
+
+  describe('amp-subscriptions navigation', () => {
+    let bodyClassList;
+
+    beforeEach(() => {
+      sandbox.stub(Services, 'subscriptionsServiceForDocOrNull').resolves({});
+      story.element.appendChild(
+          win.document.createElement('amp-story-subscriptions'));
+      bodyClassList = story.getAmpDoc().getBody().classList;
+    });
+
+    afterEach(() => {
+      bodyClassList.remove('i-amphtml-subs-grant-no');
+      bodyClassList.remove('i-amphtml-subs-grant-yes');
+    });
+
+    it('should display the paywall if next page is blocked', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      bodyClassList.add('i-amphtml-subs-grant-no');
+
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+            expect(story.storeService_.get(StateProperty.PAYWALL_STATE))
+                .to.be.true;
+          });
+    });
+
+    it('should not navigate if next page is blocked by paywall', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      bodyClassList.add('i-amphtml-subs-grant-no');
+
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should block and then navigate once the doc is reauthorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      bodyClassList.add('i-amphtml-subs-grant-no');
+
+      // Navigates to a paywall protected page, and waits until the document
+      // is successfuly reauthorized to navigate.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            bodyClassList.remove('i-amphtml-subs-grant-no');
+            bodyClassList.add('i-amphtml-subs-grant-yes');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('page-1');
+          });
+    });
+
+    it('should hide the paywall once the doc is reauthorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      bodyClassList.add('i-amphtml-subs-grant-no');
+
+      // Navigates to a paywall protected page, and waits until the document
+      // is successfuly reauthorized to navigate.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            bodyClassList.remove('i-amphtml-subs-grant-no');
+            bodyClassList.add('i-amphtml-subs-grant-yes');
+          })
+          .then(() => {
+            expect(story.storeService_.get(StateProperty.PAYWALL_STATE))
+                .to.be.false;
+          });
+    });
+
+    it('should block navigation if doc authorizations are pending', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      // Navigates to a maybe protected page (has subscriptions-section=""
+      // rule), but the document authorizations are still pending. Asserts that
+      // it blocks the navigation.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            expect(story.activePage_.element.id).to.equal('cover');
+          });
+    });
+
+    it('should navigate only after the doc is first authorized', () => {
+      createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+      // Navigates to a maybe protected page (has subscriptions-section=""
+      // rule) is blocked until the authorizations are completed.
+      return story.layoutCallback()
+          .then(() => {
+            story.getPageById('page-1')
+                .element.setAttribute('subscriptions-section', 'content');
+            return story.switchTo_('page-1');
+          })
+          .then(() => {
+            bodyClassList.add('i-amphtml-subs-grant-yes');
+          })
+          .then(() => {
             expect(story.activePage_.element.id).to.equal('page-1');
           });
     });

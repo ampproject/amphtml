@@ -79,7 +79,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   it('should display the access blocking paywall on state update', done => {
     storyAccess.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_ACCESS, true);
+    storeService.dispatch(Action.TOGGLE_PAYWALL, true);
 
     win.requestAnimationFrame(() => {
       expect(storyAccess.element)

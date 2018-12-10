@@ -64,7 +64,6 @@ export const UIType = {
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
- *    accessState: boolean,
  *    adState: boolean,
  *    bookendState: boolean,
  *    desktopState: boolean,
@@ -74,6 +73,7 @@ export const UIType = {
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pausedState: boolean,
+ *    paywallState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
@@ -104,7 +104,6 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
 
   // App States.
-  ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
   DESKTOP_STATE: 'desktopState',
@@ -114,6 +113,7 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAUSED_STATE: 'pausedState',
+  PAYWALL_STATE: 'paywallState', // amp-access and amp-subscriptions paywall.
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
@@ -141,7 +141,6 @@ export const Action = {
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
-  TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -149,6 +148,7 @@ export const Action = {
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAUSED: 'togglePaused',
+  TOGGLE_PAYWALL: 'togglePaywall',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
@@ -186,18 +186,6 @@ const actions = (state, action, data) => {
           [].concat(state[StateProperty.ACTIONS_WHITELIST], data);
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist}));
-    // Triggers the amp-acess paywall.
-    case Action.TOGGLE_ACCESS:
-      // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
-      if (state[StateProperty.ACCESS_STATE] === data) {
-        return state;
-      }
-
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {
-            [StateProperty.ACCESS_STATE]: !!data,
-            [StateProperty.PAUSED_STATE]: !!data,
-          }));
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign(
@@ -239,6 +227,17 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.PAUSED_STATE]: !!data}));
+    case Action.TOGGLE_PAYWALL:
+      // Don't change the PAUSED_STATE if PAYWALL_STATE is not changed.
+      if (state[StateProperty.PAYWALL_STATE] === data) {
+        return state;
+      }
+
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAYWALL_STATE]: !!data,
+            [StateProperty.PAUSED_STATE]: !!data,
+          }));
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.RTL_STATE]: !!data}));
@@ -389,7 +388,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
@@ -399,6 +397,7 @@ export class AmpStoryStoreService {
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.PAYWALL_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SIDEBAR_STATE]: false,

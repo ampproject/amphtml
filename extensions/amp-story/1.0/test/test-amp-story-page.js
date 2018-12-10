@@ -25,6 +25,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   let win;
   let element;
   let page;
+  let story;
 
   beforeEach(() => {
     win = env.win;
@@ -40,7 +41,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    const story = win.document.createElement('amp-story');
+    story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
 
     element = win.document.createElement('amp-story-page');
@@ -248,5 +249,47 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             done();
           });
         });
+  });
+
+  describe('Paywall public API', () => {
+    it('should be protected by the subscriptions paywall', () => {
+      story.classList.add('i-amphtml-subs-grant-no');
+      page.element.setAttribute('subscriptions-section', 'content');
+
+      expect(page.isPaywallProtected()).to.be.true;
+    });
+
+    it('should not be protected by the subscriptions paywall', () => {
+      story.classList.add('i-amphtml-subs-grant-yes');
+      page.element.setAttribute('subscriptions-section', 'content');
+
+      expect(page.isPaywallProtected()).to.be.false;
+    });
+
+    it('should be protected by the access paywall', () => {
+      page.element.setAttribute('amp-access-hide', '');
+
+      expect(page.isPaywallProtected()).to.be.true;
+    });
+
+    it('should not be protected', () => {
+      expect(page.isPaywallProtected()).to.be.false;
+    });
+
+    it('should have paywall attributes (subscriptions)', () => {
+      page.element.setAttribute('amp-access', 'someRule');
+
+      expect(page.hasPaywallAttributes()).to.be.true;
+    });
+
+    it('should have paywall attributes (subscriptions)', () => {
+      page.element.setAttribute('subscriptions-section', 'content');
+
+      expect(page.hasPaywallAttributes()).to.be.true;
+    });
+
+    it('should not have paywall attributes', () => {
+      expect(page.hasPaywallAttributes()).to.be.false;
+    });
   });
 });

@@ -919,4 +919,27 @@ export class AmpStoryPage extends AMP.BaseElement {
   isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
+
+  /**
+   * Whether the page is currently blocked by a paywall, either amp-access or
+   * amp-subscriptions.
+   * @return {boolean}
+   */
+  isPaywallProtected() {
+    return this.element.hasAttribute('amp-access-hide') ||
+        matches(
+            this.element,
+            '.i-amphtml-subs-grant-no [subscriptions-section="content"]');
+  }
+
+  /**
+   * Whether the page has amp-access or amp-subscriptions attributes that,
+   * depending on the user's authorizations, might block navigation to this
+   * page.
+   * @return {boolean}
+   */
+  hasPaywallAttributes() {
+    return this.element.hasAttribute('amp-access') ||
+        this.element.hasAttribute('subscriptions-section');
+  }
 }
