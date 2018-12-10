@@ -17,16 +17,58 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {isExperimentOn} from '../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'amp-date-display';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
 
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
+
+/** @typedef {{
+  year: number,
+  month: number,
+  monthName: string,
+  monthNameShort: string,
+  day: number,
+  dayName: string,
+  dayNameShort: string,
+  hour: number,
+  minute: number,
+  second: number,
+  iso: string,
+}} */
+let VariablesDef;
+
+/** @typedef {{
+  year: number,
+  month: number,
+  monthName: string,
+  monthNameShort: string,
+  day: number,
+  dayName: string,
+  dayNameShort: string,
+  hour: number,
+  minute: number,
+  second: number,
+  iso: string,
+  yearTwoDigit: string,
+  monthTwoDigit: string,
+  dayTwoDigit: string,
+  hourTwoDigit: string,
+  hour12: string,
+  hour12TwoDigit: string,
+  minuteTwoDigit: string,
+  secondTwoDigit: string,
+  dayPeriod: string,
+ }} */
+let EnhancedVariablesDef;
 
 export class AmpDateDisplay extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -60,8 +102,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.getWin(), 'amp-date-display')) {
-      user.warn('Experiment `amp-date-display` is not turned on.');
+    if (!isExperimentOn(this.win, 'amp-date-display')) {
+      user().warn(TAG, 'Experiment %s is not turned on.', TAG);
       return;
     }
 
@@ -94,8 +136,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     /** @private {string} */
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
-    /** @private {Object} */
-    const data = this.getDataForTemplate_();
+
+    const data = /** @type {!JsonObject} */(this.getDataForTemplate_());
 
     this.templates_
         .findAndRenderTemplate(this.element, data)
@@ -108,7 +150,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 
   /**
-   * @return {Object}
+   * @return {!EnhancedVariablesDef}
    * @private
    */
   getDataForTemplate_() {
@@ -136,7 +178,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
       epoch = Date.parse(this.datetime_);
       user().assert(
           !isNaN(epoch),
-          'amp-date-display',
           `Invalid date: '${this.datetime_}'`
       );
     } else if (this.timestampMiliseconds_) {
@@ -147,7 +188,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
     user().assert(
         epoch !== undefined,
-        'amp-date-display',
         'One of datetime, timestamp-ms, or timestamp-seconds is required'
     );
 
@@ -157,6 +197,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
+   * @return {!VariablesDef}
    * @private
    */
   getVariablesInLocal_(date, locale) {
@@ -182,6 +223,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
   /**
    * @param {!Date} date
    * @param {string} locale
+   * @return {!VariablesDef}
    * @private
    */
   getVariablesInUTC_(date, locale) {
@@ -213,24 +255,26 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} data
-   * @return {Object}
+   * @param {!VariablesDef} data
+   * @return {!EnhancedVariablesDef}
    * @private
    */
   enhanceBasicVariables_(data) {
     const hour12 = data.hour % 12 || 12;
 
-    return Object.assign({}, data, {
-      yearTwoDigit: this.padStart_(data.year % 100),
-      monthTwoDigit: this.padStart_(data.month),
-      dayTwoDigit: this.padStart_(data.day),
-      hourTwoDigit: this.padStart_(data.hour),
-      hour12,
-      hour12TwoDigit: this.padStart_(hour12),
-      minuteTwoDigit: this.padStart_(data.minute),
-      secondTwoDigit: this.padStart_(data.second),
-      dayPeriod: data.hour < 12 ? 'am' : 'pm',
-    });
+    // Override type since Object.assign is not understood
+    return /** @type {!EnhancedVariablesDef} */(
+      Object.assign({}, data, {
+        yearTwoDigit: this.padStart_(data.year % 100),
+        monthTwoDigit: this.padStart_(data.month),
+        dayTwoDigit: this.padStart_(data.day),
+        hourTwoDigit: this.padStart_(data.hour),
+        hour12,
+        hour12TwoDigit: this.padStart_(hour12),
+        minuteTwoDigit: this.padStart_(data.minute),
+        secondTwoDigit: this.padStart_(data.second),
+        dayPeriod: data.hour < 12 ? 'am' : 'pm',
+      }));
   }
 
   /**
@@ -264,6 +308,6 @@ export class AmpDateDisplay extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-date-display', '0.1', AMP => {
-  AMP.registerElement('amp-date-display', AmpDateDisplay);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpDateDisplay);
 });

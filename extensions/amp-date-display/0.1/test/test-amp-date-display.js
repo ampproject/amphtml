@@ -15,6 +15,8 @@
  */
 
 import '../amp-date-display';
+import {toggleExperiment} from '../../../../src/experiments';
+
 
 describes.realWin('amp-date-display', {
   amp: {
@@ -28,6 +30,7 @@ describes.realWin('amp-date-display', {
 
   beforeEach(() => {
     win = env.win;
+    toggleExperiment(win, 'amp-date-display', true);
     element = win.document.createElement('amp-date-display');
     win.document.body.appendChild(element);
     impl = element.implementation_;
