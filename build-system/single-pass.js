@@ -432,7 +432,7 @@ function transformPathsToTempDir(graph, config) {
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins(
-            /* isEsmBuild */ config.define.indexOf['ESM_BUILD=true'] !== -1,
+            /* isEsmBuild */ config.define.indexOf('ESM_BUILD=true') !== -1,
             /* isCommonJsModule */ isCommonJsModule(f)),
         retainLines: true,
       });
