@@ -1100,7 +1100,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        if (!Services.urlForDoc(this.getAmpDoc()).isSecure(url)) {
+        if (!Services.urlForDoc(this.element).isSecure(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }

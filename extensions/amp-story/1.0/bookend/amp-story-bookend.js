@@ -569,7 +569,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 

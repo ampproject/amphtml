@@ -785,7 +785,7 @@ export class AmpA4A extends AMP.BaseElement {
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
 
-          const urls = Services.urlForDoc(this.getAmpDoc());
+          const urls = Services.urlForDoc(this.element);
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
             urls.isSecure(image) && this.preconnect.preload(image));
@@ -1610,7 +1610,7 @@ export class AmpA4A extends AMP.BaseElement {
           throw new Error(errorMsg);
         }
 
-        const urls = Services.urlForDoc(this.getAmpDoc());
+        const urls = Services.urlForDoc(this.element);
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
