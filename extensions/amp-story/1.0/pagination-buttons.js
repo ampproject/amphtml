@@ -203,7 +203,9 @@ export class PaginationButtons {
   initializeListeners_(hasBookend) {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX,
         pageIndex => {
-          const totalPages = this.storeService_.get(StateProperty.PAGES_COUNT);
+          const totalPages =
+            /**@type {number}*/ (this.storeService_.get(
+                StateProperty.PAGES_COUNT));
           const bookendActive =
               this.storeService_.get(StateProperty.BOOKEND_STATE);
 
