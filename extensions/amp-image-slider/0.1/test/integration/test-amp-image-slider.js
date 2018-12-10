@@ -16,7 +16,7 @@
 
 import {createPointerEvent} from '../../../../../testing/test-helper';
 
-const config = describe.configure().ifNewChrome();
+const config = describe.configure().ifChrome();
 config.run('amp-image-slider', function() {
   this.timeout(20000);
   const DEFAULT_TIMEOUT = 1600;
