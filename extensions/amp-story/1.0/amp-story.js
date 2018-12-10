@@ -872,7 +872,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStoryAccess_() {
-    Services.accessServiceForDocOrNull(this.getAmpDoc()).then(accessService => {
+    Services.accessServiceForDocOrNull(this.element).then(accessService => {
       if (!accessService) {
         return;
       }

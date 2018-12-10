@@ -139,7 +139,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   buildCallback() {
     const ampdoc = this.getAmpDoc();
     this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForDoc(this.element);
 
     this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
