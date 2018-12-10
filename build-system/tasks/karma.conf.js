@@ -180,7 +180,7 @@ module.exports = {
     }, SAUCE_TIMEOUT_CONFIG),
     SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      appiumVersion: '1.8.1',
+      appiumVersion: '1.9.1',
       deviceName: 'iPhone X Simulator',
       browserName: 'Safari',
       platformName: 'iOS',
@@ -191,6 +191,12 @@ module.exports = {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_Dev: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'dev',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Safari_12: Object.assign({
       base: 'SauceLabs',

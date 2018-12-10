@@ -116,19 +116,21 @@ describe('amp-list', function() {
       doc = win.document;
     });
 
-    it('should change to layout container as on bind', function*() {
-      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
+    it.configure().skipChromeDev().run(
+        'should change to layout container as on bind', function*() {
+          expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 
-      const button = doc.getElementById('button');
-      const list = doc.getElementById('list');
-      button.click();
+          const button = doc.getElementById('button');
+          const list = doc.getElementById('list');
+          button.click();
 
-      yield poll('changes to layout container', () => {
-        const layout = list.getAttribute('layout');
-        return layout == 'container';
-      }, undefined, /* opt_timeout */ TIMEOUT);
+          yield poll('changes to layout container', () => {
+            const layout = list.getAttribute('layout');
+            return layout == 'container';
+          }, undefined, /* opt_timeout */ TIMEOUT);
 
-      expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
-    });
+          expect(list.classList.contains('i-amphtml-layout-container'))
+              .to.be.true;
+        });
   });
 });
