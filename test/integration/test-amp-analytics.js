@@ -197,7 +197,14 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           },
           "extraUrlParams": {
             "a": 1,
-            "b": "\${title}"
+            "b": "\${title}",
+            "c": {
+              "d": "\${title}",
+              "e": {
+                "f": ["\${title}", "\${title}"]
+              }
+            },
+            "g": ["\${title}", "\${title}"]
           }
         }
         </script>
@@ -207,7 +214,10 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     it('should send request use POST body payload', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
-        expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
+        expect(req.body).to.equal(
+            '{"a":2,"b":"AMP TEST","c":{"d":"AMP TEST",' +
+        '"e":{"f":["AMP TEST","AMP TEST"]}},"g":["AMP TEST","AMP TEST"]}'
+        );
       });
     });
   });
@@ -262,6 +272,57 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       });
     });
   });
+
+  describes.integration('amp-analytics useBody with extraUrlParamsReplaceMap', {
+    body:
+      `<amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "context.a": 2
+              }
+            }
+          },
+          "transport": {
+            "beacon": false,
+            "xhrpost": true,
+            "useBody": true
+          },
+          "extraUrlParamsReplaceMap": {
+            "context.": "_c_"
+          },
+          "extraUrlParams": {
+            "context.a": 1,
+            "context.b": {
+              "context.c": "\${title}",
+              "context.d": {
+                "context.e": ["\${title}", "\${title}"]
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>`,
+    extensions: ['amp-analytics'],
+  }, () => {
+    it('should only replace params for top-level keys', () => {
+      return RequestBank.withdraw().then(req => {
+        expect(req.url).to.equal('/');
+        expect(req.body).to.equal(
+            '{"_c_a":2,"_c_b":{"context.c":"AMP TEST",' +
+        '"context.d":{"context.e":["AMP TEST","AMP TEST"]}}}'
+        );
+      });
+    });
+  });
+
 
   describes.integration('amp-analytics referrerPolicy', {
     body:

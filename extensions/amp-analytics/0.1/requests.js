@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
-import {isArray, isFiniteNumber} from '../../../src/types';
+import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
 const BATCH_INTERVAL_MIN = 200;
 
@@ -355,15 +355,27 @@ function expandExtraUrlParams(variableService, urlReplacements, params,
       expansionOption.vars,
       expansionOption.iterations,
       true /* noEncode */);
-  // Add any given extraUrlParams as query string param
-  for (const k in params) {
-    if (typeof params[k] == 'string') {
-      const request = variableService.expandTemplate(params[k], option)
-          .then(v =>
-            urlReplacements.expandStringAsync(v, bindings, opt_whitelist))
-          .then(value => params[k] = value);
+
+  const expandObject = (params, key) => {
+    const value = params[key];
+
+    if (typeof value === 'string') {
+      const request = variableService.expandTemplate(value, option)
+          .then(value =>
+            urlReplacements.expandStringAsync(
+                value, bindings, opt_whitelist))
+          .then(value => params[key] = value);
       requestPromises.push(request);
+    } else if (isArray(value)) {
+      value.forEach((_, index) => expandObject(value, index));
+    } else if (isObject(value) && value !== null) {
+      Object.keys(value).forEach(key => expandObject(value, key));
     }
-  }
+  };
+
+  Object.keys(params).forEach(key =>
+    expandObject(params, key)
+  );
+
   return Promise.all(requestPromises).then(() => params);
 }
