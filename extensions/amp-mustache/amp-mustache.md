@@ -64,31 +64,31 @@ First, the `amp-mustache` has to be declared/loaded like this:
 <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
-Then, the Mustache templates can be defined either in a `script` or `template` tag
-like this:
+Then, the Mustache templates can be defined either in a `script` or `template` tag like this:
+
 
 ```html
+<!-- Using template tag. -->
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
+or
 
+<!-- Using script tag. -->
 ```html
-<script template="amp-mustache">
+<script type="text/plain" template="amp-mustache">
   Hello {{world}}!
 </script>
 ```
 
-Choosing one over the other is a matter of preference and needs. The script template
-currently doesn't support nested templates but solves an issue with templating in the context with tables; present when using template tags. See the "Tables" section further below.
+Choosing one over the other is a matter of preference and needs. The script template solves an issue with templating in the context of tables; an issue when using template tags. See the "Tables" section further below.
 
-How templates are discovered, when they are rendered, how data is provided is  all decided by the
-target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
+How templates are discovered, when they are rendered, how data is provided is all decided by the target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
 
 ## Restrictions
 
-Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
-that among other things, you can't use `amp-mustache` to:
+Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means that among other things, you can't use `amp-mustache` to:
 
 - Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
@@ -149,8 +149,7 @@ The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 </table>
 ```
 
-Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using the script tag to
-define your templates.
+Workarounds include wrapping Mustache sections in HTML comments (e.g. `<!-- {{#bar}} -->`), using non-table elements like `<div>` instead or using the script tag to define your templates.
 
 ```html
 <script type="text/plain" template="amp-mustache">

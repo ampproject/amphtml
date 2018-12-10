@@ -50,13 +50,22 @@ submitted to the AMP repository.
 Templates can be defined anywhere in the AMP document's `body`, like this:
 
 ```html
+<!-- Using the template tag -->
 <template type="amp-mustache">
   Hello {{world}}!
 </template>
 ```
+or like this:
 
-The `type` attribute must reference the template's type as defined in the `custom-template`
-attribute when the templating system was imported in the document's `head`.
+```html
+<!-- Using the script tag -->
+<script type="text/plain" template="amp-mustache">
+  Hello {{world}}!
+</script>
+```
+
+For the `template` tag, the `type` attribute must reference the template's type as defined in the `custom-template` attribute when the templating system was imported in the document's `head`. The
+`script` template type is defined in the `template` attribute.
 
 The use of the template is up to a specific AMP element that wants to use it. An AMP element would typically
 look for a template within its children or using a template's ID. For instance, an `amp-carousel` element
