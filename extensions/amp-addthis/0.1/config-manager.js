@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
+import {getMode} from './addthis-utils/mode';
 
 import {dict} from '../../../src/utils/object';
 
@@ -89,8 +90,21 @@ export class ConfigManager {
     const {iframeData} = pubData;
 
     iframeData.forEach(iframeDatum => {
-      const {iframe, widgetId, shareConfig, atConfig} = iframeDatum;
-      this.sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig});
+      const {
+        iframe,
+        widgetId,
+        shareConfig,
+        atConfig,
+        productCode,
+      } = iframeDatum;
+      this.sendConfiguration_({
+        iframe,
+        widgetId,
+        pubId,
+        shareConfig,
+        atConfig,
+        productCode,
+      });
     });
   }
 
@@ -101,9 +115,17 @@ export class ConfigManager {
    * @param {string} [input.pubId]
    * @param {!Object} [input.shareConfig]
    * @param {!Object} [input.atConfig]
+   * @param {!Object} [input.productCode]
    * @private
    */
-  sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {
+  sendConfiguration_({
+    iframe,
+    widgetId,
+    pubId,
+    shareConfig,
+    atConfig,
+    productCode,
+  }) {
     const pubData = this.dataForPubId_[pubId];
     const {
       config: dashboardConfig,
@@ -115,14 +137,41 @@ export class ConfigManager {
       'atConfig': atConfig,
       'pubId': pubId,
       'widgetId': widgetId,
+      'productCode': productCode,
       'configRequestStatus': configRequestStatus,
       'dashboardConfig': dashboardConfig,
     });
 
+
+
     if (dashboardConfig &&
-        dashboardConfig.widgets &&
-        Object.keys(dashboardConfig.widgets).length > 0) {
-      this.activeToolsMonitor_.record({widget: dashboardConfig});
+      dashboardConfig.widgets &&
+      Object.keys(dashboardConfig.widgets).length > 0) {
+      const mode = getMode({pubId, widgetId, productCode});
+      switch (mode) {
+        case 1:
+          console.log(1);
+          if (widgetId && dashboardConfig &&
+          dashboardConfig.widgets &&
+          dashboardConfig.widgets[widgetId]) {
+            this.activeToolsMonitor_.record(dashboardConfig.widgets[widgetId]);
+          }
+          break;
+        case 2:
+          console.log(2);
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
+          break;
+        case 3:
+          console.log(3);
+          // wp anonymous mode goes here
+          return;
+        default:
+          console.log(-1);
+          return;
+          // invalid tool configuration
+      }
     }
 
     iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
@@ -143,6 +192,7 @@ export class ConfigManager {
    * activeToolsMonitor: Object<string,string>,
    * atConfig: Object<string,string>,
    * widgetId: string,
+   * productCode: string,
    * iframe: !Element,
    * iframeLoadPromise: !Promise,
    * shareConfig: (JsonObject|undefined)
@@ -151,6 +201,7 @@ export class ConfigManager {
   register({
     pubId,
     widgetId,
+    productCode,
     iframe,
     iframeLoadPromise,
     shareConfig,
@@ -175,7 +226,13 @@ export class ConfigManager {
       pubData.iframeData = [];
     }
 
-    pubData.iframeData.push({iframe, shareConfig, atConfig, widgetId});
+    pubData.iframeData.push({
+      iframe,
+      shareConfig,
+      atConfig,
+      widgetId,
+      productCode,
+    });
 
     iframeLoadPromise.then(() => this.sendConfiguration_({
       iframe,
@@ -183,6 +240,7 @@ export class ConfigManager {
       widgetId,
       shareConfig,
       atConfig,
+      productCode,
     }));
   }
 
@@ -192,7 +250,7 @@ export class ConfigManager {
    */
   unregister({pubId, iframe}) {
     this.configProviderIframes_ = this.configProviderIframes_.filter(
-        providerFrame => providerFrame !== iframe
+        providerFrame => providerFrame !== iframe,
     );
 
     const pubData = this.dataForPubId_[pubId] || {};
@@ -217,6 +275,7 @@ ConfigManager.PubIdData; // purely for typedef
 /**
  * @typedef {{
  *   widgetId:string,
+ *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
  *   iframe: Element
  * }}
