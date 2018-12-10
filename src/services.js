@@ -480,7 +480,7 @@ export class Services {
    */
   static timerFor(window) {
     return /** @type {!./service/timer-impl.Timer} */ (
-      getExistingServiceInEmbedScope(window, 'timer'));
+      getExistingServiceInEmbedScope(window, 'timer', /* fallback */ true));
   }
 
   /**

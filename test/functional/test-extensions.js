@@ -24,8 +24,8 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
-  adoptStandardServicesForEmbed,
   installExtensionsService,
+  installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc, registerServiceBuilder} from '../../src/service';
@@ -1049,18 +1049,22 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    describe('adoptStandardServicesForEmbed', () => {
+    describe('installStandardServicesInEmbed', () => {
       it('verify order of adopted services for embed', () => {
-        const adoptServiceForEmbed =
-            sandbox.stub(service, 'adoptServiceForEmbed');
-        sandbox.stub(service, 'adoptServiceForEmbedIfEmbeddable')
+        const installInEmbedWindow =
+            sandbox.stub(service, 'installInEmbedWindow');
+        sandbox.stub(service, 'installServiceInEmbedIfEmbeddable')
             .withArgs({}, sinon.match.any).returns(true);
-        adoptStandardServicesForEmbed({});
-        expect(adoptServiceForEmbed.callCount).to.equal(5);
+
+        const childWin = {};
+        const parentWin = {};
+        installStandardServicesInEmbed(childWin, parentWin);
+
+        expect(installInEmbedWindow.callCount).to.equal(5);
         const expectedCallsInOrder = [
           'url', 'action', 'standard-actions', 'navigation', 'timer'];
         expectedCallsInOrder.forEach((call, index) => {
-          expect(adoptServiceForEmbed.getCall([index]).args[1])
+          expect(installInEmbedWindow.getCall([index]).args[1])
               .to.equal(expectedCallsInOrder[index]);
         });
       });

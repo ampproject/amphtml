@@ -17,14 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
-  adoptServiceForEmbed,
-  getAmpdoc,
-  installServiceInEmbedIfEmbeddable,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  setParentWindow,
-} from '../service';
-import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
@@ -35,6 +27,13 @@ import {
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
+import {
+  getAmpdoc,
+  installServiceInEmbedIfEmbeddable,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  setParentWindow,
+} from '../service';
 import {getMode} from '../mode';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {
