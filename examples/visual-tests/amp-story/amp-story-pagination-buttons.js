@@ -26,14 +26,16 @@ module.exports = {
         '.next-container > .i-amphtml-story-button-move',
         '.prev-container.i-amphtml-story-button-hidden']);
   },
-  'shows corresponding buttons for the middle of story': async (page, name) => {
+  'shows corresponding buttons when there is a previous and next page':
+      async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor('amp-story-page#page-2[active]');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
       /* loadingCompleteCss */ [
-        '.next-container > button.i-amphtml-story-button-move']);
+        '.next-container > button.i-amphtml-story-button-move',
+        '.prev-container > button.i-amphtml-story-button-move']);
   },
   'shows corresponding buttons for last page': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
@@ -43,7 +45,9 @@ module.exports = {
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ ['.i-amphtml-story-fwd-more']);
+      /* loadingCompleteCss */ [
+        '.i-amphtml-story-fwd-more',
+        '.prev-container > button.i-amphtml-story-button-move']);
   },
   'shows corresponding buttons for bookend': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');

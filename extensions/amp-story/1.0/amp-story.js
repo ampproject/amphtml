@@ -910,7 +910,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializePages_() {
-    const storyPages = this.element.querySelectorAll('amp-story-page');
     const pageImplPromises = Array.prototype.map.call(
         this.element.querySelectorAll('amp-story-page'),
         pageEl => pageEl.getImpl());

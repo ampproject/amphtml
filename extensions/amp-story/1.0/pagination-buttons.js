@@ -17,7 +17,6 @@ import {
   Action,
   StateProperty,
   getStoreService,
-  State,
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
 import {dev} from '../../../src/log';
@@ -204,7 +203,7 @@ export class PaginationButtons {
   initializeListeners_(hasBookend) {
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX,
         pageIndex => {
-          const totalPages = this.storeService_.get(StateProperty.TOTAL_PAGES);
+          const totalPages = this.storeService_.get(StateProperty.PAGES_COUNT);
           const bookendActive =
               this.storeService_.get(StateProperty.BOOKEND_STATE);
 
