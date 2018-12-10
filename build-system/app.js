@@ -1206,6 +1206,15 @@ app.get('/infinite-scroll', function(req, res) {
       'loadMoreEndText': 'end',
     };
 
+  console.log(pagesLeft);
+
+  if(pagesLeft < 3) {
+
+    res.status(500);
+    res.json({"err": "Not so fast!"});
+    return;
+  }
+
   if (latency) {
     setTimeout(() => res.json(results), latency);
   } else {

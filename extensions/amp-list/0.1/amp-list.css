@@ -23,19 +23,23 @@ amp-list[load-more] [load-more-end].amp-visible {
 }
 
 [load-more-button], [load-more-failed], [load-more-loading] {
-  --light-color: rgba(255,255,255,.8);
-  --dark-color: rgba(51,51,51,.75);
-  --dark-color-transparent: rgba(51,51,51,0);
-
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: .1em;
   text-align: center;
   height: 80px;
 
   padding: 12px 0px;
   box-sizing: border-box;
+}
+
+[load-more-button], [load-more-failed], [load-more-loading],
+.i-amphtml-amp-list-load-more-button {
+  /* TODO: Standardize the system font string we use across the code base,
+           possibly by factoring it out into its own class. */
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
 }
 
 [load-more-loading] .i-amphtml-amp-list-load-more-spinner {
@@ -44,20 +48,27 @@ amp-list[load-more] [load-more-end].amp-visible {
   height: 40px;
   margin: 8px 0px;
 
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad'%3E%3Cstop stop-color='rgba(51,51,51,.75)'%3E%3C/stop%3E%3Cstop offset='100%25' stop-color='rgba(51,51,51,0)'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M11,4.4 A18,18, 0,1,0, 38,20' fill='none' stroke='url(%23grad)' stroke-width='1.725'%3E%3C/path%3E%3C/svg%3E");
-  animation: 1000ms spin linear infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad'%3E%3Cstop stop-color='rgb(51,51,51)' stop-opacity='.75'%3E%3C/stop%3E%3Cstop offset='100%25' stop-color='rgb(51,51,51)' stop-opacity='0'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M11,4.4 A18,18, 0,1,0, 38,20' fill='none' stroke='url(%23grad)' stroke-width='1.725'%3E%3C/path%3E%3C/svg%3E");
+  animation: 1000ms amp-list-load-more-spinner linear infinite;
 }
 
-@keyframes spin {
+@keyframes amp-list-load-more-spinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.i-amphtml-amp-list-load-more-button {
+[load-more-failed] .i-amphtml-amp-list-load-more-icon {
   display: inline-block;
-  background-color: var(--dark-color);
-  box-shadow: 0px 0px 0px 1.5px var(--light-color);
-  color: var(--light-color);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0z' fill='none'%3E%3C/path%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z' fill='rgba(51,51,51,.75)'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.i-amphtml-amp-list-load-more-button {
+  border: none; margin: 0; padding: 0; /* poor man's reset */
+
+  display: inline-block;
+  background-color: rgba(51,51,51,.75);
+  box-shadow: 0px 0px 0px 1.5px rgba(255,255,255,.8);
+  color: rgba(255,255,255,.8);
   cursor: pointer;
   margin: 4px 0px;
   padding: 0px 32px;
@@ -68,12 +79,16 @@ amp-list[load-more] [load-more-end].amp-visible {
   border-radius: 24px;
 }
 
+.i-amphtml-amp-list-load-more-button:hover {
+  background-color: rgba(51,51,51,1);
+}
+
 .i-amphtml-amp-list-load-more-button.i-amphtml-amp-list-load-more-button-small {
   padding: 0px 16px;
   height: 32px;
   line-height: 32px;
 }
 
-.i-amphtml-amp-list-load-more-icon {
+.i-amphtml-amp-list-load-more-message {
 
 }

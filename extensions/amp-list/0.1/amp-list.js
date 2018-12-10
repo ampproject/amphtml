@@ -51,6 +51,7 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
+import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -202,14 +203,14 @@ export class AmpList extends AMP.BaseElement {
       this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
 
-      if(!this.loadMoreButton_) {
-        this.loadMoreButton_ = this.win.document.createElement('div');
-        this.loadMoreButton_.setAttributeNode(this.win.document.createAttribute('load-more-button'));
+      console.log(this.win.document);
 
-        let innerButton = this.win.document.createElement('div');
-        innerButton.classList.add('i-amphtml-amp-list-load-more-button');
-        innerButton.appendChild(this.win.document.createTextNode('See More'));
-        this.loadMoreButton_.appendChild(innerButton);
+      if(!this.loadMoreButton_) {
+        this.loadMoreButton_ = htmlFor(this.win.document)`
+          <div load-more-button>
+            <button class="i-amphtml-amp-list-load-more-button">See More</button>
+          </div>
+        `;
       }
     }
     return this.loadMoreButton_;
@@ -819,12 +820,11 @@ export class AmpList extends AMP.BaseElement {
           this.element, 'load-more-loading');
 
       if(!this.loadMoreLoadingElement_) {
-        this.loadMoreLoadingElement_ = this.win.document.createElement('div');
-        this.loadMoreLoadingElement_.setAttributeNode(this.win.document.createAttribute('load-more-loading'));
-
-        let spinnerWrapper = this.win.document.createElement('div');
-        spinnerWrapper.classList.add('i-amphtml-amp-list-load-more-spinner');
-        this.loadMoreLoadingElement_.appendChild(spinnerWrapper);
+        this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
+          <div load-more-loading>
+            <div class="i-amphtml-amp-list-load-more-spinner"></div>
+          </div>
+        `;
       }
     }
     return this.loadMoreLoadingElement_;
@@ -912,6 +912,21 @@ export class AmpList extends AMP.BaseElement {
     if (!this.loadMoreFailedElement_) {
       this.loadMoreFailedElement_ = childElementByAttr(
           this.element, 'load-more-failed');
+
+      if(!this.loadMoreFailedElement_) {
+
+        this.loadMoreFailedElement_ = htmlFor(this.win.document)`
+          <div load-more-failed>
+            <div class="i-amphtml-amp-list-load-more-message">
+              <div class="i-amphtml-amp-list-load-more-icon"></div>
+              Unable to Load More
+            </div>
+            <div class="amp-list-load-more-button amp-small">
+              Retry
+            </div>
+          </div>
+        `;
+      }
     }
     return this.loadMoreFailedElement_;
   }
