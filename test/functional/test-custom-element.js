@@ -1025,6 +1025,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
     });
 
+    // TODO(dvoytenko, 19750): flaky on Chrome 71
     it.skip('should apply sizes condition', () => {
       const element1 = new ElementClass();
       element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
