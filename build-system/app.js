@@ -1175,7 +1175,7 @@ const randInt = n => {
 };
 
 const squareImgUrl = width => {
-  return `http://picsum.photos/${width}?` + randInt(50);
+  return `http://picsum.photos/${width}?${randInt(50)}`;
 };
 
 const generateJson = numberOfItems => {
@@ -1238,10 +1238,6 @@ app.get('/infinite-scroll', function(req, res) {
       'loadMoreButtonText': 'test',
       'loadMoreEndText': 'end',
     };
-
-  if (pagesLeft < 3) {
-    res.status(500).json(results);
-  }
 
   if (latency) {
     setTimeout(() => res.json(results), latency);

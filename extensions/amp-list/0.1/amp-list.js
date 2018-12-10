@@ -383,9 +383,8 @@ export class AmpList extends AMP.BaseElement {
     return fetch.catch(error => {
       if (opt_append) {
         throw error;
-      } else {
-        this.showFallback_(error);
       }
+      this.showFallback_(error);
     });
   }
 
