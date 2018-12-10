@@ -239,7 +239,7 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    captureConsole: true,
+    captureConsole: false,
     verboseLogging: false,
   },
 
