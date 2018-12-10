@@ -35,12 +35,12 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
-    "@babel/core": "7.1.6",
+    "@babel/core": "7.2.0",
     "@babel/helper-plugin-test-runner": "7.1.0",
-    "@babel/plugin-proposal-class-properties": "7.1.0",
-    "@babel/plugin-transform-runtime": "7.1.0",
-    "@babel/preset-env": "7.1.6",
-    "@babel/runtime-corejs2": "7.1.5",
+    "@babel/plugin-proposal-class-properties": "7.2.1",
+    "@babel/plugin-transform-runtime": "7.2.0",
+    "@babel/preset-env": "7.2.0",
+    "@babel/runtime-corejs2": "7.2.0",
     "@octokit/rest": "15.18.0",
     "acorn-globals": "4.3.0",
     "ajv": "6.5.4",
