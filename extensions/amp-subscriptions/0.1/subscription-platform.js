@@ -40,11 +40,14 @@ export class SubscriptionPlatform {
    * Activates the subscription platform and hands over the control for
    * rendering.
    * @param {!./entitlement.Entitlement} unusedEntitlement
+   * @param {?./entitlement.Entitlement} unusedGrantEntitlement
    */
-  activate(unusedEntitlement) {}
+  activate(unusedEntitlement, unusedGrantEntitlement) {}
 
   /**
    * Reset the platform and renderer.
+   * This should clear dialogs and toasts originating
+   * from the platform.
    */
   reset() {}
 
