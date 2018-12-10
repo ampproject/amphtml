@@ -42,6 +42,17 @@ const preTestTasks = argv.nobuild ? [] : (
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 const batchSize = 4; // Number of Sauce Lab browsers
 
+const chromeBase = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
+
+const formattedFlagList = [];
+if (argv.chrome_flags) {
+  const flagList = argv.chrome_flags.split(',');
+  flagList.forEach(flag => {
+    formattedFlagList.push('--'.concat(flag));
+  });
+}
+
+
 let saucelabsBrowsers = [];
 /**
  * Read in and process the configuration settings for karma
@@ -64,17 +75,11 @@ function getConfig() {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
   }
   if (argv.chrome_flags) {
-    const flagList = argv.chrome_flags.split(',');
-    const formattedFlagList = [];
-    flagList.forEach(flag => {
-      formattedFlagList.push('--'.concat(flag));
-    });
     const config = Object.assign({}, karmaDefault, {
       browsers: ['Chrome_flags'],
       customLaunchers: {
-        /* eslint "google-camelcase/google-camelcase": 0*/
-        Chrome_flags: {
-          base: argv.chrome_canary ? 'ChromeCanary' : 'Chrome',
+        Chrome_flags: { /* eslint "google-camelcase/google-camelcase": 0*/
+          base: chromeBase,
           flags: formattedFlagList,
         },
       },
@@ -177,8 +182,6 @@ function printArgvMessages() {
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
     'chrome_canary': 'Running tests on Chrome Canary.',
-    'chrome_flags': 'Running tests on version of Chrome with the flags ' +
-      'passed in.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -200,6 +203,10 @@ function printArgvMessages() {
     'local-changes': 'Running unit tests directly affected by the files' +
         ' changed in the local branch.',
   };
+  if (argv.chrome_flags) {
+    log(green('Launching'), cyan(chromeBase), green('with flags'),
+        cyan(formattedFlagList));
+  }
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags.'));
@@ -732,7 +739,8 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
     'chrome_canary': 'Runs tests on Chrome Canary.',
-    'chrome_flags': 'Runs tests on version of Chrome with the flags passed in.',
+    'chrome_flags':
+      'Runs tests on version of specified Chrome with the flags passed in',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +
