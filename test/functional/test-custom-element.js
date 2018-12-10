@@ -1013,7 +1013,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
     });
 
 
-    it('should apply media condition', () => {
+    // TODO(alabiaga, 19752): flaky on Chrome 71
+    it.skip('should apply media condition', () => {
       const element1 = new ElementClass();
       element1.setAttribute('media', '(min-width: 1px)');
       element1.applySizesAndMediaQuery();
@@ -1025,7 +1026,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
     });
 
-    // TODO(dvoytenko, 19750): flaky on Chrome 71
+    // TODO(alabiaga, 19752): flaky on Chrome 71
     it.skip('should apply sizes condition', () => {
       const element1 = new ElementClass();
       element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
