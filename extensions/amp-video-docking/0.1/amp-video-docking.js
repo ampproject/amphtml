@@ -882,12 +882,10 @@ export class VideoDocking {
   dockInTwoSteps_(video, target) {
     // Do this in a two-step process due to a browser quirk in transferring
     // layers to GPU.
-    const step = 0.05;
-    this.dock_(video, target, step);
+    this.dock_(video, target, /* step */ 0.1);
 
     requestAnimationFrame(() => {
-      const step = 1;
-      this.dock_(video, target, step);
+      this.dock_(video, target, /* step */ 1);
     });
   }
 
@@ -898,8 +896,8 @@ export class VideoDocking {
    * @private
    */
   dock_(video, target, step) {
-    const {currentlyDocked_} = this;
-    if (currentlyDocked_ && currentlyDocked_.step >= step) {
+    const currentlyDocked = this.currentlyDocked_;
+    if (currentlyDocked && currentlyDocked.step >= step) {
       return;
     }
 
