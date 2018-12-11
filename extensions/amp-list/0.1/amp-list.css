@@ -22,15 +22,17 @@ amp-list[load-more] [load-more-end].amp-visible {
   width: 100%;
 }
 
-[load-more-button], [load-more-failed], [load-more-loading] {
-  text-align: center;
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
+amp-list[load-more] [load-more-button].i-amphtml-default-ui {
   height: 80px;
-
   padding: 12px 0px;
   box-sizing: border-box;
 }
 
-[load-more-button], [load-more-failed], [load-more-loading],
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
+amp-list[load-more] [load-more-button].i-amphtml-default-ui,
 .i-amphtml-amp-list-load-more-button {
   /* TODO: Standardize the system font string we use across the code base,
            possibly by factoring it out into its own class. */
@@ -40,9 +42,12 @@ amp-list[load-more] [load-more-end].amp-visible {
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: .1em;
+
+  color: rgb(51,51,51);
+  text-align: center;
 }
 
-[load-more-loading] .i-amphtml-amp-list-load-more-spinner {
+amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-amp-list-load-more-spinner {
   display: inline-block;
   width: 40px;
   height: 40px;
@@ -57,26 +62,24 @@ amp-list[load-more] [load-more-end].amp-visible {
   100% { transform: rotate(360deg); }
 }
 
-[load-more-failed] .i-amphtml-amp-list-load-more-icon {
-  display: inline-block;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0z' fill='none'%3E%3C/path%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z' fill='rgba(51,51,51,.75)'%3E%3C/path%3E%3C/svg%3E");
-}
-
 .i-amphtml-amp-list-load-more-button {
   border: none; margin: 0; padding: 0; /* poor man's reset */
 
   display: inline-block;
   background-color: rgba(51,51,51,.75);
-  box-shadow: 0px 0px 0px 1.5px rgba(255,255,255,.8);
-  color: rgba(255,255,255,.8);
-  cursor: pointer;
+  color: white;
   margin: 4px 0px;
   padding: 0px 32px;
   box-sizing: border-box;
 
   height: 48px;
-  line-height: 48px;
   border-radius: 24px;
+}
+
+.i-amphtml-amp-list-load-more-button,
+.i-amphtml-amp-list-load-more-button label,
+.i-amphtml-amp-list-load-more-icon {
+  cursor: pointer;
 }
 
 .i-amphtml-amp-list-load-more-button:hover {
@@ -84,11 +87,25 @@ amp-list[load-more] [load-more-end].amp-visible {
 }
 
 .i-amphtml-amp-list-load-more-button.i-amphtml-amp-list-load-more-button-small {
-  padding: 0px 16px;
+  margin: 0px;
+  padding: 4px 16px;
   height: 32px;
-  line-height: 32px;
 }
 
-.i-amphtml-amp-list-load-more-message {
+.i-amphtml-amp-list-load-more-button label {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 24px;
+}
 
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-amp-list-load-more-message {
+  line-height: 24px;
+}
+
+amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-amp-list-load-more-icon {
+  height: 24px;
+  width: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'/%3E%3C/svg%3E");
 }

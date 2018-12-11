@@ -207,8 +207,10 @@ export class AmpList extends AMP.BaseElement {
 
       if(!this.loadMoreButton_) {
         this.loadMoreButton_ = htmlFor(this.win.document)`
-          <div load-more-button>
-            <button class="i-amphtml-amp-list-load-more-button">See More</button>
+          <div load-more-button class="i-amphtml-default-ui">
+            <button class="i-amphtml-amp-list-load-more-button">
+              <label>See More</label>
+            </button>
           </div>
         `;
       }
@@ -392,8 +394,8 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
-      if (opt_append && this.loadMoreFailedElement_) {
-        this.setLoadMoreFailed_();
+      if (opt_append) {
+        throw error;
       } else {
         this.showFallback_(error);
       }
@@ -807,6 +809,8 @@ export class AmpList extends AMP.BaseElement {
             this.unlistenLoadMore_();
             this.unlistenLoadMore_ = null;
           }
+        }).catch(() => {
+          this.setLoadMoreFailed_();
         });
   }
 
@@ -821,7 +825,7 @@ export class AmpList extends AMP.BaseElement {
 
       if(!this.loadMoreLoadingElement_) {
         this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
-          <div load-more-loading>
+          <div load-more-loading class="i-amphtml-default-ui">
             <div class="i-amphtml-amp-list-load-more-spinner"></div>
           </div>
         `;
@@ -867,10 +871,10 @@ export class AmpList extends AMP.BaseElement {
   toggleLoadMoreLoading_(state) {
     this.mutateElement(() => {
       // If it's loading, then it's no longer failed or ended
-      if (this.loadMoreFailedElement_) {
+      if (this.loadMoreFailedElement_ && state) {
         this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
       }
-      if (this.loadMoreEndElement_) {
+      if (this.loadMoreEndElement_ && state) {
         this.loadMoreEndElement_.classList.toggle('amp-visible', false);
       }
       if (this.loadMoreLoadingElement_) {
@@ -898,9 +902,8 @@ export class AmpList extends AMP.BaseElement {
         this.unlistenLoadMore_ = listen(this.loadMoreFailedElement_, 'click',
             () => this.loadMoreCallback_());
       }
-      if (this.loadMoreButton_) {
-        this.loadMoreButton_.classList.toggle('amp-visible', false);
-      }
+      this.loadMoreButton_.classList.toggle('amp-visible', false);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', false);
     });
   }
 
@@ -916,14 +919,17 @@ export class AmpList extends AMP.BaseElement {
       if(!this.loadMoreFailedElement_) {
 
         this.loadMoreFailedElement_ = htmlFor(this.win.document)`
-          <div load-more-failed>
+          <div load-more-failed class="i-amphtml-default-ui">
             <div class="i-amphtml-amp-list-load-more-message">
-              <div class="i-amphtml-amp-list-load-more-icon"></div>
               Unable to Load More
             </div>
-            <div class="amp-list-load-more-button amp-small">
-              Retry
-            </div>
+            <button class=" i-amphtml-amp-list-load-more-button
+                            i-amphtml-amp-list-load-more-button-has-icon
+                            i-amphtml-amp-list-load-more-button-small"
+            >
+              <div class="i-amphtml-amp-list-load-more-icon"></div>
+              <label>Retry</label>
+            </button>
           </div>
         `;
       }
