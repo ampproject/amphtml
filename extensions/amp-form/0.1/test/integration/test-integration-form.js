@@ -135,7 +135,7 @@ describes.realWin('AmpForm Integration', {
           .skipFirefox().skipSafari().skipEdge();
 
   describeChrome.run('on=submit:form.submit', () => {
-    it('should be protected from recursive-submission', () => {
+    it.skip('should be protected from recursive-submission', () => {
       const form = getForm({
         id: 'sameform',
         actionXhr: baseUrl + '/form/post',
