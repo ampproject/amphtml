@@ -1487,7 +1487,7 @@ export class AmpStory extends AMP.BaseElement {
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
-             /* source */  null, /* caller */ null, /* event */ null,
+            /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
         this.openOpacityMask_();
       } else {
@@ -1495,7 +1495,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     } else if (this.sidebar_ && sidebarState) {
       actions.execute(this.sidebar_, 'open', /* args */ null,
-           /* source */  null, /* caller */ null, /* event */ null,
+          /* source */ null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
       this.openOpacityMask_();
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
@@ -1514,7 +1514,7 @@ export class AmpStory extends AMP.BaseElement {
           const actions = Services.actionServiceForDoc(this.element);
           if (this.sidebar_) {
             actions.execute(this.sidebar_, 'close', /* args */ null,
-                /* source */  null, /* caller */ null, /* event */ null,
+                /* source */ null, /* caller */ null, /* event */ null,
                 ActionTrust.HIGH);
             this.closeOpacityMask_()
           }
