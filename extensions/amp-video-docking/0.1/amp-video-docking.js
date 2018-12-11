@@ -252,6 +252,24 @@ const PLACEHOLDER_ICON_SMALL_WIDTH = 32;
 const PLACEHOLDER_ICON_SMALL_MARGIN = 20;
 
 
+/**
+ * @param {!Element} element
+ * @return {!../../../src/layout-rect.LayoutRectDef}
+ */
+function getIntersectionRect(element) {
+  return /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+    element.getIntersectionChangeEntry().intersectionRect);
+}
+
+
+/**
+ * @param {!../../../src/layout-rect.LayoutRectDef} rect
+ * @return {boolean}
+ */
+function isSizedLayoutRect({width, height}) {
+  return width > 0 && height > 0;
+}
+
 
 /**
  * Manages docking (a.k.a. minimize to corner) for videos that satisfy the
@@ -588,7 +606,7 @@ export class VideoDocking {
     }
     const relativeY = this.getSlotRelativeY_();
     const {element} = video;
-    const {top, bottom} = element.getIntersectionChangeEntry().intersectionRect;
+    const {top, bottom} = getIntersectionRect(element);
     const {top: slotTop, height: slotHeight} = this.getFixedSlotLayoutBox_();
     const slotBottom = this.viewport_.getSize().height - slotHeight - slotTop;
     if (relativeY == RelativeY.TOP) {
@@ -747,16 +765,23 @@ export class VideoDocking {
     if (this.slotHasDimensions_()) {
       return null;
     }
-    if (this.isCurrentlyDocked_(video)) {
+
+    if (this.isCurrentlyDocked_(video) &&
+        !isElement(this.currentlyDocked_.target)) {
       const {posY} = dev().assert(this.currentlyDocked_).target;
       return /** @type {!RelativeY} */ (dev().assertNumber(posY));
     }
+
     const {element} = video;
-    const {top} = element.getIntersectionChangeEntry().intersectionRect;
-    if (top <= this.getTopEdge_()) {
-      return RelativeY.TOP;
+    const intersectionRect = getIntersectionRect(element);
+
+    if (!isSizedLayoutRect(intersectionRect) ||
+        intersectionRect.top > this.getTopEdge_()) {
+      return null;
     }
-    return null;
+
+    dev().info(TAG, 'should dock at Y = TOP', {video, intersectionRect});
+    return RelativeY.TOP;
   }
 
   /**
@@ -948,8 +973,13 @@ export class VideoDocking {
       return element.getIntersectionChangeEntry().intersectionRatio;
     }
 
-    const {top, bottom, height} = element.getLayoutBox();
+    const layoutBox = element.getLayoutBox();
+    const {top, bottom, height} = layoutBox;
     const {top: slotTop, bottom: slotBottom} = this.getSlot_().getLayoutBox();
+
+    if (!isSizedLayoutRect(layoutBox)) {
+      return 0;
+    }
 
     if (this.getSlotRelativeY_() == RelativeY.TOP) {
       return (bottom - Math.max(top, slotTop)) / height;
