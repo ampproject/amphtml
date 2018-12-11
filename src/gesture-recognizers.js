@@ -376,12 +376,20 @@ class SwipeRecognizer extends GestureRecognizer {
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if ((!last && deltaTime > 4) || (last && deltaTime > 16)) {
-      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
+      const velocityX = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
           this.velocityX_);
-      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
+      const velocityY = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
           this.velocityY_);
-      this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
-      this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
+
+      // On iOS, the touchend will always have the same x/y position as the
+      // last touchmove, so we want to make sure we do not remove the velocity.
+      // The touchend event with zero velocity can occur within a couple of
+      // frames of the last touchmove.
+      if (!last || deltaTime > 32 || velocityX != 0 || velocityY != 0) {
+        this.velocityX_ = Math.abs(velocityX) > 1e-4 ? velocityX : 0;
+        this.velocityY_ = Math.abs(velocityY) > 1e-4 ? velocityY : 0;
+      }
+
       this.prevX_ = this.lastX_;
       this.prevY_ = this.lastY_;
       this.prevTime_ = this.lastTime_;
@@ -391,14 +399,14 @@ class SwipeRecognizer extends GestureRecognizer {
       first,
       last,
       time: this.lastTime_,
-      deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
-      deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
+      deltaX: this.lastX_ - this.startX_,
+      deltaY: this.lastY_ - this.startY_,
       startX: this.startX_,
       startY: this.startY_,
       lastX: this.lastX_,
       lastY: this.lastY_,
-      velocityX: this.horiz_ ? this.velocityX_ : 0,
-      velocityY: this.vert_ ? this.velocityY_ : 0,
+      velocityX: this.velocityX_,
+      velocityY: this.velocityY_,
     }, event);
   }
 

@@ -28,9 +28,9 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
+import {closestBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
-import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -141,6 +141,12 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    if (closestBySelector(this.element, '[amp-scale-animation]')) {
+      return;
+    }
+
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
     }
@@ -186,9 +192,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      if (!this.gestures_) {
-        this.setupGestures_();
-      }
+      this.resetImageDimensions_();
+      this.setupGestures_();
     });
   }
 
@@ -398,6 +403,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
+    if (this.gestures_) {
+      return;
+    }
+
     // TODO (#12881): this and the subsequent use of event.preventDefault
     // is a temporary solution to #12362. We should revisit this problem after
     // resolving #12881 or change the use of window.event to the specific event
