@@ -1408,13 +1408,19 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error executing onCreativeRender', err);
       })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      // There's no need to wait for all resources to load.
-      // StartRender is enough
-      friendlyIframeEmbed.whenIniLoaded().then(() => {
+      const iniLoadPromise = friendlyIframeEmbed.whenIniLoaded().then(() => {
         checkStillCurrent();
-        // Capture ini-load ping.
         this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
       });
+      const isIniLoadFixExpr = !!frameDoc.querySelector(
+          'meta[name="amp-experiments-opt-in"][content*="fie_ini_load_fix"]');
+      if (!isIniLoadFixExpr) {
+        return iniLoadPromise;
+      }
+
+      // There's no need to wait for all resources to load.
+      // StartRender is enough
+      return;
     });
   }
 

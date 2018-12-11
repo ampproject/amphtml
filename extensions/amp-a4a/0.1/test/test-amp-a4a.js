@@ -422,6 +422,7 @@ describe('amp-a4a', () => {
       });
     });
 
+    // TODO: Remove after launch fie_ini_load_fix to 100%
     it('for A4A FIE should wait for initial layout', () => {
       let iniLoadResolver;
       const iniLoadPromise = new Promise(resolve => {
@@ -445,6 +446,25 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
         expect(whenIniLoadedStub).to.be.calledOnce;
         expect(lifecycleEventStub).to.be.calledWith('friendlyIframeIniLoad');
+      });
+    });
+
+    it('for A4A layout should resolve once FIE is created', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+
+      // Never resolve
+      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded').callsFake(
+          () => {return new Promise(() => {});});
+      let creativeString = buildCreativeString();
+      // TODO: Remove after launch fie_ini_load_fix to 100%
+      creativeString = creativeString.replace('<body>',
+          '<body>' +
+          '<meta name="amp-experiments-opt-in" content="fie_ini_load_fix">');
+      const metaData = a4a.getAmpAdMetadata(creativeString);
+      return a4a.renderAmpCreative_(metaData).then(() => {
+        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
       });
     });
 
