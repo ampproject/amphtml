@@ -176,7 +176,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     };
   });
 
-  class Attributes {
+  class FakeAttributes {
     constructor() {
       const attrs = [];
       attrs.setNamedItem = function({name, value}) {
@@ -186,19 +186,19 @@ describes.sandboxed('FixedLayer', {}, () => {
             return;
           }
         }
-        this.push(new Attr(name, value));
+        this.push(new FakeAttr(name, value));
       };
       return attrs;
     }
   }
-  class Attr {
+  class FakeAttr {
     constructor(name, value) {
       this.name = name;
       this.value = value;
     }
 
     cloneNode() {
-      return new Attr(this.name, this.value);
+      return new FakeAttr(this.name, this.value);
     }
   }
   function createElement(id) {
@@ -330,7 +330,7 @@ describes.sandboxed('FixedLayer', {}, () => {
             return;
           }
         }
-        this.attributes.push(new Attr(name, value));
+        this.attributes.push(new FakeAttr(name, value));
       },
       removeAttribute(name) {
         for (let i = 0; i < this.attributes.length; i++) {
@@ -340,7 +340,7 @@ describes.sandboxed('FixedLayer', {}, () => {
           }
         }
       },
-      attributes: new Attributes(),
+      attributes: new FakeAttributes(),
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
