@@ -1446,15 +1446,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
  * @return {!Promise<undefined>}
  */
 export function installLightboxGallery(ampdoc) {
-  return ampdoc.whenBodyAvailable().then(body => {
-    const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
-    if (!existingGallery) {
-      const gallery = ampdoc.win.document.createElement(TAG);
-      gallery.setAttribute('layout', 'nodisplay');
-      gallery.setAttribute('id', DEFAULT_GALLERY_ID);
-      body.appendChild(gallery);
-    }
-  });
+  // Make sure to wait for the ampdoc to finish loading, see:
+  // https://github.com/ampproject/amphtml/issues/19728#issuecomment-446033966
+  return ampdoc.whenReady()
+      .then(() => ampdoc.getBody())
+      .then(body => {
+        const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
+        if (!existingGallery) {
+          const gallery = ampdoc.win.document.createElement(TAG);
+          gallery.setAttribute('layout', 'nodisplay');
+          gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+          body.appendChild(gallery);
+        }
+      });
 }
 
 /**
