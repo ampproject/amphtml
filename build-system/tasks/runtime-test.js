@@ -40,7 +40,8 @@ const {green, yellow, cyan, red} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
-const batchSize = 4; // Number of Sauce Lab browsers
+// TODO(amp-infra): Increase batch size once tests are stable again.
+const batchSize = 1; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
@@ -77,10 +78,12 @@ function getConfig() {
       [
         'SL_Chrome',
         'SL_Firefox',
-        'SL_Safari_11',
+        // TODO(amp-infra): Restore this once tests are stable again.
+        // 'SL_Safari_11',
         'SL_Edge_17',
-        'SL_Chrome_Dev',
-        'SL_Firefox_Dev',
+        // TODO(amp-infra): Restore these two once tests are stable again.
+        // 'SL_Chrome_Dev',
+        // 'SL_Firefox_Dev',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
