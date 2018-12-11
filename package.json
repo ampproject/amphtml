@@ -110,6 +110,7 @@
     "gulp-watch": "5.0.1",
     "gulp-webserver": "0.9.1",
     "gzip-size": "5.0.0",
+    "html-minifier": "3.5.21",
     "is-running": "2.1.0",
     "jest": "23.6.0",
     "jest-dot-reporter": "1.0.7",
