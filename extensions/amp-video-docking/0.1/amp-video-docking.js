@@ -188,10 +188,8 @@ function mapStep(step, min, max) {
 function complainAboutPortrait(element) {
   // Constant named `TAG` per lint rules.
   const TAG = element.tagName.toUpperCase();
-  const attr = VideoAttributes.DOCK;
   user().error(TAG,
-      'Minimize-to-corner (`%s`) does not support portrait video. %s',
-      attr,
+      'Minimize-to-corner (`dock`) does not support portrait video.',
       element);
 }
 
@@ -454,9 +452,7 @@ export class VideoDocking {
   /** @param {!../../../src/video-interface.VideoOrBaseElementDef} video */
   register(video) {
     user().assert(isExperimentOn(this.ampdoc_.win, 'video-dock'),
-        '`video-dock` experiment must be on to use `dock` on `amp-video`: ' +
-        '%s',
-        urls.cdn + '/experiments.html');
+        '`video-dock` experiment must be on to use `dock`.');
 
     this.install_();
 
