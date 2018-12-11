@@ -79,6 +79,12 @@ function patchWebAnimations() {
   // See https://github.com/ampproject/amphtml/issues/18612 and
   // https://github.com/web-animations/web-animations-js/issues/46
   file = file.replace(/b.true=a/g, 'b?b.true=a:true');
+
+  // Fix web-animations-js code that attempts to write a read-only property.
+  // See https://github.com/ampproject/amphtml/issues/19783 and
+  // https://github.com/web-animations/web-animations-js/issues/160
+  file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
+
   // Wrap the contents inside the install function.
   file = 'export function installWebAnimations(window) {\n' +
       'var document = window.document;\n' +
