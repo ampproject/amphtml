@@ -17,13 +17,13 @@
 @import './amp-story-desktop-user-overridable.css';
 
 
-amp-story[standalone][desktop] {
+amp-story[standalone].i-amphtml-story-desktop-panels {
  max-width: none!important;
  max-height: none!important;
  width: 100vw!important;
 }
 
-[desktop] .i-amphtml-story-logo {
+.i-amphtml-story-desktop-panels .i-amphtml-story-logo {
  display: block!important;
 }
 
@@ -88,7 +88,7 @@ amp-story[standalone][desktop] {
  * Page positions and animations.
  */
 
-[desktop] amp-story-page.i-amphtml-element {
+.i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
   /* Pages are stacked to the right side of the screen and then animated in. */
   transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
   opacity: 0.05 !important;
@@ -96,58 +96,58 @@ amp-story[standalone][desktop] {
   border-radius: 16px !important;
 }
 
-[dir=rtl] [desktop] amp-story-page.i-amphtml-element {
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
   transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-visited] {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-visited] {
   transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
 }
 
-[dir=rtl] [desktop] amp-story-page[i-amphtml-visited] {
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-visited] {
   transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="-2"],
-[desktop] amp-story-page[i-amphtml-desktop-position="-1"],
-[desktop] amp-story-page[i-amphtml-desktop-position="1"],
-[desktop] amp-story-page[i-amphtml-desktop-position="2"] {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"],
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"] {
   transition: opacity 350ms ease-out, transform 350ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="0"] {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"] {
   transition: opacity 350ms cubic-bezier(0.0, 0.0, 0.2, 1), transform 350ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="-2"],
-[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="2"] {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"],
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"] {
   transform: scale(0.9) translateX(calc(-250% - 128px)) translateY(0%) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="-1"],
-[desktop] .prev-container > .i-amphtml-story-page-sentinel,
-[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="1"],
-[dir=rtl] [desktop] .next-container > .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
+.i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel,
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
+[dir=rtl] .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel {
   transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
 
-[desktop] amp-story-page[active],
-[dir=rtl] [desktop] amp-story-page[active],
-[desktop] amp-story-page[i-amphtml-desktop-position="0"],
-[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="0"] {
+.i-amphtml-story-desktop-panels amp-story-page[active],
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active],
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"],
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
   opacity: 1 !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="1"],
-[desktop] .next-container > .i-amphtml-story-page-sentinel,
-[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="-1"],
-[dir=rtl] [desktop] .prev-container > .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
+.i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel,
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
+[dir=rtl] .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel {
   transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="2"],
-[dir=rtl] [desktop] amp-story-page[i-amphtml-desktop-position="-2"] {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"] {
   transform: scale(0.9) translate(calc(150% + 128px), 0%) !important;
 }
 
@@ -163,7 +163,7 @@ amp-story[standalone][desktop] {
  * If the next page is protected behind a paywall, blur its content and display
  * a lock icon on top of it.
  */
-[desktop] amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide]::before {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide]::before {
   content: '' !important;
   position: absolute !important;
   top: 50% !important;
@@ -175,12 +175,12 @@ amp-story[standalone][desktop] {
   z-index: 4 !important; /** Above amp-story-cta-layer and amp-story-grid-layer. */
 }
 
-[desktop] amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide] > * {
+.i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"][amp-access-hide] > * {
   filter: blur(8px) !important;
 }
 
-[desktop] > amp-story-page,
-[desktop] .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels > amp-story-page,
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;
@@ -190,6 +190,6 @@ amp-story[standalone][desktop] {
   min-height: 533px !important;
 }
 
-[desktop] > amp-story-page {
+.i-amphtml-story-desktop-panels > amp-story-page {
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }

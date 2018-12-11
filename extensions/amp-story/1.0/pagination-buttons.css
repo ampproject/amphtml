@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-[desktop-fullbleed] .i-amphtml-story-button-container,
-[desktop] .i-amphtml-story-button-container {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container,
+.i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
   position: absolute !important;
   top: 0 !important;
   bottom: 0 !important;
@@ -26,7 +26,7 @@
   display: block !important;
 }
 
-[desktop] .i-amphtml-story-button-container::before {
+.i-amphtml-story-desktop-panels .i-amphtml-story-button-container::before {
   content: '';
   position: absolute !important;
   top: 0 !important;
@@ -35,15 +35,15 @@
   width: calc(50vw - 23vh - 32px) !important;
 }
 
-[desktop] .i-amphtml-story-button-container.next-container::before,
-[dir=rtl] [desktop] .i-amphtml-story-button-container.prev-container::before {
+.i-amphtml-story-desktop-panels .i-amphtml-story-button-container.next-container::before,
+[dir=rtl] .i-amphtml-story-desktop-panels .i-amphtml-story-button-container.prev-container::before {
   right: 0 !important;
   left: auto !important;
   background: linear-gradient(to right, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
 }
 
-[desktop] .i-amphtml-story-button-container.prev-container::before,
-[dir=rtl] [desktop] .i-amphtml-story-button-container.next-container::before {
+.i-amphtml-story-desktop-panels .i-amphtml-story-button-container.prev-container::before,
+[dir=rtl] .i-amphtml-story-desktop-panels .i-amphtml-story-button-container.next-container::before {
   left: 0 !important;
   right: auto !important;
   background: linear-gradient(to right, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
@@ -77,7 +77,7 @@
   cursor: pointer;
 }
 
-[desktop-fullbleed] .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-page-sentinel {
   display: none !important;
 }
 
@@ -104,7 +104,7 @@
   outline: none!important;
 }
 
-[desktop-fullbleed] .i-amphtml-story-button-move {
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
   opacity: 0.8 !important;
 }
 
@@ -156,16 +156,16 @@
 }
 
 /* On forward (next) button mouseover */
-[desktop].i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
+.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
     .i-amphtml-story-button-move {
   transform: translateX(8px)!important;
   opacity: 1!important;
 }
 
 /* On back button mouseover */
-[desktop].i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
+.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
     .i-amphtml-story-button-move,
-[desktop].i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
+.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
     .i-amphtml-story-button-move {
   transform: translateX(-8px)!important;
   opacity: 1!important;
