@@ -202,6 +202,7 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
 
+    // TODO(#19768): Avoid passing a private function here.
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
@@ -690,12 +691,11 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.paginationButtons_ = PaginationButtons.create(this.win);
+    // TODO(#19768): Avoid passing a private function here.
+    this.paginationButtons_ =
+        PaginationButtons.create(this.win, () => this.hasBookend_());
 
     this.paginationButtons_.attach(this.element);
-
-    this.navigationState_.observe(e =>
-      this.paginationButtons_.onNavigationStateChange(e));
   }
 
   /** @visibleForTesting */
