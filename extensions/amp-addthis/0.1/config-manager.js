@@ -115,7 +115,7 @@ export class ConfigManager {
    * @param {string} [input.pubId]
    * @param {!Object} [input.shareConfig]
    * @param {!Object} [input.atConfig]
-   * @param {!Object} [input.productCode]
+   * @param {string} [input.productCode]
    * @private
    */
   sendConfiguration_({
@@ -150,7 +150,7 @@ export class ConfigManager {
       const mode = getMode({pubId, widgetId, productCode});
       switch (mode) {
         case 1:
-          console.log(1);
+          // "regular old" amp-addthis mode
           if (widgetId && dashboardConfig &&
           dashboardConfig.widgets &&
           dashboardConfig.widgets[widgetId]) {
@@ -158,17 +158,15 @@ export class ConfigManager {
           }
           break;
         case 2:
-          console.log(2);
+          // "wp addthis mode"
           if (productCode) {
             this.activeToolsMonitor_.recordProductCode(productCode);
           }
           break;
         case 3:
-          console.log(3);
-          // wp anonymous mode goes here
+          // "wp anonymous mode" COMING SOON!
           return;
         default:
-          console.log(-1);
           return;
           // invalid tool configuration
       }
