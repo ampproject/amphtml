@@ -1515,7 +1515,7 @@ export class AmpStory extends AMP.BaseElement {
             actions.execute(this.sidebar_, 'close', /* args */ null,
                 /* source */ null, /* caller */ null, /* event */ null,
                 ActionTrust.HIGH);
-            this.closeOpacityMask_()
+            this.closeOpacityMask_();
           }
         });
         this.maskElement_ = maskEl;
@@ -1533,8 +1533,8 @@ export class AmpStory extends AMP.BaseElement {
   closeOpacityMask_() {
     if (this.maskElement_) {
       this.mutateElement(() => {
-       this.maskElement_.classList.remove(OPACITY_MASK_CLASS_NAME);
-       this.maskElement_.classList.add(OPACITY_MASK_HIDDEN_CLASS_NAME);
+        this.maskElement_.classList.remove(OPACITY_MASK_CLASS_NAME);
+        this.maskElement_.classList.add(OPACITY_MASK_HIDDEN_CLASS_NAME);
       });
     }
   }
