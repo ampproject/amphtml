@@ -30,13 +30,12 @@ amp-list[load-more] [load-more-button].i-amphtml-default-ui {
   box-sizing: border-box;
 }
 
+/* TODO: Standardize the system font string we use across the code base,
+         possibly by factoring it out into its own class. */
 amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
 amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
 amp-list[load-more] [load-more-button].i-amphtml-default-ui,
 .i-amphtml-amp-list-load-more-button {
-  /* TODO: Standardize the system font string we use across the code base,
-           possibly by factoring it out into its own class. */
-
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-weight: bold;
   font-size: 14px;

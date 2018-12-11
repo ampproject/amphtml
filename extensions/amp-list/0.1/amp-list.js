@@ -40,6 +40,7 @@ import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
+import {htmlFor} from '../../../src/static-template';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
@@ -51,7 +52,6 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -198,14 +198,14 @@ export class AmpList extends AMP.BaseElement {
    * @private
    * @return {?Element}
    */
- getloadMoreButton_() {
+  getloadMoreButton_() {
     if (!this.loadMoreButton_) {
       this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
 
       console.log(this.win.document);
 
-      if(!this.loadMoreButton_) {
+      if (!this.loadMoreButton_) {
         this.loadMoreButton_ = htmlFor(this.win.document)`
           <div load-more-button class="i-amphtml-default-ui">
             <button class="i-amphtml-amp-list-load-more-button">
@@ -823,7 +823,7 @@ export class AmpList extends AMP.BaseElement {
       this.loadMoreLoadingElement_ = childElementByAttr(
           this.element, 'load-more-loading');
 
-      if(!this.loadMoreLoadingElement_) {
+      if (!this.loadMoreLoadingElement_) {
         this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
           <div load-more-loading class="i-amphtml-default-ui">
             <div class="i-amphtml-amp-list-load-more-spinner"></div>
@@ -916,7 +916,7 @@ export class AmpList extends AMP.BaseElement {
       this.loadMoreFailedElement_ = childElementByAttr(
           this.element, 'load-more-failed');
 
-      if(!this.loadMoreFailedElement_) {
+      if (!this.loadMoreFailedElement_) {
 
         this.loadMoreFailedElement_ = htmlFor(this.win.document)`
           <div load-more-failed class="i-amphtml-default-ui">
