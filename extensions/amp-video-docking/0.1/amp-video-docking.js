@@ -366,15 +366,15 @@ export class VideoDocking {
     const ampdoc = this.ampdoc_;
 
     const dockableSelector =
-      `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
+        `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
 
     const dockableElements =
-      ampdoc.getRootNode().querySelectorAll(dockableSelector);
+        ampdoc.getRootNode().querySelectorAll(dockableSelector);
 
     for (let i = 0; i < dockableElements.length; i++) {
       const element = dockableElements[i];
       if (element.signals &&
-        element.signals().get(VideoEvents.REGISTERED)) {
+          element.signals().get(VideoEvents.REGISTERED)) {
         this.registerElement(element);
       }
     }
