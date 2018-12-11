@@ -183,7 +183,7 @@ describes.realWin('amp-story', {
   it('should not prerender/load the share menu on desktop', () => {
     createPages(story.element, 2);
 
-    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
@@ -385,7 +385,7 @@ describes.realWin('amp-story', {
 
   it('should detect fullbleed desktop mode', () => {
     createPages(story.element, 4, ['cover', '1', '2', '3']);
-    story.element.setAttribute('desktop-mode', 'fullbleed');
+    story.element.setAttribute('supported-orientations', 'portrait, laNdsCApe');
 
     // Don't do this at home. :(
     story.desktopMedia_ = {matches: true};
@@ -719,7 +719,7 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
       return story.layoutCallback()
           .then(() => {
@@ -736,7 +736,7 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
       return story.layoutCallback()
           .then(() => story.switchTo_('2'))
