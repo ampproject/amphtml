@@ -341,6 +341,11 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.placeholder_ = this.getPlaceholder();
+    this.isClickToPlay_ = !!this.placeholder_;
+
+    this.isResizable_ = this.element.hasAttribute('resizable');
+
     user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
 
