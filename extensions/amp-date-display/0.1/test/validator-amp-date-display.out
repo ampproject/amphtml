@@ -1,6 +1,6 @@
 FAIL
 |  <!--
-|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ FAIL
 |    <!-- invalid, no date provided -->
 |    <amp-date-display layout="fixed" width="360" height="20">
 >>   ^~~~~~~~~
-amp-date-display/0.1/test/validator-amp-date-display.html:98:2 The tag 'amp-date-display' is missing a mandatory attribute - pick one of ['datetime', 'timestamp-seconds', 'timestamp-ms']. (see https://www.ampproject.org/docs/reference/components/amp-date-display) [AMP_TAG_PROBLEM]
+amp-date-display/0.1/test/validator-amp-date-display.html:98:2 The tag 'amp-date-display' is missing a mandatory attribute - pick one of ['datetime', 'timestamp-ms', 'timestamp-seconds']. (see https://www.ampproject.org/docs/reference/components/amp-date-display) [AMP_TAG_PROBLEM]
 |      <template type="amp-mustache">{{iso}}</template>
 |    </amp-date-display>
 |
