@@ -178,7 +178,6 @@ const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
  */
 const OPACITY_MASK_HIDDEN_CLASS_NAME = 'i-amphtml-story-opacity-mask-hidden';
 
-
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
