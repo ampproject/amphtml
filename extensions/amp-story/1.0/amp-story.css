@@ -176,20 +176,29 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-sidebar {
+amp-story amp-sidebar[side][open] {
   background-color: #ffffff !important;
   max-width: 280px !important;
+  min-width: 280px !important;
+  width: 280px !important;
   transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  display: block !important;
 }
 
-amp-sidebar[hidden] {
+amp-story amp-sidebar[side=right] {
+  max-width: 280px !important;
+  min-width: 280px !important;
+  width: 280px !important;
   transform: translate3d(100%, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  display: block !important;
 }
 
-[desktop] amp-sidebar {
+[desktop] amp-sidebar[side][open],
+[desktop] amp-sidebar[side=right] {
   max-width: 320px !important;
-  }
+}
 
 .i-amphtml-story-fallback amp-story-page {
   display: none !important;
@@ -243,6 +252,16 @@ amp-story-page[distance="2"] {
   }
 }
 
+@keyframes i-amphtml-bookend-overlay-opacity-hidden {
+  0% {
+    opacity: 0.55;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 .i-amphtml-story-opacity-mask {
   position: absolute !important;
   top: 0 !important;
@@ -253,12 +272,19 @@ amp-story-page[distance="2"] {
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
-  z-index: 2 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  z-index: 100001 !important;
+  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) forwards !important;
 }
-.i-amphtml-story-opacity-mask[hidden] {
-  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) backwards !important;
+
+.i-amphtml-story-opacity-mask-hidden {
+  background-color: #000 !important;
+  opacity: 0 !important;
+  background-image: none !important;
+  pointer-events: none !important;
+  z-index: 100001 !important;
+  animation: i-amphtml-bookend-overlay-opacity-hidden 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
 }
+
 .i-amphtml-sidebar-mask {
   display: none !important;
 }

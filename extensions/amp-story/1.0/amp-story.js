@@ -164,7 +164,20 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-const OPACITY_MASK_CLASS_NAME = '.i-amphtml-story-opacity-mask-hidden';
+/**
+ * CSS class for the opacity layer that separates the amp-sidebar and the rest
+ * of the story when the amp-sidebar is entering the screen.
+ * @const {string}
+ */
+const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
+
+/**
+ * CSS class for the opacity layer that separates the amp-sidebar and the rest
+ * of the story when the amp-sidebar is leaving the screen
+ * @const {string}
+ */
+const OPACITY_MASK_HIDDEN_CLASS_NAME = 'i-amphtml-story-opacity-mask-hidden';
+
 
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
@@ -1474,17 +1487,17 @@ export class AmpStory extends AMP.BaseElement {
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
-            /* source */ null, /* caller */ null, /* event */ null,
+             /* source */  null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
         this.openOpacityMask_();
       } else {
-        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
       actions.execute(this.sidebar_, 'open', /* args */ null,
-          /* source */ null, /* caller */ null, /* event */ null,
+           /* source */  null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
+      this.openOpacityMask_();
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
     }
   }
@@ -1496,19 +1509,22 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       if (!this.maskElement_) {
         const maskEl = this.win.document.createElement('div');
-        maskEl.classList.add('i-amphtml-story-opacity-mask');
+        maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
         maskEl.addEventListener('click', () => {
           const actions = Services.actionServiceForDoc(this.element);
           if (this.sidebar_) {
             actions.execute(this.sidebar_, 'close', /* args */ null,
-                /* source */ null, /* caller */ null, /* event */ null,
+                /* source */  null, /* caller */ null, /* event */ null,
                 ActionTrust.HIGH);
+            this.closeOpacityMask_()
           }
         });
-        this.element.appendChild(maskEl);
         this.maskElement_ = maskEl;
+      } else {
+        this.maskElement_.classList.remove(OPACITY_MASK_HIDDEN_CLASS_NAME);
+        this.maskElement_.classList.add(OPACITY_MASK_CLASS_NAME);
       }
-      toggle(this.maskElement_, /* display */true);
+      this.element.appendChild(this.maskElement_);
     });
   }
 
@@ -1518,8 +1534,8 @@ export class AmpStory extends AMP.BaseElement {
   closeOpacityMask_() {
     if (this.maskElement_) {
       this.mutateElement(() => {
-        //this.maskElement_.classList.toggle(OPACITY_MASK_CLASS_NAME, true);
-        toggle(this.maskElement_, /* display */false);
+       this.maskElement_.classList.remove(OPACITY_MASK_CLASS_NAME);
+       this.maskElement_.classList.add(OPACITY_MASK_HIDDEN_CLASS_NAME);
       });
     }
   }
