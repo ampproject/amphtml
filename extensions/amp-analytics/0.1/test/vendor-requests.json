@@ -335,6 +335,10 @@
     "pageview": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!pageViewName",
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
   },
+  "retargetly": {
+    "host": "https://api.retargetly.com",
+    "page": "https://api.retargetly.com/api?id=!accountId&src=!sourceId&url=_source_url_&n=_title_&ref=_document_referrer_&ua=_user_agent_&random=_random_&bl=_browser_language_&source=amp"
+  },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",
     "base": "?writeKey=!writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
