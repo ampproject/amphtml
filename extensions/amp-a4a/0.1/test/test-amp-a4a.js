@@ -454,8 +454,8 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
 
       // Never resolve
-      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded').callsFake(
-          () => {return new Promise(() => {});});
+      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype,'whenIniLoaded')
+          .callsFake(() => {return new Promise(() => {});});
       let creativeString = buildCreativeString();
       // TODO: Remove after launch fie_ini_load_fix to 100%
       creativeString = creativeString.replace('<body>',
@@ -526,8 +526,8 @@ describe('amp-a4a', () => {
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.buildCallback();
       a4a.onLayoutMeasure();
-      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded').callsFake(
-          () => Promise.resolve());
+      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .callsFake(() => Promise.resolve());
       return a4a.layoutCallback().then(() => {
         verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
