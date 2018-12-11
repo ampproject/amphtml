@@ -184,6 +184,7 @@ describes.repeated('', {
       let event;
 
       beforeEach(() => {
+
         getSsrAmpFormPromise = getAmpForm(getForm()).then(ampForm => {
           const form = ampForm.form_;
           form.id = 'registration';
@@ -225,12 +226,10 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
-        const setupInput = sandbox.spy(xhrUtils, 'setupInput');
-        const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
-        const fromStructuredCloneable =
-            sandbox.spy(xhrUtils, 'fromStructuredCloneable');
-        const verifyAmpCORSHeaders =
-          sandbox.spy(xhrUtils, 'verifyAmpCORSHeaders');
+        sandbox.spy(xhrUtils, 'setupInput');
+        sandbox.spy(xhrUtils, 'setupAMPCors');
+        sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+        sandbox.stub(xhrUtils, 'verifyAmpCORSHeaders');
 
         return getSsrAmpFormPromise.then(ampForm => {
           const form = ampForm.form_;
@@ -251,20 +250,24 @@ describes.repeated('', {
 
           form.xhrAction_ = 'https://www.xhr-action.org';
 
-          sandbox.stub(form.viewer_, 'sendMessageAwaitResponse')
+          sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
                     data: '<div>much success</div>',
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';
-          sandbox.stub(form.ssrTemplateHelper_.templates_, 'findTemplate')
+          sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
               .returns(template);
+
           const fetchAndRenderTemplate = sandbox.stub(
               ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
-          sandbox.stub(form.templates_, 'findAndRenderTemplate')
-              .onFirstCall().returns(Promise.resolve(renderedTemplate))
-              .onSecondCall().returns(Promise.resolve(template));
+          fetchAndRenderTemplate
+              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
+              .onSecondCall().returns(Promise.resolve({html: template}));
+
+          sandbox.stub(
+              ampForm.ssrTemplateHelper_, 'verifySsrResponse');
 
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
@@ -273,12 +276,7 @@ describes.repeated('', {
                     .to.have.been.called;
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
                     .to.have.been.calledWith(
-                        form, sinon.match.func, sinon.match.func);
-                sinon.assert.callOrder(
-                    setupInput,
-                    setupAMPCors,
-                    fromStructuredCloneable,
-                    verifyAmpCORSHeaders);
+                        form, sinon.match.object, sinon.match.object);
                 return handleSubmitEventPromise;
               });
         });
@@ -1874,44 +1872,48 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'https://google.com/';
 
-          return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-            expect(navigateTo).to.not.be.called;
-            return ampForm.xhrSubmitPromiseForTesting().then(() => {
-              expect(navigateTo).to.be.calledOnce;
-              const {args} = navigateTo.firstCall;
-              expect(args[1]).to.equal('https://google.com/');
-              expect(args[2]).to.equal('AMP-Redirect-To');
-            });
+          const submitActionPromise =
+            ampForm.handleSubmitAction_(/* invocation */ {});
+          expect(navigateTo).to.not.be.called;
+
+          return submitActionPromise.then(() => {
+            expect(navigateTo).to.be.calledOnce;
+            const {args} = navigateTo.firstCall;
+            expect(args[1]).to.equal('https://google.com/');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
 
         it('should fail to redirect to non-secure urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
-          return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-            // Make it a sync error for testing convenience
-            sandbox.stub(user(), 'assert').throws();
 
-            return ampForm.xhrSubmitPromiseForTesting().then(() => {
-              assert.fail('Submit should have failed.');
-            }, () => {
-              expect(navigateTo).to.not.be.called;
-            });
+          const submitActionPromise =
+            ampForm.handleSubmitAction_(/* invocation */ {});
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
+
+          return submitActionPromise.then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
+            expect(navigateTo).to.not.be.called;
           });
         });
 
         it('should fail to redirect to non-absolute urls', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = '/hello';
-          return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-            // Make it a sync error for testing convenience
-            sandbox.stub(user(), 'assert').throws();
 
-            return ampForm.xhrSubmitPromiseForTesting().then(() => {
-              assert.fail('Submit should have failed.');
-            }, () => {
-              expect(navigateTo).to.not.be.called;
-            });
+
+          const submitActionPromise =
+            ampForm.handleSubmitAction_(/* invocation */ {});
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
+
+          return submitActionPromise.then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1920,15 +1922,15 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchResolvePromise);
           redirectToValue = 'http://google.com/';
 
-          return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-            // Make it a sync error for testing convenience
-            sandbox.stub(user(), 'assert').throws();
+          const submitActionPromise =
+            ampForm.handleSubmitAction_(/* invocation */ {});
+          // Make it a sync error for testing convenience
+          sandbox.stub(user(), 'assert').throws();
 
-            return ampForm.xhrSubmitPromiseForTesting().then(() => {
-              assert.fail('Submit should have failed.');
-            }, () => {
-              expect(navigateTo).to.not.be.called;
-            });
+          return submitActionPromise.then(() => {
+            assert.fail('Submit should have failed.');
+          }, () => {
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1936,18 +1938,20 @@ describes.repeated('', {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
           const logSpy = sandbox.stub(user(), 'error');
-          return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-            expect(navigateTo).to.not.be.called;
-            return ampForm.xhrSubmitPromiseForTesting().then(() => {
-              expect(logSpy).to.be.calledOnce;
-              const error = logSpy.getCall(0).args[1];
-              expect(error).to.match(/Form submission failed/);
 
-              expect(navigateTo).to.be.calledOnce;
-              const {args} = navigateTo.firstCall;
-              expect(args[1]).to.equal('https://example2.com/hello');
-              expect(args[2]).to.equal('AMP-Redirect-To');
-            });
+          const submitActionPromise =
+            ampForm.handleSubmitAction_(/* invocation */ {});
+          expect(navigateTo).to.not.be.called;
+
+          return submitActionPromise.then(() => {
+            expect(logSpy).to.be.calledOnce;
+            const error = logSpy.getCall(0).args[1];
+            expect(error).to.match(/Form submission failed/);
+
+            expect(navigateTo).to.be.calledOnce;
+            const {args} = navigateTo.firstCall;
+            expect(args[1]).to.equal('https://example2.com/hello');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
       });
