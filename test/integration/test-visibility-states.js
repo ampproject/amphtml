@@ -21,7 +21,7 @@ import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
 describe.configure().skipIfPropertiesObfuscated()
-    .ifChrome().run('Viewer Visibility State', () => {
+    .skip('Viewer Visibility State', () => {
 
       function noop() {}
 

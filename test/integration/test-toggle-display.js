@@ -56,7 +56,7 @@ describe.configure().retryOnSaucelabs().run('toggle display helper', () => {
       fixture.doc.head.appendChild(s);
     },
   }, (name, setup) => {
-    it('toggle display', () => {
+    it.skip('toggle display', () => {
       setup(img);
 
       toggle(img, false);
