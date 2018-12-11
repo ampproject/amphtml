@@ -463,10 +463,7 @@ describe('service', () => {
         topService = getServiceForDoc(ampdoc, 'c');
       });
 
-      it('should return the service via ampdoc or node', () => {
-        const fromAmpdoc = getExistingServiceForDocInEmbedScope(ampdoc, 'c');
-        expect(fromAmpdoc).to.equal(topService);
-
+      it('should return the service via node', () => {
         const fromNode = getExistingServiceForDocInEmbedScope(node, 'c');
         expect(fromNode).to.equal(topService);
       });
@@ -504,8 +501,6 @@ describe('service', () => {
             .to.equal(overridenService);
 
         // Top-level service doesn't change.
-        expect(getExistingServiceForDocInEmbedScope(ampdoc, 'c'))
-            .to.equal(topService);
         expect(getExistingServiceForDocInEmbedScope(
             node, 'c', /* opt_fallbackToTopWin */ true))
             .to.equal(topService);
