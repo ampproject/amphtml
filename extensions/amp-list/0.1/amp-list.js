@@ -396,9 +396,8 @@ export class AmpList extends AMP.BaseElement {
     return fetch.catch(error => {
       if (opt_append) {
         throw error;
-      } else {
-        this.showFallback_(error);
       }
+      this.showFallback_(error);
     });
   }
 
@@ -499,7 +498,8 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       const html = /** @type {string} */ (current.data);
       this.templates_.findAndSetHtmlForTemplate(this.element, html)
-          .then(element => this.render_([element], current.append))
+          .then(result => this.updateBindings_([result]))
+          .then(element => this.render_(element, current.append))
           .then(onFulfilledCallback, onRejectedCallback);
     } else {
       const array = /** @type {!Array} */ (current.data);

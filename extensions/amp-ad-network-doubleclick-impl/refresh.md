@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 # AMP Ad Refresh
-AMP Ad Refresh provides a mechanism for DoubleClick slots to periodically refresh, that is to fetch and render a new creative. Slots will only issue refresh requests once the current creative has been viewed (i.e., has had 50% of its pixels on screen for a continuous second).
+AMP Ad Refresh provides a mechanism for Google Ad Manager slots to periodically refresh, that is to fetch and render a new creative. Slots will only issue refresh requests once the current creative has been viewed (i.e., has had 50% of its pixels on screen for a continuous second).
 
 For a network implementation guide, please click <a href="../../extensions/amp-a4a/refresh.md">here</a>.
 
@@ -48,4 +48,4 @@ Refresh is currently not supported for SRA enabled slots. If a slot is enabled f
 
 The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
 
-#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to Google Ad Manager</a>
