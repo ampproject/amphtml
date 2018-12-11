@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.40 */
+/** Version: 0.1.22.41 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -2505,16 +2505,16 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {!Document} doc The document object.
+ * @param {*} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
 function injectStyleSheet(doc, styleText) {
-  const styleElement = createElement(doc, 'style', {
+  const styleElement = createElement(doc.getWin().document, 'style', {
     'type': styleType,
   });
   styleElement.textContent = styleText;
-  doc.head.appendChild(styleElement);
+  doc.getHead().appendChild(styleElement);
   return styleElement;
 }
 
@@ -2535,6 +2535,16 @@ function isConnected(node) {
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
   return root && root.contains(node) || false;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser$1(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
 }
 
 /**
@@ -4322,7 +4332,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.40',
+    '_client': 'SwG 0.1.22.41',
   });
 }
 
@@ -4872,6 +4882,176 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -5342,7 +5522,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(iframeDoc, CSS$1);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -5789,176 +5969,6 @@ class DialogManager {
       // Ignore.
     }
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/** @implements {Doc} */
-class GlobalDoc {
-
-  /**
-   * @param {!Window|!Document} winOrDoc
-   */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
-  }
-
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
-  whenReady() {
-    return whenDocumentReady(this.doc_);
-  }
-}
-
-
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
-  }
-  // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
-  }
-  return /** @type {!Doc} */ (input);
 }
 
 /**
@@ -8875,10 +8885,6 @@ function apiV2DoesMerchantSupportSpecifiedCardType(
  * message.
  */
 function validateSecureContext() {
-  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
-    // This is for local development.
-    return null;
-  }
   if (window.isSecureContext === undefined) {
     // Browser not support isSecureContext, figure out a way to validate this
     // for the unsupported browser.
@@ -12164,6 +12170,11 @@ class ConfiguredRuntime {
 
     /** @private @const {*} */
     this.config_ = defaultConfig();
+    if (isEdgeBrowser$1(this.win_)) {
+      // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
+      // or move it to Web Activities.
+      this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
+    }
     if (opt_config) {
       this.configure_(opt_config);
     }
@@ -12217,7 +12228,7 @@ class ConfiguredRuntime {
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
 
-    injectStyleSheet(this.win_.document, CSS);
+    injectStyleSheet(this.doc_, CSS);
 
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {
