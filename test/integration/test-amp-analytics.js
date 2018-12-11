@@ -406,7 +406,24 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           },
           "extraUrlParams": {
             "a": 1,
-            "b": "\${title}"
+            "b": "\${title}",
+            "c": {
+              "d": "\${title}",
+              "e": {
+                "f": ["\${title}", "\${title}"]
+              }
+            },
+            "g": ["\${title}", "\${title}"],
+            "context.a": 1,
+            "context.b": {
+              "context.c": "\${title}",
+              "context.d": {
+                "context.e": ["\${title}", "\${title}"]
+              }
+            }
+          },
+          "extraUrlParamsReplaceMap": {
+            "context.": "_c_"
           }
         }
         </script>
@@ -416,7 +433,24 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
     it('should send request use POST body payload', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
-        expect(JSON.parse(req.body)).to.deep.equal({a: 2, b: 'AMP TEST'});
+        expect(JSON.parse(req.body)).to.deep.equal({
+          a: 2,
+          b: 'AMP TEST',
+          c: {
+            d: 'AMP TEST',
+            e: {
+              f: ['AMP TEST', 'AMP TEST'],
+            },
+          },
+          g: ['AMP TEST', 'AMP TEST'],
+          '_c_a': 1,
+          '_c_b': {
+            'context.c': 'AMP TEST',
+            'context.d': {
+              'context.e': ['AMP TEST', 'AMP TEST'],
+            },
+          },
+        });
       });
     });
   });
