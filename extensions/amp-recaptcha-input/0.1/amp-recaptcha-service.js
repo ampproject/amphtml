@@ -62,7 +62,6 @@ export class AmpRecaptchaService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -266,7 +265,8 @@ export class AmpRecaptchaService {
     // This is verified by the recaptcha frame to
     // verify the origin on its messages
     let curlsSubdomainPromise = undefined;
-    const isProxyOrigin = Services.urlForDoc(this.ampdoc_)
+    const {documentElement} = this.win_.document;
+    const isProxyOrigin = Services.urlForDoc(documentElement)
         .isProxyOrigin(this.win_.location.href);
     if (isProxyOrigin) {
       curlsSubdomainPromise = tryResolve(() => {

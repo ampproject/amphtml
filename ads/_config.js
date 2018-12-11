@@ -461,6 +461,11 @@ export const adConfig = {
     ],
   },
 
+  'freewheel': {
+    prefetch: 'https://cdn.stickyadstv.com/prime-time/fw-amp.min.js',
+    renderStartImplemented: true,
+  },
+
   'fusion': {
     prefetch: 'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
   },
@@ -1066,6 +1071,11 @@ export const adConfig = {
       'https://k.zucks.net',
       'https://static.zucks.net.zimg.jp',
     ],
+  },
+
+  'baidu': {
+    prefetch: 'https://dup.baidustatic.com/js/dm.js',
+    renderStartImplemented: true,
   },
 
 };

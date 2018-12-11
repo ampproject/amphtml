@@ -375,7 +375,9 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --headless --coverage');
+        // TODO(choumx, #19658): --headless disabled for integration tests on
+        // Travis until Chrome 72.
+        timedExecOrDie(cmd + ' --coverage');
       } else {
         startSauceConnect();
         timedExecOrDie(cmd + ' --saucelabs');
@@ -388,7 +390,9 @@ const command = {
   runSinglePassCompiledIntegrationTests: function() {
     timedExecOrDie('rm -R dist');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
-    timedExecOrDie('gulp test --integration --nobuild --headless '
+    // TODO(choumx, #19658): --headless disabled for integration tests on
+    // Travis until Chrome 72.
+    timedExecOrDie('gulp test --integration --nobuild '
         + '--compiled --single_pass');
     timedExecOrDie('rm -R dist');
   },
@@ -643,6 +647,7 @@ function main() {
     }
     if (buildTargets.has('RUNTIME')) {
       command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck(/* action */ 'pr');
     } else {
       // Skip the bundle-size check to satisfy the required GitHub check.
       command.runBundleSizeCheck(/* action */ 'skipped');
@@ -660,9 +665,6 @@ function main() {
         buildTargets.has('FLAG_CONFIG') ||
         buildTargets.has('BUILD_SYSTEM')) {
       command.verifyVisualDiffTests();
-    }
-    if (buildTargets.has('RUNTIME')) {
-      command.runBundleSizeCheck(/* action */ 'pr');
     }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();

@@ -339,6 +339,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
           {
             getUpgradeDelayMs: () => 1,
           });
+
+      // Make sure the ad iframe (FIE) has a local URL replacements service.
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(a).returns(urlReplacements);
+
       impl.buildCallback();
       impl.size_ = {width: 123, height: 456};
       impl.onCreativeRender({customElementExtensions: []});

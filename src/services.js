@@ -158,13 +158,13 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element} element
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
-  static bindForDocOrNull(elementOrAmpDoc) {
+  static bindForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>} */ (
       getElementServiceIfAvailableForDocInEmbedScope(
-          elementOrAmpDoc, 'bind', 'amp-bind'));
+          element, 'bind', 'amp-bind'));
   }
 
   /**
@@ -474,15 +474,12 @@ export class Services {
   }
 
   /**
-   * Unlike most service getters, passing `Node` is necessary for some FIE-scope
-   * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element} element
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
-  static urlReplacementsForDoc(nodeOrDoc) {
+  static urlReplacementsForDoc(element) {
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url-replace', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url-replace'));
   }
 
   /**
@@ -522,13 +519,12 @@ export class Services {
   /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-impl.Url}
    */
-  static urlForDoc(nodeOrDoc) {
+  static urlForDoc(element) {
     return /** @type {!./service/url-impl.Url} */ (
-      getExistingServiceForDocInEmbedScope(
-          nodeOrDoc, 'url', /* opt_fallbackToTopWin */ true));
+      getExistingServiceForDocInEmbedScope(element, 'url'));
   }
 
   /**
