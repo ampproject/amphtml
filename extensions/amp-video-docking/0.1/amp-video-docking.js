@@ -1026,6 +1026,11 @@ export class VideoDocking {
     // ratio. However, we only do this once to prevent jank in subsequent
     // frames.
     const boxNeedsSizing = this.boxNeedsSizing_(width, height);
+
+    /**
+     * @param {!Element} element
+     * @param {boolean=} opt_positioned
+     */
     const maybeSetSizing = (element, opt_positioned) => {
       if (!boxNeedsSizing) {
         return;
