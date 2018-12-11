@@ -54,8 +54,8 @@ config.run('amp-fx-collection', function() {
       win = env.win;
     });
 
-    it.skipChrome('runs fade-in-scroll animation with default parameters',
-        () => {
+    it.configure().skipChrome()
+        .run('runs fade-in-scroll animation with default parameters', () => {
           expect(getOpacity(win)).to.equal(0);
           win.scrollTo(0, 0.1 * getViewportHeight(win));
           return Promise.resolve().then(timeout(2000))
