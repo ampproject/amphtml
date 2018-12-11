@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@ampproject/animations@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.0.2.tgz#ca38f4e52a6aeae4cfc25bc611ab1a018e3b5f81"
-  integrity sha512-QZkzVV8I97wxr0RaGDTMV2DHUfrOr1xo2ogl5xqh8S78KZMelwj47z7jaSvjvKjOHk58yLPyKx+uNeBLadcyug==
+"@ampproject/animations@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.1.0.tgz#492f3eb5cda815d11ec2516166faf0419322350d"
+  integrity sha512-CvV2F210+I5xVgvmsSBeYKHNQGOZhWdyWNkfIlwbJPmufzM2kzkJrLshgV/WnNwJKaJMGUyedktbRGXBk2iqRw==
 
 "@ampproject/worker-dom@0.2.2":
   version "0.2.2"
