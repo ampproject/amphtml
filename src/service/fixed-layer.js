@@ -887,13 +887,14 @@ class TransferLayerBody {
     const bodyAttrs = body.attributes;
     const layerAttrs = layer.attributes;
     for (let i = 0; i < bodyAttrs.length; i++) {
-      const {name, value} = bodyAttrs[i];
+      const attr = bodyAttrs[i];
       // Style is not copied because the fixed-layer must have very precise
       // styles to enable smooth scrolling.
-      if (name === 'style') {
+      if (attr.name === 'style') {
         continue;
       }
-      layer.setAttribute(name, value);
+      // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
+      layerAttrs.setNamedItem(attr.cloneNode(false));
     }
     for (let i = 0; i < layerAttrs.length; i++) {
       const {name} = layerAttrs[i];
