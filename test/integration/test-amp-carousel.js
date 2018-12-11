@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifNewChrome().skipSinglePass();
+const config = describe.configure().ifChrome().skipSinglePass();
 config.run('amp-carousel', function() {
   this.timeout(10000);
 
@@ -184,7 +184,7 @@ config.run('amp-carousel', function() {
       expect(document.querySelectorAll('amp-carousel')).to.have.length.above(0);
     });
 
-    it('should not have the buttons visible ' +
+    it.configure().skipChrome().run('should not have the buttons visible ' +
         'when amp-mode-mouse class is not on body', () => {
       document.body.classList.remove('amp-mode-mouse');
       const amp = document.querySelector('#carousel-1');

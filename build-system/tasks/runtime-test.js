@@ -35,12 +35,13 @@ const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {exec, getStdout} = require('../exec');
 const {gitDiffNameOnlyMaster} = require('../git');
 
-const {green, yellow, cyan, red, bold} = colors;
+const {green, yellow, cyan, red} = colors;
 
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
-const batchSize = 4; // Number of Sauce Lab browsers
+// TODO(amp-infra): Increase batch size once tests are stable again.
+const batchSize = 1; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
@@ -77,21 +78,23 @@ function getConfig() {
       [
         'SL_Chrome',
         'SL_Firefox',
-        'SL_Safari_11',
+        // TODO(amp-infra): Restore this once tests are stable again.
+        // 'SL_Safari_11',
         'SL_Edge_17',
-      ]
-      // TODO(amp-infra): Evaluate and add more platforms here.
-      //'SL_Chrome_Dev',
-      //'SL_Chrome_Android_7',
-      //'SL_Safari_12',
-      //'SL_iOS_12'
-      //'SL_iOS_11',
-      //'SL_IE_11'
-      : [
+        // TODO(amp-infra): Restore these two once tests are stable again.
+        // 'SL_Chrome_Dev',
+        // 'SL_Firefox_Dev',
+        'SL_Safari_12',
+        // TODO(amp-infra): Evaluate and add more platforms here.
+        //'SL_Chrome_Android_7',
+        //'SL_iOS_11',
+        //'SL_iOS_12',
+        //'SL_IE_11',
+      ] : [
       // With --saucelabs_lite, a subset of the unit tests are run.
       // Only browsers that support chai-as-promised may be included below.
-      // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Safari_11',
+      // TODO(rsimha): Add more browsers to this list. #6039.
+        'SL_Safari_12',
       ];
 
     return Object.assign({}, karmaDefault, {
@@ -441,6 +444,7 @@ async function runTests() {
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
 
   if (argv.files) {
+    c.client.captureConsole = true;
     c.files = c.files.concat(config.commonIntegrationTestPaths, argv.files);
     if (!argv.saucelabs && !argv.saucelabs_lite) {
       c.reporters = ['mocha'];
@@ -457,6 +461,7 @@ async function runTests() {
         log(cyan(test));
       });
     }
+    c.client.captureConsole = true;
     c.files = c.files.concat(config.commonUnitTestPaths, testsToRun);
   } else if (argv.integration) {
     c.files = c.files.concat(
@@ -498,7 +503,6 @@ async function runTests() {
   }
 
   if (argv.coverage) {
-    c.client.captureConsole = false;
     c.browserify.transform = [
       ['babelify', {
         plugins: [
@@ -540,14 +544,6 @@ async function runTests() {
 
   // Avoid Karma startup errors
   refreshKarmaWdCache();
-
-  // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
-  // reporter for full unit test runs, since it likely contains copious amounts
-  // of logs.
-  const shouldCollapseSummary = process.env.TRAVIS && c.client.captureConsole &&
-      c.reporters.includes('karmaSimpleReporter') && !argv['local-changes'];
-  const sectionMarker =
-      (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
@@ -611,9 +607,6 @@ async function runTests() {
     let resolver;
     const deferred = new Promise(resolverIn => {resolver = resolverIn;});
     new Karma(configBatch, function(exitCode) {
-      if (shouldCollapseSummary) {
-        console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
-      }
       if (argv.coverage) {
         if (process.env.TRAVIS) {
           const codecovCmd =
@@ -651,12 +644,6 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
-    }).on('run_complete', function() {
-      if (shouldCollapseSummary) {
-        console./* OK*/log(bold(red('Console errors:')),
-            'Expand this section and fix all errors printed by your tests.');
-        console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
-      }
     }).on('browser_complete', function(browser) {
       const result = browser.lastResult;
       // Prevent cases where Karma detects zero tests and still passes. #16851.
@@ -666,19 +653,18 @@ async function runTests() {
           process.exit(1);
         }
       }
-      if (shouldCollapseSummary) {
-        let message = browser.name + ': ';
-        message += 'Executed ' + (result.success + result.failed) +
-            ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
-        if (result.failed === 0) {
-          message += green('SUCCESS');
-        } else {
-          message += red(result.failed + ' FAILED');
-        }
-        message += '\n';
-        console./* OK*/log('\n');
-        log(message);
+      // Print a summary for each browser as soon as tests complete.
+      let message = browser.name + ': ';
+      message += 'Executed ' + (result.success + result.failed) +
+          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      if (result.failed === 0) {
+        message += green('SUCCESS');
+      } else {
+        message += red(result.failed + ' FAILED');
       }
+      message += '\n';
+      console./* OK*/log('\n');
+      log(message);
     }).start();
     return deferred;
   }

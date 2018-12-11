@@ -47,12 +47,12 @@ export const getStoreService = win => {
 
 /**
  * Different UI experiences to display the story.
- * @const @enum {string}
+ * @const @enum {number}
  */
 export const UIType = {
-  MOBILE: 'mobile',
-  DESKTOP: 'desktop',
-  DESKTOP_FULLBLEED: 'fullbleed',
+  MOBILE: 0,
+  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
 
@@ -87,6 +87,7 @@ export const UIType = {
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
+ *    pagesCount: number,
  * }}
  */
 export let State;
@@ -130,6 +131,7 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
+  PAGES_COUNT: 'pagesCount',
 };
 
 
@@ -138,6 +140,7 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
+  SET_PAGES_COUNT: 'setPagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -274,7 +277,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             // Keep DESKTOP_STATE for compatiblity with v0.1.
-            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
+            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
             [StateProperty.UI_STATE]: data,
           }));
     case Action.SET_CONSENT_ID:
@@ -286,8 +289,11 @@ const actions = (state, action, data) => {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
           }));
+    case Action.SET_PAGES_COUNT:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.PAGES_COUNT]: data}));
     default:
-      dev().error(TAG, `Unknown action ${action}.`);
+      dev().error(TAG, 'Unknown action %s.', action);
       return state;
   }
 };
@@ -319,7 +325,7 @@ export class AmpStoryStoreService {
    */
   get(key) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Unknown state ${key}.`);
+      dev().error(TAG, 'Unknown state %s.', key);
       return;
     }
     return this.state_[key];
@@ -334,7 +340,7 @@ export class AmpStoryStoreService {
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
+      dev().error(TAG, 'Can\'t subscribe to unknown state %s.', key);
       return;
     }
     if (!this.listeners_[key]) {
@@ -408,6 +414,7 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
+      [StateProperty.PAGES_COUNT]: 0,
     });
   }
 
