@@ -29,6 +29,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getMode, isProductCode, isPubId, isWidgetId} from '../addthis-utils/mode';
 import {isDateInFuture} from '../addthis-utils/cuid';
+import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
 
 describes.realWin('amp-addthis', {
@@ -470,9 +471,9 @@ describes.realWin('amp-addthis', {
     expect(getMode(mode9)).to.equal(-1);
   });
 
-  it('pretty much knows if a thing is a pub id or not', () => {
+  it('isPubId: pretty much knows if a thing is a pub id or not', () => {
     expect(isPubId(1)).to.equal(false);
-    expect(isPubId(new String('maybe'))).to.equal(true);
+    expect(isPubId(String('maybe'))).to.equal(true);
     expect(isPubId('maybe')).to.equal(true);
     expect(isPubId({})).to.equal(false);
     expect(isPubId([])).to.equal(false);
@@ -480,7 +481,7 @@ describes.realWin('amp-addthis', {
     expect(isPubId(null)).to.equal(false);
   });
 
-  it('pretty much knows if a thing is a product code or not', () => {
+  it('isProductCode: pretty much knows if a thing is a product code or not', () => {
     expect(isProductCode(1)).to.equal(false);
     expect(isProductCode(String('mayb'))).to.equal(false);
     expect(isProductCode(String('shin'))).to.equal(true);
@@ -493,7 +494,7 @@ describes.realWin('amp-addthis', {
     expect(isProductCode(null)).to.equal(false);
   });
 
-  it('pretty much knows if a thing is a widget id or not', () => {
+  it('isWidgetId: pretty much knows if a thing is a widget id or not', () => {
     expect(isWidgetId(1)).to.equal(false);
     expect(isWidgetId(String('mayb'))).to.equal(true);
     expect(isWidgetId(String('101x'))).to.equal(true);
@@ -504,5 +505,18 @@ describes.realWin('amp-addthis', {
     expect(isWidgetId([])).to.equal(false);
     expect(isWidgetId(void 0)).to.equal(false);
     expect(isWidgetId(null)).to.equal(false);
+  });
+
+  it('isString: knows if a thing is a string or not', () => {
+    expect(isString(1)).to.equal(false);
+    expect(isString(String('mayb'))).to.equal(true);
+    expect(isString(String('101x'))).to.equal(true);
+    expect(isString('maybe')).to.equal(true);
+    expect(isString('shin')).to.equal(true);
+    expect(isString('shfs')).to.equal(true);
+    expect(isString({})).to.equal(false);
+    expect(isString([])).to.equal(false);
+    expect(isString(void 0)).to.equal(false);
+    expect(isString(null)).to.equal(false);
   });
 });
