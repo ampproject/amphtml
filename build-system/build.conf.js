@@ -18,6 +18,8 @@ const defaultPlugins = [
   require.resolve(
       './babel-plugins/babel-plugin-transform-amp-asserts'),
   require.resolve(
+      './babel-plugins/babel-plugin-transform-html-template'),
+  require.resolve(
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
 ];
 
