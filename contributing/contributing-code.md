@@ -1,4 +1,4 @@
-# Contributing Code and Features
+# Contributing code and features
 
 Thank you for helping make AMP better by fixing bugs, adding features or improving the AMP code in some other way!
 
@@ -12,7 +12,7 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 
 - [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself or comment on it to let others know you are working on it.  If there is no GitHub issue consider filing one, but for minor fixes your Pull Request description may be enough.
 - [ ] (optional) [Find a reviewer](#find-a-reviewer) before you start coding to help you answer questions.  If you don't have any questions you can find a reviewer once you have a PR ready.
-- [ ] Follow the parts of the [Coding & implementation](#coding-and-implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your reviewer.
+- [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your reviewer.
 
 ### Process for significant changes
 
@@ -30,7 +30,7 @@ Significant changes (e.g. new components or significant changes to behavior) req
 - [ ] Finalize the design of your feature.
   - Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
   - Your reviewer can help you determine if your feature requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
-- [ ] Proceed with the [coding & implementation](#coding-and-implementation) of your feature.
+- [ ] Proceed with the [implementation](#implementation) of your feature.
 - [ ] For features that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](TODO).  Indicate which experiment is gating the feature and a rollout plan.  Once this issue is approved by 3 members of the Approver WG the rollout plan described in the I2S may proceed.
 
 ## Find a reviewer
@@ -45,10 +45,10 @@ To find a reviewer:
 - If you're still not sure who your reviewer should be, reach out on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 - If you can't find a reviewer after going through these routes or the reviewers you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
-## Coding and implementation
+## Implementation
 
 1. (optional) [Join AMP on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).  (You don't need to wait to be added to the org before you start coding.)
-1.  [Perform the one-time setup](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
+1. [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
 1. [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
 1. [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
 1. Write your code.
@@ -62,17 +62,18 @@ To find a reviewer:
        - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
        - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
      - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
-  - [Put your new component behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
+  - [Put your new feature behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
 1. [Test your changes](./getting-started-e2e.md#testing-your-changes): A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 1. Prepare for your code review.
-   - For more substantial features, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.  Before your final review, make sure your change:
-   - [ ] [Has good test coverage](./TESTING.md)
-   - [ ] [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
-   - [ ] [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
-   - [ ] [Passes the presubmit checks (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
-   - [ ] [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
-   - [ ] [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
+   - For more substantial features, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
+   - Before your final review, make sure your change:
+     - [ ] [Has good test coverage](./TESTING.md)
+     - [ ] [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
+     - [ ] [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
+     - [ ] [Passes the presubmit checks (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
+     - [ ] [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
+     - [ ] [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 1. Send your code for review.
   - [Sign the CLA](#contributor-license-agreement) if you have not already done so.
   - [Pull the latest changes from the AMPHTML repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
