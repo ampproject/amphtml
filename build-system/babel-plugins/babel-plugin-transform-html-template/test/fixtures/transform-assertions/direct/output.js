@@ -1,7 +1,7 @@
-const _template4 = ["<div>fouth sibling</div>"];
-const _template3 = ["<div>third sibling</div>"];
-const _template2 = ["<div>html usage</div>"];
-const _template = ["html usage"];
+const _template = ["html usage"],
+      _template2 = ["<div>html usage</div>"],
+      _template3 = ["<div>third sibling</div>"],
+      _template4 = ["<div>fouth sibling</div>"];
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
