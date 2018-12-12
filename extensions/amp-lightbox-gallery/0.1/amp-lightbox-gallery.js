@@ -35,6 +35,7 @@ import {
   closestBySelector,
   elementByTag,
   escapeCssSelectorIdent,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -1129,9 +1130,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const parentCarousel = closestBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel) {
-      const targetSlide = closestBySelector(target, 'div.i-amphtml-slide-item');
-      const targetSlideIndex = toArray(targetSlide.parentNode.children)
-          .indexOf(targetSlide);
+      const slideSelector = '.i-amphtml-slide-item';
+      const allSlides = toArray(
+          scopedQuerySelectorAll(parentCarousel, slideSelector));
+      const targetSlide = closestBySelector(target, slideSelector);
+      const targetSlideIndex = allSlides.indexOf(targetSlide);
       dev().assert(parentCarousel).getImpl()
           .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
     }
