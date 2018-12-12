@@ -18,6 +18,7 @@ import {DayPickerPhrases} from './defaultPhrases';
 import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
+import {wrap as withMaximumNights} from './wrappers/maximum-nights';
 
 /**
  * Create a DateRangePicker React component
@@ -89,69 +90,6 @@ function createDateRangePickerBase() {
 
   return WrappedDayPickerRangeController;
 }
-
-
-/**
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)}
- */
-function withMaximumNights(WrappedComponent) {
-  const React = requireExternal('react');
-  const {END_DATE, START_DATE} = requireExternal('react-dates/constants');
-
-  const reactDates = requireExternal('react-dates');
-  const isInclusivelyAfterDay = reactDates['isInclusivelyAfterDay'];
-  const isInclusivelyBeforeDay = reactDates['isInclusivelyBeforeDay'];
-
-  class MaximumNights extends React.Component {
-    /** @override */
-    render() {
-      const props = Object.assign({}, this.props);
-      props['isOutsideRange'] = getIsOutsideRange(props);
-
-      return React.createElement(WrappedComponent, props);
-    }
-  }
-
-  /**
-   *
-   * @param {!Object} props
-   */
-  function getIsOutsideRange(props) {
-    const isOutsideRange = props['isOutsideRange'];
-    const startDate = props['startDate'];
-    const endDate = props['endDate'];
-    const focusedInput = props['focusedInput'];
-    const maximumNights = Number(props['maximumNights']);
-
-    if (!maximumNights) {
-      return isOutsideRange;
-    }
-
-    if (startDate && focusedInput == END_DATE) {
-      const firstIneligibleDay =
-          startDate.clone().add(maximumNights + 1, 'days');
-      return date => {
-        return isOutsideRange(date) ||
-            isInclusivelyAfterDay(date, firstIneligibleDay);
-      };
-    }
-
-    if (endDate && focusedInput == START_DATE) {
-      const lastIneligibleDay =
-          endDate.clone().add(-1 * (maximumNights + 1), 'days');
-      return date => {
-        return isOutsideRange(date) ||
-            isInclusivelyBeforeDay(date, lastIneligibleDay);
-      };
-    }
-
-    return isOutsideRange;
-  }
-
-  return MaximumNights;
-}
-
 
 /** @private {?function(new:React.Component, !JsonObject)} */
 let DateRangePicker_ = null;
