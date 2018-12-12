@@ -40,8 +40,7 @@ const {green, yellow, cyan, red} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
-// TODO(amp-infra): Increase batch size once tests are stable again.
-const batchSize = 1; // Number of Sauce Lab browsers
+const batchSize = 4; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
@@ -529,15 +528,15 @@ async function runTests() {
   // Run fake-server to test XHR responses.
   process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
-    port: 31862,
+    port: 8081,
     host: 'localhost',
     directoryListing: true,
     middleware: [app],
   }).on('kill', function() {
-    log(yellow('Shutting down test responses server on localhost:31862'));
+    log(yellow('Shutting down test responses server on localhost:8081'));
   }));
   log(yellow(
-      'Started test responses server on localhost:31862'));
+      'Started test responses server on localhost:8081'));
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
