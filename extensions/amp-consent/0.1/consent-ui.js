@@ -36,9 +36,9 @@ export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
-  loading: 'i-amphtml-consent-loading',
-  fill: 'i-amphtml-consent-fill',
-  placeholder: 'i-amphtml-consent-placeholder',
+  loading: 'i-amphtml-consent-ui-loading',
+  fill: 'i-amphtml-consent-ui-fill',
+  loadingPlaceholder: 'i-amphtml-consent-ui-loading-placeholder',
 };
 
 // Default Loading Placeholder for Iframe solutions
@@ -251,12 +251,12 @@ export class ConsentUI {
    * @return {!Element}
    */
   createPlaceholder_() {
-    // TODO(@zhouyx): Allow publishers to provide placeholder upon request
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
     const {classList} = placeholder;
     classList.add(consentUiClasses.fill);
-    classList.add(consentUiClasses.placeholder);
+    classList.add(consentUiClasses.loadingPlaceholder);
+    placeholder.innerHTML = consentUiDefaultLoadingPlaceholderHtml;
     return placeholder;
   }
 
