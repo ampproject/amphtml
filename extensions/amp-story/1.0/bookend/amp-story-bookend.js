@@ -104,7 +104,8 @@ const TAG = 'amp-story-bookend';
 const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
+    attrs: dict({'class': 'i-amphtml-story-bookend-replay ' +
+      'i-amphtml-story-bookend-top-level'}),
     children: [
       {
         tag: 'div',
@@ -141,7 +142,8 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
 const buildPromptConsentTemplate = consentId => {
   return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-bookend-consent'}),
+    attrs: dict({'class': 'i-amphtml-story-bookend-consent ' +
+        'i-amphtml-story-bookend-top-level'}),
     children: [
       {
         tag: 'h3',
@@ -332,17 +334,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      this.getShadowRoot().removeAttribute('desktop');
-      this.getShadowRoot().removeAttribute('desktop-fullbleed');
-
-      switch (uiState) {
-        case UIType.DESKTOP:
-          this.getShadowRoot().setAttribute('desktop', '');
-          break;
-        case UIType.DESKTOP_FULLBLEED:
-          this.getShadowRoot().setAttribute('desktop-fullbleed', '');
-          break;
-      }
+      [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -567,7 +561,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
