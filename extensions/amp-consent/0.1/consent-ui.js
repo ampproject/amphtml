@@ -197,9 +197,8 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      // Need to remove from fixed layer and add it back to update element's top
-      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
+      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
     });
   }
