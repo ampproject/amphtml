@@ -230,7 +230,6 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-/** @type {DomPurifyConfigObject.USE_PROFILES} */
 const PURIFY_CONFIG = {
   USE_PROFILES: {
     html: true,
@@ -266,15 +265,15 @@ export function purifyHtml(dirty, diffing = false) {
  * @return {!DomPurifyConfigObject}
  */
 export function purifyConfig() {
-  const config = Object.assign({}, PURIFY_CONFIG, {
+  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfigObject} */ ({
     ADD_ATTR: WHITELISTED_ATTRS,
     FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
     FORCE_BODY: true,
     // Avoid need for serializing to/from string by returning Node directly.
     RETURN_DOM: true,
-  });
-  return config;
+  }));
+  return /** @type {!DomPurifyConfigObject} */ (config);
 }
 
 /**

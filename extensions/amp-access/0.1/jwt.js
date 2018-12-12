@@ -19,7 +19,6 @@ import {
 } from '../../../src/utils/base64';
 import {pemToBytes} from '../../../src/utils/pem';
 import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
-import {dict} from '../../../src/utils/object';
 import {tryParseJson} from '../../../src/json';
 
 
@@ -61,7 +60,7 @@ export class JwtHelper {
    * @return {?JsonObject|undefined}
    */
   decode(encodedToken) {
-    return this.decodeInternal_(encodedToken)['payload'];
+    return this.decodeInternal_(encodedToken).payload;
   }
 
   /**
@@ -85,7 +84,7 @@ export class JwtHelper {
     const decodedPromise = new Promise(
         resolve => resolve(this.decodeInternal_(encodedToken)));
     return decodedPromise.then(decoded => {
-      const alg = decoded['header']['alg'];
+      const alg = decoded.header['alg'];
       if (!alg || alg != 'RS256') {
         // TODO(dvoytenko@): Support other RS* algos.
         throw new Error('Only alg=RS256 is supported');
@@ -96,11 +95,11 @@ export class JwtHelper {
             /* options */ {name: 'RSASSA-PKCS1-v1_5'},
             key,
             sig,
-            stringToBytes(decoded['verifiable'])
+            stringToBytes(decoded.verifiable)
         );
       }).then(isValid => {
         if (isValid) {
-          return decoded['payload'];
+          return decoded.payload;
         }
         throw new Error('Signature verification failed');
       });
@@ -109,7 +108,7 @@ export class JwtHelper {
 
   /**
    * @param {string} encodedToken
-   * @return {!JsonObject}
+   * @return {!JwtTokenInternalDef}
    * @private
    */
   decodeInternal_(encodedToken) {
@@ -129,12 +128,12 @@ export class JwtHelper {
     }
     const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
     const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
-    return dict({
-      'header': tryParseJson(utf8Decode(headerUtf8Bytes), invalidToken),
-      'payload': tryParseJson(utf8Decode(payloadUtf8Bytes), invalidToken),
-      'verifiable': `${parts[0]}.${parts[1]}`,
-      'sig': parts[2],
-    });
+    return {
+      header: tryParseJson(utf8Decode(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8Decode(payloadUtf8Bytes), invalidToken),
+      verifiable: `${parts[0]}.${parts[1]}`,
+      sig: parts[2],
+    };
   }
 
   /**

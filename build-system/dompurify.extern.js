@@ -17,31 +17,37 @@
 /** @externs */
 
 
-var DomPurifyConfigObject = {};
+/** @constructor */
+var DomPurifyConfigObject = function() {};
 
-DomPurifyConfigObject.ALLOWED_TAG;
-DomPurifyConfigObject.ALLOWED_ATTR;
-DomPurifyConfigObject.FORBID_TAGS;
-DomPurifyConfigObject.FORBID_ATTR;
+DomPurifyConfigObject.prototype.ALLOWED_TAGS;
+DomPurifyConfigObject.prototype.ALLOWED_ATTR;
+DomPurifyConfigObject.prototype.FORBID_TAGS;
+DomPurifyConfigObject.prototype.FORBID_ATTR;
 /** @type {?Object} */
-DomPurifyConfigObject.USE_PROFILES = {};
+DomPurifyConfigObject.prototype.USE_PROFILES = {};
 /** @type {boolean} */
-DomPurifyConfigObject.USE_PROFILES.html;
+DomPurifyConfigObject.prototype.USE_PROFILES.html;
 /** @type {boolean} */
-DomPurifyConfigObject.USE_PROFILES.svg;
+DomPurifyConfigObject.prototype.USE_PROFILES.svg;
 /** @type {boolean} */
-DomPurifyConfigObject.USE_PROFILES.svgFilters;
-DomPurifyConfigObject.ALLOW_ARIA_ATTR;
-DomPurifyConfigObject.ALLOW_DATA_ATTR;
-DomPurifyConfigObject.ALLOW_UNKNOWN_PROTOCOLS;
-DomPurifyConfigObject.SAFE_FOR_JQUERY;
-DomPurifyConfigObject.SAFE_FOR_TEMPLATES;
-DomPurifyConfigObject.WHOLE_DOCUMENT;
-DomPurifyConfigObject.RETURN_DOM;
-DomPurifyConfigObject.RETURN_DOM_FRAGMENT;
-DomPurifyConfigObject.RETURN_DOM_IMPORT;
-DomPurifyConfigObject.FORCE_BODY;
-DomPurifyConfigObject.SANITIZE_DOM;
-DomPurifyConfigObject.KEEP_CONTENT;
-DomPurifyConfigObject.IN_PLACE;
-DomPurifyConfigObject.ALLOWED_URI_REGEXP;
+DomPurifyConfigObject.prototype.USE_PROFILES.svgFilters;
+/** @type {boolean} */
+DomPurifyConfigObject.prototype.USE_PROFILES.mathMl;
+DomPurifyConfigObject.prototype.ALLOW_ARIA_ATTR;
+DomPurifyConfigObject.prototype.ALLOW_DATA_ATTR;
+DomPurifyConfigObject.prototype.ALLOW_UNKNOWN_PROTOCOLS;
+DomPurifyConfigObject.prototype.SAFE_FOR_JQUERY;
+DomPurifyConfigObject.prototype.SAFE_FOR_TEMPLATES;
+DomPurifyConfigObject.prototype.WHOLE_DOCUMENT;
+DomPurifyConfigObject.prototype.RETURN_DOM;
+DomPurifyConfigObject.prototype.RETURN_DOM_FRAGMENT;
+DomPurifyConfigObject.prototype.RETURN_DOM_IMPORT;
+DomPurifyConfigObject.prototype.FORCE_BODY;
+DomPurifyConfigObject.prototype.SANITIZE_DOM;
+DomPurifyConfigObject.prototype.KEEP_CONTENT;
+DomPurifyConfigObject.prototype.IN_PLACE;
+DomPurifyConfigObject.prototype.ALLOWED_URI_REGEXP;
+DomPurifyConfigObject.prototype.ADD_TAGS;
+DomPurifyConfigObject.prototype.ADD_ATTR;
+DomPurifyConfigObject.prototype.ADD_URI_SAFE_ATTR;
