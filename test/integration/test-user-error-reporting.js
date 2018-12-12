@@ -112,6 +112,7 @@ describe.configure().skipIfPropertiesObfuscated()
           </script>
         </amp-analytics>`,
       }, () => {
+        // TODO(lannka, #19791): fix this test.
         it.skip('should ping correct host with 3p error message', () => {
           return RequestBank.withdraw();
         });
