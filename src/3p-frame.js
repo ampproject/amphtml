@@ -146,8 +146,7 @@ export function getIframe(
 /**
  * Copies data- attributes from the element into the attributes object.
  * Removes the data- from the name and capitalizes after -. If there
- * is an attribute called json, parses the JSON and 
- ds it to the
+ * is an attribute called json, parses the JSON and adds it to the
  * attributes.
  * @param {!Element} element
  * @param {!JsonObject} attributes The destination.
