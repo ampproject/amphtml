@@ -26,6 +26,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
@@ -254,7 +255,19 @@ export class ConsentUI {
     toggle(placeholder, false);
     const {classList} = placeholder;
     classList.add(consentUiClasses.loadingPlaceholder);
-    placeholder.innerHTML = consentUiDefaultLoadingPlaceholderHtml;
+
+    const loadingSpinner = htmlFor(placeholder)`
+    <svg viewBox="0 0 40 40">
+      <defs>
+        <linearGradient id="grad">
+          <stop stop-color="rgb(105, 105, 105)"/>
+          <stop offset="100%"  stop-color="rgba(105, 105, 105, 0)"/>
+        </linearGradient>
+      </defs>
+      <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"/>
+    </svg>`;
+
+    placeholder.appendChild(loadingSpinner);
     return placeholder;
   }
 

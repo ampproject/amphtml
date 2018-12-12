@@ -172,6 +172,10 @@ describes.realWin('consent-ui', {
     });
   });
 
+  describe('placeholder', () => {
+
+  });
+
   describe('fullscreen', () => {
 
     it('should respond to the fullscreen event', () => {
