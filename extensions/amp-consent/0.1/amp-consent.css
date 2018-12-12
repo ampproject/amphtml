@@ -60,8 +60,8 @@ amp-consent.amp-hidden {
 }
 
 .i-amphtml-consent-ui-loading-placeholder > svg {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 
   fill: none;
   stroke-width: 1.5px;

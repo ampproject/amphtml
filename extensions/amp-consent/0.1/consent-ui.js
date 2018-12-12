@@ -255,7 +255,6 @@ export class ConsentUI {
     const {classList} = placeholder;
     classList.add(consentUiClasses.loadingPlaceholder);
     placeholder.innerHTML = consentUiDefaultLoadingPlaceholderHtml;
-    console.log('placeholder', placeholder);
     return placeholder;
   }
 
@@ -273,11 +272,13 @@ export class ConsentUI {
           dev().assertElement(this.placeholder_), null);
     }
     classList.add(consentUiClasses.loading);
-    toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
     insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    return this.iframeReady_.promise;
+
+    return this.baseInstance_.mutateElement(() => {
+      toggle(dev().assertElement(this.placeholder_), true);
+    }).then(() => this.iframeReady_.promise);
   }
 
   /**
