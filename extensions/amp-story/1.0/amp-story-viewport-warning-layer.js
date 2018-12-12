@@ -215,7 +215,7 @@ export class ViewportWarningLayer {
     }
 
     this.vsync_.mutate(() => {
-      uiState === UIType.DESKTOP ?
+      uiState === UIType.DESKTOP_PANELS ?
         this.overlayEl_.setAttribute('desktop', '') :
         this.overlayEl_.removeAttribute('desktop');
     });

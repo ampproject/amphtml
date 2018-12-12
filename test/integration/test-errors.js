@@ -52,7 +52,8 @@ t.run('error page', function() {
   });
 
   it.configure().skipFirefox().skipEdge()
-      .run('should show the body in error test', () => {
+      // TODO(#19790): fix this test on SuaceLabs.
+      .skip('should show the body in error test', () => {
         return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
       });
 
