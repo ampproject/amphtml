@@ -195,12 +195,22 @@ class TestConfig {
     return this.if(this.runOnChromeStable);
   }
 
+  // It's necessary to first enable Chrome Dev because we skip it by default.
+  ifChromeDev() {
+    return this.enableChromeDev().if(this.runOnChromeDev);
+  }
+
   ifEdge() {
     return this.if(this.runOnEdge);
   }
 
   ifFirefox() {
     return this.if(this.runOnFirefoxStable);
+  }
+
+  // It's necessary to first enable Firefox Dev because we skip it by default.
+  ifFirefoxDev() {
+    return this.enableFirefoxDev().if(this.runOnFirefoxDev);
   }
 
   ifSafari() {
