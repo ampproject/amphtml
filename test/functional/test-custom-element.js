@@ -1013,8 +1013,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     // TODO(alabiaga): Fixes #19752. The window.matchMedia call in the code
     // path of element.applySizesAndMediaQuery is not behaving consistently
-    // in headless mode. Thus, we mock the calls here as we are not testing
-    // window behavior.
+    // in headless mode, thus we mock the calls here. This is fine as we are
+    // not testing window behavior.
     describe('apply sizes and media query', () => {
       let element1;
       let element2;
