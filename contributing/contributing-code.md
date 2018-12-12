@@ -37,12 +37,12 @@ Significant changes (e.g. new components or significant changes to behavior) req
 
 If you're making a minor fix and just want to find someone to review/approve your code, look at the OWNERS.yaml files in the directories where you're modifying code and assign your PR to one of them (or cc them on the PR).
 
-If you're making a more substantial change, you will need to find a reviewer.  A reviewer is a member of the AMP community who is knowledgeable about the area you are modifying and who can guide you from the design phase all the way through launch.
+A reviewer is needed if you are making a more substantial change to AMP.  A reviewer is a member of the AMP community who is knowledgeable about the area you are modifying and who can guide you from the design phase all the way through launch.
 
 To find a reviewer:
-- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a reviewer from that Working Group.  If they do not, reach out to the facilitator of the WG.
-- If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS.yaml files for the areas you're changing.
-- If you're still not sure who your reviewer should be, reach out on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
+- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a reviewer from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
+- If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS.yaml files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
+- If you're still not sure who your reviewer should be, ask for a reviewer on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 - If you can't find a reviewer after going through these routes or the reviewers you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
 ## Implementation
