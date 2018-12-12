@@ -1,3 +1,6 @@
+const _template4 = ["<div>fouth sibling</div>"];
+const _template3 = ["<div>third sibling</div>"];
+const _template2 = ["<div>html usage</div>"];
 const _template = ["html usage"];
 
 /**
@@ -41,4 +44,13 @@ console.log(htmlFor(element)(["<p><span>html usage</span> <span>with comment sib
 function pleaseHoistInternalUsage() {
   console.log(html(_template));
   console.log(htmlFor(element)(_template));
+}
+
+function pleaseHoistDifferentTemplates() {
+  console.log(html(_template));
+  console.log(htmlFor(element)(_template));
+  console.log(html(_template2));
+  console.log(htmlFor(element)(_template2));
+  console.log(html(_template3));
+  console.log(htmlFor(element)(_template4));
 }

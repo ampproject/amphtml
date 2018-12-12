@@ -89,3 +89,12 @@ function pleaseHoistInternalUsage() {
   console.log(html`html usage`);
   console.log(htmlFor(element)`html usage`);
 }
+
+function pleaseHoistDifferentTemplates() {
+  console.log(html`html usage`);
+  console.log(htmlFor(element)`html usage`);
+  console.log(html`<div>html usage</div>`);
+  console.log(htmlFor(element)`<div>html usage</div>`);
+  console.log(html`<div>third sibling</div>`);
+  console.log(htmlFor(element)`<div>fouth sibling</div>`);
+}
