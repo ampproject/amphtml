@@ -46,6 +46,7 @@ import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
 
@@ -176,8 +177,9 @@ export class AnimationWorkletRunner extends AnimationRunner {
   /**
    * @param {!Window} win
    * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {?Object=} viewportData
    */
-  constructor(win, requests) {
+  constructor(win, requests, viewportData) {
     super(requests);
 
     /** @const @private */
@@ -185,21 +187,74 @@ export class AnimationWorkletRunner extends AnimationRunner {
 
     /** @protected {?Array<!WorkletAnimation>} */
     this.players_ = [];
+
+    /** @private {number} */
+    this.topRatio_ = viewportData['top-ratio'];
+
+    /** @private {number} */
+    this.bottomRatio_ = viewportData['bottom-ratio'];
+
+    /** @private {number} */
+    this.topMargin_ = viewportData['top-margin'];
+
+    /** @private {number} */
+    this.bottomMargin_ =
+      viewportData['bottom-margin'];
   }
 
   /**
    * @return {string}
    */
   createCodeBlob_() {
-
+    //TODO(nainar): This code should be moved into a self-
+    // contained file.
+    // See issue: https://github.com/ampproject/amphtml/issues/19155
     return `
     registerAnimator('anim${++animIdCounter}', class {
+      constructor(options = {
+        'time-range': 0,
+        'start-offset': 0,
+        'end-offset': 0,
+        'top-ratio': 0,
+        'bottom-ratio': 0,
+        'element-height': 0,
+      }) {
+        this.timeRange = options['time-range'];
+        this.startOffset = options['start-offset'];
+        this.endOffset = options['end-offset'];
+        this.topRatio = options['top-ratio'];
+        this.bottomRatio = options['bottom-ratio'];
+        this.height = options['element-height'];
+      }
       animate(currentTime, effect) {
-        // TODO: Do some work with \`viewport-margins\` here.
         if (currentTime == NaN) {
           return;
         }
-        effect.localTime = currentTime;
+
+        // This function mirrors updateVisibility_ in amp-position-observer
+        const currentScrollPos =
+        ((currentTime / this.timeRange) *
+        (this.endOffset - this.startOffset)) +
+        this.startOffset;
+        const halfViewport = (this.startOffset + this.endOffset) / 2;
+        const relativePositionTop = currentScrollPos > halfViewport;
+
+        const ratioToUse = relativePositionTop ?
+        this.topRatio : this.bottomRatio;
+        const offset = this.height * ratioToUse;
+        let isVisible = false;
+
+        if (relativePositionTop) {
+          isVisible =
+          currentScrollPos + this.height >= (this.startOffset + offset);
+        } else {
+          isVisible =
+          currentScrollPos <= (this.endOffset - offset);
+        }
+        if (isVisible) {
+          effect.localTime = currentTime;
+        }
+  
       }
     });
     `;
@@ -221,22 +276,52 @@ export class AnimationWorkletRunner extends AnimationRunner {
       CSS.animationWorklet.addModule(
           URL.createObjectURL(new Blob([this.createCodeBlob_()],
               {type: 'text/javascript'}))).then(() => {
-        const scrollSource =
-          Services.viewportForDoc(this.win_.document).getScrollingElement();
+        const {documentElement} = this.win_.document;
+        const viewportService = Services.viewportForDoc(documentElement);
+
+        const scrollSource = viewportService.getScrollingElement();
+        const elementRect = request.target./*OK*/getBoundingClientRect();
         const scrollTimeline = new this.win_.ScrollTimeline({
           scrollSource,
           orientation: 'block',
           timeRange: request.timing.duration,
+          startScrollOffset: `${this.topMargin_}px`,
+          endScrollOffset: `${this.bottomMargin_}px`,
+          fill: request.timing.fill,
         });
         const keyframeEffect = new KeyframeEffect(request.target,
             request.keyframes, request.timing);
         const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
             [keyframeEffect],
-            scrollTimeline);
+            scrollTimeline, {
+              'time-range': request.timing.duration,
+              'start-offset': this.topMargin_,
+              'end-offset': this.bottomMargin_,
+              'top-ratio': this.topRatio_,
+              'bottom-ratio': this.bottomRatio_,
+              'element-height': elementRect.height,
+            });
         player.play();
         this.players_.push(player);
       });
     });
+  }
+
+  /**
+   * Readjusts the given rect using the configured exclusion margins.
+   * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
+   * @private
+   */
+  applyMargins_(rect) {
+    dev().assert(rect);
+    rect = layoutRectLtwh(
+        rect.left,
+        (rect.top + this.topMargin_),
+        rect.width,
+        (rect.height - this.bottomMargin_ - this.topMargin_)
+    );
+
+    return rect;
   }
 
   /**
@@ -601,18 +686,21 @@ export class Builder {
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {boolean} hasPositionObserver
+   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, hasPositionObserver = false, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args,
+    opt_viewportData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
         return this.useAnimationWorklet_ && hasPositionObserver ?
-          new AnimationWorkletRunner(this.win_, requests) :
+          new AnimationWorkletRunner(this.win_, requests,
+              opt_viewportData) :
           new WebAnimationRunner(requests);
       });
     });

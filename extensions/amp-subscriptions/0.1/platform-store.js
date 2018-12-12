@@ -41,13 +41,15 @@ let PlatformWeightDef;
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
-   * @param {!JsonObject} scoreConfig
+   * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
+   * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
    */
-  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
+  constructor(expectedServiceIds, scoreConfig,
+    fallbackEntitlement, opt_Platforms) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = dict();
+    this.subscriptionPlatforms_ = opt_Platforms || dict();
 
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
@@ -72,9 +74,6 @@ export class PlatformStore {
 
     /** @private {?Deferred} */
     this.grantStatusPromise_ = null;
-
-    /** @private @const {!Observable} */
-    this.onGrantStateResolvedCallbacks_ = new Observable();
 
     /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
@@ -105,6 +104,25 @@ export class PlatformStore {
     this.onPlatformResolvedCallbacks_.fire({
       serviceId,
     });
+  }
+
+  /**
+   * Reset the platformStore via a factory that returns a
+   * new PlatformStore with the same platforms as this one.
+   * @return {PlatformStore}
+   */
+  resetPlatformStore() {
+    // Reset individual platforms to ensure their UX clears.
+    for (const platformKey in this.subscriptionPlatforms_) {
+      this.subscriptionPlatforms_[platformKey].reset();
+    }
+    // Then create new platform store withe the newply reset platforms in it.
+    return new PlatformStore(
+        this.serviceIds_,
+        this.scoreConfig_,
+        this.fallbackEntitlement_,
+        this.subscriptionPlatforms_
+    );
   }
 
   /**
@@ -190,6 +208,9 @@ export class PlatformStore {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
+    if (entitlement.granted) {
+      this.saveGrantEntitlement_(entitlement);
+    }
     this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
   }
 
@@ -213,15 +234,6 @@ export class PlatformStore {
     dev().assert(this.entitlementDeferredMap_[serviceId],
         `Platform ${serviceId} is not declared`);
     return this.entitlementDeferredMap_[serviceId].promise;
-  }
-
-  /**
-   * @param {string} serviceId
-   */
-  resetEntitlementFor(serviceId) {
-    dev().assert(this.entitlementDeferredMap_[serviceId],
-        `Platform ${serviceId} is not declared`);
-    this.entitlementDeferredMap_[serviceId] = new Deferred();
   }
 
   /**
@@ -250,7 +262,6 @@ export class PlatformStore {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(({entitlement}) => {
         if (entitlement.granted) {
-          this.saveGrantEntitlement_(entitlement);
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
           this.grantStatusPromise_.resolve(false);
@@ -274,7 +285,6 @@ export class PlatformStore {
           && !this.grantStatusEntitlement_.isSubscriber()
           && entitlement.isSubscriber())) {
       this.grantStatusEntitlement_ = entitlement;
-      this.onGrantStateResolvedCallbacks_.fire();
     }
   }
 
@@ -292,9 +302,10 @@ export class PlatformStore {
           || this.areAllPlatformsResolved_()) {
       this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
     } else {
-      this.onGrantStateResolvedCallbacks_.add(() => {
+      this.onEntitlementResolvedCallbacks_.add(() => {
         // Grant entitlement only if subscriber
-        if (this.grantStatusEntitlement_.isSubscriber()
+        if ((this.grantStatusEntitlement_
+             && this.grantStatusEntitlement_.isSubscriber())
             || this.areAllPlatformsResolved_()) {
           this.grantStatusEntitlementPromise_.resolve(
               this.grantStatusEntitlement_);

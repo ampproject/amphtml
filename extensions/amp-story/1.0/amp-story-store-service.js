@@ -47,12 +47,12 @@ export const getStoreService = win => {
 
 /**
  * Different UI experiences to display the story.
- * @const @enum {number}
+ * @const @enum {string}
  */
 export const UIType = {
-  MOBILE: 0,
-  DESKTOP: 1,
-  SCROLL: 2,
+  MOBILE: 'mobile',
+  DESKTOP: 'desktop',
+  DESKTOP_FULLBLEED: 'fullbleed',
 };
 
 
@@ -81,11 +81,13 @@ export const UIType = {
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
+ *    tooltipElement: ?Element,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
+ *    pagesCount: number,
  * }}
  */
 export let State;
@@ -121,6 +123,7 @@ export const StateProperty = {
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
+  TOOLTIP_ELEMENT: 'tooltipElement',
   UI_STATE: 'uiState',
 
   // App data.
@@ -128,6 +131,7 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
+  PAGES_COUNT: 'pagesCount',
 };
 
 
@@ -136,6 +140,7 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
+  SET_PAGES_COUNT: 'setPagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -152,6 +157,7 @@ export const Action = {
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
+  TOGGLE_TOOLTIP: 'toggleTooltip',
   TOGGLE_UI: 'toggleUi',
 };
 
@@ -261,6 +267,12 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
+    case Action.TOGGLE_TOOLTIP:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.TOOLTIP_ELEMENT]: data,
+          }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -277,8 +289,11 @@ const actions = (state, action, data) => {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
           }));
+    case Action.SET_PAGES_COUNT:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.PAGES_COUNT]: data}));
     default:
-      dev().error(TAG, `Unknown action ${action}.`);
+      dev().error(TAG, 'Unknown action %s.', action);
       return state;
   }
 };
@@ -310,7 +325,7 @@ export class AmpStoryStoreService {
    */
   get(key) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Unknown state ${key}.`);
+      dev().error(TAG, 'Unknown state %s.', key);
       return;
     }
     return this.state_[key];
@@ -325,7 +340,7 @@ export class AmpStoryStoreService {
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
+      dev().error(TAG, 'Can\'t subscribe to unknown state %s.', key);
       return;
     }
     if (!this.listeners_[key]) {
@@ -391,6 +406,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
+      [StateProperty.TOOLTIP_ELEMENT]: null,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
@@ -398,6 +414,7 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
+      [StateProperty.PAGES_COUNT]: 0,
     });
   }
 

@@ -100,6 +100,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -290,22 +291,15 @@ const forbiddenTerms = {
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-list/0.1/amp-list.js',
-      'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-next-page/0.1/next-page-service.js',
+      // Please keep list alphabetically sorted.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-list/0.1/amp-list.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-video-docking/0.1/amp-video-docking.js',
+      'src/service/position-observer/position-observer-impl.js',
       'src/service/video-manager-impl.js',
-      'src/service/video/docking.js',
       'src/service/video/autoplay.js',
-    ],
-  },
-  'getServiceForDocDeprecated': {
-    message: 'Use getServiceForDoc() instead.',
-    whitelist: [
-      'src/chunk.js',
-      'src/service.js',
-      'src/services.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -572,6 +566,7 @@ const forbiddenTerms = {
       'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/visual-diff/index.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
@@ -605,6 +600,8 @@ const forbiddenTerms = {
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
       'src/video-iframe-integration.js',
+      'extensions/amp-consent/0.1/amp-consent.js',
+      'extensions/amp-consent/0.1/consent-ui.js',
     ],
   },
   '\\.defer\\(\\)': {
@@ -861,6 +858,7 @@ const forbiddenTermsSrcInclusive = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/storage-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   '(cdn|3p)\\.ampproject\\.': {
@@ -870,14 +868,17 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/app.js',
       'build-system/app-index/template.js',
+      'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
       'build-system/app-video-testbench.js',
+      'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'gulpfile.js',
@@ -903,9 +904,6 @@ const forbiddenTermsSrcInclusive = {
       'src/mode.js',
       'dist.3p/current/integration.js',
     ],
-  },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -1066,7 +1064,8 @@ function hasAnyTerms(file) {
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
   const isA4A = /\/a4a\//.test(pathname);
-  if (is3pFile && !isTestFile && !isA4A) {
+  const isRecaptcha = basename == 'recaptcha.js';
+  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

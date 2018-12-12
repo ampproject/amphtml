@@ -185,6 +185,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return win;
   }
 
+  it('limit replacement params size', () => {
+    return getReplacements().then(replacements => {
+      replacements.getVariableSource().initialize();
+      const variables =
+          Object.keys(replacements.getVariableSource().replacements_);
+      // Restrict the number of replacement params to globalVaraibleSource
+      // Please consider adding the logic to amp-analytics instead.
+      // Please contact @lannka or @zhouyx if the test fail.
+      expect(variables.length).to.equal(69);
+    });
+  });
+
   it('should replace RANDOM', () => {
     return expandUrlAsync('ord=RANDOM?').then(res => {
       expect(res).to.match(/ord=(\d+(\.\d+)?)\?$/);
@@ -1737,6 +1749,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(expanded).to.match(/abc:\/\/example\.com\/\?r=(\d+(\.\d+)?)$/);
     });
 
+    it('should not encode values returned by expandStringSync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+      const expanded = urlReplacements.expandStringSync(
+          'title=TITLE',
+          {'TITLE': 'test with spaces'});
+      expect(expanded).to.equal('title=test with spaces');
+    });
+
     it('should not check protocol changes with expandStringAsync', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
@@ -1745,6 +1766,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'RANDOM': Promise.resolve('abc'),
           }).then(expanded => {
         expect(expanded).to.equal('abc:X:Y');
+      });
+    });
+
+    it('should not encode values returned by expandStringAsync', () => {
+      const win = getFakeWindow();
+      const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
+      return urlReplacements.expandStringAsync(
+          'title=TITLE',
+          {'TITLE': Promise.resolve('test with spaces')},
+      ).then(expanded => {
+        expect(expanded).to.equal('title=test with spaces');
       });
     });
   });

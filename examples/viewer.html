@@ -1,5 +1,5 @@
 <!doctype html>
-<html allow-viewer-render-template>
+<html>
 <head>
   <meta charset="utf-8">
   <title>Viewer</title>
@@ -242,7 +242,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a,swipe,viewerRenderTemplate',
+        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -405,8 +405,13 @@
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
       switch(name) {
+        case 'bindReady':
+          return Promise.resolve();
         case 'documentLoaded':
           return this.documentReady_();
+        case 'focusin':
+          log('Focusin event', data);
+          return Promise.resolve();
         case 'requestFullOverlay':
           return this.requestFullOverlay_();
         case 'cancelFullOverlay':
@@ -459,7 +464,11 @@
       // Mocked response.
       new Response
       return Promise.resolve({
-        "html": "<ul><li>Some list item</li><li>Some list item</li><li>Some list item</li></ul>",
+        "html":
+            "<ul>" +
+              "<li><p [text]='data.foo'></p></li>" +
+              "<li>Some list item</li>" +
+              "<li>Some list item</li></ul>",
         "body" : "",
         "init" : {
           "headers": {

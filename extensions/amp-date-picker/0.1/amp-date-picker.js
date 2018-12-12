@@ -52,20 +52,6 @@ import {requireExternal} from '../../../src/module';
  */
 let DateTemplateMapDef;
 
-/**
- * @typedef {{
- *   startDate: ?moment,
- *   endDate: ?moment
- * }}
- */
-let DatesChangeDetailsDef;
-
-/**
- * @typedef {{
- *   date: ?moment
- * }}
- */
-let DateChangeDetailsDef;
 
 /** @dict @extends {JsonObject} */
 class BindDateDetails {
@@ -484,6 +470,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
       this.state_ = this.getInitialState_();
+      this.render(this.state_);
     });
   }
 
@@ -870,8 +857,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       return alternativeName;
     }
 
-    user().error(TAG, `Multiple date-pickers with implicit ${name} fields ` +
-        'need to have IDs');
+    user().error(
+        TAG,
+        'Multiple date-pickers with implicit %s fields need to have IDs',
+        name);
     return '';
   }
 
@@ -1244,9 +1233,11 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Respond to user interactions that change a DateRangePicker's dates.
-   * @param {!DatesChangeDetailsDef} param
+   * @param {!JsonObject} param
    */
-  onDatesChange({startDate, endDate}) {
+  onDatesChange(param) {
+    const startDate = param['startDate'];
+    const endDate = param['endDate'];
     const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
         this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
@@ -1701,15 +1692,16 @@ export class AmpDatePicker extends AMP.BaseElement {
       const {minHeight} = computedStyle(this.win, container);
       if (minHeight === DEFAULT_TRANSITION_CONTAINER_MIN_HEIGHT) {
         user().warn(TAG,
+            '%s\n The "day-size" attribute is changed from the default value '
+            + '%s. You must specify a new "min-height" `for the %s element in '
+            + 'your AMP CSS.\n This is necessary due to a bug in the '
+            + 'date-picker library. When the bug is fixed, the %s CSS class '
+            + 'will be removed. '
+            + 'See https://github.com/ampproject/amphtml/issues/13897',
             this.element,
-            'The "day-size" attribute is changed from the default value ' +
-            `"${DEFAULT_DAY_SIZE}". You must specify a new "min-height" ` +
-            `for the "${TRANSITION_CONTAINER_SELECTOR}" element in your ` +
-            'AMP CSS.\n' +
-            'This is necessary due to a bug in the date-picker library. ' +
-            `When the bug is fixed, the "${RESIZE_BUG_CSS}" CSS class ` +
-            'will be removed.\n' +
-            'See https://github.com/ampproject/amphtml/issues/13897');
+            DEFAULT_DAY_SIZE,
+            TRANSITION_CONTAINER_SELECTOR,
+            RESIZE_BUG_CSS);
       }
     }
   }

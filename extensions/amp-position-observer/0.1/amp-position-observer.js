@@ -154,14 +154,28 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * This event is triggered only when position-observer triggers which is
    * at most every animation frame.
    *
+   * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
    * @private
    */
-  triggerScroll_() {
+  triggerScroll_(adjustedViewportRect) {
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
         dict({'percent': this.scrollProgress_}));
+    event.additionalViewportData = {
+      'top-ratio': this.topRatio_,
+      'bottom-ratio': this.bottomRatio_,
+      'top-margin': adjustedViewportRect.top,
+      'bottom-margin': adjustedViewportRect.bottom,
+    };
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
+    // TODO(nainar): We want to remove the position observer if the scroll
+    // event is only used by the AnimationWorklet codepath of amp-animation.
+    // This involves having amp-animation signal back to amp-position-observer
+    // that it is using AnimationWorklet AND amp-position-observer needs to
+    // ensure nothing else other than amp-animation is using scroll AND
+    // that `enter` and `exit` events are not used.
   }
+
 
   /**
    * Called by position observer.
@@ -204,7 +218,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
-      this.triggerScroll_();
+      this.triggerScroll_(adjViewportRect);
       this.triggerExit_();
       this.firstIterationComplete_ = true;
     }
@@ -216,7 +230,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send scroll progress if visible.
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
-      this.triggerScroll_();
+      this.triggerScroll_(adjViewportRect);
     }
   }
 
@@ -444,6 +458,18 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       );
     }
   }
+
+  /**
+   * @private
+   */
+  maybeUninstallPositionObserver_() {
+    if (this.positionObserver_) {
+      const scene = this.discoverScene_();
+      this.positionObserver_.unobserve(scene);
+      this.positionObserver_ = null;
+    }
+  }
+
 }
 
 AMP.extension(TAG, '0.1', AMP => {

@@ -44,6 +44,7 @@ import {
   getExperimentIds,
   getForceSafeframe,
   getIdentity,
+  getIsFluid,
   getPageOffsets,
   getSizes,
   getTargetingAndExclusions,
@@ -247,6 +248,12 @@ describes.realWin('Doubleclick SRA', config , env => {
       impls[2] = {element: {parentElement: {tagName: 'AMP-CAROUSEL',
         parentElement: {tagName: 'AMP-STICKY-AD'}}}};
       expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
+    });
+    it('should combine fluid state', () => {
+      impls[0] = {isFluidRequest: () => true};
+      impls[1] = {isFluidRequest: () => false};
+      impls[2] = {isFluidRequest: () => true};
+      expect(getIsFluid(impls)).to.jsonEqual({'fluid': 'height,0,height'});
     });
   });
 
