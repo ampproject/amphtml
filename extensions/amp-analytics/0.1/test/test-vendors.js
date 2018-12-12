@@ -50,13 +50,11 @@ describes.realWin('amp-analytics', {
   },
 }, function(env) {
   let win, doc;
-  let ampdoc;
   let requestVerifier;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ampdoc = env.ampdoc;
     const wi = mockWindowInterface(env.sandbox);
     wi.getLocation.returns(win.location);
     requestVerifier = new ImagePixelVerifier(wi);
