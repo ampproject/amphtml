@@ -135,7 +135,8 @@ export function getIframe(
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
   }
-  if (isExperimentOn(parentWindow, 'sandbox-ads') && type == 'amp-ad') {
+  const excludeFromSandbox = ['facebook', 'embedly'];
+  if (isExperimentOn(parentWindow, 'sandbox-ads') && !excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute('data-amp-3p-sentinel',
@@ -360,6 +361,8 @@ export function applySandbox(iframe) {
     // This remains subject to popup blocking, it just makes it supported
     // at all.
     'allow-popups',
+    // Give access to presentation API
+    'allow-presentation',
     // This applies inside the iframe and is crucial to not break the web.
     'allow-same-origin',
     'allow-scripts',
