@@ -362,8 +362,6 @@ export function applySandbox(iframe) {
     // This remains subject to popup blocking, it just makes it supported
     // at all.
     'allow-popups',
-    // Give access to presentation API
-    'allow-presentation',
     // This applies inside the iframe and is crucial to not break the web.
     'allow-same-origin',
     'allow-scripts',
