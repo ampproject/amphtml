@@ -199,11 +199,7 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story-page[active] {
-  transition: filter 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-}
-
-.i-amphtml-story-bookend-active amp-story-page[active] {
+[desktop].i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
@@ -228,7 +224,7 @@ amp-story-page[active] {
   }
 
   100% {
-    opacity: 0.55;
+    opacity: 0.75;
   }
 }
 
