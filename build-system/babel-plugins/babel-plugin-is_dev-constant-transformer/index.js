@@ -19,20 +19,15 @@
   * The above said variables are in src/mode.js file.
   * @param {Object} babelTypes
   */
-module.exports = function(babelTypes) {
-  const {types: t} = babelTypes;
+module.exports = function({types: t}) {
   return {
     visitor: {
       VariableDeclarator(path) {
-        const {id, init} = path.node;
+        const {node} = path;
+        const {id, init} = node;
         if (t.isIdentifier(id, {name: 'IS_DEV'})
             && t.isBooleanLiteral(init, {value: true})) {
-          path.replaceWith(
-              t.variableDeclarator(
-                  t.identifier('IS_DEV'),
-                  t.booleanLiteral(false)
-              )
-          );
+          node.init = t.booleanLiteral(false);
         }
       },
     },
