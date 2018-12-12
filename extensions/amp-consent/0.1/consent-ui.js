@@ -250,7 +250,7 @@ export class ConsentUI {
         <linearGradient id="grad">
           <stop stop-color="rgb(105, 105, 105)"></stop>
           <stop offset="100%"
-          stop-color="rgba(105, 105, 105, 0)"
+          stop-color="rgb(105, 105, 105)"
           stop-opacity="0"></stop>
         </linearGradient>
       </defs>
