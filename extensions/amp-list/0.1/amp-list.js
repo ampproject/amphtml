@@ -449,7 +449,6 @@ export class AmpList extends AMP.BaseElement {
       payload: opt_payload};
 
     if (this.renderedItems_ && append) {
-      this.renderItems_.data = this.renderedItems_.concat(data);
       this.renderItems_.payload = opt_payload || {};
     }
 
@@ -737,6 +736,8 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreButton_) {
       return this.mutateElement(() => {
         this.loadMoreButton_.classList.toggle('amp-visible', true);
+        this.loadMoreEndElement_.classList.toggle('amp-visible', false);
+        this.loadMoreFailedElement_.classList.toggle('amp-visible', false);
         this.unlistenLoadMore_ = listen(this.loadMoreButton_, 'click',
             () => this.loadMoreCallback_());
         // Guarantees that the height accounts for the newly visible button
