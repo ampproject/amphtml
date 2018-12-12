@@ -249,7 +249,9 @@ export class ConsentUI {
       <defs>
         <linearGradient id="grad">
           <stop stop-color="rgb(105, 105, 105)"></stop>
-          <stop offset="100%"  stop-color="rgba(105, 105, 105, 0)"></stop>
+          <stop offset="100%"
+          stop-color="rgba(105, 105, 105, 0)"
+          stop-opacity="0"></stop>
         </linearGradient>
       </defs>
       <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
