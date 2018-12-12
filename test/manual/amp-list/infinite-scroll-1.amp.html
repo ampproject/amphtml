@@ -17,14 +17,6 @@
       margin: 8px;
     }
 
-    [load-more-button], [load-more-failed], [load-more-loading] {
-      background: gray;
-      color: #fff;
-      cursor: pointer;
-      z-index: 2;
-      padding: 16px;
-    }
-
     .pin-container {
       border-radius: 8px;
       background-color: #fefefe;
@@ -72,7 +64,7 @@
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3&latency=100"
+    src="/infinite-scroll?items=5&left=3"
     load-more="auto"
     load-more-bookmark="next">
     <template type="amp-mustache">
@@ -86,15 +78,6 @@
     </template>
     <div overflow>
       OVERFLOW
-    </div>
-    <div load-more-button>
-      SEE MORE
-    </div>
-    <div load-more-loading>
-      LOADING
-    </div>
-    <div load-more-failed>
-      LOAD FAILED
     </div>
     <div load-more-end>
       LOAD ENDED

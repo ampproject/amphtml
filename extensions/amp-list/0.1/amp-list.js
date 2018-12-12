@@ -40,6 +40,7 @@ import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
+import {htmlFor} from '../../../src/static-template';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
@@ -201,6 +202,16 @@ export class AmpList extends AMP.BaseElement {
     if (!this.loadMoreButton_) {
       this.loadMoreButton_ = childElementByAttr(
           this.element, 'load-more-button');
+
+      if (!this.loadMoreButton_) {
+        this.loadMoreButton_ = htmlFor(this.win.document)`
+          <div load-more-button class="i-amphtml-default-ui">
+            <button class="i-amphtml-list-load-more-button">
+              <label>See More</label>
+            </button>
+          </div>
+        `;
+      }
     }
     return this.loadMoreButton_;
   }
@@ -810,6 +821,14 @@ export class AmpList extends AMP.BaseElement {
     if (!this.loadMoreLoadingElement_) {
       this.loadMoreLoadingElement_ = childElementByAttr(
           this.element, 'load-more-loading');
+
+      if (!this.loadMoreLoadingElement_) {
+        this.loadMoreLoadingElement_ = htmlFor(this.win.document)`
+          <div load-more-loading class="i-amphtml-default-ui">
+            <div class="i-amphtml-list-load-more-spinner"></div>
+          </div>
+        `;
+      }
     }
     return this.loadMoreLoadingElement_;
   }
@@ -895,6 +914,24 @@ export class AmpList extends AMP.BaseElement {
     if (!this.loadMoreFailedElement_) {
       this.loadMoreFailedElement_ = childElementByAttr(
           this.element, 'load-more-failed');
+
+      if (!this.loadMoreFailedElement_) {
+
+        this.loadMoreFailedElement_ = htmlFor(this.win.document)`
+          <div load-more-failed class="i-amphtml-default-ui">
+            <div class="i-amphtml-list-load-more-message">
+              Unable to Load More
+            </div>
+            <button class="i-amphtml-list-load-more-button
+                           i-amphtml-list-load-more-button-has-icon
+                           i-amphtml-list-load-more-button-small"
+            >
+              <div class="i-amphtml-list-load-more-icon"></div>
+              <label>Retry</label>
+            </button>
+          </div>
+        `;
+      }
     }
     return this.loadMoreFailedElement_;
   }
