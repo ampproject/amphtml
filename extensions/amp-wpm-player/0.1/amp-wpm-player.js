@@ -16,10 +16,9 @@
 
 import {
   PlayingStates,
-  VideoAnalyticsEvents,
-  VideoAttributes,
-  VideoEvents,
-  VideoInterface,
+  VideoAttributes, // TODO: docking
+  VideoEvents, // TODO: registered, visibility
+  VideoInterface, // TODO: played ranges
 } from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
@@ -27,6 +26,8 @@ import {
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
+
+import {listenOncePromise} from '../../../src/event-helper';
 
 import {
   installVideoManagerForDoc,
@@ -81,10 +82,13 @@ export class AmpWpmPlayer extends AMP.BaseElement {
    */
   parseOptions_() {
     const output = {};
-    output.ampnoaudio = true;
+    output.ampnoaudio = this.parseAttribute_(VideoAttributes.NO_AUDIO);
+    output.autoplay = this.parseAttribute_(VideoAttributes.AUTOPLAY);
+    output.dock = this.parseAttribute_(VideoAttributes.DOCK);
+    output.rotateToFullscreen = this.parseAttribute_(VideoAttributes.ROTATE_TO_FULLSCREEN);
+
     output.ampcontrols = true;
     output.target = 'playerTarget';
-    output.autoplay = this.parseAttribute_('autoplay', false, true);
     output.adv = this.parseAttribute_('adv', false, true);
     output.url = this.parseAttribute_('url', true);
     output.title = this.parseAttribute_('title');
@@ -189,6 +193,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     if (!this.screenshot) {
       this.screenshot = getScreenshot(this.videoId);
     }
+    console.log('constructor done');
   }
 
   /**
@@ -199,6 +204,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     console.log('component -> sent', message);
     if (this.playerReady_ || message.startsWith('init')) {
       const HEADER = 'WP.AMP.PLAYER.';
+      console.log('asdfasdf');
       this.contentWindow_.postMessage(HEADER + message, '*');
     } else {
       console.warn('Added ', message, ' to queue');
@@ -223,8 +229,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       const HEADER = 'WP.AMP.PLAYER.';
 
       if (data === `${HEADER}FRAME.READY`) {
-        // that.eventListeners_.splice(that.eventListeners_.indexOf(this), 1);
-
         that.contentWindow_ = that.iframe_
             .querySelector('iframe')
             .contentWindow;
@@ -239,6 +243,8 @@ export class AmpWpmPlayer extends AMP.BaseElement {
       if (data === `${HEADER}PLAYER.READY`) {
         that.playerReady_ = true;
 
+        that.element.dispatchCustomEvent(VideoEvents.LOAD);
+
         while (that.toSend_.length) {
           that.sendCommand_(that.toSend_.shift());
         }
@@ -250,10 +256,54 @@ export class AmpWpmPlayer extends AMP.BaseElement {
     this.eventListeners_.push(function(data) {
       const HEADER = 'WP.AMP.PLAYER.';
 
-      if (data.startsWith(`${HEADER}METADATA`)) {
-        that.metadata_ = JSON.parse(data.replace(`${HEADER}METADATA`, ''));
+      if (data.startsWith(`${HEADER}START_MOVIE`)) {
+        that.metadata_ = JSON.parse(data.replace(`${HEADER}START_MOVIE`, ''));
+        that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: sprawdzic czy wszystko
+        that.element.dispatchCustomEvent(VideoEvents.RELOAD); // TODO: sprawdzic czy wszystko
       }
     });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}PLAY`)) {
+        that.element.dispatchCustomEvent(VideoEvents.PLAYING); // TODO: dokończyc to, autoplay
+      }
+    });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}PAUSE`)) {
+        that.element.dispatchCustomEvent(VideoEvents.PAUSE); // TODO: dokończyc to, autoplay
+      }
+    });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}END_MOVIE`)) {
+        that.element.dispatchCustomEvent(VideoEvents.ENDED); // TODO: dokończyc to, pause + to + src change pewnie
+      }
+    });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}START_ADV_QUEUE`)) {
+        that.element.dispatchCustomEvent(VideoEvents.AD_START);
+      }
+    });
+
+    this.eventListeners_.push(function(data) {
+      const HEADER = 'WP.AMP.PLAYER.';
+
+      if (data.startsWith(`${HEADER}END_ADV_QUEUE`)) {
+        that.element.dispatchCustomEvent(VideoEvents.AD_END); // TODO: czy to moze byc jako adstart i adend ++ czy end beak moze byc tak samo jak end queue
+      }
+    });
+
+    // TODO: event listenery do kupy
 
     this.createPosterForAndroidBug_();
     this.registerAction('showControls', () => {this.showControls();});
@@ -379,13 +429,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   /**
   * @override
   */
-  pause() {
-    this.sendCommand_('pause');
-  }
-
-  /**
-  * @override
-  */
   play() {
     this.sendCommand_('play');
   }
@@ -393,8 +436,16 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   /**
   * @override
   */
+  pause() {
+    this.sendCommand_('pause');
+  }
+
+  /**
+  * @override
+  */
   mute() {
     this.sendCommand_('mute');
+    this.element.dispatchCustomEvent(VideoEvents.MUTED);
   }
 
   /**
@@ -402,6 +453,7 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   */
   unmute() {
     this.sendCommand_('unmute');
+    this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
   }
 
   /**
@@ -409,7 +461,6 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   */
   showControls() {
     this.sendCommand_('showControls');
-    // setTimeout(() => {this.hideControls();}, 3000);
   }
 
   /**
@@ -445,18 +496,28 @@ export class AmpWpmPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  getCurrentTime() {
-    return this.video_.currentTime;
+  getCurrentTime() { // TODO: current time
+    return 0;
   }
 
   /** @override */
   getDuration() {
-    return this.video_.duration;
+    return 0; // TODO: duration
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    return []; // TODO: implement
   }
 
   /** @override */
   preimplementsAutoFullscreen() {
-    return false;
+    return true; // TODO: nie wiem
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false; // TODO: nie wiem
   }
 
   // TODO: zaimplementować video element actions z: https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events
