@@ -263,10 +263,10 @@ export function purifyHtml(dirty, diffing = false) {
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
  *
- * NOTE: see that we use DomPurifyConfig found in build-system/dompurify.extern.j
- * as the exact type. This is to prevent closure compiler from optimizing these
- * fields here in this file and in the 3rd party library file. See #19624
- * for further information.
+ * NOTE: see that we use DomPurifyConfig found in
+ * build-system/dompurify.extern.js as the exact type. This is to prevent
+ * closure compiler from optimizing these fields here in this file and in the
+ * 3rd party library file. See #19624 for further information.
  * @return {!DomPurifyConfig}
  */
 export function purifyConfig() {
