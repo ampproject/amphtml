@@ -75,13 +75,14 @@ describes.repeated('', {
 
     function createAmpElementMock(tag = 'div') {
       const element = env.win.document.createElement(tag);
+      const defaultLayoutRect = layoutRectLtwh(0, 0, 0, 0);
       Object.assign(element, {
         getIntersectionChangeEntry: noop,
-        getLayoutBox: noop,
+        getLayoutBox: () => defaultLayoutRect,
       });
       return {
         element,
-        getLayoutBox: noop,
+        getLayoutBox: () => defaultLayoutRect,
       };
     }
 
@@ -123,7 +124,7 @@ describes.repeated('', {
       sandbox.stub(docking, 'getAreaWidth_').returns(width);
     }
 
-    function setValidAreaHeight(videoHeight) {
+    function setValidAreaHeight(videoHeight = 400) {
       mockAreaHeight(videoHeight * REVERT_TO_INLINE_RATIO);
     }
 
@@ -249,13 +250,10 @@ describes.repeated('', {
       const video = createVideo();
       const dock = sandbox.spy(docking, 'dock_');
 
-      const videoWidth = 0;
-      const videoHeight = 0;
+      placeVideoLtwh(video, 0, -100, 0, 0);
 
-      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
-
-      mockInvalidAreaWidth();
-      setValidAreaHeight(videoHeight);
+      setValidAreaWidth();
+      setValidAreaHeight();
 
       docking.updateOnPositionChange_(video);
 

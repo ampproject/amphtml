@@ -371,14 +371,16 @@ export class VideoDocking {
     /** @private {boolean} */
     this.isTransitioning_ = false;
 
-    if (!getMode(ampdoc.win).test) {
-      this.registerAll_();
-    }
+    this.registerAll_();
   }
 
   /** @private */
   registerAll_() {
     const ampdoc = this.ampdoc_;
+
+    if (getMode(ampdoc.win).test) {
+      return;
+    }
 
     const dockableSelector =
         `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
