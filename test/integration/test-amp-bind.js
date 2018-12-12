@@ -20,7 +20,7 @@ import {Services} from '../../src/services';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 
 // TODO(#19647): Unskip tests
-describe.configure().skipChrome().run('amp-bind', function() {
+describe.skip('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
