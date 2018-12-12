@@ -243,6 +243,25 @@ describes.repeated('', {
       expect(dock).to.not.have.been.called;
     });
 
+    it('should not dock if the video\'s layout box is not sized', () => {
+      maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
+
+      const video = createVideo();
+      const dock = sandbox.spy(docking, 'dock_');
+
+      const videoWidth = 0;
+      const videoHeight = 0;
+
+      placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
+
+      mockInvalidAreaWidth();
+      setValidAreaHeight(videoHeight);
+
+      docking.updateOnPositionChange_(video);
+
+      expect(dock).to.not.have.been.called;
+    });
+
     it('should not dock if another video is docked', () => {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
