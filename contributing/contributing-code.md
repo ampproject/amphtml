@@ -47,11 +47,11 @@ To find a reviewer:
 
 ## Implementation
 
-1. (optional) [Join AMP on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).  (You don't need to wait to be added to the org before you start coding.)
-1. [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
-1. [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
-1. [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
-1. Write your code.
+- (optional) [Join AMP on GitHub](https://goo.gl/forms/T65peVtfQfEoDWeD3).  You don't need to wait to be added to the org before you start coding.
+- [Perform the one-time setup if needed](./getting-started-quick.md#one-time-setup): Set up your GitHub account, install Node, Yarn, Gulp CLI, fork repo, track repo, etc.
+- [Create a working branch](./getting-started-e2e.md#create-a-git-branch).
+- [Build AMP](./getting-started-e2e.md#building-amp-and-starting-a-local-server).
+- Write your code.
    - For more substantial features, multiple smaller PRs are preferable to one large PR.  These will be easier to review and can prevent wasted work.
    - Consult these resources for guidance and guidelines:
      - **Design**: [AMP Design Principles](./DESIGN_PRINCIPLES.md)
@@ -64,26 +64,26 @@ To find a reviewer:
      - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
   - [Put your new feature behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
-1. [Test your changes](./getting-started-e2e.md#testing-your-changes): A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
-1. Prepare for your code review.
+- [Test your changes](./getting-started-e2e.md#testing-your-changes): A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
+- Prepare for your code review.
    - For more substantial features, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
    - Before your final review, make sure your change:
-     - [ ] [Has good test coverage](./TESTING.md)
-     - [ ] [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
-     - [ ] [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
-     - [ ] [Passes the presubmit checks (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
-     - [ ] [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
-     - [ ] [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
-1. Send your code for review.
-  - [Sign the CLA](#contributor-license-agreement) if you have not already done so.
+     - [Has good test coverage](./TESTING.md)
+     - [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
+     - [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
+     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](./build-system/enable-git-pre-push.sh#L17-L20)
+     - [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
+     - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
+- Send your code for review.
+  - [Sign the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
   - [Pull the latest changes from the AMPHTML repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
   - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/enable-git-pre-push.sh#L17-L20).
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-1. After your PR is approved, it will merged by your reviewer or one of the other approvers. To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
-1. [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
+- After your PR is approved, it will merged by your reviewer or one of the other approvers. To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
+- [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
 ## Contributing extended components
 
