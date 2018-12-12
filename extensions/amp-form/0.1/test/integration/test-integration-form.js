@@ -36,7 +36,7 @@ describes.realWin('AmpForm Integration', {
   },
   mockFetch: false,
 }, env => {
-  const baseUrl = 'http://localhost:31862';
+  const baseUrl = 'http://localhost:8081';
   let doc;
   let sandbox;
 
@@ -131,10 +131,12 @@ describes.realWin('AmpForm Integration', {
   }
 
   const describeChrome =
-      describe.configure().skipFirefox().skipSafari().skipEdge();
+      describe.configure().skipChromeDev()
+          .skipFirefox().skipSafari().skipEdge();
 
   describeChrome.run('on=submit:form.submit', () => {
-    it('should be protected from recursive-submission', () => {
+    // TODO(cvializ, #19788): fix this test for Chrome 71.
+    it.skip('should be protected from recursive-submission', () => {
       const form = getForm({
         id: 'sameform',
         actionXhr: baseUrl + '/form/post',

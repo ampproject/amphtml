@@ -1,16 +1,16 @@
-# AMP Real Time Config with DoubleClick (DFP)
+# AMP Real Time Config with Google Ad Manager
 
 
 ## Introduction
 
-This implementation guide is intended for publishers who wish to use Real Time Config with DoubleClick Fast Fetch in AMP. Any publishers using remote.html with DoubleClick will need to implement this, as Delayed Fetch (and therefore remote.html support) will be deprecated March 29, 2018. See [Intent to Implement: Delayed Fetch Deprecation.](https://github.com/ampproject/amphtml/issues/11834)
+This implementation guide is intended for publishers who wish to use Real Time Config with Google Ad Manager Fast Fetch in AMP. Any publishers using remote.html with Google Ad Manager will need to implement this, as Delayed Fetch (and therefore remote.html support) will be deprecated March 29, 2018. See [Intent to Implement: Delayed Fetch Deprecation.](https://github.com/ampproject/amphtml/issues/11834)
 
 
 ## Background
 
-For full details and background, please refer to the [RTC Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended to highlight some of the details of DoubleClick's implementation of RTC.
+For full details and background, please refer to the [RTC Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended to highlight some of the details of Google Ad Manager's implementation of RTC.
 
-AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to augment ad requests with targeting information that is retrieved at runtime. This dynamic targeting data can be applied in addition to any existing statically-defined data on each amp-ad element. RTC allows 5 callouts to targeting servers for each individual ad slot, the results of which can be added to the ad request. To use RTC with DoubleClick, you must simply setup the rtc-config on each amp-ad element.
+AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to augment ad requests with targeting information that is retrieved at runtime. This dynamic targeting data can be applied in addition to any existing statically-defined data on each amp-ad element. RTC allows 5 callouts to targeting servers for each individual ad slot, the results of which can be added to the ad request. To use RTC with Google Ad Manager, you must simply setup the rtc-config on each amp-ad element.
 
 
 ## Setting Up RTC-Config
@@ -18,7 +18,7 @@ AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to 
 For instructions on how to set the rtc-config attribute on the amp-ad, refer to [Setting Up RTC-Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md#setting-up-rtc-config) in the Publisher Implementation Guide.
 
 ## Available URL Macros
-Doubleclick's RTC implementation has made many macros available for RTC url expansion. Please note that the time to expand the URL is counted against the RTC timeout. Additionally, note that all RTC URLs are truncated at 16384 characters, so keep possible truncation in mind when determining which macros to include, and which order to include them in your URL. Currently available macros are as follows:
+Google Ad Manager's RTC implementation has made many macros available for RTC url expansion. Please note that the time to expand the URL is counted against the RTC timeout. Additionally, note that all RTC URLs are truncated at 16384 characters, so keep possible truncation in mind when determining which macros to include, and which order to include them in your URL. Currently available macros are as follows:
 
 - **PAGEVIEWID** - pageViewId
 - **HREF** - equivalent to window.context.location.href
@@ -40,7 +40,7 @@ Doubleclick's RTC implementation has made many macros available for RTC url expa
 
 To use their own first-party data, publishers will need to build a RTC-compatible endpoint that returns this targeting data. For those only retrieving data from 3rd-party vendors, this section is not applicable.
 
-The requirements for an RTC endpoint to be used with DoubleClick are the same as what is specified in the Publisher Implementation Guide. In summary:
+The requirements for an RTC endpoint to be used with Google Ad Manager are the same as what is specified in the Publisher Implementation Guide. In summary:
 
 The RTC Response to a GET must meet the following requirements:
 
@@ -48,7 +48,7 @@ The RTC Response to a GET must meet the following requirements:
 *   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 *   Body of response is a JSON object of targeting information such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
-    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using Google Ad Manager, refer to Google Ad Manager docs).
 
 
 
@@ -166,7 +166,7 @@ And let the response from VendorB be:
 ```
 
 
-The DoubleClick Fast Fetch implementation automatically converts both of these responses to:
+The Google Ad Manager Fast Fetch implementation automatically converts both of these responses to:
 
 Rewritten VendorA Response
 
@@ -318,6 +318,6 @@ https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26e
 
 ## Using RTC In DFP
 
-The results of the RTC Callouts will be added to the DoubleClick Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for DoubleClick.
+The results of the RTC Callouts will be added to the Google Ad Manager Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for Google Ad Manager.
 
-#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to Google Ad Manager</a>

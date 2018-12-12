@@ -69,4 +69,4 @@ Example - Valid multi-size request (ignores minimum size constraint)
 </amp-ad>
 ```
 
-#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to Google Ad Manager</a>

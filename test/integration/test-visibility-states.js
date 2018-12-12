@@ -21,7 +21,8 @@ import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
 describe.configure().skipIfPropertiesObfuscated()
-    .ifNewChrome().run('Viewer Visibility State', () => {
+    // TODO(jridgewell, #19793): fix this test for Chrome 71.
+    .skip('Viewer Visibility State', () => {
 
       function noop() {}
 

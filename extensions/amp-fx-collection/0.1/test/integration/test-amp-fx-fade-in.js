@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifNewChrome();
+const config = describe.configure().ifChrome();
 config.run('amp-fx-collection', function() {
   this.timeout(100000);
 
