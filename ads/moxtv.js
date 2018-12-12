@@ -39,16 +39,16 @@ export function moxtv(global, data) {
   const scriptSrc = 'https://ad.mox.tv/mox/mwayss_invocation.min.js?tld=123&pzoneid=' + data.zoneId + '&height=' + data.w + '&width=' + data.h;
   const iframeContent =
     '<!DOCTYPE html>' +
-    <html>' +
-    <head>' +
-    <style>body{margin:0}</style>' +
-    </head>' +
-    <body>' +
-    <div id="adSlot" style="display:flex;justify-content:center;font-size:0">' +
-    <script async src="' + scriptSrc + '"></script>' +
-    </div>' +
-    </body>' +
-    </html>';
+    '<html>' +
+    '<head>' +
+    '<style>body{margin:0}</style>' +
+    '</head>' +
+    '<body>' +
+    '<div id="adSlot" style="display:flex;justify-content:center;font-size:0">' +
+    '<script async src="' + scriptSrc + '"></script>' +
+    '</div>' +
+    '</body>' +
+    '</html>';
 
   iframeDocument.write(iframeContent);
   iframeDocument.close();
