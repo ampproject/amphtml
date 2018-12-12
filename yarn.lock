@@ -1463,16 +1463,16 @@ auto-bind@^1.1.0:
   resolved "https://registry.yarnpkg.com/auto-bind/-/auto-bind-1.2.1.tgz#807f7910b0210db9eefe133f3492c28e89698b96"
   integrity sha512-/W9yj1yKmBLwpexwAujeD9YHwYmRuWFGV8HWE7smQab797VeHa4/cnE2NFeDhA+E+5e/OGBI8763EhLjfZ/MXA==
 
-autoprefixer@9.3.1:
-  version "9.3.1"
-  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.3.1.tgz#71b622174de2b783d5fd99f9ad617b7a3c78443e"
-  integrity sha512-DY9gOh8z3tnCbJ13JIWaeQsoYncTGdsrgCceBaQSIL4nvdrLxgbRSBPevg2XbX7u4QCSfLheSJEEIUUSlkbx6Q==
+autoprefixer@9.4.2:
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.4.2.tgz#0234d20900684fc4bfb67926493deb68384067f5"
+  integrity sha512-tYQYJvZvqlJCzF+BLC//uAcdT/Yy4ik9bwZRXr/EehUJ/bjjpTthsWTy8dpowdoIE1sLCDf1ch4Eb2cOSzZC9w==
   dependencies:
-    browserslist "^4.3.3"
-    caniuse-lite "^1.0.30000898"
+    browserslist "^4.3.5"
+    caniuse-lite "^1.0.30000914"
     normalize-range "^0.1.2"
     num2fraction "^1.2.2"
-    postcss "^7.0.5"
+    postcss "^7.0.6"
     postcss-value-parser "^3.3.1"
 
 ava-init@^0.2.0:
@@ -2833,7 +2833,7 @@ browserify@16.2.3, browserify@^16.1.0:
     vm-browserify "^1.0.0"
     xtend "^4.0.0"
 
-browserslist@^4.0.0, browserslist@^4.3.3, browserslist@^4.3.4:
+browserslist@^4.0.0, browserslist@^4.3.4, browserslist@^4.3.5:
   version "4.3.5"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.3.5.tgz#1a917678acc07b55606748ea1adf9846ea8920f7"
   integrity sha512-z9ZhGc3d9e/sJ9dIx5NFXkKoaiQTnrvrMsN3R1fGb1tkWWNSz12UewJn9TNxGo1l7J23h0MRaPmk7jfeTZYs1w==
@@ -3075,7 +3075,7 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000898, caniuse-lite@^1.0.30000912:
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000912, caniuse-lite@^1.0.30000914:
   version "1.0.30000918"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000918.tgz#6288f79da3c5c8b45e502f47ad8f3eb91f1379a9"
   integrity sha512-CAZ9QXGViBvhHnmIHhsTPSWFBujDaelKnUj7wwImbyQRxmXynYqKGi3UaZTSz9MoVh+1EVxOS/DFIkrJYgR3aw==
@@ -6253,40 +6253,40 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler-java@^20181028.0.0:
-  version "20181028.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20181028.0.0.tgz#84629942e8e563a08a83c7e9e9b28e4385272e24"
-  integrity sha512-msRSt+BqBsFQlE3kwbQN+RDlW8bzbFrA+YWxXAN7jalm1RAYyFdU7KH30nYSmwmuKgYQYsBTnc7PFwdZNk003Q==
+google-closure-compiler-java@^20181125.0.1:
+  version "20181125.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20181125.0.1.tgz#4def6bc712f01acb0df22a0ec1c39271ba8b6f07"
+  integrity sha512-UURFLSpdizI40C7cJ8wAzedZww8hjoWnwW4YKLVsTkenvdI1qe1WsWohGUNxPUJoHODVExJHfTtBlfcigesGKg==
 
-google-closure-compiler-js@^20181028.0.0:
-  version "20181028.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20181028.0.0.tgz#4a75b5ab656b1e0ff4ce1b0a285ea1b598effa91"
-  integrity sha512-yTF8uBR8TMf5SW76+1LU1ywvgeVyeNCQ+Jj3KJfMiIShoYhxPtVfLn99nx9r3uwIVNNyMxdQVc9zUFD2DEkTaA==
+google-closure-compiler-js@^20181125.0.1:
+  version "20181125.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20181125.0.1.tgz#ed06f6bab66acfe0d187e0262114c92c5569e2f0"
+  integrity sha512-3+K8b18kWP6CR+qyYwa6DxN9QuijYZvBYpK8L1Va8urXvbDY07x1hA6tKeiEfHmd19pAp7MUW2Ivv2aquDAozw==
 
-google-closure-compiler-linux@^20181028.0.1:
-  version "20181028.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20181028.0.1.tgz#80a3a6fde1046647720d190314106fe203a22b2d"
-  integrity sha512-yMfqIBkc9mg9D8wWTBJ/It+IY2NIMmwZDThYK6bfkcq3ZpeJI3GBfb3cA8GxOrHQgtopKysDwQQRrMq9UNscqw==
+google-closure-compiler-linux@^20181125.0.1:
+  version "20181125.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20181125.0.1.tgz#231ad4d1988068488a4d2f60e7b1647323199822"
+  integrity sha512-yPejZG9x5fIsygo6qG8NbusY4uQ9865I4664KbQ9jJbJitySORzu1/V4QoUM23efrNI4loDGt6gqDGQ1kR7dTw==
 
-google-closure-compiler-osx@^20181028.0.1:
-  version "20181028.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20181028.0.1.tgz#24a5a975d317403dcb82b0b2bb8898226e22804a"
-  integrity sha512-A3g1Ri5dNU1P6dGtY88/3xIAkMt5cQpIG4YqAwwBMTbG5fG7jRfExTetLaUsAaJwQQXG3TYWUELV3kSAMr/bAg==
+google-closure-compiler-osx@^20181125.0.1:
+  version "20181125.0.1"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20181125.0.1.tgz#d188dd31a866ba2c4ae041050c3da86d882c3894"
+  integrity sha512-jORcziwwlcl/VVeEJLPoPyOB0GyMSeFhzq+B9jaG3ge1q1K2Pcj0fu5rD1QMKuKx70Y3cHWbOXAQVan/jnmLKQ==
 
-google-closure-compiler@20181028.0.1:
-  version "20181028.0.1"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20181028.0.1.tgz#2c419f8e1e8ba7b677841860933de2b722276485"
-  integrity sha512-Gj+hNFJzxpNbnkZWRe+Gag2IeUfYSfl93qZ5TkRzXZAFznRhL1JpA/0v6nckly8QQDsEjVNMQOloOgfQP6Itkg==
+google-closure-compiler@20181125.1.0:
+  version "20181125.1.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20181125.1.0.tgz#7aed998480b52d0823f6243b6366b489afcbd7c5"
+  integrity sha512-PpLbUwzrAjdNKwnJzOualhEoJu08RzFvGw9AnPY/sxLpnbMneuo6OLyTchche1QWlgE2EsjWUjdaNijLLTU8YQ==
   dependencies:
     chalk "^1.0.0"
-    google-closure-compiler-java "^20181028.0.0"
-    google-closure-compiler-js "^20181028.0.0"
+    google-closure-compiler-java "^20181125.0.1"
+    google-closure-compiler-js "^20181125.0.1"
     minimist "^1.2.0"
     vinyl "^2.0.1"
     vinyl-sourcemaps-apply "^0.2.0"
   optionalDependencies:
-    google-closure-compiler-linux "^20181028.0.1"
-    google-closure-compiler-osx "^20181028.0.1"
+    google-closure-compiler-linux "^20181125.0.1"
+    google-closure-compiler-osx "^20181125.0.1"
 
 google-closure-compiler@^20151015.0.0:
   version "20151015.7.0"
@@ -8929,10 +8929,10 @@ latest-version@^3.0.0:
   dependencies:
     package-json "^4.0.0"
 
-lazypipe@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/lazypipe/-/lazypipe-1.0.1.tgz#1471aef6b37a340d51c34df44699dcef064c1940"
-  integrity sha1-FHGu9rN6NA1Rw030Rpnc7wZMGUA=
+lazypipe@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/lazypipe/-/lazypipe-1.0.2.tgz#b66f64ed7fd8b04869f1f1bcb795dbbaa80e418c"
+  integrity sha512-CrU+NYdFHW8ElaeXCWz5IbmetiYVYq1fOCmpdAeZ8L+khbv1e7EnshyjlKqkO+pJbVPrsJQnHbVxEiLujG6qhQ==
   dependencies:
     stream-combiner "*"
 
@@ -11319,7 +11319,7 @@ postcss@7.0.5:
     source-map "^0.6.1"
     supports-color "^5.5.0"
 
-postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.5:
+postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.5, postcss@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.6.tgz#6dcaa1e999cdd4a255dcd7d4d9547f4ca010cdc2"
   integrity sha512-Nq/rNjnHFcKgCDDZYO0lNsl6YWe6U7tTy+ESN+PnLxebL8uBtYX59HZqvrj7YLK5UCyll2hqDsJOo3ndzEW8Ug==
