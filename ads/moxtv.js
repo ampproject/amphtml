@@ -14,65 +14,16 @@
  * limitations under the License.
  */
 
-import {setStyle} from '../src/style';
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {!Object} config
  */
-export function moxtv(global, data) {
-  validateData(data, ['zoneId', 'w', 'h']);
+export function moxtv(global, config) {
+  validateData(config, ['z', 'w', 'h'], ['u']);
 
-  setStyle(document.body, 'height', '9999px');
+  global.config = config;
 
-  const iframe = global.document.createElement('iframe');
-  setStyle(iframe, 'width', '100%');
-  setStyle(iframe, 'height', '100%');
-  setStyle(iframe, 'border', 0);
-
-  document.getElementById('c').appendChild(iframe);
-
-  const iframeDocument =
-    iframe.document || iframe.contentDocument || iframe.contentWindow.document;
-
-  const scriptSrc = 'https://ad.mox.tv/mox/mwayss_invocation.min.js?tld=123&pzoneid=' + data.zoneId + '&height=' + data.w + '&width=' + data.h;
-  const iframeContent =
-    '<!DOCTYPE html>' +
-    '<html>' +
-    '<head>' +
-    '<style>body{margin:0}</style>' +
-    '</head>' +
-    '<body>' +
-    '<div id="adSlot" style="display:flex;justify-content:center;font-size:0">' +
-    '<script async src="' + scriptSrc + '"></script>' +
-    '</div>' +
-    '</body>' +
-    '</html>';
-
-  iframeDocument.write(iframeContent);
-  iframeDocument.close();
-
-  let width;
-  let height;
-
-  iframeDocument.defaultView.addEventListener('resize', function() {
-    const aspectRatioEl = document.querySelector('#c img');
-
-    if (!aspectRatioEl || !aspectRatioEl.src) {
-      return;
-    }
-
-    const adSlot = iframeDocument.getElementById('adSlot');
-    const {width: aWidth, height: aHeight} = adSlot.getBoundingClientRect();
-
-    if (aWidth === width && aHeight === height) {
-      return;
-    }
-
-    width = aWidth;
-    height = aHeight;
-
-    window.context.requestResize(width - 2, height);
-  });
+  loadScript(global, config.u || 'https://ad.mox.tv/mox/js/amp.min.js');
 }
