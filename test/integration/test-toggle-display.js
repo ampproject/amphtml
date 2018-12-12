@@ -56,8 +56,7 @@ describe.configure().retryOnSaucelabs().run('toggle display helper', () => {
       fixture.doc.head.appendChild(s);
     },
   }, (name, setup) => {
-    // TODO(jridgewell, #19791): fix this test for Chrome 71.
-    it.skip('toggle display', () => {
+    it('toggle display', () => {
       setup(img);
 
       toggle(img, false);
