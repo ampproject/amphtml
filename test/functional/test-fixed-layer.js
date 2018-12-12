@@ -324,6 +324,9 @@ describes.sandboxed('FixedLayer', {}, () => {
         return null;
       },
       setAttribute(name, value) {
+        if (name.includes('[')) {
+          throw new Error('invalid characters');
+        }
         for (let i = 0; i < this.attributes.length; i++) {
           if (this.attributes[i].name === name) {
             this.attributes[i].value = value;
@@ -1536,10 +1539,16 @@ describes.sandboxed('FixedLayer', {}, () => {
       expect(layer.getAttribute('test')).to.equal(null);
       expect(layer.getAttribute('test1')).to.equal(null);
       expect(layer.getAttribute('test2')).to.equal(null);
+
+      body.attributes.push(new FakeAttr('[class]', 'amp-bind'));
+      fixedLayer.update();
+      expect(layer.getAttribute('[class]')).to.equal('amp-bind');
     });
 
     it('should sync invalid-named attributes to layer', () => {
       // Holy poop it's hard to inject an invalid-named attribute.
+      // This is a sanity check using real Elements to ensure we can insert
+      // a cloned attribute into another element.
       let div = document.createElement('div');
       div.innerHTML = '<div [class]="amp-bind"></div>';
       div = div.firstElementChild;
