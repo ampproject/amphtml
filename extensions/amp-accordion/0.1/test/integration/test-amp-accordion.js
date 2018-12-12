@@ -40,6 +40,7 @@ describe('amp-accordion', function() {
       iframe.width = 300;
     });
 
+    // TODO(#19799): Fix test that broke on Chrome 71.
     it.configure().skipChrome().run('should respect the media attribute',
         () => {
           const accordion = doc.getElementById('media-accordion');

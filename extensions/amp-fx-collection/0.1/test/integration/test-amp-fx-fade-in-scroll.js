@@ -54,6 +54,7 @@ config.run('amp-fx-collection', function() {
       win = env.win;
     });
 
+    // TODO(#19800): Fix test that broke on Chrome 71.
     it.configure().skipChrome()
         .run('runs fade-in-scroll animation with default parameters', () => {
           expect(getOpacity(win)).to.equal(0);
