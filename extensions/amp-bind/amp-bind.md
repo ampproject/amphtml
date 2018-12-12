@@ -79,7 +79,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
 There is a limit of 100 operands what can be used in an expression.
-3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
+3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes. Note that while this bracketed syntax works in HTML, it won't work in XML (including JSX); in this case, you can use an XML-compatible syntax where instead of a `[text]` attribute you can use the attribute `data-amp-bind-text`.
 
 `amp-bind` takes special care to ensure speed, security and performance on AMP pages.
 
@@ -360,7 +360,7 @@ A macro can also call other macros <i>defined before itself</i>. A macro cannot 
 
 ### Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). There is also an XML-compatible syntax for such attributes in the form of `data-amp-bind-property`.
 
 When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
 
@@ -404,6 +404,7 @@ Notes on Bindings:
 - For security reasons, binding to `innerHTML` is disallowed.
 - All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
 - Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
+- When writing XML (including XHTML and JSX), use attributes like `data-amp-bind-x` instead of the braketed syntax `[x]`.
 
 
 #### Element-specific attributes
