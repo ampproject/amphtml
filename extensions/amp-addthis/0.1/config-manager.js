@@ -67,12 +67,12 @@ export class ConfigManager {
   /**
    * Store the configuration received for the provided pubId, mark the request
    * for the config as completed, and broadcast the config to relevant iframes.
-   * @param {!Object} input
-   * @param {!Object} [input.config]
-   * @param {string} [input.pubId]
-   * @param {*} [input.source]
+   * @param {!JsonObject} data
    */
-  receiveConfiguration({config, pubId, source}) {
+  receiveConfiguration(data) {
+    const config = data['config'];
+    const pubId = data['pubId'];
+    const source = data['source'];
     // Check that the configuration event is coming from an iframe that
     // should be providing configuration information.
     const isProviderIframe = this.configProviderIframes_.some(iframe => {
@@ -95,12 +95,12 @@ export class ConfigManager {
   }
 
   /**
-   * @param {!Object} input
-   * @param {*} [input.iframe]
-   * @param {string} [input.widgetId]
-   * @param {string} [input.pubId]
-   * @param {!Object} [input.shareConfig]
-   * @param {!Object} [input.atConfig]
+   * @param {!Object} param1
+   *    - iframe
+   *    - widgetId
+   *    - pubId
+   *    - shareConfig
+   *    - atConfig
    * @private
    */
   sendConfiguration_({iframe, widgetId, pubId, shareConfig, atConfig}) {

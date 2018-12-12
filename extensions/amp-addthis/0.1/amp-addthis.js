@@ -291,7 +291,7 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {JsonObject<string, string>}
+   * @return {!JsonObject}
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
@@ -314,7 +314,7 @@ class AmpAddThis extends AMP.BaseElement {
   /**
    * @private
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @return {!Object<string, string>}
+   * @return {!JsonObject}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {

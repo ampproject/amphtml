@@ -37,7 +37,8 @@ const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 /**
  * @typedef {{
- * loc:*, title:string,
+ * loc:*,
+ * title:string,
  * pubId:string,
  * atConfig: JsonObject<AtConfigDef>,
  * referrer: string,
@@ -70,14 +71,11 @@ let LojsonDataDef;
  */
 let AtConfigDef;
 
-const getLojsonData = (/** @type {!LojsonDataDef} */ {
-  loc,
-  title,
-  pubId,
-  atConfig,
-  referrer,
-  ampDoc,
-}) => {
+/**
+ * @param {!LojsonDataDef} param1
+ * @return {!JsonObject}
+ */
+export function getLojsonData({loc, title, pubId, atConfig, referrer, ampDoc}) {
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),
@@ -134,9 +132,12 @@ const getLojsonData = (/** @type {!LojsonDataDef} */ {
     'skipb': 1,
     'sr': service,
   });
-};
+}
 
-export const callLojson = props => {
+/**
+ * @param {!LojsonDataDef} props
+ */
+export function callLojson(props) {
   const data = getLojsonData(props);
   const endpoint = `${API_SERVER}/live/red_lojson/300lo.json`;
 
@@ -145,4 +146,4 @@ export const callLojson = props => {
     endpoint,
     data,
   });
-};
+}
