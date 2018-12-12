@@ -27,7 +27,7 @@ function referrerDomain(ampdoc) {
   if (!referrer) {
     return '';
   }
-  const {hostname} = Services.urlForDoc(ampdoc).parse(referrer);
+  const {hostname} = Services.urlForDoc(ampdoc.getHeadNode()).parse(referrer);
   return hostname;
 }
 
