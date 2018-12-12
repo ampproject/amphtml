@@ -1133,7 +1133,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const slideSelector = '.i-amphtml-slide-item';
       const allSlides = toArray(
           scopedQuerySelectorAll(parentCarousel, slideSelector));
-      const targetSlide = closestBySelector(target, slideSelector);
+      const targetSlide = dev().assertElement(
+          closestBySelector(target, slideSelector));
       const targetSlideIndex = allSlides.indexOf(targetSlide);
       dev().assert(parentCarousel).getImpl()
           .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
