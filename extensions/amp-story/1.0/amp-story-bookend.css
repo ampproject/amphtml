@@ -54,7 +54,7 @@
   content: " " !important;
   display: block !important;
   z-index: -1 !important; /* places it under content */
-  background: rgba(0, 0, 0, 0.70) !important;
+  background: #202125 !important;
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
@@ -364,6 +364,10 @@
   min-height: 100vh !important;
   padding: 104px 156px 64px !important;
   margin: 0 !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner::before {
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-bookend-replay {
