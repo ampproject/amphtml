@@ -65,7 +65,10 @@ describes.realWin('consent-ui', {
         };
       },
       scheduleLayout: () => {},
-      mutateElement: callback => callback(),
+      mutateElement: callback => {
+        callback();
+        return Promise.resolve();
+      },
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
@@ -142,6 +145,32 @@ describes.realWin('consent-ui', {
     });
   });
 
+  describe('placeholder', () => {
+    it('should add a placeholder element' +
+      ' while loading CMP Iframe', () => {
+
+        const config = dict({
+          'promptUISrc': 'https//promptUISrc',
+        });
+        consentUI =
+          new ConsentUI(mockInstance, config);
+
+        const placeholder = consentUI.placeholder_;
+        expect(placeholder).to.be.ok;
+        expect(placeholder.hasAttribute('hidden')).to.be.ok;
+
+        consentUI.show();
+
+        // Pop onto the back of the event queue,
+        // so we expect() once our mutate element in show() resolves
+        return mockInstance.mutateElement(() => {}).then(() => {
+          expect(placeholder.hasAttribute('hidden')).to.not.be.ok;
+          expect(placeholder.childNodes.length > 0).to.be.ok;
+        });
+      });
+  });
+
+
   describe('CMP Iframe', () => {
 
     it('should load the iframe, ' +
@@ -170,10 +199,6 @@ describes.realWin('consent-ui', {
         ).to.be.true;
       });
     });
-  });
-
-  describe('placeholder', () => {
-
   });
 
   describe('fullscreen', () => {
