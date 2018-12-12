@@ -18,36 +18,36 @@
 
 
 /** @constructor */
-var DomPurifyConfigObject = function() {};
+var DomPurifyConfig = function() {};
 
-DomPurifyConfigObject.prototype.ALLOWED_TAGS;
-DomPurifyConfigObject.prototype.ALLOWED_ATTR;
-DomPurifyConfigObject.prototype.FORBID_TAGS;
-DomPurifyConfigObject.prototype.FORBID_ATTR;
+DomPurifyConfig.prototype.ALLOWED_TAGS;
+DomPurifyConfig.prototype.ALLOWED_ATTR;
+DomPurifyConfig.prototype.FORBID_TAGS;
+DomPurifyConfig.prototype.FORBID_ATTR;
 /** @type {?Object} */
-DomPurifyConfigObject.prototype.USE_PROFILES = {};
+DomPurifyConfig.prototype.USE_PROFILES = {};
 /** @type {boolean} */
-DomPurifyConfigObject.prototype.USE_PROFILES.html;
+DomPurifyConfig.prototype.USE_PROFILES.html;
 /** @type {boolean} */
-DomPurifyConfigObject.prototype.USE_PROFILES.svg;
+DomPurifyConfig.prototype.USE_PROFILES.svg;
 /** @type {boolean} */
-DomPurifyConfigObject.prototype.USE_PROFILES.svgFilters;
+DomPurifyConfig.prototype.USE_PROFILES.svgFilters;
 /** @type {boolean} */
-DomPurifyConfigObject.prototype.USE_PROFILES.mathMl;
-DomPurifyConfigObject.prototype.ALLOW_ARIA_ATTR;
-DomPurifyConfigObject.prototype.ALLOW_DATA_ATTR;
-DomPurifyConfigObject.prototype.ALLOW_UNKNOWN_PROTOCOLS;
-DomPurifyConfigObject.prototype.SAFE_FOR_JQUERY;
-DomPurifyConfigObject.prototype.SAFE_FOR_TEMPLATES;
-DomPurifyConfigObject.prototype.WHOLE_DOCUMENT;
-DomPurifyConfigObject.prototype.RETURN_DOM;
-DomPurifyConfigObject.prototype.RETURN_DOM_FRAGMENT;
-DomPurifyConfigObject.prototype.RETURN_DOM_IMPORT;
-DomPurifyConfigObject.prototype.FORCE_BODY;
-DomPurifyConfigObject.prototype.SANITIZE_DOM;
-DomPurifyConfigObject.prototype.KEEP_CONTENT;
-DomPurifyConfigObject.prototype.IN_PLACE;
-DomPurifyConfigObject.prototype.ALLOWED_URI_REGEXP;
-DomPurifyConfigObject.prototype.ADD_TAGS;
-DomPurifyConfigObject.prototype.ADD_ATTR;
-DomPurifyConfigObject.prototype.ADD_URI_SAFE_ATTR;
+DomPurifyConfig.prototype.USE_PROFILES.mathMl;
+DomPurifyConfig.prototype.ALLOW_ARIA_ATTR;
+DomPurifyConfig.prototype.ALLOW_DATA_ATTR;
+DomPurifyConfig.prototype.ALLOW_UNKNOWN_PROTOCOLS;
+DomPurifyConfig.prototype.SAFE_FOR_JQUERY;
+DomPurifyConfig.prototype.SAFE_FOR_TEMPLATES;
+DomPurifyConfig.prototype.WHOLE_DOCUMENT;
+DomPurifyConfig.prototype.RETURN_DOM;
+DomPurifyConfig.prototype.RETURN_DOM_FRAGMENT;
+DomPurifyConfig.prototype.RETURN_DOM_IMPORT;
+DomPurifyConfig.prototype.FORCE_BODY;
+DomPurifyConfig.prototype.SANITIZE_DOM;
+DomPurifyConfig.prototype.KEEP_CONTENT;
+DomPurifyConfig.prototype.IN_PLACE;
+DomPurifyConfig.prototype.ALLOWED_URI_REGEXP;
+DomPurifyConfig.prototype.ADD_TAGS;
+DomPurifyConfig.prototype.ADD_ATTR;
+DomPurifyConfig.prototype.ADD_URI_SAFE_ATTR;

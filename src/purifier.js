@@ -230,13 +230,13 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 const INVALID_INLINE_STYLE_REGEX =
     /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
-const PURIFY_CONFIG = {
+const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
   USE_PROFILES: {
     html: true,
     svg: true,
     svgFilters: true,
   },
-};
+});
 
 
 /**
@@ -262,10 +262,15 @@ export function purifyHtml(dirty, diffing = false) {
 /**
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
- * @return {!DomPurifyConfigObject}
+ *
+ * NOTE: see that we use DomPurifyConfig found in build-system/dompurify.extern.j
+ * as the exact type. This is to prevent closure compiler from optimizing these
+ * fields here in this file and in the 3rd party library file. See #19624
+ * for further information.
+ * @return {!DomPurifyConfig}
  */
 export function purifyConfig() {
-  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfigObject} */ ({
+  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
     ADD_ATTR: WHITELISTED_ATTRS,
     FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
@@ -273,7 +278,7 @@ export function purifyConfig() {
     // Avoid need for serializing to/from string by returning Node directly.
     RETURN_DOM: true,
   }));
-  return /** @type {!DomPurifyConfigObject} */ (config);
+  return /** @type {!DomPurifyConfig} */ (config);
 }
 
 /**
