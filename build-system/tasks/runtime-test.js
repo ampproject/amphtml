@@ -40,8 +40,7 @@ const {green, yellow, cyan, red} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
-// TODO(amp-infra): Increase batch size once tests are stable again.
-const batchSize = 1; // Number of Sauce Lab browsers
+const batchSize = 4; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
