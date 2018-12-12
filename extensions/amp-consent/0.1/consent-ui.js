@@ -42,18 +42,6 @@ export const consentUiClasses = {
   loadingPlaceholder: 'i-amphtml-consent-ui-loading-placeholder',
 };
 
-// Default Loading Placeholder for Iframe solutions
-const consentUiDefaultLoadingPlaceholderHtml =
-  `<svg viewBox="0 0 40 40">
-    <defs>
-      <linearGradient id="grad">
-        <stop stop-color="rgb(105, 105, 105)"/>
-        <stop offset="100%"  stop-color="rgba(105, 105, 105, 0)"/>
-      </linearGradient>
-    </defs>
-    <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"/>
-  </svg>`;
-
 export class ConsentUI {
 
   /**
@@ -260,11 +248,11 @@ export class ConsentUI {
     <svg viewBox="0 0 40 40">
       <defs>
         <linearGradient id="grad">
-          <stop stop-color="rgb(105, 105, 105)"/>
-          <stop offset="100%"  stop-color="rgba(105, 105, 105, 0)"/>
+          <stop stop-color="rgb(105, 105, 105)"></stop>
+          <stop offset="100%"  stop-color="rgba(105, 105, 105, 0)"></stop>
         </linearGradient>
       </defs>
-      <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"/>
+      <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
     </svg>`;
 
     placeholder.appendChild(loadingSpinner);

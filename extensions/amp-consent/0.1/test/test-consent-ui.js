@@ -149,25 +149,25 @@ describes.realWin('consent-ui', {
     it('should add a placeholder element' +
       ' while loading CMP Iframe', () => {
 
-        const config = dict({
-          'promptUISrc': 'https//promptUISrc',
-        });
-        consentUI =
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
           new ConsentUI(mockInstance, config);
 
-        const placeholder = consentUI.placeholder_;
-        expect(placeholder).to.be.ok;
-        expect(placeholder.hasAttribute('hidden')).to.be.ok;
+      const placeholder = consentUI.placeholder_;
+      expect(placeholder).to.be.ok;
+      expect(placeholder.hasAttribute('hidden')).to.be.ok;
 
-        consentUI.show();
+      consentUI.show();
 
-        // Pop onto the back of the event queue,
-        // so we expect() once our mutate element in show() resolves
-        return mockInstance.mutateElement(() => {}).then(() => {
-          expect(placeholder.hasAttribute('hidden')).to.not.be.ok;
-          expect(placeholder.childNodes.length > 0).to.be.ok;
-        });
+      // Pop onto the back of the event queue,
+      // so we expect() once our mutate element in show() resolves
+      return mockInstance.mutateElement(() => {}).then(() => {
+        expect(placeholder.hasAttribute('hidden')).to.not.be.ok;
+        expect(placeholder.childNodes.length).to.be.above(0);
       });
+    });
   });
 
 
