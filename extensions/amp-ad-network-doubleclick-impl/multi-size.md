@@ -25,6 +25,10 @@ set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
 two dimensions, of their primary size counterpart, unless 
 `data-multi-size-validation` is explicitly set to false. See below for some valid and invalid examples.
 
+<b>Note that multi-size slots may have unexpected interactions with
+`layout="responsive"`. For this reason it is strongly encouraged that multi-size
+slots use `layout="fixed"`.</b>
+
 #### Attributes
 Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
 - `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
@@ -34,6 +38,7 @@ Example - Valid multi-size request
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"
+    layout="fixed"
     data-slot="/6355419/Travel"
     data-multi-size="700x90,700x60,500x60">
 </amp-ad>
@@ -43,6 +48,7 @@ Example - Invalid multi-size request (multi-size size is too small relative to o
 ```html
 <amp-ad width=320 height=50
     type="doubleclick"
+    layout="fixed"
     data-slot="/6355419/Travel"
     data-override-width=728
     data-override-height=90
@@ -54,6 +60,7 @@ Example - Invalid multi-size request (last multi-size size is too small)
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"
+    layout="fixed"
     data-slot="/6355419/Travel"
     data-multi-size="700x90,700x60,300x25">
 </amp-ad>
@@ -63,6 +70,7 @@ Example - Valid multi-size request (ignores minimum size constraint)
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"
+    layout="fixed"
     data-slot="/6355419/Travel"
     data-multi-size="700x90,700x60,300x25">
     data-multi-size-validation="false">
