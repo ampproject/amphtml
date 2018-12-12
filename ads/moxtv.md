@@ -23,7 +23,7 @@ Please visit our [website](https://mox.tv) for more information about us.
 ```html
 <amp-ad height="1"
     type="moxtv"
-    data-zone-id="1183"
+    data-z="1183"
     data-w="720"
     data-h="405">
 </amp-ad>
@@ -33,6 +33,10 @@ Please visit our [website](https://mox.tv) for more information about us.
 
 #### Required parameters:
 
-- `data-zone-id` — Ad zone unique id
+- `data-z` — Ad zone unique id
 - `data-w` — Ad unit width
 - `data-h` — Ad unit height
+
+#### Optional parameters:
+
+- `data-u` — URL of invocation script
