@@ -361,8 +361,7 @@ export class ConsentUI {
     }
 
     if (data['type'] === 'consent-ui-ready') {
-      // TODO (torch2424): Uncomment this
-      // this.iframeReady_.resolve();
+      this.iframeReady_.resolve();
     }
 
     if (data['type'] === 'consent-ui-enter-fullscreen') {
