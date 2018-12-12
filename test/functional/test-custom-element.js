@@ -1011,11 +1011,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }).to.throw(/Must never be called in template/); });
     });
 
-    // TODO(alabiaga): Fixes #19752. The window matchMedia call in the code
+    // TODO(alabiaga): Fixes #19752. The window.matchMedia call in the code
     // path of element.applySizesAndMediaQuery is not behaving consistently
     // in headless mode. Thus, we mock the calls here as we are not testing
-    // window behavior. Still worth investigating as to why it randomly returns
-    // true/false.
+    // window behavior.
     describe('apply sizes and media query', () => {
       let element1;
       let element2;
