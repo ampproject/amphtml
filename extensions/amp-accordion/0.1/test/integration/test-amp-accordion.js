@@ -40,17 +40,16 @@ describe('amp-accordion', function() {
       iframe.width = 300;
     });
 
-    it.configure().skipChrome().run('should respect the media attribute',
-        () => {
-          const accordion = doc.getElementById('media-accordion');
-          expect(iframe.clientWidth).to.equal(300);
-          expect(accordion.className).to.match(/i-amphtml-hidden-by-media-query/);
-          iframe.width = 600;
-          expect(iframe.clientWidth).to.equal(600);
-          return timeout(200).then(() => {
-            expect(accordion.className).to.not.match(/i-amphtml-hidden-by-media-query/);
-          });
-        });
+    it('should respect the media attribute', () => {
+      const accordion = doc.getElementById('media-accordion');
+      expect(iframe.clientWidth).to.equal(300);
+      expect(accordion.className).to.match(/i-amphtml-hidden-by-media-query/);
+      iframe.width = 600;
+      expect(iframe.clientWidth).to.equal(600);
+      return timeout(200).then(() => {
+        expect(accordion.className).to.not.match(/i-amphtml-hidden-by-media-query/);
+      });
+    });
   });
 });
 

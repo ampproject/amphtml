@@ -52,7 +52,7 @@ t.run('error page', function() {
   });
 
   it.configure().skipFirefox().skipEdge()
-      .skip('should show the body in error test', () => {
+      .run('should show the body in error test', () => {
         return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
       });
 

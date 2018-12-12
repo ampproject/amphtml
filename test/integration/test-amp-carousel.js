@@ -184,7 +184,7 @@ config.run('amp-carousel', function() {
       expect(document.querySelectorAll('amp-carousel')).to.have.length.above(0);
     });
 
-    it.configure().skipChrome().run('should not have the buttons visible ' +
+    it('should not have the buttons visible ' +
         'when amp-mode-mouse class is not on body', () => {
       document.body.classList.remove('amp-mode-mouse');
       const amp = document.querySelector('#carousel-1');
