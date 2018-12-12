@@ -8929,10 +8929,10 @@ latest-version@^3.0.0:
   dependencies:
     package-json "^4.0.0"
 
-lazypipe@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/lazypipe/-/lazypipe-1.0.1.tgz#1471aef6b37a340d51c34df44699dcef064c1940"
-  integrity sha1-FHGu9rN6NA1Rw030Rpnc7wZMGUA=
+lazypipe@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/lazypipe/-/lazypipe-1.0.2.tgz#b66f64ed7fd8b04869f1f1bcb795dbbaa80e418c"
+  integrity sha512-CrU+NYdFHW8ElaeXCWz5IbmetiYVYq1fOCmpdAeZ8L+khbv1e7EnshyjlKqkO+pJbVPrsJQnHbVxEiLujG6qhQ==
   dependencies:
     stream-combiner "*"
 
