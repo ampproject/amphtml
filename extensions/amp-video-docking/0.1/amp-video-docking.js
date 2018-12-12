@@ -63,7 +63,6 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
-import {urls} from '../../../src/config';
 
 
 /** @private @const {number} */
