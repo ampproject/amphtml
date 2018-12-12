@@ -650,6 +650,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'moxtv': {},
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
