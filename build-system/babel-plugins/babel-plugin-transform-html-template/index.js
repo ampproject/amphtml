@@ -30,20 +30,19 @@ const insertedTemplates = new Map();
  * @param {*} outputArguments converted template in [string] form.
  */
 function hoistTemplate(path, t, originalIdentifer, outputArguments) {
-  const program = path.findParent(path => path.isProgram());
   const argumentsToString = outputArguments.elements[0].value.toString();
   let identifier;
   if (insertedTemplates.get(argumentsToString)) {
     identifier = insertedTemplates.get(argumentsToString);
   } else {
     identifier = path.scope.generateUidIdentifier('template');
-
+    const program = path.findParent(path => path.isProgram());
     const variableDeclaration = t.variableDeclaration(
         'const',
         [t.variableDeclarator(identifier, outputArguments)]
     );
-    program.get('body.0').insertBefore(variableDeclaration);
 
+    program.get('body.0').insertBefore(variableDeclaration);
     insertedTemplates.set(argumentsToString, identifier);
   }
 
