@@ -50,6 +50,18 @@ export function withDatePickerCommon(WrappedComponent) {
   }
 
   /**
+   * Check if the given date is between or equal to the two bounds.
+   * @param {!moment} date
+   * @param {!moment} min
+   * @param {!moment} max
+   * @return {boolean}
+   */
+  function isInclusivelyBetween(date, min, max) {
+    return isInclusivelyAfterDay(date, min) &&
+        isInclusivelyBeforeDay(date, max);
+  }
+
+  /**
    * @param {string} min
    * @param {string} max
    * @param {!moment} date
@@ -65,7 +77,7 @@ export function withDatePickerCommon(WrappedComponent) {
     } else if (!maxInclusive) {
       return !isInclusivelyAfterDay(date, minInclusive);
     } else {
-      return !date.isBetween(minInclusive, maxInclusive);
+      return !isInclusivelyBetween(date, minInclusive, maxInclusive);
     }
   }
 
