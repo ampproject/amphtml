@@ -658,7 +658,7 @@ function disposeServiceInternal(id, service) {
 export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
   const isEmbeddableService =
       typeof serviceClass.installInEmbedWindow === 'function';
-  if (isEmbeddableService) {
+  if (!isEmbeddableService) {
     return false;
   }
   const frameElement = dev().assertElement(embedWin.frameElement,
