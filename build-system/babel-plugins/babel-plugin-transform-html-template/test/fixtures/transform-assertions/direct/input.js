@@ -84,3 +84,8 @@ console.log(htmlFor(element)`<p>
   <span>html usage</span>
   <span>with comment sibling</span>
 </p>`);
+
+function pleaseHoistInternalUsage() {
+  console.log(html`html usage`);
+  console.log(htmlFor(element)`html usage`);
+}

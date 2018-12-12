@@ -16,6 +16,46 @@
 
 const {minify} = require('html-minifier');
 
+const insertedTemplates = new Map();
+
+/**
+ * Hoist a converted template into the top of the body scope of the program.
+ *
+ * Note: Ensures duplicates are not added by leveraging pre-existing templates
+ * with the _exact_ same markup.
+ *
+ * @param {*} path path of the template in original source.
+ * @param {*} t babel types, so this method can create variableDeclarations.
+ * @param {*} originalIdentifer identifier used in original source.
+ * @param {*} outputArguments converted template in [string] form.
+ */
+function hoistTemplate(path, t, originalIdentifer, outputArguments) {
+  const program = path.findParent(path => path.isProgram());
+  const argumentsToString = outputArguments.elements[0].value.toString();
+  let identifier;
+  if (insertedTemplates.get(argumentsToString)) {
+    identifier = insertedTemplates.get(argumentsToString);
+  } else {
+    identifier = path.scope.generateUidIdentifier('template');
+
+    const variableDeclaration = t.variableDeclaration(
+        'const',
+        [t.variableDeclarator(identifier, outputArguments)]
+    );
+    program.get('body.0').insertBefore(variableDeclaration);
+
+    insertedTemplates.set(argumentsToString, identifier);
+  }
+
+  path.replaceWith(t.callExpression(originalIdentifer, [identifier]));
+}
+
+/**
+ * Optimizes the tagged template literal by removing whitespace, comments
+ * and removes attribute quoting where possible.
+ * @param {*} templateLiteral original tagged template literal.
+ * @return {string} optimized template
+ */
 function optimizeLiteralOutput(templateLiteral) {
   if (templateLiteral.quasis.length !== 1) {
     console/* OK */.log('Improperly formatted `html` tagged template literal' +
@@ -40,12 +80,16 @@ module.exports = function(babel) {
           const template = optimizeLiteralOutput(path.node.quasi);
 
           if (template !== null) {
-            const outputArguments = [
-              t.arrayExpression([t.stringLiteral(template)]),
-            ];
-            path.replaceWith(
-                t.callExpression(t.identifier('html'), outputArguments)
+            const identifier = t.identifier('html');
+            const outputArguments = t.arrayExpression(
+                [t.stringLiteral(template)]
             );
+
+            if (t.isProgram(path.scope.block)) {
+              path.replaceWith(t.callExpression(identifier, [outputArguments]));
+            } else {
+              hoistTemplate(path, t, identifier, outputArguments);
+            }
           }
         } else if (t.isCallExpression(path.node.tag) &&
                    t.isIdentifier(path.node.tag.callee, {name: 'htmlFor'})) {
@@ -56,10 +100,17 @@ module.exports = function(babel) {
             const wrapperMethod = t.callExpression(
                 t.identifier('htmlFor'), wrapperMethodArguments
             );
-            const outputArguments = [
-              t.arrayExpression([t.stringLiteral(template)]),
-            ];
-            path.replaceWith(t.callExpression(wrapperMethod, outputArguments));
+            const outputArguments = t.arrayExpression(
+                [t.stringLiteral(template)]
+            );
+
+            if (t.isProgram(path.scope.block)) {
+              path.replaceWith(
+                  t.callExpression(wrapperMethod, [outputArguments])
+              );
+            } else {
+              hoistTemplate(path, t, wrapperMethod, outputArguments);
+            }
           }
         }
       },

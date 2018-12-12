@@ -1,3 +1,5 @@
+const _template = ["html usage"];
+
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -35,3 +37,8 @@ console.log(htmlFor(element)(["<p><span>html usage</span> <span>whitespace befor
 console.log(htmlFor(element)(["<p><span>html usage</span> <span>comment before entry tag</span></p>"]));
 console.log(htmlFor(element)(["<p><span>html usage</span> <span>comment after entry tag</span></p>"]));
 console.log(htmlFor(element)(["<p><span>html usage</span> <span>with comment sibling</span></p>"]));
+
+function pleaseHoistInternalUsage() {
+  console.log(html(_template));
+  console.log(htmlFor(element)(_template));
+}
