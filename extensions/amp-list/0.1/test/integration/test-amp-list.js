@@ -27,7 +27,7 @@ const body =
 
 const extensions = ['amp-list', 'amp-mustache', 'amp-bind'];
 
-describe('amp-list', function() {
+describe.configure().run('amp-list', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
@@ -116,7 +116,7 @@ describe('amp-list', function() {
       doc = win.document;
     });
 
-    it.configure().skipChromeDev().run(
+    it.configure().run(
         'should change to layout container as on bind', function*() {
           expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
 

@@ -16,6 +16,12 @@
 
 import {registerServiceBuilder} from '../service';
 
+// Latest stable version numbers of browsers as of 12/3/2018
+const latestVersion = {
+  chrome: 71,
+  firefox: 64,
+  safari: 12,
+};
 
 /**
  * A helper class that provides information about device/OS/browser currently
@@ -68,6 +74,28 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is the latest stable Chrome browser.
+   * @return {boolean}
+   */
+  isChromeStable() {
+    if (!this.isChrome()) {
+      return false;
+    }
+    return this.getMajorVersion() === latestVersion.chrome;
+  }
+
+  /**
+   * Whether the current browser is the Chrome Dev browser.
+   * @return {boolean}
+   */
+  isChromeDev() {
+    if (!this.isChrome()) {
+      return false;
+    }
+    return this.getMajorVersion() > latestVersion.chrome;
+  }
+
+  /**
    * Whether the current browser is a Firefox browser.
    * @return {boolean}
    */
@@ -75,6 +103,27 @@ export class Platform {
     return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
   }
 
+  /**
+   * Whether the current browser is the latest stable Firefox browser.
+   * @return {boolean}
+   */
+  isFirefoxStable() {
+    if (!this.isFirefox()) {
+      return false;
+    }
+    return this.getMajorVersion() === latestVersion.firefox;
+  }
+
+  /**
+   * Whether the current browser is the Firefox Dev browser.
+   * @return {boolean}
+   */
+  isFirefoxDev() {
+    if (!this.isFirefox()) {
+      return false;
+    }
+    return this.getMajorVersion() > latestVersion.firefox;
+  }
   /**
    * Whether the current browser is an Opera browser.
    * @return {boolean}

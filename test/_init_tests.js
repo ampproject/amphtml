@@ -58,13 +58,6 @@ global.describes = describes;
 // during the normal 2000 allowance.
 const BEFORE_AFTER_TIMEOUT = 5000;
 
-// Latest stable version numbers of browsers as of 12/3/2018
-const latestVersion = {
-  chrome: 71,
-  firefox: 64,
-  safari: 12,
-};
-
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adopt(window);
@@ -124,28 +117,26 @@ class TestConfig {
     /**
      * Predicate functions that determine whether to run tests on a platform.
      */
-    this.runOnChrome = this.platform.isChrome.bind(this.platform);
+    this.runOnChromeStable = this.platform.isChromeStable.bind(this.platform);
+    this.runOnChromeDev = this.platform.isChromeDev.bind(this.platform);
     this.runOnEdge = this.platform.isEdge.bind(this.platform);
-    this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
+    this.runOnFirefoxStable = this.platform.isFirefoxStable.bind(this.platform);
+    this.runOnFirefoxDev = this.platform.isFirefoxDev.bind(this.platform);
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
     this.runOnIe = this.platform.isIe.bind(this.platform);
 
     /**
-     * By default, IE is skipped. Individual tests may opt in.
+     * By default, Chrome Dev, Firefox Dev and IE are skipped.
+     * Individual tests may opt in.
      */
+    this.skip(this.runOnChromeDev);
+    this.skip(this.runOnFirefoxDev);
     this.skip(this.runOnIe);
   }
 
   skipChrome() {
-    return this.skip(this.runOnChrome);
-  }
-
-  skipChromeDev() {
-    return this.skip(() => {
-      return this.platform.isChrome() &&
-        this.platform.getMajorVersion() > latestVersion.chrome;
-    });
+    return this.skip(this.runOnChromeStable);
   }
 
   skipEdge() {
@@ -153,25 +144,11 @@ class TestConfig {
   }
 
   skipFirefox() {
-    return this.skip(this.runOnFirefox);
-  }
-
-  skipFirefoxDev() {
-    return this.skip(() => {
-      return this.platform.isFirefox() &&
-        this.platform.getMajorVersion() > latestVersion.firefox;
-    });
+    return this.skip(this.runOnFirefoxStable);
   }
 
   skipSafari() {
     return this.skip(this.runOnSafari);
-  }
-
-  skipSafariLatest() {
-    return this.skip(() => {
-      return this.platform.isSafari() &&
-        this.platform.getMajorVersion() === latestVersion.safari;
-    });
   }
 
   skipIos() {
@@ -190,6 +167,17 @@ class TestConfig {
     });
   }
 
+  enableChromeDev() {
+    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnChromeDev), 1);
+    return this;
+  }
+
+  enableFirefoxDev() {
+    this.skipMatchers.splice(
+        this.skipMatchers.indexOf(this.runOnFirefoxDev), 1);
+    return this;
+  }
+
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -204,7 +192,7 @@ class TestConfig {
   }
 
   ifChrome() {
-    return this.if(this.runOnChrome);
+    return this.if(this.runOnChromeStable);
   }
 
   ifEdge() {
@@ -212,7 +200,7 @@ class TestConfig {
   }
 
   ifFirefox() {
-    return this.if(this.runOnFirefox);
+    return this.if(this.runOnFirefoxStable);
   }
 
   ifSafari() {
