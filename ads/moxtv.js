@@ -25,5 +25,5 @@ export function moxtv(global, config) {
 
   global.config = config;
 
-  loadScript(global, config.u || 'https://ad.mox.tv/mox/js/amp.min.js');
+  loadScript(global, config.u || 'https://ad.mox.tv/js/amp.min.js');
 }
