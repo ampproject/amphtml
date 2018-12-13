@@ -32,7 +32,7 @@ import {setStyles, toggle} from '../../../src/style';
 const TAG = 'amp-consent-ui';
 
 // Classes for consent UI
-const consentUiClasses = {
+export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
@@ -197,9 +197,8 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      // Need to remove from fixed layer and add it back to update element's top
-      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
+      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
     });
   }
