@@ -711,7 +711,10 @@ export function installStandardServicesInEmbed(childWin, parentWin) {
     Services.timerFor(parentWin),
   ];
   const ampdoc = getAmpdoc(frameElement);
-  standardServices.forEach(s => s.installInEmbedWindow(childWin, ampdoc));
+  standardServices.forEach(service => {
+    // Static functions must be invoked on the class, not the instance.
+    service.constructor.installInEmbedWindow(childWin, ampdoc);
+  });
 }
 
 
