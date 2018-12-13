@@ -196,10 +196,30 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should show abbrv offer on activate when granted non-subscriber', () => {
     platform.activate(new Entitlement({service: 'subscribe.google.com',
-      granted: true, subscribed: true}));
+      granted: true, grantReason: GrantReason.METERING}));
     expect(methods.showAbbrvOffer).to.be.calledOnce
         .calledWithExactly({list: 'amp'});
     expect(methods.showOffers).to.not.be.called;
+  });
+
+  it('should override show offers with the grant for subscriber', () => {
+    const entitlement = new Entitlement({service: 'subscribe.google.com',
+      granted: false});
+    const grantEntitlement = new Entitlement({service: 'local',
+      granted: true, grantReason: GrantReason.SUBSCRIBER});
+    platform.activate(entitlement, grantEntitlement);
+    expect(methods.showOffers).to.not.be.called;
+    expect(methods.showAbbrvOffer).to.not.be.called;
+  });
+
+  it('should override show offers with the grant non-subscriber', () => {
+    const entitlement = new Entitlement({service: 'subscribe.google.com',
+      granted: false});
+    const grantEntitlement = new Entitlement({service: 'local',
+      granted: true, grantReason: GrantReason.METERING});
+    platform.activate(entitlement, grantEntitlement);
+    expect(methods.showOffers).to.not.be.called;
+    expect(methods.showAbbrvOffer).to.be.calledOnce;
   });
 
   it('should start linking flow when requested', () => {
@@ -228,15 +248,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should reauthorize on complete linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.linkComplete)();
   });
 
   it('should reauthorize on canceled linking', () => {
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
@@ -245,8 +263,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const promise = Promise.resolve();
     const response = new SubscribeResponse(null, null, null, null,
         () => promise);
-    serviceAdapterMock.expects('reAuthorizePlatform')
-        .withExactArgs(platform)
+    serviceAdapterMock.expects('resetPlatforms')
         .once();
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;

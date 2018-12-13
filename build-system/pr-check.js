@@ -336,12 +336,8 @@ const command = {
     }
     timedExecOrDie(cmd);
   },
-  runBundleSizeCheck: function(storeBundleSize = false) {
-    let cmd = 'gulp bundle-size';
-    if (storeBundleSize) {
-      cmd += ' --store';
-    }
-    timedExecOrDie(cmd);
+  runBundleSizeCheck: function(action) {
+    timedExecOrDie(`gulp bundle-size --on_${action}_build`);
   },
   runDepAndTypeChecks: function() {
     timedExecOrDie('gulp dep-check');
@@ -379,7 +375,9 @@ const command = {
     }
     if (process.env.TRAVIS) {
       if (coverage) {
-        timedExecOrDie(cmd + ' --headless --coverage');
+        // TODO(choumx, #19658): --headless disabled for integration tests on
+        // Travis until Chrome 72.
+        timedExecOrDie(cmd + ' --coverage');
       } else {
         startSauceConnect();
         timedExecOrDie(cmd + ' --saucelabs');
@@ -392,7 +390,9 @@ const command = {
   runSinglePassCompiledIntegrationTests: function() {
     timedExecOrDie('rm -R dist');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
-    timedExecOrDie('gulp test --integration --nobuild --headless '
+    // TODO(choumx, #19658): --headless disabled for integration tests on
+    // Travis until Chrome 72.
+    timedExecOrDie('gulp test --integration --nobuild '
         + '--compiled --single_pass');
     timedExecOrDie('rm -R dist');
   },
@@ -466,10 +466,7 @@ function runAllCommands() {
     command.updatePackages();
     command.cleanBuild();
     command.buildRuntimeMinified(/* extensions */ true);
-    // Disable bundle-size check on release branch builds.
-    if (process.env['TRAVIS_BRANCH'] === 'master') {
-      command.runBundleSizeCheck(/* storeBundleSize */ true);
-    }
+    command.runBundleSizeCheck(/* action */ 'push');
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true, /* coverage */ false);
     command.runSinglePassCompiledIntegrationTests();
@@ -489,7 +486,6 @@ function runAllCommandsLocally() {
     command.cleanBuild();
     command.buildRuntime();
     command.buildRuntimeMinified(/* extensions */ false);
-    command.runBundleSizeCheck();
   }
 
   // These tests need a build.
@@ -645,13 +641,16 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      if (buildTargets.has('RUNTIME')) {
-        command.buildRuntimeMinified(/* extensions */ false);
-        command.runBundleSizeCheck();
-      }
     } else {
-      // Generates a blank Percy build to satisfy the required Github check.
+      // Generate a blank Percy build to satisfy the required GitHub check.
       command.runVisualDiffTests(/* opt_mode */ 'empty');
+    }
+    if (buildTargets.has('RUNTIME')) {
+      command.buildRuntimeMinified(/* extensions */ false);
+      command.runBundleSizeCheck(/* action */ 'pr');
+    } else {
+      // Skip the bundle-size check to satisfy the required GitHub check.
+      command.runBundleSizeCheck(/* action */ 'skipped');
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||

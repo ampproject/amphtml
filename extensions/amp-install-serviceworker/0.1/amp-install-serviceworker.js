@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
 
@@ -79,7 +80,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     } else if (urlService.parse(win.location.href).origin ==
       urlService.parse(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
-        return install(this.win, src);
+        return install(this.win, src, this.element);
       });
     } else {
       this.user().error(TAG,
@@ -155,7 +156,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     shellUrl, winUrl.href);
 
     // Install URL rewriter.
-    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
+    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl,
+        this.element);
 
     // Cache shell.
     if (urlService.isSecure(shellUrl)) {
@@ -224,8 +226,9 @@ class UrlRewriter_ {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!RegExp} urlMatchExpr
    * @param {string} shellUrl
+   * @param {!Element} element
    */
-  constructor(ampdoc, urlMatchExpr, shellUrl) {
+  constructor(ampdoc, urlMatchExpr, shellUrl, element) {
     /** @const {!Window} */
     this.win = ampdoc.win;
 
@@ -236,7 +239,7 @@ class UrlRewriter_ {
     this.shellUrl_ = shellUrl;
 
     /** @private @const {!../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(ampdoc);
+    this.urlService_ = Services.urlForDoc(element);
 
     /** @const @private {!Location} */
     this.shellLoc_ = this.urlService_.parse(shellUrl);
@@ -290,19 +293,71 @@ class UrlRewriter_ {
  * Installs the service worker at src via direct service worker installation.
  * @param {!Window} win
  * @param {string} src
+ * @param {Element} element
  * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
-function install(win, src) {
+function install(win, src, element) {
   return win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
       user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
-    sendAmpScriptToSwOnFirstVisit(registration, win);
+    // Check if there is a new service worker installing.
+    const installingSw = registration.installing;
+    if (installingSw) {
+      // if not already active, wait till it becomes active
+      installingSw.addEventListener('statechange', evt => {
+        if (evt.target.state === 'activated') {
+          performServiceWorkerOptimizations(
+              registration,
+              win,
+              element
+          );
+        }
+      });
+    } else if (registration.active) {
+      performServiceWorkerOptimizations(registration, win, element);
+    }
+
     return registration;
   }, function(e) {
     user().error(TAG, 'ServiceWorker registration failed:', e);
   });
+}
+
+/**
+ * Initiates AMP service worker based optimizations
+ * @param {ServiceWorkerRegistration} registration
+ * @param {!Window} win
+ * @param {Element} element
+ */
+function performServiceWorkerOptimizations(registration, win, element) {
+  sendAmpScriptToSwOnFirstVisit(win);
+  // prefetching outgoing links should be opt in.
+  if (element.hasAttribute('data-prefetch')) {
+    prefetchOutgoingLinks(registration, win);
+  }
+}
+
+/**
+ * Whenever a new service worker is activated, controlled page will send
+ * the used AMP scripts and the self's URL to service worker to be cached.
+ * @param {!Window} win
+ */
+function sendAmpScriptToSwOnFirstVisit(win) {
+  if ('performance' in win) {
+    // Fetch all AMP-scripts used on the page
+    const ampScriptsUsed = win.performance.getEntriesByType('resource')
+        .filter(item => item.initiatorType === 'script' &&
+          startsWith(item.name, urls.cdn))
+        .map(script => script.name);
+    const controllerSw = win.navigator.serviceWorker.controller;
+    // using convention from https://github.com/redux-utilities/flux-standard-action.
+    controllerSw.postMessage(JSON.stringify(dict({
+      'type': 'AMP__FIRST-VISIT-CACHING',
+      'payload': ampScriptsUsed,
+    })));
+  }
 }
 
 /**
@@ -311,29 +366,37 @@ function install(win, src) {
  * @param {ServiceWorkerRegistration} registration
  * @param {!Window} win
  */
-function sendAmpScriptToSwOnFirstVisit(registration, win) {
-  const installingServiceWorker = registration.installing;
-  if (installingServiceWorker && 'performance' in win) {
-    installingServiceWorker.addEventListener('statechange', evt => {
-      const controllerSw = win.navigator.serviceWorker.controller;
-      if (evt.target.state !== 'activated' || !controllerSw) {
-        return;
-      }
-
-      // Fetch all AMP-scripts used on the page
-      const ampScriptsUsed = win.performance.getEntriesByType('resource')
-          .filter(item => item.initiatorType === 'script' &&
-            item.name.indexOf(urls.cdn) !== -1)
-          .map(script => script.name);
-      // using https://github.com/redux-utilities/flux-standard-action
-      controllerSw.postMessage(JSON.stringify(dict({
-        'type': 'FIRST_VISIT_CACHING',
-        'payload': ampScriptsUsed,
-      })));
+function prefetchOutgoingLinks(registration, win) {
+  const {document} = win;
+  const links = [].map.call(document.querySelectorAll('a[data-rel=prefetch]'),
+      link => link.href);
+  if (supportsPrefetch(document)) {
+    links.forEach(link => {
+      const linkTag = document.createElement('link');
+      linkTag.setAttribute('rel', 'prefetch');
+      linkTag.setAttribute('href', link);
+      document.head.appendChild(linkTag);
     });
+  } else {
+    registration.active.postMessage(JSON.stringify(dict({
+      'type': 'AMP__LINK-PREFETCH',
+      'payload': links,
+    })));
   }
 }
 
+/**
+ * Returns whether or not link rel=prefetch is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function supportsPrefetch(doc) {
+  const fakeLink = doc.createElement('link');
+  if (fakeLink.relList && fakeLink.relList.supports) {
+    return fakeLink.relList.supports('prefetch');
+  }
+  return false;
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpInstallServiceWorker);

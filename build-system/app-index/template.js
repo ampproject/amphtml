@@ -20,17 +20,11 @@
 'use strict';
 
 const boilerPlate = require('./boilerplate');
+const documentModes = require('./document-modes');
 const html = require('./html');
 const ProxyForm = require('./proxy-form');
+const {KeyValueOptions} = require('./form');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
-
-
-const examplesDocumentModes = {
-  'standard': '/',
-  'a4a': '/a4a/',
-  'a4a-3p': '/a4a-3p/',
-  'inabox': '/inabox/1/',
-};
 
 
 const headerLinks = [
@@ -104,10 +98,6 @@ const Header = ({isMainPage, links}) => html`
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
 
-const ExamplesDocumentModeSelectOption = ({value, name}) => html`
-  <option value=${value}>${name}</option>`;
-
-
 const ExamplesDocumentModeSelect = ({selectModePrefix}) => html`
   <amp-state id="documentMode">
     <script type="application/json">
@@ -122,16 +112,12 @@ const ExamplesDocumentModeSelect = ({selectModePrefix}) => html`
             selectModePrefix: event.value
           }
         })">
-      ${Object.keys(examplesDocumentModes).map(key =>
-        ExamplesDocumentModeSelectOption({
-          value: examplesDocumentModes[key],
-          name: key,
-        })).join('')}
+      ${KeyValueOptions(documentModes)}
     </select>
   </label>`;
 
 
-const SelectModeOptional = ({basepath, selectModePrefix}) =>
+const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
   !/^\/examples/.test(basepath) ? '' : ExamplesDocumentModeSelect({
     selectModePrefix,
   });
@@ -228,7 +214,7 @@ const renderTemplate = ({
           </a>
         </h3>
         <div class="push-right-after-heading">
-          ${SelectModeOptional({basepath, selectModePrefix})}
+          ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
           <a href="/~" class="underlined">List root directory</a>
         </div>
         ${FileList({

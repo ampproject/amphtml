@@ -27,9 +27,19 @@ import {
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
+
+// Classes for consent UI
+export const consentUiClasses = {
+  iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
+  iframeActive: 'i-amphtml-consent-ui-iframe-active',
+  in: 'i-amphtml-consent-ui-in',
+  loading: 'i-amphtml-consent-loading',
+  fill: 'i-amphtml-consent-fill',
+  placeholder: 'i-amphtml-consent-placeholder',
+};
 
 export class ConsentUI {
 
@@ -48,6 +58,15 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.isPostPrompt_ = false;
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
+    /** @private {boolean} */
+    this.isIframeVisible_ = false;
+
+    /** @private {boolean} */
+    this.isFullscreen_ = false;
 
     /** @private {?Element} */
     this.ui_ = null;
@@ -83,7 +102,7 @@ export class ConsentUI {
           this.ampdoc_.getElementById(opt_postPromptUI);
       if (!postPromptUI) {
         user().error(TAG, 'postPromptUI element with ' +
-          `id=${opt_postPromptUI} not found`);
+          'id=%s not found', opt_postPromptUI);
       }
       this.ui_ = dev().assertElement(postPromptUI);
       this.isPostPrompt_ = true;
@@ -96,7 +115,7 @@ export class ConsentUI {
       const promptElement = this.ampdoc_.getElementById(promptUI);
       if (!promptElement || !this.parent_.contains(promptElement)) {
         user().error(TAG, 'child element of <amp-consent> with ' +
-          `promptUI id ${promptUI} not found`);
+          'promptUI id %s not found', promptUI);
       }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
@@ -153,27 +172,49 @@ export class ConsentUI {
         this.ui_.whenBuilt().then(() => show()) :
         show();
     }
+
+    this.isVisible_ = true;
   }
 
   /**
    * Hide the UI
    */
   hide() {
+
     if (!this.ui_) {
       // Nothing to hide from;
       return;
     }
-    if (!this.isPostPrompt_) {
-      const {classList} = this.parent_;
-      classList.remove('amp-active');
-      classList.add('amp-hidden');
+
+    this.baseInstance_.mutateElement(() => {
+      if (this.isCreatedIframe_) {
+        this.resetIframe_();
+      }
+
+      if (!this.isPostPrompt_) {
+        const {classList} = this.parent_;
+        classList.remove('amp-active');
+        classList.add('amp-hidden');
+      }
+
+      toggle(dev().assertElement(this.ui_), false);
+      this.baseInstance_.getViewport().updateFixedLayer();
+      this.isVisible_ = false;
+    });
+  }
+
+  /**
+   * Enter the fullscreen state for the UI
+   */
+  enterFullscreen_() {
+    if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
+      return;
     }
-    // Need to remove from fixed layer and add it back to update element's top
-    this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
-    toggle(this.ui_, false);
-    if (this.isCreatedIframe_) {
-      this.resetIframe_();
-    }
+
+    const {classList} = this.parent_;
+    classList.add(consentUiClasses.iframeFullscreen);
+
+    this.isFullscreen_ = true;
   }
 
   /**
@@ -186,7 +227,7 @@ export class ConsentUI {
     iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     iframe.setAttribute('sandbox', 'allow-scripts');
     const {classList} = iframe;
-    classList.add('i-amphtml-consent-fill');
+    classList.add(consentUiClasses.fill);
     // Append iframe lazily to save resources.
     return iframe;
   }
@@ -200,8 +241,8 @@ export class ConsentUI {
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
     const {classList} = placeholder;
-    classList.add('i-amphtml-consent-fill');
-    classList.add('i-amphtml-consent-placeholder');
+    classList.add(consentUiClasses.fill);
+    classList.add(consentUiClasses.placeholder);
     return placeholder;
   }
 
@@ -218,7 +259,7 @@ export class ConsentUI {
       insertAfterOrAtStart(this.parent_,
           dev().assertElement(this.placeholder_), null);
     }
-    classList.add('loading');
+    classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
@@ -232,23 +273,50 @@ export class ConsentUI {
    */
   showIframe_() {
     const {classList} = this.parent_;
+    classList.add(consentUiClasses.iframeActive);
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
-    classList.remove('loading');
-    classList.add('i-amphtml-consent-ui-in');
-    classList.add('consent-iframe-active');
+
+    // Remove transition/transform styles added by the fixed layer
+    setStyles(this.parent_, {
+      transform: '',
+      transition: '',
+    });
+
+    /**
+     * Waiting for mutation twice here.
+     * First mutation is for when the correct elements,
+     * are shown/hidden, and the iframe active class
+     * pushes it out of view.
+     * Second, is for the loading class to be removed.
+     * This will avoid race conditions with the slidein transition.
+     */
+    this.baseInstance_.mutateElement(() => {
+      classList.remove(consentUiClasses.loading);
+      this.baseInstance_.mutateElement(() => {
+        classList.add(consentUiClasses.in);
+        this.isIframeVisible_ = true;
+      });
+    });
   }
 
   /**
    * Remove the iframe from doc
    * Remove event listener
    * Reset UI state
+   * Takes in a function to call after our transition has ended
    */
   resetIframe_() {
     const {classList} = this.parent_;
-    classList.remove('i-amphtml-consent-ui-in');
-    classList.remove('consent-iframe-active');
+
+    // Remove the iframe active to go back to our normal height
+    classList.remove(consentUiClasses.iframeActive);
+
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
+    classList.remove(consentUiClasses.iframeFullscreen);
+    this.isFullscreen_ = false;
+    classList.remove(consentUiClasses.in);
+    this.isIframeVisible_ = false;
     removeElement(dev().assertElement(this.ui_));
   }
 
@@ -260,6 +328,12 @@ export class ConsentUI {
    * {
    *   type: 'consent-ui-ready'
    * }
+   *
+   * Enter Fullscreen
+   * {
+   *   type: 'consent-ui-enter-fullscreen'
+   * }
+   *
    * @param {!Event} event
    */
   handleIframeMessages_(event) {
@@ -269,12 +343,24 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data) {
+    if (!data || !data['type']) {
       return;
     }
 
-    if (data['type'] == 'consent-ui-ready') {
+    if (data['type'] === 'consent-ui-ready') {
       this.iframeReady_.resolve();
+    }
+
+    if (data['type'] === 'consent-ui-enter-fullscreen') {
+
+      // TODO (@torch2424) Send response back if enter fullscreen was succesful
+      if (!this.isIframeVisible_) {
+        return;
+      }
+
+      this.baseInstance_.mutateElement(() => {
+        this.enterFullscreen_();
+      });
     }
   }
 }

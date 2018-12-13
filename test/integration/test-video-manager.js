@@ -46,7 +46,7 @@ describe.configure().skip('Fake Video Player' +
   });
 });
 
-describe.configure().ifNewChrome().run('VideoManager', function() {
+describe.configure().ifChrome().run('VideoManager', function() {
   describes.fakeWin('VideoManager', {
     amp: {
       ampdoc: 'single',
@@ -245,6 +245,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
       sandbox = sinon.sandbox;
       klass = createFakeVideoPlayerClass(env.win);
       video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+      env.win.document.body.appendChild(video);
       impl = video.implementation_;
       installVideoManagerForDoc(env.ampdoc);
       videoManager = Services.videoManagerForDoc(env.ampdoc);
@@ -258,7 +259,7 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 });
 
 
-describe.configure().ifNewChrome().run('Autoplay support', () => {
+describe.configure().ifChrome().run('Autoplay support', () => {
   const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
 
   let sandbox;

@@ -16,6 +16,10 @@
 
 const defaultPlugins = [
   require.resolve(
+      './babel-plugins/babel-plugin-transform-amp-asserts'),
+  require.resolve(
+      './babel-plugins/babel-plugin-transform-html-template'),
+  require.resolve(
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
 ];
 
@@ -31,6 +35,7 @@ module.exports = {
             './polyfills/document-contains': ['installDocContains'],
             './polyfills/math-sign': ['installMathSign'],
             './polyfills/object-assign': ['installObjectAssign'],
+            './polyfills/object-values': ['installObjectValues'],
             './polyfills/promise': ['installPromise'],
           },
         }],

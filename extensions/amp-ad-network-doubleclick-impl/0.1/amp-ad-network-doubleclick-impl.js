@@ -1100,7 +1100,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     impressions.split(',').forEach(url => {
       try {
-        if (!Services.urlForDoc(this.getAmpDoc()).isSecure(url)) {
+        if (!Services.urlForDoc(this.element).isSecure(url)) {
           dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }
@@ -1386,6 +1386,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
+  }
+
+  /**
+   * @return {boolean} True if 'fluid' is one of the requested sizes, false
+   * otherwise.
+   */
+  isFluidRequest() {
+    return this.isFluidRequest_;
   }
 }
 
