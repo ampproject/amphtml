@@ -408,6 +408,7 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
+   * @private
    */
   fireSelectEvent_(el) {
     const name = 'select';
