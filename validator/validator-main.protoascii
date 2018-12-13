@@ -1536,6 +1536,7 @@ tags: {
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
+      protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
@@ -1550,6 +1551,7 @@ tags: {
       protocol: "viber"
       protocol: "webcal"
       protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "wh"
       protocol: "whatsapp"
       allow_empty: true
     }
