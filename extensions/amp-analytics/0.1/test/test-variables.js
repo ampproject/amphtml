@@ -162,15 +162,14 @@ describe('amp-analytics.VariableService', function() {
 
   describes.fakeWin('macros', {amp: true}, env => {
     let win;
-    let ampdoc;
     let urlReplacementService;
 
     beforeEach(() => {
-      ampdoc = env.ampdoc;
       win = env.win;
       installVariableService(win);
       variables = variableServiceFor(win);
-      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+      const {documentElement} = win.document;
+      urlReplacementService = Services.urlReplacementsForDoc(documentElement);
     });
 
     function check(input, output) {
