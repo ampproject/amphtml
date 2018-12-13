@@ -257,7 +257,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
+    return this.maybeApplyFirstAnimationFrame();
   }
 
 
