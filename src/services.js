@@ -17,7 +17,6 @@
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
-  getExistingServiceInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
@@ -479,8 +478,9 @@ export class Services {
    * @return {!./service/timer-impl.Timer}
    */
   static timerFor(window) {
+    // TODO(alabiaga): This will always return the top window's Timer service.
     return /** @type {!./service/timer-impl.Timer} */ (
-      getExistingServiceInEmbedScope(window, 'timer', /* fallback */ true));
+      getService(window, 'timer'));
   }
 
   /**
