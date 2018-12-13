@@ -92,6 +92,7 @@ const attributesToForward = [
   'month-format',
   'number-of-months',
   'minimum-nights',
+  'maximum-nights',
 ];
 
 /** @enum {string} */

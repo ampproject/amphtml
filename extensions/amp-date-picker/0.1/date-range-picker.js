@@ -18,6 +18,7 @@ import {DayPickerPhrases} from './defaultPhrases';
 import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
+import {wrap as withMaximumNights} from './wrappers/maximum-nights';
 
 /**
  * Create a DateRangePicker React component
@@ -84,7 +85,7 @@ function createDateRangePickerBase() {
   });
 
   const WrappedDayPickerRangeController =
-      withDatePickerCommon(DayPickerRangeController);
+      withDatePickerCommon(withMaximumNights(DayPickerRangeController));
   WrappedDayPickerRangeController['defaultProps'] = defaultProps;
 
   return WrappedDayPickerRangeController;

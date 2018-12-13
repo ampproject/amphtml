@@ -364,6 +364,12 @@ If no `week-day-format` is present, the weekdays display as the first character 
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
 
+##### maximum-nights
+
+The number of nights that the user's selection may not exceed in a date range.
+The default is `"0"`.
+A value of `"0"` allows the user to select an unlimited number of nights.
+
 ##### minimum-nights
 
 The number of nights that the user must select in a date range. The default is `"1"`.
