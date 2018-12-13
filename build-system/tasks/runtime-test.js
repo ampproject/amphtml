@@ -205,7 +205,7 @@ function printArgvMessages() {
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
-        log(yellow('--' + arg + ':'), green(message));
+        log(yellow(`--${arg}:`), green(message));
       }
     });
   }
@@ -240,7 +240,7 @@ function getImports(jsFile) {
   const rootDir = path.dirname(path.dirname(__dirname));
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function(file) {
-    const fullPath = path.resolve(jsFileDir, file) + '.js';
+    const fullPath = path.resolve(jsFileDir, `${file}.js`);
     if (fs.existsSync(fullPath)) {
       const relativePath = path.relative(rootDir, fullPath);
       files.push(relativePath);
@@ -285,10 +285,9 @@ function getTestsFor(srcFiles) {
  * @param {!Object<string, string>} cssJsFileMap
  */
 function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-  const cssFilePath = 'extensions/' + cssData['name'] + '/' +
-      cssData['version'] + '/' + cssBinaryName + '.css';
-  const jsFilePath = 'build/' + cssBinaryName + '-' +
-      cssData['version'] + '.css.js';
+  const cssFilePath = `extensions/${cssData['name']}/${cssData['version']}/` +
+      `${cssBinaryName}.css`;
+  const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
   cssJsFileMap[cssFilePath] = jsFilePath;
 }
 
@@ -339,7 +338,7 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
       return path.extname(file) == '.js';
     });
     jsFilesInDir.forEach(jsFile => {
-      const jsFilePath = cssFileDir + '/' + jsFile;
+      const jsFilePath = `${cssFileDir}/${jsFile}`;
       if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
         jsFiles.push(jsFilePath);
       }
@@ -369,7 +368,7 @@ function unitTestsToRun() {
     }
   });
   if (srcFiles.length > 0) {
-    log(green('INFO: ') + 'Determining which unit tests to run...');
+    log(green('INFO:'), 'Determining which unit tests to run...');
     const moreTestsToRun = getTestsFor(srcFiles);
     moreTestsToRun.forEach(test => {
       if (!testsToRun.includes(test)) {
@@ -417,7 +416,7 @@ async function runTests() {
   }
 
   if (argv.saucelabs && !argv.integration) {
-    log(red('ERROR:'), 'Only integration tests may be run on the full set of ' +
+    log(red('ERROR:'), 'Only integration tests may be run on the full set of',
         'Sauce Labs browsers');
     log('Use', cyan('--saucelabs'), 'with', cyan('--integration'));
     process.exit();
@@ -451,11 +450,11 @@ async function runTests() {
   } else if (argv['local-changes']) {
     const testsToRun = unitTestsToRun();
     if (testsToRun.length == 0) {
-      log(green('INFO: ') +
+      log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
       return Promise.resolve();
     } else {
-      log(green('INFO: ') + 'Running the following unit tests:');
+      log(green('INFO:'), 'Running the following unit tests:');
       testsToRun.forEach(test => {
         log(cyan(test));
       });
@@ -567,7 +566,7 @@ async function runTests() {
   if (processExitCode != 0) {
     log(
         red('ERROR:'),
-        yellow('Karma test failed with exit code ' + processExitCode));
+        yellow(`Karma test failed with exit code ${processExitCode}`));
     process.exitCode = processExitCode;
   }
 
@@ -658,24 +657,24 @@ async function runTests() {
           } else if (argv.integration) {
             flags = ' --flags=integration_tests';
           }
-          log(green('INFO: ') + 'Uploading code coverage report to ' +
-              cyan('https://codecov.io/gh/ampproject/amphtml') + ' by running ' +
+          log(green('INFO: '), 'Uploading code coverage report to',
+              cyan('https://codecov.io/gh/ampproject/amphtml'), 'by running',
               cyan(codecovCmd + flags) + '...');
           const output = getStdout(codecovCmd + flags);
           const viewReportPrefix = 'View report at: ';
-          const viewReport = output.match(viewReportPrefix + '.*');
+          const viewReport = output.match(`${viewReportPrefix}.*`);
           if (viewReport && viewReport.length > 0) {
-            log(green('INFO: ') + viewReportPrefix +
+            log(green('INFO:'), viewReportPrefix +
                 cyan(viewReport[0].replace(viewReportPrefix, '')));
           } else {
-            log(yellow('WARNING: ') +
-                'Code coverage report upload may have failed:\n' +
+            log(yellow('WARNING:'),
+                'Code coverage report upload may have failed:\n',
                 yellow(output));
           }
         } else {
           const coverageReportUrl =
               'file://' + path.resolve('test/coverage/index.html');
-          log(green('INFO: ') + 'Generated code coverage report at ' +
+          log(green('INFO:'), 'Generated code coverage report at',
               cyan(coverageReportUrl));
           opn(coverageReportUrl, {wait: false});
         }
@@ -695,9 +694,9 @@ async function runTests() {
         }
       }
       // Print a summary for each browser as soon as tests complete.
-      let message = browser.name + ': ';
-      message += 'Executed ' + (result.success + result.failed) +
-          ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
+      let message = `${browser.name}: Executed ` +
+          `${result.success + result.failed} of ${result.total} ` +
+          `(Skipped ${result.skipped}) `;
       if (result.failed === 0) {
         message += green('SUCCESS');
       } else {
