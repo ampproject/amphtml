@@ -39,6 +39,9 @@ import {
 } from '../../../src/style';
 
 
+const TAG = 'amp-video-docking-controls';
+
+
 /** @private @const {!Array<!./breakpoints.SyntheticBreakpointDef>} */
 const BREAKPOINTS = [
   {
@@ -82,32 +85,40 @@ const renderDockedOverlay = html =>
  * @private
  */
 const renderControls = html =>
-  // This currently bloats the resulting binary with
-  // 1. some whitespace and 2. duplicate declarations of equal strings.
-  // Upcoming fixes: #14657, #14658.
-  // TODO(alanorozco): Cleanup markup for readability once fixes land.
   html`<div class="amp-video-docked-controls" hidden>
   <div class="amp-video-docked-main-button-group">
     <div class="amp-video-docked-button-group">
-      <div role="button" ref="playButton" class="amp-video-docked-play">
+      <div role="button"
+          ref="playButton"
+          class="amp-video-docked-play">
       </div>
-      <div role="button" ref="pauseButton" class="amp-video-docked-pause">
-      </div>
-    </div>
-    <div class="amp-video-docked-button-group">
-      <div role="button" ref="muteButton" class="amp-video-docked-mute">
-      </div>
-      <div role="button" ref="unmuteButton" class="amp-video-docked-unmute">
+      <div role="button"
+          ref="pauseButton"
+          class="amp-video-docked-pause">
       </div>
     </div>
     <div class="amp-video-docked-button-group">
-      <div role="button" ref="fullscreenButton"
+      <div role="button"
+          ref="muteButton"
+          class="amp-video-docked-mute">
+      </div>
+      <div role="button"
+          ref="unmuteButton"
+          class="amp-video-docked-unmute">
+      </div>
+    </div>
+    <div class="amp-video-docked-button-group">
+      <div role="button"
+          ref="fullscreenButton"
           class="amp-video-docked-fullscreen">
       </div>
     </div>
   </div>
-  <div class="amp-video-docked-button-dismiss-group" ref="dismissContainer">
-    <div role="button" ref="dismissButton" class="amp-video-docked-dismiss">
+  <div class="amp-video-docked-button-dismiss-group"
+      ref="dismissContainer">
+    <div role="button"
+        ref="dismissButton"
+        class="amp-video-docked-dismiss">
     </div>
   </div>
 </div>`;
@@ -179,11 +190,13 @@ export class Controls {
 
   /** @public */
   disable() {
+    dev().info(TAG, 'disable');
     this.isDisabled_ = true;
   }
 
   /** @public */
   enable() {
+    dev().info(TAG, 'enable');
     this.isDisabled_ = false;
   }
 
