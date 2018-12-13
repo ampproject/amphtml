@@ -902,6 +902,15 @@ function createBaseCustomElementClass(win) {
       if (!pretendDisconnected && dom.isConnectedNode(this)) {
         return;
       }
+
+      // This path only comes from Resource#disconnect, which deletes the
+      // Resource instance tied to this element. Therefore, it is no longer
+      // an AMP Element. But, DOM queries for i-amphtml-element assume that
+      // the element is tied to a Resource.
+      if (pretendDisconnected) {
+        this.classList.remove('i-amphtml-element');
+      }
+
       this.isConnected_ = false;
       this.getResources().remove(this);
       if (isExperimentOn(this.ampdoc_.win, 'layers')) {
