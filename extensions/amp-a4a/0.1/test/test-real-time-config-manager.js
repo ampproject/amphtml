@@ -62,7 +62,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     // RealTimeConfigManager uses the UrlReplacements service scoped to the A4A
     // (FIE), but for testing stub in the parent service for simplicity.
-    const urlReplacements = Services.urlReplacementsForDoc(env.ampdoc);
+    const urlReplacements = Services.urlReplacementsForDoc(element);
     sandbox.stub(Services, 'urlReplacementsForDoc')
         .withArgs(a4aElement.element).returns(urlReplacements);
 

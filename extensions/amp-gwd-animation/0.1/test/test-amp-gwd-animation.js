@@ -121,7 +121,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           element = el;
           impl = element.implementation_;
           runtime = getExistingServiceForDocInEmbedScope(
-              variant.ampdoc == 'fie' ? element : ampdoc, GWD_SERVICE_NAME);
+              element, GWD_SERVICE_NAME);
           page1Elem = doc.getElementById('page1');
         });
       });
@@ -451,8 +451,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
 
-        const actionService = Services.actionServiceForDoc(
-            variant.ampdoc == 'fie' ? element : ampdoc);
+        const actionService = Services.actionServiceForDoc(element);
         sandbox.stub(actionService, 'trigger').callsFake(
             (target, name, event) => {
               triggeredAmpEventNames.push(name);

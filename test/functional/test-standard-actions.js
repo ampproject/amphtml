@@ -440,48 +440,48 @@ describes.sandboxed('StandardActions', {}, () => {
 
 
     it('should implement setState()', () => {
-      const invokeSpy = sandbox.stub();
-      // Bind.invoke() doesn't resolve with a value,
-      // but add one here to check that the promise is chained.
-      invokeSpy.returns(Promise.resolve('set-state-complete'));
+      const element = createElement();
 
-      window.services.bind = {
-        obj: {invoke: invokeSpy},
-      };
+      const bind = {invoke: sandbox.stub()};
+      // Bind.invoke() doesn't actually resolve with a value,
+      // but add one here to check that the promise is chained.
+      bind.invoke.returns(Promise.resolve('set-state-complete'));
+      sandbox.stub(Services, 'bindForDocOrNull')
+          .withArgs(element).returns(Promise.resolve(bind));
 
       invocation.method = 'setState';
       invocation.args = {
         [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      invocation.node = ampdoc;
+      invocation.node = element;
 
       return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('set-state-complete');
-        expect(invokeSpy).to.be.calledOnce;
-        expect(invokeSpy).to.be.calledWith(invocation);
+        expect(bind.invoke).to.be.calledOnce;
+        expect(bind.invoke).to.be.calledWith(invocation);
       });
     });
 
     it('should implement pushState()', () => {
-      const invokeSpy = sandbox.stub();
-      // Bind.invoke() doesn't resolve with a value,
-      // but add one here to check that the promise is chained.
-      invokeSpy.returns(Promise.resolve('push-state-complete'));
+      const element = createElement();
 
-      window.services.bind = {
-        obj: {invoke: invokeSpy},
-      };
+      const bind = {invoke: sandbox.stub()};
+      // Bind.invoke() doesn't actually resolve with a value,
+      // but add one here to check that the promise is chained.
+      bind.invoke.returns(Promise.resolve('push-state-complete'));
+      sandbox.stub(Services, 'bindForDocOrNull')
+          .withArgs(element).returns(Promise.resolve(bind));
 
       invocation.method = 'pushState';
       invocation.args = {
         [RAW_OBJECT_ARGS_KEY]: '{foo: 123}',
       };
-      invocation.node = ampdoc;
+      invocation.node = element;
 
       return standardActions.handleAmpTarget(invocation).then(result => {
         expect(result).to.equal('push-state-complete');
-        expect(invokeSpy).to.be.calledOnce;
-        expect(invokeSpy).to.be.calledWith(invocation);
+        expect(bind.invoke).to.be.calledOnce;
+        expect(bind.invoke).to.be.calledWith(invocation);
       });
     });
 
