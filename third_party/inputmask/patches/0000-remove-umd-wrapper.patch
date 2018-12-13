@@ -1,0 +1,44 @@
+diff --git a/third_party/inputmask/inputmask.dependencyLib.js b/third_party/inputmask/inputmask.dependencyLib.js
+index 3916874f1..dabe6c770 100755
+--- a/third_party/inputmask/inputmask.dependencyLib.js
++++ b/third_party/inputmask/inputmask.dependencyLib.js
+@@ -6,9 +6,7 @@
+ * Version: 3.3.11
+ */
+ 
+-!function(factory) {
+-    "function" == typeof define && define.amd ? define([ "../global/window", "../global/document" ], factory) : "object" == typeof exports ? module.exports = factory(require("../global/window"), require("../global/document")) : window.dependencyLib = factory(window, document);
+-}(function(window, document) {
++export function factory(window, document) {
+     function indexOf(list, elem) {
+         for (var i = 0, len = list.length; i < len; i++) if (list[i] === elem) return i;
+         return -1;
+@@ -130,4 +128,4 @@
+         return evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail), 
+         evt;
+     }, DependencyLib.Event.prototype = window.Event.prototype), DependencyLib;
+-});
+\ No newline at end of file
++}
+diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
+index c6836be84..71f7b99b6 100644
+--- a/third_party/inputmask/inputmask.js
++++ b/third_party/inputmask/inputmask.js
+@@ -6,9 +6,7 @@
+ * Version: 3.3.11
+ */
+ 
+-!function(factory) {
+-    "function" == typeof define && define.amd ? define([ "./dependencyLibs/inputmask.dependencyLib", "./global/window", "./global/document" ], factory) : "object" == typeof exports ? module.exports = factory(require("./dependencyLibs/inputmask.dependencyLib"), require("./global/window"), require("./global/document")) : window.Inputmask = factory(window.dependencyLib || jQuery, window, document);
+-}(function($, window, document, undefined) {
++export function factory($, window, document, undefined) {
+     function Inputmask(alias, options, internal) {
+         if (!(this instanceof Inputmask)) return new Inputmask(alias, options, internal);
+         this.el = undefined, this.events = {}, this.maskset = undefined, this.refreshValue = !1, 
+@@ -1622,4 +1620,4 @@
+         WINDOWS: 91,
+         X: 88
+     }, Inputmask;
+-});
+\ No newline at end of file
++}
