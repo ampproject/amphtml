@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,18 +30,8 @@ tags: {  # <amp-date-display>
   requires_extension: "amp-date-display"
   attrs: {
     name: "datetime"
-    mandatory_oneof: "['datetime', 'timestamp-seconds', 'timestamp-ms']"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
     value_regex: "now|(\\d{4}-[01]\\d-[0-3]\\d(T[0-2]\\d:[0-5]\\d(:[0-6]\\d(\\.\\d\\d?\\d?)?)?(Z|[+-][0-1]\\d:[0-5]\\d)?)?)"
-  }
-  attrs: {
-    name: "timestamp-seconds"
-    mandatory_oneof: "['datetime', 'timestamp-seconds', 'timestamp-ms']"
-    value_regex: "\\d+"
-  }
-  attrs: {
-    name: "timestamp-ms"
-    mandatory_oneof: "['datetime', 'timestamp-seconds', 'timestamp-ms']"
-    value_regex: "\\d+"
   }
   attrs: {
     name: "display-in"
@@ -52,6 +42,16 @@ tags: {  # <amp-date-display>
     value_regex: "-?\\d+"
   }
   attrs: { name: "locale" }
+  attrs: {
+    name: "timestamp-ms"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "timestamp-seconds"
+    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    value_regex: "\\d+"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

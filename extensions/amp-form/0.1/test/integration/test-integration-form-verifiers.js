@@ -15,7 +15,7 @@
  */
 import {poll} from '../../../../../testing/iframe';
 
-const baseUrl = 'http://localhost:31862';
+const baseUrl = 'http://localhost:8081';
 
 const RENDER_TIMEOUT = 15000;
 
