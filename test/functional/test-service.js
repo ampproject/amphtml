@@ -30,7 +30,6 @@ import {
   installServiceInEmbedIfEmbeddable,
   installServiceInEmbedScope,
   isDisposable,
-  isEmbeddable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
@@ -589,18 +588,13 @@ describe('service', () => {
           },
         };
         nonEmbeddable = {};
-        embeddable = {adoptEmbedWindow: sandbox.spy()};
+        embeddable = {installInEmbedWindow: sandbox.spy()};
         registerServiceBuilderForDoc(ampdoc, 'embeddable', function() {
           return embeddable;
         });
         registerServiceBuilderForDoc(ampdoc, 'nonEmbeddable', function() {
           return nonEmbeddable;
         });
-      });
-
-      it('should test embeddable interface', () => {
-        expect(isEmbeddable(embeddable)).to.be.true;
-        expect(isEmbeddable(nonEmbeddable)).to.be.false;
       });
 
       describe('installServiceInEmbedIfEmbeddable()', () => {
@@ -614,7 +608,6 @@ describe('service', () => {
 
           result = installServiceInEmbedIfEmbeddable(embedWin, nonEmbeddable);
           expect(result).to.be.false;
-          expect(nonEmbeddable.installInEmbedWindow).to.not.be.called;
         });
       });
     });
