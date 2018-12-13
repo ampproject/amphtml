@@ -16,7 +16,7 @@
 
 import {
   ActionTrust,
-  DEFAULT_METHOD,
+  DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
 } from '../action-constants';
 import {Keys} from '../utils/key-codes';
@@ -746,27 +746,18 @@ export class ActionService {
  */
 function isActionWhitelisted_(invocation, whitelist) {
   const {method, node, tagOrTarget} = invocation;
-  const tagOrTargetRegex = caseInsensitiveMatch(tagOrTarget);
-  let invocationMethodRegex = caseInsensitiveMatch(method);
+  const tagOrTargetToMatch = tagOrTarget.toLowerCase();
+  let invocationMethodToMatch = method.toLowerCase();
   const defaultActionAlias = node.getDefaultActionAlias();
-  if (method == DEFAULT_METHOD && (node
+  if (method == DEFAULT_ACTION && (node
       && defaultActionAlias)) {
-    invocationMethodRegex = caseInsensitiveMatch(defaultActionAlias);
+    invocationMethodToMatch = defaultActionAlias.toLowerCase();
   }
 
   return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*' || tagOrTargetRegex.test(tagOrTarget)) &&
-        (invocationMethodRegex.test(method));
+    return (tagOrTarget === '*' || tagOrTargetToMatch == tagOrTarget.toLowerCase()) &&
+        (invocationMethodToMatch == method.toLowerCase());
   });
-}
-
-/**
- * Generate a case insensitive regex with the provided string.
- * @param {string} toMatch
- * @return {RegExp}
- */
-function caseInsensitiveMatch(toMatch) {
-  return new RegExp('^' + toMatch + '$', 'i');
 }
 
 /**
@@ -859,7 +850,7 @@ export function parseActionMap(s, context) {
             toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
 
         // Method: ".method". Method is optional.
-        let method = DEFAULT_METHOD;
+        let method = DEFAULT_ACTION;
         let args = null;
 
         peek = toks.peek();

@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {DEFAULT_METHOD} from '../../src/action-constants';
+import {DEFAULT_ACTION} from '../../src/action-constants';
 import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
@@ -111,7 +111,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should execute default method by "activate"', () => {
     const handler = sandbox.spy();
     element.registerDefaultAction(handler);
-    const invocation = {method: DEFAULT_METHOD, satisfiesTrust: () => true};
+    const invocation = {method: DEFAULT_ACTION, satisfiesTrust: () => true};
     element.executeAction(invocation, null, false);
     expect(handler).to.be.calledOnce;
   });

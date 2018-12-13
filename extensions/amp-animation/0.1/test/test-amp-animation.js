@@ -15,7 +15,7 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {DEFAULT_METHOD} from '../../../../src/action-constants';
+import {DEFAULT_ACTION} from '../../../../src/action-constants';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {WebAnimationRunner} from '../web-animations';
 
@@ -372,7 +372,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should trigger activate', () => {
         const args = {};
         const invocation = {
-          method: DEFAULT_METHOD,
+          method: DEFAULT_ACTION,
           args,
           satisfiesTrust: () => true,
         };

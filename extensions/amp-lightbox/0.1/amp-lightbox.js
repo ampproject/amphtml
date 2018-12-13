@@ -171,7 +171,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.maybeSetTransparentBody_();
 
     this.registerDefaultAction(
-        invocation => this.open_(invocation),
+        unused => this.open_(),
         'open');
     this.registerAction('close', this.close.bind(this));
   }
@@ -255,10 +255,9 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  open_(opt_invocation) {
+  open_() {
     if (this.active_) {
       return;
     }

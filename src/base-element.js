@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust, DEFAULT_METHOD} from './action-constants';
+import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
@@ -155,7 +155,7 @@ export class BaseElement {
      * }>} */
     this.actionMap_ = null;
 
-    /** @private {?string} The default action alias. See #registerDefaultAction */
+    /** @private {?string} */
     this.defaultActionAlias_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -603,40 +603,23 @@ export class BaseElement {
    * @public
    */
   registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
-    this.registerAction_(
-        alias, handler, minTrust, /* opt_isDefault */ false);
+    this.initActionMap_();
+    this.actionMap_[alias] = {handler, minTrust};
   }
 
   /**
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust=} minTrust
+   * @public
    */
   registerDefaultAction(
-    handler,
-    alias = DEFAULT_METHOD,
-    minTrust = ActionTrust.HIGH) {
-    this.registerAction_(
-        alias, handler, minTrust, /* opt_isDefault */ true);
-  }
-
-  /**
-   * @param {string} alias
-   * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ActionTrust} minTrust
-   * @param {boolean} isDefault Whether this action is the default.
-   * @private
-   */
-  registerAction_(alias, handler, minTrust = ActionTrust.HIGH,
-    isDefault = false) {
-    this.initActionMap_();
-    this.actionMap_[alias] = {handler, minTrust};
-    if (isDefault) {
-      dev().assert(!this.defaultActionAlias_,
-          'There is already a default action registered.');
-      this.defaultActionAlias_ = alias;
-    }
+      handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
+    dev().assert(!this.defaultActionAlias_,
+        'There is already a default action registered.');
+    this.registerAction(alias, handler, minTrust);
+    this.defaultActionAlias_ = alias;
   }
 
   /**
@@ -651,12 +634,12 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     const {method} = invocation;
-    const isDefaultMethod = (method == DEFAULT_METHOD);
+    const isDefaultAction = (method == DEFAULT_ACTION);
     let handler;
     let minTrust;
 
     if (this.defaultActionAlias_
-        && (isDefaultMethod || this.defaultActionAlias_ == method)) {
+        && (isDefaultAction || this.defaultActionAlias_ == method)) {
       handler = this.actionMap_[this.defaultActionAlias_].handler;
       minTrust = this.activationTrust();
     } else {

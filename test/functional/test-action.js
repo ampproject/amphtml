@@ -23,7 +23,7 @@ import {
 } from '../../src/service/action-impl';
 import {
   ActionTrust,
-  DEFAULT_METHOD,
+  DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
 } from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
@@ -114,17 +114,17 @@ describe('ActionService parseAction', () => {
     const a = parseAction('event1:target1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
-    expect(a.method).to.equal(DEFAULT_METHOD);
+    expect(a.method).to.equal(DEFAULT_ACTION);
   });
 
   it('should parse with default method for two different targets', () => {
     const a = parseMultipleActions('event1:target1,target2');
     expect(a[0].event).to.equal('event1');
     expect(a[0].target).to.equal('target1');
-    expect(a[0].method).to.equal(DEFAULT_METHOD);
+    expect(a[0].method).to.equal(DEFAULT_ACTION);
     expect(a[1].event).to.equal('event1');
     expect(a[1].target).to.equal('target2');
-    expect(a[1].method).to.equal(DEFAULT_METHOD);
+    expect(a[1].method).to.equal(DEFAULT_ACTION);
   });
 
   it('should parse with numeric target', () => {
@@ -185,7 +185,7 @@ describe('ActionService parseAction', () => {
     // action definitions for event1
     expect(a['event1'][0].event).to.equal('event1');
     expect(a['event1'][0].target).to.equal('foo');
-    expect(a['event1'][0].method).to.equal(DEFAULT_METHOD);
+    expect(a['event1'][0].method).to.equal(DEFAULT_ACTION);
     expect(a['event1'][0].args).to.be.null;
 
     expect(a['event1'][1].event).to.equal('event1');
@@ -201,7 +201,7 @@ describe('ActionService parseAction', () => {
     // action definitions for event2
     expect(a['event2'][0].event).to.equal('event2');
     expect(a['event2'][0].target).to.equal('bar');
-    expect(a['event2'][0].method).to.equal(DEFAULT_METHOD);
+    expect(a['event2'][0].method).to.equal(DEFAULT_ACTION);
     expect(a['event2'][0].args).to.be.null;
 
     expect(a['event2'][1].event).to.equal('event2');
