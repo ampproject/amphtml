@@ -91,12 +91,12 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
-    name: "title"
-    mandatory: true
-  }
-  attrs: {
     name: "supports-landscape"
     value: ""
+  }
+  attrs: {
+    name: "title"
+    mandatory: true
   }
   siblings_disallowed: true
   child_tags: {
