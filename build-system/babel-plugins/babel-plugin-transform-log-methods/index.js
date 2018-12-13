@@ -1,22 +1,23 @@
 let ctr = 0;
 
-function convertFromBase10ToBase16(str){
-    const num = parseInt(str, 10);
-    return num.toString(16);
+function convertFromBase10ToBase16(str) {
+  const num = parseInt(str, 10);
+  return num.toString(16);
 }
+
 /**
  * @type {!Array<LogMethodMetadataDef>}
  */
 const transformableMethods = [
-  {name: "assert", variadic: true, startPos: 1},
-  {name: "assertString", variadic: false, startPos: 1},
-  {name: "assertNumber", variadic: false, startPos: 1},
-  {name: "assertBoolean", variadic: false, startPos: 1},
-  {name: "assertEnumValue", variadic: false, startPos: 2},
-  {name: "assertElement", variadic: false, startPos: 1},
-  {name: "fine", variadic: true, startPos: 1 },
-  {name: "info", variadic: true, startPos: 1 },
-  {name: "warn", variadic: true, startPos: 1 },
+  {name: 'assert', variadic: true, startPos: 1},
+  {name: 'assertString', variadic: false, startPos: 1},
+  {name: 'assertNumber', variadic: false, startPos: 1},
+  {name: 'assertBoolean', variadic: false, startPos: 1},
+  {name: 'assertEnumValue', variadic: false, startPos: 2},
+  {name: 'assertElement', variadic: false, startPos: 1},
+  {name: 'fine', variadic: true, startPos: 1},
+  {name: 'info', variadic: true, startPos: 1},
+  {name: 'warn', variadic: true, startPos: 1},
   {name: 'createExpectedError', variadic: true, startPos: 0},
   {name: 'error', variadic: true, startPos: 1},
   {name: 'expectedError', variadic: true, startPos: 1},
@@ -28,8 +29,8 @@ function isTransformableMethod(t, node, methods) {
     return false;
   }
   return methods.some(names => {
-    const name = names.name;
-    return t.isIdentifier(node, { name: name });
+    const {name} = names;
+    return t.isIdentifier(node, {name});
   });
 }
 
@@ -46,7 +47,7 @@ function getMetadata(name) {
  * @return {boolean}
  */
 function isBinaryConcat(node) {
-  return node.type === "BinaryExpression" && node.operator === "+";
+  return node.type === 'BinaryExpression' && node.operator === '+';
 }
 
 /**
@@ -57,29 +58,14 @@ function isLiteralString(node) {
   return node.type === "StringLiteral";
 }
 
-/**
- * @param {!Node} node
- * @return {boolean}
- */
-function isMessageString(node) {
-  if (node.type === "Literal") {
-    return isLiteralString(node);
-  }
-  // Allow for string concatenation operations.
-  if (isBinaryConcat(node)) {
-    return isMessageString(node.left) && isMessageString(node.right);
-  }
-  return false;
-}
 
 module.exports = function(babel) {
   const {types: t} = babel;
   return {
     visitor: {
-      CallExpression(path, state) {
+      CallExpression(path) {
         const {node} = path;
         const {callee} = node;
-        const {parenthesized} = node.extra || {};
 
         // Test to see if it looks like a method().call()
         const isMemberAndCallExpression =
@@ -90,13 +76,14 @@ module.exports = function(babel) {
 
         // this is dev() or user() call expression
         const logCallee = callee.object.callee;
-        const { property } = callee;
+        const {property} = callee;
         const isTransformableDevCall =
-          t.isIdentifier(logCallee, { name: "dev" }) &&
+          t.isIdentifier(logCallee, {name: 'dev'}) &&
           isTransformableMethod(t, property, transformableMethods);
         const isTransformableUserCall =
-          t.isIdentifier(logCallee, { name: "user" }) &&
+          t.isIdentifier(logCallee, {name: 'user'}) &&
           isTransformableMethod(t, property, transformableMethods);
+
         if (!(isTransformableDevCall || isTransformableUserCall)) {
           return;
         }
@@ -116,26 +103,28 @@ module.exports = function(babel) {
         const otherArgs = [];
 
         // Construct a String Literal from the argument. This is because
-        // There could be other Nodes like Template Literals, Binary Expressions,
-        // Method calls etc.
+        // There could be other Nodes like Template Literals, Binary
+        // Expressions, Method calls etc.
         const message = buildMessage(messageArg, otherArgs);
 
         const newArgs = path.node.arguments.slice(0, metadata.startPos);
-        const interpolateArgs = path.node.arguments.slice(metadata.startPos + 1);
+        const interpolateArgs = path.node.arguments
+            .slice(metadata.startPos + 1);
         const newCall = t.memberExpression(
-          t.callExpression(t.identifier(logCallee.name), []),
-          t.identifier("getLogUrl")
+            t.callExpression(t.identifier(logCallee.name), []),
+            t.identifier('getLogUrl')
         );
-        console.log('ctr', ctr)
         const hex = convertFromBase10ToBase16(ctr++);
-        console.log('hex', hex);
-        const getLogUrlArgs = [t.stringLiteral(hex), t.arrayExpression([...interpolateArgs, ...otherArgs])];
+        const getLogUrlArgs = [
+          t.stringLiteral(hex),
+          t.arrayExpression([...interpolateArgs, ...otherArgs]),
+        ];
         newArgs[metadata.startPos] = t.callExpression(newCall, getLogUrlArgs);
 
         path.node.arguments.length = 0;
         path.node.arguments.push.apply(path.node.arguments, newArgs);
-      }
-    }
+      },
+    },
   };
 };
 
@@ -149,11 +138,12 @@ function buildMessage(node, otherNodes) {
   }
 
   if (isBinaryConcat(node)) {
-    return buildMessage(node.left, otherNodes) + buildMessage(node.right, otherNodes);
+    return buildMessage(node.left, otherNodes) +
+        buildMessage(node.right, otherNodes);
   }
 
-  if (node.type === "TemplateLiteral") {
-    let quasied = "";
+  if (node.type === 'TemplateLiteral') {
+    let quasied = '';
     let i = 0;
     for (; i < node.quasis.length - 1; i++) {
       quasied += node.quasis[i].value.cooked;
@@ -164,5 +154,5 @@ function buildMessage(node, otherNodes) {
   }
 
   otherNodes.push(node);
-  return "%";
+  return '%';
 }
