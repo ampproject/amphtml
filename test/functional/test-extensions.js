@@ -891,8 +891,11 @@ describes.sandboxed('Extensions', {}, () => {
         'navigationForDoc',
         'timerFor',
       ].forEach(s => {
-        const fakeService = {installInEmbedWindow: sandbox.stub()};
-        sandbox.stub(Services, s).returns(fakeService);
+        class FakeService {
+          static installInEmbedWindow() {}
+        }
+        sandbox.stub(FakeService, 'installInEmbedWindow');
+        sandbox.stub(Services, s).returns(new FakeService());
       });
 
       iframe = parentWin.document.createElement('iframe');
@@ -951,13 +954,17 @@ describes.sandboxed('Extensions', {}, () => {
       extensions.installExtensionsInChildWindow(iframeWin, []);
 
       const any = {}; // Input doesn't matter since services are stubbed.
-      expect(Services.urlForDoc(any).installInEmbedWindow).to.be.called;
-      expect(Services.actionServiceForDoc(any).installInEmbedWindow)
-          .to.be.called;
-      expect(Services.standardActionsForDoc(any).installInEmbedWindow)
-          .to.be.called;
-      expect(Services.navigationForDoc(any).installInEmbedWindow).to.be.called;
-      expect(Services.timerFor(any).installInEmbedWindow).to.be.called;
+      const url = Services.urlForDoc(any);
+      const actions = Services.actionServiceForDoc(any);
+      const standardActions = Services.standardActionsForDoc(any);
+      const navigation = Services.navigationForDoc(any);
+      const timer = Services.timerFor(any);
+
+      expect(url.constructor.installInEmbedWindow).to.be.called;
+      expect(actions.constructor.installInEmbedWindow).to.be.called;
+      expect(standardActions.constructor.installInEmbedWindow).to.be.called;
+      expect(navigation.constructor.installInEmbedWindow).to.be.called;
+      expect(timer.constructor.installInEmbedWindow).to.be.called;
     });
 
     it('should install extensions in child window', () => {
@@ -1072,18 +1079,24 @@ describes.sandboxed('Extensions', {}, () => {
         installStandardServicesInEmbed(iframeWin, parentWin);
 
         const any = {}; // Input doesn't matter since services are stubbed.
-        const url = Services.urlForDoc(any).installInEmbedWindow;
-        const actions = Services.actionServiceForDoc(any).installInEmbedWindow;
-        const standardActions =
-            Services.standardActionsForDoc(any).installInEmbedWindow;
-        const navigation = Services.navigationForDoc(any).installInEmbedWindow;
-        const timer = Services.timerFor(any).installInEmbedWindow;
+        const url = Services.urlForDoc(any);
+        const actions = Services.actionServiceForDoc(any);
+        const standardActions = Services.standardActionsForDoc(any);
+        const navigation = Services.navigationForDoc(any);
+        const timer = Services.timerFor(any);
 
         // Expected order: url, action, standard-actions, navigation, timer.
-        expect(url).to.be.calledBefore(actions);
-        expect(actions).to.be.calledBefore(standardActions);
-        expect(standardActions).to.be.calledBefore(navigation);
-        expect(navigation).to.be.calledBefore(timer);
+        const one = url.constructor.installInEmbedWindow;
+        const two = actions.constructor.installInEmbedWindow;
+        const three = standardActions.constructor.installInEmbedWindow;
+        const four = navigation.constructor.installInEmbedWindow;
+        const five = timer.constructor.installInEmbedWindow;
+
+        expect(one).to.be.calledBefore(two);
+        expect(two).to.be.calledBefore(three);
+        expect(three).to.be.calledBefore(four);
+        expect(four).to.be.calledBefore(five);
+        expect(five).to.be.called;
       });
     });
   });
