@@ -72,6 +72,7 @@ function getConfig() {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
 
+    // Browser names are defined in `karma.conf.js`.
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
@@ -80,15 +81,14 @@ function getConfig() {
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
         'SL_Edge_17',
-        // TODO(amp-infra): Restore these two once tests are stable again.
-        // 'SL_Chrome_Dev',
-        // 'SL_Firefox_Dev',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
         //'SL_IE_11',
+        'SL_Chrome_Dev',
+        'SL_Firefox_Dev',
       ] : [
       // With --saucelabs_lite, a subset of the unit tests are run.
       // Only browsers that support chai-as-promised may be included below.
@@ -572,26 +572,68 @@ async function runTests() {
   }
 
   /**
-   * Runs tests in batches
+   * Runs tests in batches.
+   *
+   * Splits stable and dev browsers to separate batches. Test failures in any of
+   * the stable browsers will return an exit code of 1, whereas test failures in
+   * any of the dev browsers will only print error messages, but will return an
+   * exit code of 0.
+   *
    * @return {number} processExitCode
    */
   async function runTestInBatches() {
+    const browsers = {stable: [], dev: []};
+    for (const browserId of saucelabsBrowsers) {
+      browsers[browserId.toLowerCase().endsWith('_dev') ? 'dev' : 'stable']
+          .push(browserId);
+    }
+    if (browsers.stable.length) {
+      const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+          'stable', browsers.stable);
+      if (allBatchesExitCodes) {
+        log(yellow('Some tests have failed on'), cyan('stable'),
+            yellow('browsers, so skipping running them on dev browsers.'));
+        return allBatchesExitCodes;
+      }
+    }
+
+    if (browsers.dev.length) {
+      const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+          'dev', browsers.dev);
+      if (allBatchesExitCodes) {
+        log(yellow('Some tests have failed on'), cyan('dev'),
+            yellow('browsers. However, this is not a fatal error.'));
+      }
+    }
+
+    return 0;
+  }
+
+  /**
+   * Runs tests in named batch(es), with the specified browsers.
+   *
+   * @param {string} batchName a human readable name for the batch.
+   * @param {!Array{string}} browsers list of SauceLabs browsers as
+   *     customLaunchers IDs.
+   * @return {number} processExitCode
+   */
+  async function runTestInBatchesWithBrowsers(batchName, browsers) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
     const batchExitCodes = [];
 
-    log(green('Running tests on ' + saucelabsBrowsers.length +
-      ' Sauce Lab browser(s) in total...'));
+    log(green('Running tests on'), cyan(browsers.length),
+        green('Sauce Labs'), cyan(batchName), green('browser(s)...'));
     while (startIndex < endIndex) {
       const configBatch = Object.assign({}, c);
-      configBatch.browsers = saucelabsBrowsers.slice(startIndex, endIndex);
-      log(green('Batch #' + batch + ': Running tests on ' +
-        configBatch.browsers.length + ' Sauce Labs browser(s)...'));
+      configBatch.browsers = browsers.slice(startIndex, endIndex);
+      log(green('Batch'), cyan(`#${batch}`) + green(': Running tests on'),
+          cyan(configBatch.browsers.length), green('Sauce Labs browser(s)...'));
       batchExitCodes.push(await createKarmaServer(configBatch));
       startIndex = batch * batchSize;
       batch++;
-      endIndex = Math.min(batch * batchSize, saucelabsBrowsers.length);
+      endIndex = Math.min(batch * batchSize, browsers.length);
     }
 
     return batchExitCodes.every(exitCode => exitCode == 0) ? 0 : 1;
