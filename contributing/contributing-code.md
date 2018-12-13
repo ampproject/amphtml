@@ -64,7 +64,8 @@ To find a reviewer:
      - **Integrating third-party software, embeds, services**: [Guidelines](../3p/README.md)
   - [Put your new feature behind an experiment flag](./building-an-amp-extension.md#experiments) unless it is a minor fix or your reviewer indicates this is not needed.
   - [Commit your files](./getting-started-e2e.md#edit-files-and-commit-them).
-- [Test your changes](./getting-started-e2e.md#testing-your-changes): A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
+- [Test your changes](./getting-started-e2e.md#testing-your-changes).
+  - A key feature of AMP is performance.  All changes will be analyzed for any performance impact; we particularly appreciate changes that make things even faster.  Please include any measured performance impact with substantial pull requests.
 - Prepare for your code review.
    - For more substantial features, it's usually preferable to have your code reviewed before you make a significant investment in new tests, examples, etc.
    - Before your final review, make sure your change:
