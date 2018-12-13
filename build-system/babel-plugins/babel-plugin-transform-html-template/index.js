@@ -16,53 +16,7 @@
 
 const {minify} = require('html-minifier');
 
-const insertedTemplates = new Map();
-
-/**
- * Replace a matching TemplateExpression by either inlining a transpiled
- * template or hoisting the template and referring to its value.
- *
- * Note: Ensures duplicate templates are not hoisted.
- *
- * @param {*} path path of the template in original source.
- * @param {*} t babel types, so this method can create variableDeclarations.
- * @param {*} method identifier used in original source.
- */
-function replaceExpression(path, t, method) {
-  const template = optimizeLiteralOutput(path.node.quasi);
-
-  if (template !== null) {
-    const templateArrayExpression = t.arrayExpression(
-        [t.stringLiteral(template)]
-    );
-
-    if (t.isProgram(path.scope.block)) {
-      path.replaceWith(t.callExpression(method, [templateArrayExpression]));
-    } else {
-      // Since the template is inline, and the block scope isn't the program
-      // We can hoist the transpiled template and avoid creation each usage.
-      let hoistedIdentifier;
-      if (insertedTemplates.get(template)) {
-        // Template already hoisted.
-        hoistedIdentifier = t.clone(insertedTemplates.get(template));
-      } else {
-        // Template not hoisted. Hoist it.
-        hoistedIdentifier = path.scope.generateUidIdentifier('template');
-        const program = path.findParent(path => path.isProgram());
-
-        program.scope.push({
-          id: hoistedIdentifier,
-          init: templateArrayExpression,
-          kind: 'const',
-        });
-        insertedTemplates.set(template, hoistedIdentifier);
-      }
-
-      // Leverage the hoisted template.
-      path.replaceWith(t.callExpression(method, [hoistedIdentifier]));
-    }
-  }
-}
+const INSERTED_TEMPLATES = new Map();
 
 /**
  * Optimizes the tagged template literal by removing whitespace, comments
@@ -90,13 +44,51 @@ module.exports = function({types: t}) {
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
 
-        if (t.isIdentifier(tag, {name: 'html'})) {
-          replaceExpression(path, t, t.identifier('html'));
-        } else if (t.isCallExpression(tag) &&
-                   t.isIdentifier(tag.callee, {name: 'htmlFor'})) {
-          replaceExpression(path, t, t.callExpression(
-              t.identifier('htmlFor'), tag.arguments
-          ));
+        if (t.isIdentifier(tag, {name: 'html'}) ||
+            (t.isCallExpression(tag) &&
+             t.isIdentifier(tag.callee, {name: 'htmlFor'}))) {
+          // Replace a matching TemplateExpression by either inlining a
+          // transpiled template or hoisting the template and referring
+          // to its value.
+          // Note: Ensures duplicate templates are not hoisted.
+          const template = optimizeLiteralOutput(path.node.quasi);
+
+          if (template !== null) {
+            const templateArrayExpression = t.arrayExpression(
+                [t.stringLiteral(template)]
+            );
+
+            if (t.isProgram(path.scope.block)) {
+              path.replaceWith(
+                  t.callExpression(tag, [templateArrayExpression])
+              );
+            } else {
+              // Since the template is inline, and the block scope
+              // isn't the program. We can hoist the transpiled
+              // template and avoid creation each usage.
+              let hoistedIdentifier;
+              if (INSERTED_TEMPLATES.get(template)) {
+                // Template already hoisted.
+                hoistedIdentifier = t.clone(INSERTED_TEMPLATES.get(template));
+              } else {
+                // Template not hoisted. Hoist it.
+                hoistedIdentifier = path.scope.generateUidIdentifier(
+                    'template'
+                );
+                const program = path.findParent(path => path.isProgram());
+
+                program.scope.push({
+                  id: hoistedIdentifier,
+                  init: templateArrayExpression,
+                  kind: 'const',
+                });
+                INSERTED_TEMPLATES.set(template, hoistedIdentifier);
+              }
+
+              // Leverage the hoisted template.
+              path.replaceWith(t.callExpression(tag, [hoistedIdentifier]));
+            }
+          }
         }
       },
     },
