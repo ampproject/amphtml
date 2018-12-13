@@ -18,7 +18,7 @@ import '../amp-facebook';
 import {facebook} from '../../../../3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
-
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-facebook', {
   amp: {
@@ -63,6 +63,19 @@ describes.realWin('amp-facebook', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
+  it('ensures iframe is not sandboxed in amp-facebook', () => {
+    // We sandbox all 3P iframes however facebook embeds completely break in
+    // sandbox mode since they need access to document.domain, so we
+    // exclude facebook.
+    toggleExperiment(win, 'sandbox-ads', true);
+    return getAmpFacebook(fbPostHref).then(ampFB => {
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.hasAttribute('sandbox')).to.be.false;
     });
   });
 

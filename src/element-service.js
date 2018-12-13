@@ -86,7 +86,7 @@ function isElementScheduled(win, elementName) {
  * implementation loaded. Users should typically wrap this as a special purpose
  * function (e.g. Services.viewportForDoc(...)) for type safety and because the
  * factory should not be passed around.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -104,7 +104,7 @@ export function getElementServiceForDoc(elementOrAmpDoc, id, extension,
 /**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id of the service.
  * @param {string} extension Name of the custom extension that provides the
  *     implementation of this service.
@@ -138,35 +138,31 @@ export function getElementServiceIfAvailableForDoc(
 
 /**
  * Returns a promise for service for the given id in the embed scope of
- * a given node, if it exists. Otherwise, falls back to ampdoc scope IFF
- * the given node is in the top-level window.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * a given element, if it exists. Falls back to ampdoc scope if the element
+ * is not embedded.
+ *
+ * @param {!Element|!ShadowRoot} element
  * @param {string} id of the service.
  * @param {string} extension Name of the custom element that provides
  *     the implementation of this service.
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-  elementOrAmpDoc, id, extension) {
-  const s = getExistingServiceForDocInEmbedScope(elementOrAmpDoc, id);
+  element, id, extension
+) {
+  const s = getExistingServiceForDocInEmbedScope(element, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
-  // Return embed-scope element service promise if scheduled.
-  if (elementOrAmpDoc.nodeType) {
-    const win = toWin(elementOrAmpDoc.ownerDocument.defaultView);
-    const topWin = getTopWindow(win);
-    // In embeds, doc-scope services are window-scope. But make sure to
-    // only do this for embeds (not the top window), otherwise we'd grab
-    // a promise from the wrong service holder which would never resolve.
-    if (win !== topWin) {
-      return getElementServicePromiseOrNull(win, id, extension);
-    } else {
-      // Fallback to ampdoc IFF the given node is _not_ FIE.
-      return getElementServiceIfAvailableForDoc(elementOrAmpDoc, id, extension);
-    }
+  const win = toWin(element.ownerDocument.defaultView);
+  const topWin = getTopWindow(win);
+  // In embeds, doc services are stored on the embed window.
+  if (win !== topWin) {
+    return getElementServicePromiseOrNull(win, id, extension);
+  } else {
+    // Only fallback to element's ampdoc (top-level) if not embedded.
+    return getElementServiceIfAvailableForDoc(element, id, extension);
   }
-  return /** @type {!Promise<?Object>} */ (Promise.resolve(null));
 }
 
 /**
