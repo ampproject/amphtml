@@ -409,10 +409,10 @@ CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the J
 Not all CSS properties can be used in keyframes. Only CSS properties that modern browsers can optimize and
 animate quickly are white listed. This list will grow as more properties are confirmed to provide good
 performance. Currently the list contains:
- - `opacity`
- - `transform`
- - `visibility`
- - 'offsetDistance'
+ - [`opacity`](https://developer.mozilla.org/en-US/docs/Web/CSS/opacity)
+ - [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
+ - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
+ - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
 
 
 Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
