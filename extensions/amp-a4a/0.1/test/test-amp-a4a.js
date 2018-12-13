@@ -1918,7 +1918,7 @@ describe('amp-a4a', () => {
             }),
         'Some style is "background: green"').to.be.true;
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
-        expect(Services.urlReplacementsForDoc(frameDoc))
+        expect(Services.urlReplacementsForDoc(frameDoc.documentElement))
             .to.not.equal(Services.urlReplacementsForDoc(a4aElement));
       });
     });

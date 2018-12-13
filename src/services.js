@@ -158,7 +158,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-bind/0.1/bind-impl.Bind>}
    */
   static bindForDocOrNull(element) {
@@ -474,7 +474,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {

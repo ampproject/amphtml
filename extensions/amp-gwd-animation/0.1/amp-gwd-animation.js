@@ -209,9 +209,8 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   executeInvocation_(invocation) {
-    const elementOrAmpDoc = this.fie_ ? this.element : this.getAmpDoc();
     const service = user().assert(
-        getExistingServiceForDocInEmbedScope(elementOrAmpDoc, GWD_SERVICE_NAME),
+        getExistingServiceForDocInEmbedScope(this.element, GWD_SERVICE_NAME),
         'Cannot execute action because the GWD service is not registered.');
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
