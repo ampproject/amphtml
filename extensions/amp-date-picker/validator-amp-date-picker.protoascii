@@ -183,6 +183,10 @@ attr_lists: {
   attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
   attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
     name: "minimum-nights"
     value_regex: "[0-9]+"
   }
