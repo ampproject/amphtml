@@ -50,6 +50,7 @@ describes.repeated('', {
     const viewportSize = {width: 0, height: 0};
 
     const targetType = useSlot ? 'slot element' : 'corner';
+    const skipForSlot = useSlot ? it.skip : it;
 
     function createVideo() {
       const video = createAmpElementMock();
@@ -142,7 +143,7 @@ describes.repeated('', {
     }
 
     function stubDock() {
-      return sandbox.stub(docking, 'dock_');
+      return sandbox.stub(docking, 'dockInTwoSteps_');
     }
 
     beforeEach(() => {
@@ -163,7 +164,9 @@ describes.repeated('', {
       sandbox.stub(Services, 'viewportForDoc').returns(viewport);
       sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
 
-      docking = new VideoDocking(ampdoc);
+      const positionObserverMock = {};
+
+      docking = new VideoDocking(ampdoc, positionObserverMock);
     });
 
     afterEach(() => {
@@ -205,12 +208,14 @@ describes.repeated('', {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
       const video = createVideo();
-      const dock = sandbox.spy(docking, 'dock_');
+      const dock = stubDock();
 
       const videoWidth = 400;
       const videoHeight = 300;
 
       placeVideoLtwh(video, 0, -200, videoWidth, videoHeight);
+
+      setScrollDirection(Direction.UP);
 
       mockInvalidAreaWidth();
       setValidAreaHeight(videoHeight);
@@ -229,28 +234,31 @@ describes.repeated('', {
       const videoWidth = 300;
       const videoHeight = 400;
 
+      setScrollDirection(Direction.UP);
+
       setValidAreaWidth();
       setValidAreaHeight(videoHeight);
 
       placeVideoLtwh(video, 0, -400, videoWidth, videoHeight);
 
-      // allowConsoleError(() => {
-      // (user().error() expected)
-      // For some reason, getLayoutBox() gets reset to (0, 0, 0, 0) on
-      // `allowConsoleError` callback
-      docking.updateOnPositionChange_(video);
-      // });
+      allowConsoleError(() => {
+        // user().error() expected.
+        docking.updateOnPositionChange_(video);
+      });
 
       expect(dock).to.not.have.been.called;
     });
 
-    it('should not dock if the video\'s layout box is not sized', () => {
+    // TODO(alanorozco): Unskip for slot
+    skipForSlot('does not dock if the video\'s layout box is not sized', () => {
       maybeCreateSlotElementLtwh(190, topBoundary, 200, 100);
 
       const video = createVideo();
-      const dock = sandbox.spy(docking, 'dock_');
+      const dock = stubDock();
 
       placeVideoLtwh(video, 0, -100, 0, 0);
+
+      setScrollDirection(Direction.UP);
 
       setValidAreaWidth();
       setValidAreaHeight();
@@ -271,6 +279,8 @@ describes.repeated('', {
       placeVideoLtwh(video, 0, 0, 0, 0);
 
       docking.currentlyDocked_ = {video: createVideo()};
+
+      setScrollDirection(Direction.UP);
 
       docking.updateOnPositionChange_(video);
 
@@ -300,8 +310,6 @@ describes.repeated('', {
 
       expect(dock).to.have.been.calledOnce;
     });
-
-    const skipForSlot = useSlot ? it.skip : it;
 
     // TODO(alanorozco): Unskip
     skipForSlot('should not dock if video does not touch boundaries', () => {

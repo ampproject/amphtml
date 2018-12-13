@@ -47,7 +47,6 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {getMode} from '../../../src/mode';
 import {getServiceForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -63,6 +62,9 @@ import {
   setStyles,
   toggle,
 } from '../../../src/style';
+
+
+const TAG = 'amp-video-docking';
 
 
 /** @private @const {number} */
@@ -277,8 +279,9 @@ export class VideoDocking {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!PositionObserver=} opt_injectedPositionObserver
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_injectedPositionObserver) {
 
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -295,9 +298,11 @@ export class VideoDocking {
     /** @private {?DockedDef} */
     this.currentlyDocked_ = null;
 
-    /** @private {!RelativeX} */
-    // Overriden when user drags the video to a corner.
-    // Y-corner is determined based on scroll direction.
+    /**
+     * Overriden when user drags the video to a corner.
+     * Y-corner is determined based on scroll direction.
+     * @private {!RelativeX}
+     */
     this.preferredCornerX_ =
         isRTL(this.getDoc_()) ? RelativeX.LEFT : RelativeX.RIGHT;
 
@@ -353,20 +358,27 @@ export class VideoDocking {
     /** @private {!Array<!../../../src/video-interface.VideoOrBaseElementDef>} */
     this.observed_ = [];
 
-    /** @private @const {!function()} */
-    // Lazily invoked.
+    /**
+     * Lazily invoked.
+     * @private @const {!function()}
+     */
     this.install_ = once(() => {
+      const ampdoc = this.ampdoc_;
+
       this.viewport_.onScroll(
-          throttleByAnimationFrame(this.ampdoc_.win,
-              () => this.updateScroll_()));
+          throttleByAnimationFrame(ampdoc.win, () => this.updateScroll_()));
 
       this.viewport_.onResize(() => this.updateAllOnResize_());
 
-      this.installStyles_();
+      installStylesForDoc(ampdoc, CSS, /* callback */ null,
+          /* isRuntimeCss */ false, TAG);
     });
 
     /** @private @const {function():?Element} */
     this.getSlot_ = once(() => this.querySlot_());
+
+    /** @private @const {?PositionObserver} */
+    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
 
     /** @private {boolean} */
     this.isTransitioning_ = false;
@@ -377,10 +389,6 @@ export class VideoDocking {
   /** @private */
   registerAll_() {
     const ampdoc = this.ampdoc_;
-
-    if (getMode(ampdoc.win).test) {
-      return;
-    }
 
     const dockableSelector =
         `[${escapeCssSelectorIdent(VideoAttributes.DOCK)}]`;
@@ -433,16 +441,6 @@ export class VideoDocking {
     }
 
     return el;
-  }
-
-  /** @private */
-  installStyles_() {
-    installStylesForDoc(
-        this.ampdoc_,
-        CSS,
-        /* callback */ null,
-        /* opt_isRuntimeCss */ false,
-        /* opt_ext */ 'amp-video-docking');
   }
 
   /** @private */
@@ -561,6 +559,11 @@ export class VideoDocking {
    * @private
    */
   getPositionObserver_() {
+    // for testing
+    if (this.injectedPositionObserver_) {
+      return this.injectedPositionObserver_;
+    }
+
     installPositionObserverServiceForDoc(this.ampdoc_);
 
     // No getter in services.js.
@@ -1769,8 +1772,6 @@ export class VideoDocking {
     removeElement(el);
   }
 }
-
-const TAG = 'amp-video-docking';
 
 AMP.extension(TAG, 0.1, AMP => {
   AMP.registerServiceForDoc('video-docking', VideoDocking);
