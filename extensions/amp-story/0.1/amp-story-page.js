@@ -33,7 +33,6 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
-import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
 import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
 import {
@@ -258,7 +257,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
+    return this.maybeApplyFirstAnimationFrame();
   }
 
 
@@ -482,15 +481,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
-   * @private
-   */
-  scale_() {
-    const storyEl = dev().assertElement(this.element.parentNode);
-    return PageScalingService.for(storyEl).scale(this.element);
-  }
-
-  /**
    * @param {boolean} isActive
    */
   setActive(isActive) {
@@ -527,7 +517,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
-      this.scale_();
     }
   }
 
