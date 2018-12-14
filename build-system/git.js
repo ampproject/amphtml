@@ -26,7 +26,7 @@ const {getStdout} = require('./exec');
  * @return {string}
  */
 exports.gitBranchPointFromMaster = function() {
-  return getStdout('git merge-base master HEAD^').trim();
+  return getStdout('git merge-base master HEAD').trim();
 };
 
 /**
@@ -38,7 +38,7 @@ exports.gitTravisCommitRangeStart = function() {
   if (process.env.TRAVIS_COMMIT_RANGE) {
     return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
   }
-  return exports.gitBranchPointFromMaster();
+  return getStdout('git merge-base master HEAD^').trim();
 };
 
 /**
