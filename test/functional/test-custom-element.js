@@ -24,7 +24,6 @@ import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementForTesting} from '../../src/custom-element';
 
-
 describes.realWin('CustomElement', {amp: true}, env => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
   describe.configure().skipSafari().run('CustomElement', () => {
@@ -1012,88 +1011,97 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }).to.throw(/Must never be called in template/); });
     });
 
+    describe('apply sizes and media query', () => {
+      let element1;
+      let element2;
+      let matchMedia;
 
-    // TODO(alabiaga, 19752): flaky on Chrome 71
-    it.skip('should apply media condition', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('media', '(min-width: 1px)');
-      element1.applySizesAndMediaQuery();
-      expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+      beforeEach(() => {
+        element1 = new ElementClass();
 
-      const element2 = new ElementClass();
-      element2.setAttribute('media', '(min-width: 1111111px)');
-      element2.applySizesAndMediaQuery();
-      expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
-    });
+        // Fixes #19752. The window.matchMedia call in the code
+        // path of element.applySizesAndMediaQuery is not behaving consistently
+        // in headless mode, thus we mock the calls here. This is fine as we are
+        // not testing window behavior.
+        matchMedia =
+            sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
+        matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+        matchMedia.withArgs('(min-width: 1111111px)').returns(
+            {matches: false});
+        element2 = new ElementClass();
+      });
 
-    // TODO(alabiaga, 19752): flaky on Chrome 71
-    it.skip('should apply sizes condition', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-      element1.applySizesAndMediaQuery();
-      expect(element1.style.width).to.equal('200px');
+      it('should apply media condition', () => {
+        element1.setAttribute('media', '(min-width: 1px)');
+        element1.applySizesAndMediaQuery();
+        expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
 
-      const element2 = new ElementClass();
-      element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
-      element2.applySizesAndMediaQuery();
-      expect(element2.style.width).to.equal('50vw');
-    });
+        element2.setAttribute('media', '(min-width: 1111111px)');
+        element2.applySizesAndMediaQuery();
+        expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+      });
 
-    // TODO(alabiaga, 19752): flaky on Chrome 71
-    it.skip('should apply heights condition', () => {
-      const element1 = new ElementClass();
-      element1.sizerElement = doc.createElement('div');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement.style.paddingTop).to.equal('99%');
+      it('should apply sizes condition', () => {
+        element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
+        element1.applySizesAndMediaQuery();
+        expect(element1.style.width).to.equal('200px');
 
-      const element2 = new ElementClass();
-      element2.sizerElement = doc.createElement('div');
-      element2.setAttribute('layout', 'responsive');
-      element2.setAttribute('width', '200px');
-      element2.setAttribute('height', '200px');
-      element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
-      container.appendChild(element2);
-      element2.applySizesAndMediaQuery();
-      expect(element2.sizerElement.style.paddingTop).to.equal('1%');
-    });
+        element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
+        element2.applySizesAndMediaQuery();
+        expect(element2.style.width).to.equal('50vw');
+      });
 
-    it('should rediscover sizer to apply heights in SSR', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('i-amphtml-layout', 'responsive');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
+      it('should apply heights condition', () => {
+        element1.sizerElement = doc.createElement('div');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement.style.paddingTop).to.equal('99%');
 
-      const sizer = doc.createElement('i-amphtml-sizer');
-      expect(element1.sizerElement).to.be.undefined;
-      element1.appendChild(sizer);
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement).to.equal(sizer);
-      expect(sizer.style.paddingTop).to.equal('99%');
-    });
+        element2.sizerElement = doc.createElement('div');
+        element2.setAttribute('layout', 'responsive');
+        element2.setAttribute('width', '200px');
+        element2.setAttribute('height', '200px');
+        element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
+        container.appendChild(element2);
+        element2.applySizesAndMediaQuery();
+        expect(element2.sizerElement.style.paddingTop).to.equal('1%');
+      });
 
-    it('should NOT rediscover sizer after reset in SSR', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('i-amphtml-layout', 'responsive');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
+      it('should rediscover sizer to apply heights in SSR', () => {
+        element1.setAttribute('i-amphtml-layout', 'responsive');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
 
-      const sizer = doc.createElement('i-amphtml-sizer');
-      element1.appendChild(sizer);
-      element1.sizerElement = null;
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement).to.be.null;
-      expect(sizer.style.paddingTop).to.equal('');
+        const sizer = doc.createElement('i-amphtml-sizer');
+        expect(element1.sizerElement).to.be.undefined;
+        element1.appendChild(sizer);
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement).to.equal(sizer);
+        expect(sizer.style.paddingTop).to.equal('99%');
+      });
+
+      it('should NOT rediscover sizer after reset in SSR', () => {
+        element1.setAttribute('i-amphtml-layout', 'responsive');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
+
+        const sizer = doc.createElement('i-amphtml-sizer');
+        element1.appendChild(sizer);
+        element1.sizerElement = null;
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement).to.be.null;
+        expect(sizer.style.paddingTop).to.equal('');
+      });
     });
 
     it('should reapply layout=nodisplay in SSR', () => {
