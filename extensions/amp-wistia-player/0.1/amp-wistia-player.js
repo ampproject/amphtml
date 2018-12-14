@@ -38,6 +38,8 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+const TAG = 'amp-wistia-player';
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -319,11 +321,11 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-wistia-player', '0.1', AMP => {
-  AMP.registerElement('amp-wistia-player', AmpWistiaPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpWistiaPlayer);
 });

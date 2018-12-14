@@ -33,6 +33,8 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 
+const TAG = 'amp-viqeo-player';
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -317,12 +319,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
-AMP.extension('amp-viqeo-player', '0.1', AMP => {
-  AMP.registerElement('amp-viqeo-player', AmpViqeoPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpViqeoPlayer);
 });
 
 export default AmpViqeoPlayer;

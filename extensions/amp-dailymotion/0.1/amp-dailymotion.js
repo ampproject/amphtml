@@ -42,6 +42,10 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+
+const TAG = 'amp-dailymotion';
+
+
 /**
  * Player events reverse-engineered from the Dailymotion API
  * NOTE: 'unstarted' isn't part of the API, just a placeholder
@@ -426,11 +430,11 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-dailymotion', '0.1', AMP => {
-  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpDailymotion);
 });

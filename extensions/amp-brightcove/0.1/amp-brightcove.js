@@ -442,11 +442,11 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-brightcove', '0.1', AMP => {
-  AMP.registerElement('amp-brightcove', AmpBrightcove);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpBrightcove);
 });

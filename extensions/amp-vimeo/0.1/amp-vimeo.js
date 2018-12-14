@@ -37,6 +37,8 @@ import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 
+const TAG = 'amp-vimeo';
+
 
 /**
  * Get the name of the method for a given getter or setter.
@@ -368,11 +370,11 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-vimeo', '0.1', AMP => {
-  AMP.registerElement('amp-vimeo', AmpVimeo);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVimeo);
 });

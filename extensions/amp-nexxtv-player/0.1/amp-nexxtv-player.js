@@ -39,6 +39,8 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 
 
+const TAG = 'amp-nexxtv-player';
+
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpNexxtvPlayer extends AMP.BaseElement {
 
@@ -322,11 +324,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-nexxtv-player', '0.1', AMP => {
-  AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpNexxtvPlayer);
 });

@@ -40,6 +40,8 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
+const TAG = 'amp-mowplayer';
+
 /**
  * @enum {number}
  * @private
@@ -363,11 +365,11 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error('`seekTo` not supported.');
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
 
-AMP.extension('amp-mowplayer', '0.1', AMP => {
-  AMP.registerElement('amp-mowplayer', AmpMowplayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpMowplayer);
 });
