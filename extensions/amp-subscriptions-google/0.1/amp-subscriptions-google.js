@@ -27,14 +27,20 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {
+  SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents,
+} from '../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor}
   from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+const CONFIG_TAG = 'amp-subscriptions';
 
 
 /**
@@ -71,6 +77,13 @@ export class GoogleSubscriptionsPlatform {
    * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
+    const configElement = ampdoc.getElementById(CONFIG_TAG);
+
+    /** @private {!../../amp-subscriptions/0.1/analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics(
+        user().assertElement(configElement)
+    );
+
     /**
      * @private @const
      * {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter}
@@ -89,10 +102,16 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.LINK_COMPLETE,
+          this.getServiceId());
     });
     this.runtime_.setOnFlowCanceled(e => {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
+        this.subscriptionAnalytics_.serviceEvent(
+            SubscriptionAnalyticsEvents.LINK_CANCELED,
+            this.getServiceId());
       }
     });
     this.runtime_.setOnNativeSubscribeRequest(() => {
@@ -125,6 +144,9 @@ export class GoogleSubscriptionsPlatform {
   onLoginRequest_(linkRequested) {
     if (linkRequested && this.isGoogleViewer_) {
       this.runtime_.linkAccount();
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.LINK_REQUESTED,
+          this.getServiceId());
     } else {
       this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
           'login'));
@@ -133,7 +155,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onLinkComplete_() {
-    this.serviceAdapter_.reAuthorizePlatform(this);
+    this.serviceAdapter_.resetPlatforms();
   }
 
   /** @private */
@@ -160,7 +182,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onSubscribeResponse_(response) {
     response.complete().then(() => {
-      this.serviceAdapter_.reAuthorizePlatform(this);
+      this.serviceAdapter_.resetPlatforms();
     });
   }
 
@@ -196,12 +218,13 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  activate(entitlement) {
+  activate(entitlement, grantEntitlement) {
+    const best = grantEntitlement || entitlement;
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
-    if (!entitlement.granted) {
+    if (!best.granted) {
       this.runtime_.showOffers({list: 'amp'});
-    } else if (!entitlement.isSubscriber()) {
+    } else if (!best.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }

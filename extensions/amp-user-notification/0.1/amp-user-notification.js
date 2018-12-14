@@ -138,7 +138,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const ampdoc = this.getAmpDoc();
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     this.elementId_ = user().assert(this.element.id,

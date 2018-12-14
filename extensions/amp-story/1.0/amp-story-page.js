@@ -39,6 +39,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
+import {LocalizedStringId} from './localization';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {VideoServiceSync} from '../../../src/service/video-service-sync-impl';
@@ -56,8 +57,10 @@ import {
 } from '../../../src/friendly-iframe-embed';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {htmlFor} from '../../../src/static-template';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
+import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -85,6 +88,18 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
+
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPlayMessageElement = element =>
+  htmlFor(element)`
+      <button role="button"
+          class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
+        <span class="i-amphtml-story-page-play-label"></span>
+        <span class='i-amphtml-story-page-play-icon'></span>
+      </button>`;
 
 /**
  * amp-story-page states.
@@ -117,6 +132,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
+
+    /** @private {?Element} */
+    this.playMessageEl_ = null;
 
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
@@ -279,7 +297,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP) {
+    this.togglePlayMessage_(false);
+
+    if (this.storeService_.get(StateProperty.UI_STATE) ===
+        UIType.DESKTOP_PANELS) {
       // The rewinding is delayed on desktop so that it happens at a lower
       // opacity instead of immediately jumping to the first frame. See #17985.
       this.pauseAllMedia_(false /** rewindToBeginning */);
@@ -459,7 +480,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.pause();
       } else {
         return mediaPool.pause(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl),
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl),
             rewindToBeginning);
       }
     });
@@ -476,7 +497,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.play();
       } else {
         return mediaPool.play(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl)).catch(() => {
+          // Auto playing the media failed, which could be caused by a data
+          // saver, or a battery saving mode. Display a message so we can
+          // get a user gesture to bless the media elements, and play them.
+          this.debounceToggleLoadingSpinner_(false);
+          this.togglePlayMessage_(true);
+        });
       }
     });
   }
@@ -492,7 +519,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         // No-op.
       } else {
         return mediaPool.preload(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -508,7 +535,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.setAttribute('muted', '');
       } else {
         return mediaPool.mute(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -524,7 +551,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.removeAttribute('muted');
       } else {
         return mediaPool.unmute(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -540,7 +567,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         // No-op.
       } else {
         return mediaPool.register(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -556,7 +583,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.currentTime = 0;
       } else {
         return mediaPool.rewindToBeginning(
-            /** @type {!./media-pool.PlaceholderElementDef} */ (mediaEl));
+            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
       }
     });
   }
@@ -839,6 +866,52 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.loadingSpinner_.toggle(isActive);
     });
+  }
+
+  /**
+   * Builds and appends a message and icon to play the story on tap.
+   * This message is built when the playback failed (data saver, low battery
+   * modes, ...).
+   * @private
+   */
+  buildAndAppendPlayMessage_() {
+    const localizationService = Services.localizationService(this.win);
+
+    this.playMessageEl_ = buildPlayMessageElement(this.element);
+    const labelEl =
+        this.playMessageEl_.querySelector('.i-amphtml-story-page-play-label');
+    labelEl.textContent = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
+
+    this.playMessageEl_.addEventListener('click', () => {
+      this.togglePlayMessage_(false);
+      this.mediaPoolPromise_
+          .then(mediaPool => mediaPool.blessAll())
+          .then(() => this.playAllMedia_());
+    });
+
+    this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
+  }
+
+  /**
+   * Toggles the visibility of the "Play video" fallback message.
+   * @param {boolean} isActive
+   * @private
+   */
+  togglePlayMessage_(isActive) {
+    if (!isActive) {
+      this.playMessageEl_ &&
+          this.mutateElement(() =>
+            toggle(dev().assertElement(this.playMessageEl_), false));
+      return;
+    }
+
+    if (!this.playMessageEl_) {
+      this.buildAndAppendPlayMessage_();
+    }
+
+    this.mutateElement(() =>
+      toggle(dev().assertElement(this.playMessageEl_), true));
   }
 
   /**

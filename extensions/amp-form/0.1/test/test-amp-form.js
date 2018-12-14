@@ -176,6 +176,7 @@ describes.repeated('', {
       });
 
       it('should server side render templates if enabled', () => {
+        const setupInput = sandbox.spy(xhrUtils, 'setupInput');
         const setupAMPCors = sandbox.spy(xhrUtils, 'setupAMPCors');
         const fromStructuredCloneable =
             sandbox.spy(xhrUtils, 'fromStructuredCloneable');
@@ -223,6 +224,7 @@ describes.repeated('', {
                     .to.have.been.calledWith(
                         form, sinon.match.func, sinon.match.func);
                 sinon.assert.callOrder(
+                    setupInput,
                     setupAMPCors,
                     fromStructuredCloneable,
                     verifyAmpCORSHeaders);
@@ -1441,7 +1443,7 @@ describes.repeated('', {
     it('should install action handler and handle submit action', () => {
       const form = getForm();
       document.body.appendChild(form);
-      const actions = Services.actionServiceForDoc(env.ampdoc);
+      const actions = Services.actionServiceForDoc(form);
 
       sandbox.stub(actions, 'installActionHandler');
       const ampForm = new AmpForm(form);

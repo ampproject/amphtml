@@ -1,8 +1,24 @@
 <html>
-  afdsafdsfqewrfdsdasvcx cvfewsadf
-  <button id='a'>Accept</button>
-  <button id='r'>Reject</button>
-  <button id='d'>Dismiss</button>
+  <div id="consent-wrapper">
+    <div id="decision-state">
+      <h1>Hello! I am a consent Iframe.</h1>
+      <h3>I am in `test/manual/diy-consent.html`</h3>
+      <button id='f'>Learn More</button>
+    </div>
+    <div id="learn-more-state">
+      <p>
+        I am glad you decided to learn more! Learning is great!
+      </p>
+    </div>
+    <div>
+      <button id='a'>Accept</button>
+      <button id='r'>Reject</button>
+      <button id='d'>Dismiss</button>
+    </div>
+  </div>
+  <div id="confirmation-wrapper">
+    <h1>Thank you!</h1>
+  </div>
   <script type="text/javascript">
 
     // Default values for non-3P iframe.
@@ -30,27 +46,92 @@ setTimeout(() => {
   }, '*');
 }, 500);
 
-document.querySelector('#a').onclick = function () {
-		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
-		parent.postMessage({
-      type: 'consent-response',
-      action: 'accept'
+function registerClickConsentMessage(querySelector, type, action, info) {
+  document.querySelector(querySelector).onclick = function () {
+    // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
+    parent.postMessage({
+      type,
+      action,
+      info
     }, '*');
   };
-document.querySelector('#r').onclick = function () {
-		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
-		parent.postMessage({
-      type: 'consent-response',
-      action: 'reject'
-    }, '*');
-  };
+}
 
-document.querySelector('#d').onclick = function () {
-		// parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
-		parent.postMessage({
-      type: 'consent-response',
-      action: 'dismiss'
-    }, '*');
-	};
+function showDecisionState() {
+  document.querySelector('#decision-state').style = 'display: block';
+  document.querySelector('#learn-more-state').style = 'display: none';
+}
+
+function showLearnMoreState() {
+  document.querySelector('#decision-state').style = 'display: none';
+  document.querySelector('#learn-more-state').style = 'display: block';
+}
+
+function showConsent() {
+  document.querySelector('#consent-wrapper').style = 'display: block';
+  document.querySelector('#confirmation-wrapper').style = 'display: none';
+}
+
+
+function showConfirmation() {
+  document.querySelector('#consent-wrapper').style = 'display: none';
+  document.querySelector('#confirmation-wrapper').style = 'display: block';
+}
+
+const consentObjects = [
+  {
+    querySelector: '#a',
+    type: 'consent-response',
+    action: 'accept',
+    info: 'accept-str',
+    onclick: () => {
+      showConfirmation();
+    }
+  },
+  {
+    querySelector: '#r',
+    type: 'consent-response',
+    action: 'reject',
+    info: '',
+    onclick: () => {
+      showConfirmation();
+    }
+  },
+  {
+    querySelector: '#d',
+    type: 'consent-response',
+    action: 'dismiss',
+    info: 'dismiss-str',
+    onclick: () => {
+      showConfirmation();
+    }
+  },
+  {
+    querySelector: '#f',
+    type: 'consent-ui-enter-fullscreen',
+    onclick: () => {
+      showLearnMoreState();
+    }
+  }
+]
+consentObjects.forEach(consentObject => {
+  registerClickConsentMessage(
+    consentObject.querySelector,
+    consentObject.type,
+    consentObject.action,
+    consentObject.info
+  );
+
+  if (consentObject.onclick) {
+    document
+      .querySelector(consentObject.querySelector)
+      .addEventListener('click', () => {
+        consentObject.onclick();
+      });
+  }
+});
+
+showConsent();
+showDecisionState();
 </script>
 </html>

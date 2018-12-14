@@ -30,7 +30,6 @@ import {
   VideoEvents,
 } from '../video-interface';
 import {Services} from '../services';
-import {VideoDocking} from './video/docking';
 import {
   VideoServiceInterface,
   VideoServiceSignals,
@@ -41,10 +40,12 @@ import {
 } from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
+import {clamp} from '../utils/math';
 import {
   createCustomEvent,
   getData,
   listen,
+  listenOnce,
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
@@ -88,14 +89,13 @@ function userInteractedWith(video) {
  * all videos within a document.
  *
  * @implements {VideoServiceInterface}
+ * @implements {../service.Disposable}
  */
 export class VideoManager {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
@@ -116,7 +116,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
@@ -125,13 +125,21 @@ export class VideoManager {
     this.getAutoFullscreenManager_ =
         once(() => new AutoFullscreenManager(this.ampdoc, this));
 
-    /** @private @const {function():!VideoDocking} */
-    this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
-
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
     // video analytics are not present.
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /** @override */
+  dispose() {
+    if (!this.entries_) {
+      return;
+    }
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      entry.dispose();
+    }
   }
 
   /**
@@ -348,11 +356,6 @@ export class VideoManager {
     this.getAutoFullscreenManager_().register(entry);
   }
 
-  /** @param {!VideoEntry} entry */
-  registerForDocking(entry) {
-    this.getDocking_().register(entry.video);
-  }
-
   /**
    * @return {!AutoFullscreenManager}
    * @visibleForTesting
@@ -411,6 +414,10 @@ class VideoEntry {
       return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
     };
 
+    /** @private @const {function(): !AnalyticsPercentageTracker} */
+    this.getAnalyticsPercentageTracker_ = once(() =>
+      new AnalyticsPercentageTracker(this.ampdoc_.win, this));
+
     // Autoplay Variables
 
     /** @private {boolean} */
@@ -435,6 +442,16 @@ class VideoEntry {
 
     /** @private {!../mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
+
+    /** @private @const {function()} */
+    this.boundMediasessionPlay_ = () => {
+      this.video.play(/* isAutoplay */ false);
+    };
+
+    /** @private @const {function()} */
+    this.boundMediasessionPause_ = () => {
+      this.video.pause();
+    };
 
     listenOncePromise(video.element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -465,11 +482,17 @@ class VideoEntry {
       const trust = ActionTrust.LOW;
       const event = createCustomEvent(this.ampdoc_.win, firstPlay,
           /* detail */ dict({}));
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
-      actions.trigger(this.video.element, firstPlay, event, trust);
+      const {element} = this.video;
+      const actions = Services.actionServiceForDoc(element);
+      actions.trigger(element, firstPlay, event, trust);
     });
 
     this.listenForAutoplayDelegation_();
+  }
+
+  /** @public */
+  dispose() {
+    this.getAnalyticsPercentageTracker_().stop();
   }
 
   /**
@@ -509,22 +532,10 @@ class VideoEntry {
       this.manager_.registerForAutoFullscreen(this);
     }
 
-    if (this.isDockable_()) {
-      this.manager_.registerForDocking(this);
-    }
-
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isDockable_() {
-    return this.video.element.hasAttribute(VideoAttributes.DOCK);
   }
 
   /**
@@ -554,15 +565,18 @@ class VideoEntry {
       this.firstPlayEventOrNoop_();
     }
 
-    if (!this.video.preimplementsMediaSessionAPI()) {
-      const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
-      };
-      const pauseHandler = () => {
-        this.video.pause();
-      };
-      // Update the media session
-      setMediaSession(this.ampdoc_, this.metadata_, playHandler, pauseHandler);
+    const {video} = this;
+    const {element} = video;
+
+    if (!video.preimplementsMediaSessionAPI() &&
+        !element.classList.contains('i-amphtml-disable-mediasession')) {
+
+      setMediaSession(
+          element,
+          this.ampdoc_.win,
+          this.metadata_,
+          this.boundMediasessionPlay_,
+          this.boundMediasessionPause_);
     }
 
     this.actionSessionManager_.beginSession();
@@ -607,6 +621,8 @@ class VideoEntry {
     this.internalElement_ = getInternalVideoElementFor(this.video.element);
 
     this.fillMediaSessionMetadata_();
+
+    this.getAnalyticsPercentageTracker_().start();
 
     this.updateVisibility();
     if (this.isVisible_) {
@@ -1231,6 +1247,213 @@ function isLandscape(win) {
   return Math.abs(win.orientation) == 90;
 }
 
+
+/** @visibleForTesting */
+export const PERCENTAGE_INTERVAL = 5;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MIN_MS = 250;
+
+/** @private */
+const PERCENTAGE_FREQUENCY_MAX_MS = 4000;
+
+
+/**
+ * Calculates the "ideal" analytics check frequency from playback start, e.g.
+ * the amount of ms after each PERCENTAGE_INTERVAL.
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateIdealPercentageFrequencyMs(durationSeconds) {
+  return durationSeconds * 10 * PERCENTAGE_INTERVAL;
+}
+
+
+/**
+ * Calculates the "actual" analytics check frequency by calculating the ideal
+ * frequency and clamping it between MIN and MAX.
+ * @param {number} durationSeconds
+ * @return {number}
+ */
+function calculateActualPercentageFrequencyMs(durationSeconds) {
+  return clamp(
+      calculateIdealPercentageFrequencyMs(durationSeconds),
+      PERCENTAGE_FREQUENCY_MIN_MS,
+      PERCENTAGE_FREQUENCY_MAX_MS);
+}
+
+
+/** @visibleForTesting */
+export class AnalyticsPercentageTracker {
+  /**
+   * @param {!Window} win
+   * @param {!VideoEntry} entry
+   */
+  constructor(win, entry) {
+
+    // This is destructured in `calculate_()`, but the linter thinks it's unused
+    /** @private @const {!./timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win); // eslint-disable-line
+
+    /** @private @const {!VideoEntry} */
+    this.entry_ = entry;
+
+    /** @private {?Array<!UnlistenDef>} */
+    this.unlisteners_ = null;
+
+    /** @private {number} */
+    this.last_ = 0;
+
+    /**
+     * Counter for each trigger `start`. This is to prevent duplicate events if
+     * two consecutive triggers take place, or to prevent events firing once
+     * the tracker is stopped.
+     * @private {number}
+     */
+    this.triggerId_ = 0;
+  }
+
+  /** @public */
+  start() {
+    const {element} = this.entry_.video;
+
+    this.stop();
+
+    this.unlisteners_ = this.unlisteners_ || [];
+
+    this.unlisteners_.push(
+        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+          if (this.hasDuration_()) {
+            this.calculate_(this.triggerId_);
+          }
+        }),
+
+        listen(element, VideoEvents.ENDED, () => {
+          if (this.hasDuration_()) {
+            this.maybeTrigger_(/* normalizedPercentage */ 100);
+          }
+        }));
+  }
+
+  /** @public */
+  stop() {
+    if (!this.unlisteners_) {
+      return;
+    }
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop().call();
+    }
+    this.triggerId_++;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasDuration_() {
+    const {video} = this.entry_;
+    const duration = video.getDuration();
+
+    // Livestreams or videos with no duration information available.
+    if (!duration ||
+      isNaN(duration) ||
+      duration <= 0) {
+      return false;
+    }
+
+    if (calculateIdealPercentageFrequencyMs(duration) <
+        PERCENTAGE_FREQUENCY_MIN_MS) {
+
+      const bestResultLength = Math.ceil(
+          PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL) / 1000);
+
+      this.warnForTesting_(
+          'This video is too short for `video-percentage-played`. ' +
+          'Reports may be innacurate. For best results, use videos over',
+          bestResultLength,
+          'seconds long.',
+          video.element);
+    }
+
+    return true;
+  }
+
+  /**
+   * @param  {...*} args
+   * @private
+   */
+  warnForTesting_(...args) {
+    user().warn.apply(user(), [TAG].concat(args));
+  }
+
+  /**
+   * @param {number=} triggerId
+   * @private
+   */
+  calculate_(triggerId) {
+    if (triggerId != this.triggerId_) {
+      return;
+    }
+
+    const {
+      entry_: entry,
+      timer_: timer,
+    } = this;
+    const {video} = entry;
+
+    const calculateAgain = () => this.calculate_(triggerId);
+
+    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
+      return;
+    }
+
+    const duration = video.getDuration();
+
+    const frequencyMs = calculateActualPercentageFrequencyMs(duration);
+
+    const percentage = (video.getCurrentTime() / duration) * 100;
+    const normalizedPercentage =
+      Math.floor(percentage / PERCENTAGE_INTERVAL) * PERCENTAGE_INTERVAL;
+
+    dev().assert(isFiniteNumber(normalizedPercentage));
+
+    this.maybeTrigger_(normalizedPercentage);
+
+    timer.delay(calculateAgain, frequencyMs);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  maybeTrigger_(normalizedPercentage) {
+    if (normalizedPercentage <= 0) {
+      return;
+    }
+
+    if (this.last_ == normalizedPercentage) {
+      return;
+    }
+
+    this.last_ = normalizedPercentage;
+
+    this.analyticsEventForTesting_(normalizedPercentage);
+  }
+
+  /**
+   * @param {number} normalizedPercentage
+   * @private
+   */
+  analyticsEventForTesting_(normalizedPercentage) {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+      'normalizedPercentage': normalizedPercentage.toString(),
+    });
+  }
+}
 
 
 /**

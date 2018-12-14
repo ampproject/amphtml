@@ -93,9 +93,9 @@ Example:
 ```html
 <button on="tap:mySelector.clear">Clear Selection</button>
 <amp-selector id="mySelector" layout="container" multiple>
-  <div>Option One</div>
-  <div>Option Two</div>
-  <div>Option Three</div>
+  <div option>Option One</div>
+  <div option>Option Two</div>
+  <div option>Option Three</div>
 </amp-selector>
 ```
 
