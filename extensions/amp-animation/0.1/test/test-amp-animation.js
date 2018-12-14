@@ -15,7 +15,7 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {DEFAULT_METHOD} from '../../../../src/action-constants';
+import {DEFAULT_ACTION} from '../../../../src/action-constants';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {WebAnimationRunner} from '../web-animations';
 
@@ -149,7 +149,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should not activate w/o visibility trigger', function* () {
       const anim = yield createAnim({}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'startAction');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       yield anim.layoutCallback();
       expect(activateStub).to.not.be.called;
@@ -157,7 +157,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     it('should activate with visibility trigger', function* () {
       const anim = yield createAnim({trigger: 'visibility'}, {duration: 1001});
-      const activateStub = sandbox.stub(anim, 'startAction');
+      const activateStub = sandbox.stub(anim, 'startAction_');
       viewer.setVisibilityState_('visible');
       yield anim.layoutCallback();
       expect(activateStub).to.be.calledOnce;
@@ -372,7 +372,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should trigger activate', () => {
         const args = {};
         const invocation = {
-          method: DEFAULT_METHOD,
+          method: DEFAULT_ACTION,
           args,
           satisfiesTrust: () => true,
         };
