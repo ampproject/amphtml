@@ -460,7 +460,7 @@ describe('amp-a4a', () => {
       // TODO: Remove after launch fie_ini_load_fix to 100%
       creativeString = creativeString.replace('<body>',
           '<body>' +
-          '<meta name="amp-experiments-opt-in" content="fie_ini_load_fix">');
+          '<meta name=amp-experiments-opt-in content=a,fie_ini_load_fix,b>');
       const metaData = a4a.getAmpAdMetadata(creativeString);
       return a4a.renderAmpCreative_(metaData).then(() => {
         expect(a4a.friendlyIframeEmbed_).to.exist;

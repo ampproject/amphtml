@@ -1420,7 +1420,6 @@ export class AmpA4A extends AMP.BaseElement {
 
       // There's no need to wait for all resources to load.
       // StartRender is enough
-      return;
     });
   }
 
