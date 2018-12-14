@@ -296,7 +296,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (eventReceived == 'error' && !this.canPlay_) {
-      return reject();
+      return reject('Received `error` event.');
     }
 
     if (eventReceived == 'analytics') {
