@@ -69,8 +69,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://static.viqeo.tv', opt_onLayout);
-    this.preconnect.url('https://stage.embed.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://api.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://cdn.viqeo.tv', opt_onLayout);
   }
 
   /**
@@ -85,7 +85,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
-    user().assert(
+    this.videoId_ = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-viqeo-player> %s',
         this.element);
@@ -95,7 +95,11 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);
 
-    this.hasAutoplay_ = this.element.hasAttribute(VideoAttributes.AUTOPLAY);
+    // Enable autoplay by default
+    this.hasAutoplay_ = !this.element.hasAttribute('noautoplay');
+    if (this.hasAutoplay_) {
+      this.element.setAttribute('autoplay', '');
+    }
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -186,6 +190,20 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
+    placeholder.setAttribute('src',
+        `http://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`);
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    placeholder.setAttribute('alt', 'Loading video');
+    this.applyFillContent(placeholder);
+    return placeholder;
   }
 
   /** @override */
