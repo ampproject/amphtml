@@ -139,7 +139,7 @@ const Attributes = {
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
   VISITED: 'i-amphtml-visited', // stacked offscreen to left
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
-  SUPPORTED_ORIENTATIONS: 'supported-orientations',
+  SUPPORTS_LANDSCAPE: 'supports-landscape',
 };
 
 /**
@@ -186,12 +186,6 @@ const HIDE_ON_BOOKEND_SELECTOR =
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#F1F3F4';
-
-/** @enum {string} */
-const ScreenOrientations = {
-  PORTRAIT: 'portrait',
-  LANDSCAPE: 'landscape',
-};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -1298,9 +1292,9 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
-    if (uiState !== UIType.MOBILE ||
-        this.getSupportedOrientations_()
-            .includes(ScreenOrientations.LANDSCAPE)) {
+    if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
+      // TODO: Rename the TOGGLE_LANDSCAPE action. (#19670)
+      // Hides the UI that prevents users from using the LANDSCAPE orientation.
       this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
       return;
     }
@@ -1397,9 +1391,7 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.MOBILE;
     }
 
-    const supportedOrientations = this.getSupportedOrientations_();
-
-    if (supportedOrientations.includes(ScreenOrientations.LANDSCAPE)) {
+    if (this.isLandscapeSupported_()) {
       return UIType.DESKTOP_FULLBLEED;
     }
 
@@ -1425,29 +1417,13 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Returns an array of the supported orientations configured by the publisher.
-   * Defaults to ['portrait'].
-   * @return {!Array<string>}
+   * Whether the story should support landscape orientation: landscape mobile,
+   * or full bleed desktop UI.
+   * @return {boolean}
    * @private
    */
-  getSupportedOrientations_() {
-    if (this.supportedOrientations_) {
-      return this.supportedOrientations_;
-    }
-
-    const supportedOrientationsAttribute =
-        this.element.getAttribute(Attributes.SUPPORTED_ORIENTATIONS);
-
-    if (!supportedOrientationsAttribute) {
-      return [ScreenOrientations.PORTRAIT];
-    }
-
-    this.supportedOrientations_ =
-        supportedOrientationsAttribute
-            .split(',')
-            .map(orientation => orientation.trim().toLowerCase());
-
-    return this.supportedOrientations_;
+  isLandscapeSupported_() {
+    return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
   }
 
   /**
