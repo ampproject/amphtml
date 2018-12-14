@@ -397,12 +397,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-video-iframe',
-    name: 'Allows the use of the amp-video-iframe component.',
-    spec: 'https://github.com/ampproject/amphtml/issues/16252',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
-  },
-  {
     id: 'amp-date-display',
     name: 'Enables displaying dates',
     spec: 'https://github.com/ampproject/amphtml/issues/10837',
