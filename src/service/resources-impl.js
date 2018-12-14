@@ -598,6 +598,24 @@ export class Resources {
   }
 
   /**
+   * Checks if all the children are available to a Resource's Element.
+   * @param {!Resource} resource
+   * @return {boolean}
+   * @private
+   */
+  isResourceComplete_(resource) {
+    const skipAppendNodesFilter =  /** @type {!NodeFilter} */({
+      acceptNode: (node) => {
+        return this.ampdoc.isAppendedToBody(node) ?
+            NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      },
+    });
+
+    return hasNextNodeInDocumentOrder(
+      resource.element, this.ampdoc.getRootNode(), skipAppendNodesFilter);
+  }
+
+  /**
    * @param {boolean=} scheduleWhenBuilt
    * @private
    */
@@ -607,14 +625,7 @@ export class Resources {
     // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
-      if (this.documentReady_ ||
-          hasNextNodeInDocumentOrder(
-              resource.element, this.ampdoc.getRootNode(), {
-                acceptNode: (node) => {
-                  return this.ampdoc.isAppendedToBody(node) ?
-                      NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-                },
-              })) {
+      if (this.documentReady_ || this.isResourceComplete_(resource)) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
