@@ -1023,9 +1023,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
         // path of element.applySizesAndMediaQuery is not behaving consistently
         // in headless mode, thus we mock the calls here. This is fine as we are
         // not testing window behavior.
-        matchMedia = sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
+        matchMedia =
+            sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
         matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
-        matchMedia.withArgs('(min-width: 1111111px)').returns({matches: false});
+        matchMedia.withArgs('(min-width: 1111111px)').returns(
+            {matches: false});
         element2 = new ElementClass();
       });
 
