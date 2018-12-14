@@ -155,7 +155,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
     // Actions.
     this.registerDefaultAction(
-        this.startAction.bind(this),
+        this.startAction_.bind(this),
         'start',
         ActionTrust.LOW);
     this.registerAction('restart',
