@@ -42,7 +42,8 @@ if (hashMatch) {
 
 setTimeout(() => {
   parent.postMessage({
-    type: 'consent-ui-ready',
+    type: 'consent-ui',
+    action: 'ready'
   }, '*');
 }, 500);
 
@@ -108,7 +109,8 @@ const consentObjects = [
   },
   {
     querySelector: '#f',
-    type: 'consent-ui-enter-fullscreen',
+    type: 'consent-ui',
+    action: 'enter-fullscreen',
     onclick: () => {
       showLearnMoreState();
     }

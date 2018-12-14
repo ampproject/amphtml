@@ -326,12 +326,14 @@ export class ConsentUI {
    *
    * Required message from iframe to hide placeholder and display iframe
    * {
-   *   type: 'consent-ui-ready'
+   *   type: 'consent-ui',
+   *   action: 'ready'
    * }
    *
    * Enter Fullscreen
    * {
-   *   type: 'consent-ui-enter-fullscreen'
+   *   type: 'consent-ui',
+   *   action: 'enter-fullscreen'
    * }
    *
    * @param {!Event} event
@@ -343,15 +345,15 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data || !data['type']) {
+    if (!data || data['type'] != 'consent-ui') {
       return;
     }
 
-    if (data['type'] === 'consent-ui-ready') {
+    if (data['action'] === 'ready') {
       this.iframeReady_.resolve();
     }
 
-    if (data['type'] === 'consent-ui-enter-fullscreen') {
+    if (data['action'] === 'enter-fullscreen') {
 
       // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {
