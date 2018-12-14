@@ -32,7 +32,7 @@ const path = require('path');
 const webserver = require('gulp-webserver');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {exec, getStdout} = require('../exec');
+const {getStdout} = require('../exec');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const {green, yellow, cyan, red} = colors;
@@ -138,14 +138,6 @@ function getAdTypes() {
     }
   }
   return adTypes;
-}
-
-/**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
 
 /**
@@ -540,9 +532,6 @@ async function runTests() {
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
-
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
 
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
