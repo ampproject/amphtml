@@ -301,6 +301,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 

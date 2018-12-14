@@ -365,6 +365,11 @@ class AmpVimeo extends AMP.BaseElement {
       'value': optParams || '',
     })), '*');
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 

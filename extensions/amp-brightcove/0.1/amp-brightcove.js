@@ -440,6 +440,10 @@ class AmpBrightcove extends AMP.BaseElement {
     return [];
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 

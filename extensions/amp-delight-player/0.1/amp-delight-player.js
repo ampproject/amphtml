@@ -543,6 +543,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
     return this.playedRanges_;
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

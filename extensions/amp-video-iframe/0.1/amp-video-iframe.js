@@ -466,6 +466,11 @@ class AmpVideoIframe extends AMP.BaseElement {
     // TODO(alanorozco)
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

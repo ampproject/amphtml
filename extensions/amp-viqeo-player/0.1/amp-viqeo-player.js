@@ -314,6 +314,11 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     }
     contentWindow./*OK*/postMessage(command, '*');
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error('`seekTo` not supported.');
+  }
 }
 
 AMP.extension('amp-viqeo-player', '0.1', AMP => {
