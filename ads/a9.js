@@ -16,6 +16,7 @@
 
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
+import {getSourceUrl, parseUrlDeprecated} from '../src/url';
 import {parseJson} from '../src/json';
 
 const mandatoryParams = [],
@@ -50,6 +51,12 @@ export function a9(global, data) {
   }
 
   validateData(data, mandatoryParams, optionalParams);
+
+  const publisherUrl = global.context.canonicalUrl ||
+      getSourceUrl(global.context.location.href),
+      referrerUrl = global.context.referrer;
+
+  const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
 
   if (data.amzn_assoc_ad_mode) {
     if (data.amzn_assoc_ad_mode === 'auto') {
@@ -90,6 +97,8 @@ function getURL(data) {
 function loadRecTag(global, data) {
   let url = getURL(data);
   url += '&adInstanceId=' + data['adinstanceid'];
+  global['amzn_assoc_URL'] = publisherUrl;
+
   if (data['recomtype'] === 'sync') {
     writeScript(global, url);
   }
@@ -144,6 +153,9 @@ function loadSearTag(global, data) {
     }
     if (data.amzn_assoc_url) {
       global['amzn_assoc_URL'] = data['amzn_assoc_url'];
+    } 
+    else {
+      global['amzn_assoc_URL'] = publisherUrl;
     }
 
     writeScript(global, url);
