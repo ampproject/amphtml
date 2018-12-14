@@ -19,91 +19,217 @@ import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 
-describes.integration('amp-bind', {
-  body: `
-    <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
-    <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
-    <p id="text" class="before_class" [class]="c" [text]="t">before_text</p>
-  `,
-  extensions: ['amp-bind'],
-}, env => {
-  it('[text]', () => {
-    const doc = env.win.document;
-    const text = doc.getElementById('text');
-    const button = doc.getElementById('changeText');
-    expect(text.textContent).to.equal('before_text');
-    button.click();
-    return poll('[text]', () => text.textContent === 'after_text');
+describe('amp-bind', function() {
+  // Give more than default 2000ms timeout for local testing.
+  const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
+  this.timeout(TIMEOUT);
+
+  function poll_(desc, condition, onError) {
+    return poll(desc, condition, onError, TIMEOUT);
+  }
+
+  describes.integration('basic', {
+    /* eslint-disable max-len */
+    body: `
+      <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
+      <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
+      <p id="text" class="before_class" [class]="c" [text]="t">before_text</p>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-bind'],
+  }, env => {
+    let doc, text;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      text = doc.getElementById('text');
+    });
+
+    it('[text]', () => {
+      expect(text.textContent).to.equal('before_text');
+      const button = doc.getElementById('changeText');
+      button.click();
+      return poll_('[text]', () => text.textContent === 'after_text');
+    });
+
+    it('[class]', () => {
+      expect(text.className).to.equal('before_class');
+      const button = doc.getElementById('changeClass');
+      button.click();
+      return poll_('[class]', () => text.className === 'after_class');
+    });
   });
 
-  it('[class]', () => {
-    const doc = env.win.document;
-    const text = doc.getElementById('text');
-    const button = doc.getElementById('changeClass');
-    expect(text.className).to.equal('before_class');
-    button.click();
-    return poll('[class]', () => text.textContent === 'after_class');
+  describes.integration('+ amp-img', {
+    body: `
+      <amp-img id="image" layout="responsive"
+        src="http://example.com/before.jpg" [src]="src"
+        alt="before_alt" [alt]="alt"
+        width="1" [width]="w"
+        height="1" [height]="h"></amp-img>
+
+      <button on="tap:AMP.setState({src: 'http://example.com/after.jpg'})" id="changeSrc"></button>
+      <button on="tap:AMP.setState({alt: 'after_alt'})" id="changeAlt"></button>
+      <button on="tap:AMP.setState({w: 2, h: 2})" id="changeSize"></button>
+    `,
+    extensions: ['amp-bind'],
+  }, env => {
+    let doc, img;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      img = doc.getElementById('image');
+    });
+
+    it('[src] with valid URL', () => {
+      const button = doc.getElementById('changeSrc');
+      expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
+      button.click();
+      return poll_('[src]',
+          () => img.getAttribute('src') === 'http://example.com/after.jpg');
+    });
+
+    it('[alt]', () => {
+      const button = doc.getElementById('changeAlt');
+      expect(img.getAttribute('alt')).to.equal('before_alt');
+      button.click();
+      return poll_('[src]', () => img.getAttribute('alt') === 'after_alt');
+    });
+
+    it('[width] and [height]', () => {
+      const button = doc.getElementById('changeSize');
+      expect(img.getAttribute('width')).to.equal('1');
+      expect(img.getAttribute('height')).to.equal('1');
+      button.click();
+      return Promise.all([
+        poll_('[width]', () => img.getAttribute('width') === '2'),
+        poll_('[height]', () => img.getAttribute('height') === '2'),
+      ]);
+    });
+  });
+
+  describes.integration('+ forms', {
+    /* eslint-disable max-len */
+    body: `
+      <input id="range" type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
+      <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
+
+      <input id="checkbox" type="checkbox" on="change:AMP.setState({checkboxChange: event})">
+      <p id="checkboxText" [text]="'checked: ' + checkboxChange.checked" id="checkboxText">before_check</p>
+
+      <input id="radio" type="radio" on="change:AMP.setState({radioChange: event})">
+      <p id="radioText" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
+
+      <input id="checkbox_two" type="checkbox" [checked]="isChecked">
+      <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})" id="button"></button>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-bind'],
+  }, env => {
+    let doc;
+
+    beforeEach(() => {
+      doc = env.win.document;
+    });
+
+    it('input[type=range] on:change', () => {
+      const rangeText = doc.getElementById('rangeText');
+      const range = doc.getElementById('range');
+      expect(rangeText.textContent).to.equal('before_range');
+      // Calling #click() on the range element will not generate a change event,
+      // so it must be generated manually.
+      range.value = 47;
+      range.dispatchEvent(new Event('change', {bubbles: true}));
+      poll_('[text]', () => rangeText.textContent === '0 <= 47 <= 100');
+    });
+
+    it('input[type=checkbox] on:change', () => {
+      const checkboxText = doc.getElementById('checkboxText');
+      const checkbox = doc.getElementById('checkbox');
+      expect(checkboxText.textContent).to.equal('before_check');
+      checkbox.click();
+      poll_('[text]', () => checkboxText.textContent === 'checked: true');
+    });
+
+    it('input[type=radio] on:change', () => {
+      const radioText = doc.getElementById('radioText');
+      const radio = doc.getElementById('radio');
+      expect(radioText.textContent).to.equal('before_radio');
+      radio.click();
+      poll_('[text]', () => radioText.textContent === 'checked: true');
+    });
+
+    it('[checked]', function*() {
+      const checkbox = doc.getElementById('checkbox_two');
+      const button = doc.getElementById('button');
+
+      checkbox.click();
+      // Note that attributes are initial values, properties are current values.
+      expect(checkbox.hasAttribute('checked')).to.be.false;
+      expect(checkbox.checked).to.be.true;
+
+      button.click();
+      yield poll_('[checked]', () => !checkbox.checked);
+      expect(checkbox.hasAttribute('checked')).to.be.false;
+
+      button.click();
+      yield poll_('[checked]', () => checkbox.checked);
+      // amp-bind sets both the attribute and property.
+      expect(checkbox.hasAttribute('checked')).to.be.true;
+    });
+  });
+
+  describes.integration('+ amp-carousel', {
+    /* eslint-disable max-len */
+    body: `
+      <button on="tap:AMP.setState({slide: 1})" id="goToSlideOne"></button>
+      <p id="slideText" [text]="slide">0</p>
+      <amp-carousel id="carousel" type="slides" width=10 height=10
+          on="slideChange:AMP.setState({slide: event.index})" [slide]="slide">
+        <amp-img src="http://example.com/foo.jpg" width=10 height=10></amp-img>
+        <amp-img src="http://example.com/bar.jpg" width=10 height=10></amp-img>
+      </amp-carousel>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-bind', 'amp-carousel'],
+  }, env => {
+    let doc, carousel, slideText;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      carousel = doc.getElementById('carousel');
+      slideText = doc.getElementById('slideText');
+    });
+
+    it('on:slideChange', () => {
+      expect(slideText.textContent).to.equal('0');
+
+      const nextSlide = carousel.querySelector('div.amp-carousel-button-next');
+      nextSlide.click();
+      return poll_('[slide]', () => slideText.textContent === '1');
+    });
+
+    it('[slide]', function*() {
+      const slides = carousel.querySelectorAll(
+          '.i-amphtml-slide-item > amp-img');
+      const first = slides[0];
+      const second = slides[1];
+
+      expect(first.getAttribute('aria-hidden')).to.equal('false');
+      expect(second.getAttribute('aria-hidden')).to.be.equal('true');
+
+      const button = doc.getElementById('goToSlideOne');
+      button.click();
+
+      yield poll_('[slide]', () =>
+        first.getAttribute('aria-hidden') === 'true');
+      yield poll_('[slide]', () =>
+        second.getAttribute('aria-hidden') === 'false');
+    });
   });
 });
 
-describes.integration('amp-bind + amp-img', {
-  body: `
-    <amp-img id="image" layout="responsive"
-      src="http://example.com/before.jpg" [src]="src"
-      alt="before" [alt]="alt"
-      width="1" [width]="w"
-      height="1" [height]="h"></amp-img>
-
-    <button on="tap:AMP.setState({src: 'http://example.com/after.jpg'})" id="changeSrc"></button>
-    <button on="tap:AMP.setState({src: '?__amp_source_origin'})" id="invalidSrc"></button>
-    <button on="tap:AMP.setState({alt: 'after'})" id="changeAlt"></button>
-    <button on="tap:AMP.setState({w: 2, h: 2})" id="changeSize"></button>
-  `,
-  extensions: ['amp-bind'],
-}, env => {
-  let doc, img;
-
-  beforeEach(() => {
-    doc = env.win.document;
-    img = doc.getElementById('image');
-  });
-
-  it('[src] with valid URL', () => {
-    const button = doc.getElementById('changeSrc');
-    expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
-    button.click();
-    return poll('[src]',
-        () => img.getAttribute('src') === 'http://example.com/after.jpg');
-  });
-
-  // TODO: How to poll for non-events?
-  it.skip('[src] with invalid URL', () => {
-    const button = doc.getElementById('invalidSrc');
-    expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
-    button.click();
-    return poll('[src]',
-        () => img.getAttribute('src') === 'http://example.com/after.jpg');
-  });
-
-  it('[alt]', () => {
-    const button = doc.getElementById('changeAlt');
-    expect(img.getAttribute('alt')).to.equal('before_alt');
-    button.click();
-    return poll('[src]', () => img.getAttribute('alt') === 'after_alt');
-  });
-
-  it('[width] and [height]', () => {
-    const button = doc.getElementById('changeSize');
-    expect(img.getAttribute('width')).to.equal('1');
-    expect(img.getAttribute('height')).to.equal('1');
-    button.click();
-    return Promises.all([
-      poll('[width]', () => img.getAttribute('width') === '2'),
-      poll('[height]', () => img.getAttribute('height') === '2'),
-    ]);
-  });
-});
-
+// TODO(choumx): Rewrite/unskip the remaining tests.
 describe.skip('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
@@ -198,109 +324,6 @@ describe.skip('amp-bind', function() {
         expect(templatedText.getAttribute('style')).to.be.null;
         // [text] is ok.
         expect(templatedText.textContent).to.equal('textIsLegal');
-      });
-    });
-  });
-
-  describe('with <input>', () => {
-    beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-basic.html', 0);
-    });
-
-    it('should update on range input changes', () => {
-      const rangeText = fixture.doc.getElementById('rangeText');
-      const range = fixture.doc.getElementById('range');
-      expect(rangeText.textContent).to.equal('Unbound');
-      // Calling #click() the range will not generate a change event
-      // so it must be generated manually.
-      range.value = 47;
-      range.dispatchEvent(new Event('change', {bubbles: true}));
-      return waitForSetState().then(() => {
-        expect(rangeText.textContent).to.equal('0 <= 47 <= 100');
-      });
-    });
-
-    it('should update on checkbox input changes', () => {
-      const checkboxText = fixture.doc.getElementById('checkboxText');
-      const checkbox = fixture.doc.getElementById('checkbox');
-      expect(checkboxText.textContent).to.equal('Unbound');
-      checkbox.click();
-      return waitForSetState().then(() => {
-        expect(checkboxText.textContent).to.equal('Checked: true');
-      });
-    });
-
-    it('should update input[checked] when its binding changes', () => {
-      // Does *NOT* have the `checked` attribute.
-      const checkbox = fixture.doc.getElementById('checkedBound');
-      const button = fixture.doc.getElementById('toggleCheckedButton');
-      // Some attributes on certain input elements, such as `checked` on
-      // checkbox, only specify an initial value. Clicking the checkbox
-      // ensures the element is no longer relying on `value` as
-      // an initial value.
-      checkbox.click();
-      expect(checkbox.hasAttribute('checked')).to.be.false;
-      expect(checkbox.checked).to.be.true;
-      button.click();
-      return waitForSetState().then(() => {
-        expect(checkbox.hasAttribute('checked')).to.be.false;
-        expect(checkbox.checked).to.be.false;
-        button.click();
-        return waitForSetState();
-      }).then(() => {
-        // When Bind checks the box back to true, it adds the checked attr.
-        expect(checkbox.hasAttribute('checked')).to.be.true;
-        expect(checkbox.checked).to.be.true;
-      });
-    });
-
-    it('should update on radio input changes', () => {
-      const radioText = fixture.doc.getElementById('radioText');
-      const radio = fixture.doc.getElementById('radio');
-      expect(radioText.textContent).to.equal('Unbound');
-      radio.click();
-      return waitForSetState().then(() => {
-        expect(radioText.textContent).to.equal('Checked: true');
-      });
-    });
-  });
-
-  describe('with <amp-carousel>', () => {
-    beforeEach(() => {
-      // One <amp-carousel> plus two <amp-img> elements.
-      return setupWithFixture('test/fixtures/bind-carousel.html', 3);
-    });
-
-    it('should update on carousel slide changes', () => {
-      const slideNumber = fixture.doc.getElementById('slideNumber');
-      expect(slideNumber.textContent).to.equal('0');
-
-      const carousel = fixture.doc.getElementById('carousel');
-      const nextSlideButton =
-          carousel.querySelector('div.amp-carousel-button-next');
-      nextSlideButton.click();
-
-      return waitForSetState().then(() => {
-        expect(slideNumber.textContent).to.equal('1');
-      });
-    });
-
-    it('should change slides when the slide attribute binding changes', () => {
-      const carousel = fixture.doc.getElementById('carousel');
-      const slides =
-      carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
-      const firstSlide = slides[0];
-      const secondSlide = slides[1];
-
-      expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
-      expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('true');
-
-      const button = fixture.doc.getElementById('goToSlideOne');
-      button.click();
-
-      return waitForSetState().then(() => {
-        expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('false');
-        expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
       });
     });
   });

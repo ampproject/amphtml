@@ -15,16 +15,6 @@
   <amp-state id="ampState" src="https://www.google.com/bind/first/source" [src]="ampState.stateSrc">
   </amp-state>
 
-  <!-- various input tags -->
-  <input type="range" min="0" max="100" value="0" on="change:AMP.setState({rangeChange: event})" id="range">
-  <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">range</p>
-  <input type="checkbox" on="change:AMP.setState({checkboxChange: event})" id="checkbox">
-  <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">check</p>
-  <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
-  <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">radio</p>
-  <input type="checkbox" [checked]="isChecked" id="checkedBound">
-  <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})" id="toggleCheckedButton"></button>
-
   <button id="setState" on="tap:AMP.setState({})"></button>
 </body>
 </html>
