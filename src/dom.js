@@ -216,8 +216,7 @@ export function isConnectedNode(node) {
  */
 export function rootNodeFor(node) {
   if (Node.prototype.getRootNode) {
-    // Type checker says `getRootNode` may return null.
-    return node.getRootNode() || node;
+    return node.getRootNode();
   }
   let n;
   for (n = node; !!n.parentNode; n = n.parentNode) {}
@@ -561,23 +560,22 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
 }
 
 /**
- * Whether the element have a next node in the document order.
+ * Whether the Node has a next Node in the document order.
  * This means either:
- *  a. The element itself has a nextSibling.
- *  b. Any of the element ancestors has a nextSibling.
- * @param {!Element} element
- * @param {?Node} opt_stopNode
+ *  a. The Node itself has a nextSibling.
+ *  b. Any of the Node ancestors has a nextSibling.
+ * @param {!Node} currentNode The Node to look for a following Node.
+ * @param {?Node} root A root Node to look within.
+ * @param {?NodeFilter} filter A filter to exclude certain Nodes from being
+ *    considered as a following Node.
  * @return {boolean}
  */
-export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
-  let currentElement = element;
-  do {
-    if (currentElement.nextSibling) {
-      return true;
-    }
-  } while ((currentElement = currentElement.parentNode) &&
-            currentElement != opt_stopNode);
-  return false;
+export function hasNextNodeInDocumentOrder(
+  currentNode, root = rootNodeFor(currentNode), filter = null) {
+  const walker = currentNode.ownerDocument.createTreeWalker(
+      root, NodeFilter.SHOW_ALL, filter, false);
+  walker.currentNode = currentNode;
+  return !!walker.nextNode();
 }
 
 

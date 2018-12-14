@@ -609,7 +609,12 @@ export class Resources {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ ||
           hasNextNodeInDocumentOrder(
-              resource.element, this.ampdoc.getRootNode())) {
+              resource.element, this.ampdoc.getRootNode(), {
+                acceptNode: (node) => {
+                  return this.ampdoc.isAppendedToBody(node) ?
+                      NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+                },
+              })) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);

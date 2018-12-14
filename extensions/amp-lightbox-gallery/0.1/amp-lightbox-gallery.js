@@ -991,7 +991,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       targetImg.classList.add('i-amphtml-ghost');
       // Apply the image animation prepared in the measure step.
       imageAnimation.applyAnimation();
-      this.getAmpDoc().getBody().appendChild(transLayer);
+      this.getAmpDoc().appendToBody(transLayer);
     };
 
     const cleanup = () => {
@@ -1006,7 +1006,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       srcImg.classList.remove('i-amphtml-ghost');
       targetImg.classList.remove('i-amphtml-ghost');
       imageAnimation.cleanupAnimation();
-      this.getAmpDoc().getBody().removeChild(transLayer);
+      this.getAmpDoc().removeFromBody(transLayer);
     };
 
     return this.measureMutateElement(measure, mutate)

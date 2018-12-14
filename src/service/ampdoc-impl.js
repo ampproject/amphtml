@@ -29,6 +29,8 @@ import {waitForBodyPromise} from '../dom';
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
 
+const DYNAMICALY_APPENEDED_PROP = '__AMPDOC-DYNAMIC-APPEND';
+
 
 /**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
@@ -397,6 +399,36 @@ export class AmpDoc {
    */
   contains(node) {
     return this.getRootNode().contains(node);
+  }
+
+  /**
+   * Appends a Node to the body of the AmpDoc and records that the Node was
+   * appended. This should be used instead of directly adding Nodes to the
+   * body of an AmpDoc.
+   * @param {!Node} node 
+   */
+  appendToBody(node) {
+    node[DYNAMICALY_APPENEDED_PROP] = true;
+    this.getBody().appendChild(node);
+  }
+
+  /**
+   * Removes a Node from the body and clears the record of it having been
+   * appended.
+   * @param {!Node} node 
+   */
+  removeFromBody(node) {
+    node[DYNAMICALY_APPENEDED_PROP] = false;
+    this.getBody().removeChild(node);
+  }
+
+  /**
+   * Checks if a Node has been appended to the AmpDoc using `appendToBody`.
+   * @param {!Node} node
+   * @return {boolean}
+   */
+  isAppendedToBody(node) {
+    return !!node[DYNAMICALY_APPENEDED_PROP];
   }
 }
 

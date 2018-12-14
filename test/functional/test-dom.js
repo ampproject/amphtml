@@ -734,6 +734,42 @@ describes.sandboxed('DOM', {}, env => {
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
       expect(dom.hasNextNodeInDocumentOrder(element, parent)).to.be.false;
     });
+
+    it('should return false when the only following node is rejected', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const ignoredUncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      ignoredUncle._ignore = true;
+      ancestor.appendChild(parent);
+      ancestor.appendChild(ignoredUncle);
+      parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element, undefined, {
+        acceptNode: (node) => {
+          return node._ignore ?
+              NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        },
+      })).to.be.false;
+    });
+
+    it('should return true when skipping a rejected node', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const ignoredUncle = document.createElement('div');
+      const includedUncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      ignoredUncle._ignore = true;
+      ancestor.appendChild(parent);
+      ancestor.appendChild(ignoredUncle);
+      ancestor.appendChild(includedUncle);
+      parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element, undefined, {
+        acceptNode: (node) => {
+          return node._ignore ?
+              NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        },
+      })).to.be.true;
+    });
   });
 
   describe('openWindowDialog', () => {
