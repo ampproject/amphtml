@@ -866,11 +866,13 @@ describes.realWin('amp-video', {
         height: 90,
       }, /* children */ null, element => {
         const {implementation_} = element;
-        expect(implementation_.video_.currentTime).to.equal(0);
+        const {video_} = implementation_;
+
+        expect(video_.currentTime).to.equal(0);
 
         [20, 100, 0, 50, 22].forEach(timeSeconds => {
           implementation_.seekTo(timeSeconds);
-          expect(implementation_.video_.currentTime).to.equal(timeSeconds);
+          expect(video_.currentTime).to.equal(timeSeconds);
         });
 
         resolve();
