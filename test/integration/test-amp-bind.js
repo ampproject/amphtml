@@ -19,7 +19,91 @@ import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 
-// TODO(#19647): Unskip tests
+describes.integration('amp-bind', {
+  body: `
+    <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
+    <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
+    <p id="text" class="before_class" [class]="c" [text]="t">before_text</p>
+  `,
+  extensions: ['amp-bind'],
+}, env => {
+  it('[text]', () => {
+    const doc = env.win.document;
+    const text = doc.getElementById('text');
+    const button = doc.getElementById('changeText');
+    expect(text.textContent).to.equal('before_text');
+    button.click();
+    return poll('[text]', () => text.textContent === 'after_text');
+  });
+
+  it('[class]', () => {
+    const doc = env.win.document;
+    const text = doc.getElementById('text');
+    const button = doc.getElementById('changeClass');
+    expect(text.className).to.equal('before_class');
+    button.click();
+    return poll('[class]', () => text.textContent === 'after_class');
+  });
+});
+
+describes.integration('amp-bind + amp-img', {
+  body: `
+    <amp-img id="image" layout="responsive"
+      src="http://example.com/before.jpg" [src]="src"
+      alt="before" [alt]="alt"
+      width="1" [width]="w"
+      height="1" [height]="h"></amp-img>
+
+    <button on="tap:AMP.setState({src: 'http://example.com/after.jpg'})" id="changeSrc"></button>
+    <button on="tap:AMP.setState({src: '?__amp_source_origin'})" id="invalidSrc"></button>
+    <button on="tap:AMP.setState({alt: 'after'})" id="changeAlt"></button>
+    <button on="tap:AMP.setState({w: 2, h: 2})" id="changeSize"></button>
+  `,
+  extensions: ['amp-bind'],
+}, env => {
+  let doc, img;
+
+  beforeEach(() => {
+    doc = env.win.document;
+    img = doc.getElementById('image');
+  });
+
+  it('[src] with valid URL', () => {
+    const button = doc.getElementById('changeSrc');
+    expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
+    button.click();
+    return poll('[src]',
+        () => img.getAttribute('src') === 'http://example.com/after.jpg');
+  });
+
+  // TODO: How to poll for non-events?
+  it.skip('[src] with invalid URL', () => {
+    const button = doc.getElementById('invalidSrc');
+    expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
+    button.click();
+    return poll('[src]',
+        () => img.getAttribute('src') === 'http://example.com/after.jpg');
+  });
+
+  it('[alt]', () => {
+    const button = doc.getElementById('changeAlt');
+    expect(img.getAttribute('alt')).to.equal('before_alt');
+    button.click();
+    return poll('[src]', () => img.getAttribute('alt') === 'after_alt');
+  });
+
+  it('[width] and [height]', () => {
+    const button = doc.getElementById('changeSize');
+    expect(img.getAttribute('width')).to.equal('1');
+    expect(img.getAttribute('height')).to.equal('1');
+    button.click();
+    return Promises.all([
+      poll('[width]', () => img.getAttribute('width') === '2'),
+      poll('[height]', () => img.getAttribute('height') === '2'),
+    ]);
+  });
+});
+
 describe.skip('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
@@ -57,7 +141,7 @@ describe.skip('amp-bind', function() {
       ];
       if (numberOfAmpComponents > 0) {
         promises.push(
-            poll('All AMP components are laid out', () => {
+            poll(`${numberOfAmpComponents} AMP components are laid out`, () => {
               const laidOutElements =
                   fixture.doc.querySelectorAll('.i-amphtml-layout').length;
               return laidOutElements === numberOfAmpComponents;
@@ -80,37 +164,7 @@ describe.skip('amp-bind', function() {
     return fixture.awaitEvent(BindEvents.RESCAN_TEMPLATE, ++numTemplated);
   }
 
-  // TODO(choumx, #19647): Times out on SL Chrome 71.
-  describe.skip('with [text] and [class]', () => {
-    beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-basic.html');
-    });
-
-    it('should update text when text attribute binding changes', () => {
-      const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('changeTextButton');
-      expect(textElement.textContent).to.equal('unbound');
-      button.click();
-      return waitForSetState().then(() => {
-        expect(textElement.textContent).to.equal('hello world');
-      });
-    });
-
-    it('should update CSS class when class binding changes', () => {
-      const textElement = fixture.doc.getElementById('textElement');
-      const button = fixture.doc.getElementById('changeTextClassButton');
-      expect(textElement.className).to.equal('original');
-      button.click();
-      return waitForSetState().then(() => {
-        expect(textElement.className).to.equal('new');
-      });
-    });
-  });
-
-  // TODO(choumx, #9759): Seems like old browsers give up when hitting
-  // expected user errors due to illegal bindings in the form's template.
-  // TODO(choumx, #19647): Times out on SL Chrome 71.
-  describe.configure().ifChrome().skip('with <amp-form>', () => {
+  describe('with <amp-form>', () => {
     beforeEach(() => {
       // <form> is not an AMP element.
       return setupWithFixture('test/fixtures/bind-form.html', 0)
@@ -150,7 +204,7 @@ describe.skip('amp-bind', function() {
 
   describe('with <input>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-basic.html');
+      return setupWithFixture('test/fixtures/bind-basic.html', 0);
     });
 
     it('should update on range input changes', () => {
@@ -211,115 +265,42 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  // TODO(choumx): Flaky on Edge/Firefox for some reason.
-  describe.configure().ifChrome().skipChromeDev()
-      .run('with <amp-carousel>', () => {
-        beforeEach(() => {
-          // One <amp-carousel> plus two <amp-img> elements.
-          return setupWithFixture('test/fixtures/bind-carousel.html', 3);
-        });
-
-        it('should update on carousel slide changes', () => {
-          const slideNumber = fixture.doc.getElementById('slideNumber');
-          expect(slideNumber.textContent).to.equal('0');
-
-          const carousel = fixture.doc.getElementById('carousel');
-          const nextSlideButton =
-              carousel.querySelector('div.amp-carousel-button-next');
-          nextSlideButton.click();
-
-          return waitForSetState().then(() => {
-            expect(slideNumber.textContent).to.equal('1');
-          });
-        });
-
-        // TODO(choumx, #19647): Times out on SL Chrome 71.
-        it.skip('should change slides when the slide attribute binding changes',
-            () => {
-              const carousel = fixture.doc.getElementById('carousel');
-              const slides =
-              carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
-              const firstSlide = slides[0];
-              const secondSlide = slides[1];
-
-              expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
-              expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
-                  'true');
-
-              const button = fixture.doc.getElementById('goToSlideOne');
-              button.click();
-
-              return waitForSetState().then(() => {
-                expect(secondSlide.getAttribute('aria-hidden')).to.be.equal(
-                    'false');
-                expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
-              });
-            });
-      });
-
-  describe('with <amp-img>', () => {
+  describe('with <amp-carousel>', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-basic.html');
+      // One <amp-carousel> plus two <amp-img> elements.
+      return setupWithFixture('test/fixtures/bind-carousel.html', 3);
     });
 
-    it('should change src when the src attribute binding changes', () => {
-      const button = fixture.doc.getElementById('changeImgSrcButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      button.click();
+    it('should update on carousel slide changes', () => {
+      const slideNumber = fixture.doc.getElementById('slideNumber');
+      expect(slideNumber.textContent).to.equal('0');
+
+      const carousel = fixture.doc.getElementById('carousel');
+      const nextSlideButton =
+          carousel.querySelector('div.amp-carousel-button-next');
+      nextSlideButton.click();
+
       return waitForSetState().then(() => {
-        expect(img.getAttribute('src')).to
-            .equal('http://www.google.com/image2');
+        expect(slideNumber.textContent).to.equal('1');
       });
     });
 
-    it('should NOT change src when new value is a blocked URL', () => {
-      const button = fixture.doc.getElementById('invalidSrcButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-      button.click();
-      return waitForSetState().then(() => {
-        expect(img.getAttribute('src')).to
-            .equal('http://www.google.com/image1');
-      });
-    });
+    it('should change slides when the slide attribute binding changes', () => {
+      const carousel = fixture.doc.getElementById('carousel');
+      const slides =
+      carousel.querySelectorAll('.i-amphtml-slide-item > amp-img');
+      const firstSlide = slides[0];
+      const secondSlide = slides[1];
 
-    it('should NOT change src when new value uses an invalid protocol',
-        () => {
-          const img = fixture.doc.getElementById('image');
-          expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-          const ftpSrcButton = fixture.doc.getElementById('ftpSrcButton');
-          ftpSrcButton.click();
-          return waitForSetState().then(() => {
-            expect(img.getAttribute('src')).to.equal('http://www.google.com/image1');
-            const telSrcButton = fixture.doc.getElementById('telSrcButton');
-            telSrcButton.click();
-            return waitForSetState();
-          }).then(() => {
-            expect(img.getAttribute('src')).to
-                .equal('http://www.google.com/image1');
-          });
-        });
+      expect(firstSlide.getAttribute('aria-hidden')).to.equal('false');
+      expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('true');
 
-    it('should change alt when the alt attribute binding changes', () => {
-      const button = fixture.doc.getElementById('changeImgAltButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('alt')).to.equal('unbound');
+      const button = fixture.doc.getElementById('goToSlideOne');
       button.click();
-      return waitForSetState().then(() => {
-        expect(img.getAttribute('alt')).to.equal('hello world');
-      });
-    });
 
-    it('should change width and height when their bindings change', () => {
-      const button = fixture.doc.getElementById('changeImgDimensButton');
-      const img = fixture.doc.getElementById('image');
-      expect(img.getAttribute('height')).to.equal('200');
-      expect(img.getAttribute('width')).to.equal('200');
-      button.click();
       return waitForSetState().then(() => {
-        expect(img.getAttribute('height')).to.equal('300');
-        expect(img.getAttribute('width')).to.equal('300');
+        expect(secondSlide.getAttribute('aria-hidden')).to.be.equal('false');
+        expect(firstSlide.getAttribute('aria-hidden')).to.equal('true');
       });
     });
   });
@@ -553,8 +534,7 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  // TODO(choumx, #19647): Times out on SL Chrome 71.
-  describe.skip('with <amp-list>', () => {
+  describe('with <amp-list>', () => {
     beforeEach(() => {
       return setupWithFixture('test/fixtures/bind-list.html', 1);
     });
@@ -570,8 +550,7 @@ describe.skip('amp-bind', function() {
       });
     });
 
-    // TODO(choumx): Fix this flaky test.
-    it.skip('should evaluate bindings in template', () => {
+    it('should evaluate bindings in template', () => {
       const list = fixture.doc.getElementById('list');
       return fixture.awaitEvent(AmpEvents.DOM_UPDATE, 1).then(() => {
         list.querySelectorAll('span.foobar').forEach(span => {
@@ -581,57 +560,52 @@ describe.skip('amp-bind', function() {
     });
   });
 
-  describe('with <amp-state>', () => {
+  describe.configure().skipIfPropertiesObfuscated().run('+ amp-state', () => {
     beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-basic.html');
+      return setupWithFixture('test/fixtures/bind-basic.html', 0);
     });
 
-    it.configure().skipIfPropertiesObfuscated().run(
-        'should not loop infinitely if updates change its src binding',
-        () => {
-          const changeAmpStateSrcButton =
-          fixture.doc.getElementById('ampStateSrcButton');
-          const triggerBindApplicationButton =
-          fixture.doc.getElementById('triggerBindApplicationButton');
-          const ampState = fixture.doc.getElementById('ampState');
-          const batchedXhr = Services.batchedXhrFor(fixture.win);
-          // Stub XHR for endpoint such that it returns state that would
-          // point the amp-state element back to its original source.
-          sandbox.stub(batchedXhr, 'fetchJson')
-              .withArgs(
-                  'https://www.google.com/bind/second/source',
-                  sinon.match.any)
-              .returns(Promise.resolve({
-                json() {
-                  return Promise.resolve({
-                    stateSrc: 'https://www.google.com/bind/first/source',
-                  });
-                },
-              }));
-          // Changes amp-state's src from
-          // .../first/source to .../second/source.
-          changeAmpStateSrcButton.click();
-          return waitForSetState().then(() => {
-            expect(ampState.getAttribute('src'))
-                .to.equal('https://www.google.com/bind/second/source');
-            // Wait for XHR to finish and for bind to re-apply bindings.
-            return waitForSetState();
-          }).then(() => {
-            // bind applications caused by an amp-state mutation SHOULD NOT
-            // update src attributes on amp-state elements.
-            expect(ampState.getAttribute('src'))
-                .to.equal('https://www.google.com/bind/second/source');
-            // Trigger a bind apply that isn't from an amp-state
-            triggerBindApplicationButton.click();
-            return waitForSetState();
-          }).then(() => {
-            // Now that a non-amp-state mutation has ocurred, the
-            // amp-state's src attribute can be updated with the new
-            // src from the XHR.
-            expect(ampState.getAttribute('src'))
-                .to.equal('https://www.google.com/bind/first/source');
-          });
-        });
+    it('should not loop infinitely if updates change its src binding', () => {
+      const {doc, win} = fixture;
+      const changeAmpStateSrcButton = doc.getElementById('changeAmpStateSrc');
+      const setState = doc.getElementById('setState');
+      const ampState = doc.getElementById('ampState');
+      const batchedXhr = Services.batchedXhrFor(win);
+      // Stub XHR for endpoint such that it returns state that would
+      // point the amp-state element back to its original source.
+      sandbox.stub(batchedXhr, 'fetchJson')
+          .withArgs(
+              'https://www.google.com/bind/second/source', sinon.match.any)
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve({
+                stateSrc: 'https://www.google.com/bind/first/source',
+              });
+            },
+          }));
+      // Changes amp-state's src from
+      // .../first/source to .../second/source.
+      changeAmpStateSrcButton.click();
+      return waitForSetState().then(() => {
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/second/source');
+        // Wait for XHR to finish and for bind to re-apply bindings.
+        return waitForSetState();
+      }).then(() => {
+        // bind applications caused by an amp-state mutation SHOULD NOT
+        // update src attributes on amp-state elements.
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/second/source');
+        setState.click();
+        return waitForSetState();
+      }).then(() => {
+        // Now that a non-amp-state mutation has ocurred, the
+        // amp-state's src attribute can be updated with the new
+        // src from the XHR.
+        expect(ampState.getAttribute('src'))
+            .to.equal('https://www.google.com/bind/first/source');
+      });
+    });
   });
 
   // The only difference in amp4email is that URL attributes cannot be bound.
