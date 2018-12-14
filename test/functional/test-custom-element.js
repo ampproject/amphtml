@@ -1011,10 +1011,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }).to.throw(/Must never be called in template/); });
     });
 
-    // TODO(alabiaga): Fixes #19752. The window.matchMedia call in the code
-    // path of element.applySizesAndMediaQuery is not behaving consistently
-    // in headless mode, thus we mock the calls here. This is fine as we are
-    // not testing window behavior.
     describe('apply sizes and media query', () => {
       let element1;
       let element2;
@@ -1022,10 +1018,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       beforeEach(() => {
         element1 = new ElementClass();
-        matchMedia =
-          sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
-        matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
 
+        // Fixes #19752. The window.matchMedia call in the code
+        // path of element.applySizesAndMediaQuery is not behaving consistently
+        // in headless mode, thus we mock the calls here. This is fine as we are
+        // not testing window behavior.
+        matchMedia = sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
+        matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+        matchMedia.withArgs('(min-width: 1111111px)').returns({matches: false});
         element2 = new ElementClass();
       });
 
@@ -1034,11 +1034,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element1.applySizesAndMediaQuery();
         expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
 
-        matchMedia.restore();
-
-        matchMedia =
-           sandbox.stub(element2.ownerDocument.defaultView, 'matchMedia');
-        matchMedia.withArgs('(min-width: 1111111px)').returns({matches: false});
         element2.setAttribute('media', '(min-width: 1111111px)');
         element2.applySizesAndMediaQuery();
         expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
@@ -1049,11 +1044,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element1.applySizesAndMediaQuery();
         expect(element1.style.width).to.equal('200px');
 
-        matchMedia.restore();
-
-        matchMedia =
-           sandbox.stub(element2.ownerDocument.defaultView, 'matchMedia');
-        matchMedia.withArgs('(min-width: 1111111px)').returns({matches: false});
         element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
         element2.applySizesAndMediaQuery();
         expect(element2.style.width).to.equal('50vw');
@@ -1069,11 +1059,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element1.applySizesAndMediaQuery();
         expect(element1.sizerElement.style.paddingTop).to.equal('99%');
 
-        matchMedia.restore();
-
-        matchMedia =
-           sandbox.stub(element2.ownerDocument.defaultView, 'matchMedia');
-        matchMedia.withArgs('(min-width: 1111111px)').returns({matches: false});
         element2.sizerElement = doc.createElement('div');
         element2.setAttribute('layout', 'responsive');
         element2.setAttribute('width', '200px');
