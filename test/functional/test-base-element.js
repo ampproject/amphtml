@@ -146,7 +146,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     // Action 'foo' is invoked by default 'activate' method.
     element.executeAction({
       method: 'activate',
-      satisfiesTrust: t => (t <= element.activationTrust()),
+      satisfiesTrust: () => true,
     }, null, false);
     expect(handler).to.be.called;
   });
