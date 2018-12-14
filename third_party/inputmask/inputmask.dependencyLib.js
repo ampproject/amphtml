@@ -6,9 +6,6 @@
 * Version: 3.3.11
 */
 
-// !function(factory) {
-//     "function" == typeof define && define.amd ? define([ "../global/window", "../global/document" ], factory) : "object" == typeof exports ? module.exports = factory(require("../global/window"), require("../global/document")) : window.dependencyLib = factory(window, document);
-// }(function(window, document) {
 export function factory(window, document) {
     function indexOf(list, elem) {
         for (var i = 0, len = list.length; i < len; i++) if (list[i] === elem) return i;
@@ -83,7 +80,6 @@ export function factory(window, document) {
                     };
                     if (document.createEvent) {
                         try {
-                            // evnt = new CustomEvent(ev, params);
                             evnt = ["change","input","click"].indexOf(ev) > -1 ? new Event(ev, params) : new CustomEvent(ev, params);
                         } catch (e) {
                             (evnt = document.createEvent("CustomEvent")).initCustomEvent(ev, params.bubbles, params.cancelable, params.detail);
@@ -133,4 +129,3 @@ export function factory(window, document) {
         evt;
     }, DependencyLib.Event.prototype = window.Event.prototype), DependencyLib;
 }
-// });
