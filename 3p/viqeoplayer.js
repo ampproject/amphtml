@@ -55,8 +55,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   function subscribe(playerEventName, targetEventName) {
     VIQEO['subscribeTracking'](
         () => { sendMessage(targetEventName); },
-        `Player:${playerEventName}`,
-    );
+        `Player:${playerEventName}`);
   }
 
   /**
