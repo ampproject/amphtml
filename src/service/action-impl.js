@@ -746,17 +746,21 @@ export class ActionService {
  */
 function isActionWhitelisted_(invocation, whitelist) {
   const {method, node, tagOrTarget} = invocation;
-  const tagOrTargetToMatch = tagOrTarget.toLowerCase();
-  let invocationMethodToMatch = method.toLowerCase();
+  const tagOrTargetCalled = tagOrTarget.toLowerCase();
+  let methodCalled = method.toLowerCase();
   const defaultActionAlias = node.getDefaultActionAlias();
-  if (method == DEFAULT_ACTION && (node
-      && defaultActionAlias)) {
-    invocationMethodToMatch = defaultActionAlias.toLowerCase();
+  const calledByDefaultActionAndHasDefaultAlias =
+      method == DEFAULT_ACTION && (node && defaultActionAlias);
+  // If called via default action 'activate', check the whitelist
+  // against the default action alias.
+  if (calledByDefaultActionAndHasDefaultAlias) {
+    methodCalled = defaultActionAlias.toLowerCase();
   }
 
   return whitelist.some(({tagOrTarget, method}) => {
-    return (tagOrTarget === '*' || tagOrTargetToMatch == tagOrTarget.toLowerCase()) &&
-        (invocationMethodToMatch == method.toLowerCase());
+    return (tagOrTarget === '*'
+        || tagOrTargetCalled == tagOrTarget.toLowerCase()) &&
+        (methodCalled == method.toLowerCase());
   });
 }
 

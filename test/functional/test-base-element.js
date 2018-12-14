@@ -122,7 +122,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.registerDefaultAction(handler);
     return allowConsoleError(() => { expect(() => {
       element.registerDefaultAction(anotherHandler);
-    }).to.throw(/There is already a default action registered./);});
+    }).to.throw(/Default action "activate" already registered./);});
   });
 
   it('should check trust before invocation', () => {

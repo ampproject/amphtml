@@ -615,9 +615,9 @@ export class BaseElement {
    * @public
    */
   registerDefaultAction(
-      handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
+    handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
     dev().assert(!this.defaultActionAlias_,
-        'There is already a default action registered.');
+        'Default action "%s" already registered.', this.defaultActionAlias_);
     this.registerAction(alias, handler, minTrust);
     this.defaultActionAlias_ = alias;
   }
@@ -633,23 +633,15 @@ export class BaseElement {
    * @package
    */
   executeAction(invocation, unusedDeferred) {
-    const {method} = invocation;
-    const isDefaultAction = (method == DEFAULT_ACTION);
-    let handler;
-    let minTrust;
-
-    if (this.defaultActionAlias_
-        && (isDefaultAction || this.defaultActionAlias_ == method)) {
-      handler = this.actionMap_[this.defaultActionAlias_].handler;
-      minTrust = this.activationTrust();
-    } else {
-      this.initActionMap_();
-      const holder = this.actionMap_[method];
-      user().assert(holder, `Method not found: ${method} in %s`, this);
-      handler = holder.handler;
-      minTrust = holder.minTrust;
+    let {method} = invocation;
+    // If the default action has an alias, the handler will be stored under it.
+    if (method === DEFAULT_ACTION) {
+      method = this.defaultActionAlias_ || method;
     }
-
+    this.initActionMap_();
+    const holder = this.actionMap_[method];
+    user().assert(holder, `Method not found: ${method} in %s`, this);
+    const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
     }

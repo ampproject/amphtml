@@ -187,7 +187,7 @@ export class AmpAnimation extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.triggerOnVisibility_) {
-      this.startAction();
+      this.startAction_();
     }
     return Promise.resolve();
   }
@@ -200,8 +200,10 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @return {?Promise}
+   * @private
+   * @visibleForTesting
    */
-  startAction(opt_invocation) {
+  startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it
     // will actually be running.
     this.triggered_ = true;
