@@ -403,7 +403,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {<!JsonObject|!Array<JsonObject>} data
+   * @param {!JsonObject|!Array<JsonObject>} data
    * @private
    */
   maybeUpdateLoadMoreSrc_(data) {
