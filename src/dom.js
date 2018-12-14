@@ -572,6 +572,7 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  */
 export function hasNextNodeInDocumentOrder(
   currentNode, root = rootNodeFor(currentNode), filter = null) {
+  // We need the 4th argument for IE.
   const walker = currentNode.ownerDocument.createTreeWalker(
       root, NodeFilter.SHOW_ALL, filter, false);
   walker.currentNode = currentNode;
