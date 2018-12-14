@@ -274,15 +274,16 @@ a.underlined::before {
 }
 
 .file-list .file-link-container {
-  margin: 10px;
-  max-height: 75px;
+  margin-bottom: 10px;
+  margin-right: 20px;
+  height: 20px;
 }
 
 .file-list .file-link {
   padding: 0;
-  margin: 0 0 10px;
+  margin: 0;
   display: inline-block;
-  width: 200px;
+  width: 300px;
   display: block;
   text-overflow: ellipsis;
   overflow: hidden;
