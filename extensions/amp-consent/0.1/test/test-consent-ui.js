@@ -164,8 +164,8 @@ describes.realWin('consent-ui', {
       // Pop onto the back of the event queue,
       // so we expect() once our mutate element in show() resolves
       return mockInstance.mutateElement(() => {}).then(() => {
-        expect(placeholder.hasAttribute('hidden')).to.not.be.ok;
-        expect(placeholder.childNodes.length).to.be.above(0);
+        expect(placeholder.hidden).to.be.false;
+        expect(placeholder.childNodes).to.not.be.empty;
       });
     });
   });

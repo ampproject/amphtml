@@ -39,7 +39,7 @@ export const consentUiClasses = {
   in: 'i-amphtml-consent-ui-in',
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
-  loadingPlaceholder: 'i-amphtml-consent-ui-loading-placeholder',
+  placeholder: 'i-amphtml-consent-ui-placeholder',
 };
 
 export class ConsentUI {
@@ -241,21 +241,20 @@ export class ConsentUI {
   createPlaceholder_() {
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
-    const {classList} = placeholder;
-    classList.add(consentUiClasses.loadingPlaceholder);
+    placeholder.classList.add(consentUiClasses.placeholder);
 
     const loadingSpinner = htmlFor(placeholder)`
-    <svg viewBox="0 0 40 40">
-      <defs>
-        <linearGradient id="grad">
-          <stop stop-color="rgb(105, 105, 105)"></stop>
-          <stop offset="100%"
-          stop-color="rgb(105, 105, 105)"
-          stop-opacity="0"></stop>
-        </linearGradient>
-      </defs>
-      <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
-    </svg>`;
+      <svg viewBox="0 0 40 40">
+        <defs>
+          <linearGradient id="grad">
+            <stop stop-color="rgb(105, 105, 105)"></stop>
+            <stop offset="100%"
+            stop-color="rgb(105, 105, 105)"
+            stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
+      </svg>`;
 
     placeholder.appendChild(loadingSpinner);
     return placeholder;

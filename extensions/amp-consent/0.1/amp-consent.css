@@ -41,7 +41,7 @@ amp-consent.amp-hidden {
   visibility: hidden;
 }
 
-@keyframes loading-placeholder-spin  {
+@keyframes amp-consent-ui-placeholder-spin  {
   from {
     transform: rotate(0deg);
   }
@@ -50,7 +50,7 @@ amp-consent.amp-hidden {
   }
 }
 
-.i-amphtml-consent-ui-loading-placeholder {
+.i-amphtml-consent-ui-placeholder {
   width: 100%;
   height: 100%;
 
@@ -59,14 +59,14 @@ amp-consent.amp-hidden {
   align-items: center;
 }
 
-.i-amphtml-consent-ui-loading-placeholder > svg {
+.i-amphtml-consent-ui-placeholder > svg {
   width: 30px;
   height: 30px;
 
   fill: none;
   stroke-width: 1.5px;
   transform-origin: 50% 50%;
-  animation: 1000ms loading-placeholder-spin linear infinite;
+  animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
 }
 
 .i-amphtml-consent-ui-fill {
