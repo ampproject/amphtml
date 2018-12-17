@@ -447,11 +447,14 @@ export class AmpStory extends AMP.BaseElement {
     // if possible, with the fall back being default dark gray.
     const meta = this.win.document.createElement('meta');
     const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
-    const styles = computedStyle(this.win, ampStoryEl);
+    const ampStoryPageEl =
+      this.win.document.getElementsByTagName('amp-story-page')[0];
+    const storyStyles = computedStyle(this.win, ampStoryEl);
+    const pageStyles = computedStyle(this.win, ampStoryPageEl);
     meta.name = 'theme-color';
     meta.content =
-      styles.getPropertyValue('--primary-color') ||
-      styles.getPropertyValue('background-color') ||
+      storyStyles.getPropertyValue('--primary-color') ||
+      pageStyles.getPropertyValue('background-color') ||
       DEFAULT_THEME_COLOR;
     this.win.document.head.appendChild(meta);
   }
