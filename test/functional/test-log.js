@@ -588,7 +588,6 @@ describe('Logging', () => {
     });
   });
 
-
   describe('error', () => {
     let log;
     let reportedError;
