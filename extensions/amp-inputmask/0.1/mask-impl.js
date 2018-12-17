@@ -88,6 +88,7 @@ export class Mask {
       showMaskOnHover: false,
       showMaskOnFocus: false,
       noValuePatching: true,
+      jitMasking: true,
     };
 
     if (NamedMasksToInputmask[mask]) {
