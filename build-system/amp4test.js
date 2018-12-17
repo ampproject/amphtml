@@ -17,7 +17,7 @@
 
 const app = module.exports = require('express').Router();
 
-/*eslint "max-len": 0*/
+/* eslint-disable max-len */
 
 /**
  * Logs the given messages to the console in local dev mode, but not while
@@ -32,58 +32,30 @@ function log(...messages) {
 
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
-  const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
-  const frameHtml = process.env.SERVE_MODE == 'compiled'
+  const {body, css, experiments, extensions} = req.query;
+
+  const compiled = process.env.SERVE_MODE == 'compiled';
+  const frameHtml = (compiled)
     ? 'dist.3p/current-min/frame.html'
     : 'dist.3p/current/frame.max.html';
-  const {extensions} = req.query;
-  let extensionScripts = '';
-  if (!!extensions) {
-    extensionScripts = extensions.split(',').map(function(extension) {
-      return '<script async custom-element="'
-              + extension + '" src=/dist/v0/'
-              + extension + '-0.1.' + mode + 'js></script>';
-    }).join('\n');
-  }
 
-  const {experiments} = req.query;
-  let metaTag = '';
-  let experimentString = '';
+  let metaExperiments = '', experimentString = '';
   if (experiments) {
-    metaTag = '<meta name="amp-experiments-opt-in" content="' +
-      experiments + '">';
-    experimentString = '"' + experiments.split(',').join('","') + '"';
+    metaExperiments = `<meta name="amp-experiments-opt-in" content="${experiments}">`;
+    experimentString = `"${experiments.split(',').join('","')}"`;
   }
-  const {css} = req.query;
-  const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
-  res.send(`
-<!doctype html>
-<html ⚡>
-<head>
-  <meta charset="utf-8">
-  <link rel="canonical" href="http://nonblocking.io/" >
-  <title>AMP TEST</title>
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  ${metaTag}
+  const head = `
   <script>
-    window.AMP_CONFIG = window.AMP_CONFIG || {
-      "localDev": true
-    };
-    window.AMP_CONFIG['allow-doc-opt-in'] =
-    (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
+    window.AMP_CONFIG = window.AMP_CONFIG || {"localDev": true};
+    window.AMP_CONFIG['allow-doc-opt-in'] = (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
   </script>
-  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
+  ${metaExperiments}
   <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
-  ${extensionScripts}
-  ${cssTag}
-</head>
-<body>
-${req.query.body}
-</body>
-</html>
-`);
+  `;
+
+  const doc = composeDocument({body, css, extensions, head});
+  res.send(doc);
 });
 
 /**
@@ -158,12 +130,22 @@ app.get('/a4a/:bid', (req, res) => {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   const {bid} = req.params;
-  res.send(`
-<!doctype html><html amp4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1,initial-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-accordion src=https://cdn.ampproject.org/v0/amp-accordion-0.1.js></script><script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script><script async custom-element=amp-anim src=https://cdn.ampproject.org/v0/amp-anim-0.1.js></script><script async custom-element=amp-audio src=https://cdn.ampproject.org/v0/amp-audio-0.1.js></script><script async custom-element=amp-carousel src=https://cdn.ampproject.org/v0/amp-carousel-0.1.js></script><script async custom-element=amp-fit-text src=https://cdn.ampproject.org/v0/amp-fit-text-0.1.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><script async custom-element=amp-form src=https://cdn.ampproject.org/v0/amp-form-0.1.js></script><script async custom-element=amp-social-share src=https://cdn.ampproject.org/v0/amp-social-share-0.1.js></script><style amp-custom>body {
-  background-color: #f4f4f4;
-}
-</style><style amp4ads-boilerplate>body{visibility:hidden}</style></head>
-<body>
+
+  const extensions = [
+    'amp-accordion',
+    'amp-analytics',
+    'amp-anim',
+    'amp-audio',
+    'amp-carousel',
+    'amp-fit-text',
+    'amp-font',
+    'amp-form',
+    'amp-social-share',
+  ];
+
+  const css = 'body { background-color: #f4f4f4; }';
+
+  const body = `
   <a href=https://ampbyexample.com target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
@@ -207,7 +189,61 @@ app.get('/a4a/:bid', (req, res) => {
      ]
   }
   </script>
-</body>
-</html>
-`);
+  `;
+
+  const doc = composeDocument({spec: 'amp4ads', body, css, extensions});
+  res.send(doc);
 });
+
+function composeDocument(config) {
+  const {body, css, extensions, head, spec} = config;
+
+  const cssTag = css ? `<style amp-custom>${css}</style>` : '';
+
+  let extensionScripts = '';
+  if (extensions) {
+    extensionScripts = extensions.split(',').map(extension => {
+      // TODO: Use '-latest'?
+      return `<script async custom-element="${extension}" + src="https://cdn.ampproject.org/v0/${extension}-0.1.${mode}js"></script>`;
+    }).join('\n');
+  }
+
+  const amp = spec || 'amp';
+  let canonical, boilerplate, runtime;
+  switch (spec) {
+    case 'amp':
+      canonical = '<link rel="canonical" href="self.html" />';
+      boilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+      runtime = 'https://cdn.ampproject.org/v0.js';
+    case 'amp4ads':
+      canonical = '';
+      boilerplate = '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
+      runtime = 'https://cdn.ampproject.org/amp4ads-v0.js';
+      break;
+    case 'amp4email':
+      canonical = '';
+      boilerplate = '<style amp4email-boilerplate>body{visibility:hidden}</style>';
+      runtime = 'https://cdn.ampproject.org/v0.js';
+      break;
+    default:
+      throw new Error('Unrecognized AMP spec: ' + spec);
+  }
+
+  return `
+<!doctype html>
+<html ${amp}>
+<head>
+  <meta charset="utf-8">
+  ${canonical}
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  ${head || ''}
+  ${boilerplate}
+  <script async src="${runtime}"></script>
+  ${extensionScripts}
+  ${cssTag}
+</head>
+<body>
+${body}
+</body>
+</html>`;
+}
