@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
 
-describe('amp-bind', function() {
+// Skip Edge, which throws "Permission denied" errors when inspecting
+// element properties in the testing iframe (Edge 17, Windows 10).
+describe.configure().skipEdge().run('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
