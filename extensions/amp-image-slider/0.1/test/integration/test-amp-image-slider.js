@@ -16,8 +16,11 @@
 
 import {createPointerEvent} from '../../../../../testing/test-helper';
 
-const config = describe.configure().ifChrome();
-config.run('amp-image-slider', function() {
+const t = describe.configure()
+    .ifChrome()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
+t.run('amp-image-slider', function() {
   this.timeout(20000);
   const DEFAULT_TIMEOUT = 1600;
 

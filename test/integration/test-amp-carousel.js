@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-const config = describe.configure().ifChrome().skipSinglePass();
-config.run('amp-carousel', function() {
+const t = describe.configure()
+    .ifChrome()
+    .skipSinglePass()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+
+t.run('amp-carousel', function() {
   this.timeout(10000);
 
   const extensions = ['amp-carousel'];
