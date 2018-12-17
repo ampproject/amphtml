@@ -53,7 +53,7 @@ export class Url {
     this.cache_ = new LruCache(100);
   }
 
-  /** @override */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, SERVICE,
         new Url(ampdoc, embedWin.document));

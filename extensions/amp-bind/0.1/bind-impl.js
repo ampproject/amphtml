@@ -195,7 +195,7 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
         embedWin, 'bind', new Bind(ampdoc, embedWin));

@@ -159,7 +159,7 @@ export class Navigation {
         maybeExpandUrlParams.bind(null, ampdoc), /* capture */ true);
   }
 
-  /** @override */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, TAG,
         new Navigation(ampdoc, embedWin.document));

@@ -72,7 +72,7 @@ export class StandardActions {
     this.installActions_(this.actions_);
   }
 
-  /** @override */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'standard-actions',
         new StandardActions(ampdoc, embedWin));

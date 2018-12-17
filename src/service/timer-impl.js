@@ -169,7 +169,7 @@ export class Timer {
     });
   }
 
-  /** @override */
+  /** @override @nocollapse */
   static installInEmbedWindow(embedWin, unusedAmpDoc) {
     installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
   }
