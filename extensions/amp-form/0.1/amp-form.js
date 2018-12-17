@@ -1320,6 +1320,6 @@ export class AmpFormService {
 
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerServiceForDoc(TAG, AmpFormService);
   AMP.registerServiceForDoc('form-submit-service', FormSubmitService);
+  AMP.registerServiceForDoc(TAG, AmpFormService);
 });

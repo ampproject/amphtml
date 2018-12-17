@@ -1553,7 +1553,7 @@ describes.repeated('', {
     it('should install action handler and handle submit action', () => {
       const form = getForm();
       document.body.appendChild(form);
-      const actions = Services.actionServiceForDoc(env.ampdoc);
+      const actions = Services.actionServiceForDoc(form);
 
       sandbox.stub(actions, 'installActionHandler');
       const ampForm = new AmpForm(form);

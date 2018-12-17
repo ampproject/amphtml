@@ -92,6 +92,7 @@
       <option>pressboard</option>
       <option>quantcast</option>
       <option>rakam</option>
+      <option>retargetly</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
@@ -1064,6 +1065,22 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Quantcast example -->
+
+<!-- Retargetly example -->
+<amp-analytics data-credentials="include" type="retargetly" id="retargetly">
+<script type="application/json">
+{
+    "vars": {
+        "accountId": "107",
+        "sourceId": "0"
+    },
+    "extraUrlParams": {
+        "tags": "this,is,just,an,example"
+    }
+}
+</script>
+</amp-analytics>
+<!-- End Retargetly example -->
 
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">

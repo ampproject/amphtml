@@ -183,7 +183,7 @@ describes.realWin('amp-story', {
   it('should not prerender/load the share menu on desktop', () => {
     createPages(story.element, 2);
 
-    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+    story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
     const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
 
@@ -383,9 +383,24 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should detect fullbleed desktop mode', () => {
+  it('should default to the three panels UI desktop experience', () => {
     createPages(story.element, 4, ['cover', '1', '2', '3']);
-    story.element.setAttribute('desktop-mode', 'fullbleed');
+
+    // Don't do this at home. :(
+    story.desktopMedia_ = {matches: true};
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.storeService_.get(StateProperty.UI_STATE))
+              .to.equals(UIType.DESKTOP_PANELS);
+        });
+  });
+
+  it('should detect landscape opt in', () => {
+    createPages(story.element, 4, ['cover', '1', '2', '3']);
+    story.element.setAttribute('supports-landscape', '');
 
     // Don't do this at home. :(
     story.desktopMedia_ = {matches: true};
@@ -719,7 +734,7 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
       return story.layoutCallback()
           .then(() => {
@@ -736,7 +751,7 @@ describes.realWin('amp-story', {
 
       story.buildCallback();
 
-      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+      story.storeService_.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
 
       return story.layoutCallback()
           .then(() => story.switchTo_('2'))

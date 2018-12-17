@@ -136,7 +136,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
    * @return {!Promise<string>}
    */
   getValue() {
-
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
           this.element.getResourceId(), this.action_

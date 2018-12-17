@@ -572,7 +572,8 @@ class VideoEntry {
         !element.classList.contains('i-amphtml-disable-mediasession')) {
 
       setMediaSession(
-          this.ampdoc_,
+          element,
+          this.ampdoc_.win,
           this.metadata_,
           this.boundMediasessionPlay_,
           this.boundMediasessionPause_);
