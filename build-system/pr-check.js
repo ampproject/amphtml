@@ -143,8 +143,12 @@ function isBuildSystemFile(filePath) {
  */
 function isBuildSystemAndRuntimeFile(filePath) {
   return isBuildSystemFile(filePath) &&
-      // Babel plugins are likely to affect the runtime as well.
-      filePath.startsWith('build-system/babel-plugins');
+      // These build system files are involved in the compilation/bundling and
+      // are likely to affect the runtime as well.
+      (
+        filePath.startsWith('build-system/babel-plugins') ||
+        filePath.startsWith('build-system/runner')
+      );
 }
 
 /**
