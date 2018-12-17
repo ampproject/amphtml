@@ -45,12 +45,11 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
 
   @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
+      new AssertionFunctionSpec("module$src$log.devAssert", JSTypeNative.TRUTHY),
+      new AssertionFunctionSpec("devAssert$$module$src$log", JSTypeNative.TRUTHY),
+      new AssertionFunctionSpec("assertService$$module$src$element_service", JSTypeNative.TRUTHY),
+      new AssertFunctionByTypeName("module$src$layout.assertLength", "string"),
+      new AssertFunctionByTypeName("assertLength$$module$src$layout", "string")
     );
   }
 
