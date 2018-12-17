@@ -251,7 +251,7 @@ export class Performance {
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
         docVisibleTime = this.win.Date.now();
-        // Mark this instance in the browser timeline.
+        // Mark this first visible instance in the browser timeline.
         this.mark('visible');
       });
     }
