@@ -278,9 +278,12 @@ export class ConsentUI {
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
     insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
 
-    return this.baseInstance_.mutateElement(() => {
-      toggle(dev().assertElement(this.placeholder_), true);
-    }).then(() => this.iframeReady_.promise);
+    return Promise.all([
+      this.iframeReady_.promise,
+      return this.baseInstance_.mutateElement(() => {
+        toggle(dev().assertElement(this.placeholder_), true);
+      })
+    ]);
   }
 
   /**
