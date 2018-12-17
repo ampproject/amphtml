@@ -195,10 +195,10 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin, 'bind', new Bind(this.ampdoc, embedWin));
+        embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as service from '../../src/service';
 import {
   AmpDocShadow,
   AmpDocShell,
@@ -24,8 +23,8 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
-  adoptStandardServicesForEmbed,
   installExtensionsService,
+  installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc, registerServiceBuilder} from '../../src/service';
@@ -413,7 +412,12 @@ describes.sandboxed('Extensions', {}, () => {
       }, {});
 
       const holder = extensions.getExtensionHolder_('amp-ext');
-      expect(holder.extension.services).to.deep.equal(['service1']);
+      expect(holder.extension.services).to.exist;
+      expect(holder.extension.services).to.have.length(1);
+      expect(holder.extension.services[0]).to.deep.equal({
+        serviceName: 'service1',
+        serviceClass: factory,
+      });
     });
 
     it('should add service factory out of registration', () => {
@@ -421,7 +425,12 @@ describes.sandboxed('Extensions', {}, () => {
       extensions.addService('service1', factory);
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
-      expect(holder.extension.services).to.deep.equal(['service1']);
+      expect(holder.extension.services).to.exist;
+      expect(holder.extension.services).to.have.length(1);
+      expect(holder.extension.services[0]).to.deep.equal({
+        serviceName: 'service1',
+        serviceClass: factory,
+      });
     });
 
     it('should install auto undeclared services for single-doc', () => {
@@ -875,6 +884,20 @@ describes.sandboxed('Extensions', {}, () => {
       extensions = Services.extensionsFor(parentWin);
       extensionsMock = sandbox.mock(extensions);
 
+      [
+        'urlForDoc',
+        'actionServiceForDoc',
+        'standardActionsForDoc',
+        'navigationForDoc',
+        'timerFor',
+      ].forEach(s => {
+        class FakeService {
+          static installInEmbedWindow() {}
+        }
+        sandbox.stub(FakeService, 'installInEmbedWindow');
+        sandbox.stub(Services, s).returns(new FakeService());
+      });
+
       iframe = parentWin.document.createElement('iframe');
       const promise = loadPromise(iframe);
       const html = '<div id="one"></div>';
@@ -927,20 +950,21 @@ describes.sandboxed('Extensions', {}, () => {
       expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
     });
 
-    it('should adopt core services', () => {
-      const actionsMock = sandbox.mock(
-          parentWin.services['action'].obj);
-      const standardActionsMock = sandbox.mock(
-          parentWin.services['standard-actions'].obj);
-      actionsMock.expects('adoptEmbedWindow')
-          .withExactArgs(iframeWin)
-          .once();
-      standardActionsMock.expects('adoptEmbedWindow')
-          .withExactArgs(iframeWin)
-          .once();
+    it('should adopt standard services', () => {
       extensions.installExtensionsInChildWindow(iframeWin, []);
-      actionsMock.verify();
-      standardActionsMock.verify();
+
+      const any = {}; // Input doesn't matter since services are stubbed.
+      const url = Services.urlForDoc(any);
+      const actions = Services.actionServiceForDoc(any);
+      const standardActions = Services.standardActionsForDoc(any);
+      const navigation = Services.navigationForDoc(any);
+      const timer = Services.timerFor(any);
+
+      expect(url.constructor.installInEmbedWindow).to.be.called;
+      expect(actions.constructor.installInEmbedWindow).to.be.called;
+      expect(standardActions.constructor.installInEmbedWindow).to.be.called;
+      expect(navigation.constructor.installInEmbedWindow).to.be.called;
+      expect(timer.constructor.installInEmbedWindow).to.be.called;
     });
 
     it('should install extensions in child window', () => {
@@ -962,9 +986,7 @@ describes.sandboxed('Extensions', {}, () => {
       }, parentWin.AMP);
       return promise.then(() => {
         // Main extension.
-        // TODO(choumx, #19344): Registering in parent window is a temporary
-        // workaround to fix FIE element services.
-        expect(parentWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+        expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
         expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
         expect(iframeWin.document
             .querySelector('style[amp-extension=amp-test]')).to.exist;
@@ -973,10 +995,7 @@ describes.sandboxed('Extensions', {}, () => {
             .to.be.instanceOf(AmpTest);
 
         // Secondary extension.
-        // TODO(choumx, #19344): Registering in parent window is a temporary
-        // workaround to fix FIE element services.
-        expect(parentWin.ampExtendedElements['amp-test-sub'])
-            .to.equal(AmpTestSub);
+        expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
         expect(iframeWin.ampExtendedElements['amp-test-sub'])
             .to.equal(AmpTestSub);
         expect(iframeWin.document
@@ -988,27 +1007,33 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should adopt extension services', () => {
-      const fooSpy = sandbox.spy();
-      const fakeServiceFoo = {adoptEmbedWindow: fooSpy};
+      class FooService {
+        static installInEmbedWindow() {}
+      }
+      sandbox.stub(FooService, 'installInEmbedWindow');
       registerServiceBuilder(parentWin, 'fake-service-foo',
-          () => fakeServiceFoo, /* opt_instantiate */ true);
+          FooService, /* opt_instantiate */ true);
 
-      const barSpy = sandbox.spy();
-      const fakeServiceBar = {adoptEmbedWindow: barSpy};
+      class BarService {
+        static installInEmbedWindow() {}
+      }
+      sandbox.stub(BarService, 'installInEmbedWindow');
       registerServiceBuilder(parentWin, 'fake-service-bar',
-          () => fakeServiceBar, /* opt_instantiate */ true);
+          BarService, /* opt_instantiate */ true);
 
       const extHolder = extensions.getExtensionHolder_('amp-test');
       extHolder.scriptPresent = true;
-      const promise =
-          extensions.installExtensionsInChildWindow(iframeWin, ['amp-test']);
-      // Resolve the promise.
+      const install = extensions.installExtensionsInChildWindow(
+          iframeWin, ['amp-test']);
+
+      // Resolve the promise `install`.
       extensions.registerExtension('amp-test', AMP => {
-        AMP.registerServiceForDoc('fake-service-foo', () => fakeServiceFoo);
+        AMP.registerServiceForDoc('fake-service-foo', FooService);
       }, parentWin.AMP);
-      return promise.then(() => {
-        expect(fooSpy).calledOnce;
-        expect(barSpy).to.not.be.called;
+
+      return install.then(() => {
+        expect(FooService.installInEmbedWindow).calledOnce;
+        expect(BarService.installInEmbedWindow).to.not.be.called;
       });
     });
 
@@ -1049,20 +1074,29 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    describe('adoptStandardServicesForEmbed', () => {
+    describe('installStandardServicesInEmbed', () => {
       it('verify order of adopted services for embed', () => {
-        const adoptServiceForEmbed =
-            sandbox.stub(service, 'adoptServiceForEmbed');
-        sandbox.stub(service, 'adoptServiceForEmbedIfEmbeddable')
-            .withArgs({}, sinon.match.any).returns(true);
-        adoptStandardServicesForEmbed({});
-        expect(adoptServiceForEmbed.callCount).to.equal(5);
-        const expectedCallsInOrder = [
-          'url', 'action', 'standard-actions', 'navigation', 'timer'];
-        expectedCallsInOrder.forEach((call, index) => {
-          expect(adoptServiceForEmbed.getCall([index]).args[1])
-              .to.equal(expectedCallsInOrder[index]);
-        });
+        installStandardServicesInEmbed(iframeWin, parentWin);
+
+        const any = {}; // Input doesn't matter since services are stubbed.
+        const url = Services.urlForDoc(any);
+        const actions = Services.actionServiceForDoc(any);
+        const standardActions = Services.standardActionsForDoc(any);
+        const navigation = Services.navigationForDoc(any);
+        const timer = Services.timerFor(any);
+
+        // Expected order: url, action, standard-actions, navigation, timer.
+        const one = url.constructor.installInEmbedWindow;
+        const two = actions.constructor.installInEmbedWindow;
+        const three = standardActions.constructor.installInEmbedWindow;
+        const four = navigation.constructor.installInEmbedWindow;
+        const five = timer.constructor.installInEmbedWindow;
+
+        expect(one).to.be.calledBefore(two);
+        expect(two).to.be.calledBefore(three);
+        expect(three).to.be.calledBefore(four);
+        expect(four).to.be.calledBefore(five);
+        expect(five).to.be.called;
       });
     });
   });
