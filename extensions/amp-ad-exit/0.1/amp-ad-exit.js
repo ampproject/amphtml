@@ -272,18 +272,18 @@ export class AmpAdExit extends AMP.BaseElement {
         this.userFilters_[name] = createFilter(name, spec, this);
       }
       for (const name in config['targets']) {
-        const target = config['targets'][name];
+        const /** !JsonObject */ target = config['targets'][name];
         this.targets_[name] = {
-          finalUrl: target.finalUrl,
-          trackingUrls: target.trackingUrls || [],
-          vars: target.vars || {},
+          finalUrl: target['finalUrl'],
+          trackingUrls: target['trackingUrls'] || [],
+          vars: target['vars'] || {},
           filters:
-              (target.filters || []).map(
+              (target['filters'] || []).map(
                   f => this.userFilters_[f]).filter(f => f),
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {
-          if (!target.vars[customVar].iframeTransportSignal) {
+          if (!target['vars'][customVar].iframeTransportSignal) {
             continue;
           }
           const matches = target['vars'][customVar].iframeTransportSignal.match(
