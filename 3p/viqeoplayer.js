@@ -28,7 +28,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   let viqeoPlayerInstance;
   VIQEO['setConfig']({url: sourceUrl, amp: {pageViewId, canonicalUrl}});
   VIQEO['subscribeTracking'](params => {
-    viqeoPlayerInstance = params.player;
+    viqeoPlayerInstance = params['player'];
   }, 'Player:added');
   VIQEO['createPlayer']({
     videoId: data['videoid'],
