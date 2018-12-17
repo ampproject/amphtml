@@ -279,9 +279,9 @@ export class ConsentUI {
 
     return Promise.all([
       this.iframeReady_.promise,
-      return this.baseInstance_.mutateElement(() => {
+      this.baseInstance_.mutateElement(() => {
         toggle(dev().assertElement(this.placeholder_), true);
-      })
+      }),
     ]);
   }
 

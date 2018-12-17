@@ -147,7 +147,7 @@ describes.realWin('consent-ui', {
 
   describe('placeholder', () => {
     it('should be created / shown' +
-      ' while loading CMP Iframe', async () => {
+      ' while loading CMP Iframe', async() => {
 
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
