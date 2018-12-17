@@ -559,45 +559,33 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   return params;
 }
 
-/**
- * @param {?function(!Node): number} filter A filter to exclude certain Nodes
- *    from being considered as a following Node. Should return one of the
- *    NodeFilter.FILTER_* constants.
- * @return {?NodeFilter} A NodeFilter that can be used with `TreeWalker` or
- *    `NodeIterator`.
- */
-function toNodeFilter(filter) {
-  if (!filter) {
-    return null;
-  }
-
-  // For IE 9-11: This must be a function, not an object with `acceptNode`.
-  const nodeFilter = node => filter(node);
-  // For non-IE, need to have an `acceptNode` property.
-  nodeFilter['acceptNode'] = nodeFilter;
-  return /** @type {!NodeFilter} */ (nodeFilter);
-}
 
 /**
- * Whether the Node has a next Node in the document order.
+ * Whether the Node has a next nNde in the document order.
  * This means either:
  *  a. The Node itself has a nextSibling.
- *  b. Any of the Node ancestors has a nextSibling.
- * @param {!Node} currentNode The Node to look for a following Node.
- * @param {?Node} root A root Node to look within.
- * @param {?function(!Node): number} filter A filter to exclude certain Nodes
- *    from being considered as a following Node. Should return one of the
- *    NodeFilter.FILTER_* constants.
+ *  b. Any of the Node's ancestors has a nextSibling.
+ * @param {!Node} node
+ * @param {?Node} opt_stopNode
+ * @param {?function(!Node): boolean} opt_predicate
  * @return {boolean}
  */
-export function hasNextNodeInDocumentOrder(
-  currentNode, root = rootNodeFor(currentNode), filter = null) {
-  // We need the 4th argument for IE.
-  const walker = currentNode.ownerDocument.createTreeWalker(
-      root, NodeFilter.SHOW_ALL, toNodeFilter(filter), false);
-  walker.currentNode = currentNode;
-  return !!walker.nextNode();
+export function hasNextNodeInDocumentOrder(node, opt_stopNode, opt_predicate) {
+  let currentNode = node;
+  do {
+    // Search among the following siblings of the current Node.
+    for (let sibling = currentNode.nextSibling; sibling &&
+      sibling != opt_stopNode; sibling = sibling.nextSibling) {
+      if (!opt_predicate || opt_predicate(sibling)) {
+        return true;
+      }
+    }
+    // No matching sibling found, go up to the parent and look again.
+  } while ((currentNode = currentNode.parentNode) &&
+            currentNode != opt_stopNode);
+  return false;
 }
+
 
 
 /**
