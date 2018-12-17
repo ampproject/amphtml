@@ -560,21 +560,41 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
 }
 
 /**
+ * @param {?function(!Node): number} filter A filter to exclude certain Nodes
+ *    from being considered as a following Node. Should return one of the
+ *    NodeFilter.FILTER_* constants.
+ * @return {?NodeFilter} A NodeFilter that can be used with `TreeWalker` or
+ *    `NodeIterator`.
+ */
+function toNodeFilter(filter) {
+  if (!filter) {
+    return null;
+  }
+
+  // For IE 9-11: This must be a function, not an object with `acceptNode`.
+  const nodeFilter = (node) => filter(node);
+  // For non-IE, need to have an `acceptNode` property.
+  nodeFilter['acceptNode'] = nodeFilter;
+  return /** @type {!NodeFilter} */ (nodeFilter);
+}
+
+/**
  * Whether the Node has a next Node in the document order.
  * This means either:
  *  a. The Node itself has a nextSibling.
  *  b. Any of the Node ancestors has a nextSibling.
  * @param {!Node} currentNode The Node to look for a following Node.
  * @param {?Node} root A root Node to look within.
- * @param {?NodeFilter} filter A filter to exclude certain Nodes from being
- *    considered as a following Node.
+ * @param {?function(!Node): number} filter A filter to exclude certain Nodes
+ *    from being considered as a following Node. Should return one of the
+ *    NodeFilter.FILTER_* constants.
  * @return {boolean}
  */
 export function hasNextNodeInDocumentOrder(
   currentNode, root = rootNodeFor(currentNode), filter = null) {
   // We need the 4th argument for IE.
   const walker = currentNode.ownerDocument.createTreeWalker(
-      root, NodeFilter.SHOW_ALL, filter, false);
+      root, NodeFilter.SHOW_ALL, toNodeFilter(filter), false);
   walker.currentNode = currentNode;
   return !!walker.nextNode();
 }

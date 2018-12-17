@@ -604,17 +604,11 @@ export class Resources {
    * @private
    */
   isResourceComplete_(resource) {
-    // For IE 9-11: This must be a function, not an object with `acceptNode`.
-    const skipAppendedNodesFilter = (node) => {
-      return this.ampdoc.isAppendedToBody(node) ?
-            NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-    };
-    // For all other browsers.
-    skipAppendedNodesFilter['acceptNode'] = skipAppendedNodesFilter;
-
     return hasNextNodeInDocumentOrder(
-      resource.element, this.ampdoc.getRootNode(),
-      /** @type {!NodeFilter} */ (skipAppendedNodesFilter));
+      resource.element, this.ampdoc.getRootNode(), (node) => {
+        return this.ampdoc.isAppendedToBody(node) ?
+              NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      });
   }
 
   /**
