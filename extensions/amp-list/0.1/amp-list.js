@@ -366,18 +366,25 @@ export class AmpList extends AMP.BaseElement {
     } else {
       const itemsExpr = this.element.getAttribute('items') || 'items';
       fetch = this.fetch_(opt_refresh).then(data => {
-        this.maybeUpdateLoadMoreSrc_(data);
-        let items = getValueForExpr(data, itemsExpr);
+        let items = data;
+        if (itemsExpr != '.') {
+          items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
+        }
         if (this.element.hasAttribute('single-item')) {
           items = this.forceSingleItemToArray_(items, itemsExpr);
         }
+        // TODO (cathyxz): add assertArray function
         user().assert(isArray(items),
             'Response must contain an array at "%s". %s',
             itemsExpr, this.element);
+        items = /** @type {!Array} */ (items);
         if (this.element.hasAttribute('max-items')) {
           items = this.truncateToMaxLen_(items);
         }
-        return this.scheduleRender_(/** @type {!Array} */(items), !!opt_append, data);
+        if (this.loadMoreEnabled_) {
+          this.updateLoadMoreSrc_(/**@type {!JsonObject} */(data));
+        }
+        return this.scheduleRender_(items, !!opt_append, data);
       });
     }
 
@@ -403,20 +410,17 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject|!Array<JsonObject>} data
+   * @param {!JsonObject} data
    * @private
    */
-  maybeUpdateLoadMoreSrc_(data) {
-    if (!this.loadMoreEnabled_) {
-      return;
-    }
+  updateLoadMoreSrc_(data) {
     const nextExpr = this.element.getAttribute('load-more-bookmark')
       || 'load-more-src';
     this.loadMoreSrc_ = /** @type {string} */ (getValueForExpr(data, nextExpr));
   }
 
   /**
-   * @param {!Object} items
+   * @param {*} items
    * @param {string} itemsExpr
    * @return {!Array}
    * @private
@@ -428,7 +432,7 @@ export class AmpList extends AMP.BaseElement {
     if (!isArray(items)) {
       items = [items];
     }
-    return items;
+    return /**@type{!Array} */(items);
   }
 
   /**
@@ -474,7 +478,7 @@ export class AmpList extends AMP.BaseElement {
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|?JsonObject|string|undefined} data
    * @param {boolean} append
-   * @param {JsonObject=} opt_payload
+   * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
    * @private
    */
@@ -964,7 +968,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {boolean} opt_refresh
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @return {!Promise<(!Array<JsonObject>|!JsonObject)>}
    * @private
    */
   fetch_(opt_refresh = false) {
