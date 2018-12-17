@@ -184,12 +184,10 @@ export class AmpGwdRuntimeService {
     });
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin,
-        GWD_SERVICE_NAME,
-        new AmpGwdRuntimeService(this.ampdoc_, embedWin));
+        embedWin, GWD_SERVICE_NAME, new AmpGwdRuntimeService(ampdoc, embedWin));
   }
 
   /**

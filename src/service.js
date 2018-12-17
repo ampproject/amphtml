@@ -63,18 +63,17 @@ export class Disposable {
 
 
 /**
- * This interface provides a `adoptEmbedWindow` method that will be called by
- * runtime for a new embed window.
+ * Services must implement this interface to be embeddable in FIEs.
  * @interface
  */
 export class EmbeddableService {
 
   /**
-   * Instructs the service to adopt the embed window and add any necessary
-   * listeners and resources.
+   * Installs a new instance of the service in the given FIE window.
    * @param {!Window} unusedEmbedWin
+   * @param {!./service/ampdoc-impl.AmpDoc} unusedAmpDoc
    */
-  adoptEmbedWindow(unusedEmbedWin) {}
+  static installInEmbedWindow(unusedEmbedWin, unusedAmpDoc) {}
 }
 
 
@@ -585,49 +584,22 @@ function disposeServiceInternal(id, service) {
 
 
 /**
- * Whether the specified service implements `EmbeddableService` interface.
- * @param {!Object} service
- * @return {boolean}
- */
-export function isEmbeddable(service) {
-  return typeof service.adoptEmbedWindow == 'function';
-}
-
-
-/**
  * Adopts an embeddable (implements `EmbeddableService` interface) service
  * in embed scope.
  * @param {!Window} embedWin
- * @param {string} serviceId
- * @visibleForTesting
- */
-export function adoptServiceForEmbed(embedWin, serviceId) {
-  const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, serviceId);
-  dev().assert(adopted, `Service ${serviceId} not found on parent ` +
-      'or doesn\'t implement EmbeddableService.');
-}
-
-
-/**
- * Adopts an embeddable (implements `EmbeddableService` interface) service
- * in embed scope.
- * @param {!Window} embedWin
- * @param {string} serviceId
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} serviceClass
  * @return {boolean}
  */
-export function adoptServiceForEmbedIfEmbeddable(embedWin, serviceId) {
+export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
+  const isEmbeddableService =
+      typeof serviceClass.installInEmbedWindow === 'function';
+  if (!isEmbeddableService) {
+    return false;
+  }
   const frameElement = dev().assertElement(embedWin.frameElement,
       'frameElement not found for embed');
   const ampdoc = getAmpdoc(frameElement);
-  const holder = getAmpdocServiceHolder(ampdoc);
-  if (!isServiceRegistered(holder, serviceId)) {
-    return false;
-  }
-  const service = getServiceForDoc(frameElement, serviceId);
-  if (!isEmbeddable(service)) {
-    return false;
-  }
-  service.adoptEmbedWindow(embedWin);
+  serviceClass.installInEmbedWindow(embedWin, ampdoc);
   return true;
 }
 

@@ -15,8 +15,6 @@
  */
 
 import {
-  adoptServiceForEmbed,
-  adoptServiceForEmbedIfEmbeddable,
   assertDisposable,
   disposeServicesForDoc,
   getExistingServiceForDocInEmbedScope,
@@ -28,9 +26,9 @@ import {
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
+  installServiceInEmbedIfEmbeddable,
   installServiceInEmbedScope,
   isDisposable,
-  isEmbeddable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
@@ -529,7 +527,7 @@ describe('service', () => {
           },
         };
         nonEmbeddable = {};
-        embeddable = {adoptEmbedWindow: sandbox.spy()};
+        embeddable = {installInEmbedWindow: sandbox.spy()};
         registerServiceBuilderForDoc(ampdoc, 'embeddable', function() {
           return embeddable;
         });
@@ -538,46 +536,17 @@ describe('service', () => {
         });
       });
 
-      it('should test embeddable interface', () => {
-        expect(isEmbeddable(embeddable)).to.be.true;
-        expect(isEmbeddable(nonEmbeddable)).to.be.false;
-      });
+      describe('installServiceInEmbedIfEmbeddable()', () => {
+        it('should install embeddable if embeddable', () => {
+          let result;
 
-      describe('adoptServiceForEmbed()', () => {
-        it('should adopt embeddable', () => {
-          adoptServiceForEmbed(embedWin, 'embeddable');
-          expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
-          expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
-        });
+          result = installServiceInEmbedIfEmbeddable(embedWin, embeddable);
+          expect(result).to.be.true;
+          expect(embeddable.installInEmbedWindow).to.be.calledOnce;
+          expect(embeddable.installInEmbedWindow.args[0][0]).to.equal(embedWin);
 
-        it('should refuse adopt of non-embeddable', () => {
-          allowConsoleError(() => { expect(() => {
-            adoptServiceForEmbed(embedWin, 'nonEmbeddable');
-          }).to.throw(/implement EmbeddableService/); });
-        });
-
-        it('should refuse adopt of unknown service', () => {
-          allowConsoleError(() => { expect(() => {
-            adoptServiceForEmbed(embedWin, 'unknown');
-          }).to.throw(/unknown/); });
-        });
-      });
-
-      describe('adoptServiceForServiceIfEmbeddable()', () => {
-        it('should adopt embeddable if embeddable', () => {
-          adoptServiceForEmbedIfEmbeddable(embedWin, 'embeddable');
-          expect(embeddable.adoptEmbedWindow).to.be.calledOnce;
-          expect(embeddable.adoptEmbedWindow.args[0][0]).to.equal(embedWin);
-
-          // Should not throw 'required to implement EmbeddableService' error.
-          adoptServiceForEmbedIfEmbeddable(embedWin, 'nonEmbeddable');
-        });
-
-        it('should soft fail adopt of unknown service', () => {
-          // If the embed has an extension service that the parent doesn't,
-          // e.g. AmpFormService if parent lacks amp-form extension.
-          const adopted = adoptServiceForEmbedIfEmbeddable(embedWin, 'unknown');
-          expect(adopted).to.be.false;
+          result = installServiceInEmbedIfEmbeddable(embedWin, nonEmbeddable);
+          expect(result).to.be.false;
         });
       });
     });
