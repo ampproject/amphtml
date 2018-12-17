@@ -78,10 +78,15 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         });
       }
     } else if (urlService.parse(win.location.href).origin ==
-      urlService.parse(src).origin) {
+      urlService.parse(src).origin && !isSafari(win)) {
       this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src, this.element);
       });
+    } else if (isSafari(win)) {
+      // https://webkit.org/blog/8090/workers-at-your-service/
+      this.user().error(TAG,
+          'Did not install ServiceWorker because of safari double keyring ' +
+          'caching as it will not have any effect');
     } else {
       this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
@@ -288,6 +293,16 @@ class UrlRewriter_ {
   }
 }
 
+/**
+ * Checks if the current UA is of iPhone and thus prevent installing
+ * due to double keyring.
+ *
+ * @param {!Window} win
+ */
+function isSafari(win) {
+  const {userAgent} = win.navigator;
+  return /^((?!chrome|android).)*safari/i.test(userAgent);
+}
 
 /**
  * Installs the service worker at src via direct service worker installation.

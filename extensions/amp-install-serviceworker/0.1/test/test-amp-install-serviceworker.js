@@ -90,6 +90,9 @@ describes.realWin('amp-install-serviceworker', {
             return p;
           },
         },
+        userAgent: 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)'
+            + ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98'
+            + ' Mobile Safari/537.36',
       },
     };
     whenVisible = Promise.resolve();
@@ -147,6 +150,7 @@ describes.realWin('amp-install-serviceworker', {
             postMessage: postMessageStub,
           },
         },
+        userAgent: 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)',
       },
       performance: {
         getEntriesByType: () => {
@@ -206,6 +210,7 @@ describes.realWin('amp-install-serviceworker', {
             return p;
           },
         },
+        userAgent: 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)',
       },
       document: {
         querySelectorAll: () => [
@@ -276,6 +281,28 @@ describes.realWin('amp-install-serviceworker', {
             return p;
           },
         },
+        userAgent: 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T)',
+      },
+    };
+    allowConsoleError(() => {
+      implementation.buildCallback();
+    });
+    expect(install.children).to.have.length(0);
+  });
+
+  it('should do nothing with safari UA', () => {
+    const install = doc.createElement('amp-install-serviceworker');
+    const implementation = install.implementation_;
+    expect(implementation).to.exist;
+    install.setAttribute('src', 'https://other-origin.com/sw.js');
+    implementation.win = {
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X)'
+            + ' AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0'
+            + ' Mobile/15A372 Safari/604.1',
       },
     };
     allowConsoleError(() => {
