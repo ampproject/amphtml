@@ -62,6 +62,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
+
+    /** @private {string} */
+    this.videoId_ = '';
   }
 
   /**
