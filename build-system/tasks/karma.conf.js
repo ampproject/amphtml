@@ -156,11 +156,11 @@ module.exports = {
       platform: 'Windows 10',
       version: 'latest',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_Dev: Object.assign({
+    SL_Chrome_Beta: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       platform: 'Windows 10',
-      version: 'dev',
+      version: 'beta',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_Android_7: Object.assign({
       base: 'SauceLabs',
@@ -192,11 +192,11 @@ module.exports = {
       platform: 'Windows 10',
       version: 'latest',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox_Dev: Object.assign({
+    SL_Firefox_Beta: Object.assign({
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: 'dev',
+      version: 'beta',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Safari_12: Object.assign({
       base: 'SauceLabs',
