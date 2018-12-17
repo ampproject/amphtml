@@ -370,14 +370,18 @@ export class AmpList extends AMP.BaseElement {
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
         }
-        if (this.element.hasAttribute('single-item')) {
-          items = this.forceSingleItemToArray_(items, itemsExpr);
+        user().assert(typeof items !== 'undefined',
+            'Response must contain an array or object at "%s". %s',
+            itemsExpr, this.element);
+        if (this.element.hasAttribute('single-item') && !isArray(items)) {
+          items = [items];
         }
         // TODO (cathyxz): add assertArray function
         user().assert(isArray(items),
             'Response must contain an array at "%s". %s',
             itemsExpr, this.element);
         items = /** @type {!Array} */ (items);
+
         if (this.element.hasAttribute('max-items')) {
           items = this.truncateToMaxLen_(items);
         }
@@ -397,8 +401,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array} items
-   * @return {!Array}
+   * @param {!Array<?JsonObject>} items
+   * @return {!Array<?JsonObject>}
    * @private
    */
   truncateToMaxLen_(items) {
@@ -417,22 +421,6 @@ export class AmpList extends AMP.BaseElement {
     const nextExpr = this.element.getAttribute('load-more-bookmark')
       || 'load-more-src';
     this.loadMoreSrc_ = /** @type {string} */ (getValueForExpr(data, nextExpr));
-  }
-
-  /**
-   * @param {*} items
-   * @param {string} itemsExpr
-   * @return {!Array}
-   * @private
-   */
-  forceSingleItemToArray_(items, itemsExpr) {
-    user().assert(typeof items !== 'undefined',
-        'Response must contain an array or object at "%s". %s',
-        itemsExpr, this.element);
-    if (!isArray(items)) {
-      items = [items];
-    }
-    return /**@type{!Array} */(items);
   }
 
   /**
