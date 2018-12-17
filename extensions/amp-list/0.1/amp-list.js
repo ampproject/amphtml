@@ -371,21 +371,21 @@ export class AmpList extends AMP.BaseElement {
         if (itemsExpr != '.') {
           items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
         }
+
         user().assert(typeof items !== 'undefined',
             'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
+
         if (this.element.hasAttribute('single-item') && !isArray(items)) {
           items = [items];
         }
-        // TODO (cathyxz): add assertArray function
-        user().assert(isArray(items),
-            'Response must contain an array at "%s". %s',
-            itemsExpr, this.element);
-        items = /** @type {!Array} */ (items);
+
+        items = user().assertArray(items, 'response must contain an array');
 
         if (this.element.hasAttribute('max-items')) {
           items = this.truncateToMaxLen_(items);
         }
+
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/**@type {!JsonObject} */(data));
         }
