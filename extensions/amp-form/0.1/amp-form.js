@@ -35,6 +35,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  createElementsWithAttributes,
   escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
@@ -752,11 +753,11 @@ export class AmpForm {
               `input[name=${escapeCssSelectorIdent(name)}]`
           );
           if (!input) {
-            input = document.createElement('input');
-            input.setAttribute('name',
-                asyncInput.getAttribute(AsyncInputAttributes.NAME));
+            input = createElementWithAttributes(this.win_.document, 'input', {
+              name: asyncInput.getAttribute(AsyncInputAttributes.NAME),
+              hidden: 'true'
+            });
           }
-          input.setAttribute('hidden', 'true');
           input.setAttribute('value', value);
           this.form_.appendChild(input);
         });

@@ -34,8 +34,8 @@ describes.realWin('amp-recaptcha-input', {
   });
 
   const ampRecaptchaInputAttributes = {
-    layout: 'nodisplay',
-    name: 'recaptcha-test',
+    'layout': 'nodisplay',
+    'name': 'recaptcha-test',
     'data-sitekey': 'fake-sitekey-fortesting',
     'data-action': 'unit-test',
   };
