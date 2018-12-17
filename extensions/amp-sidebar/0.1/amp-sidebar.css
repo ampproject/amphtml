@@ -59,10 +59,6 @@ amp-sidebar[side] {
   margin: 0;
 }
 
-.i-amphtml-sidebar-mask.amp-visible {
-  visibility: visible;
-}
-
 .i-amphtml-sidebar-mask {
   position: fixed !important;
   top: 0 !important;
@@ -74,5 +70,4 @@ amp-sidebar[side] {
   background-image: none !important;
   background-color: #000;
   z-index: 2147483646;
-  visibility: hidden;
 }
