@@ -26,3 +26,5 @@ If the build has been red for some time, please send a note to the [#contributin
   * Assuming Travis was green, make sure there are no diffs in the Percy build.
     * If there are diffs that look like flakes, click “Approve” on the Percy build to unblock the PR (and ping Daniel Rozenberg as an FYI).
   * Approve and merge the PR.
+* Report and triage any failing tests on *beta* browsers:
+  * Check recent [master builds](https://travis-ci.org/ampproject/amphtml/branches) on Travis, even the green ones. Look for the `gulp test ... --saucelabs` task in the logs and check for any failing tests under the *beta* test batch(es). Create issues for those tests.
