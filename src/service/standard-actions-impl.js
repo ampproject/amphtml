@@ -54,7 +54,7 @@ export class StandardActions {
     this.ampdoc = ampdoc;
 
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(ampdoc.getHeadNode());
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -67,7 +67,8 @@ export class StandardActions {
 
   /** @override */
   adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+    const {documentElement} = embedWin.document;
+    this.installActions_(Services.actionServiceForDoc(documentElement));
   }
 
   /**
@@ -106,8 +107,9 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const ampdoc = getAmpdoc(node);
-        return Services.bindForDocOrNull(ampdoc).then(bind => {
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });

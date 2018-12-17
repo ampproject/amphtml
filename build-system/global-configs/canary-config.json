@@ -5,7 +5,6 @@
     "ampdoc-shell",
     "disable-amp-story-desktop",
     "inabox-rov",
-    "url-replacement-v2",
     "linker-meta-opt-in"
   ],
   "allow-url-opt-in": [
@@ -36,12 +35,10 @@
   "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "amp-consent": 1,
-  "amp-story-hold-to-pause": 1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "expAdsenseUnconditionedCanonical": 0.01,
   "expAdsenseCanonical": 0.01,
-  "faster-bind-scan": 1,
   "font-display-swap": 1,
   "amp-date-picker": 1,
   "linker-meta-opt-in": 1,
@@ -54,5 +51,6 @@
   "linker-form": 1,
   "scroll-height-bounce": 0,
   "scroll-height-minheight": 0,
-  "hidden-mutation-observer": 1
+  "hidden-mutation-observer": 1,
+  "sandbox-ads": 1
 }

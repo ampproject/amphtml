@@ -520,15 +520,6 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: hidden;
 }
 
-/**
- * The default amp-hidden changes visibility, which takes up space. In the case
- * where amp-list becomes a container via the resizable-children attribute, the
- * loader should be fully hidden and not take up space.
- */
-amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
-  display: none !important;
-}
-
 .i-amphtml-loader-line {
   position: absolute;
   top:0;
@@ -630,22 +621,6 @@ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
   visibility: visible;
 }
 
-amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading],
-amp-list[load-more] > [load-more-failed],
-amp-list[load-more] > [load-more-button]{
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading].amp-visible,
-amp-list[load-more] > [load-more-failed].amp-visible,
-amp-list[load-more] > [load-more-button].amp-visible {
-  visibility: visible;
-}
-
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
   display: none !important;
@@ -687,14 +662,9 @@ amp-instagram {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
+amp-analytics:not(.i-amphtml-element),
+amp-story-auto-ads:not(.i-amphtml-element){
+  display: none !important;
 }
 
 /**
@@ -812,6 +782,27 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/* amp-list CSS to avoid FOUC */
+
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the resizable-children attribute, the
+ * loader should be fully hidden and not take up space.
+ */
+ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
+}
+
+/* load-more elements should be hidden by default */
+amp-list[load-more] [load-more-loading],
+amp-list[load-more] [load-more-failed],
+amp-list[load-more] [load-more-button],
+amp-list[load-more] [load-more-end],
+amp-list[load-more] [load-more-button] > .i-amphtml-loader
+{
+  display: none;
 }
 
 /**

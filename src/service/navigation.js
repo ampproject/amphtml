@@ -219,7 +219,7 @@ export class Navigation {
    */
   navigateTo(
     win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
-    const urlService = Services.urlForDoc(this.ampdoc);
+    const urlService = Services.urlForDoc(this.ampdoc.getHeadNode());
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
@@ -579,7 +579,11 @@ export class Navigation {
    */
   parseUrl_(url) {
     // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
-    return Services.urlForDoc(this.rootNode_).parse(url);
+    const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
+      (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+        ? this.rootNode_.documentElement
+        : this.rootNode_);
+    return Services.urlForDoc(elementOrShadowRoot).parse(url);
   }
 }
 
@@ -609,7 +613,7 @@ function maybeExpandUrlParams(ampdoc, e) {
       return e.pageY;
     },
   };
-  const newHref = Services.urlReplacementsForDoc(ampdoc).expandUrlSync(
+  const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
       hrefToExpand, vars, undefined, /* opt_whitelist */ {
         // For now we only allow to replace the click location vars
         // and nothing else.
