@@ -26,19 +26,20 @@ const {getStdout} = require('./exec');
  * @return {string}
  */
 exports.gitBranchPointFromMaster = function() {
-  return getStdout('git merge-base master HEAD^').trim();
+  return getStdout('git merge-base master HEAD').trim();
 };
 
 /**
  * When running on Travis, this returns the branch point of the current branch
- * off of master, as merged by Travis. When not running on Travis, falls back to
- * gitBranchPointFromMaster.
+ * off of master, as merged by Travis. When not running on Travis, returns the
+ * common ancestor of the parent commit and `master`.
+ * // TODO(rsimha): Revisit this logic, used by bundle-size and visual tests.
  */
 exports.gitTravisCommitRangeStart = function() {
   if (process.env.TRAVIS_COMMIT_RANGE) {
     return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
   }
-  return exports.gitBranchPointFromMaster();
+  return getStdout('git merge-base master HEAD^').trim();
 };
 
 /**
