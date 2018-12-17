@@ -87,8 +87,8 @@ function getConfig() {
         //'SL_iOS_11',
         //'SL_iOS_12',
         //'SL_IE_11',
-        'SL_Chrome_Dev',
-        'SL_Firefox_Dev',
+        'SL_Chrome_Beta',
+        'SL_Firefox_Beta',
       ] : [
       // With --saucelabs_lite, a subset of the unit tests are run.
       // Only browsers that support chai-as-promised may be included below.
@@ -573,17 +573,17 @@ async function runTests() {
   /**
    * Runs tests in batches.
    *
-   * Splits stable and dev browsers to separate batches. Test failures in any of
-   * the stable browsers will return an exit code of 1, whereas test failures in
-   * any of the dev browsers will only print error messages, but will return an
-   * exit code of 0.
+   * Splits stable and beta browsers to separate batches. Test failures in any
+   * of the stable browsers will return an exit code of 1, whereas test failures
+   * in any of the beta browsers will only print error messages, but will return
+   * an exit code of 0.
    *
    * @return {number} processExitCode
    */
   async function runTestInBatches() {
-    const browsers = {stable: [], dev: []};
+    const browsers = {stable: [], beta: []};
     for (const browserId of saucelabsBrowsers) {
-      browsers[browserId.toLowerCase().endsWith('_dev') ? 'dev' : 'stable']
+      browsers[browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable']
           .push(browserId);
     }
     if (browsers.stable.length) {
@@ -591,17 +591,21 @@ async function runTests() {
           'stable', browsers.stable);
       if (allBatchesExitCodes) {
         log(yellow('Some tests have failed on'), cyan('stable'),
-            yellow('browsers, so skipping running them on dev browsers.'));
+            yellow('browsers, so skipping running them on'), cyan('beta'),
+            yellow('browsers.'));
         return allBatchesExitCodes;
       }
     }
 
-    if (browsers.dev.length) {
+    if (browsers.beta.length) {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
-          'dev', browsers.dev);
+          'beta', browsers.beta);
       if (allBatchesExitCodes) {
-        log(yellow('Some tests have failed on'), cyan('dev'),
-            yellow('browsers. However, this is not a fatal error.'));
+        log(yellow('Some tests have failed on'), cyan('beta'),
+            yellow('browsers.'));
+        log(yellow('This is not currently a fatal error, but will become an'),
+            yellow('error once the beta browsers are released as next stable'),
+            yellow('version!'));
       }
     }
 
