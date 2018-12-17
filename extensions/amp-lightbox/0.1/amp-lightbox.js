@@ -152,7 +152,8 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {
-      const container = dev().assertElement(this.container_);
+      const container = user().assertElement(this.container_,
+          'E#19457 this.container_');
       this.scheduleLayout(container);
       this.scheduleResume(container);
     }, 500);
@@ -396,6 +397,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   closeOnEscape_(event) {
     if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }

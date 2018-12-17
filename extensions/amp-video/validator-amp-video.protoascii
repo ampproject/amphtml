@@ -52,7 +52,10 @@ attr_lists: {
     name: "disableremoteplayback"
     value: ""
   }
-  attrs: { name: "dock" }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   attrs: {
     name: "loop"
     value: ""

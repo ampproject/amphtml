@@ -170,6 +170,7 @@ export class IntersectionObserverApi {
    */
   destroy() {
     this.shouldObserve_ = false;
+    this.intersectionObserver_.disconnect();
     this.intersectionObserver_ = null;
     if (this.unlistenOnDestroy_) {
       this.unlistenOnDestroy_();
@@ -247,6 +248,8 @@ export class IntersectionObserverPolyfill {
   }
 
   /**
+   * Function to unobserve all elements.
+   * and clean up the polyfill.
    */
   disconnect() {
     this.observeEntries_.length = 0;

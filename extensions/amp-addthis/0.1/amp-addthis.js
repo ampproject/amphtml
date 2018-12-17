@@ -18,6 +18,8 @@
  * @fileoverview Embeds an AddThis widget.
  * The data-pub-id and data-widget-id can be found easily in the AddThis
  * dashboard at addthis.com.
+ * For floating tool, pickup floating widget-id from dashboard
+ * and add an attribute: data-widget-type="floating"
  * Example:
  * <code>
  * <amp-addthis
@@ -113,6 +115,9 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {(?Object<string, string>|null)} */
     this.atConfig_ = null;
+
+    /** @private {string} */
+    this.widgetType_ = '';
   }
 
   /**
@@ -140,6 +145,7 @@ class AmpAddThis extends AMP.BaseElement {
         ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
+    this.widgetType_ = this.element.getAttribute('data-widget-type');
     this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
@@ -191,6 +197,11 @@ class AmpAddThis extends AMP.BaseElement {
     this.preconnect.url('https://su.addthis.com', opt_onLayout);
   }
 
+  /** @override */
+  isAlwaysFixed() {
+    return this.widgetType_ === 'floating';
+  }
+
   /**
    * @return {Element}
    */
@@ -230,10 +241,12 @@ class AmpAddThis extends AMP.BaseElement {
           'frameborder': 0,
           'title': ALT_TEXT,
           'src': `${ORIGIN}/dc/amp-addthis.html`,
+          'id': this.widgetId_,
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
     setStyle(iframe, 'margin-bottom', '-5px');
+
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -278,7 +291,7 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {JsonObject<string, string>}
+   * @return {!JsonObject}
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
@@ -301,7 +314,7 @@ class AmpAddThis extends AMP.BaseElement {
   /**
    * @private
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
-   * @return {!Object<string, string>}
+   * @return {!JsonObject}
    */
   getATConfig_(ampDoc) {
     return AT_CONFIG_KEYS.reduce((config, key) => {

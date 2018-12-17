@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
 const body =
@@ -24,12 +25,14 @@ const body =
       '</template>' +
     '</amp-list>';
 
+const extensions = ['amp-list', 'amp-mustache', 'amp-bind'];
+
 describe('amp-list', function() {
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
   describes.integration('(integration)', {
-    body, extensions: ['amp-list', 'amp-mustache'],
+    body, extensions,
   }, env => {
     it('should render items', function*() {
       const list = env.win.document.getElementById('list');
@@ -46,5 +49,88 @@ describe('amp-list', function() {
       expect(children[1].textContent.trim()).to.equal('pear : 538 @ $0.54');
       expect(children[2].textContent.trim()).to.equal('tomato : 0 @ $0.23');
     });
+  });
+
+  const body2 =
+  '<button id="button" on="tap:list.changeToLayoutContainer()">+</button>' +
+  '<amp-list id="list" width=300 height=100 ' +
+      'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
+    '<template type="amp-mustache">' +
+      '{{name}} : {{quantity}} @ ${{unitPrice}}' +
+    '</template>' +
+  '</amp-list>';
+
+  describes.integration('with changeToLayoutContainer', {
+    body: body2, extensions,
+    experiments: ['amp-list-resizable-children']},
+  env => {
+
+    let win, doc;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
+
+    it('should change to layout container as action', function*() {
+      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
+
+      const button = doc.getElementById('button');
+      const list = doc.getElementById('list');
+      button.click();
+
+      yield poll('changes to layout container', () => {
+        const layout = list.getAttribute('layout');
+        return layout == 'container';
+      }, undefined, /* opt_timeout */ TIMEOUT);
+
+      expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
+    });
+  });
+
+  const body3 =
+  '<amp-state id="state">' +
+    '<script type="application/json">' +
+      'false' +
+    '</script>' +
+  '</amp-state>' +
+    '<button id="button" on="tap:AMP.setState({state: true})">+</button>' +
+    '<amp-list id="list" width=300 height=100 ' +
+      '[is-layout-container]="state" ' +
+      'src="http://localhost:9876/list/fruit-data/get?cors=0">' +
+      '<template type="amp-mustache">' +
+        '{{name}} : {{quantity}} @ ${{unitPrice}}' +
+      '</template>' +
+    '</amp-list>';
+
+  // TODO(cathyxz, #19647): Fix test on Chrome 71.
+  describes.integration.skip('with bindable is-layout-container', {
+    body: body3, extensions,
+    experiments: ['amp-list-resizable-children']},
+  env => {
+
+    let win, doc;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
+
+    it.configure().skipChromeDev().run(
+        'should change to layout container as on bind', function*() {
+          expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
+
+          const button = doc.getElementById('button');
+          const list = doc.getElementById('list');
+          button.click();
+
+          yield poll('changes to layout container', () => {
+            const layout = list.getAttribute('layout');
+            return layout == 'container';
+          }, undefined, /* opt_timeout */ TIMEOUT);
+
+          expect(list.classList.contains('i-amphtml-layout-container'))
+              .to.be.true;
+        });
   });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
+describe.configure().ifChrome().run('amp-bodymovin-animation', function() {
   const extensions = ['amp-bodymovin-animation'];
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"

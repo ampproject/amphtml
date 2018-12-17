@@ -96,14 +96,16 @@ const bank = {};
  * Deposit a request. An ID has to be specified. Will override previous request
  * if the same ID already exists.
  */
-app.use('/request-bank/deposit/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/:bid/deposit/:id/', (req, res) => {
+  if (!bank[req.params.bid]) {
+    bank[req.params.bid] = {};
+  }
+  const key = req.params.id;
   log('SERVER-LOG [DEPOSIT]: ', key);
-  if (typeof bank[key] === 'function') {
-    bank[key](req);
+  if (typeof bank[req.params.bid][key] === 'function') {
+    bank[req.params.bid][key](req);
   } else {
-    bank[key] = req;
+    bank[req.params.bid][key] = req;
   }
   res.end();
 });
@@ -113,11 +115,13 @@ app.use('/request-bank/deposit/', (req, res) => {
  * return it immediately. Otherwise wait until it gets deposited
  * The same request cannot be withdrawn twice at the same time.
  */
-app.use('/request-bank/withdraw/', (req, res) => {
-  // req.url is relative to the path specified in app.use
-  const key = req.url;
+app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
+  if (!bank[req.params.bid]) {
+    bank[req.params.bid] = {};
+  }
+  const key = req.params.id;
   log('SERVER-LOG [WITHDRAW]: ' + key);
-  const result = bank[key];
+  const result = bank[req.params.bid][key];
   if (typeof result === 'function') {
     return res.status(500).send('another client is withdrawing this ID');
   }
@@ -125,12 +129,85 @@ app.use('/request-bank/withdraw/', (req, res) => {
     res.json({
       headers: result.headers,
       body: result.body,
+      url: result.url,
     });
-    delete bank[key];
+    delete bank[req.params.bid][key];
   };
   if (result) {
     callback(result);
   } else {
-    bank[key] = callback;
+    bank[req.params.bid][key] = callback;
   }
+});
+
+/**
+ * Clean up all pending withdraw & deposit requests.
+ */
+app.use('/request-bank/:bid/teardown/', (req, res) => {
+  bank[req.params.bid] = {};
+  log('SERVER-LOG [TEARDOWN]');
+  res.end();
+});
+
+/**
+ * Serves a fake ad for test-amp-ad-fake.js
+ */
+app.get('/a4a/:bid', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  const {bid} = req.params;
+  res.send(`
+<!doctype html><html amp4ads><head><meta charset=utf-8><meta content=width=device-width,minimum-scale=1,initial-scale=1 name=viewport><script async src=https://cdn.ampproject.org/amp4ads-v0.js></script><script async custom-element=amp-accordion src=https://cdn.ampproject.org/v0/amp-accordion-0.1.js></script><script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script><script async custom-element=amp-anim src=https://cdn.ampproject.org/v0/amp-anim-0.1.js></script><script async custom-element=amp-audio src=https://cdn.ampproject.org/v0/amp-audio-0.1.js></script><script async custom-element=amp-carousel src=https://cdn.ampproject.org/v0/amp-carousel-0.1.js></script><script async custom-element=amp-fit-text src=https://cdn.ampproject.org/v0/amp-fit-text-0.1.js></script><script async custom-element=amp-font src=https://cdn.ampproject.org/v0/amp-font-0.1.js></script><script async custom-element=amp-form src=https://cdn.ampproject.org/v0/amp-form-0.1.js></script><script async custom-element=amp-social-share src=https://cdn.ampproject.org/v0/amp-social-share-0.1.js></script><style amp-custom>body {
+  background-color: #f4f4f4;
+}
+</style><style amp4ads-boilerplate>body{visibility:hidden}</style></head>
+<body>
+  <a href=https://ampbyexample.com target=_blank>
+    <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
+  </a>
+  <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
+  <amp-analytics>
+    <script type="application/json">
+    {
+      "requests": {
+        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "pageview",
+          "extraUrlParams": {
+            "title": "\${title}",
+            "ampdocUrl": "\${ampdocUrl}",
+            "canonicalUrl": "\${canonicalUrl}",
+            "cid": "\${clientId(a)}",
+            "img": "\${htmlAttr(amp-img,src)}",
+            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
+            "adNavType": "\${adNavType}",
+            "adRedirectCount": "\${adRedirectCount}"
+          }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+  <script amp-ad-metadata type=application/json>
+  {
+     "ampRuntimeUtf16CharOffsets" : [ 134, 1129 ],
+     "customElementExtensions" : [
+       "amp-analytics"
+     ],
+     "extensions" : [
+        {
+           "custom-element" : "amp-analytics",
+           "src" : "https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
+        }
+     ]
+  }
+  </script>
+</body>
+</html>
+`);
 });

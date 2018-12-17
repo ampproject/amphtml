@@ -64,7 +64,7 @@ export function runVideoPlayerIntegrationTests(
   }
 
   describe.configure().skipIfPropertiesObfuscated()
-      .ifNewChrome().run('Video Interface', function() {
+      .ifChrome().run('Video Interface', function() {
         this.timeout(TIMEOUT);
 
         it('should override the video interface methods', function() {
@@ -86,7 +86,7 @@ export function runVideoPlayerIntegrationTests(
         afterEach(cleanUp);
       });
 
-  describe.configure().ifNewChrome().run('Actions', function() {
+  describe.configure().ifChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     // TODO(cvializ, #14827): Fails on Chrome 66.
@@ -137,7 +137,7 @@ export function runVideoPlayerIntegrationTests(
   });
 
   describe.configure().skipIfPropertiesObfuscated()
-      .ifNewChrome().run('Analytics Triggers', function() {
+      .ifChrome().run('Analytics Triggers', function() {
         this.timeout(TIMEOUT);
         let video;
 
@@ -342,7 +342,7 @@ export function runVideoPlayerIntegrationTests(
 
         afterEach(cleanUp);
       });
-  const t = describe.configure().ifNewChrome().skipIfPropertiesObfuscated();
+  const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
   t.run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
@@ -441,7 +441,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().ifNewChrome().run('Rotate-to-fullscreen', function() {
+  describe.configure().ifChrome().run('Rotate-to-fullscreen', function() {
     this.timeout(TIMEOUT);
 
     let video;

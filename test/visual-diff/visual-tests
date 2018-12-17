@@ -577,6 +577,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
+      "flaky": true,
+      // See https://percy.io/ampproject/amphtml/builds/1179875
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -584,6 +586,15 @@
         ".i-amphtml-story-loaded"
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
-    }
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
+      "name": "amp-story: pagination-buttons desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
+    },
   ]
 }

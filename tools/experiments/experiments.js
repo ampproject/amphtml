@@ -148,6 +148,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
@@ -249,12 +255,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-hold-to-pause',
-    name: 'Hold to pause an amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/18714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -331,11 +331,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'linker-meta-opt-in',
-    name: 'Opts-in users that have included the GA client-id meta tag ',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
-  },
-  {
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',
@@ -400,6 +395,18 @@ const EXPERIMENTS = [
     name: 'Forces min-height on body (fix for #18861 and #8798)',
     spec: 'https://github.com/ampproject/amphtml/issues/18861',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
   },
 ];
 
