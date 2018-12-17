@@ -31,8 +31,9 @@ exports.gitBranchPointFromMaster = function() {
 
 /**
  * When running on Travis, this returns the branch point of the current branch
- * off of master, as merged by Travis. When not running on Travis, falls back to
- * gitBranchPointFromMaster.
+ * off of master, as merged by Travis. When not running on Travis, returns the
+ * common ancestor of the parent commit and `master`.
+ * // TODO(rsimha): Revisit this logic, used by bundle-size and visual tests.
  */
 exports.gitTravisCommitRangeStart = function() {
   if (process.env.TRAVIS_COMMIT_RANGE) {
