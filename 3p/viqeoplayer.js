@@ -27,11 +27,14 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   const data = getData(global.context);
   let viqeoPlayerInstance;
   VIQEO['setConfig']({url: sourceUrl, amp: {pageViewId, canonicalUrl}});
+  VIQEO['subscribeTracking'](params => {
+    viqeoPlayerInstance = params.player;
+  }, 'Player:added');
   VIQEO['createPlayer']({
     videoId: data['videoid'],
     profileId: data['profileid'],
     parent: global.document.getElementById('c'),
-  }).then(player => { viqeoPlayerInstance = player; });
+  });
 
   global.addEventListener('message', parseMessage, false);
 
