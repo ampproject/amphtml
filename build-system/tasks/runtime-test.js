@@ -661,7 +661,7 @@ async function runTests() {
           } else if (argv.integration) {
             flags = ' --flags=integration_tests';
           }
-          log(green('INFO: '), 'Uploading code coverage report to',
+          log(green('INFO:'), 'Uploading code coverage report to',
               cyan('https://codecov.io/gh/ampproject/amphtml'), 'by running',
               cyan(codecovCmd + flags) + '...');
           const output = getStdout(codecovCmd + flags);
