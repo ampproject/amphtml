@@ -604,7 +604,7 @@ export class Resources {
    * @private
    */
   isResourceComplete_(resource) {
-    const skipAppendNodesFilter =  /** @type {!NodeFilter} */({
+    const skipAppendedNodesFilter = /** @type {!NodeFilter} */({
       acceptNode: (node) => {
         return this.ampdoc.isAppendedToBody(node) ?
             NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
@@ -612,7 +612,7 @@ export class Resources {
     });
 
     return hasNextNodeInDocumentOrder(
-      resource.element, this.ampdoc.getRootNode(), skipAppendNodesFilter);
+      resource.element, this.ampdoc.getRootNode(), skipAppendedNodesFilter);
   }
 
   /**
