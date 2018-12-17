@@ -112,7 +112,7 @@ function isValidatorWebuiFile(filePath) {
 }
 
 /**
- * Determines whether the given file belongs to the Validator webui,
+ * Determines whether the given file belongs to the build system,
  * that is, the 'BUILD_SYSTEM' target.
  * @param {string} filePath
  * @return {boolean}
@@ -133,6 +133,18 @@ function isBuildSystemFile(filePath) {
       !isVisualDiffFile(filePath))
       // OWNERS.yaml files should trigger build system to run tests
       || isOwnersFile(filePath);
+}
+
+/**
+ * Determines whether the given file belongs to the build system, but also
+ * affects the runtime.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isBuildSystemAndRuntimeFile(filePath) {
+  return isBuildSystemFile(filePath) &&
+      // Babel plugins are likely to affect the runtime as well.
+      filePath.startsWith('build-system/babel-plugins');
 }
 
 /**
@@ -261,10 +273,12 @@ function determineBuildTargets(filePaths) {
       'VISUAL_DIFF']);
   }
   const targetSet = new Set();
-  for (let i = 0; i < filePaths.length; i++) {
-    const p = filePaths[i];
+  for (const p of filePaths) {
     if (isBuildSystemFile(p)) {
       targetSet.add('BUILD_SYSTEM');
+      if (isBuildSystemAndRuntimeFile(p)) {
+        targetSet.add('RUNTIME');
+      }
     } else if (isValidatorWebuiFile(p)) {
       targetSet.add('VALIDATOR_WEBUI');
     } else if (isValidatorFile(p)) {
