@@ -60,7 +60,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     userErrorStub = sandbox.stub(user(), 'error');
     sandbox.stub(Services, 'urlForDoc').returns({
       parse: url => parseUrlDeprecated(url),
-    })
+    });
   });
 
   function getReplacements(opt_options) {
