@@ -440,11 +440,10 @@ export class AmpStory extends AMP.BaseElement {
     // The theme color should be copied from the story's primary accent color
     // if possible, with the fall back being default dark gray.
     const meta = this.win.document.createElement('meta');
-    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
-    const ampStoryPageEl = ampStoryEl.querySelector('amp-story-page');
+    const ampStoryPageEl = this.element.querySelector('amp-story-page');
     meta.name = 'theme-color';
     meta.content =
-      computedStyle(this.win, ampStoryEl).getPropertyValue('--primary-color') ||
+      computedStyle(this.win, this.element).getPropertyValue('--primary-color') ||
       computedStyle(
           this.win, ampStoryPageEl).getPropertyValue('background-color') ||
       DEFAULT_THEME_COLOR;
