@@ -54,7 +54,12 @@ app.use('/compose-doc', function(req, res) {
   <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
   `;
 
-  const doc = composeDocument({body, css, extensions, head});
+  const doc = composeDocument({
+    body,
+    css,
+    extensions: extensions.split(','),
+    head,
+  });
   res.send(doc);
 });
 
@@ -191,39 +196,62 @@ app.get('/a4a/:bid', (req, res) => {
   </script>
   `;
 
-  const doc = composeDocument({spec: 'amp4ads', body, css, extensions});
+  const doc = composeDocument({
+    spec: 'amp4ads',
+    body,
+    css,
+    extensions,
+    mode: 'cdn',
+  });
   res.send(doc);
 });
 
+/**
+ * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ */
 function composeDocument(config) {
-  const {body, css, extensions, head, spec} = config;
+  const {body, css, extensions, head, spec, mode} = config;
+
+  const m = (mode || process.env.SERVE_MODE);
+  const cdn = (m === 'cdn');
+  const compiled = (m === 'compiled');
 
   const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
   let extensionScripts = '';
   if (extensions) {
-    extensionScripts = extensions.split(',').map(extension => {
+    extensionScripts = extensions.map(extension => {
       // TODO: Use '-latest'?
-      return `<script async custom-element="${extension}" + src="https://cdn.ampproject.org/v0/${extension}-0.1.${mode}js"></script>`;
+      const src = (cdn)
+        ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
+        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`;
+      return `<script async custom-element="${extension}" + src="${src}"></script>`;
     }).join('\n');
   }
 
-  const amp = spec || 'amp';
   let canonical, boilerplate, runtime;
-  switch (spec) {
+  const amp = spec || 'amp';
+  switch (amp) {
     case 'amp':
-      canonical = '<link rel="canonical" href="self.html" />';
+      canonical = '<link rel="canonical" href="http://nonblocking.io" />';
       boilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
-      runtime = 'https://cdn.ampproject.org/v0.js';
+      runtime = (cdn)
+        ? 'https://cdn.ampproject.org/v0.js'
+        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
+      break;
     case 'amp4ads':
       canonical = '';
       boilerplate = '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
-      runtime = 'https://cdn.ampproject.org/amp4ads-v0.js';
+      runtime = (cdn)
+        ? 'https://cdn.ampproject.org/amp4ads-v0.js'
+        : `/dist/${compiled ? 'amp4ads-v0' : 'amp-inabox'}.js`;
       break;
     case 'amp4email':
       canonical = '';
       boilerplate = '<style amp4email-boilerplate>body{visibility:hidden}</style>';
-      runtime = 'https://cdn.ampproject.org/v0.js';
+      runtime = (cdn)
+        ? 'https://cdn.ampproject.org/v0.js'
+        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
       break;
     default:
       throw new Error('Unrecognized AMP spec: ' + spec);
@@ -233,6 +261,7 @@ function composeDocument(config) {
 <!doctype html>
 <html ${amp}>
 <head>
+  <title>AMP TEST</title>
   <meta charset="utf-8">
   ${canonical}
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
