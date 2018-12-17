@@ -6,9 +6,6 @@
 * Version: 3.3.11
 */
 
-// !function(factory) {
-//     "function" == typeof define && define.amd ? define([ "./dependencyLibs/inputmask.dependencyLib", "./global/window", "./global/document" ], factory) : "object" == typeof exports ? module.exports = factory(require("./dependencyLibs/inputmask.dependencyLib"), require("./global/window"), require("./global/document")) : window.Inputmask = factory(window.dependencyLib || jQuery, window, document);
-// }(function($, window, document, undefined) {
 export function factory($, window, document, undefined) {
     function Inputmask(alias, options, internal) {
         if (!(this instanceof Inputmask)) return new Inputmask(alias, options, internal);
@@ -1128,7 +1125,7 @@ export function factory($, window, document, undefined) {
                             }(npt.type), function(npt) {
                                 EventRuler.on(npt, "mouseenter", function(event) {
                                     var $input = $(this);
-                                    this.inputmask._valueGet() !== getBuffer().join("") && $input.trigger("setvalue");
+                                    opts.showMaskOnHover == !0 && this.inputmask._valueGet() !== getBuffer().join("") && $input.trigger("setvalue");
                                 });
                             }(npt));
                         }
@@ -1290,7 +1287,7 @@ export function factory($, window, document, undefined) {
             "*": {
                 validator: "[0-9１-９A-Za-zА-яЁёÀ-ÿµ]",
                 cardinality: 1
-            },
+            }
         },
         aliases: {},
         masksCache: {},
@@ -1332,7 +1329,6 @@ export function factory($, window, document, undefined) {
                 var scopedOpts = $.extend(!0, {}, that.opts);
                 importAttributeOptions(el, scopedOpts, $.extend(!0, {}, that.userOptions), that.dataAttribute);
                 var maskset = generateMaskSet(scopedOpts, that.noMasksCache);
-                // maskset !== undefined && (el.inputmask !== undefined && (el.inputmask.opts.autoUnmask = !0,
                 maskset !== undefined && (el.inputmask !== undefined && (el.inputmask.opts.autoUnmask = el.inputmask.opts.autoUnmask,
                 el.inputmask.remove()), el.inputmask = new Inputmask(undefined, undefined, !0),
                 el.inputmask.opts = scopedOpts, el.inputmask.noMasksCache = that.noMasksCache, el.inputmask.userOptions = $.extend(!0, {}, that.userOptions),
@@ -1630,4 +1626,3 @@ export function factory($, window, document, undefined) {
         X: 88
     }, Inputmask;
 }
-// });

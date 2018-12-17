@@ -56,7 +56,7 @@ describes.realWin('consent-ui', {
       getViewport: () => {
         return {
           addToFixedLayer: () => {},
-          removeFromFixedLayer: () => {},
+          updateFixedLayer: () => {},
         };
       },
       getVsync: () => {
@@ -214,7 +214,8 @@ describes.realWin('consent-ui', {
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen',
+            type: 'consent-ui',
+            action: 'enter-fullscreen',
           },
         });
 
@@ -235,7 +236,8 @@ describes.realWin('consent-ui', {
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen',
+            type: 'consent-ui',
+            action: 'enter-fullscreen',
           },
         });
 

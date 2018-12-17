@@ -135,7 +135,9 @@ export function getIframe(
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
   }
-  if (isExperimentOn(parentWindow, 'sandbox-ads')) {
+  const excludeFromSandbox = ['facebook'];
+  if (isExperimentOn(parentWindow, 'sandbox-ads')
+      && !excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute('data-amp-3p-sentinel',

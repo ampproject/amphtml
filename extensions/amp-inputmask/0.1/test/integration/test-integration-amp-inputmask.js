@@ -21,7 +21,7 @@ const config = describe.configure().retryOnSaucelabs().ifChrome();
 config.skip('amp-inputmask', () => {
   describes.integration('attributes', {
     body: `
-    <form method="post" action-xhr="http://localhost:31862/form/post" target="_blank">
+    <form method="post" action-xhr="http://localhost:8081/form/post" target="_blank">
       <input name="alphabetic" mask="L">
       <input name="numeric" mask="0">
       <input name="mask-output-test" mask="(A)" mask-output="alphanumeric">

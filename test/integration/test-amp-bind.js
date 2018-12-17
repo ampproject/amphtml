@@ -19,7 +19,8 @@ import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {createFixtureIframe, poll} from '../../testing/iframe';
 
-describe.configure().ifChrome().run('amp-bind', function() {
+// TODO(#19647): Unskip tests
+describe.skip('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
