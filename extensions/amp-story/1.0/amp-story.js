@@ -357,8 +357,8 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
-    this.setThemeColor_();
 
+    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
