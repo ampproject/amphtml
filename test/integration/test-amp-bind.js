@@ -17,15 +17,15 @@ import {AmpEvents} from '../../src/amp-events';
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
-import {createFixtureIframe, poll} from '../../testing/iframe';
+import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
 
 describe('amp-bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
 
-  function poll_(desc, condition, onError) {
-    return poll(desc, condition, onError, TIMEOUT);
+  function poll(desc, condition, onError) {
+    return classicPoll(desc, condition, onError, TIMEOUT);
   }
 
   describes.integration('basic', {
@@ -49,14 +49,14 @@ describe('amp-bind', function() {
       expect(text.textContent).to.equal('before_text');
       const button = doc.getElementById('changeText');
       button.click();
-      return poll_('[text]', () => text.textContent === 'after_text');
+      return poll('[text]', () => text.textContent === 'after_text');
     });
 
     it('[class]', () => {
       expect(text.className).to.equal('before_class');
       const button = doc.getElementById('changeClass');
       button.click();
-      return poll_('[class]', () => text.className === 'after_class');
+      return poll('[class]', () => text.className === 'after_class');
     });
   });
 
@@ -85,7 +85,7 @@ describe('amp-bind', function() {
       const button = doc.getElementById('changeSrc');
       expect(img.getAttribute('src')).to.equal('http://example.com/before.jpg');
       button.click();
-      return poll_('[src]',
+      return poll('[src]',
           () => img.getAttribute('src') === 'http://example.com/after.jpg');
     });
 
@@ -93,7 +93,7 @@ describe('amp-bind', function() {
       const button = doc.getElementById('changeAlt');
       expect(img.getAttribute('alt')).to.equal('before_alt');
       button.click();
-      return poll_('[src]', () => img.getAttribute('alt') === 'after_alt');
+      return poll('[src]', () => img.getAttribute('alt') === 'after_alt');
     });
 
     it('[width] and [height]', () => {
@@ -102,8 +102,8 @@ describe('amp-bind', function() {
       expect(img.getAttribute('height')).to.equal('1');
       button.click();
       return Promise.all([
-        poll_('[width]', () => img.getAttribute('width') === '2'),
-        poll_('[height]', () => img.getAttribute('height') === '2'),
+        poll('[width]', () => img.getAttribute('width') === '2'),
+        poll('[height]', () => img.getAttribute('height') === '2'),
       ]);
     });
   });
@@ -140,7 +140,7 @@ describe('amp-bind', function() {
       // so it must be generated manually.
       range.value = 47;
       range.dispatchEvent(new Event('change', {bubbles: true}));
-      poll_('[text]', () => rangeText.textContent === '0 <= 47 <= 100');
+      poll('[text]', () => rangeText.textContent === '0 <= 47 <= 100');
     });
 
     it('input[type=checkbox] on:change', () => {
@@ -148,7 +148,7 @@ describe('amp-bind', function() {
       const checkbox = doc.getElementById('checkbox');
       expect(checkboxText.textContent).to.equal('before_check');
       checkbox.click();
-      poll_('[text]', () => checkboxText.textContent === 'checked: true');
+      poll('[text]', () => checkboxText.textContent === 'checked: true');
     });
 
     it('input[type=radio] on:change', () => {
@@ -156,7 +156,7 @@ describe('amp-bind', function() {
       const radio = doc.getElementById('radio');
       expect(radioText.textContent).to.equal('before_radio');
       radio.click();
-      poll_('[text]', () => radioText.textContent === 'checked: true');
+      poll('[text]', () => radioText.textContent === 'checked: true');
     });
 
     it('[checked]', function*() {
@@ -169,11 +169,11 @@ describe('amp-bind', function() {
       expect(checkbox.checked).to.be.true;
 
       button.click();
-      yield poll_('[checked]', () => !checkbox.checked);
+      yield poll('[checked]', () => !checkbox.checked);
       expect(checkbox.hasAttribute('checked')).to.be.false;
 
       button.click();
-      yield poll_('[checked]', () => checkbox.checked);
+      yield poll('[checked]', () => checkbox.checked);
       // amp-bind sets both the attribute and property.
       expect(checkbox.hasAttribute('checked')).to.be.true;
     });
@@ -206,7 +206,7 @@ describe('amp-bind', function() {
 
       const nextSlide = carousel.querySelector('div.amp-carousel-button-next');
       nextSlide.click();
-      return poll_('[slide]', () => slideText.textContent === '1');
+      return poll('[slide]', () => slideText.textContent === '1');
     });
 
     it('[slide]', function*() {
@@ -221,10 +221,101 @@ describe('amp-bind', function() {
       const button = doc.getElementById('goToSlideOne');
       button.click();
 
-      yield poll_('[slide]', () =>
+      yield poll('[slide]', () =>
         first.getAttribute('aria-hidden') === 'true');
-      yield poll_('[slide]', () =>
+      yield poll('[slide]', () =>
         second.getAttribute('aria-hidden') === 'false');
+    });
+  });
+
+  describes.integration('+ amp-list', {
+    /* eslint-disable max-len */
+    body: `
+      <amp-state id="foo">
+        <script type="application/json">
+          {"bar": "Evaluated!"}
+        </script>
+      </amp-state>
+      <button id="button" on="tap:AMP.setState({src: 'https://example.com/data'})"></button>
+      <amp-list id="list" width=200 height=50 template=mustache src="/list/fruit-data/get?cors=0" [src]="src">
+      </amp-list>
+      <template id=mustache type="amp-mustache">
+        <p [text]="foo.bar"></p>
+      </template>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-bind', 'amp-list', 'amp-mustache'],
+  }, env => {
+    let doc, list, button;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      list = doc.getElementById('list');
+      button = doc.getElementById('button');
+    });
+
+    it('[src]', () => {
+      expect(list.getAttribute('src')).to.equal('/list/fruit-data/get?cors=0');
+      button.click();
+      poll('[src]', () =>
+        list.getAttribute('src') === 'https://example.com/data');
+    });
+
+    it('evaluate bindings in children', function*() {
+      yield poll('render', () => list.querySelectorAll('p').length > 0);
+      const children = list.querySelectorAll('p');
+      expect(children.length).to.equal(3);
+      children.forEach(span => {
+        expect(span.textContent).to.equal('Evaluated!');
+      });
+    });
+  });
+
+  describes.integration('+ amp-selector', {
+    /* eslint-disable max-len */
+    body: `
+      <button on="tap:AMP.setState({selected: 2})" id="button"></button>
+      <p id="text" [text]="selected"></p>
+      <amp-selector layout="container" [selected]="selected" on="select:AMP.setState({selected: event.targetOption})">
+        <amp-img src="/0.jpg" width="60" height="40" option="0" id="selectorImg1"></amp-img>
+        <amp-img src="/1.jpg" width="60" height="40" option="1" id="selectorImg2"></amp-img>
+        <amp-img src="/2.jpg" width="60" height="40" option="2" id="selectorImg3"></amp-img>
+      </amp-selector>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-bind', 'amp-selector'],
+  }, env => {
+    let doc, images, selectedText;
+
+    beforeEach(() => {
+      doc = env.win.document;
+      images = doc.getElementsByTagName('amp-img');
+      selectedText = doc.getElementById('text');
+    });
+
+    it('on:select', function*() {
+      expect(images[0].hasAttribute('selected')).to.be.false;
+      expect(images[1].hasAttribute('selected')).to.be.false;
+      expect(images[2].hasAttribute('selected')).to.be.false;
+      expect(selectedText.textContent).to.equal('');
+      images[1].click();
+      yield poll('[text]', () => selectedText.textContent === '1');
+      expect(images[0].hasAttribute('selected')).to.be.false;
+      expect(images[1].hasAttribute('selected')).to.be.true;
+      expect(images[2].hasAttribute('selected')).to.be.false;
+    });
+
+    it('[selected]', function*() {
+      const button = doc.getElementById('button');
+      expect(images[0].hasAttribute('selected')).to.be.false;
+      expect(images[1].hasAttribute('selected')).to.be.false;
+      expect(images[2].hasAttribute('selected')).to.be.false;
+      expect(selectedText.textContent).to.equal('');
+      button.click();
+      yield poll('[text]', () => selectedText.textContent === '2');
+      expect(images[0].hasAttribute('selected')).to.be.false;
+      expect(images[1].hasAttribute('selected')).to.be.false;
+      expect(images[2].hasAttribute('selected')).to.be.true;
     });
   });
 });
@@ -267,7 +358,7 @@ describe.skip('amp-bind', function() {
       ];
       if (numberOfAmpComponents > 0) {
         promises.push(
-            poll(`${numberOfAmpComponents} AMP components are laid out`, () => {
+            classicPoll('All AMP components are laid out', () => {
               const laidOutElements =
                   fixture.doc.querySelectorAll('.i-amphtml-layout').length;
               return laidOutElements === numberOfAmpComponents;
@@ -382,53 +473,6 @@ describe.skip('amp-bind', function() {
             .equal('hello world');
       });
     });
-  });
-
-  describe('with <amp-selector>', () => {
-    beforeEach(() => {
-      // One <amp-selector> and three <amp-img> elements.
-      return setupWithFixture('test/fixtures/bind-selector.html', 4);
-    });
-
-    it('should update when selection changes', () => {
-      const selectionText = fixture.doc.getElementById('selectionText');
-      const img1 = fixture.doc.getElementById('selectorImg1');
-      const img2 = fixture.doc.getElementById('selectorImg2');
-      const img3 = fixture.doc.getElementById('selectorImg3');
-      expect(img1.hasAttribute('selected')).to.be.false;
-      expect(img2.hasAttribute('selected')).to.be.false;
-      expect(img3.hasAttribute('selected')).to.be.false;
-      expect(selectionText.textContent).to.equal('None');
-      img2.click();
-      return waitForSetState().then(() => {
-        expect(img1.hasAttribute('selected')).to.be.false;
-        expect(img2.hasAttribute('selected')).to.be.true;
-        expect(img3.hasAttribute('selected')).to.be.false;
-        expect(selectionText.textContent).to.equal('2');
-      });
-    });
-
-    it('should update selection when bound value for selected changes',
-        () => {
-          const button = fixture.doc.getElementById(
-              'changeSelectionButton');
-          const selectionText = fixture.doc.getElementById('selectionText');
-          const img1 = fixture.doc.getElementById('selectorImg1');
-          const img2 = fixture.doc.getElementById('selectorImg2');
-          const img3 = fixture.doc.getElementById('selectorImg3');
-          expect(img1.hasAttribute('selected')).to.be.false;
-          expect(img2.hasAttribute('selected')).to.be.false;
-          expect(img3.hasAttribute('selected')).to.be.false;
-          expect(selectionText.textContent).to.equal('None');
-          // Changes selection to 2
-          button.click();
-          return waitForSetState().then(() => {
-            expect(img1.hasAttribute('selected')).to.be.false;
-            expect(img2.hasAttribute('selected')).to.be.true;
-            expect(img3.hasAttribute('selected')).to.be.false;
-            expect(selectionText.textContent).to.equal('2');
-          });
-        });
   });
 
   describe('with <amp-video>', () => {
@@ -553,32 +597,6 @@ describe.skip('amp-bind', function() {
       return waitForSetState().then(() => {
         expect(ampIframe.getAttribute('src')).to.contain(newSrc);
         expect(iframe.src).to.contain(newSrc);
-      });
-    });
-  });
-
-  describe('with <amp-list>', () => {
-    beforeEach(() => {
-      return setupWithFixture('test/fixtures/bind-list.html', 1);
-    });
-
-    it('should support binding to src', () => {
-      const list = fixture.doc.getElementById('list');
-      expect(list.getAttribute('src')).to.equal(
-          '/list/fruit-data/get?cors=0');
-      fixture.doc.getElementById('button').click();
-      return waitForSetState().then(() => {
-        expect(list.getAttribute('src')).to.equal(
-            'https://foo.com/data.json');
-      });
-    });
-
-    it('should evaluate bindings in template', () => {
-      const list = fixture.doc.getElementById('list');
-      return fixture.awaitEvent(AmpEvents.DOM_UPDATE, 1).then(() => {
-        list.querySelectorAll('span.foobar').forEach(span => {
-          expect(span.textContent).to.equal('Evaluated!');
-        });
       });
     });
   });
