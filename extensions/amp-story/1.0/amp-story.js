@@ -443,7 +443,8 @@ export class AmpStory extends AMP.BaseElement {
     const ampStoryPageEl = this.element.querySelector('amp-story-page');
     meta.name = 'theme-color';
     meta.content =
-      computedStyle(this.win, this.element).getPropertyValue('--primary-color') ||
+      computedStyle(
+        this.win, this.element).getPropertyValue('--primary-color') ||
       computedStyle(
           this.win, ampStoryPageEl).getPropertyValue('background-color') ||
       DEFAULT_THEME_COLOR;
