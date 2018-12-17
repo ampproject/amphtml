@@ -18,8 +18,8 @@ import {
   RefreshIntersectionObserverWrapper,
 } from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
