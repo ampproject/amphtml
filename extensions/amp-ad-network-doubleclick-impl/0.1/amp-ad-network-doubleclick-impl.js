@@ -520,13 +520,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
-      if (this.element.getAttribute('layout') == 'responsive') {
-        // TODO(levitzky) Define the behavior and remove this warning.
-        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Forcefully overriding layout to ' +
-            '`fixed`.');
-        this.element.setAttribute('layout', 'fixed');
-      }
       const multiSizeValidation = this.element
           .getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,

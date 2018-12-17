@@ -32,7 +32,7 @@ const path = require('path');
 const webserver = require('gulp-webserver');
 const {app} = require('../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {exec, getStdout} = require('../exec');
+const {getStdout} = require('../exec');
 const {gitDiffNameOnlyMaster} = require('../git');
 
 const {green, yellow, cyan, red} = colors;
@@ -40,8 +40,7 @@ const {green, yellow, cyan, red} = colors;
 const preTestTasks = argv.nobuild ? [] : (
   (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
-// TODO(amp-infra): Increase batch size once tests are stable again.
-const batchSize = 1; // Number of Sauce Lab browsers
+const batchSize = 4; // Number of Sauce Lab browsers
 
 let saucelabsBrowsers = [];
 /**
@@ -139,14 +138,6 @@ function getAdTypes() {
     }
   }
   return adTypes;
-}
-
-/**
- * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
- * by refreshing the wd cache so that Karma can launch without an error.
- */
-function refreshKarmaWdCache() {
-  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
 
 /**
@@ -529,21 +520,18 @@ async function runTests() {
   // Run fake-server to test XHR responses.
   process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
-    port: 31862,
+    port: 8081,
     host: 'localhost',
     directoryListing: true,
     middleware: [app],
   }).on('kill', function() {
-    log(yellow('Shutting down test responses server on localhost:31862'));
+    log(yellow('Shutting down test responses server on localhost:8081'));
   }));
   log(yellow(
-      'Started test responses server on localhost:31862'));
+      'Started test responses server on localhost:8081'));
 
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
-
-  // Avoid Karma startup errors
-  refreshKarmaWdCache();
 
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.

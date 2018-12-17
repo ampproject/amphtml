@@ -383,9 +383,24 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should detect fullbleed desktop mode', () => {
+  it('should default to the three panels UI desktop experience', () => {
     createPages(story.element, 4, ['cover', '1', '2', '3']);
-    story.element.setAttribute('supported-orientations', 'portrait, laNdsCApe');
+
+    // Don't do this at home. :(
+    story.desktopMedia_ = {matches: true};
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.storeService_.get(StateProperty.UI_STATE))
+              .to.equals(UIType.DESKTOP_PANELS);
+        });
+  });
+
+  it('should detect landscape opt in', () => {
+    createPages(story.element, 4, ['cover', '1', '2', '3']);
+    story.element.setAttribute('supports-landscape', '');
 
     // Don't do this at home. :(
     story.desktopMedia_ = {matches: true};

@@ -1,11 +1,13 @@
 ---
 name: Cherry pick template
 about: Used to request a cherry pick.  See bit.ly/amp-cherry-pick
-title: 🌸 Cherry pick request for <YOUR_ISSUE_NUMBER> into <RELEASE_ISSUE_NUMBER> (Pending)
+title: "\U0001F338 Cherry pick request for <YOUR_ISSUE_NUMBER> into <RELEASE_ISSUE_NUMBER>
+  (Pending)"
 labels: 'Type: Release'
 assignees: cramforce
+
 ---
- 
+
 **Replace *everything* in angle brackets in the title AND body of this issue.  If you have any questions see the [cherry pick documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-picks).**
 
 
