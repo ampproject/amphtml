@@ -364,7 +364,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
-    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -447,11 +446,16 @@ export class AmpStory extends AMP.BaseElement {
     // if possible, with the fall back being default dark gray.
     const meta = this.win.document.createElement('meta');
     const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
-    const ampStoryPageEl =
-      this.win.document.getElementsByTagName('amp-story-page')[0];
+    const ampStoryPageEl = ampStoryEl.querySelector('amp-story-page')[0];
     const storyStyles = computedStyle(this.win, ampStoryEl);
     const pageStyles = computedStyle(this.win, ampStoryPageEl);
+    console.log(typeof(ampStoryEl));
+    console.log(typeof(ampStoryPageEl));
     meta.name = 'theme-color';
+    // meta.content =
+    //   computedStyle(this.win, ampStoryEl).getPropertyValue('--primary-color') ||
+    //   computedStyle(this.win, ampStoryPageEl).getPropertyValue('background-color') ||
+    //   DEFAULT_THEME_COLOR;
     meta.content =
       storyStyles.getPropertyValue('--primary-color') ||
       pageStyles.getPropertyValue('background-color') ||
@@ -742,6 +746,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeBookend_();
     this.initializeSidebar_();
+    this.setThemeColor_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => {
