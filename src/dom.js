@@ -572,7 +572,7 @@ function toNodeFilter(filter) {
   }
 
   // For IE 9-11: This must be a function, not an object with `acceptNode`.
-  const nodeFilter = (node) => filter(node);
+  const nodeFilter = node => filter(node);
   // For non-IE, need to have an `acceptNode` property.
   nodeFilter['acceptNode'] = nodeFilter;
   return /** @type {!NodeFilter} */ (nodeFilter);

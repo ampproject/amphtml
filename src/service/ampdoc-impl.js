@@ -405,7 +405,7 @@ export class AmpDoc {
    * Appends a Node to the body of the AmpDoc and records that the Node was
    * appended. This should be used instead of directly adding Nodes to the
    * body of an AmpDoc.
-   * @param {!Node} node 
+   * @param {!Node} node
    */
   appendToBody(node) {
     node[DYNAMICALY_APPENEDED_PROP] = true;
@@ -415,7 +415,7 @@ export class AmpDoc {
   /**
    * Removes a Node from the body and clears the record of it having been
    * appended.
-   * @param {!Node} node 
+   * @param {!Node} node
    */
   removeFromBody(node) {
     node[DYNAMICALY_APPENEDED_PROP] = false;

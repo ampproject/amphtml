@@ -605,10 +605,10 @@ export class Resources {
    */
   isResourceComplete_(resource) {
     return hasNextNodeInDocumentOrder(
-      resource.element, this.ampdoc.getRootNode(), (node) => {
-        return this.ampdoc.isAppendedToBody(node) ?
-              NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-      });
+        resource.element, this.ampdoc.getRootNode(), node => {
+          return this.ampdoc.isAppendedToBody(node) ?
+            NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        });
   }
 
   /**

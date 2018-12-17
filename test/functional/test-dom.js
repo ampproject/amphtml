@@ -744,9 +744,9 @@ describes.sandboxed('DOM', {}, env => {
       ancestor.appendChild(parent);
       ancestor.appendChild(ignoredUncle);
       parent.appendChild(element);
-      expect(dom.hasNextNodeInDocumentOrder(element, undefined, (node) => {
-        return node._ignore ?
-            NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      expect(dom.hasNextNodeInDocumentOrder(element, undefined, node => {
+        return node._ignore ? NodeFilter.FILTER_REJECT :
+          NodeFilter.FILTER_ACCEPT;
       })).to.be.false;
     });
 
@@ -761,9 +761,9 @@ describes.sandboxed('DOM', {}, env => {
       ancestor.appendChild(ignoredUncle);
       ancestor.appendChild(includedUncle);
       parent.appendChild(element);
-      expect(dom.hasNextNodeInDocumentOrder(element, undefined, (node) => {
-        return node._ignore ?
-            NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      expect(dom.hasNextNodeInDocumentOrder(element, undefined, node => {
+        return node._ignore ? NodeFilter.FILTER_REJECT :
+          NodeFilter.FILTER_ACCEPT;
       })).to.be.true;
     });
   });
