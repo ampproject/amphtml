@@ -57,7 +57,7 @@ describes.realWin('amp-viqeo-player', {
     });
   });
 
-  describe('test-playing-actions', () => {
+  describe.skip('test-playing-actions', () => {
     it('renders responsively', () => {
       return getViqeo().then(p => {
         const iframe = p.viqeoElement.querySelector('iframe');
@@ -66,9 +66,8 @@ describes.realWin('amp-viqeo-player', {
       });
     });
 
-    it('should propagate autoplay to ad iframe ' +
-      'without autoplay attribute', () => {
-      return getViqeo().then(p => {
+    it('should propagate autoplay to ad iframe', () => {
+      return getViqeo({opt_params: {autoplay: ''}}).then(p => {
         const iframe = p.viqeoElement.querySelector('iframe');
         const data = JSON.parse(iframe.name).attributes;
         expect(data).to.be.ok;
@@ -77,8 +76,19 @@ describes.realWin('amp-viqeo-player', {
       });
     });
 
-    it('should paused with noautoplay attribute', () => {
-      return getViqeo({opt_params: {noautoplay: ''}}).then(p => {
+    it('should propagate autoplay=false ' +
+      'if element has not autoplay attribute to ad iframe', () => {
+      return getViqeo().then(p => {
+        const iframe = p.viqeoElement.querySelector('iframe');
+        const data = JSON.parse(iframe.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        return expect(data._context.autoplay).to.equal(false);
+      });
+    });
+
+    it('should paused without autoplay', () => {
+      return getViqeo().then(p => {
         const curState = p.videoManager.getPlayingState(p.viqeo);
         return expect(curState).to.equal(PlayingStates.PAUSED);
       });

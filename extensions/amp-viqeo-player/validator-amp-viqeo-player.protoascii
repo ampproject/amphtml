@@ -29,7 +29,7 @@ tags: {  # <amp-viqeo-player>
   html_format: AMP
   tag_name: "AMP-VIQEO-PLAYER"
   requires_extension: "amp-viqeo-player"
-  attrs: { name: "noautoplay" }
+  attrs: { name: "autoplay" }
   attrs: {
     name: "data-profileid"
     value_regex: "[0-9a-f]*"

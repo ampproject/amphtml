@@ -95,11 +95,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
         'The data-profileid attribute is required for <amp-viqeo-player> %s',
         this.element);
 
-    // Enable autoplay by default
-    this.hasAutoplay_ = !this.element.hasAttribute('noautoplay');
-    if (this.hasAutoplay_) {
-      this.element.setAttribute('autoplay', '');
-    }
+    this.hasAutoplay_ = this.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
