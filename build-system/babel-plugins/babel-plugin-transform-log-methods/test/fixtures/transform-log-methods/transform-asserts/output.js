@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 user().assert(1 + 1);
-let result = user().assert(user(), getLogUrlz('hello', 'world'));
+let result = user().assert(user(), user().getLogUrl('hello', 'world'));
 let result2 = user().assert();

@@ -1,4 +1,24 @@
-let ctr = 0;
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const fs = require('fs');
+
+console.log(__dirname);
+
+const logMessagesPath = `${__dirname}/../../log-messages.json`;
 
 function convertFromBase10ToBase16(str) {
   const num = parseInt(str, 10);
@@ -58,6 +78,40 @@ function isLiteralString(node) {
   return node.type === "StringLiteral";
 }
 
+/**
+ * Retrieves the error map from the json file.
+ */
+function getErrorMap() {
+  return JSON.parse(fs.readFileSync(logMessagesPath));
+}
+
+/**
+ * Retrieves the error map from the json file.
+ */
+function writeErrorMap(obj) {
+  const json = JSON.stringify(obj);
+  console.log(json);
+  return JSON.parse(fs.writeFileSync(logMessagesPath), json);
+}
+
+function getHexId(message) {
+  const errorMap = getErrorMap();
+  console.log('errormap', errorMap);
+  console.log('message', message);
+  console.log('in it?', message in errorMap);
+  console.log('typeof', typeof errorMap[message]);
+  console.log('woop', errorMap[message]);
+  if (errorMap[message]) {
+    hexId = errorMap[message];
+  } else {
+    hexId = convertFromBase10ToBase16(Object.keys(errorMap).length + 1);
+    errorMap[message] = hexId;
+    console.log('i am in AAAA', hexId);
+    writeErrorMap(errorMap);
+    console.log('i am in BBBB', hexId);
+  }
+}
+
 
 module.exports = function(babel) {
   const {types: t} = babel;
@@ -107,6 +161,8 @@ module.exports = function(babel) {
         // Expressions, Method calls etc.
         const message = buildMessage(messageArg, otherArgs);
 
+        let hexId = getHexId();
+
         const newArgs = path.node.arguments.slice(0, metadata.startPos);
         const interpolateArgs = path.node.arguments
             .slice(metadata.startPos + 1);
@@ -114,9 +170,9 @@ module.exports = function(babel) {
             t.callExpression(t.identifier(logCallee.name), []),
             t.identifier('getLogUrl')
         );
-        const hex = convertFromBase10ToBase16(ctr++);
+
         const getLogUrlArgs = [
-          t.stringLiteral(hex),
+          t.stringLiteral(hexId),
           t.arrayExpression([...interpolateArgs, ...otherArgs]),
         ];
         newArgs[metadata.startPos] = t.callExpression(newCall, getLogUrlArgs);
