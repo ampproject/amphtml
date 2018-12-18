@@ -230,7 +230,7 @@ export class AmpList extends AMP.BaseElement {
       this.attemptToFit_(placeholder);
     }
 
-    if (isExperimentOn(this.win, 'amp-list-resize-on-measure')) {
+    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
       this.getViewport().onResize(() => {
         this.attemptToFit_(dev().assertElement(this.container_));
       });
