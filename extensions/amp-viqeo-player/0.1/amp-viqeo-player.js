@@ -193,8 +193,15 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
+    const placeholder = this.element.ownerDocument.createElement('amp-img');
     this.propagateAttributes(['aria-label'], placeholder);
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute('alt',
+          'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     placeholder.setAttribute('src',
         `http://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`);
     placeholder.setAttribute('layout', 'fill');
