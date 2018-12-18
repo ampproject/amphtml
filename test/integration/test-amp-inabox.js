@@ -40,13 +40,13 @@ describe.configure().skipIfPropertiesObfuscated().run('inabox', function() {
       const pixelPromise = RequestBank.withdraw('pixel').then(req => {
         expect(req.url).to.equal('/foo?cid=');
       });
-      const analPromise = RequestBank.withdraw('analytics').then(req => {
+      const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
         expect(req.url).to.match(/^\/bar\?/);
         const queries =
             parseQueryString(req.url.substr('/bar'.length));
         expect(queries['cid']).to.equal('');
       });
-      return Promise.all([imgPromise, pixelPromise, analPromise]);
+      return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
     });
   });
 
