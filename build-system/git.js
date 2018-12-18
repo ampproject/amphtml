@@ -31,15 +31,10 @@ exports.gitBranchPointFromMaster = function() {
 
 /**
  * When running on Travis, this returns the branch point of the current branch
- * off of master, as merged by Travis. When not running on Travis, returns the
- * common ancestor of the parent commit and `master`.
- * // TODO(rsimha): Revisit this logic, used by bundle-size and visual tests.
+ * off of master, as merged by Travis.
  */
 exports.gitTravisCommitRangeStart = function() {
-  if (process.env.TRAVIS_COMMIT_RANGE) {
-    return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
-  }
-  return getStdout('git merge-base master HEAD^').trim();
+  return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
 };
 
 /**
