@@ -47,7 +47,7 @@ app.use('/compose-doc', function(req, res) {
   let experimentsBlock = '';
   if (experiments) {
     const string = `"${experiments.split(',').join('","')}"`;
-    // TODO: Why is localDev necessary?
+    // TODO: Why is setting localDev necessary?
     // `allow-doc-opt-in` enables any experiment to be enabled via doc opt-in.
     experimentsBlock =
       `<script>
@@ -57,7 +57,7 @@ app.use('/compose-doc', function(req, res) {
       <meta name="amp-experiments-opt-in" content="${experiments}">`;
   }
 
-  // TODO: What is amp-3p-iframe-src used for?
+  // TODO: Do we need to inject amp-3p-iframe-src for non-ad tests?
   const head =
     `${experimentsBlock}
     <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">`;
@@ -212,16 +212,8 @@ function composeDocument(config) {
 
   const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
-  let extensionScripts = '';
-  if (extensions) {
-    extensionScripts = extensions.map(extension => {
-      const src = (cdn)
-        ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
-        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`; // TODO: Use '-latest'?
-      return `<script async custom-element="${extension}" src="${src}"></script>`;
-    }).join('\n');
-  }
-
+  // Set link[rel=canonical], CSS boilerplate and runtime <script> depending
+  // on the AMP spec.
   let canonical, boilerplate, runtime;
   const amp = spec || 'amp';
   switch (amp) {
@@ -251,6 +243,18 @@ function composeDocument(config) {
   }
   const runtimeScript = `<script async src="${runtime}"></script>`;
 
+  // Generate extension <script> markup.
+  let extensionScripts = '';
+  if (extensions) {
+    extensionScripts = extensions.map(extension => {
+      const src = (cdn)
+        ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
+        // TODO: Version 0.1 is hard-coded. Use '-latest'?
+        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`;
+      return `<script async custom-element="${extension}" src="${src}"></script>`;
+    }).join('\n');
+  }
+
   const topHalfOfHtml =
     `<!doctype html>
     <html ${amp}>
@@ -269,6 +273,8 @@ function composeDocument(config) {
   // To enable A4A FIE, a <script amp-ad-metadata> tag must exist.
   let ampAdMeta = '';
   if (amp === 'amp4ads') {
+    // `ampRuntimeUtf16CharOffsets` is used to cut out all runtime scripts,
+    // which are not needed in FIE mode.
     const start = topHalfOfHtml.indexOf(runtimeScript);
     let end = start + runtimeScript.length;
 
@@ -280,7 +286,8 @@ function composeDocument(config) {
       extensionsMap = customElements.map(ce => {
         return {
           'custom-element': ce,
-          'src': `https://cdn.ampproject.org/v0/${ce}-0.1.js`, // TODO: Local?
+          // TODO: Should this be a local URL i.e. /dist/v0/...?
+          'src': `https://cdn.ampproject.org/v0/${ce}-0.1.js`,
         };
       });
     }
