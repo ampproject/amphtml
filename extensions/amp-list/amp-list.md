@@ -282,33 +282,62 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 If `binding` attribute is not provided, default is `always`.
 
 ## Experimental: Infinite Scroll (amp-list-load-more)
-We've introduced an experiment called `amp-list-load-more` as an implementation for pagination and infinite scroll in amp-list. This is an experimental feature, and final APIs may change.
+We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `amp-list`. This is an experimental feature, and final APIs may change.
 
 ### Attributes
 #### load-more (mandatory)
-Adding this attribute will allow amp-list (with no value) to show a “load-more" button at the end of the amp-list. The value of this attribute can be set to “auto" to trigger automatic loading more elements three viewports down for an infinite scroll effect.
+Adding this attribute allows amp-list (with no value) to show a “load-more" button at the end of the amp-list. The value of this attribute can be set to “auto" to trigger automatic loading more elements three viewports down for an infinite scroll effect.
 
-#### load-more-bookmark (mandatory)
-This attribute specifies an attribute in the returned data that will give the url of the next items to load. E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
+#### load-more-bookmark (optional)
+This attribute specifies an attribute in the returned data that will give the url of the next items to load. If this attribute is not specified, `amp-list` expects the json payload to have the `load-more-src` field, which corresponds to the next url to load. In the case where this field is called something else, you can specify the name of that field via the `load-more-bookmark` field.E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
 
 ```
-{ "items": [], "next": "https://url.to.load" }
+{ "items": [...], "next": "https://url.to.load" }
 ```
 
-### Additional children of `<amp-list>`
-`<amp-list>` with the `load-more` attribute expects the following additional child elements. All of these elements are templated. (Note that UX defaults for these are on the roadmap, thus it will not always be necessary to include these elements.)
+### Customizing load-more elements
+`<amp-list>` with the `load-more` attribute contains these UI elements: a load-more button, a loader, a load-failed element, and optionally an end-cap marking the end of the list. These elements can be customized by providing elements as children of `amp-list` with the following attributes:
 
-#### load-more-button (mandatory)
-An element containing the `load-more-button` attribute, usually a button. Clicking on this element will trigger a fetch to load more elements from the url contained in the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be templated via `amp-mustache`.
+#### load-more-button
+This element is a button that shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `amp-list` with a child element that has the attribute `load-more-button`. It can be templated via `amp-mustache`. Example:
 
-#### load-more-loading (mandatory)
-An element containing the `load-more-loading` attribute. This element will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the amp-list are still loading).
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <div load-more-button>
+    See More /* My custom see more button */
+  </div>
+</amp-list>
+```
 
-#### load-more-failed (mandatory)
-An element containing the `load-more-failed` attribute. This element will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed.
+#### load-more-loading
+This element is a loader that will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the amp-list are still loading). This element can be customized by providing `amp-list` with a child element that has the attribute `load-more-loading`. It can be templated via `amp-mustache`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <div load-more-loading>
+    <svg>...</svg> /* My custom loader */
+  </div>
+</amp-list>
+```
 
-#### load-more-end (optional)
-An element containing the `load-more-end` attribute. This element will be displayed at the bottom of the `<amp-list>` if there are no more items. This element is optional. This element can be templated via `amp-mustache`.
+#### load-more-failed
+This element will be displayed at the bottom of the `<amp-list>` if loading failed. Clicking on this element will trigger a reload of the url that failed. This element can be customized by providing `amp-list` with a child element that has the attribute `load-more-failed`. It can be templated via `amp-mustache`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <div load-more-failed>
+    Something went wrong, click here to try again /* Custom load-failed element */
+  </div>
+</amp-list>
+```
+
+#### load-more-end
+This element is not provided by default, but if an element containing the `load-more-end` attribute is attached to `amp-list` as a child element, this element will be displayed at the bottom of the `<amp-list>` if there are no more items.  This element can be templated via `amp-mustache`. Example below:
+```
+<amp-list load-more src="https://www.load.more/" ...>
+  <div load-more-end>
+    Congratulations! You've reached the end. /* Custom load-end element */
+  </div>
+</amp-list>
+```
 
 ##### common attributes
 
