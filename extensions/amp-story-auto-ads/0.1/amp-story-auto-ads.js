@@ -603,11 +603,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   enoughContentPagesViewed_() {
-    if (this.firstAdViewed_ && this.uniquePagesCount_ >= MIN_INTERVAL) {
+    // In desktop we have to insert ads two pages away, because the next page is
+    // already visible. This adjustment ensures the ads show in the same place
+    // on mobile and desktop.
+    const adjustedInterval = this.isDesktopView_ ? MIN_INTERVAL - 1
+      : MIN_INTERVAL;
+    const adjustedFirst = this.isDesktopView_ ? FIRST_AD_MIN - 1 : FIRST_AD_MIN;
+
+    if (this.firstAdViewed_ && this.uniquePagesCount_ >= adjustedInterval) {
       return true;
     }
 
-    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= FIRST_AD_MIN) {
+    if (!this.firstAdViewed_ && this.uniquePagesCount_ >= adjustedFirst) {
       return true;
     }
 
