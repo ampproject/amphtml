@@ -498,6 +498,11 @@ Only binding to the following components and attributes are allowed:
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
   </tr>
   <tr>
+    <td><code>&lt;details&gt;</code></td>
+    <td><code>[open]</code></td>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
+  </tr>
+  <tr>
     <td><code>&lt;fieldset&gt;</code></td>
     <td><code>[disabled]</code></td>
     <td>Enables or disables the fieldset.</td>
