@@ -1,13 +1,13 @@
 diff --git a/third_party/inputmask/inputmask.dependencyLib.js b/third_party/inputmask/inputmask.dependencyLib.js
-index dabe6c770..aff110fc5 100755
+index a6980ea95..ccc66a9ea 100755
 --- a/third_party/inputmask/inputmask.dependencyLib.js
 +++ b/third_party/inputmask/inputmask.dependencyLib.js
-@@ -22,7 +22,7 @@ export function factory(window, document) {
-         return "function" !== ltype && !isWindow(obj) && (!(1 !== obj.nodeType || !length) || ("array" === ltype || 0 === length || "number" == typeof length && length > 0 && length - 1 in obj));
+@@ -30,7 +30,7 @@ export function factory(window, document) {
+         return ltype === "array" || length === 0 || typeof length === "number" && length > 0 && length - 1 in obj;
      }
      function isValidElement(elem) {
 -        return elem instanceof Element;
 +        return elem instanceof window.Element;
      }
      function DependencyLib(elem) {
-         return elem instanceof DependencyLib ? elem : this instanceof DependencyLib ? void (void 0 !== elem && null !== elem && elem !== window && (this[0] = elem.nodeName ? elem : void 0 !== elem[0] && elem[0].nodeName ? elem[0] : document.querySelector(elem), 
+         if (elem instanceof DependencyLib) {

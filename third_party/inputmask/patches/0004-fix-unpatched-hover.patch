@@ -1,13 +1,14 @@
 diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
-index c6836be84..ac471bcf3 100644
+index 80d7b42a7..f1f0fa849 100644
 --- a/third_party/inputmask/inputmask.js
 +++ b/third_party/inputmask/inputmask.js
-@@ -1127,7 +1127,7 @@
-                             }(npt.type), function(npt) {
-                                 EventRuler.on(npt, "mouseenter", function(event) {
-                                     var $input = $(this);
--                                    this.inputmask._valueGet() !== getBuffer().join("") && $input.trigger("setvalue");
-+                                    opts.showMaskOnHover == !0 && this.inputmask._valueGet() !== getBuffer().join("") && $input.trigger("setvalue");
-                                 });
-                             }(npt));
-                         }
+@@ -2475,6 +2475,9 @@ export function factory($, window, document, undefined) {
+                     function installNativeValueSetFallback(npt) {
+                         EventRuler.on(npt, "mouseenter", function(event) {
+                             var $input = $(this), input = this, value = input.inputmask._valueGet();
++                            if (!opts.showMaskOnHover) {
++                                return;
++                            }
+                             if (value !== getBuffer().join("")) {
+                                 $input.trigger("setvalue");
+                             }
