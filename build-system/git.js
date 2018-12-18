@@ -59,8 +59,8 @@ exports.gitDiffStatMaster = function() {
 };
 
 /**
- * Returns a detailed log of commits included in a PR check, starting with the
- * branch point off of master.
+ * Returns a detailed log of commits included in a PR check, starting with (and
+ * including) the branch point off of master.
  *
  * @return {string}
  */
@@ -69,7 +69,7 @@ exports.gitDiffCommitLog = function() {
     exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
   return getStdout(`git -c color.ui=always log --graph --pretty=format:\
 "%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) %s \
-%C(green)(%cr)%C(reset)" --abbrev-commit ${branchPoint}...HEAD`).trim();
+%C(green)(%cr)%C(reset)" --abbrev-commit ${branchPoint}^...HEAD`).trim();
 };
 
 /**
