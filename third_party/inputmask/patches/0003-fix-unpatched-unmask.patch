@@ -1,13 +1,13 @@
 diff --git a/third_party/inputmask/inputmask.js b/third_party/inputmask/inputmask.js
-index 71f7b99b6..215e86839 100644
+index 06f0e1a95..80d7b42a7 100644
 --- a/third_party/inputmask/inputmask.js
 +++ b/third_party/inputmask/inputmask.js
-@@ -1324,7 +1324,7 @@ export function factory($, window, document, undefined) {
-                 var scopedOpts = $.extend(!0, {}, that.opts);
-                 importAttributeOptions(el, scopedOpts, $.extend(!0, {}, that.userOptions), that.dataAttribute);
-                 var maskset = generateMaskSet(scopedOpts, that.noMasksCache);
--                maskset !== undefined && (el.inputmask !== undefined && (el.inputmask.opts.autoUnmask = !0, 
-+                maskset !== undefined && (el.inputmask !== undefined && (el.inputmask.opts.autoUnmask = el.inputmask.opts.autoUnmask,
-                 el.inputmask.remove()), el.inputmask = new Inputmask(undefined, undefined, !0), 
-                 el.inputmask.opts = scopedOpts, el.inputmask.noMasksCache = that.noMasksCache, el.inputmask.userOptions = $.extend(!0, {}, that.userOptions), 
-                 el.inputmask.isRTL = scopedOpts.isRTL || scopedOpts.numericInput, el.inputmask.el = el, 
+@@ -170,7 +170,7 @@ export function factory($, window, document, undefined) {
+                     var maskset = generateMaskSet(scopedOpts, that.noMasksCache);
+                     if (maskset !== undefined) {
+                         if (el.inputmask !== undefined) {
+-                            el.inputmask.opts.autoUnmask = true;
++                            el.inputmask.opts.autoUnmask = el.inputmask.opts.autoUnmask;
+                             el.inputmask.remove();
+                         }
+                         el.inputmask = new Inputmask(undefined, undefined, true);
