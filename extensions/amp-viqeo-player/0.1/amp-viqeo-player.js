@@ -207,7 +207,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
-    placeholder.setAttribute('alt', 'Loading video');
     this.applyFillContent(placeholder);
     return placeholder;
   }
