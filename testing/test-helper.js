@@ -193,6 +193,30 @@ export class RequestBank {
   }
 }
 
+export class BrowserController {
+  constructor(win) {
+    this.win_ = win;
+    this.doc_ = this.win_.document;
+  }
+
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
+  click(selector) {
+    const element = this.doc_.querySelector(selector);
+    if (element) {
+      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
+    }
+  }
+
+  scrollTo(px) {
+    this.win_.scrollTo(0, px);
+  }
+}
+
 export function createPointerEvent(type, x, y) {
   const event = new /*OK*/CustomEvent(type, {bubbles: true});
   event.clientX = x;
