@@ -700,7 +700,10 @@ export function isFromEmbed(win, opt_element) {
 export function devAssert(
   // eslint-disable-next-line no-unused-vars
   shouldBeTrueish, opt_message, var_args) {
-  return dev().assert.apply(this, arguments);
+  if (getMode().minified) {
+    return shouldBeTrueish;
+  }
+  return dev().assert.apply(dev(), arguments);
 }
 
 /**
@@ -726,5 +729,5 @@ export function devAssert(
 export function userAssert(
   // eslint-disable-next-line no-unused-vars
   shouldBeTrueish, opt_message, var_args) {
-  return user().assert.apply(this, arguments);
+  return user().assert.apply(user(), arguments);
 }
