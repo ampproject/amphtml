@@ -38,6 +38,22 @@ exports.gitTravisCommitRangeStart = function() {
 };
 
 /**
+ */
+exports.gitTravisCommitRangeEnd = function() {
+  return process.env.TRAVIS_COMMIT_RANGE.substr(43, 40);
+};
+
+/**
+ * When running on Travis, this returns the branch point of the PR branch off of
+ * master, as present on the fork from which the PR originated.
+ */
+exports.gitTravisPrBranchPoint = function() {
+  const start = exports.gitTravisCommitRangeStart();
+  const end = exports.gitTravisCommitRangeEnd();
+  return getStdout(`git merge-base ${start} ${end}`).trim();
+};
+
+/**
  * Returns the list of files changed on the local branch relative to the branch
  * point off of master, one on each line.
  * @return {!Array<string>}
@@ -64,10 +80,9 @@ exports.gitDiffStatMaster = function() {
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
-  const commitRangeStart = exports.gitTravisCommitRangeStart();
-  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
-"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" \
---abbrev-commit ${commitRangeStart}^...HEAD`).trim();
+  return getStdout('git -c color.ui=always log --graph --pretty=format:\
+"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) %s \
+%C(green)(%cr)%C(reset)" --abbrev-commit -25').trim();
 };
 
 /**

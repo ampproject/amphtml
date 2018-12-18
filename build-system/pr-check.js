@@ -30,8 +30,16 @@ const colors = require('ansi-colors');
 const config = require('./config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {
+  gitBranchPointFromMaster,
+  gitDiffColor,
+  gitDiffCommitLog,
+  gitDiffNameOnlyMaster,
+  gitDiffStatMaster,
+  gitTravisCommitRangeStart,
+  gitTravisPrBranchPoint,
+} = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
-const {gitDiffColor, gitDiffCommitLog, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -95,6 +103,15 @@ function printChangeSummary() {
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
+
+  console.log(fileLogPrefix, 'TRAVIS_COMMIT_RANGE:',
+      colors.cyan(process.env.TRAVIS_COMMIT_RANGE));
+  console.log(fileLogPrefix, 'gitBranchPointFromMaster:',
+      colors.cyan(gitBranchPointFromMaster()));
+  console.log(fileLogPrefix, 'gitTravisCommitRangeStart:',
+      colors.cyan(gitTravisCommitRangeStart()));
+  console.log(fileLogPrefix, 'gitTravisPrBranchPoint:',
+      colors.cyan(gitTravisPrBranchPoint()));
 
   const commitLog = gitDiffCommitLog();
   console.log(fileLogPrefix, 'Commits included in this PR check:');
