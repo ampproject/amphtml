@@ -33,7 +33,6 @@ import {
 } from '../../../src/batched-json';
 import {childElementByAttr, removeChildren} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {createLoaderElement} from '../../../src/loader';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -117,8 +116,6 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.loadMoreButton_ = null;
     /** @private {?Element} */
-    this.loadMoreLoadingOverlay_ = null;
-    /** @private {?Element} */
     this.loadMoreLoadingElement_ = null;
     /** @private {?Element} */
     this.loadMoreFailedElement_ = null;
@@ -186,9 +183,6 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreEnabled_) {
       this.getloadMoreButton_();
       this.getLoadMoreLoadingElement_();
-      if (!this.loadMoreLoadingElement_) {
-        this.getLoadMoreLoadingOverlay_();
-      }
       this.getLoadMoreFailedElement_();
       this.getLoadMoreEndElement_();
     }
@@ -846,20 +840,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Element}
-   * @private
-   */
-  getLoadMoreLoadingOverlay_() {
-    if (!this.loadMoreLoadingOverlay_) {
-      this.loadMoreLoadingOverlay_ = createLoaderElement(
-          this.win.document, 'load-more-loading');
-      this.loadMoreLoadingOverlay_.setAttribute('load-more-loading', '');
-      this.loadMoreButton_.appendChild(this.loadMoreLoadingOverlay_);
-    }
-    return this.loadMoreLoadingOverlay_;
-  }
-
-  /**
    * @return {!Promise}
    * @private
    */
@@ -889,7 +869,6 @@ export class AmpList extends AMP.BaseElement {
         }
       }
       this.loadMoreButton_.classList.toggle('amp-load-more-loading', state);
-      this.loadMoreLoadingOverlay_.classList.toggle('amp-active', !state);
     });
   }
 
