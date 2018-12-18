@@ -229,6 +229,13 @@ export class AmpList extends AMP.BaseElement {
     if (placeholder) {
       this.attemptToFit_(placeholder);
     }
+
+    if (isExperimentOn(this.win, 'amp-list-viewport-resize')) {
+      this.getViewport().onResize(() => {
+        this.attemptToFit_(dev().assertElement(this.container_));
+      });
+    }
+
     return this.fetchList_();
   }
 
@@ -668,6 +675,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
+    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+      return;
+    }
     this.measureElement(() => {
       const scrollHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
