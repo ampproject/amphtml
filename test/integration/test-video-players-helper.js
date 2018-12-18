@@ -136,8 +136,11 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  describe.configure().skipIfPropertiesObfuscated()
-      .ifChrome().run('Analytics Triggers', function() {
+  describe.configure()
+      .skipIfPropertiesObfuscated()
+      .ifChrome()
+      .skipWindows() // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+      .run('Analytics Triggers', function() {
         this.timeout(TIMEOUT);
         let video;
 
@@ -342,6 +345,7 @@ export function runVideoPlayerIntegrationTests(
 
         afterEach(cleanUp);
       });
+
   const t = describe.configure().ifChrome().skipIfPropertiesObfuscated();
   t.run('Autoplay', function() {
     this.timeout(TIMEOUT);
