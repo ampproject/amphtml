@@ -249,6 +249,7 @@ function composeDocument(config) {
     default:
       throw new Error('Unrecognized AMP spec: ' + spec);
   }
+  const runtimeScript = `<script async src="${runtime}"></script>`;
 
   const topHalfOfHtml =
     `<!doctype html>
@@ -260,7 +261,7 @@ function composeDocument(config) {
       <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
       ${head || ''}
       ${boilerplate}
-      <script async src="${runtime}"></script>
+      ${runtimeScript}
       ${extensionScripts}
       ${cssTag}
     </head>`;
@@ -268,10 +269,12 @@ function composeDocument(config) {
   // To enable A4A FIE, a <script amp-ad-metadata> tag must exist.
   let ampAdMeta = '';
   if (amp === 'amp4ads') {
-    let start = 0, end = 0, customElements = [], extensionsMap = [];
+    const start = topHalfOfHtml.indexOf(runtimeScript);
+    let end = start + runtimeScript.length;
+
+    let customElements = [], extensionsMap = [];
     if (extensions) {
-      start = topHalfOfHtml.indexOf(extensionScripts);
-      end = start + extensionScripts.length;
+      end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
       customElements = extensions.filter(e => e !== 'amp-mustache');
       extensionsMap = customElements.map(ce => {
