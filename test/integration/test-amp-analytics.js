@@ -19,7 +19,7 @@ import {parseQueryString} from '../../src/url';
 
 describe.configure().skipIfPropertiesObfuscated().run('amp' +
     '-analytics', function() {
-  this.timeout(15000);
+  this.timeout(5000);
 
   describes.integration('basic pageview', {
     body: `
@@ -27,6 +27,8 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         // initialize _cid cookie with a CLIENT_ID
         document.cookie='_cid=amp-12345';
       </script>
+      <!-- put amp-analytics > 3 viewports away from viewport -->
+      <div style="height: 400vh"></div>
       <amp-analytics>
         <script type="application/json">
         {
