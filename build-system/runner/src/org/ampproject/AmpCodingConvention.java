@@ -47,6 +47,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     return ImmutableList.of(
       new AssertionFunctionSpec("module$src$log.devAssert", JSTypeNative.TRUTHY),
       new AssertionFunctionSpec("devAssert$$module$src$log", JSTypeNative.TRUTHY),
+      new AssertionFunctionSpec("module$src$log.userAssert", JSTypeNative.TRUTHY),
+      new AssertionFunctionSpec("userAssert$$module$src$log", JSTypeNative.TRUTHY),
       new AssertionFunctionSpec("assertService$$module$src$element_service", JSTypeNative.TRUTHY),
       new AssertFunctionByTypeName("module$src$layout.assertLength", "string"),
       new AssertFunctionByTypeName("assertLength$$module$src$layout", "string")
