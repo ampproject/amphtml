@@ -1,27 +1,111 @@
 <html>
-  <div id="consent-wrapper">
-    <div id="decision-state">
-      <h1>We value your privacy!</h1>
-      <div>
-        This website uses a technologies like Cookies or Targeting in order to personalize the advertising that you see. This helps us to show you more relevant ads and improves your internet experience. We also use it in order to measure results or align our website content. Because we value your privacy, we are herewith asking for your permission to use this technologies.
+
+  <head>
+    <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+    <style>
+html {
+  width: 100%;
+  background-color: #fff;
+  padding: 0px !important;
+}
+
+body {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px;
+  background-color: #fff;
+  line-height: initial;
+  margin: 0;
+  padding: 5px;
+}
+
+.bttn-primary {
+  margin-right: 10px;
+}
+
+.decision-text {
+  font-size: 0.85em;
+  word-wrap: break-word;
+}
+
+h1 {
+  font-size: 1.15em;
+}
+
+#decision-buttons {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#always-show {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
+.close {
+  transition: all 0.5s;
+  color: red;
+  font-size: 1em;
+  background-color: transparent;
+  border: 1px solid #000;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.close:hover {
+  color: red;
+  font-size: 1.25em;
+  background-color: transparent;
+  border: 1px solid #000;
+}
+    </style>
+  </head>
+
+  <body>
+
+    <div id="consent-wrapper">
+      <div id="decision-state">
+        <h1 class="animated fadeIn">We value your privacy!</h1>
+        <div class="decision-text animated fadeIn">
+          This website uses a technologies like Cookies or Targeting in order to personalize the advertising that you see. This helps us to show you more relevant ads and improves your internet experience. We also use it in order to measure results or align our website content. Because we value your privacy, we are here with asking for your permission to use this technologies.
+        </div>
       </div>
-      <button id='a'>Accept All</button>
-      <button id='r'>Reject All</button>
-      <button id='f'>Learn More</button>
+      <div id="learn-more-state">
+
+        <h1 class="animated fadeIn">More Information</h1>
+        <div class="animated fadeIn">
+          The General Data Protection Regulation (EU) 2016/679 ("GDPR") is a regulation in EU law on data protection and privacy for all individuals within the European Union (EU) and the European Economic Area (EEA). It also addresses the export of personal data outside the EU and EEA areas. The GDPR aims primarily to give control to individuals over their personal data and to simplify the regulatory environment for international business by unifying the regulation within the EU.[1] Superseding the Data Protection Directive 95/46/EC, the regulation contains provisions and requirements pertaining to the processing of personal data of individuals (formally called data subjects in the GDPR) inside the EEA, and applies to an enterprise established in the EEA or—regardless of its location and the data subjects' citizenship—that is processing the personal information of data subjects inside the EEA.
+        </div>
+
+        <div class="animated fadeIn">
+          What’s a consent management platform anyway?
+It’s the technical infrastructure a business uses to collect and store what data customers have consented to be used and for what. The CMP then feeds that information to other selected partners in the digital ad supply chain. The idea is that everyone in a publisher’s supply chain understands what data they may use and for what. Some brands, like telcos, have had consent management systems for several years. Some anti-ad-blocking tech providers have started to make it part of their offering.
+
+Does the GDPR require businesses to have a CMP?
+No, but it’s advisable. The Interactive Advertising Bureau Europe has said any business that’s classified as a data controller (any website owner with first-party data) needs to have a CMP if it wants to plug into its consent framework, which is a way of standardizing requests for consent across the digital ad supply chain.
+        </div>
+
+      </div>
+      <div id="decision-buttons" class="animated fadeInUp">
+        <button id='a' class="bttn-primary bttn-jelly bttn-xs">Accept All</button>
+        <button id='r' class="bttn-primary bttn-jelly bttn-xs">Reject All</button>
+        <button id='f' class="bttn-primary bttn-jelly bttn-xs">Learn More</button>
+      </div>
+      <div id="always-show">
+        <button id='d' class="close">X</button>
+      </div>
     </div>
-    <div id="learn-more-state">
-      <p>
-        I am glad you decided to learn more! Learning is great!
-      </p>
+    <div id="confirmation-wrapper">
+      <h1>Thank you!</h1>
     </div>
-    <div>
-      <button id='d'>Dismiss</button>
-    </div>
-  </div>
-  <div id="confirmation-wrapper">
-    <h1>Thank you!</h1>
-  </div>
-  <script type="text/javascript">
+
+    <script type="text/javascript">
 
     // Default values for non-3P iframe.
 var sentinel = 'amp';
@@ -47,27 +131,31 @@ setTimeout(() => {
     type: 'consent-ui',
     action: 'ready'
   }, '*');
-}, 500);
+}, 2000);
 
-function registerClickConsentMessage(querySelector, type, action, info) {
+function registerClickConsentMessage(querySelector, type, action, info, timeout) {
   document.querySelector(querySelector).onclick = function () {
     // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
-    parent.postMessage({
-      type,
-      action,
-      info
-    }, '*');
+    setTimeout(() => {
+      parent.postMessage({
+        type,
+        action,
+        info
+      }, '*');
+    }, timeout);
   };
 }
 
 function showDecisionState() {
   document.querySelector('#decision-state').style = 'display: block';
   document.querySelector('#learn-more-state').style = 'display: none';
+  document.querySelector('#f').style = 'display: inline-block';
 }
 
 function showLearnMoreState() {
   document.querySelector('#decision-state').style = 'display: none';
   document.querySelector('#learn-more-state').style = 'display: block';
+  document.querySelector('#f').style = 'display: none';
 }
 
 function showConsent() {
@@ -87,6 +175,7 @@ const consentObjects = [
     type: 'consent-response',
     action: 'accept',
     info: 'accept-str',
+    timeout: 1000,
     onclick: () => {
       showConfirmation();
     }
@@ -96,6 +185,7 @@ const consentObjects = [
     type: 'consent-response',
     action: 'reject',
     info: '',
+    timeout: 1000,
     onclick: () => {
       showConfirmation();
     }
@@ -105,6 +195,7 @@ const consentObjects = [
     type: 'consent-response',
     action: 'dismiss',
     info: 'dismiss-str',
+    timeout: 1000,
     onclick: () => {
       showConfirmation();
     }
@@ -113,6 +204,7 @@ const consentObjects = [
     querySelector: '#f',
     type: 'consent-ui',
     action: 'enter-fullscreen',
+    timeout: 0,
     onclick: () => {
       showLearnMoreState();
     }
@@ -123,7 +215,8 @@ consentObjects.forEach(consentObject => {
     consentObject.querySelector,
     consentObject.type,
     consentObject.action,
-    consentObject.info
+    consentObject.info,
+    consentObject.timeout || 0
   );
 
   if (consentObject.onclick) {
@@ -138,4 +231,5 @@ consentObjects.forEach(consentObject => {
 showConsent();
 showDecisionState();
 </script>
+</body>
 </html>

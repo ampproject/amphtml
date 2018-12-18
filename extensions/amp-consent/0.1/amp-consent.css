@@ -78,7 +78,11 @@ amp-consent.amp-hidden {
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active {
+  width: 100vw !important;
   height: 100vh !important;
+  padding: 0px !important;
+  margin: 0px !important;
+
   transform: translate3d(0px, 100%, 0px) !important;
 }
 
