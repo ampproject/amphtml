@@ -20,12 +20,12 @@ import {
 } from './amp-story-store-service';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
-import {TOOLTIP_TRIGGERABLE_SELECTORS} from './amp-story-tooltip';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
+import {tooltipDelegatableSelectors} from './amp-story-tooltip';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -283,9 +283,6 @@ class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -469,7 +466,7 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
 
     if (this.canShowTooltip_(event) &&
-      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      matches(target, Object.values(tooltipDelegatableSelectors()).join(','))) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();

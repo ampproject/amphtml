@@ -312,6 +312,23 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
+
+.i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer,
+.i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer * {
+  contain: none !important;
+  z-index: auto !important;
+}
+
+amp-story-page.i-amphtml-story-grid-layer-z-index-reset[active] {
+  contain: none !important;
+  z-index: 100001 !important; /* On top of i-amphtml-story-system-layer. */
+}
+
+amp-twitter.i-amphtml-increment-z-index {
+  z-index: 2 !important;
+  position: relative !important;
+}
+
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
@@ -692,6 +709,38 @@ amp-story .amp-video-eq,
   animation: play-button-fly-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   background-color: transparent !important;
   z-index: 10000 !important;
+}
+
+.i-amphtml-story-expanded-view-overflow {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 1) !important;
+  z-index: 1 !important;
+  position: absolute;
+}
+
+.i-amphtml-expanded-view-close-button {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 48px !important;
+  width: 48px !important;
+  color: #757575 !important;
+  cursor: pointer !important;
+  font-size: 24px !important;
+  line-height: 48px !important;
+  text-align: center !important;
+}
+
+.i-amphtml-expandable-component-shield::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
 }
 
 @keyframes play-button-fly-in {

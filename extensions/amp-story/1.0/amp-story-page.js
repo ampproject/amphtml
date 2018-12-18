@@ -241,6 +241,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+    this.storeService_.subscribe(StateProperty.EXPAND_COMPONENT, el => {
+      if (this.isActive()) {
+        this.toggleExpandedView_(el);
+      }
+    });
   }
 
   /**

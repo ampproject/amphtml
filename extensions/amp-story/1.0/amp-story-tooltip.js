@@ -23,7 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, closest} from '../../../src/dom';
+import {addAttributesToElement, closest, matches} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -33,10 +33,23 @@ import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {setImportantStyles} from '../../../src/style';
 
 /**
- * List of selectors that can trigger a tooltip.
- * @const {!Array<string>}
+ * Enum of elements that can be expanded.
+ * @enum {string}
  */
-export const TOOLTIP_TRIGGERABLE_SELECTORS = ['a[href]'];
+export const EXPANDABLE_COMPONENTS = {
+  TWITTER: 'amp-twitter',
+};
+
+/**
+ * Selectors that should delegate to the tooltip.
+ */
+export function tooltipDelegatableSelectors() {
+  return Object.assign({}, EXPANDABLE_COMPONENTS, {
+    EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
+      '.i-amphtml-expanded-view-close-button',
+    LINK: 'a[href]',
+  });
+}
 
 /**
  * Minimum vertical space needed to position tooltip.
@@ -109,7 +122,10 @@ export class AmpStoryTooltip {
      * Clicked element producing the tooltip. Used to avoid building the same
      * element twice.
      * @private {?Element} */
-    this.clickedEl_ = null;
+    this.previousClickedEl_ = null;
+
+    /** @private */
+    this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
     this.storeService_.subscribe(StateProperty.TOOLTIP_ELEMENT, el => {
       this.onTooltipStateUpdate_(el);
@@ -174,16 +190,37 @@ export class AmpStoryTooltip {
       this.storyEl_.appendChild(this.build_());
     }
 
-    if (clickedEl != this.clickedEl_) {
-      this.clickedEl_ = clickedEl;
-      this.attachTooltipToEl_(clickedEl);
+    if (matches(clickedEl,
+        tooltipDelegatableSelectors().EXPANDED_VIEW_OVERLAY)) {
+      this.onExpandedViewClose_();
+      return;
     }
+
+    this.updateTooltipBehavior_(clickedEl);
+    if (clickedEl != this.previousClickedEl_) {
+      // Only update tooltip when necessary.
+      this.updateTooltipEl_(clickedEl);
+    }
+    this.previousClickedEl_ = clickedEl;
 
     this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
         () => {
           this.tooltipOverlayEl_
               .classList.toggle('i-amphtml-hidden', false);
         });
+  }
+
+  /**
+   * Performs necessary actions for an expandable element that was closed.
+   * @private
+   */
+  onExpandedViewClose_() {
+    // Re-add click shield to expandable element and close overlay.
+    this.previousClickedEl_.classList
+        .toggle('i-amphtml-expandable-component-shield', true);
+    this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
+    this.tooltip_.removeEventListener('click',
+        this.expandComponentHandler_, true);
   }
 
   /**
@@ -207,41 +244,66 @@ export class AmpStoryTooltip {
    * @param {!Element} clickedEl
    * @private
    */
-  attachTooltipToEl_(clickedEl) {
+  updateTooltipEl_(clickedEl) {
+    this.updateTooltipText_(clickedEl);
+    this.updateTooltipIcon_(clickedEl);
+    this.positionTooltip_(clickedEl);
+  }
+
+  /**
+   * Updates tooltip behavior depending on the clicked element.
+   * @param {!Element} clickedEl
+   */
+  updateTooltipBehavior_(clickedEl) {
+    if (matches(clickedEl, tooltipDelegatableSelectors().LINK)) {
+      addAttributesToElement(dev().assertElement(this.tooltip_),
+          dict({'href': this.getElementHref_(clickedEl)}));
+    }
+    else if (matches(clickedEl, tooltipDelegatableSelectors().TWITTER)) {
+      this.tooltip_.addEventListener('click',
+          this.expandComponentHandler_, true);
+    }
+  }
+
+  /**
+   * Handles the event of an interactive element coming into expanded view.
+   * @param {!Event} event
+   * @private
+   */
+  onExpandComponent_(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.closeTooltip_();
+    this.previousClickedEl_.classList
+        .toggle('i-amphtml-expandable-component-shield', false);
+    this.storeService_.dispatch(
+        Action.TOGGLE_EXPANDED_COMPONENT, this.previousClickedEl_);
+  }
+
+  /**
+   * Gets href from an element containing a url.
+   * @param {!Element} clickedEl
+   * @private
+   */
+  getElementHref_(clickedEl) {
     const elUrl = clickedEl.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
       return;
     }
 
-    const iconUrl = clickedEl.getAttribute('data-tooltip-icon');
-    if (!isProtocolValid(iconUrl)) {
-      user().error(TAG, 'The tooltip icon url is invalid');
-      return;
-    }
-
-    const {href} = parseUrlDeprecated(elUrl);
-
-    const tooltipText = clickedEl.getAttribute('data-tooltip-text') ||
-      getSourceOriginForElement(clickedEl, href);
-    this.updateTooltipText_(tooltipText);
-
-    const iconSrc = iconUrl ? parseUrlDeprecated(iconUrl).href :
-      DEFAULT_ICON_SRC;
-    this.updateTooltipIcon_(iconSrc);
-
-    addAttributesToElement(dev().assertElement(this.tooltip_),
-        dict({'href': href}));
-
-    this.positionTooltip_(clickedEl);
+    return parseUrlDeprecated(elUrl).href;
   }
 
   /**
    * Updates tooltip text content.
-   * @param {string} tooltipText
+   * @param {!Element} clickedEl
    * @private
    */
-  updateTooltipText_(tooltipText) {
+  updateTooltipText_(clickedEl) {
+    const tooltipText = clickedEl.getAttribute('data-tooltip-text') ||
+      getSourceOriginForElement(clickedEl, this.getElementHref_(clickedEl));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
 
@@ -251,10 +313,18 @@ export class AmpStoryTooltip {
   /**
    * Updates tooltip icon. If no icon src is declared, it sets a default src and
    * hides it.
-   * @param {string} iconSrc
+   * @param {!Element} clickedEl
    * @private
    */
-  updateTooltipIcon_(iconSrc) {
+  updateTooltipIcon_(clickedEl) {
+    const iconUrl = clickedEl.getAttribute('data-tooltip-icon');
+    if (!isProtocolValid(iconUrl)) {
+      user().error(TAG, 'The tooltip icon url is invalid');
+      return;
+    }
+    const iconSrc = iconUrl ? parseUrlDeprecated(iconUrl).href :
+      DEFAULT_ICON_SRC;
+
     const existingTooltipIcon =
       this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
 
@@ -358,8 +428,20 @@ export class AmpStoryTooltip {
     if (!closest(dev().assertElement(event.target),
         el => el == this.tooltip_)) {
       event.stopPropagation();
+      this.clearTooltip_();
       this.closeTooltip_();
     }
+  }
+
+  /**
+   * Clears any attributes or handlers that may have been added to the tooltip,
+   * but weren't used.
+   * @private
+   */
+  clearTooltip_() {
+    this.tooltip_.removeEventListener('click',
+        this.expandComponentHandler_, true);
+    this.tooltip_.removeAttribute('href');
   }
 
   /**

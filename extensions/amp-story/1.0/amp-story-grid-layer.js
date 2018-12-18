@@ -27,6 +27,7 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {EXPANDABLE_COMPONENTS} from './amp-story-tooltip';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
@@ -98,6 +99,20 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
+    this.applyClickShields_();
+  }
+
+  /**
+   * Apply a click shield on interactive elements that can go in an expandable
+   * view.
+   * @private
+   */
+  applyClickShields_() {
+    const expandableEls = scopedQuerySelectorAll(this.element,
+        Object.values(EXPANDABLE_COMPONENTS).join(','));
+    Array.prototype.forEach.call(expandableEls, el => {
+      el.classList.add('i-amphtml-expandable-component-shield');
+    });
   }
 
   /** @override */
