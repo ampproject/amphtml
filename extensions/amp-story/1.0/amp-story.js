@@ -1516,7 +1516,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     this.mutateElement(() => {
-      toggle(this.maskElement_, /* display */true);
+      toggle(dev().assertElement(this.maskElement_), /* display */true);
     });
   }
 
@@ -1526,7 +1526,7 @@ export class AmpStory extends AMP.BaseElement {
   closeOpacityMask_() {
     if (this.maskElement_) {
       this.mutateElement(() => {
-        toggle(this.maskElement_, /* display */false);
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
       });
     }
   }
