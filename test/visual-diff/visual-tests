@@ -568,18 +568,22 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-inabox/amp-ads.html",
-      "name": "AMP Inabox Ad",
+      "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
+      "name": "AMP Inabox GPT Ad",
       "loading_complete_css": [
         ".slot-render-ended",
-        ".impression-viewable",
+//        ".impression-viewable",
         ".slot-onload",
-        ".slot-visibility-changed",
+//        ".slot-visibility-changed",
       ],
     },
     {
-      "url": "examples/visual-tests/amp-inabox/amp-ads-second.html",
-      "name": "AMP Inabox Two Ads",
+    // This test is disabled for now because it relies on visibility events,
+    // and upon using them GPT will automatically convert to a non-AMP ad.
+      "flaky": true,
+      "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt-two-ads.html",
+      "name": "AMP Inabox GPT Two Ads",
+      "viewport": {"width": 500, "height": 500},
       "forbidden_css": [".second-impression-viewable"],
       "loading_complete_css": [".first-impression-viewable"],
       "interactive_tests": "examples/visual-tests/amp-inabox/amp-ads-second.js"
