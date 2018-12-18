@@ -358,7 +358,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
-    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -734,6 +733,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeBookend_();
     this.initializeSidebar_();
+    this.setThemeColor_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => {
