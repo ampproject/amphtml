@@ -16,7 +16,6 @@
 
 import {RequestBank} from '../../testing/test-helper';
 import {addParamsToUrl, parseQueryString} from '../../src/url';
-import {loadPromise} from '../../src/event-helper';
 import {poll} from '../../testing/iframe';
 
 describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
