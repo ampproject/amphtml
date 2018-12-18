@@ -419,6 +419,94 @@ describes.sandboxed('StandardActions', {}, () => {
       });
     });
 
+    describe('closeOrNavigateTo', () => {
+      let navigateToStub;
+      let closeOrNavigateToSpy;
+      let winCloseSpy;
+
+      beforeEach(() => {
+        navigateToStub = sandbox.stub(standardActions, 'handleNavigateTo')
+            .returns(Promise.resolve());
+
+        closeOrNavigateToSpy = sandbox.spy(standardActions,
+            'handleCloseOrNavigateTo');
+
+        win.close = () => {
+          win.closed = true;
+        };
+        winCloseSpy = sandbox.spy(win, 'close');
+
+        // Fake ActionInvocation.
+        invocation.method = 'closeOrNavigateTo';
+        invocation.args = {
+          url: 'http://bar.com',
+        };
+        invocation.caller = {tagName: 'DIV'};
+      });
+
+      it('should be implemented', () => {
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(closeOrNavigateToSpy).to.be.calledOnce;
+          expect(closeOrNavigateToSpy).to.be.calledWithExactly(invocation);
+        });
+      });
+
+      it('should close window if allowed', () => {
+        win.opener = {};
+        win.parent = win;
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(winCloseSpy).to.be.calledOnce;
+          expect(navigateToStub).to.be.not.called;
+        });
+      });
+
+      it('should NOT close if no opener', () => {
+        win.opener = null;
+        win.parent = win;
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(winCloseSpy).to.be.not.called;
+        });
+      });
+
+      it('should NOT close if has a parent', () => {
+        win.opener = {};
+        win.parent = {};
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(winCloseSpy).to.be.not.called;
+        });
+      });
+
+      it('should NOT close if in multi-doc', () => {
+        win.opener = {};
+        win.parent = win;
+        sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(winCloseSpy).to.be.not.called;
+        });
+      });
+
+      it('should navigate if not allowed to close', () => {
+        win.opener = null;
+        win.parent = win;
+        sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(winCloseSpy).to.be.not.called;
+          expect(navigateToStub).to.be.called;
+        });
+      });
+
+      it('should navigate if win.close rejects', () => {
+        win.opener = {};
+        win.parent = win;
+        win.close = () => {
+          win.closed = false;
+        };
+        return standardActions.handleAmpTarget(invocation).then(() => {
+          expect(navigateToStub).to.be.called;
+        });
+      });
+    });
+
     it('should implement goBack', () => {
       installHistoryServiceForDoc(ampdoc);
       const history = Services.historyForDoc(ampdoc);
@@ -437,7 +525,6 @@ describes.sandboxed('StandardActions', {}, () => {
       yield macroTask();
       expect(optoutStub).to.be.calledOnce;
     });
-
 
     it('should implement setState()', () => {
       const element = createElement();
