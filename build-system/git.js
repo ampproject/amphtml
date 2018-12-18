@@ -30,27 +30,12 @@ exports.gitBranchPointFromMaster = function() {
 };
 
 /**
- * When running on Travis, this returns the branch point of the current branch
- * off of master, as merged by Travis.
+ * Returns the point at which the PR branch was forked from master. Used during
+ * Travis PR builds to print the range of commits included in a PR check.
  */
-exports.gitTravisCommitRangeStart = function() {
-  return process.env.TRAVIS_COMMIT_RANGE.substr(0, 40);
-};
-
-/**
- */
-exports.gitTravisCommitRangeEnd = function() {
-  return process.env.TRAVIS_COMMIT_RANGE.substr(43, 40);
-};
-
-/**
- * When running on Travis, this returns the branch point of the PR branch off of
- * master, as present on the fork from which the PR originated.
- */
-exports.gitTravisPrBranchPoint = function() {
-  const start = exports.gitTravisCommitRangeStart();
-  const end = exports.gitTravisCommitRangeEnd();
-  return getStdout(`git merge-base ${start} ${end}`).trim();
+exports.gitPrBranchPoint = function() {
+  const commitRange = process.env.TRAVIS_COMMIT_RANGE.split('...');
+  return getStdout(`git merge-base ${commitRange[0]} ${commitRange[1]}`).trim();
 };
 
 /**
@@ -80,9 +65,11 @@ exports.gitDiffStatMaster = function() {
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
-  return getStdout('git -c color.ui=always log --graph --pretty=format:\
+  const branchPoint = process.env.TRAVIS ?
+    exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
+  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
 "%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) %s \
-%C(green)(%cr)%C(reset)" --abbrev-commit -25').trim();
+%C(green)(%cr)%C(reset)" --abbrev-commit ${branchPoint}...HEAD`).trim();
 };
 
 /**

@@ -25,8 +25,12 @@ const path = require('path');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
+const {
+  gitBranchName,
+  gitBranchPointFromMaster,
+  gitCommitterEmail,
+} = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {gitBranchName, gitCommitterEmail, gitTravisCommitRangeStart} = require('../../git');
 const {log, verifyCssElements} = require('./helpers');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
@@ -97,7 +101,7 @@ function setPercyBranch() {
  */
 function setPercyTargetCommit() {
   if (process.env.TRAVIS && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitTravisCommitRangeStart();
+    process.env['PERCY_TARGET_COMMIT'] = gitBranchPointFromMaster();
   }
 }
 
