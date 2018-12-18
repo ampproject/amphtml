@@ -16,12 +16,6 @@ googletag.cmd.push(function() {
     document.getElementById('slotrenderendedannounce').textContent = "SlotRenderEnded fired.";
     document.documentElement.classList.add('slot-render-ended');
   });
-  /*
-  googletag.pubads().addEventListener('impressionViewable', function(event) {
-    document.getElementById('impressionviewableannounce').textContent = "ImpressionViewable fired.";
-    document.documentElement.classList.add('impression-viewable');
-  });
-  */
   googletag.pubads().addEventListener('slotOnload', function(event) {
     document.getElementById('slotonloadannounce').textContent = "SlotOnload fired.";
     document.documentElement.classList.add('slot-onload');
@@ -29,18 +23,10 @@ googletag.cmd.push(function() {
     var adIframe = document.getElementById('google_ads_iframe_/8479/regtests/AmpInaboxTest.java/firstad_0');
     adIframe.srcdoc = adIframe.contentDocument.documentElement.outerHTML;
   });
-  /*
-  googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
-    document.getElementById('slotvisibilitychangedannounce').textContent = "SlotVisibilityChanged fired.";
-    document.documentElement.classList.add('slot-visibility-changed');
-  });
-  */
 });
 </script>
 <p id="slotrenderendedannounce">SlotRenderEnded not fired.</p>
-<!-- <p id="impressionviewableannounce">ImpressionViewableEvent not fired.</p> -->
 <p id="slotonloadannounce">SlotOnload not fired.</p>
-<!-- <p id="slotvisibilitychangedannounce">SlotVisibilityChanged not fired.</p> -->
 <!-- /8479/regtests/AmpInaboxTest.java/firstad -->
 <div id="div-gpt-ad-1541535279148-0" style="height:250px; width:300px; background-color:red;">
   <script>
