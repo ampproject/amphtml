@@ -96,9 +96,9 @@ function printChangeSummary() {
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
 
-  const commits = getStdout('git log --graph --pretty=format:"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" --abbrev-commit ' + process.env.TRAVIS_COMMIT_RANGE);
+  const commits = getStdout('git -c color.ui=always log --graph --pretty=format:"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" --abbrev-commit -25');
   console.log(fileLogPrefix, 'Commits contained in this PR:');
-  console.log(commits);
+  console.log(commits + '\n');
 }
 
 /**
