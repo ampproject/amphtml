@@ -31,7 +31,7 @@ const config = require('./config');
 const minimatch = require('minimatch');
 const path = require('path');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
-const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
+const {gitDiffColor, gitDiffCommitLog, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -96,9 +96,9 @@ function printChangeSummary() {
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
 
-  const commits = getStdout('git -c color.ui=always log --graph --pretty=format:"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" --abbrev-commit -25');
-  console.log(fileLogPrefix, 'Commits contained in this PR:');
-  console.log(commits + '\n');
+  const commitLog = gitDiffCommitLog();
+  console.log(fileLogPrefix, 'Commits included in this PR check:');
+  console.log(commitLog + '\n');
 }
 
 /**
@@ -574,6 +574,7 @@ function main() {
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
     process.env['LOCAL_PR_CHECK'] = true;
+    printChangeSummary();
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);

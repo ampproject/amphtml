@@ -63,6 +63,17 @@ exports.gitDiffStatMaster = function() {
 };
 
 /**
+ * Returns a detailed commit log starting from the branch point off of master.
+ * @return {string}
+ */
+exports.gitDiffCommitLog = function() {
+  const branchPoint = exports.gitBranchPointFromMaster();
+  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
+"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" \
+--abbrev-commit ${branchPoint}...HEAD`).trim();
+};
+
+/**
  * Returns the list of files added by the local branch relative to the branch
  * point off of master, one on each line.
  * @return {!Array<string>}
