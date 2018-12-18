@@ -15,49 +15,89 @@
  */
 
 import {RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/url';
+import {addParamsToUrl, parseQueryString} from '../../src/url';
+import {loadPromise} from '../../src/event-helper';
+import {poll} from '../../testing/iframe';
 
 describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
   this.timeout(15000);
 
-  describes.integration('AMPHTML ads rendered on AMP page', {
+  // describes.integration('AMPHTML ads rendered on AMP page', {
+  //   body: `
+  //     <amp-ad width="300" height="400"
+  //         id="i-amphtml-demo-id"
+  //         type="fake"
+  //         src="/amp4test/a4a/${RequestBank.getBrowserId()}">
+  //       <div placeholder>Loading...</div>
+  //       <div fallback>Could not display the fake ad :(</div>
+  //     </amp-ad>
+  //     `,
+  //   extensions: ['amp-ad'],
+  // }, () => {
+  //   it('should layout amp-img, amp-pixel, amp-analytics', () => {
+  //     // See amp4test.js for creative content
+  //     return Promise.all([
+  //       RequestBank.withdraw('image'),
+  //       RequestBank.withdraw('pixel'),
+  //       RequestBank.withdraw('analytics'),
+  //     ]).then(reqs => {
+  //       const imageReq = reqs[0];
+  //       const pixelReq = reqs[1];
+  //       const analyticsReq = reqs[2];
+  //       expect(imageReq.url).to.equal('/');
+  //       expect(pixelReq.url).to.equal('/foo?cid=');
+  //       expect(analyticsReq.url).to.match(/^\/bar\?/);
+  //       const queries =
+  //           parseQueryString(analyticsReq.url.substr('/bar'.length));
+  //       expect(queries).to.include({
+  //         title: 'AMP TEST', // ${title},
+  //         cid: '', // ${clientId(a)}
+  //         adNavTiming: '0', // ${adNavTiming(requestStart,requestStart)}
+  //         adNavType: '0', // ${adNavType}
+  //         adRedirectCount: '0', // ${adRedirectCount}
+  //       });
+  //       expect(queries['ampdocUrl']).to.contain('http://localhost:9876/amp4test/compose-doc?');
+  //       expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
+  //       expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
+  //     });
+  //   });
+  // });
+
+  const src = addParamsToUrl('/amp4test/compose-doc', {
+    body: '<p [text]="foo"></p>' +
+        '<button on="tap:AMP.setState({foo: 123})"></button>',
+    extensions: 'amp-bind',
+  });
+  describes.integration('amp-bind in A4A', {
     body: `
-      <amp-ad width="300" height="400"
-          id="i-amphtml-demo-id"
-          type="fake"
-          src="/amp4test/a4a/${RequestBank.getBrowserId()}">
-        <div placeholder>Loading...</div>
-        <div fallback>Could not display the fake ad :(</div>
-      </amp-ad>
-      `,
-    extensions: ['amp-ad'],
-  }, () => {
-    it('should layout amp-img, amp-pixel, amp-analytics', () => {
-      // See amp4test.js for creative content
-      return Promise.all([
-        RequestBank.withdraw('image'),
-        RequestBank.withdraw('pixel'),
-        RequestBank.withdraw('analytics'),
-      ]).then(reqs => {
-        const imageReq = reqs[0];
-        const pixelReq = reqs[1];
-        const analyticsReq = reqs[2];
-        expect(imageReq.url).to.equal('/');
-        expect(pixelReq.url).to.equal('/foo?cid=');
-        expect(analyticsReq.url).to.match(/^\/bar\?/);
-        const queries =
-            parseQueryString(analyticsReq.url.substr('/bar'.length));
-        expect(queries).to.include({
-          title: 'AMP TEST', // ${title},
-          cid: '', // ${clientId(a)}
-          adNavTiming: '0', // ${adNavTiming(requestStart,requestStart)}
-          adNavType: '0', // ${adNavType}
-          adRedirectCount: '0', // ${adRedirectCount}
-        });
-        expect(queries['ampdocUrl']).to.contain('http://localhost:9876/amp4test/compose-doc?');
-        expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
-        expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
-      });
+    <amp-ad width="300" height="400"
+        id="i-amphtml-demo-id"
+        type="fake"
+        src="${src}">
+      <div placeholder>Loading...</div>
+      <div fallback>Could not display the fake ad :(</div>
+    </amp-ad>
+    `,
+  }, env => {
+    it('p[text]', function*() {
+      // Wait for the amp-ad to construct its child iframe.
+      const ad = env.win.document.getElementById('i-amphtml-demo-id');
+      yield poll('amp-ad > iframe', () => ad.querySelector('iframe'));
+
+      // Wait for the iframe contents to load.
+      const fie = ad.querySelector('iframe').contentWindow;
+      yield poll('iframe > button', () => fie.document.querySelector('button'));
+
+      const text = fie.document.querySelector('p');
+      expect(text.textContent).to.equal('');
+
+      const button = fie.document.querySelector('button');
+      return poll('[text]', () => {
+        // We click this too many times but there's no good way to tell whether
+        // amp-bind is initialized yet.
+        button.click();
+        return text.textContent === '123';
+      }, undefined, 5000);
     });
   });
 });

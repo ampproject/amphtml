@@ -31,7 +31,12 @@ function log(...messages) {
 }
 
 app.use('/compose-doc', function(req, res) {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
   res.setHeader('X-XSS-Protection', '0');
+
   const {body, css, experiments, extensions} = req.query;
 
   const compiled = process.env.SERVE_MODE == 'compiled';
@@ -57,7 +62,7 @@ app.use('/compose-doc', function(req, res) {
   const doc = composeDocument({
     body,
     css,
-    extensions: extensions.split(','),
+    extensions: extensions ? extensions.split(',') : '',
     head,
   });
   res.send(doc);
