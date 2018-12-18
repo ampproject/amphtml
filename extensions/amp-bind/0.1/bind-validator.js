@@ -326,6 +326,9 @@ function createElementRules_() {
       'type': null,
       'value': null,
     },
+    'DETAILS': {
+      'open': null,
+    },
     'FIELDSET': {
       'disabled': null,
     },

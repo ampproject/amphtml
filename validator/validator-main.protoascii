@@ -4446,6 +4446,30 @@ tags: {
   tag_name: "LEGEND"
 }
 
+# 4.11 (HTML5.3) Interactive elements
+# 4.11.1 (HTML5.3) The details element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "DETAILS"
+  attrs: {
+    name: "open"
+    value: ""
+  }
+  attrs: { name: "[open]" }
+}
+# 4.11.2 (HTML5.3) The summary element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "SUMMARY"
+  mandatory_parent: "DETAILS"
+}
+
 # 4.11 Scripting
 # 4.11.1 The script element
 # Only the amphtml script, custom extensions and the LD/JSON description are
