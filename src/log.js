@@ -697,7 +697,9 @@ export function isFromEmbed(win, opt_element) {
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function devAssert(shouldBeTrueish, opt_message, var_args) {
+export function devAssert(
+  // eslint-disable-next-line no-unused-vars
+  shouldBeTrueish, opt_message, var_args) {
   return dev().assert.apply(this, arguments);
 }
 
@@ -721,6 +723,8 @@ export function devAssert(shouldBeTrueish, opt_message, var_args) {
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function userAssert(shouldBeTrueish, opt_message, var_args) {
+export function userAssert(
+  // eslint-disable-next-line no-unused-vars
+  shouldBeTrueish, opt_message, var_args) {
   return user().assert.apply(this, arguments);
 }
