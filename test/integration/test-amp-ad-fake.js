@@ -64,20 +64,23 @@ describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
   });
 
   const src = addParamsToUrl('/amp4test/compose-doc', {
-    body: '<p [text]="foo"></p>' +
-        '<button on="tap:AMP.setState({foo: 123})"></button>',
+    body: `
+      <p [text]="foo">123</p>
+      <button on="tap:AMP.setState({foo: 456})"></button>
+      `,
     extensions: 'amp-bind',
+    spec: 'amp4ads',
   });
   describes.integration('amp-bind in A4A', {
     body: `
-    <amp-ad width="300" height="400"
-        id="i-amphtml-demo-id"
-        type="fake"
-        src="${src}">
-      <div placeholder>Loading...</div>
-      <div fallback>Could not display the fake ad :(</div>
-    </amp-ad>
-    `,
+      <amp-ad width="300" height="400"
+          id="i-amphtml-demo-id"
+          type="fake"
+          src="${src}">
+        <div placeholder>Loading...</div>
+        <div fallback>Could not display the fake ad :(</div>
+      </amp-ad>
+      `,
   }, env => {
     it('p[text]', function*() {
       // Wait for the amp-ad to construct its child iframe.
@@ -89,15 +92,15 @@ describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
       yield poll('iframe > button', () => fie.document.querySelector('button'));
 
       const text = fie.document.querySelector('p');
-      expect(text.textContent).to.equal('');
+      expect(text.textContent).to.equal('123');
 
       const button = fie.document.querySelector('button');
       return poll('[text]', () => {
         // We click this too many times but there's no good way to tell whether
         // amp-bind is initialized yet.
         button.click();
-        return text.textContent === '123';
-      }, undefined, 5000);
+        return text.textContent === '456';
+      }, /* onError */ undefined, 5000);
     });
   });
 });

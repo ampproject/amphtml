@@ -37,33 +37,37 @@ app.use('/compose-doc', function(req, res) {
   }
   res.setHeader('X-XSS-Protection', '0');
 
-  const {body, css, experiments, extensions} = req.query;
+  const {body, css, experiments, extensions, spec} = req.query;
 
   const compiled = process.env.SERVE_MODE == 'compiled';
   const frameHtml = (compiled)
     ? 'dist.3p/current-min/frame.html'
     : 'dist.3p/current/frame.max.html';
 
-  let metaExperiments = '', experimentString = '';
+  let experimentsBlock = '';
   if (experiments) {
-    metaExperiments = `<meta name="amp-experiments-opt-in" content="${experiments}">`;
-    experimentString = `"${experiments.split(',').join('","')}"`;
+    const string = `"${experiments.split(',').join('","')}"`;
+    // TODO: Why is localDev necessary?
+    // `allow-doc-opt-in` enables any experiment to be enabled via doc opt-in.
+    experimentsBlock =
+      `<script>
+        window.AMP_CONFIG = window.AMP_CONFIG || {"localDev": true};
+        window.AMP_CONFIG['allow-doc-opt-in'] = (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${string}]);
+      </script>
+      <meta name="amp-experiments-opt-in" content="${experiments}">`;
   }
 
-  const head = `
-  <script>
-    window.AMP_CONFIG = window.AMP_CONFIG || {"localDev": true};
-    window.AMP_CONFIG['allow-doc-opt-in'] = (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
-  </script>
-  ${metaExperiments}
-  <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
-  `;
+  // TODO: What is amp-3p-iframe-src used for?
+  const head =
+    `${experimentsBlock}
+    <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">`;
 
   const doc = composeDocument({
     body,
     css,
     extensions: extensions ? extensions.split(',') : '',
     head,
+    spec,
   });
   res.send(doc);
 });
@@ -184,22 +188,7 @@ app.get('/a4a/:bid', (req, res) => {
       }
     }
     </script>
-  </amp-analytics>
-  <script amp-ad-metadata type=application/json>
-  {
-     "ampRuntimeUtf16CharOffsets" : [ 134, 1129 ],
-     "customElementExtensions" : [
-       "amp-analytics"
-     ],
-     "extensions" : [
-        {
-           "custom-element" : "amp-analytics",
-           "src" : "https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
-        }
-     ]
-  }
-  </script>
-  `;
+  </amp-analytics>`;
 
   const doc = composeDocument({
     spec: 'amp4ads',
@@ -226,11 +215,10 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions.map(extension => {
-      // TODO: Use '-latest'?
       const src = (cdn)
         ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
-        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`;
-      return `<script async custom-element="${extension}" + src="${src}"></script>`;
+        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`; // TODO: Use '-latest'?
+      return `<script async custom-element="${extension}" src="${src}"></script>`;
     }).join('\n');
   }
 
@@ -262,22 +250,51 @@ function composeDocument(config) {
       throw new Error('Unrecognized AMP spec: ' + spec);
   }
 
-  return `
-<!doctype html>
-<html ${amp}>
-<head>
-  <title>AMP TEST</title>
-  <meta charset="utf-8">
-  ${canonical}
-  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  ${head || ''}
-  ${boilerplate}
-  <script async src="${runtime}"></script>
-  ${extensionScripts}
-  ${cssTag}
-</head>
-<body>
-${body}
-</body>
-</html>`;
+  const topHalfOfHtml =
+    `<!doctype html>
+    <html ${amp}>
+    <head>
+      <title>AMP TEST</title>
+      <meta charset="utf-8">
+      ${canonical}
+      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+      ${head || ''}
+      ${boilerplate}
+      <script async src="${runtime}"></script>
+      ${extensionScripts}
+      ${cssTag}
+    </head>`;
+
+  // To enable A4A FIE, a <script amp-ad-metadata> tag must exist.
+  let ampAdMeta = '';
+  if (amp === 'amp4ads') {
+    let start = 0, end = 0, customElements = [], extensionsMap = [];
+    if (extensions) {
+      start = topHalfOfHtml.indexOf(extensionScripts);
+      end = start + extensionScripts.length;
+      // Filter out extensions that are not custom elements, e.g. amp-mustache.
+      customElements = extensions.filter(e => e !== 'amp-mustache');
+      extensionsMap = customElements.map(ce => {
+        return {
+          'custom-element': ce,
+          'src': `https://cdn.ampproject.org/v0/${ce}-0.1.js`, // TODO: Local?
+        };
+      });
+    }
+    ampAdMeta =
+      `<script amp-ad-metadata type=application/json>
+      {
+        "ampRuntimeUtf16CharOffsets": [ ${start}, ${end} ],
+        "customElementExtensions": ${JSON.stringify(customElements)},
+        "extensions": ${JSON.stringify(extensionsMap)}
+      }
+      </script>`;
+  }
+
+  return `${topHalfOfHtml}
+    <body>
+    ${body}
+    ${ampAdMeta}
+    </body>
+    </html>`;
 }
