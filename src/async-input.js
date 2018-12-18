@@ -56,7 +56,7 @@ export const AsyncInputAttributes = {
    * Element. This is used by AMP form to add the key
    * for the form submission request
   */
-  'NAME': 'name',
+  NAME: 'name',
 };
 
 
