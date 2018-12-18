@@ -597,7 +597,7 @@ describes.realWin('performance', {amp: true}, env => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
             expect(getPerformanceMarks()).to.deep.equal(
-                ['ol', 'pc', 'ofv', 'visible']);
+                ['ol', 'pc', 'visible', 'ofv']);
           });
         });
       });
