@@ -140,5 +140,5 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
  */
 function assertName(name) {
   user().assert(nameValidator.test(name),
-      `Invalid name ${name}: %s. Allowed chars are [a-zA-Z0-9-_].`);
+      'Invalid name: %s. Allowed chars are [a-zA-Z0-9-_].', name);
 }

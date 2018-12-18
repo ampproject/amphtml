@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 767
+spec_file_revision: 780
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -259,6 +259,7 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attrs: { name: "async" }
   attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
@@ -873,6 +874,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: EXPERIMENTAL
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1067,6 +1069,16 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
       }
       at_rule_spec: {
         name: 'page'
@@ -1096,45 +1108,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
-}
-tags: {
-  html_format: AMP
-  html_format: EXPERIMENTAL
-  tag_name: "STYLE"
-  spec_name: "head > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "HEAD"
-  # Special Case. This tag is deprecated, however this matches any <style> tag
-  # in the document head without an associated attribute. This is far more
-  # likely to happen to be caused by the user intending to use
-  # <style amp-custom> than having used a deprecated amp-boilerplate. So, for
-  # this case, we do not emit deprecation warnings. Note that the <noscript>
-  # component of the deprecated boilerplate will still emit a deprecation
-  # warning.  See https://github.com/ampproject/amphtml/issues/4421
-  #deprecation: "head > style[amp-boilerplate]"
-  #deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata: {
-    cdata_regex: "body ?{opacity: ?0}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-}
-tags: {
-  html_format: AMP
-  tag_name: "STYLE"
-  spec_name: "noscript > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "NOSCRIPT"
-  mandatory_ancestor: "HEAD"
-  deprecation: "noscript > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata {
-    cdata_regex: "body ?{opacity: ?1}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   html_format: AMP
@@ -1563,6 +1536,7 @@ tags: {
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
+      protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
@@ -1577,6 +1551,7 @@ tags: {
       protocol: "viber"
       protocol: "webcal"
       protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "wh"
       protocol: "whatsapp"
       allow_empty: true
     }
@@ -3738,7 +3713,6 @@ tags {  # <form method=GET ...>
 tags {  # <form method=POST ...>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
   requires_extension: "amp-form"

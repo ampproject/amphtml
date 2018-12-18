@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE} from './consent-state-manager';
+import {CONSENT_ITEM_STATE} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {dev, user} from '../../../src/log';
@@ -165,8 +165,8 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, `can not find defined policy ${policyId}, ` +
-          'only supported predefined policy supported now');
+        user().error(TAG, 'can not find policy %s, ' +
+          'only predefined policies are supported', policyId);
         return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
       }
     }
@@ -186,8 +186,8 @@ export class ConsentPolicyManager {
     if (!ConsentPolicyManager.isMultiSupported(this.ampdoc_.win)) {
       // If customized policy is not supported
       if (!WHITELIST_POLICY[policyId]) {
-        user().error(TAG, `can not find defined policy ${policyId}, ` +
-          'only supported predefined policy supported now');
+        user().error(TAG, 'can not find policy %s, ' +
+          'only predefined policies are supported', policyId);
         return Promise.resolve(false);
       }
     }
@@ -312,15 +312,15 @@ export class ConsentPolicyInstance {
           fallbackState = CONSENT_ITEM_STATE.REJECTED;
         } else if (timeoutConfig['fallbackAction'] &&
             timeoutConfig['fallbackAction'] != 'dismiss') {
-          user().error(TAG,
-              `unsupported fallbackAction ${timeoutConfig['fallbackAction']}`);
+          user().error(TAG, 'unsupported fallbackAction %s',
+              timeoutConfig['fallbackAction']);
         }
         timeoutSecond = timeoutConfig['seconds'];
       } else {
         timeoutSecond = timeoutConfig;
       }
       user().assert(isFiniteNumber(timeoutSecond),
-          `invalid timeout value ${timeoutSecond}`);
+          'invalid timeout value %s', timeoutSecond);
     }
 
     if (timeoutSecond != null) {
@@ -340,7 +340,7 @@ export class ConsentPolicyInstance {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
     if (!hasOwn(this.itemToConsentState_, consentId)) {
-      dev().error(TAG, `cannot find ${consentId} in policy state`);
+      dev().error(TAG, 'cannot find %s in policy state', consentId);
       return;
     }
 

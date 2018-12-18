@@ -40,6 +40,9 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp-inabox.js');
     file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
+        hostName + '/dist/video-iframe-integration.js');
+    file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.max.js');
     if (inabox) {
@@ -62,6 +65,9 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp4ads-v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/video-iframe-integration-v0\.js/g,
+        hostName + '/dist/video-iframe-integration-v0.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
         hostName + '/dist/v0/$1.js');

@@ -135,33 +135,86 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-/////////////////
-// Request Bank
-// A server side temporary request storage which is useful for testing
-// browser sent HTTP requests.
-/////////////////
+// Use a browserId to avoid cross-browser race conditions
+// when testing in Saucelabs.
+/** @const {string} */
+const browserId = (Date.now() + Math.random()).toString(32);
 
 /** @const {string} */
-const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/' + browserId;
 
 /**
- * Append user agent to request-bank deposit/withdraw IDs to avoid
- * cross-browser race conditions when testing in Saucelabs.
- * @const {string}
+ * A server side temporary request storage which is useful for testing
+ * browser sent HTTP requests.
  */
-const userAgent = encodeURIComponent(window.navigator.userAgent);
+export class RequestBank {
 
-export function depositRequestUrl(path) {
-  return `${REQUEST_URL}deposit/${userAgent}/${path}`;
+  static getBrowserId() {
+    return browserId;
+  }
+
+  /**
+   * Returns the URL for depositing a request.
+   *
+   * @param {number|string|undefined} requestId
+   * @returns {string}
+   */
+  static getUrl(requestId) {
+    return `${REQUEST_URL}/deposit/${requestId}/`;
+  }
+
+  /**
+   * Returns a Promise that resolves when the request of given ID is deposited.
+   * The returned promise resolves to an JsonObject contains the request info:
+   * {
+   *   url: string
+   *   headers: JsonObject
+   *   body: string
+   * }
+   * @param {number|string|undefined} requestId
+   * @returns {Promise<JsonObject>}
+   */
+  static withdraw(requestId) {
+    const url = `${REQUEST_URL}/withdraw/${requestId}/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    }).then(res => res.json());
+  }
+
+  static tearDown() {
+    const url = `${REQUEST_URL}/teardown/`;
+    return xhrServiceForTesting(window).fetchJson(url, {
+      method: 'GET',
+      ampCors: false,
+      credentials: 'omit',
+    });
+  }
 }
 
-export function withdrawRequest(win, path) {
-  const url = `${REQUEST_URL}withdraw/${userAgent}/${path}`;
-  return xhrServiceForTesting(win).fetchJson(url, {
-    method: 'GET',
-    ampCors: false,
-    credentials: 'omit',
-  }).then(res => res.json());
+export class BrowserController {
+  constructor(win) {
+    this.win_ = win;
+    this.doc_ = this.win_.document;
+  }
+
+  wait(duration) {
+    return new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
+  }
+
+  click(selector) {
+    const element = this.doc_.querySelector(selector);
+    if (element) {
+      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
+    }
+  }
+
+  scrollTo(px) {
+    this.win_.scrollTo(0, px);
+  }
 }
 
 export function createPointerEvent(type, x, y) {
