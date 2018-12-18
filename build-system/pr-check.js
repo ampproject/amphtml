@@ -87,18 +87,18 @@ function timedExecOrDie(cmd) {
 }
 
 /**
- * Returns a list of files in the commit range within this pull request (PR)
- * after filtering out commits to master from other PRs.
- * @return {!Array<string>}
+ * Prints a summary of files changed by, and commits included in the PR.
  */
-function filesInPr() {
-  const files = gitDiffNameOnlyMaster();
-  const changeSummary = gitDiffStatMaster();
+function printChangeSummary() {
+  const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
-  console.log(changeSummary);
-  return files;
+  console.log(filesChanged);
+
+  const commits = getStdout('git log --graph --pretty=format:"%Cred%h%Creset %C(bold cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)" --abbrev-commit ' + process.env.TRAVIS_COMMIT_RANGE);
+  console.log(fileLogPrefix, 'Commits contained in this PR:');
+  console.log(commits);
 }
 
 /**
@@ -591,7 +591,8 @@ function main() {
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const files = filesInPr();
+  printChangeSummary();
+  const files = gitDiffNameOnlyMaster();
   const buildTargets = determineBuildTargets(files);
 
   // Exit early if flag-config files are mixed with runtime files.
