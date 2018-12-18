@@ -1580,7 +1580,8 @@ function createBaseCustomElementClass(win) {
         return;
       }
       if (!this.loadingContainer_) {
-        const doc = devAssert(this.ownerDocument);
+        const doc = this.ownerDocument;
+        devAssert(doc);
 
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
