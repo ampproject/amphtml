@@ -92,11 +92,14 @@ exports.gitDiffColor = function() {
 };
 
 /**
- * Returns the name of the local branch.
+ * Returns the name of the branch from which the PR originated. On Travis, this
+ * is exposed via TRAVIS_PULL_REQUEST_BRANCH.
  * @return {string}
  */
 exports.gitBranchName = function() {
-  return getStdout('git rev-parse --abbrev-ref HEAD').trim();
+  return process.env.TRAVIS ?
+    process.env.TRAVIS_PULL_REQUEST_BRANCH :
+    getStdout('git rev-parse --abbrev-ref HEAD').trim();
 };
 
 /**

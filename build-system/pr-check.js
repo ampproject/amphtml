@@ -31,6 +31,7 @@ const config = require('./config');
 const minimatch = require('minimatch');
 const path = require('path');
 const {
+  gitBranchName,
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffNameOnlyMaster,
@@ -101,9 +102,10 @@ function printChangeSummary() {
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
 
-  const commitLog = gitDiffCommitLog();
-  console.log(fileLogPrefix, 'Commits included in this PR check:');
-  console.log(commitLog + '\n');
+  console.log(fileLogPrefix, 'Commit log since branch',
+      colors.cyan(gitBranchName()), 'was forked from',
+      colors.cyan('master') + ':');
+  console.log(gitDiffCommitLog() + '\n');
 }
 
 /**

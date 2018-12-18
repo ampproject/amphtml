@@ -83,8 +83,7 @@ function setPercyBranch() {
   if (!process.env['PERCY_BRANCH'] &&
       (!argv.master || !process.env['TRAVIS'])) {
     const userName = gitCommitterEmail();
-    const branchName = process.env['TRAVIS'] ?
-      process.env['TRAVIS_PULL_REQUEST_BRANCH'] : gitBranchName();
+    const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }
