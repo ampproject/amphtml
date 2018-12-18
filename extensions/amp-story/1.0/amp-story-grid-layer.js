@@ -47,6 +47,12 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 };
 
 /**
+ * Interactive elements to which a click shield should be applied.
+ * @private @const
+ */
+const SHIELDED_TARGETS = Object.values(EXPANDABLE_COMPONENTS).join(',');
+
+/**
  * Converts the keys of the SUPPORTED_CSS_GRID_ATTRIBUTES object above into a
  * selector for the specified attributes.
  * (e.g. [align-content], [align-items], ...)
@@ -109,7 +115,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    */
   applyClickShields_() {
     const expandableEls = scopedQuerySelectorAll(this.element,
-        Object.values(EXPANDABLE_COMPONENTS).join(','));
+        SHIELDED_TARGETS);
     Array.prototype.forEach.call(expandableEls, el => {
       el.classList.add('i-amphtml-expandable-component-shield');
     });

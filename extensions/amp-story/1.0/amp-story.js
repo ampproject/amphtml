@@ -92,6 +92,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
+import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {removeAttributeInMutate, setAttributeInMutate} from './utils';
@@ -201,6 +202,20 @@ const HIDE_ON_BOOKEND_SELECTOR =
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
+
+/**
+ * Builds expanded view overlay for expandable components.
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildExpandedViewOverlay = element =>
+  htmlFor(element)`
+      <div class="i-amphtml-story-expanded-view-overflow
+          i-amphtml-story-system-reset">
+        <span class="i-amphtml-expanded-view-close-button" role="button">
+          &times;
+        </span>
+      </div>`;
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -316,6 +331,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
+
+    /** @private {?Element} */
+    this.expandedViewOverlay_ = null;
+
+    /** @private {?Element} */
+    this.expandableTarget_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -621,6 +642,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
+    this.storeService_.subscribe(StateProperty.EXPAND_COMPONENT, target => {
+      this.toggleExpandedView_(target);
+    });
+
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
@@ -639,6 +664,55 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
+  }
+
+  /**
+   * Toggles expanded view for interactive components that support it.
+   * @param {?Element} targetToExpand
+   * @private
+   */
+  toggleExpandedView_(targetToExpand) {
+    if (!targetToExpand) {
+      this.expandedViewOverlay_ &&
+          this.mutateElement(() => {
+            this.arrangeZindexesForExpandedView_(false);
+            toggle(dev().assertElement(this.expandedViewOverlay_), false);
+          });
+      return;
+    }
+
+    if (!this.expandedViewOverlay_) {
+      this.buildAndAppendExpandedViewOverlay_();
+    }
+
+    this.mutateElement(() => {
+      this.expandableTarget_ = targetToExpand;
+      toggle(dev().assertElement(this.expandedViewOverlay_), true);
+      this.arrangeZindexesForExpandedView_(true);
+    });
+  }
+
+  /**
+   * When active, resets the z-indexes on the grid layers of this page to auto,
+   * and increases the component's z-index so that it's on top of other
+   * elements in the page.
+   * @param {boolean} isActive
+   */
+  arrangeZindexesForExpandedView_(isActive) {
+    this.activePage_.element.classList.toggle(
+        'i-amphtml-story-grid-layer-z-index-reset', isActive);
+    this.expandableTarget_.classList.toggle(
+        'i-amphtml-increment-z-index', isActive);
+  }
+
+  /**
+   * Builds the expanded view overlay element and appends it to the page.
+   * @private
+   */
+  buildAndAppendExpandedViewOverlay_() {
+    this.expandedViewOverlay_ = buildExpandedViewOverlay(this.element);
+    this.mutateElement(() =>
+      this.activePage_.element.appendChild(this.expandedViewOverlay_));
   }
 
   /** @private */

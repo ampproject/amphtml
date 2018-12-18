@@ -312,7 +312,6 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
-
 .i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer,
 .i-amphtml-story-grid-layer-z-index-reset amp-story-grid-layer * {
   contain: none !important;

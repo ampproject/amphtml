@@ -119,10 +119,10 @@ export class AmpStoryTooltip {
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /**
-     * Clicked element producing the tooltip. Used to avoid building the same
+     * Target producing the tooltip. Used to avoid building the same
      * element twice.
      * @private {?Element} */
-    this.previousClickedEl_ = null;
+    this.previousTarget_ = null;
 
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
@@ -173,11 +173,11 @@ export class AmpStoryTooltip {
 
   /**
    * Reacts to store updates related to tooltip active status.
-   * @param {!Element} clickedEl
+   * @param {!Element} target
    * @private
    */
-  onTooltipStateUpdate_(clickedEl) {
-    if (!clickedEl) {
+  onTooltipStateUpdate_(target) {
+    if (!target) {
       this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
           () => {
             this.tooltipOverlayEl_
@@ -190,18 +190,18 @@ export class AmpStoryTooltip {
       this.storyEl_.appendChild(this.build_());
     }
 
-    if (matches(clickedEl,
+    if (matches(target,
         tooltipDelegatableSelectors().EXPANDED_VIEW_OVERLAY)) {
       this.onExpandedViewClose_();
       return;
     }
 
-    this.updateTooltipBehavior_(clickedEl);
-    if (clickedEl != this.previousClickedEl_) {
+    this.updateTooltipBehavior_(target);
+    if (target != this.previousTarget_) {
       // Only update tooltip when necessary.
-      this.updateTooltipEl_(clickedEl);
+      this.updateTooltipEl_(target);
     }
-    this.previousClickedEl_ = clickedEl;
+    this.previousTarget_ = target;
 
     this.resources_.mutateElement(dev().assertElement(this.tooltipOverlayEl_),
         () => {
@@ -216,7 +216,7 @@ export class AmpStoryTooltip {
    */
   onExpandedViewClose_() {
     // Re-add click shield to expandable element and close overlay.
-    this.previousClickedEl_.classList
+    this.previousTarget_.classList
         .toggle('i-amphtml-expandable-component-shield', true);
     this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
     this.tooltip_.removeEventListener('click',
@@ -239,27 +239,27 @@ export class AmpStoryTooltip {
   }
 
   /**
-   * Builds tooltip and attaches it depending on the clicked element content and
+   * Builds tooltip and attaches it depending on the target's content and
    * position.
-   * @param {!Element} clickedEl
+   * @param {!Element} target
    * @private
    */
-  updateTooltipEl_(clickedEl) {
-    this.updateTooltipText_(clickedEl);
-    this.updateTooltipIcon_(clickedEl);
-    this.positionTooltip_(clickedEl);
+  updateTooltipEl_(target) {
+    this.updateTooltipText_(target);
+    this.updateTooltipIcon_(target);
+    this.positionTooltip_(target);
   }
 
   /**
-   * Updates tooltip behavior depending on the clicked element.
-   * @param {!Element} clickedEl
+   * Updates tooltip behavior depending on the target.
+   * @param {!Element} target
    */
-  updateTooltipBehavior_(clickedEl) {
-    if (matches(clickedEl, tooltipDelegatableSelectors().LINK)) {
+  updateTooltipBehavior_(target) {
+    if (matches(target, tooltipDelegatableSelectors().LINK)) {
       addAttributesToElement(dev().assertElement(this.tooltip_),
-          dict({'href': this.getElementHref_(clickedEl)}));
+          dict({'href': this.getElementHref_(target)}));
     }
-    else if (matches(clickedEl, tooltipDelegatableSelectors().TWITTER)) {
+    else if (matches(target, tooltipDelegatableSelectors().TWITTER)) {
       this.tooltip_.addEventListener('click',
           this.expandComponentHandler_, true);
     }
@@ -275,19 +275,19 @@ export class AmpStoryTooltip {
     event.stopPropagation();
 
     this.closeTooltip_();
-    this.previousClickedEl_.classList
+    this.previousTarget_.classList
         .toggle('i-amphtml-expandable-component-shield', false);
     this.storeService_.dispatch(
-        Action.TOGGLE_EXPANDED_COMPONENT, this.previousClickedEl_);
+        Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
   }
 
   /**
    * Gets href from an element containing a url.
-   * @param {!Element} clickedEl
+   * @param {!Element} target
    * @private
    */
-  getElementHref_(clickedEl) {
-    const elUrl = clickedEl.getAttribute('href');
+  getElementHref_(target) {
+    const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
       return;
@@ -298,12 +298,12 @@ export class AmpStoryTooltip {
 
   /**
    * Updates tooltip text content.
-   * @param {!Element} clickedEl
+   * @param {!Element} target
    * @private
    */
-  updateTooltipText_(clickedEl) {
-    const tooltipText = clickedEl.getAttribute('data-tooltip-text') ||
-      getSourceOriginForElement(clickedEl, this.getElementHref_(clickedEl));
+  updateTooltipText_(target) {
+    const tooltipText = target.getAttribute('data-tooltip-text') ||
+      getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText =
       this.tooltip_.querySelector('.i-amphtml-tooltip-text');
 
@@ -313,11 +313,11 @@ export class AmpStoryTooltip {
   /**
    * Updates tooltip icon. If no icon src is declared, it sets a default src and
    * hides it.
-   * @param {!Element} clickedEl
+   * @param {!Element} target
    * @private
    */
-  updateTooltipIcon_(clickedEl) {
-    const iconUrl = clickedEl.getAttribute('data-tooltip-icon');
+  updateTooltipIcon_(target) {
+    const iconUrl = target.getAttribute('data-tooltip-icon');
     if (!isProtocolValid(iconUrl)) {
       user().error(TAG, 'The tooltip icon url is invalid');
       return;
@@ -339,11 +339,11 @@ export class AmpStoryTooltip {
 
   /**
    * Positions tooltip and its pointing arrow according to the position of the
-   * clicked element.
-   * @param {!Element} clickedEl
+   * target.
+   * @param {!Element} target
    * @private
    */
-  positionTooltip_(clickedEl) {
+  positionTooltip_(target) {
     const state = {arrowOnTop: false};
 
     this.resources_.measureMutateElement(this.storyEl_,
@@ -351,11 +351,11 @@ export class AmpStoryTooltip {
         () => {
           const storyPage =
               this.storyEl_.querySelector('amp-story-page[active]');
-          const clickedElRect = clickedEl./*OK*/getBoundingClientRect();
+          const targetRect = target./*OK*/getBoundingClientRect();
           const pageRect = storyPage./*OK*/getBoundingClientRect();
 
-          this.verticalPositioning_(clickedElRect, pageRect, state);
-          this.horizontalPositioning_(clickedElRect, pageRect, state);
+          this.verticalPositioning_(targetRect, pageRect, state);
+          this.horizontalPositioning_(targetRect, pageRect, state);
         },
         /** mutate */
         () => {
@@ -372,21 +372,21 @@ export class AmpStoryTooltip {
 
   /**
    * In charge of deciding where to position the tooltip depending on the
-   * clicked element's position and size, and available space in the page. Also
+   * target's position and size, and available space in the page. Also
    * places the tooltip's arrow on top when the tooltip is below an element.
-   * @param {!ClientRect} clickedElRect
+   * @param {!ClientRect} targetRect
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    */
-  verticalPositioning_(clickedElRect, pageRect, state) {
-    const clickedElTopOffset = clickedElRect.top - pageRect.top;
-    const clickedElBottomOffset = clickedElRect.bottom - pageRect.top;
+  verticalPositioning_(targetRect, pageRect, state) {
+    const targetTopOffset = targetRect.top - pageRect.top;
+    const targetBottomOffset = targetRect.bottom - pageRect.top;
 
-    if (clickedElTopOffset > MIN_VERTICAL_SPACE) { // Tooltip fits above clicked element.
-      state.tooltipTop = clickedElRect.top - MIN_VERTICAL_SPACE;
-    } else if (pageRect.height - clickedElBottomOffset >
-        MIN_VERTICAL_SPACE) { // Tooltip fits below clicked element. Place arrow on top of the tooltip.
-      state.tooltipTop = clickedElRect.bottom + EDGE_PADDING * 2;
+    if (targetTopOffset > MIN_VERTICAL_SPACE) { // Tooltip fits above target.
+      state.tooltipTop = targetRect.top - MIN_VERTICAL_SPACE;
+    } else if (pageRect.height - targetBottomOffset >
+        MIN_VERTICAL_SPACE) { // Tooltip fits below target. Place arrow on top of the tooltip.
+      state.tooltipTop = targetRect.bottom + EDGE_PADDING * 2;
       state.arrowOnTop = true;
     } else { // Element takes whole vertical space. Place tooltip on the middle.
       state.tooltipTop = pageRect.height / 2;
@@ -395,13 +395,13 @@ export class AmpStoryTooltip {
 
   /**
    * In charge of positioning the tooltip and the tooltip's arrow horizontally.
-   * @param {!ClientRect} clickedElRect
+   * @param {!ClientRect} targetRect
    * @param {!ClientRect} pageRect
    * @param {!Object} state
    */
-  horizontalPositioning_(clickedElRect, pageRect, state) {
-    const clickedElLeftOffset = clickedElRect.left - pageRect.left;
-    const elCenterLeft = clickedElRect.width / 2 + clickedElLeftOffset;
+  horizontalPositioning_(targetRect, pageRect, state) {
+    const targetLeftOffset = targetRect.left - pageRect.left;
+    const elCenterLeft = targetRect.width / 2 + targetLeftOffset;
     const tooltipWidth = this.tooltip_./*OK*/offsetWidth;
     state.tooltipLeft = elCenterLeft - (tooltipWidth / 2);
     const maxHorizontalLeft = pageRect.width - tooltipWidth - EDGE_PADDING;
@@ -435,7 +435,8 @@ export class AmpStoryTooltip {
 
   /**
    * Clears any attributes or handlers that may have been added to the tooltip,
-   * but weren't used.
+   * but weren't used. E.g. when user clicks on an expandable target but then
+   * clicks away.
    * @private
    */
   clearTooltip_() {
