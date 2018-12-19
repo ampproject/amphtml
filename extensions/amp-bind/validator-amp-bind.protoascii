@@ -58,7 +58,6 @@ tags: {  # <amp-state> (json)
 }
 tags: {  # <amp-state>
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-STATE"
   spec_name: "amp-state"
   requires_extension: "amp-bind"
