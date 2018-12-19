@@ -75,7 +75,7 @@ function getConfig() {
     const config = Object.assign({}, karmaDefault, {
       browsers: ['Chrome_flags'],
       customLaunchers: {
-        Chrome_flags: { /* eslint "google-camelcase/google-camelcase": 0*/
+        Chrome_flags: { // eslint "google-camelcase/google-camelcase": 0
           base: chromeBase,
           flags: formattedFlagList,
         },
