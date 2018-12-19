@@ -45,13 +45,6 @@ const batchSize = 4; // Number of Sauce Lab browsers
 const chromeBase = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 
 const formattedFlagList = [];
-if (argv.chrome_flags) {
-  const flagList = argv.chrome_flags.split(',');
-  flagList.forEach(flag => {
-    formattedFlagList.push('--'.concat(flag));
-  });
-}
-
 
 let saucelabsBrowsers = [];
 /**
@@ -75,6 +68,10 @@ function getConfig() {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
   }
   if (argv.chrome_flags) {
+    const flagList = argv.chrome_flags.split(',');
+    flagList.forEach(flag => {
+      formattedFlagList.push('--'.concat(flag));
+    });
     const config = Object.assign({}, karmaDefault, {
       browsers: ['Chrome_flags'],
       customLaunchers: {
@@ -175,7 +172,7 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
-    'chrome_canary': 'Running tests on Chrome Canary.',
+    chrome_canary: 'Running tests on Chrome Canary.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -757,9 +754,9 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'firefox': '  Runs tests on Firefox',
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
-    'chrome_canary': 'Runs tests on Chrome Canary.',
+    'chrome_canary': 'Runs tests on Chrome Canary',
     'chrome_flags':
-      'Runs tests on version of specified Chrome with the flags passed in',
+      'Uses the given flags to launch Chrome',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +
