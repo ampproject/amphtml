@@ -170,3 +170,24 @@ function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
   }
   return !badParams.length;
 }
+
+/**
+ * Calculates height of responsive matched content slot based on its width.
+ * This logic should be kept as close to possible to the logic inside
+ * adsbygoogle.js.
+ *
+ * @param {number} width
+ * @return {number}
+ */
+export function getMatchedContentResponsiveHeight(width) {
+  if (width >= 1200) {
+    return 600;
+  } else if (width >= 850) {
+    return Math.floor(width * 0.5);
+  } else if (width >= 550) {
+    return Math.floor(width * 0.6);
+  } else if (width >= 468) {
+    return Math.floor(width * 0.7);
+  }
+  return Math.floor(width * 3.44);
+}

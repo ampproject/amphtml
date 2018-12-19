@@ -16,6 +16,7 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
+  getMatchedContentResponsiveHeight,
 } from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
@@ -219,8 +220,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'Ad units with data-full-width must have width="100vw".');
     user().assert(!!this.config.fullWidthHeightRatio,
         'Ad network does not support full width ads.');
-    user().assert(!!this.config.mcFullWidthHeightRatio,
-        'Ad network does not support matched content full width ads.');
     dev().info(TAG_3P_IMPL,
         '#${this.getResource().getId()} Full width requested');
     return true;
@@ -436,9 +435,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   getFullWidthHeight_(width, maxHeight) {
+    // TODO(google a4a eng): remove this once adsense switches fully to
+    // fast fetch.
     if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
-      return Math.max(MIN_FULL_WIDTH_HEIGHT,
-          Math.round(width / this.config.mcFullWidthHeightRatio));
+      return getMatchedContentResponsiveHeight(width);
     }
     return clamp(Math.round(width / this.config.fullWidthHeightRatio),
         MIN_FULL_WIDTH_HEIGHT, maxHeight);
