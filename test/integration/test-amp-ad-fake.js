@@ -17,7 +17,7 @@
 import {RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
+describe.configure().run('A4A', function() {
   this.timeout(15000);
 
   describes.integration('AMPHTML ads rendered on AMP page', {
