@@ -31,7 +31,9 @@ describe.configure().run('inabox', function() {
       <script src="/examples/inabox-tag-integration.js"></script>
       `,
   }, () => {
-    it('should layout amp-img, amp-pixel, amp-analytics', () => {
+    // TODO: unskip this test once #14010 is fixed
+    it.configure().skipSafari('should layout amp-img, amp-pixel, ' +
+        'amp-analytics', () => {
       // See amp4test.js for creative content
 
       const imgPromise = RequestBank.withdraw('image').then(req => {
