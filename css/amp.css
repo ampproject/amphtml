@@ -176,6 +176,18 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   overflow: hidden !important;
 }
 
+/**
+ * TODO(dvoytenko, #19004): if/when "scroll-height-minheight" launched, merge
+ * these styles into _both_: `#i-amphtml-wrapper > body` and
+ * `html.i-amphtml-ios-embed-sd > body` sections above.
+ */
+.i-amphtml-body-minheight > body {
+  /* A slightly overflowing height is necessary to avoid scrolling and
+     rendering bugs on iOS due to
+     https://bugs.webkit.org/show_bug.cgi?id=158342. */
+  min-height: calc(100vh + 1px);
+}
+
 
 .i-amphtml-element {
   display: inline-block;
@@ -422,6 +434,14 @@ i-amphtml-sizer {
 .i-amphtml-element > [placeholder].amp-hidden {
   visibility: hidden;
 }
+/* Placeholder, by design, expands layout=container unlike other layouts where
+   it is position:absolute and overlays the layout box.
+   However, when it goes away it should no longer expand the parent, so instead
+   of visibility:hidden it must be display:none */
+.i-amphtml-layout-container > [placeholder].hidden,
+.i-amphtml-layout-container > [placeholder].amp-hidden {
+  display: none;
+}
 
 .i-amphtml-element:not(.amp-notsupported) > [fallback] {
   display: none;
@@ -498,15 +518,6 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
  */
 .i-amphtml-loading-container.amp-hidden {
   visibility: hidden;
-}
-
-/**
- * The default amp-hidden changes visibility, which takes up space. In the case
- * where amp-list becomes a container via the resizable-children attribute, the
- * loader should be fully hidden and not take up space.
- */
-amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
-  display: none !important;
 }
 
 .i-amphtml-loader-line {
@@ -610,22 +621,6 @@ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
   visibility: visible;
 }
 
-amp-list[load-more] > [load-more-button] > .i-amphtml-loader {
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading],
-amp-list[load-more] > [load-more-failed],
-amp-list[load-more] > [load-more-button]{
-  visibility: hidden;
-}
-
-amp-list[load-more] > [load-more-loading].amp-visible,
-amp-list[load-more] > [load-more-failed].amp-visible,
-amp-list[load-more] > [load-more-button].amp-visible {
-  visibility: visible;
-}
-
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
   display: none !important;
@@ -667,14 +662,9 @@ amp-instagram {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
-  /* Fixed to make position independent of page other elements. */
-  position: fixed !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  visibility: hidden;
+amp-analytics:not(.i-amphtml-element),
+amp-story-auto-ads:not(.i-amphtml-element){
+  display: none !important;
 }
 
 /**
@@ -794,6 +784,26 @@ amp-accordion > section[expanded] > :last-child {
   display: block !important;
 }
 
+/* amp-list CSS to avoid FOUC */
+
+/**
+ * The default amp-hidden changes visibility, which takes up space. In the case
+ * where amp-list becomes a container via the resizable-children attribute, the
+ * loader should be fully hidden and not take up space.
+ */
+ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
+  display: none !important;
+}
+
+/* load-more elements should be hidden by default */
+amp-list[load-more] [load-more-loading],
+amp-list[load-more] [load-more-failed],
+amp-list[load-more] [load-more-button],
+amp-list[load-more] [load-more-end]
+{
+  display: none;
+}
+
 /**
  * amp-story
  */
@@ -830,4 +840,19 @@ amp-story .i-amphtml-loader {
  */
 [amp-fx^="fly-in"] {
   visibility: hidden;
+}
+
+/**
+ * amp-addthis
+ */
+
+/**
+ * Make amp-addthis tool floating if user give data-widget-type
+ */
+
+amp-addthis[data-widget-type="floating"] {
+  position: fixed !important;
+  width:100% !important;
+  height:50px;
+  bottom:0;
 }

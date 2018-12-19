@@ -292,14 +292,16 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - have attribute `charset`
  - do not have attributes `content`, `itemprop`, `name` and `property`
- - have attribute `http-equiv` where attribute value is not `x-dns-prefetch-control`
+ - have attribute `http-equiv` where attribute value is not one of:
+   - `content-security-policy`
+   - `refresh`
+   - `x-dns-prefetch-control`
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
  - have attribute `name` with case-insensitive prefix `i-amphtml-`
  - have attribute `name` with case-insensitive prefix `twitter:`
  - have attribute `name=apple-itunes-app`
- - have attribute `name=copyright`
  - have attribute `name=referrer` [note: this may be inserted by AMP Cache]
  - have attribute `name=robots` [note: this is inserted by AMP Cache]
  - have attribute `name=viewport`

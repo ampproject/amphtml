@@ -19,46 +19,98 @@ import {
   serializeQueryString,
 } from '../../../src/url';
 
-/**
- * "trigger": string
- * "timestamp": null,
- *  "extraUrlParams": !JsonObject
- */
-/** @typedef {!JsonObject} */
-export let batchSegmentDef;
+const EXTRA_URL_PARAM_VAR = '${extraUrlParams}';
 
 /**
- * Please register your batch plugin function below.
+ * @typedef {{
+ *   trigger: (string|undefined),
+ *   timestamp: (number|undefined),
+ *   extraUrlParams: (!JsonObject|undefined)
+ * }}
+ */
+export let BatchSegmentDef;
+
+/**
+ * @typedef {{
+ *   url: string,
+ *   payload: (string|undefined),
+ * }}
+ */
+export let RequestDef;
+
+/**
+ * The interface for all TransportSerializer to implement.
+ * @interface
+ */
+export class TransportSerializerDef {
+
+  /**
+   * @param {string} unusedBaseUrl
+   * @param {!BatchSegmentDef} unusedSegment
+   * @param {boolean} unusedWithPayload
+   * @return {!RequestDef}
+   */
+  generateRequest(unusedBaseUrl, unusedSegment, unusedWithPayload) {}
+
+  /**
+   * @param {string} unusedBaseUrl
+   * @param {!Array<!BatchSegmentDef>} unusedSegments
+   * @param {boolean} unusedWithPayload
+   * @return {!RequestDef}
+   */
+  generateBatchRequest(unusedBaseUrl, unusedSegments, unusedWithPayload) {}
+}
+
+/**
+ * The default serializer.
+ *
+ * @implements {TransportSerializerDef}
+ */
+class DefaultTransportSerializer {
+
+  /** @override */
+  generateRequest(baseUrl, segment, withPayload = false) {
+    if (withPayload) {
+      return {
+        url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
+        payload: JSON.stringify(segment.extraUrlParams),
+      };
+    }
+    return {
+      url: defaultSerializer(baseUrl, [segment]),
+    };
+  }
+
+  /** @override */
+  generateBatchRequest(baseUrl, segments, withPayload = false) {
+    if (withPayload) {
+      return {
+        url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
+        payload: JSON.stringify(
+            segments.map(segment => segment.extraUrlParams)),
+      };
+    }
+    return {
+      url: defaultSerializer(baseUrl, segments),
+    };
+  }
+}
+
+/**
+ * Please register your serializer below.
  * Please keep the object in alphabetic order.
- * Note: extraUrlParams passed in are not encoded. Please make sure to proper
- * encode segments and make sure the final output url is valid.
+ *
+ * @const {Object<string, TransportSerializerDef>}
  */
 export const TransportSerializers = {
-  'default': defaultSerializer,
+  'default': new DefaultTransportSerializer(),
 };
-
-
-/**
- * Please add your batch plugin function below in alphabetic order. All batch
- * plugin function should accept input of a string, an array of batchSegment
- * Then return a string. Note: extraUrlParams passed in are not encoded. Please
- * make sure to proper encode segments and make sure the final output url is
- * valid.
- */
-
-// Below is a function prototype for easy copy
-// /**
-//  * @param {string} baseUrl
-//  * @param {Array<!batchSegmentDef>} batchSegments
-//  * @return {string}
-//  */
-// function ping(baseUrl, batchSegments) {}
 
 /**
  * The default way for merging batch segments
  *
  * @param {string} baseUrl
- * @param {!Array<!batchSegmentDef>} batchSegments
+ * @param {!Array<!BatchSegmentDef>} batchSegments
  * @return {string}
  */
 export function defaultSerializer(baseUrl, batchSegments) {
@@ -67,8 +119,8 @@ export function defaultSerializer(baseUrl, batchSegments) {
       .filter(queryString => !!queryString)
       .join('&');
   let requestUrl;
-  if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
-    requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+  if (baseUrl.indexOf(EXTRA_URL_PARAM_VAR) >= 0) {
+    requestUrl = baseUrl.replace(EXTRA_URL_PARAM_VAR, extraUrlParamsStr);
   } else {
     requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
   }

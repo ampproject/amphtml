@@ -46,20 +46,11 @@ export const Presets = {
       const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(fxElement.getElement(),
-          function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(),
-                {transform:
-                  `translateY(${fxElement.getOffset().toFixed(0)}px)`});
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(),
+          {transform:
+            `translateY(${fxElement.getOffset().toFixed(0)}px)`});
     },
   },
   'fly-in-bottom': {
@@ -84,36 +75,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} + ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} +
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+      });
     },
   },
   'fly-in-left': {
@@ -136,37 +123,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} - ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
+      });
     },
   },
   'fly-in-right': {
@@ -189,37 +171,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
                 'left':
-                  `calc(${style.left} + ${fxElement.getFlyInDistance()}vw)`,
+                  `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
+      });
     },
   },
   'fly-in-top': {
@@ -244,36 +221,32 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // only do this on the first element
       if (!fxElement.initialTrigger) {
         fxElement.getResources().mutateElement(
             fxElement.getElement(), function() {
               const style = computedStyle(fxElement.getAmpDoc().win,
                   fxElement.getElement());
+              const topAsLength = style.top === 'auto' ? '0px' : style.top;
+              const positionKeyword =
+                style.position === 'static' ? 'relative' : style.position;
               setStyles(fxElement.getElement(), {
-                'top': `calc(${style.top} - ${fxElement.getFlyInDistance()}vh)`,
+                'top': `calc(${topAsLength} -
+                  ${fxElement.getFlyInDistance()}vh)`,
                 'visibility': 'visible',
+                'position': positionKeyword,
               });
               fxElement.initialTrigger = true;
             });
       }
 
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
+      });
     },
   },
   'fade-in': {
@@ -296,22 +269,13 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(
-          fxElement.getElement(), function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {
-              'transition-duration': fxElement.getDuration(),
-              'transition-timing-function': fxElement.getEasing(),
-              'opacity': 1,
-            });
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {
+        'transition-duration': fxElement.getDuration(),
+        'transition-timing-function': fxElement.getEasing(),
+        'opacity': 1,
+      });
     },
   },
   'fade-in-scroll': {
@@ -343,10 +307,6 @@ export const Presets = {
         return;
       }
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // Early exit if the animation doesn't need to repeat and it is fully
       // opaque.
       if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
@@ -361,18 +321,9 @@ export const Presets = {
         (marginDelta * fxElement.viewportHeight);
       fxElement.setOffset(offset);
 
-      if (fxElement.isMutateScheduled()) {
-        return;
-      }
-
       // If above the threshold of trigger-position
-      fxElement.setIsMutateScheduled(true);
-      fxElement.getResources().mutateElement(fxElement.getElement(),
-          function() {
-            fxElement.setIsMutateScheduled(false);
-            // Translate the element offset pixels.
-            setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
-          });
+      // Translate the element offset pixels.
+      setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
     },
   },
 };

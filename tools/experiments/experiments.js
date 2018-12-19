@@ -148,6 +148,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
@@ -249,24 +255,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'amp-story-scroll',
-    name: 'Scrollable experience for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/16465',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16466',
-  },
-  {
-    id: 'amp-story-hold-to-pause',
-    name: 'Hold to pause an amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/18714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18715',
-  },
-  {
-    id: 'url-replacement-v2',
-    name: 'new parsing engine for url variables',
-    spec: 'https://github.com/ampproject/amphtml/issues/12119',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -343,9 +331,9 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
   },
   {
-    id: 'linker-meta-opt-in',
-    name: 'Opts-in users that have included the GA client-id meta tag ',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16737',
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
   },
   {
     id: 'amp-consent-v2',
@@ -394,6 +382,37 @@ const EXPERIMENTS = [
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'scroll-height-minheight',
+    name: 'Forces min-height on body (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
+  },
+  {
+    id: 'amp-list-viewport-resize',
+    name: 'Enables amp-list to resize on viewport resize',
+    spec: 'https://github.com/ampproject/amphtml/issues/19945',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
   },
 ];
 

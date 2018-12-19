@@ -306,7 +306,7 @@ export class VideoEntry {
 
       const {win} = this.ampdoc_;
       const {element} = this.video_;
-      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      const actions = Services.actionServiceForDoc(element);
       const name = 'timeUpdate';
       const percent = time / duration;
       const event = createCustomEvent(win, `${TAG}.${name}`,
@@ -322,7 +322,7 @@ export class VideoEntry {
  * @private
  */
 function warnUnimplemented(feature) {
-  dev().warn(TAG, `${feature} unimplemented.`);
+  dev().warn(TAG, '%s unimplemented.', feature);
 }
 
 

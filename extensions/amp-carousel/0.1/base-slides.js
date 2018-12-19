@@ -17,6 +17,8 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';
+import {isFiniteNumber} from '../../../src/types';
+import {user} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {
 
@@ -31,10 +33,19 @@ export class BaseSlides extends BaseCarousel {
     this.hasLoop_ = false;
 
     /** @private {boolean} */
+    this.loopAdded_ = false;
+
+    /** @private {boolean} */
     this.hasAutoplay_ = false;
 
     /** @private {number} */
     this.autoplayDelay_ = 5000;
+
+    /** @protected {?number} */
+    this.autoplayLoops_ = null;
+
+    /** @protected {number} */
+    this.loopsMade_ = 0;
 
     /** @protected {boolean} */
     this.shouldLoop = false;
@@ -48,14 +59,18 @@ export class BaseSlides extends BaseCarousel {
     this.hasLoop_ = this.element.hasAttribute('loop');
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
-
+    const autoplayVal = this.element.getAttribute('autoplay');
+    if (autoplayVal) {
+      this.autoplayLoops_ = parseInt(autoplayVal, 10);
+      user().assert(isFiniteNumber(this.autoplayLoops_));
+    }
     this.buildSlides();
 
     this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
 
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
-    if (this.shouldAutoplay_) {
+    if (this.shouldAutoplay_ && this.autoplayLoops_ != 0) {
       this.setupAutoplay_();
     }
 
@@ -140,6 +155,7 @@ export class BaseSlides extends BaseCarousel {
     // is looping. (to be able to advance past the last item)
     if (!this.hasLoop_) {
       this.element.setAttribute('loop', '');
+      this.loopAdded_ = true;
       this.hasLoop_ = true;
       this.shouldLoop = true;
     }
@@ -150,7 +166,7 @@ export class BaseSlides extends BaseCarousel {
   * @private
   */
   autoplay_() {
-    if (!this.shouldAutoplay_) {
+    if (!this.shouldAutoplay_ || this.autoplayLoops_ == 0) {
       return;
     }
     this.clearAutoplay();
@@ -195,5 +211,22 @@ export class BaseSlides extends BaseCarousel {
       Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
       this.autoplayTimeoutId_ = null;
     }
+  }
+
+  /**
+  * Remove autoplay.
+  * @protected
+  */
+  removeAutoplay() {
+    this.clearAutoplay();
+    if (this.loopAdded_) {
+      // Only remove if specified due to the `autoplay` attribute
+      this.element.removeAttribute('loop');
+      this.loopAdded_ = false;
+      this.hasLoop_ = false;
+      this.shouldLoop = false;
+    }
+    this.hasAutoplay_ = false;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
   }
 }

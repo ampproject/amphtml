@@ -176,8 +176,32 @@ describes.sandboxed('FixedLayer', {}, () => {
     };
   });
 
+  class FakeAttributes {
+    constructor() {
+      const attrs = [];
+      attrs.setNamedItem = function({name, value}) {
+        for (let i = 0; i < this.length; i++) {
+          if (this[i].name === name) {
+            this[i].value = value;
+            return;
+          }
+        }
+        this.push(new FakeAttr(name, value));
+      };
+      return attrs;
+    }
+  }
+  class FakeAttr {
+    constructor(name, value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    cloneNode() {
+      return new FakeAttr(this.name, this.value);
+    }
+  }
   function createElement(id) {
-    const attrs = {};
     const children = [];
     const elem = {
       id,
@@ -283,15 +307,43 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
         return Node.DOCUMENT_POSITION_PRECEDING;
       },
-      hasAttribute: name => {
-        return Object.prototype.hasOwnProperty.call(attrs, name);
+      hasAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return true;
+          }
+        }
+        return false;
       },
-      setAttribute: (name, value) => {
-        attrs[name] = value;
+      getAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            return this.attributes[i].value;
+          }
+        }
+        return null;
       },
-      removeAttribute: name => {
-        delete attrs[name];
+      setAttribute(name, value) {
+        if (name.includes('[')) {
+          throw new Error('invalid characters');
+        }
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes[i].value = value;
+            return;
+          }
+        }
+        this.attributes.push(new FakeAttr(name, value));
       },
+      removeAttribute(name) {
+        for (let i = 0; i < this.attributes.length; i++) {
+          if (this.attributes[i].name === name) {
+            this.attributes.splice(i, 1);
+            return;
+          }
+        }
+      },
+      attributes: new FakeAttributes(),
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
@@ -1449,6 +1501,68 @@ describes.sandboxed('FixedLayer', {}, () => {
           expect(state['F0'].zIndex).to.equal('');
         });
       });
+    });
+
+    it('should sync attributes between body and layer', () => {
+      const {body} = ampdoc.win.document;
+
+      // Necessary to create the fixed layer
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
+      fixedLayer.vsync_ = {
+        runPromise({measure, mutate}, state) {
+          measure(state);
+          mutate(state);
+          return Promise.resolve();
+        },
+      };
+
+      body.setAttribute('test', 'hello');
+      fixedLayer.update();
+      expect(fixedLayer.transferLayer_).to.exist;
+      const layer = fixedLayer.transferLayer_.layer_;
+      expect(layer.getAttribute('test')).to.equal('hello');
+
+      body.removeAttribute('test');
+      body.setAttribute('test1', 'hello1');
+      body.setAttribute('test2', 'hello2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal('hello1');
+      expect(layer.getAttribute('test2')).to.equal('hello2');
+
+      body.removeAttribute('test1');
+      body.removeAttribute('test2');
+      fixedLayer.update();
+      expect(layer.getAttribute('test')).to.equal(null);
+      expect(layer.getAttribute('test1')).to.equal(null);
+      expect(layer.getAttribute('test2')).to.equal(null);
+
+      body.attributes.push(new FakeAttr('[class]', 'amp-bind'));
+      fixedLayer.update();
+      expect(layer.getAttribute('[class]')).to.equal('amp-bind');
+    });
+
+    it('should sync invalid-named attributes to layer', () => {
+      // Holy poop it's hard to inject an invalid-named attribute.
+      // This is a sanity check using real Elements to ensure we can insert
+      // a cloned attribute into another element.
+      let div = document.createElement('div');
+      div.innerHTML = '<div [class]="amp-bind"></div>';
+      div = div.firstElementChild;
+      const attr = div.attributes[0];
+      expect(attr.name).to.equal('[class]');
+      expect(attr.value).to.equal('amp-bind');
+
+      const body = document.createElement('body');
+      body.attributes.setNamedItem(attr.cloneNode(false));
+
+      expect(div.getAttribute('[class]')).to.equal('amp-bind');
+      expect(body.getAttribute('[class]')).to.equal('amp-bind');
+      expect(body.attributes.getNamedItem('[class]')).to.not.equal(
+          div.attributes.getNamedItem('[class]'));
     });
   });
 });

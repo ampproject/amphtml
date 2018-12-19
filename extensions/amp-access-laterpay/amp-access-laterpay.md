@@ -52,7 +52,7 @@ The `amp-access-laterpay` component does not require an authorization or pingbac
 
 The different purchase options can be configured on the publisher's LaterPay account, and the component will retrieve the configuration and create a list of available purchase options.
 
-You can refer to the documentation on configuring the [LaterPay Connector](http://docs.laterpay.net/connector/configuring/), LaterPay's existing front-end integration, to learn how to configure the purchase options.
+You can refer to the documentation on configuring the [LaterPay Connector](https://docs.laterpay.net/connector/configuration/), LaterPay's existing front-end integration, to learn how to configure the purchase options.
 
 The generated list can be styled and presented according to the publisher's preference.
 
@@ -91,14 +91,14 @@ The following values can be set in the `laterpay` config object:
     <td>Comma separated list of identifiers</td>
     <td>By default, the URL of an article is used to match it to a purchase option, but instead of specifying a URL path for a purchase option you can set an Article ID in the LaterPay Connector-UI and then use the <code>articleId</code> property to match the article with the purchase option.
     <br />
-    This is necessary in cases where matching a purchase option by an article’s URL is not flexible enough. See the <a href="http://docs.laterpay.net/connector/inpage_configuration/article_id/">configuration page for the LaterPay Connector()</a> to see learn about some example scenarios in which this is useful.</td>
+    This is necessary in cases where matching a purchase option by an article’s URL is not flexible enough. See the <a href="https://docs.laterpay.net/connector/configuration/inpage_configuration/article_id/">configuration page for the LaterPay Connector()</a> to see learn about some example scenarios in which this is useful.</td>
   </tr>
   <tr>
     <td><code>jwt</code></td>
     <td>JWT token for dynamic payment configuration</td>
     <td>This option allows you specify a signed JSON Web Token with a configuration for the available paid content. This means that you can provide an in page configuration, programatically generated in your pages rather than specifying it manually on LaterPay's Connector Admin interface. This might be specially useful when configuring Single Purchases for many different articles.
     <br />
-    If you'd like more information on how to create this token and what content can be specified in it, please refer to LaterPay's <a href="http://docs.laterpay.net/connector/connector_script_3_beta/#jwt-paid-content-api">JWT Paid Content API</a> documentation for the Connector Script integration.
+    If you'd like more information on how to create this token and what content can be specified in it, please refer to LaterPay's <a href="https://docs.laterpay.net/connector/configuration/inpage_configuration/config_token/#jwt-object-properties">JWT Paid Content API</a> documentation for the Connector Script integration.
     </td>
   </tr>
   <tr>
@@ -255,7 +255,7 @@ The following message keys can be translated or customized, but be aware that th
 
 * [AMP Access](https://www.ampproject.org/docs/reference/components/amp-access)
 * [LaterPay](https://www.laterpay.net)
-* [LaterPay: How we do MicroPayments](http://docs.laterpay.net/how_we_do_micropayments/)
+* [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
 * [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.
 
 ## Validation

@@ -51,8 +51,8 @@ export const getStoreService = win => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP: 1,
-  SCROLL: 2,
+  DESKTOP_PANELS: 1, // Default desktop UI.
+  DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
 };
 
 
@@ -77,14 +77,17 @@ export const UIType = {
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
- *    storyAudioState: boolean,
+ *    storyHasAudioState: boolean,
+ *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
+ *    tooltipElement: ?Element,
  *    uiState: !UIType,
  *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
+ *    pagesCount: number,
  * }}
  */
 export let State;
@@ -115,8 +118,12 @@ export const StateProperty = {
   SHARE_MENU_STATE: 'shareMenuState',
   SIDEBAR_STATE: 'sidebarState',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
-  STORY_HAS_AUDIO_STATE: 'storyAudioState',
+  // Any page has audio, or amp-story has a `background-audio` attribute.
+  STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
+  // amp-story has a `background-audio` attribute.
+  STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
+  TOOLTIP_ELEMENT: 'tooltipElement',
   UI_STATE: 'uiState',
 
   // App data.
@@ -124,6 +131,7 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
+  PAGES_COUNT: 'pagesCount',
 };
 
 
@@ -132,6 +140,7 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
+  SET_PAGES_COUNT: 'setPagesCount',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
@@ -146,7 +155,9 @@ export const Action = {
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
+  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
+  TOGGLE_TOOLTIP: 'toggleTooltip',
   TOGGLE_UI: 'toggleUi',
 };
 
@@ -212,6 +223,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_STORY_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.STORY_HAS_AUDIO_STATE]: !!data}));
+    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
+      return /** @type {!State} */ (Object.assign({}, state,
+          {[StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data}));
     case Action.TOGGLE_LANDSCAPE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
@@ -253,11 +267,17 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data}));
+    case Action.TOGGLE_TOOLTIP:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.PAUSED_STATE]: !!data,
+            [StateProperty.TOOLTIP_ELEMENT]: data,
+          }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             // Keep DESKTOP_STATE for compatiblity with v0.1.
-            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP,
+            [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
             [StateProperty.UI_STATE]: data,
           }));
     case Action.SET_CONSENT_ID:
@@ -269,8 +289,11 @@ const actions = (state, action, data) => {
             [StateProperty.CURRENT_PAGE_ID]: data.id,
             [StateProperty.CURRENT_PAGE_INDEX]: data.index,
           }));
+    case Action.SET_PAGES_COUNT:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.PAGES_COUNT]: data}));
     default:
-      dev().error(TAG, `Unknown action ${action}.`);
+      dev().error(TAG, 'Unknown action %s.', action);
       return state;
   }
 };
@@ -302,7 +325,7 @@ export class AmpStoryStoreService {
    */
   get(key) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Unknown state ${key}.`);
+      dev().error(TAG, 'Unknown state %s.', key);
       return;
     }
     return this.state_[key];
@@ -317,7 +340,7 @@ export class AmpStoryStoreService {
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
-      dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
+      dev().error(TAG, 'Can\'t subscribe to unknown state %s.', key);
       return;
     }
     if (!this.listeners_[key]) {
@@ -381,7 +404,9 @@ export class AmpStoryStoreService {
       [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
+      [StateProperty.TOOLTIP_ELEMENT]: null,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
@@ -389,6 +414,7 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
+      [StateProperty.PAGES_COUNT]: 0,
     });
   }
 

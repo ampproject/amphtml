@@ -25,6 +25,11 @@ If you just want to validate a page, please see
 ## Chrome Extension
 Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
+## Visual Studio Code Extension
+
+An extension for Visual Studio Code
+[VSCode marketplace](https://marketplace.visualstudio.com/items?itemName=amphtml.amphtml-validator)
+
 ## Command Line Tool and Node.js API
 
 Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).

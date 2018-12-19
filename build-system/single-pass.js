@@ -43,6 +43,18 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
+const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+
+// Since we no longer pass the process_common_js_modules flag to closure
+// compiler, we must now tranform these common JS node_modules to ESM before
+// passing them to closure.
+// TODO(rsimha, erwinmombay): Derive this list programmatically if possible.
+const commonJsModules = [
+  'node_modules/dompurify/',
+  'node_modules/promise-pjs/',
+  'node_modules/set-dom/',
+];
+
 // Override to local closure compiler JAR
 ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
@@ -77,7 +89,6 @@ exports.getFlags = function(config) {
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
-    process_common_js_modules: true,
     rewrite_polyfills: false,
     create_source_map: '%outname%.map',
     parse_inline_source_maps: true,
@@ -213,9 +224,12 @@ exports.getBundleFlags = function(g) {
       if (isMain || isAltMainBundle(name)) {
         jsFilesToWrap.push(name);
       } else {
+        const configEntry = getExtensionBundleConfig(originalName);
+        const marker = configEntry && Array.isArray(configEntry.postPrepend) ?
+          SPLIT_MARKER : '';
         flagsArray.push('--module_wrapper', name + ':' +
-           massageWrapper(wrappers.extension(
-               info.name, info.loadPriority, bundleDeps)));
+          massageWrapper(wrappers.extension(
+              info.name, info.loadPriority, bundleDeps, marker)));
       }
     } else {
       throw new Error('Expect to build more than one bundle.');
@@ -387,6 +401,16 @@ function setupBundles(graph) {
 }
 
 /**
+ * Returns true if the file is known to be a common JS module.
+ * @param {string} file
+ */
+function isCommonJsModule(file) {
+  return commonJsModules.some(function(module) {
+    return file.startsWith(module);
+  });
+}
+
+/**
  * Takes all of the nodes in the dependency graph and transfers them
  * to a temporary directory where we can run babel transformations.
  *
@@ -399,12 +423,19 @@ function transformPathsToTempDir(graph, config) {
   }
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    // Don't transform node_module files for now and just copy it.
-    if (f.startsWith('node_modules/')) {
+    // For now, just copy node_module files instead of transforming them. The
+    // exceptions are common JS modules that need to be transformed to ESM
+    // because we now no longer use the process_common_js_modules flag for
+    // closure compiler.
+    if (f.startsWith('node_modules/') && !isCommonJsModule(f)) {
       fs.copySync(f, `${graph.tmp}/${f}`);
     } else {
       const {code} = babel.transformFileSync(f, {
-        plugins: conf.plugins(config.define.indexOf['ESM_BUILD=true'] !== -1),
+        plugins: conf.plugins({
+          isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
+          isCommonJsModule: isCommonJsModule(f),
+          isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
+        }),
         retainLines: true,
       });
       fs.outputFileSync(`${graph.tmp}/${f}`, code);
@@ -419,6 +450,7 @@ function getExtensionBundleConfig(filename) {
 }
 
 const knownExtensions = {
+  mjs: true,
   js: true,
   es: true,
   es6: true,
@@ -490,7 +522,7 @@ exports.singlePassCompile = function(entryModule, options) {
       }),
       move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
     ]);
-  }).then(wrapMainBinaries).catch(e => {
+  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
@@ -511,13 +543,51 @@ function wrapMainBinaries() {
   const prefix = pair[0];
   const suffix = pair[1];
   // Cache the v0 file so we can prepend it to alternative binaries.
-  const mainFile = fs.readFileSync('dist/v0.js');
+  const mainFile = fs.readFileSync('dist/v0.js', 'utf8');
   jsFilesToWrap.forEach(x => {
     const path = `dist/${x}.js`;
     const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
     const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
     fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
         `${fs.readFileSync(path).toString()}${suffix}`);
+  });
+}
+
+/**
+ * Appends the listed file to the built js binary.
+ * TODO(erwinm, #18811): This operation is needed but straight out breaks
+ * source maps.
+ */
+function postProcessConcat() {
+  const extensions = extensionBundles.filter(
+      x => Array.isArray(x.postPrepend));
+  extensions.forEach(extension => {
+    const isAltMainBundle = altMainBundles.some(x => {
+      return x.name === extension.name;
+    });
+    // We assume its in v0 unless its an alternative main binary.
+    const srcTargetDir = isAltMainBundle ? 'dist/' : 'dist/v0/';
+
+    function createFullPath(version) {
+      return `${srcTargetDir}${extension.name}-${version}.js`;
+    }
+
+    let targets = [];
+    if (Array.isArray(extension.version)) {
+      targets = extension.version.map(createFullPath);
+    } else {
+      targets.push(createFullPath(extension.version));
+    }
+    targets.forEach(path => {
+      const prependContent = extension.postPrepend.map(x => {
+        return ';' + fs.readFileSync(x, 'utf8').toString();
+      }).join('');
+      const content = fs.readFileSync(path, 'utf8').toString()
+          .split(SPLIT_MARKER);
+      const prefix = content[0];
+      const suffix = content[1];
+      fs.writeFileSync(path, prefix + prependContent + suffix, 'utf8');
+    });
   });
 }
 

@@ -18,7 +18,6 @@ import {
   purifyHtml,
   purifyTagsForTripleMustache,
   resolveUrlAttr,
-  rewriteAttributeValue,
   rewriteAttributesForElement,
 } from '../../src/purifier';
 
@@ -79,6 +78,11 @@ describe('DOMPurify-based', () => {
           .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
       expect(purify('<p [class]="bar"></p>')).to.be
           .equal('<p data-amp-bind-class="bar" i-amphtml-binding=""></p>');
+    });
+
+    it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
+      expect(purify('<p data-amp-bind-text="foo"></p>')).to.be
+          .equal('<p i-amphtml-binding="" data-amp-bind-text="foo"></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
@@ -319,6 +323,8 @@ function runSanitizerTests() {
           'a<a target="_top">b</a>');
       expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>');
+      expect(purify('a<a href="?__amp_source_origin=foo">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>');
     });
 
     it('should NOT output blacklisted values for class attributes', () => {
@@ -539,18 +545,6 @@ describe('rewriteAttributesForElement', () => {
       expect(element.getAttribute('href')).to.equal('#hash');
       expect(element.hasAttribute('target')).to.equal(false);
     });
-  });
-});
-
-describe('rewriteAttributeValue', () => {
-  it('should be case-insensitive to tag and attribute name', () => {
-    expect(rewriteAttributeValue('a', 'href', '/doc2'))
-        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
-    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
-        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
-    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
-        .to.equal(rewriteAttributeValue(
-            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
   });
 });
 

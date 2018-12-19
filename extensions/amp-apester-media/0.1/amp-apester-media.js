@@ -230,9 +230,10 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /** @param {string} id
-   * @return {string}
+   *  @param {boolean} usePlayer
+   *  @return {string}
    * */
-  constructUrlFromMedia_(id) {
+  constructUrlFromMedia_(id, usePlayer) {
     const queryParams = dict();
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
     queryParams['type'] = this.embedOptions_.playlist
@@ -245,7 +246,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     queryParams['sdk'] = 'amp';
 
     return addParamsToUrl(
-        `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
+        `${this.rendererBaseUrl_}/${usePlayer ? 'v2' : 'interaction'}/`
+         + `${encodeURIComponent(id)}`,
         queryParams
     );
   }
@@ -331,14 +333,18 @@ class AmpApesterMedia extends AMP.BaseElement {
           const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
             ? payload[Math.floor(Math.random() * payload.length)]
             : payload);
-          const src = this.constructUrlFromMedia_(media['interactionId']);
+
+          const interactionId = media['interactionId'];
+          const usePlayer = media['usePlayer'];
+
+          const src = this.constructUrlFromMedia_(interactionId, usePlayer);
           const iframe = this.constructIframe_(src);
           this.intersectionObserverApi_ = new IntersectionObserverApi(
               this,
               iframe
           );
 
-          this.mediaId_ = media['interactionId'];
+          this.mediaId_ = interactionId;
           this.iframe_ = iframe;
           this.registerToApesterEvents_();
 
@@ -355,16 +361,18 @@ class AmpApesterMedia extends AMP.BaseElement {
               .then(() => {
                 return this.loadPromise(iframe).then(() => {
                   return vsync.mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
-                    if (media['campaignData']) {
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                          /** @type {JsonObject} */ ({
-                            type: 'campaigns',
-                            data: media['campaignData'],
-                          }),
-                          '*'
-                      );
+                    if (this.iframe_) {
+                      this.iframe_.classList
+                          .add('i-amphtml-apester-iframe-ready');
+                      if (media['campaignData']) {
+                        this.iframe_.contentWindow./*OK*/ postMessage(
+                            /** @type {JsonObject} */ ({
+                              type: 'campaigns',
+                              data: media['campaignData'],
+                            }),
+                            '*'
+                        );
+                      }
                     }
                     this.togglePlaceholder(false);
                     this.ready_ = true;

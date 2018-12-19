@@ -161,6 +161,17 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 - An `<amp-state>` element's child JSON has a maximum size of 100KB.
 - An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
 
+#### Refreshing state
+
+The `refresh` action is supported by this component and can be used to refresh the
+state's contents.
+
+```html
+<amp-state id="amp-state" ...></amp-state>
+<!-- Clicking the button will refresh and refetch the json in amp-state. -->
+<button on="tap:amp-state.refresh"></button>
+```
+
 #### Updating state with `AMP.setState()`
 
 The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
@@ -372,7 +383,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Expression result must be a space-delimited string.</td>
   </tr>
   <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">The <code>hidden</code> attribute</a></td>
+    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
     <td><code>[hidden]</code></td>
     <td>Should be a boolean expression.</td>
   </tr>
@@ -414,6 +425,17 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;amp-carousel type=slides&gt;</code></td>
     <td><code>[slide]</code><sup>*</sup></td>
     <td>Changes the currently displayed slide index. <a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-date-picker&gt;</code></td>
+    <td>
+      <code>[min]</code><br>
+      <code>[max]</code>
+    </td>
+    <td>
+      Sets the earliest selectable date<br>
+      Sets the latest selectable date
+    </td>
   </tr>
   <tr>
     <td><code>&lt;amp-google-document-embed&gt;</code></td>
@@ -474,6 +496,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;button&gt;</code></td>
     <td><code>[disabled]</code><br><code>[type]</code><br><code>[value]</code></td>
     <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
+  </tr>
+  <tr>
+    <td><code>&lt;details&gt;</code></td>
+    <td><code>[open]</code></td>
+    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
   </tr>
   <tr>
     <td><code>&lt;fieldset&gt;</code></td>

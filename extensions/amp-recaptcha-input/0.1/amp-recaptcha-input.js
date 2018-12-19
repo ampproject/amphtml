@@ -20,20 +20,22 @@
  * recaptcha tokens
  */
 
+import {AsyncInputClasses} from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
 import {
-  installRecaptchaService,
-  recaptchaServiceFor,
+  installRecaptchaServiceForDoc,
+  recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {user} from '../../../src/log';
 
-
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
+
+/** @implements {../../../src/async-input.AsyncInput} */
 export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -46,19 +48,14 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     /** @private {?string} */
     this.action_ = null;
 
-    /** @private {!./amp-recaptcha-service.AmpRecaptchaService} */
-    this.recaptchaService_ = recaptchaServiceFor(this.win);
+    /** @private {?./amp-recaptcha-service.AmpRecaptchaService} */
+    this.recaptchaService_ = null;
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
 
     /** @private {boolean} */
     this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -77,8 +74,12 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         'The data-action attribute is required for <amp-recaptcha-input> %s',
         this.element);
 
+    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
+
     return this.mutateElement(() => {
       toggle(this.element);
+      // Add the required AsyncInput class
+      this.element.classList.add(AsyncInputClasses['ASYNC_INPUT']);
       /**
        * We are applying styles here, to minizime the amp.css file.
        * These styles will create an in-place element, that is 1x1,
@@ -97,11 +98,17 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
       this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
     }
-    return this.registerPromise_;
+
+    return /** @type {!Promise} */ (this.registerPromise_);
   }
 
   /** @override */
@@ -116,13 +123,13 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /**
    * Function to return the recaptcha token.
    * Will be an override of AMP.AsyncInput
-   * @return {Promise<string>}
+   * @override
+   * @return {!Promise<string>}
    */
   getValue() {
-
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
-          this.element.getResourceId(), this.sitekey_, this.action_
+          this.element.getResourceId(), this.action_
       );
     }
     return Promise.reject(new Error(
@@ -133,6 +140,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaService(AMP.win);
+  installRecaptchaServiceForDoc(AMP.ampdoc);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

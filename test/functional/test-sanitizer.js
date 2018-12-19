@@ -58,6 +58,11 @@ describe('Caja-based', () => {
           .equal('<p [text]="foo" [class]="bar" i-amphtml-binding=""></p>');
     });
 
+    it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
+      expect(sanitizeHtml('<p data-amp-bind-text="foo"></p>')).to.be
+          .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
+    });
+
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar". Adding `target` attribute is not necessary
       // (but harmless) since <amp-bind> will use rewriteAttributesForElement().

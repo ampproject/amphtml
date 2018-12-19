@@ -131,6 +131,7 @@ exports.rules = [
       '3p/**->src/consent-state.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -224,6 +225,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-powr-player/0.1/amp-powr-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
@@ -243,6 +246,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
@@ -259,9 +264,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-list/0.1/amp-list.js->' +
             'src/service/position-observer/position-observer-worker.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'src/service/video/docking.js->' +
+      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
@@ -271,9 +276,6 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
           'src/service/position-observer/position-observer-worker.js',
-      // TODO(calebcordry) remove this once experiment is launched
-      'extensions/amp-analytics/0.1/variables.js->' +
-          'src/service/url-replacements-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
           'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
@@ -296,6 +298,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/linker-manager.js->' +
           'src/service/navigation.js',
+      'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
+        'src/service/navigation.js',
       'extensions/amp-list/0.1/amp-list.js->' +
           'src/service/xhr-impl.js',
       'extensions/amp-form/0.1/amp-form.js->' +
@@ -316,11 +320,13 @@ exports.rules = [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
+      '3p/polyfills.js->src/polyfills/object-values.js',
       'src/polyfills.js->src/polyfills/domtokenlist-toggle.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
       'src/polyfills.js->src/polyfills/math-sign.js',
       'src/polyfills.js->src/polyfills/object-assign.js',
+      'src/polyfills.js->src/polyfills/object-values.js',
       'src/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/array-includes.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
@@ -402,8 +408,6 @@ exports.rules = [
       'ads/pulsepoint.js->ads/google/doubleclick.js',
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST **/
-      'ads/criteo.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
     ],
   },

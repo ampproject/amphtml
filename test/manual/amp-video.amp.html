@@ -43,6 +43,10 @@
       font-size: 14px;
     }
 
+    #analytics-events {
+      width: 100%;
+    }
+
     .dropdown-container select {
       margin: 0 0 20px;
     }
@@ -138,15 +142,16 @@
         <button on="tap:my-video.unmute">Unmute</button>
         <button on="tap:my-video.fullscreen">Fullscreen</button>
         <h2>Analytics Events</h2>
-        <table style="margin-bottom: 10px">
+        <table style="margin-bottom: 10px; width: 100%;">
           <thead>
             <tr>
-              <td width="80px">Abs. time</td>
+              <td width="100px">Time of Day</td>
               <td width="80px">Autoplay</td>
-              <td width="200px">Type</td>
-              <td width="150px">Current time</td>
-              <td width="150px">Played Total</td>
-              <td>Duration</td>
+              <td>Type</td>
+              <td width="100px">Current Time</td>
+              <td width="50px">%</td>
+              <td width="100px">Played Total</td>
+              <td width="100px">Duration</td>
             </tr>
           </thead>
         </table>
@@ -157,12 +162,13 @@
         <table id="analytics-events">
           <!-- Empty row hack to force widths in disjointed tables. -->
           <tr class="empty">
+            <td width="100px"></td>
             <td width="80px"></td>
-            <td width="80px"></td>
-            <td width="200px"></td>
-            <td width="150px"></td>
-            <td width="150px"></td>
             <td></td>
+            <td width="100px"></td>
+            <td width="50px"></td>
+            <td width="100px"></td>
+            <td width="100px"></td>
           </tr>
         </table>
       </div>
@@ -173,7 +179,7 @@
     <script type="application/json">
       {
         "requests": {
-          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}"
+          "event": "https://foo.com/event?autoplay=${autoplay}&type=${eventType}&time=${currentTime}&total=${playedTotal}&duration=${duration}&myVar=${custom_myVar}&normalizedPercentage=${normalizedPercentage}"
         },
         "transport": {
           "beacon": false,
@@ -222,6 +228,25 @@
             "selector": "#my-video",
             "vars": {
               "eventType": "video-ended"
+            }
+          },
+          "myVideoPercentagePlayed": {
+            "on": "video-percentage-played",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-percentage-played"
+            },
+            "videoSpec": {
+              "percentages": [25, 50, 75, 100]
+            }
+          },
+          "myVideoCustom": {
+            "on": "video-custom-foo",
+            "request": "event",
+            "selector": "#my-video",
+            "vars": {
+              "eventType": "video-custom"
             }
           }
         }

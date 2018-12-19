@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
@@ -25,9 +26,8 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -1071,9 +1071,14 @@ export class VideoEventTracker extends EventTracker {
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
+    const percentages = videoSpec['percentages'];
+
     const on = config['on'];
 
+    const percentageInterval = 5;
+
     let intervalCounter = 0;
+    let lastPercentage = 0;
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
@@ -1088,7 +1093,7 @@ export class VideoEventTracker extends EventTracker {
 
       if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
         user().error(TAG, 'video-seconds-played requires interval spec ' +
-            'with non-zero value');
+          'with non-zero value');
         return;
       }
 
@@ -1097,6 +1102,43 @@ export class VideoEventTracker extends EventTracker {
         if (intervalCounter % interval !== 0) {
           return;
         }
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
+        if (!percentages) {
+          user().error(TAG,
+              'video-percentage-played requires percentages spec.');
+          return;
+        }
+
+        for (let i = 0; i < percentages.length; i++) {
+          const percentage = percentages[i];
+
+          if (percentage <= 0 || (percentage % percentageInterval) != 0) {
+            user().error(TAG,
+                'Percentages must be set in increments of %s with non-zero ' +
+                  'values',
+                percentageInterval);
+
+            return;
+          }
+        }
+
+        const normalizedPercentage = details['normalizedPercentage'];
+        const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
+
+        dev().assert(isFiniteNumber(normalizedPercentageInt));
+        dev().assert((normalizedPercentageInt % percentageInterval) == 0);
+
+        if (lastPercentage == normalizedPercentageInt) {
+          return;
+        }
+
+        if (percentages.indexOf(normalizedPercentageInt) < 0) {
+          return;
+        }
+
+        lastPercentage = normalizedPercentageInt;
       }
 
       if (isVisibleType && !endSessionWhenInvisible) {
@@ -1142,11 +1184,33 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    let reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
-    // special polyfill for eventType: 'hidden'
-    let createReadyReportPromiseFunc = null;
+    let createReportReadyPromiseFunc = null;
+
+    if (reportWhenSpec) {
+      user().assert(!visibilitySpec['repeat'],
+          'reportWhen and repeat are mutually exclusive.');
+    }
+
     if (eventType == 'hidden') {
-      createReadyReportPromiseFunc = this.createReportReadyPromise_.bind(this);
+      if (reportWhenSpec) {
+        user().error(TAG,
+            'ReportWhen should not be defined when eventType is "hidden"');
+      }
+      // special polyfill for eventType: 'hidden'
+      reportWhenSpec = 'documentHidden';
+    }
+
+    if (reportWhenSpec == 'documentHidden') {
+      createReportReadyPromiseFunc =
+          this.createReportReadyPromiseForDocumentHidden_.bind(this);
+    } else if (reportWhenSpec == 'documentExit') {
+      createReportReadyPromiseFunc =
+          this.createReportReadyPromiseForDocumentExit_.bind(this);
+    } else {
+      user().assert(!reportWhenSpec, 'reportWhen value "%s" not supported.',
+          reportWhenSpec);
     }
 
     // Root selectors are delegated to analytics roots.
@@ -1156,7 +1220,7 @@ export class VisibilityTracker extends EventTracker {
       return visibilityManager.listenRoot(
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -1174,7 +1238,7 @@ export class VisibilityTracker extends EventTracker {
           element,
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector, element),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {
@@ -1185,9 +1249,12 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: documentHidden
    * @return {!Promise}
+   * @private
    */
-  createReportReadyPromise_() {
+  createReportReadyPromiseForDocumentHidden_() {
     const viewer = this.root.getViewer();
 
     if (!viewer.isVisible()) {
@@ -1201,6 +1268,50 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     });
+  }
+
+  /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: documentExit
+   * @return {!Promise}
+   * @private
+   */
+  createReportReadyPromiseForDocumentExit_() {
+    const deferred = new Deferred();
+    const {win} = this.root.ampdoc;
+    let unloadListener, pageHideListener;
+
+    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
+    // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
+    // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
+    // short the difference between them is:
+    // * unload is fired when document is being unloaded. Does not fire on
+    //   Safari.
+    // * pagehide is fired when traversing away from a session history item.
+    // Usually, if one is fired, the other is too, with pagehide being fired
+    // first. An exception is that in Safari (desktop and mobile), pagehide is
+    // fired when navigating to another page, but unload is not.
+    // On mobile Chrome, and mobile Firefox, neither of these will fire if the
+    // user presses the home button, uses the OS task switcher to switch to
+    // a different app, answers an incoming call, etc.
+
+    win.addEventListener('unload', unloadListener = () => {
+      win.removeEventListener('unload', unloadListener);
+      deferred.resolve();
+    });
+
+    // Note: pagehide is currently not supported on Opera Mini, nor IE<=10.
+    // Documentation conflicts as to whether Safari on iOS will also fire it
+    // when switching tabs or switching to another app. Chrome does not fire it
+    // in this case.
+    // Good, but several years old, analysis at:
+    // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
+    // Especially note the event table on this page.
+    win.addEventListener('pagehide', pageHideListener = () => {
+      win.removeEventListener('pagehide', pageHideListener);
+      deferred.resolve();
+    });
+    return deferred.promise;
   }
 
   /**

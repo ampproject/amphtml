@@ -16,6 +16,7 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -44,6 +45,8 @@ import {dev, user} from '../../../src/log';
 import {extractKeyframes} from './keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
 
@@ -84,18 +87,280 @@ const SERVICE_PROPS = {
 
 /**
  */
-export class WebAnimationRunner {
+export class AnimationRunner {
 
   /**
    * @param {!Array<!InternalWebAnimationRequestDef>} requests
    */
   constructor(requests) {
-    /** @const @private */
+    /** @const @protected */
     this.requests_ = requests;
+  }
 
-    /** @private {?Array<!Animation>} */
+  /**
+   * @return {!WebAnimationPlayState}
+   */
+  getPlayState() {
+  }
+
+  /**
+   * @param {function(!WebAnimationPlayState)} unusedHandler
+   * @return {!UnlistenDef}
+   */
+  onPlayStateChanged(unusedHandler) {
+  }
+
+  /**
+  * Initializes the players but does not change the state.
+   */
+  init() {
+  }
+
+  /**
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+  }
+
+  /**
+   */
+  pause() {
+  }
+
+  /**
+   */
+  resume() {
+  }
+
+  /**
+   */
+  reverse() {
+  }
+
+  /**
+   * @param {time} unusedTime
+   */
+  seekTo(unusedTime) {
+  }
+
+  /**
+   * Seeks to a relative position within the animation timeline given a
+   * percentage (0 to 1 number).
+   * @param {number} unusedPercent between 0 and 1
+   */
+  seekToPercent(unusedPercent) {
+  }
+
+  /**
+   */
+  finish() {
+  }
+
+  /**
+   */
+  cancel() {
+  }
+
+  /**
+   * @param {!WebAnimationPlayState} unusedPlayState
+   * @private
+   */
+  setPlayState_(unusedPlayState) {
+  }
+}
+
+/**
+ */
+export class AnimationWorkletRunner extends AnimationRunner {
+
+  /**
+   * @param {!Window} win
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   * @param {?Object=} viewportData
+   */
+  constructor(win, requests, viewportData) {
+    super(requests);
+
+    /** @const @private */
+    this.win_ = win;
+
+    /** @protected {?Array<!WorkletAnimation>} */
+    this.players_ = [];
+
+    /** @private {number} */
+    this.topRatio_ = viewportData['top-ratio'];
+
+    /** @private {number} */
+    this.bottomRatio_ = viewportData['bottom-ratio'];
+
+    /** @private {number} */
+    this.topMargin_ = viewportData['top-margin'];
+
+    /** @private {number} */
+    this.bottomMargin_ =
+      viewportData['bottom-margin'];
+  }
+
+  /**
+   * @return {string}
+   */
+  createCodeBlob_() {
+    //TODO(nainar): This code should be moved into a self-
+    // contained file.
+    // See issue: https://github.com/ampproject/amphtml/issues/19155
+    return `
+    registerAnimator('anim${++animIdCounter}', class {
+      constructor(options = {
+        'time-range': 0,
+        'start-offset': 0,
+        'end-offset': 0,
+        'top-ratio': 0,
+        'bottom-ratio': 0,
+        'element-height': 0,
+      }) {
+        this.timeRange = options['time-range'];
+        this.startOffset = options['start-offset'];
+        this.endOffset = options['end-offset'];
+        this.topRatio = options['top-ratio'];
+        this.bottomRatio = options['bottom-ratio'];
+        this.height = options['element-height'];
+      }
+      animate(currentTime, effect) {
+        if (currentTime == NaN) {
+          return;
+        }
+
+        // This function mirrors updateVisibility_ in amp-position-observer
+        const currentScrollPos =
+        ((currentTime / this.timeRange) *
+        (this.endOffset - this.startOffset)) +
+        this.startOffset;
+        const halfViewport = (this.startOffset + this.endOffset) / 2;
+        const relativePositionTop = currentScrollPos > halfViewport;
+
+        const ratioToUse = relativePositionTop ?
+        this.topRatio : this.bottomRatio;
+        const offset = this.height * ratioToUse;
+        let isVisible = false;
+
+        if (relativePositionTop) {
+          isVisible =
+          currentScrollPos + this.height >= (this.startOffset + offset);
+        } else {
+          isVisible =
+          currentScrollPos <= (this.endOffset - offset);
+        }
+        if (isVisible) {
+          effect.localTime = currentTime;
+        }
+  
+      }
+    });
+    `;
+  }
+
+  /**
+  * @override
+  * Initializes the players but does not change the state.
+   */
+  init() {
+    this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        setStyles(request.target,
+            assertDoesNotContainDisplay(request.vars));
+      }
+      // TODO(nainar): This switches all animations to AnimationWorklet.
+      // Limit only to Scroll based animations for now.
+      CSS.animationWorklet.addModule(
+          URL.createObjectURL(new Blob([this.createCodeBlob_()],
+              {type: 'text/javascript'}))).then(() => {
+        const {documentElement} = this.win_.document;
+        const viewportService = Services.viewportForDoc(documentElement);
+
+        const scrollSource = viewportService.getScrollingElement();
+        const elementRect = request.target./*OK*/getBoundingClientRect();
+        const scrollTimeline = new this.win_.ScrollTimeline({
+          scrollSource,
+          orientation: 'block',
+          timeRange: request.timing.duration,
+          startScrollOffset: `${this.topMargin_}px`,
+          endScrollOffset: `${this.bottomMargin_}px`,
+          fill: request.timing.fill,
+        });
+        const keyframeEffect = new KeyframeEffect(request.target,
+            request.keyframes, request.timing);
+        const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
+            [keyframeEffect],
+            scrollTimeline, {
+              'time-range': request.timing.duration,
+              'start-offset': this.topMargin_,
+              'end-offset': this.bottomMargin_,
+              'top-ratio': this.topRatio_,
+              'bottom-ratio': this.bottomRatio_,
+              'element-height': elementRect.height,
+            });
+        player.play();
+        this.players_.push(player);
+      });
+    });
+  }
+
+  /**
+   * Readjusts the given rect using the configured exclusion margins.
+   * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
+   * @private
+   */
+  applyMargins_(rect) {
+    dev().assert(rect);
+    rect = layoutRectLtwh(
+        rect.left,
+        (rect.top + this.topMargin_),
+        rect.width,
+        (rect.height - this.bottomMargin_ - this.topMargin_)
+    );
+
+    return rect;
+  }
+
+  /**
+   * @override
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+  }
+
+  /**
+   * @override
+   */
+  cancel() {
+    if (!this.players_) {
+      return;
+    }
+    this.players_.forEach(player => {
+      player.cancel();
+    });
+  }
+
+}
+
+/**
+ */
+export class WebAnimationRunner extends AnimationRunner {
+
+  /**
+   * @param {!Array<!InternalWebAnimationRequestDef>} requests
+   */
+  constructor(requests) {
+    super(requests);
+
+    /** @protected {?Array<!Animation>} */
     this.players_ = null;
-
 
     /** @private {number} */
     this.runningCount_ = 0;
@@ -108,6 +373,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @return {!WebAnimationPlayState}
    */
   getPlayState() {
@@ -115,6 +381,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {function(!WebAnimationPlayState)} handler
    * @return {!UnlistenDef}
    */
@@ -123,6 +390,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players but does not change the state.
    */
   init() {
@@ -133,7 +401,8 @@ export class WebAnimationRunner {
         setStyles(request.target,
             assertDoesNotContainDisplay(request.vars));
       }
-      const player = request.target.animate(request.keyframes, request.timing);
+      const player = request.target.animate(
+          request.keyframes, request.timing);
       player.pause();
       return player;
     });
@@ -149,6 +418,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Initializes the players if not already initialized,
    * and starts playing the animations.
    */
@@ -160,6 +430,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   pause() {
     dev().assert(this.players_);
@@ -172,6 +443,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   resume() {
     dev().assert(this.players_);
@@ -191,15 +463,18 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   reverse() {
     dev().assert(this.players_);
+    // TODO(nainar) there is no reverse call on WorkletAnimation
     this.players_.forEach(player => {
       player.reverse();
     });
   }
 
   /**
+   * @override
    * @param {time} time
    */
   seekTo(time) {
@@ -212,6 +487,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * Seeks to a relative position within the animation timeline given a
    * percentage (0 to 1 number).
    * @param {number} percent between 0 and 1
@@ -224,6 +500,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   finish() {
     if (!this.players_) {
@@ -238,6 +515,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    */
   cancel() {
     if (!this.players_) {
@@ -250,6 +528,7 @@ export class WebAnimationRunner {
   }
 
   /**
+   * @override
    * @param {!WebAnimationPlayState} playState
    * @private
    */
@@ -379,6 +658,9 @@ export class Builder {
    */
   constructor(win, rootNode, baseUrl, vsync, resources) {
     /** @const @private */
+    this.win_ = win;
+
+    /** @const @private */
     this.css_ = new CssContextImpl(win, rootNode, baseUrl);
 
     /** @const @private */
@@ -392,22 +674,34 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
+
+    /** @private {boolean} */
+    this.useAnimationWorklet_ =
+      Services.platformFor(this.win_).isChrome() &&
+      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+      'animationWorklet' in CSS;
   }
 
   /**
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
+   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!WebAnimationRunner>}
    */
-  createRunner(spec, opt_args) {
+  createRunner(spec, hasPositionObserver = false, opt_args,
+    opt_viewportData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return new WebAnimationRunner(requests);
+        return this.useAnimationWorklet_ && hasPositionObserver ?
+          new AnimationWorkletRunner(this.win_, requests,
+              opt_viewportData) :
+          new WebAnimationRunner(requests);
       });
     });
   }

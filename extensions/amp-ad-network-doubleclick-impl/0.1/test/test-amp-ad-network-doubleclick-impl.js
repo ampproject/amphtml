@@ -411,6 +411,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           {
             getUpgradeDelayMs: () => 1,
           });
+
+      // Make sure the ad iframe (FIE) has a local URL replacements service.
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(a).returns(urlReplacements);
+
       impl.buildCallback();
       impl.size_ = {width: 123, height: 456};
       impl.onCreativeRender({customElementExtensions: []});
@@ -545,7 +551,28 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
+          /(\?|&)bdt=[1-9][0-9]*(&|$)/,
         ].forEach(regexp => expect(url).to.match(regexp));
+      });
+    });
+
+    it('includes psts param when there are pageview tokens', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      const impl2 = new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      impl2.setPageviewStateToken('def');
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/);
+        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*abc(%2C[^&]+)*(&|$)/);
+      });
+    });
+
+    it('does not include psts param when there are no pageview tokens', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      new AmpAdNetworkDoubleclickImpl(element);
+      impl.setPageviewStateToken('abc');
+      return impl.getAdUrl().then(url => {
+        expect(url).to.not.match(/(\?|&)psts=([^&]+%2C)*abc(%2C[^&]+)*(&|$)/);
       });
     });
 
@@ -1074,20 +1101,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_).to.be.ok;
         expect(impl.adUrl_.length).to.be.ok;
       });
-    });
-
-    it('should force layout to `fixed` if `responsive`', () => {
-      impl.element.setAttribute('layout', 'responsive');
-      impl.element.setAttribute('data-multi-size', '320x50');
-      impl.populateAdUrlState();
-      expect(impl.element.getAttribute('layout')).to.equal('fixed');
-    });
-
-    it('should not change layout if not `responsive`', () => {
-      impl.element.setAttribute('layout', 'not-responsive');
-      impl.element.setAttribute('data-multi-size', '320x50');
-      impl.populateAdUrlState();
-      expect(impl.element.getAttribute('layout')).to.equal('not-responsive');
     });
   });
 

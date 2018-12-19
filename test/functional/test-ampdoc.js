@@ -222,6 +222,14 @@ describe('AmpDocService', () => {
       }).to.throw(/No ampdoc found/);
     });
 
+    it('should allow checking for an AmpDoc for an external node', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      const ampDoc = service.getAmpDocIfAvailable(host);
+      expect(ampDoc).to.be.null;
+    });
+
     it('should fail to install shadow doc twice', () => {
       if (!shadowRoot) {
         return;

@@ -257,7 +257,7 @@ export class PinWidget {
       this.pinId = this.pinUrl.split('/pin/')[1].split('/')[0];
     } catch (err) {
       return Promise.reject(
-          user().createError('Invalid pinterest url: ' + this.pinUrl)
+          user().createError('Invalid pinterest url: %s', this.pinUrl)
       );
     }
 

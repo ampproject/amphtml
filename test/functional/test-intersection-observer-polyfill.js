@@ -20,8 +20,16 @@ import {
   IntersectionObserverPolyfill,
   getIntersectionChangeEntry,
   getThresholdSlot,
+  intersectionRatio,
 } from '../../src/intersection-observer-polyfill';
+import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
+
+const fakeAmpDoc = {
+  getRootNode: () => {return window.document;},
+  win: window,
+  isSingleDoc: () => {return true;},
+};
 
 describe('IntersectionObserverApi', () => {
   let sandbox;
@@ -31,6 +39,20 @@ describe('IntersectionObserverApi', () => {
   let baseElement;
   let ioApi;
   let tickSpy;
+
+  const mockViewport = {
+    getRect: () => {
+      return layoutRectLtwh(50, 100, 150, 200);
+    },
+    onScroll: () => {
+      onScrollSpy();
+      return () => {};
+    },
+    onChanged: () => {
+      onChangeSpy();
+      return () => {};
+    },
+  };
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-intersection.html';
@@ -51,6 +73,10 @@ describe('IntersectionObserverApi', () => {
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
+    sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+      return mockViewport;
+    });
+    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
     testEle = {
       isBuilt: () => {return true;},
       getOwner: () => {return null;},
@@ -68,19 +94,7 @@ describe('IntersectionObserverApi', () => {
         };
       },
       getViewport: () => {
-        return {
-          getRect: () => {
-            return layoutRectLtwh(50, 100, 150, 200);
-          },
-          onScroll: () => {
-            onScrollSpy();
-            return () => {};
-          },
-          onChanged: () => {
-            onChangeSpy();
-            return () => {};
-          },
-        };
+        return mockViewport;
       },
       isInViewport: () => {return false;},
     };
@@ -132,10 +146,13 @@ describe('IntersectionObserverApi', () => {
   });
 
   it('should destroy correctly', () => {
-    const subscriptionApiDestroySy =
-        sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    const subscriptionApiDestroySpy =
+      sandbox.spy(ioApi.subscriptionApi_, 'destroy');
+    const polyfillDisconnectSpy =
+      sandbox.spy(ioApi.intersectionObserver_, 'disconnect');
     ioApi.destroy();
-    expect(subscriptionApiDestroySy).to.be.called;
+    expect(subscriptionApiDestroySpy).to.be.called;
+    expect(polyfillDisconnectSpy).to.be.called;
     expect(ioApi.unlistenOnDestroy_).to.be.null;
     expect(ioApi.intersectionObserver_).to.be.null;
     expect(ioApi.subscriptionApi_).to.be.null;
@@ -194,6 +211,7 @@ describe('IntersectionObserverPolyfill', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
+    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
   });
 
   afterEach(() => {
@@ -283,6 +301,23 @@ describe('IntersectionObserverPolyfill', () => {
     beforeEach(() => {
       callbackSpy = sandbox.spy();
       io = new IntersectionObserverPolyfill(callbackSpy);
+
+      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getRect: () => {
+            return layoutRectLtwh(50, 100, 150, 200);
+          },
+        };
+      });
+      sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
+        return {
+          onNextPass: callback => {
+            callback();
+          },
+        };
+      });
+
+
       element = {
         isBuilt: () => {return true;},
         getOwner: () => {return null;},
@@ -349,7 +384,49 @@ describe('IntersectionObserverPolyfill', () => {
       expect(callbackSpy).to.be.calledOnce;
     });
 
+    describe('mutation observer', () => {
+      it('should create a mutation observer,' +
+        ' on initial observer', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+      });
 
+      it('should not create a mutation observer,' +
+        ' if one already exists', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        const mutationObserver = io.mutationObserver_;
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        expect(io.mutationObserver_).to.be.equal(mutationObserver);
+      });
+
+      it('should remove mutation observer,' +
+        ' on disconnect', () => {
+        io = new IntersectionObserverPolyfill(callbackSpy, {
+          threshold: [0, 1],
+        });
+        element.getLayoutBox = () => {
+          return layoutRectLtwh(0, 0, 100, 100);
+        };
+        io.observe(element);
+        expect(io.mutationObserver_).to.be.ok;
+        io.disconnect();
+        expect(io.mutationObserver_).to.not.be.ok;
+      });
+    });
 
     describe('w/o container should get IntersectionChangeEntry when', () => {
       it('completely in viewport', () => {
@@ -683,5 +760,35 @@ describe('IntersectionObserverPolyfill', () => {
         }]);
       });
     });
+  });
+});
+
+describe('intersectionRatio', () => {
+
+  let smallRectMock;
+  let largeRectMock;
+  beforeEach(() => {
+    smallRectMock = {
+      width: 100,
+      height: 100,
+    };
+    largeRectMock = {
+      width: 200,
+      height: 200,
+    };
+  });
+
+  it('should return a valid ratio', () => {
+    const ratio = intersectionRatio(smallRectMock, largeRectMock);
+    expect(ratio).to.be.equal(0.25);
+  });
+
+  it('should not return NaN', () => {
+    const notVisibleMock = {
+      width: 0,
+      height: 0,
+    };
+    const ratio = intersectionRatio(notVisibleMock, notVisibleMock);
+    expect(ratio).to.not.be.equal(NaN);
   });
 });

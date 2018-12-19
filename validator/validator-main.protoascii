@@ -26,7 +26,7 @@ min_validator_revision_required: 348
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 749
+spec_file_revision: 790
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -259,6 +259,7 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attrs: { name: "async" }
   attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
@@ -386,7 +387,7 @@ tags: {
       properties: { name: "width" mandatory: true value: "device-width" }
       properties: { name: "height" }
       properties: { name: "initial-scale" }
-      properties: { name: "minimum-scale" mandatory: true value_double: 1.0 }
+      properties: { name: "minimum-scale" }
       properties: { name: "maximum-scale" }
       properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
@@ -873,6 +874,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   html_format: EXPERIMENTAL
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -905,6 +907,10 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
       }
       at_rule_spec: {
         name: 'supports'
@@ -981,6 +987,18 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: false
+          type: 'all'
+          type: 'print'
+          type: 'screen'
+          type: 'speech'
+          feature: 'width'
+          feature: 'height'
+          feature: 'aspect-ratio'
+          feature: 'orientation'
+          feature: 'resolution'
+        }
       }
       at_rule_spec: {
         name: 'supports'
@@ -1051,6 +1069,20 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       at_rule_spec: {
         name: 'media'
         type: PARSE_AS_RULES
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      at_rule_spec: {
+        name: 'page'
+        type: PARSE_AS_DECLARATIONS
       }
       at_rule_spec: {
         name: '$DEFAULT'  # matches if none of the above match
@@ -1076,45 +1108,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     }
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#stylesheets"
-}
-tags: {
-  html_format: AMP
-  html_format: EXPERIMENTAL
-  tag_name: "STYLE"
-  spec_name: "head > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "HEAD"
-  # Special Case. This tag is deprecated, however this matches any <style> tag
-  # in the document head without an associated attribute. This is far more
-  # likely to happen to be caused by the user intending to use
-  # <style amp-custom> than having used a deprecated amp-boilerplate. So, for
-  # this case, we do not emit deprecation warnings. Note that the <noscript>
-  # component of the deprecated boilerplate will still emit a deprecation
-  # warning.  See https://github.com/ampproject/amphtml/issues/4421
-  #deprecation: "head > style[amp-boilerplate]"
-  #deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata: {
-    cdata_regex: "body ?{opacity: ?0}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-}
-tags: {
-  html_format: AMP
-  tag_name: "STYLE"
-  spec_name: "noscript > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
-  unique: true
-  mandatory_parent: "NOSCRIPT"
-  mandatory_ancestor: "HEAD"
-  deprecation: "noscript > style[amp-boilerplate]"
-  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
-  attrs: { name: "nonce" }
-  cdata {
-    cdata_regex: "body ?{opacity: ?1}"
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   html_format: AMP
@@ -1543,6 +1536,7 @@ tags: {
       # Blackberry messenger
       # (http://devblog.blackberry.com/2015/02/cross-platform-sharing-with-bbm/)
       protocol: "bbmi"
+      protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
@@ -1557,6 +1551,7 @@ tags: {
       protocol: "viber"
       protocol: "webcal"
       protocol: "web+mastodon"  # See GitHub issue #14793
+      protocol: "wh"
       protocol: "whatsapp"
       allow_empty: true
     }
@@ -1617,7 +1612,7 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#links"
 }
 # AMP4EMAIL restricts the use of mustache delimiters in href. The only allowed
-# protocols for href are https and mailto. Relative urls are disallowed.
+# protocols for href are http, https and mailto. Relative urls are disallowed.
 tags: {
   html_format: AMP4EMAIL
   tag_name: "A"
@@ -1626,6 +1621,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      protocol: "http"
       protocol: "https"
       protocol: "mailto"
       allow_relative: false
@@ -1955,7 +1951,14 @@ tags: {
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   attrs: { name: "alt" }
+  attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
+  attrs: {
+    name: "decoding"
+    value: "async"
+    value: "auto"
+    value: "sync"
+  }
   attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "ismap" }
   attrs: {
@@ -1977,6 +1980,7 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
 }
 # 4.7.2 The iframe element
@@ -2079,7 +2083,35 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
+# 4.7.7 The picture element
+# Only allowed in noscript tags which support img tags.
+tags: {
+  html_format: AMP
+  tag_name: "PICTURE"
+  mandatory_parent: "NOSCRIPT"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
 # 4.7.8 The source element
+tags: {
+  html_format: AMP
+  tag_name: "SOURCE"
+  spec_name: "picture > source"
+  mandatory_parent: "PICTURE"  # PICTURE is only allowed inside NOSCRIPT
+  attrs: { name: "media" }
+  attrs: { name: "sizes" }
+  attrs: {
+    name: "srcset"
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+      allow_relative: true
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+}
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -2401,6 +2433,7 @@ attr_lists: {
   attrs: { name: "filter" }
   attrs: { name: "flood-color" }
   attrs: { name: "flood-opacity" }
+  attrs: { name: "focusable" }
   attrs: { name: "font-family" }
   attrs: { name: "font-size" }
   attrs: { name: "font-size-adjust" }
@@ -3680,7 +3713,6 @@ tags {  # <form method=GET ...>
 tags {  # <form method=POST ...>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: EXPERIMENTAL
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
   requires_extension: "amp-form"
@@ -4414,10 +4446,36 @@ tags: {
   tag_name: "LEGEND"
 }
 
+# 4.11 (HTML5.3) Interactive elements
+# 4.11.1 (HTML5.3) The details element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "DETAILS"
+  attrs: {
+    name: "open"
+    value: ""
+  }
+  attrs: { name: "[open]" }
+}
+# 4.11.2 (HTML5.3) The summary element
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "SUMMARY"
+  mandatory_parent: "DETAILS"
+}
+
 # 4.11 Scripting
 # 4.11.1 The script element
-# Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed.
+# Only the amphtml script, custom extensions and the LD/JSON or TEXT/PLAIN
+# description are allowed.
+# Note that the type TEXT/PLAIN description is define in
+# validator-amp-mustache.protoascii.
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL

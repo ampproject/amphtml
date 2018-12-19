@@ -42,7 +42,7 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
-[desktop].i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+.i-amphtml-story-desktop-panels.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0 !important;
 }
 
@@ -193,15 +193,15 @@
   display: block !important;
 }
 
-.audio-playing:not([muted]) .i-amphtml-story-mute-audio-control,
-.audio-playing[muted] .i-amphtml-story-unmute-audio-control {
+.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
 
-.audio-playing[muted] .i-amphtml-story-mute-text,
-[i-amphtml-story-audio-state].audio-playing:not([muted]) .i-amphtml-story-unmute-sound-text,
-:not([i-amphtml-story-audio-state]).audio-playing:not([muted]) .i-amphtml-story-unmute-no-sound-text {
+.i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
+:not([i-amphtml-current-page-has-audio]).i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-no-sound-text {
   display: block !important;
 }
 
@@ -248,7 +248,7 @@
   display: none !important;
 }
 
-[desktop].i-amphtml-story-system-layer {
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
   top: auto !important;
   bottom: 0 !important;
@@ -259,18 +259,18 @@
   flex-direction: row-reverse !important;
 }
 
-[desktop] .i-amphtml-story-progress-bar {
+.i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
   position: relative !important;
   height: 3px !important;
   width: calc(100vw / 3) !important;
   margin: 0 24px !important;
 }
 
-[desktop] .i-amphtml-story-page-progress-bar {
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
   border-radius: 100px !important;
 }
 
-[desktop].i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
+.i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
   display: flex !important;
   height: 40px !important;
   align-items: center !important;
@@ -278,7 +278,7 @@
   margin-top: 0px !important;
 }
 
-[desktop] .i-amphtml-story-share-control {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-control {
   display: none !important;
 }
 
@@ -294,7 +294,7 @@ div.i-amphtml-story-share-pill-container {
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-[desktop] div.i-amphtml-story-share-pill-container {
+.i-amphtml-story-desktop-panels div.i-amphtml-story-share-pill-container {
   display: block !important;
 }
 
@@ -426,39 +426,39 @@ span.i-amphtml-story-share-pill-label {
   padding: 0;
 }
 
-[desktop] .i-amphtml-story-share-icon {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon {
   font-size: 0px!important;
   background-size: 24px 24px !important;
   background-position: center center !important;
   padding: 0 !important;
 }
 
-[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon.amp-social-share-facebook {
   /* SVG icon has inner padding, so the glyph renders visually smaller than
    * other icons, so we work around it by setting a higher background size. */
   background-size: 28px 28px !important;
   background-position: center center !important;
 }
 
-[desktop] .i-amphtml-story-share-icon::before {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  background-color: transparent !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-label {
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-share-icon:active::before {
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-share-list {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
   margin-right: 72px !important;
 }
 
-[dir=rtl][desktop] .i-amphtml-story-share-list {
+[dir=rtl].i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
   margin-right: 0 !important;
   margin-left: 72px !important;
 }
 
 /* system layer changes */
 
-[desktop] .i-amphtml-story-share-pill-container {
+.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill-container {
   z-index: 100002 !important; /* 1 higher than bookend */
 }

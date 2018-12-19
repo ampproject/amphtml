@@ -19,7 +19,9 @@ import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
+import {
+  getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
+} from '../service';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
@@ -48,13 +50,18 @@ const PERMITTED_POSITIONS = ['top','bottom','center'];
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    const context = (opt_win)
+      ? opt_win.document.documentElement
+      : ampdoc.getHeadNode();
+
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(context);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -65,9 +72,10 @@ export class StandardActions {
     this.installActions_(this.actions_);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
+    installServiceInEmbedScope(embedWin, 'standard-actions',
+        new StandardActions(ampdoc, embedWin));
   }
 
   /**
@@ -106,8 +114,9 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const ampdoc = getAmpdoc(node);
-        return Services.bindForDocOrNull(ampdoc).then(bind => {
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });

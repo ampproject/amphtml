@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,7 +22,7 @@ import {loadScript, validateData, writeScript} from '../3p/3p';
  */
 export function adgeneration(global, data) {
   validateData(data, ['id'],
-      ['targetid', 'displayid', 'adtype', 'async', 'option']);
+      ['targetid', 'displayid', 'adtype', 'option']);
 
   // URL encoding
   const option = data.option ? encodeQueryValue(data.option) : null;
@@ -31,21 +31,15 @@ export function adgeneration(global, data) {
       'id=' + encodeURIComponent(data.id) +
       '&width=' + encodeURIComponent(data.width) +
       '&height=' + encodeURIComponent(data.height) +
+      '&async=true' +
       '&adType=' +
-      (data.adtype ? encodeURIComponent(data.adtype.toUpperCase()) : 'FREE') +
-      '&async=' +
-      (data.async ? encodeURIComponent(data.async.toLowerCase()) : 'false') +
+      (validateAdType(data.adType)) +
       '&displayid=' +
       (data.displayid ? encodeURIComponent(data.displayid) : '1') +
       '&tagver=2.0.0' +
       (data.targetid ? '&targetID=' + encodeURIComponent(data.targetid) : '') +
       (option ? '&' + option : '');
-
-  if (data.async && data.async.toLowerCase() === 'true') {
-    loadScript(global, url);
-  } else {
-    writeScript(global, url);
-  }
+  loadScript(global, url);
 }
 
 /**
@@ -59,4 +53,20 @@ function encodeQueryValue(str) {
         val = v.split('=')[1];
     return encodeURIComponent(key) + '=' + encodeURIComponent(val);
   }).join('&');
+}
+/**
+ * If adtype is "RECTANGLE", replace it with "RECT"
+ * @param {string} str
+ * @return {string}
+ */
+function validateAdType(str) {
+  if (str != null) {
+    const upperStr = encodeURIComponent(str.toUpperCase());
+    if (upperStr === 'RECTANGLE') {
+      return 'RECT';
+    } else {
+      return upperStr;
+    }
+  }
+  return 'FREE';
 }

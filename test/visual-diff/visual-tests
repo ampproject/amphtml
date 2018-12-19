@@ -56,7 +56,7 @@
    *     "width": 400,
    *     "height": 600
    *   },
-   *    
+   *
    *   // [optional] CSS selectors for elements that must never appear on the
    *   // webpage.
    *   "forbidden_css": [
@@ -106,6 +106,27 @@
    *   // allow you to interact with elements on the page in the same capacity
    *   // that a user would. (e.g., click on links, swipe gallery images.)
    *   "enable_percy_javascript": true,
+   *
+   *   // [optional, EXPERIMENTAL] Path of JavaScript file relative to webserver
+   *   // root that exports a dictionary of (async) test functions keyed by a
+   *   // short descriptive name. Each test function is passed two arguments: a
+   *   // reference to the Puppeteer page, and the full name of the test (page
+   *   // name + test name). e.g., the JS file can be:
+   *   //   module.exports = {
+   *   //     'tap red button': async (page, name) => {
+   *   //       await page.tap('#red_button');
+   *   //       await verifyCssElements(page, name, null, ['.red-loading'],
+   *   //         ['.red-loaded']);
+   *   //     },
+   *   //     'tap red and blue button': async (page, name) => {
+   *   //       await page.tap('#red_button');
+   *   //       await page.tap('#blue_button');
+   *   //       await verifyCssElements(page, name, null,
+   *   //         ['.red-loading', '.blue-loading'],
+   *   //         ['.red-loaded', '.blue-loaded']);
+   *   //     },
+   *   //   };
+   *   "interactive_tests": "examples/visual-tests/foo/foo-test.js",
    *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous
@@ -170,7 +191,8 @@
       "loading_complete_css": [
         ".list1",
         ".list2"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
     {
       "url": "examples/visual-tests/amp-lightbox-gallery.html",
@@ -296,6 +318,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
@@ -485,6 +509,8 @@
       ]
     },
     {
+      "flaky": true,
+      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
@@ -540,6 +566,43 @@
       "loading_complete_css": [
         ".i-amphtml-story-no-rotation-overlay"
       ]
-    }
+    },
+    {
+      "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
+      "name": "AMP Inabox GPT Ad",
+      "loading_complete_css": [
+        ".slot-render-ended",
+        ".slot-onload",
+      ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "name": "amp-story: tooltip",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
+    },
+    {
+      "flaky": true,
+      // See https://percy.io/ampproject/amphtml/builds/1179875
+      "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
+      "name": "amp-story: tooltip desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
+      "name": "amp-story: pagination-buttons desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_css": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
+    },
   ]
 }

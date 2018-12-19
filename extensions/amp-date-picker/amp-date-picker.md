@@ -324,10 +324,14 @@ an initial end date dynamically.
 The earliest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `min` attribute is present, the current date will be the minimum date.
 
+The `min` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
+
 ##### max
 
 The latest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `max` attribute is present, the date picker will have no maximum date.
+
+The `max` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 #####  month-format
 
@@ -359,6 +363,12 @@ If no `week-day-format` is present, the weekdays display as the first character 
 ##### locale
 
 The locale to use for rendering the calendar view. The default locale is `"en"`.
+
+##### maximum-nights
+
+The number of nights that the user's selection may not exceed in a date range.
+The default is `"0"`.
+A value of `"0"` allows the user to select an unlimited number of nights.
 
 ##### minimum-nights
 

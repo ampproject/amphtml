@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-const root = document.createElement('div');
-root.className = "root";
-document.body.appendChild(root);
-
-function createButton(label, onClick) {
-  const btn = document.createElement('button');
-  const text = document.createTextNode(label);
-  btn.appendChild(text);
-  btn.addEventListener('click', onClick);
-  root.appendChild(btn);
-}
-
-createButton('Insert Hello World!', () => {
+document.getElementById('hello').addEventListener('click', () => {
   const el = document.createElement('h1');
   el.textContent = 'Hello World!';
   document.body.appendChild(el);
 });
 
 // <amp-img> should be allowed.
-createButton('Insert amp-img', () => {
+document.getElementById('amp-img').addEventListener('click', () => {
   const el = document.createElement('amp-img');
   el.setAttribute('width', '300');
   el.setAttribute('height', '200');
@@ -42,13 +30,13 @@ createButton('Insert amp-img', () => {
 });
 
 // <script> should be sanitized.
-createButton('Insert <script>', () => {
+document.getElementById('script').addEventListener('click', () => {
   const el = document.createElement('script');
   document.body.appendChild(el);
 });
 
 // <img> should be sanitized.
-createButton('Insert <img>', () => {
+document.getElementById('img').addEventListener('click', () => {
   const el = document.createElement('img');
   document.body.appendChild(el);
 });

@@ -368,6 +368,21 @@ describe('Store', () => {
     });
   });
 
+  it('should update a value w/o changing timestamp', () => {
+    store.set('key1', 'value1', true);
+    clock.tick(101);
+    store.set('key2', 'value2', true);
+    store.set('key1', 'value1b', true);
+    expect(store.get('key1')).to.equal('value1b');
+    expect(Object.keys(store.values_).length).to.equal(2);
+    expect(store.values_['key1']['t']).to.equal(0);
+    expect(store.values_['key2']['t']).to.equal(101);
+    expect(store.values_).to.deep.equal({
+      'key1': {v: 'value1b', t: 0},
+      'key2': {v: 'value2', t: 101},
+    });
+  });
+
   it('should remove a value', () => {
     store.set('key1', 'value1');
     store.set('key2', 'value2');

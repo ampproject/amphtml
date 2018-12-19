@@ -59,7 +59,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.configJson_ = null;
 
-    /** @private {?./web-animations.WebAnimationRunner} */
+    /** @private {?./web-animations.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?Promise} */
@@ -67,6 +67,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?Pass} */
     this.restartPass_ = null;
+
+    /** @private {boolean} */
+    this.hasPositionObserver_ = false;
   }
 
   /** @override */
@@ -87,9 +90,8 @@ export class AmpAnimation extends AMP.BaseElement {
       user().assert(
           this.element.parentNode == this.element.ownerDocument.body ||
           this.element.parentNode == ampdoc.getBody(),
-          `${TAG} is only allowed as a direct child of <body> element` +
-          ' when trigger is visibility.' +
-          ' This restriction will be removed soon.');
+          '%s is only allowed as a direct child of <body> element when trigger'
+          + ' is visibility. This restriction will be removed soon.', TAG);
     }
 
     // Parse config.
@@ -288,7 +290,11 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    return this.createRunnerIfNeeded_().then(() => {
+    this.hasPositionObserver_ = !!invocation.caller &&
+      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
+    const viewportData = (invocation && invocation.event) ?
+      invocation.event.additionalViewportData : null;
+    return this.createRunnerIfNeeded_(null, viewportData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -403,12 +409,14 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise}
    * @private
    */
-  createRunnerIfNeeded_(opt_args) {
+  createRunnerIfNeeded_(opt_args, opt_viewportData) {
     if (!this.runnerPromise_) {
-      this.runnerPromise_ = this.createRunner_(opt_args).then(runner => {
+      this.runnerPromise_ = this.createRunner_(
+          opt_args, opt_viewportData).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -442,10 +450,11 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?JsonObject=} opt_args
+   * @param {?Object=} opt_viewportData
    * @return {!Promise<!./web-animations.WebAnimationRunner>}
    * @private
    */
-  createRunner_(opt_args) {
+  createRunner_(opt_args, opt_viewportData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
@@ -468,7 +477,8 @@ export class AmpAnimation extends AMP.BaseElement {
           baseUrl,
           this.getVsync(),
           this.element.getResources());
-      return builder.createRunner(configJson, args);
+      return builder.createRunner(configJson,
+          this.hasPositionObserver_, args, opt_viewportData);
     });
   }
 

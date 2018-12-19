@@ -34,12 +34,14 @@ import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
+import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
 import {FACEBOOKPIXEL_CONFIG} from './vendors/facebookpixel';
 import {GEMIUS_CONFIG} from './vendors/gemius';
 import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
+import {KEEN_CONFIG} from './vendors/keen';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -58,10 +60,12 @@ import {
 import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
 import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
+import {PERMUTIVE_CONFIG} from './vendors/permutive';
 import {PIANO_CONFIG} from './vendors/piano';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
+import {RETARGETLY_CONFIG} from './vendors/retargetly';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
   ADOBEANALYTICS_NATIVECONFIG_CONFIG,
@@ -71,6 +75,7 @@ import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
 import {TREASUREDATA_CONFIG} from './vendors/treasuredata';
@@ -180,6 +185,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'comscore': COMSCORE_CONFIG,
   'cxense': CXENSE_CONFIG,
   'dynatrace': DYNATRACE_CONFIG,
+  'epica': EPICA_CONFIG,
   'euleriananalytics': EULERIANANALYTICS_CONFIG,
   'facebookpixel': FACEBOOKPIXEL_CONFIG,
   'gemius': GEMIUS_CONFIG,
@@ -189,6 +195,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'ibeatanalytics': IBEATANALYTICS_CONFIG,
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
+  'keen': KEEN_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
@@ -209,14 +216,17 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'oracleInfinityAnalytics': ORACLEINFINITYANALYTICS_CONFIG,
   'parsely': PARSELY_CONFIG,
   'piStats': PISTATS_CONFIG,
+  'permutive': PERMUTIVE_CONFIG,
   'piano': PIANO_CONFIG,
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
+  'retargetly': RETARGETLY_CONFIG,
   'rakam': RAKAM_CONFIG,
   'segment': SEGMENT_CONFIG,
   'shinystat': SHINYSTAT_CONFIG,
   'simplereach': SIMPLEREACH_CONFIG,
   'snowplow': SNOWPLOW_CONFIG,
+  'teaanalytics': TEAANALYTICS_CONFIG,
   'tealiumcollect': TEALIUMCOLLECT_CONFIG,
   'top100': TOP100_CONFIG,
   'topmailru': TOPMAILRU_CONFIG,

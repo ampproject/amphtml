@@ -37,6 +37,17 @@ const HIGHLIGHT_DISMISS = 'highlightDismiss';
 const HIGHLIGHT_STATE = 'highlightState';
 
 /**
+ *
+ * @type {string}
+ */
+const PARAM_OLD_TOP_DISCREPANCY = 'od';
+
+/**
+ * @type {string}
+ */
+const PARAM_NEW_TOP_DISCREPANCY = 'nd';
+
+/**
  * The length limit of highlight param to avoid parsing
  * a incredibley large string as JSON. The limit is 100kB.
  * @type {number}
@@ -192,9 +203,11 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
+      // The background color is same as Android Chrome text finding.
+      // https://cs.chromium.org/chromium/src/chrome/android/java/res/values/colors.xml?l=158&rcl=8b461e376e824c72fec1d6d91cd6633ba344dd55&q=ff9632
       setStyles(n, {
-        backgroundColor: '#ff0',
-        color: '#333',
+        backgroundColor: '#ff9632',
+        color: '#000',
       });
     }
 
@@ -263,6 +276,32 @@ export class HighlightHandler {
   }
 
   /**
+   * Adjust scroll-top if the right scroll position is changed or
+   * the final scroll position is wrong after animation.
+   * This is necessary to center highlighted texts properly in pages reported
+   * in #18917
+   * @param {number} oldTop
+   * @return {?JsonObject}
+   */
+  mayAdjustTop_(oldTop) {
+    // Double-check the highlighted nodes are centered after animation.
+    const newTop = this.calcTopToCenterHighlightedNodes_();
+    const current = this.viewport_.getScrollTop();
+    if (current == newTop && current == oldTop) {
+      return null;
+    }
+    const shownParam = dict();
+    if (current != newTop) {
+      this.viewport_.setScrollTop(newTop);
+      shownParam[PARAM_NEW_TOP_DISCREPANCY] = current - newTop;
+    }
+    if (current != oldTop) {
+      shownParam[PARAM_OLD_TOP_DISCREPANCY] = current - oldTop;
+    }
+    return shownParam;
+  }
+
+  /**
    * @param {number} top
    * @private
    */
@@ -292,8 +331,8 @@ export class HighlightHandler {
     body.appendChild(sentinel);
     this.sendHighlightState_('auto_scroll');
     this.viewport_.animateScrollIntoView(sentinel).then(() => {
-      this.sendHighlightState_('shown');
       body.removeChild(sentinel);
+      this.sendHighlightState_('shown', this.mayAdjustTop_(top));
     });
   }
 

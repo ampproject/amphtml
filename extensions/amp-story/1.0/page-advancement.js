@@ -20,11 +20,11 @@ import {
 } from './amp-story-store-service';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
+import {TOOLTIP_TRIGGERABLE_SELECTORS} from './amp-story-tooltip';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
@@ -114,8 +114,9 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should cease taking effect.
+   * @param {boolean=} unusedCanResume
    */
-  stop() {
+  stop(unusedCanResume) {
     this.isRunning_ = false;
   }
 
@@ -248,10 +249,10 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
     this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop();
+      advancementMode.stop(canResume);
     });
   }
 }
@@ -322,12 +323,10 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   startListening_() {
-    if (isExperimentOn(this.win_, 'amp-story-hold-to-pause')) {
-      this.element_
-          .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
-      this.element_
-          .addEventListener('touchend', this.onTouchend_.bind(this), true);
-    }
+    this.element_
+        .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
+    this.element_
+        .addEventListener('touchend', this.onTouchend_.bind(this), true);
     this.element_
         .addEventListener(
             'click', this.maybePerformNavigation_.bind(this), true);
@@ -425,11 +424,40 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * For an element to trigger a tooltip it has to be descendant of
+   * amp-story-page but not of amp-story-cta-layer.
+   * @param {!Event} event
+   * @return {boolean}
+   * @private
+   */
+  canShowTooltip_(event) {
+    let valid = true;
+    return !!closest(dev().assertElement(event.target), el => {
+      if (el.tagName.toLowerCase() == 'amp-story-cta-layer') {
+        valid = false;
+        return false;
+      }
+      return el.tagName.toLowerCase() == 'amp-story-page' && valid;
+    }, /* opt_stopAt */ this.element_);
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    */
   maybePerformNavigation_(event) {
+    const target = dev().assertElement(event.target);
+
+    if (this.canShowTooltip_(event) &&
+      matches(target, TOOLTIP_TRIGGERABLE_SELECTORS.join(','))) {
+      // Clicked element triggers a tooltip, so we dispatch the corresponding
+      // event and skip navigation.
+      event.preventDefault();
+      this.storeService_.dispatch(Action.TOGGLE_TOOLTIP, target);
+      return;
+    }
+
     if (!this.isRunning() ||
       !this.isNavigationalClick_(event) ||
       this.isProtectedTarget_(event) ||
@@ -508,6 +536,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.delayMs_ = delayMs;
 
     /** @private {?number} */
+    this.remainingDelayMs_ = null;
+
+    /** @private {?number} */
     this.startTimeMs_ = null;
 
     /** @private {number|string|null} */
@@ -525,9 +556,17 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   start() {
     super.start();
-    this.startTimeMs_ = this.getCurrentTimestampMs_();
 
-    this.timeoutId_ = this.timer_.delay(() => this.onAdvance(), this.delayMs_);
+    if (this.remainingDelayMs_) {
+      this.startTimeMs_ =
+          this.getCurrentTimestampMs_() -
+              (this.delayMs_ - this.remainingDelayMs_);
+    } else {
+      this.startTimeMs_ = this.getCurrentTimestampMs_();
+    }
+
+    this.timeoutId_ = this.timer_.delay(
+        () => this.onAdvance(), this.remainingDelayMs_ || this.delayMs_);
 
     this.onProgressUpdate();
 
@@ -538,12 +577,18 @@ class TimeBasedAdvancement extends AdvancementConfig {
   }
 
   /** @override */
-  stop() {
+  stop(canResume = false) {
     super.stop();
 
     if (this.timeoutId_ !== null) {
       this.timer_.cancel(this.timeoutId_);
     }
+
+    // Store the remaining time if the advancement can be resume, ie: if it is
+    // paused.
+    this.remainingDelayMs_ = canResume ?
+      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_() :
+      null;
   }
 
   /** @override */

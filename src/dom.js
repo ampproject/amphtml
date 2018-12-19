@@ -632,18 +632,16 @@ export function templateContentClone(template) {
 }
 
 /**
- * Iterate over an array-like. Some collections like NodeList are
- * lazily evaluated in some browsers, and accessing `length` forces full
- * evaluation. We can improve performance by iterating until an element is
- * `undefined` to avoid checking the `length` property.
- * Test cases: https://jsperf.com/iterating-over-collections-of-elements
+ * Iterate over an array-like.
+ * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
  * @param {!IArrayLike<T>} iterable
  * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {
-  for (let i = 0, value; (value = iterable[i]) !== undefined; i++) {
-    cb(value, i);
+  const {length} = iterable;
+  for (let i = 0; i < length; i++) {
+    cb(iterable[i], i);
   }
 }
 

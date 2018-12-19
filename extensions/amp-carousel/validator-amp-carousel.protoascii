@@ -42,7 +42,7 @@ tags: {  # <amp-carousel>
   }
   attrs: {
     name: "autoplay"
-    value: ""
+    value_regex: "(|[0-9]+)"
   }
   attrs: { name: "controls" }
   attrs: {

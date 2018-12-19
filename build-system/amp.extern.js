@@ -198,6 +198,8 @@ window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
 
+window.__AMP_TOP;
+window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
@@ -228,6 +230,8 @@ AmpConfigType.prototype.canary;
 AmpConfigType.prototype.runtime;
 /* @public {boolean} */
 AmpConfigType.prototype.test;
+/* @public {string|undefined} */
+AmpConfigType.prototype.spt;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -260,16 +264,19 @@ function IframeTransportContext() {}
 IframeTransportContext.onAnalyticsEvent;
 IframeTransportContext.sendResponseToCreative;
 
+/** @typedef {function(!JsonObject)} */
+let VegaChartFactory;
+
 // amp-viz-vega related externs.
 /**
- * @typedef {{spec: function(!JsonObject, function())}}
+ * @typedef {{spec: function(!JsonObject, function(?Error, !VegaChartFactory))}}
  */
 let VegaParser;
 /**
  * @typedef {{parse: VegaParser}}
  */
 let VegaObject;
-/* @type {VegaObject} */
+/* @type {!VegaObject} */
 window.vg;
 
 // amp-date-picker externs
@@ -279,19 +286,19 @@ window.vg;
 let ReactRender = function() {};
 
 /**
- * @struct
+ * @dict
  */
 let PropTypes = {};
 
 /**
- * @struct
+ * @@dict
  */
 let ReactDates = {};
 
 /** @constructor */
 ReactDates.DayPickerSingleDateController;
 
-/** @struct */
+/** @dict */
 ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
@@ -304,7 +311,7 @@ ReactDates.isInclusivelyBeforeDay;
 ReactDates.isSameDay;
 
 /**
- * @struct
+ * @dict
  */
 let ReactDatesConstants = {};
 

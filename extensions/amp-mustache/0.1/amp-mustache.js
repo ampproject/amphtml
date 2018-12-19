@@ -20,15 +20,11 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
-  parse as mustacheParse,
-  render as mustacheRender,
-  setUnescapedSanitizer,
-} from '../../../third_party/mustache/mustache';
-import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
 import {user} from '../../../src/log';
+import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
@@ -48,7 +44,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
 
     user().warn(TAG, 'The extension "amp-mustache-0.1.js" is deprecated. ' +
         'Please use a more recent version of this extension.');
@@ -64,23 +60,51 @@ export class AmpMustache extends AMP.BaseTemplate {
     }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
-    let index = 0;
-    const content = templateContentClone(this.element);
-    iterateCursor(content.querySelectorAll('template'), nestedTemplate => {
-      const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
-      this.nestedTemplates_[nestedTemplateKey] = nestedTemplate./*OK*/outerHTML;
 
+    /** @private @const {string} */
+    this.template_ = this.initTemplateString_();
+
+    mustache.parse(this.template_, /* tags */ undefined);
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  initTemplateString_() {
+    if (this.element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(this.element);
+      this.processNestedTemplates_(content);
+      const container = this.element.ownerDocument.createElement('div');
+      container.appendChild(content);
+      return container./*OK*/innerHTML;
+    } else if (this.element.tagName == 'SCRIPT') {
+      return this.element.textContent;
+    }
+
+    return '';
+  }
+
+  /**
+   * Stores and replaces nested templates with custom triple-mustache pointers.
+   *
+   * This prevents the outer-most template from replacing variables in nested
+   * templates. Note that this constrains nested template markup to the more
+   * restrictive sanitization rules of triple-mustache.
+   *
+   * @param {!DocumentFragment} content
+   */
+  processNestedTemplates_(content) {
+    const templates = content.querySelectorAll('template');
+    iterateCursor(templates, (nestedTemplate, index) => {
+      const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
+      this.nestedTemplates_[nestedTemplateKey] =
+          nestedTemplate./*OK*/outerHTML;
       const nestedTemplateAsVariable = this.element.ownerDocument
           .createTextNode(`{{{${nestedTemplateKey}}}}`);
       nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
           nestedTemplate);
-      index++;
     });
-    const container = this.element.ownerDocument.createElement('div');
-    container.appendChild(content);
-    /** @private @const {string} */
-    this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_, /* tags */ undefined);
   }
 
   /** @override */
@@ -94,7 +118,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     if (typeof data === 'object') {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
-    const html = mustacheRender(this.template_, mustacheData,
+    const html = mustache.render(this.template_, mustacheData,
         /* partials */ undefined);
     return this.serializeHtml_(html);
   }

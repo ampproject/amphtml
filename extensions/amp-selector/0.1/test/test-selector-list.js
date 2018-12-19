@@ -120,26 +120,30 @@ describes.realWin('amp-selector amp-list interaction', {
   it('should load selector options correctly with template', function() {
     return layoutPromise.then(() => {
       return poll('wait for options to construct', () => {
-        return selector.options_.length > 0;
+        // TODO: Integration tests really should not be inspecting ivars, or
+        // anything other than DOM-observable properties and attributes.
+        return selector.getElementsForTesting().length > 0;
       }, () => {}, 1000);
-    })
-        .then(() => {
-          expect(selector.options_.length).to.equal(2);
-          expect(selector.options_[0].getAttribute('option')).to.equal('0');
-          expect(selector.options_[1].getAttribute('option')).to.equal('1');
-        });
+    }).then(() => {
+      const options = selector.getElementsForTesting();
+      expect(options.length).to.equal(2);
+      expect(options[0].getAttribute('option')).to.equal('0');
+      expect(options[1].getAttribute('option')).to.equal('1');
+    });
   });
 
   it('should not call init again if no actual option is changed', function() {
-    let opts;
+    let options;
     let initCount;
     return layoutPromise.then(() => {
       return poll('wait for options to construct', () => {
-        return selector.options_.length > 0;
+        // TODO: Integration tests really should not be inspecting ivars, or
+        // anything other than DOM-observable properties and attributes.
+        return selector.getElementsForTesting().length > 0;
       }, () => {}, 1000);
     })
         .then(() => {
-          opts = selector.options_;
+          options = selector.getElementsForTesting();
           initCount = AmpSelector.prototype.init_.callCount;
 
           refreshDeferred = new Deferred();
@@ -152,7 +156,7 @@ describes.realWin('amp-selector amp-list interaction', {
           return refreshDeferred.promise;
         })
         .then(() => {
-          expect(opts).to.equal(selector.options_);
+          expect(options).to.equal(selector.getElementsForTesting());
           expect(AmpSelector.prototype.init_.callCount).to.equal(initCount);
         });
   });

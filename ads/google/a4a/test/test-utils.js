@@ -513,6 +513,22 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should include domLoading time', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
+          });
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {

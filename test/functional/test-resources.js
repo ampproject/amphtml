@@ -1634,6 +1634,24 @@ describe('Resources discoverWork', () => {
       });
     });
   });
+
+  describe('onNextPass', () => {
+
+    it('should only run callbacks once.', () => {
+      resources.isRuntimeOn_ = true;
+      resources.documentReady_ = true;
+      resources.firstPassAfterDocumentReady_ = true;
+
+      const passCallback = sandbox.spy();
+      resources.onNextPass(passCallback);
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+    });
+  });
 });
 
 describes.realWin('Resources contentHeight', {
@@ -1643,12 +1661,14 @@ describes.realWin('Resources contentHeight', {
 }, env => {
   let win;
   let resources;
-  let viewerSendMessageStub;
+  let viewerSendMessageStub, viewportContentHeightChangedStub;
 
   beforeEach(() => {
     win = env.win;
     resources = win.services.resources.obj;
     viewerSendMessageStub = sandbox.stub(resources.viewer_, 'sendMessage');
+    viewportContentHeightChangedStub =
+        sandbox.stub(resources.viewport_, 'contentHeightChanged');
     sandbox.stub(resources.vsync_, 'run').callsFake(task => {
       task.measure({});
     });
@@ -1675,6 +1695,7 @@ describes.realWin('Resources contentHeight', {
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+    expect(viewportContentHeightChangedStub).to.be.calledOnce;
   });
 
   it('should not send contentHeight to viewer if height is not changed', () => {
@@ -1686,6 +1707,7 @@ describes.realWin('Resources contentHeight', {
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.contentHeight_).to.equal(contentHeight);
     expect(viewerSendMessageStub).to.not.be.called;
+    expect(viewportContentHeightChangedStub).to.not.be.called;
   });
 
   it('should send contentHeight to viewer if viewport resizes', () => {
@@ -1701,6 +1723,7 @@ describes.realWin('Resources contentHeight', {
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+    expect(viewportContentHeightChangedStub).to.be.calledOnce;
   });
 
 });
