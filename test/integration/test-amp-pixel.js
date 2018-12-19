@@ -15,7 +15,7 @@
  */
 
 import {AmpPixel} from '../../builtins/amp-pixel';
-import {RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
@@ -26,7 +26,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
     params: {
       a: 123,
     },
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-pixel');
+    });
+
     it('should expand the TITLE macro', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url)
@@ -38,7 +43,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
 
   describes.integration('amp-pixel referrer integration test', {
     body: `<amp-pixel src="${RequestBank.getUrl()}">`,
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-pixel');
+    });
+
     it('should keep referrer if no referrerpolicy specified', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
@@ -50,7 +60,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   describes.integration('amp-pixel no-referrer integration test', {
     body: `<amp-pixel src="${RequestBank.getUrl()}"
              referrerpolicy="no-referrer">`,
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-pixel');
+    });
+
     it('should remove referrer if referrerpolicy=no-referrer', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');

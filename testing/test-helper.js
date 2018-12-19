@@ -205,6 +205,27 @@ export class BrowserController {
     });
   }
 
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementLayout(selector, timeout = 5000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    const tags = [].map.apply(elements, e => e.tagName);
+    return poll(`${tags} to layout`,
+        () => {
+          const notLaidOut = [].some.apply(elements,
+              e => !e.classList.contains('i-amphtml-layout'));
+          return !notLaidOut;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
   click(selector) {
     const element = this.doc_.querySelector(selector);
     if (element) {
