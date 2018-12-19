@@ -1367,7 +1367,21 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
     throw invalidMethod;
   }
 
-   if (req.headers['amp-same-origin'] == 'true') {
+  if (req.headers.origin) {
+    origin = req.headers.origin;
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidOrigin}));
+      throw invalidOrigin;
+    }
+
+    if (!opt_ignoreMissingSourceOrigin &&
+        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({message: invalidSourceOrigin}));
+      throw invalidSourceOrigin;
+    }
+  } else if (req.headers['amp-same-origin'] == 'true') {
     origin = getUrlPrefix(req);
   } else {
     res.statusCode = 401;
