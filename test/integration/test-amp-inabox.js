@@ -24,7 +24,7 @@ describe.configure().run('inabox', function() {
     amp: false,
     body: `
       <iframe
-      src="//ads.localhost:9876/amp4test/inabox/${RequestBank.getBrowserId()}"
+      src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
           scrolling="no"
           width="300" height="250">
       </iframe>
@@ -49,6 +49,4 @@ describe.configure().run('inabox', function() {
       return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
     });
   });
-
-  // TODO: add visible trigger test for BTF case. Currently blocked by #14010
 });

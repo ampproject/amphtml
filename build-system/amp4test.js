@@ -154,7 +154,7 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
 /**
  * Serves a fake ad for test-amp-ad-fake.js
  */
-app.get(['/a4a/:bid', '/inabox/:bid'], (req, res) => {
+app.get('/a4a/:bid', (req, res) => {
   const sourceOrigin = req.query['__amp_source_origin'];
   if (sourceOrigin) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
