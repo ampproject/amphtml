@@ -30,8 +30,14 @@ const colors = require('ansi-colors');
 const config = require('./config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {
+  gitBranchName,
+  gitDiffColor,
+  gitDiffCommitLog,
+  gitDiffNameOnlyMaster,
+  gitDiffStatMaster,
+} = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
-const {gitDiffColor, gitDiffNameOnlyMaster, gitDiffStatMaster} = require('./git');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -87,18 +93,19 @@ function timedExecOrDie(cmd) {
 }
 
 /**
- * Returns a list of files in the commit range within this pull request (PR)
- * after filtering out commits to master from other PRs.
- * @return {!Array<string>}
+ * Prints a summary of files changed by, and commits included in the PR.
  */
-function filesInPr() {
-  const files = gitDiffNameOnlyMaster();
-  const changeSummary = gitDiffStatMaster();
+function printChangeSummary() {
+  const filesChanged = gitDiffStatMaster();
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
-  console.log(changeSummary);
-  return files;
+  console.log(filesChanged);
+
+  console.log(fileLogPrefix, 'Commit log since branch',
+      colors.cyan(gitBranchName()), 'was forked from',
+      colors.cyan('master') + ':');
+  console.log(gitDiffCommitLog() + '\n');
 }
 
 /**
@@ -574,6 +581,7 @@ function main() {
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
     process.env['LOCAL_PR_CHECK'] = true;
+    printChangeSummary();
     console.log(fileLogPrefix, 'Running all pr-check commands locally.');
     runAllCommandsLocally();
     stopTimer('pr-check.js', startTime);
@@ -591,7 +599,8 @@ function main() {
     stopTimer('pr-check.js', startTime);
     return 0;
   }
-  const files = filesInPr();
+  printChangeSummary();
+  const files = gitDiffNameOnlyMaster();
   const buildTargets = determineBuildTargets(files);
 
   // Exit early if flag-config files are mixed with runtime files.
