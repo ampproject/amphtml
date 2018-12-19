@@ -58,9 +58,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
   beforeEach(() => {
     canonical = 'https://canonical.com/doc1';
     userErrorStub = sandbox.stub(user(), 'error');
-    sandbox.stub(Services, 'urlForDoc').returns({
-      parse: url => parseUrlDeprecated(url),
-    });
   });
 
   function getReplacements(opt_options) {
@@ -169,7 +166,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
         documentElement: {
           nodeType: /* element */ 1,
         },
-        head: document.createElement('head'),
       },
       Math: {
         random: () => 0.1234,

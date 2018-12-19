@@ -132,15 +132,15 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the canonical URL for this AMP document.
     this.set('CANONICAL_HOST', () =>
-      this.parseUrl_(this.getDocInfo_().canonicalUrl).host);
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).host);
 
     // Returns the hostname of the canonical URL for this AMP document.
     this.set('CANONICAL_HOSTNAME', () =>
-      this.parseUrl_(this.getDocInfo_().canonicalUrl).hostname);
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).hostname);
 
     // Returns the path of the canonical URL for this AMP document.
     this.set('CANONICAL_PATH', () =>
-      this.parseUrl_(this.getDocInfo_().canonicalUrl).pathname);
+      parseUrlDeprecated(this.getDocInfo_().canonicalUrl).pathname);
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -155,7 +155,7 @@ export class GlobalVariableSource extends VariableSource {
             if (!referrer) {
               return null;
             }
-            const referrerHostname = this.parseUrl_(getSourceUrl(referrer))
+            const referrerHostname = parseUrlDeprecated(getSourceUrl(referrer))
                 .hostname;
             const currentHostname =
                 WindowInterface.getHostname(win);
@@ -179,13 +179,13 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
-      const url = this.parseUrl_(win.location.href);
+      const url = parseUrlDeprecated(win.location.href);
       return url && url.host;
     });
 
     // Returns the hostname of the URL for this AMP document.
     this.set('AMPDOC_HOSTNAME', () => {
-      const url = this.parseUrl_(win.location.href);
+      const url = parseUrlDeprecated(win.location.href);
       return url && url.hostname;
     });
 
@@ -200,15 +200,15 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the host of the Source URL for this AMP document.
     this.set('SOURCE_HOST', () =>
-      this.parseUrl_(this.getDocInfo_().sourceUrl).host);
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).host);
 
     // Returns the hostname of the Source URL for this AMP document.
     this.set('SOURCE_HOSTNAME', () =>
-      this.parseUrl_(this.getDocInfo_().sourceUrl).hostname);
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).hostname);
 
     // Returns the path of the Source URL for this AMP document.
     this.set('SOURCE_PATH', () =>
-      this.parseUrl_(this.getDocInfo_().sourceUrl).pathname);
+      parseUrlDeprecated(this.getDocInfo_().sourceUrl).pathname);
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
@@ -596,17 +596,6 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Return the parsed url for doc.
-   * @param {string} url
-   * @param {boolean=} opt_nocache
-   * @return {!Location}
-   */
-  parseUrl_(url, opt_nocache) {
-    return Services.urlForDoc(this.ampdoc.getHeadNode())
-        .parse(url, opt_nocache);
-  }
-
-  /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
    * @param {function(!../../extensions/amp-access/0.1/access-vars.AccessVars):(T|!Promise<T>)} getter
@@ -645,7 +634,7 @@ export class GlobalVariableSource extends VariableSource {
     user().assert(param,
         'The first argument to QUERY_PARAM, the query string ' +
         'param is required');
-    const url = this.parseUrl_(
+    const url = parseUrlDeprecated(
         removeAmpJsParamsFromUrl(this.ampdoc.win.location.href));
     const params = parseQueryString(url.search);
     const key = user().assertString(param);
