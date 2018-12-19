@@ -63,7 +63,8 @@ describe.configure().run('inabox', function() {
       `,
   }, env => {
     // TODO: unskip this test once #14010 is fixed
-    it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+    it.configure().skipSafari('should layout amp-img, amp-pixel, ' +
+        'amp-analytics', () => {
       // See amp4test.js for creative content
       // The iframe starts BTF. "visible" trigger should be after scroll.
       // We will record scrolling time for comparison.
