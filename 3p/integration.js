@@ -413,6 +413,7 @@ register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
 register('onead', onead);
+register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
 register('outbrain', outbrain);
