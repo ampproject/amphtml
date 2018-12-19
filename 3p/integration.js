@@ -185,6 +185,7 @@ import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
 import {onead} from '../ads/onead';
+import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
