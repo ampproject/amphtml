@@ -771,22 +771,12 @@ export class AmpStory extends AMP.BaseElement {
           if (bookendInHistory) {
             return this.hasBookend_().then(hasBookend => {
               if (hasBookend) {
-                // Ensure that when bookend is built in the switchTo_ call
-                // below, it will skip the opening animation.
-                this.openedBookend_ = true;
+                this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
               }
             });
           }
         })
         .then(() => this.switchTo_(initialPageId))
-        .then(() => {
-          if (this.openedBookend_) {
-            // The bookend trigger must be done AFTER the swithTo_ call above
-            // to ensure the correct displaying of pagination buttons in
-            // desktop.
-            this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-          }
-        })
         .then(() => this.updateViewportSizeStyles_())
         .then(() => {
           // Preloads and prerenders the share menu if mobile, where the share
@@ -1854,7 +1844,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildAndPreloadBookend_() {
-    this.bookend_.build(this.openedBookend_);
+    this.bookend_.build(!!this.getHistoryState_(HistoryStates.BOOKEND_ACTIVE));
     return this.bookend_.loadConfigAndMaybeRenderBookend();
   }
 
