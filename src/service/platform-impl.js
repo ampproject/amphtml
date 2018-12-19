@@ -111,6 +111,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is running on Windows.
+   * @return {boolean}
+   */
+  isWindows() {
+    return /Windows/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Whether the current browser is isStandalone.
    * @return {boolean}
    */

@@ -785,7 +785,7 @@ export class AmpA4A extends AMP.BaseElement {
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
             this.preconnect.preload(font.href));
 
-          const urls = Services.urlForDoc(this.getAmpDoc());
+          const urls = Services.urlForDoc(this.element);
           // Preload any AMP images.
           (creativeMetaDataDef.images || []).forEach(image =>
             urls.isSecure(image) && this.preconnect.preload(image));
@@ -1408,14 +1408,18 @@ export class AmpA4A extends AMP.BaseElement {
         dev().error(TAG, this.element.getAttribute('type'),
             'Error executing onCreativeRender', err);
       })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      // It's enough to wait for "ini-load" signal because in a FIE case
-      // we know that the embed no longer consumes significant resources
-      // after the initial load.
-      return friendlyIframeEmbed.whenIniLoaded();
-    }).then(() => {
-      checkStillCurrent();
-      // Capture ini-load ping.
-      this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+      const iniLoadPromise = friendlyIframeEmbed.whenIniLoaded().then(() => {
+        checkStillCurrent();
+        this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+      });
+      const isIniLoadFixExpr = !!frameDoc.querySelector(
+          'meta[name="amp-experiments-opt-in"][content*="fie_ini_load_fix"]');
+      if (!isIniLoadFixExpr) {
+        return iniLoadPromise;
+      }
+
+      // There's no need to wait for all resources to load.
+      // StartRender is enough
     });
   }
 
@@ -1610,7 +1614,7 @@ export class AmpA4A extends AMP.BaseElement {
           throw new Error(errorMsg);
         }
 
-        const urls = Services.urlForDoc(this.getAmpDoc());
+        const urls = Services.urlForDoc(this.element);
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||

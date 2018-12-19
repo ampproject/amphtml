@@ -183,7 +183,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     });
   });
 
-  describe.configure().ifNewChrome().run('Unit Tests for messaging.js', () => {
+  describe.configure().ifChrome().run('Unit Tests for messaging.js', () => {
     const viewerOrigin = 'http://localhost:9876';
     const requestProcessor = function() {
       return Promise.resolve({});
