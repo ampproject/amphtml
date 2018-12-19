@@ -210,17 +210,18 @@ export class BrowserController {
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForElementLayout(selector, timeout = 5000) {
+  waitForElementReady(selector, timeout = 5000) {
     const elements = this.doc_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
-    const tags = [].map.apply(elements, e => e.tagName);
-    return poll(`${tags} to layout`,
+    return poll(`"${selector}" to layout`,
         () => {
-          const notLaidOut = [].some.apply(elements,
-              e => !e.classList.contains('i-amphtml-layout'));
-          return !notLaidOut;
+          // AMP elements set `readyState` to complete when their
+          // layoutCallback() promise is resolved.
+          const someNotReady = [].some.call(elements,
+              e => e.readyState !== 'complete');
+          return !someNotReady;
         },
         /* onError */ undefined,
         timeout);
