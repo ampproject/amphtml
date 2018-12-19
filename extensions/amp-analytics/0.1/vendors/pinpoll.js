@@ -37,11 +37,6 @@ export const PINPOLL_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'pageview',
     },
   },
-  'transport': {
-    'beacon': true,
-    'xhrpost': true,
-    'image': true,
-  },
   'vars': {
     'version': 'v1',
     'protocol': 'https',
