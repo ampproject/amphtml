@@ -60,6 +60,9 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
+  if (argv.chrome_canary) {
+    return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
+  }
   if (argv.headless) {
     return Object.assign({}, karmaDefault,
         {browsers: ['Chrome_no_extensions_headless']});
@@ -149,6 +152,7 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
@@ -726,6 +730,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'firefox': '  Runs tests on Firefox',
     'edge': '  Runs tests on Edge',
     'ie': '  Runs tests on IE',
+    'chrome_canary': 'Runs tests on Chrome Canary.',
     'unit': '  Run only unit tests.',
     'integration': '  Run only integration tests.',
     'dev_dashboard': ' Run only the dev dashboard tests. ' +
