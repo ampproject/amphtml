@@ -32,10 +32,12 @@ const minimatch = require('minimatch');
 const path = require('path');
 const {
   gitBranchName,
+  gitBranchPointFromMaster,
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffNameOnlyMaster,
   gitDiffStatMaster,
+  gitPrBranchPoint,
 } = require('./git');
 const {execOrDie, exec, getStderr, getStdout} = require('./exec');
 
@@ -102,9 +104,11 @@ function printChangeSummary() {
       colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(filesChanged);
 
+  const branchPoint = process.env.TRAVIS ?
+    gitPrBranchPoint() : gitBranchPointFromMaster();
   console.log(fileLogPrefix, 'Commit log since branch',
       colors.cyan(gitBranchName()), 'was forked from',
-      colors.cyan('master') + ':');
+      colors.cyan('master'), 'at', colors.cyan(branchPoint) + ':');
   console.log(gitDiffCommitLog() + '\n');
 }
 

@@ -21,6 +21,8 @@
 
 const {getStdout} = require('./exec');
 
+const commitLogMaxCount = 100;
+
 /**
  * Returns the branch point of the current branch off of master.
  * @return {string}
@@ -60,7 +62,8 @@ exports.gitDiffStatMaster = function() {
 
 /**
  * Returns a detailed log of commits included in a PR check, starting with (and
- * including) the branch point off of master.
+ * including) the branch point off of master. Limited to at most 100 commits to
+ * keep the output sane.
  *
  * @return {string}
  */
@@ -70,7 +73,8 @@ exports.gitDiffCommitLog = function() {
   return getStdout(`git -c color.ui=always log --graph --pretty=format:\
 "%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) \
 %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
---abbrev-commit ${branchPoint}^...HEAD`).trim();
+--abbrev-commit ${branchPoint}^...HEAD \
+--max-count=${commitLogMaxCount}`).trim();
 };
 
 /**
