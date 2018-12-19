@@ -73,7 +73,7 @@ class DefaultTransportSerializer {
     if (withPayload) {
       return {
         url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
-        payload: JSON.stringify(segment.extraUrlParams),
+        payload: JSON.stringify(segment['extraUrlParams']),
       };
     }
     return {
@@ -87,7 +87,7 @@ class DefaultTransportSerializer {
       return {
         url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
         payload: JSON.stringify(
-            segments.map(segment => segment.extraUrlParams)),
+            segments.map(segment => segment['extraUrlParams'])),
       };
     }
     return {
