@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {RequestBank} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '../../testing/test-helper';
 
 const t = describe.configure()
     .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
@@ -46,7 +46,12 @@ t.run('user-error', function() {
     <amp-pixel src="https://foo.com/tracker/foo"
             referrerpolicy="fail-referrer">
             `,
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should ping correct host with amp-pixel user().assert err', () => {
       return RequestBank.withdraw();
     });
@@ -79,7 +84,12 @@ t.run('user-error', function() {
         }
       </script>
     </amp-analytics>`,
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-img');
+    });
+
     it('should ping correct host with amp-img user().error err', () => {
       return RequestBank.withdraw();
     });
@@ -113,7 +123,12 @@ t.run('user-error', function() {
         }
       </script>
     </amp-analytics>`,
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-ad');
+    });
+
     it('should ping correct host with 3p error message', () => {
       return RequestBank.withdraw();
     });
