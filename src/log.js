@@ -692,18 +692,26 @@ export function isFromEmbed(win, opt_element) {
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
+ * @param {*=} opt_1 Optional argument (Var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
  * @return {T} The value of shouldBeTrueish.
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function devAssert(
-  // eslint-disable-next-line no-unused-vars
-  shouldBeTrueish, opt_message, var_args) {
+export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
+  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
   if (getMode().minified) {
     return shouldBeTrueish;
   }
-  return dev().assert.apply(dev(), arguments);
+  return dev().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
+      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }
 
 /**
@@ -721,13 +729,21 @@ export function devAssert(
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
+ * @param {*=} opt_1 Optional argument (Var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
  * @return {T} The value of shouldBeTrueish.
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function userAssert(
-  // eslint-disable-next-line no-unused-vars
-  shouldBeTrueish, opt_message, var_args) {
-  return user().assert.apply(user(), arguments);
+export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
+  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
+  return user().assert(shouldBeTrueish, opt_message, opt_1, opt_2, opt_3,
+      opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
 }
