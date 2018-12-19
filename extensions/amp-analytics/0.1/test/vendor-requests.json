@@ -320,6 +320,9 @@
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid",
     "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=!contentCreated&content_author=!contentAuthor&content_section=!contentSection&timezone_offset=_timezone_&tags=!tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid"
   },
+  "pinpoll": {
+    "pageview": "https://pa.pinpoll.com/v1?url=_source_url_&sourceHost=_source_host_&sourceHostname=_source_hostname_&sourcePath=_source_path_&canonicalUrl=_canonical_url_&platform=AMP&title=_title_&referrer=_document_referrer_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&ua=_user_agent_&clientId=_client_id_"
+  },
   "pressboard": {
     "host": "https://adserver.pressboard.ca",
     "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset",
