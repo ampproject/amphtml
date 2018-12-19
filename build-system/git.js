@@ -70,9 +70,9 @@ exports.gitDiffStatMaster = function() {
 exports.gitDiffCommitLog = function() {
   const branchPoint = process.env.TRAVIS ?
     exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
-  return getStdout(`git -c color.ui=always log --graph \
---pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
--%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
+  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
+"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) \
+%C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
 --abbrev-commit ${branchPoint}^...HEAD \
 --max-count=${commitLogMaxCount}`).trim();
 };
