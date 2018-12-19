@@ -290,27 +290,6 @@ describes.realWin('amp-install-serviceworker', {
     expect(install.children).to.have.length(0);
   });
 
-  it('should do nothing with safari UA', () => {
-    const install = doc.createElement('amp-install-serviceworker');
-    const implementation = install.implementation_;
-    expect(implementation).to.exist;
-    install.setAttribute('src', 'https://other-origin.com/sw.js');
-    implementation.win = {
-      location: {
-        href: 'https://example.com/some/path',
-      },
-      navigator: {
-        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X)'
-            + ' AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0'
-            + ' Mobile/15A372 Safari/604.1',
-      },
-    };
-    allowConsoleError(() => {
-      implementation.buildCallback();
-    });
-    expect(install.children).to.have.length(0);
-  });
-
   it('should do nothing on proxy without iframe URL', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
@@ -394,7 +373,7 @@ describes.realWin('amp-install-serviceworker', {
       });
     });
 
-    function testIframe() {
+    function testIframe(callCount = 1) {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       let iframe;
@@ -421,7 +400,7 @@ describes.realWin('amp-install-serviceworker', {
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
           () => {
-            expect(mutateElement).to.have.been.calledOnce;
+            expect(mutateElement).to.have.been.callCount(callCount);
           });
     }
 
@@ -450,6 +429,11 @@ describes.realWin('amp-install-serviceworker', {
       allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
       }).to.throw(/https/); });
+    });
+
+    it('should not inject iframe on proxy if safari', () => {
+      implementation.isSafari_ = true;
+      return testIframe(0);
     });
   });
 });

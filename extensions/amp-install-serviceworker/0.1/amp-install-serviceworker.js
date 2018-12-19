@@ -44,6 +44,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @visibleForTesting {?UrlRewriter_}  */
     this.urlRewriter_ = null;
+
+    /** @private @const {boolean}*/
+    this.isSafari_ = Services.platformFor(this.win).isSafari();
   }
 
   /** @override */
@@ -57,8 +60,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     urlService.assertHttpsUrl(src, this.element);
 
-    if (urlService.isProxyOrigin(src) ||
-        urlService.isProxyOrigin(win.location.href)) {
+    if ((urlService.isProxyOrigin(src) ||
+        urlService.isProxyOrigin(win.location.href)) && !this.isSafari_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         urlService.assertHttpsUrl(iframeSrc, this.element);
@@ -78,11 +81,11 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         });
       }
     } else if (urlService.parse(win.location.href).origin ==
-      urlService.parse(src).origin && !isSafari(win)) {
+      urlService.parse(src).origin) {
       this.whenLoadedAndVisiblePromise_().then(() => {
         return install(this.win, src, this.element);
       });
-    } else if (isSafari(win)) {
+    } else if (this.isSafari_) {
       // https://webkit.org/blog/8090/workers-at-your-service/
       this.user().error(TAG,
           'Did not install ServiceWorker because of safari double keyring ' +
@@ -291,17 +294,6 @@ class UrlRewriter_ {
     target.href = this.shellUrl_ + '#href=' + encodeURIComponent(
         `${tgtLoc.pathname}${tgtLoc.search}${tgtLoc.hash}`);
   }
-}
-
-/**
- * Checks if the current UA is of iPhone and thus prevent installing
- * due to double keyring.
- *
- * @param {!Window} win
- */
-function isSafari(win) {
-  const {userAgent} = win.navigator;
-  return /^((?!chrome|android).)*safari/i.test(userAgent);
 }
 
 /**
