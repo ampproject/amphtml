@@ -26,7 +26,8 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitBranchPointFromMaster, gitCommitHash} = require('../git');
+const {gitBranchPointFromMaster, gitCommitHash,
+  gitDiffNameOnlyMaster} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -351,6 +352,12 @@ async function performBundleSizeCheck() {
     return await skipBundleSize();
   } else {
     if (argv.on_push_build) {
+      const files = gitDiffNameOnlyMaster();
+      const runtimeFiles = files.filter(fileName => fileName.startsWith('src'));
+      if (runtimeFiles.length == 0) {
+        log('No runtime files were touched, skipping bundle size check.');
+        return;
+      }
       await storeBundleSize();
     } else if (argv.on_pr_build) {
       await reportBundleSize();
