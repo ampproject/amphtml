@@ -72,6 +72,22 @@ app.use('/compose-doc', function(req, res) {
   res.send(doc);
 });
 
+app.use('/compose-html', function(req, res) {
+  res.setHeader('X-XSS-Protection', '0');
+  res.send(`
+<!doctype html>
+<html>
+<head>
+  <title>NON-AMP TEST</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+</head>
+<body>
+${req.query.body}
+</body>
+</html>
+  `);
+});
+
 /**
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
@@ -145,35 +161,37 @@ app.get('/a4a/:bid', (req, res) => {
   }
   const {bid} = req.params;
   const body = `
-    <a href=https://ampbyexample.com target=_blank>
-      <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
-    </a>
-    <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
-    <amp-analytics>
-      <script type="application/json">
-      {
-        "requests": {
-          "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
-        },
-        "triggers": {
-          "pageview": {
-            "on": "visible",
-            "request": "pageview",
-            "extraUrlParams": {
-              "title": "\${title}",
-              "ampdocUrl": "\${ampdocUrl}",
-              "canonicalUrl": "\${canonicalUrl}",
-              "cid": "\${clientId(a)}",
-              "img": "\${htmlAttr(amp-img,src)}",
-              "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
-              "adNavType": "\${adNavType}",
-              "adRedirectCount": "\${adRedirectCount}"
-            }
+  <a href=https://ampbyexample.com target=_blank>
+    <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
+  </a>
+  <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
+  <amp-analytics>
+    <script type="application/json">
+    {
+      "requests": {
+        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "pageview",
+          "extraUrlParams": {
+            "timestamp": "\${timestamp}",
+            "title": "\${title}",
+            "ampdocUrl": "\${ampdocUrl}",
+            "canonicalUrl": "\${canonicalUrl}",
+            "cid": "\${clientId(a)}",
+            "img": "\${htmlAttr(amp-img,src)}",
+            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
+            "adNavType": "\${adNavType}",
+            "adRedirectCount": "\${adRedirectCount}"
           }
         }
       }
-      </script>
-    </amp-analytics>`;
+    }
+    </script>
+  </amp-analytics>`;
+
   const doc = composeDocument({
     spec: 'amp4ads',
     body,
