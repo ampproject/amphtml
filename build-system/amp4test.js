@@ -72,6 +72,22 @@ app.use('/compose-doc', function(req, res) {
   res.send(doc);
 });
 
+app.use('/compose-html', function(req, res) {
+  res.setHeader('X-XSS-Protection', '0');
+  res.send(`
+<!doctype html>
+<html>
+<head>
+  <title>NON-AMP TEST</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+</head>
+<body>
+${req.query.body}
+</body>
+</html>
+  `);
+});
+
 /**
  * A server side temporary request storage which is useful for testing
  * browser sent HTTP requests.
@@ -175,6 +191,7 @@ app.get('/a4a/:bid', (req, res) => {
           "on": "visible",
           "request": "pageview",
           "extraUrlParams": {
+            "timestamp": "\${timestamp}",
             "title": "\${title}",
             "ampdocUrl": "\${ampdocUrl}",
             "canonicalUrl": "\${canonicalUrl}",
