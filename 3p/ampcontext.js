@@ -299,6 +299,7 @@ export class AbstractAmpContext {
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
     this.initialConsentState = context.initialConsentState;
+    this.initialConsentValue = context.initialConsentValue;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrlDeprecated(context.location.href);
@@ -311,10 +312,6 @@ export class AbstractAmpContext {
     this.tagName = context.tagName;
 
     this.embedType_ = dataObject.type || null;
-
-    if (context.initialConsentValue) {
-      this.initialConsentValue = context.initialConsentValue;
-    }
   }
 
   /**

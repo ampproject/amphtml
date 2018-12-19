@@ -224,7 +224,8 @@ export class ConsentPolicyManager {
   }
 
   /**
-   * Get the consent string of a policy. Will only resolved if th
+   * Get the consent string value of a policy. Return a promise that resolves
+   * when the policy resolves.
    * @param {string} policyId
    * @return {!Promise<?string>}
    */
@@ -473,7 +474,7 @@ export class ConsentPolicyInstance {
 
   /**
    * Returns the current consent string info
-   * @return {?git stastring}
+   * @return {?string}
    */
   getConsentString() {
     // Return a string because we only support one consent instance now.
