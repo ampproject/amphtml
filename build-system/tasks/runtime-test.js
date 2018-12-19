@@ -75,7 +75,7 @@ function getConfig() {
     const config = Object.assign({}, karmaDefault, {
       browsers: ['Chrome_flags'],
       customLaunchers: {
-        Chrome_flags: { /* eslint "google-camelcase/google-camelcase": 0*/
+        Chrome_flags: { // eslint-disable-line google-camelcase/google-camelcase
           base: chromeBase,
           flags: formattedFlagList,
         },
@@ -172,7 +172,7 @@ function printArgvMessages() {
     firefox: 'Running tests on Firefox.',
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
-    chrome_canary: 'Running tests on Chrome Canary.',
+    'chrome_canary': 'Running tests on Chrome Canary.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
     saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
