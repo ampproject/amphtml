@@ -153,6 +153,8 @@ window.context.sourceUrl;
 window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
+window.context.initialConsentState;
+window.context.consentSharedData;
 
 // Service Holder
 window.services;
