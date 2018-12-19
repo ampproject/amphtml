@@ -215,7 +215,7 @@ export class BrowserController {
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
-    return poll(`"${selector}" to layout`,
+    return poll(`"${selector}" to build`,
         () => {
           const someNotBuilt = [].some.call(elements,
               e => e.classList.contains('i-amphtml-notbuilt'));

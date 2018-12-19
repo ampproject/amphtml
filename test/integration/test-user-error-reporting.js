@@ -50,10 +50,7 @@ t.run('user-error', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return Promise.all([
-        browser.waitForElementLayout('amp-analytics'),
-        browser.waitForElementBuild('amp-pixel'),
-      ]);
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should ping correct host with amp-pixel user().assert err', () => {
