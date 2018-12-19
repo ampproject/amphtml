@@ -595,9 +595,7 @@
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
-<<<<<<< HEAD
     {
-<<<<<<< HEAD
       "flaky": true,
       // See https://percy.io/ampproject/amphtml/builds/1260087
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
@@ -608,11 +606,7 @@
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
-=======
-      {
-    // See https://percy.io/ampproject/amphtml/builds/1179875
-=======
->>>>>>> cb6e9dc19... fixed merge conflicts and percy tests
+    {
     "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
     "name": "amp-story: sidebar",
     "viewport": {"width": 1440, "height": 900},
@@ -621,10 +615,6 @@
       ".i-amphtml-story-sidebar-control.i-amphtml-story-button"
     ],
     "interactive_tests": "examples/visual-tests/amp-story/amp-story-sidebar.js"
-<<<<<<< HEAD
-  }
->>>>>>> a838ede9b... added tests
-=======
     },
     {
       "flaky": true,
@@ -637,6 +627,5 @@
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
->>>>>>> cb6e9dc19... fixed merge conflicts and percy tests
   ]
 }
