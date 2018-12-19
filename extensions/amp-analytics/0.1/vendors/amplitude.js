@@ -47,7 +47,7 @@ export const AMPLITUDE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
   'cookies': {
-    'amplitude': {
+    'amplitude_amp_id': {
       'value': 'LINKER_PARAM(amplitude, amplitude_amp_id)',
     },
   },
