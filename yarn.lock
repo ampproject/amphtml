@@ -3533,7 +3533,7 @@ commander@~2.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
   integrity sha1-0SG7roYNmZKj1Re6lvVliOR8Z4E=
 
-comment-parser@^0.5.0:
+comment-parser@^0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-0.5.1.tgz#041fb38d943ba99b700aff44c13958681eb89adc"
   integrity sha512-6RIp9+7yxmrTjwa1S+fv2eZ2x/ta81pdhOBmRtkY+0o+3tdquvPWqARAv6djmk0YSsAzpx7UgeHcvSv7bHQYCA==
@@ -4920,12 +4920,12 @@ eslint-plugin-jasmine@2.10.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
   integrity sha1-VzO3CedR9LxA4x4cFpib0s377Jc=
 
-eslint-plugin-jsdoc@3.14.0:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-3.14.0.tgz#a0fa9ec71366d04dca14bcee4ed04434202f8104"
-  integrity sha512-5QBhxmf7XeJpUsha3cEUe0j8JVcd7XMnDUkqhKdtbrUb0oz4Ea0/b1kfE8FN0/iu2mvVSb1HArMPQT9SxQY2/g==
+eslint-plugin-jsdoc@3.14.1:
+  version "3.14.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-3.14.1.tgz#465836dfde8e3061a66e69a95b21e83f9c89779e"
+  integrity sha512-rhWrW3UrMt487TCXxSIXW4aCqB3pb1tGAWki0CjWG/ApQdNnhoCs/Lz7EtxOfQfBGvBSjfYiXEEnJRCRMTtubQ==
   dependencies:
-    comment-parser "^0.5.0"
+    comment-parser "^0.5.1"
     jsdoctypeparser "^2.0.0-alpha-8"
     lodash "^4.17.11"
 
