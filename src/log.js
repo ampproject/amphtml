@@ -328,13 +328,14 @@ export class Log {
       const first = splitMessage.shift();
       let formatted = first;
       const messageArray = [];
+      let i = 2;
       pushIfNonEmpty(messageArray, first);
-      for (let i = 2; i < arguments.length; i++) {
-        const val = arguments[i];
+      while (splitMessage.length > 0) {
+        const nextConstant = splitMessage.shift();
+        const val = arguments[i++];
         if (val && val.tagName) {
           firstElement = val;
         }
-        const nextConstant = splitMessage.shift();
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
         formatted += toString(val) + nextConstant;
