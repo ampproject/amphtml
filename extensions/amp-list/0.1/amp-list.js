@@ -864,8 +864,7 @@ export class AmpList extends AMP.BaseElement {
     });
   }
   /**
-   * Toggles the visibility of the load-more-loading element, the
-   * amp-load-more-loading CSS class, and the active state of the loader.
+   * Toggles the visibility of the load-more-loading element.
    * @param {boolean} state
    * @private
    */
