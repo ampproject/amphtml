@@ -17,7 +17,7 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe.configure().skipIfPropertiesObfuscated().run('amp' +
+describe.configure().run('amp' +
     '-analytics', function() {
   this.timeout(5000);
 
@@ -105,6 +105,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should send request', () => {
@@ -153,6 +154,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should trigger on scroll', () => {
@@ -208,6 +210,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should trigger when image being 50% visible for 0.5s', () => {
@@ -262,7 +265,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       </amp-analytics>
       `,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should trigger 1s after amp-analytics starts', () => {
       const startTime = Date.now();
       return RequestBank.withdraw().then(req => {
@@ -315,7 +323,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
       </amp-analytics>
       `,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     afterEach(() => {
       // clean up written _cid cookie
       document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
@@ -376,7 +389,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should send request in batch', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
@@ -431,7 +449,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should send request use POST body payload', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
@@ -495,7 +518,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should send batch request use POST body payload', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
@@ -529,7 +557,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
           </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should remove referrer if referrerpolicy=no-referrer', () => {
       return RequestBank.withdraw().then(req => {
         expect(req.url).to.equal('/');
@@ -569,7 +602,12 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
         </script>
       </amp-analytics>`,
     extensions: ['amp-analytics'],
-  }, () => {
+  }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     afterEach(() => {
       // clean up written _ga cookie
       document.cookie = '_ga=;expires=' + new Date(0).toUTCString();
