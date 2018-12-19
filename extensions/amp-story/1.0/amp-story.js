@@ -1615,10 +1615,9 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Shows the bookend overlay.
    * @private
-   * @return {!Promise}
    */
   showBookend_() {
-    return this.buildAndPreloadBookend_().then(() => {
+    this.buildAndPreloadBookend_().then(() => {
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
     });
   }
