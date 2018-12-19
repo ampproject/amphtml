@@ -37,7 +37,7 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 const TOOLTIP_DELEGATABLE_SELECTORS = Object.values(
-  tooltipDelegatableSelectors()).join(',');
+    tooltipDelegatableSelectors()).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;

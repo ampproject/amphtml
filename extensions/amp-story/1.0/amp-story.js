@@ -642,7 +642,7 @@ export class AmpStory extends AMP.BaseElement {
       this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.EXPAND_COMPONENT, target => {
+    this.storeService_.subscribe(StateProperty.EXPANDED_COMPONENT, target => {
       this.toggleExpandedView_(target);
     });
 

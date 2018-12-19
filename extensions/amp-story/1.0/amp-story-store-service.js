@@ -88,7 +88,7 @@ export const UIType = {
  *    currentPageId: string,
  *    currentPageIndex: number,
  *    pagesCount: number,
- *    expandComponent: ?Element,
+ *    expandedComponent: ?Element,
  * }}
  */
 export let State;
@@ -126,7 +126,7 @@ export const StateProperty = {
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   TOOLTIP_ELEMENT: 'tooltipElement',
   UI_STATE: 'uiState',
-  EXPAND_COMPONENT: 'expandComponent',
+  EXPANDED_COMPONENT: 'expandedComponent',
 
   // App data.
   ACTIONS_WHITELIST: 'actionsWhitelist',
@@ -280,7 +280,7 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign(
           {}, state, {
             [StateProperty.PAUSED_STATE]: !!data,
-            [StateProperty.EXPAND_COMPONENT]: data,
+            [StateProperty.EXPANDED_COMPONENT]: data,
           }));
     case Action.TOGGLE_UI:
       return /** @type {!State} */ (Object.assign(
@@ -402,7 +402,7 @@ export class AmpStoryStoreService {
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
-      [StateProperty.EXPAND_COMPONENT]: null,
+      [StateProperty.EXPANDED_COMPONENT]: null,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,

@@ -192,12 +192,12 @@ export class AmpStoryTooltip {
 
     if (matches(target,
         tooltipDelegatableSelectors().EXPANDED_VIEW_OVERLAY)) {
-      this.onExpandedViewClose_();
+      this.closeExpandedView_();
       return;
     }
 
     this.updateTooltipBehavior_(target);
-    if (target != this.previousTarget_) {
+    if (target !== this.previousTarget_) {
       // Only update tooltip when necessary.
       this.updateTooltipEl_(target);
     }
@@ -211,14 +211,14 @@ export class AmpStoryTooltip {
   }
 
   /**
-   * Performs necessary actions for an expandable element that was closed.
+   * Closes expanded view and resets properties of elements affected by it.
    * @private
    */
-  onExpandedViewClose_() {
+  closeExpandedView_() {
+    this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
     // Re-add click shield to expandable element and close overlay.
     this.previousTarget_.classList
-        .toggle('i-amphtml-expandable-component-shield', true);
-    this.storeService_.dispatch(Action.TOGGLE_EXPANDED_COMPONENT, null);
+        .toggle('i-amphtml-remove-click-shield', false);
     this.tooltip_.removeEventListener('click',
         this.expandComponentHandler_, true);
   }
@@ -258,8 +258,11 @@ export class AmpStoryTooltip {
     if (matches(target, tooltipDelegatableSelectors().LINK)) {
       addAttributesToElement(dev().assertElement(this.tooltip_),
           dict({'href': this.getElementHref_(target)}));
+      return;
     }
-    else if (matches(target, tooltipDelegatableSelectors().TWITTER)) {
+
+    if (Object.values(EXPANDABLE_COMPONENTS)
+        .includes(target.tagName.toLowerCase())) {
       this.tooltip_.addEventListener('click',
           this.expandComponentHandler_, true);
     }
@@ -276,7 +279,7 @@ export class AmpStoryTooltip {
 
     this.closeTooltip_();
     this.previousTarget_.classList
-        .toggle('i-amphtml-expandable-component-shield', false);
+        .toggle('i-amphtml-remove-click-shield', true);
     this.storeService_.dispatch(
         Action.TOGGLE_EXPANDED_COMPONENT, this.previousTarget_);
   }
@@ -440,8 +443,8 @@ export class AmpStoryTooltip {
    * @private
    */
   clearTooltip_() {
-    this.tooltip_.removeEventListener('click',
-        this.expandComponentHandler_, true);
+    this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
+        true);
     this.tooltip_.removeAttribute('href');
   }
 
