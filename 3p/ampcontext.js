@@ -74,6 +74,9 @@ export class AbstractAmpContext {
     /** @type {?number} */
     this.initialConsentState = null;
 
+    /** @type {?string} */
+    this.initialConsentValue = null;
+
     /** @type {?Object} */
     this.initialLayoutRect = null;
 
@@ -308,6 +311,10 @@ export class AbstractAmpContext {
     this.tagName = context.tagName;
 
     this.embedType_ = dataObject.type || null;
+
+    if (context.initialConsentValue) {
+      this.initialConsentValue = context.initialConsentValue;
+    }
   }
 
   /**
