@@ -65,7 +65,10 @@ describes.realWin('consent-ui', {
         };
       },
       scheduleLayout: () => {},
-      mutateElement: callback => callback(),
+      mutateElement: callback => {
+        callback();
+        return Promise.resolve();
+      },
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
@@ -141,6 +144,32 @@ describes.realWin('consent-ui', {
       expect(elementByTag(parent, 'iframe')).to.be.null;
     });
   });
+
+  describe('placeholder', () => {
+    it('should be created / shown' +
+      ' while loading CMP Iframe', async() => {
+
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+          new ConsentUI(mockInstance, config);
+
+      const placeholder = consentUI.placeholder_;
+      expect(placeholder).to.be.ok;
+      expect(placeholder.hidden).to.be.true;
+
+      consentUI.show();
+
+      // Pop onto the back of the event queue,
+      // so we expect() once our mutate element in show() resolves
+      await mockInstance.mutateElement(() => {});
+
+      expect(placeholder.hidden).to.be.false;
+      expect(placeholder.childNodes).to.not.be.empty;
+    });
+  });
+
 
   describe('CMP Iframe', () => {
 
