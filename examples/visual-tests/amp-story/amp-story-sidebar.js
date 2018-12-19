@@ -21,11 +21,11 @@ module.exports = {
   'tapping on sidebar control button should show sidebar ': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-    await page.tap('.i-amphtml-story-sidebar-control.i-amphtml-story-button');
+    await page.waitFor('amp-story-page#cover[active]');
+    await page.tap('.i-amphtml-story-sidebar-control');
     await verifyCssElements(page, name,
       /* forbiddenCss */ null,
       /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ ['amp-sidebar#sidebar1']);
+      /* loadingCompleteCss */ ['amp-sidebar[side][open]']);
   },
  };
