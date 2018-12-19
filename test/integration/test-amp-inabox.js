@@ -76,7 +76,7 @@ describe.configure().skipIfPropertiesObfuscated().run('inabox', function() {
         expect(Date.now()).to.be.below(scrollTime);
         expect(req.url).to.equal('/foo?cid=');
       });
-      const analPromise = RequestBank.withdraw('analytics').then(req => {
+      const analyticsPromise = RequestBank.withdraw('analytics').then(req => {
         expect(req.url).to.match(/^\/bar\?/);
         const queries =
             parseQueryString(req.url.substr('/bar'.length));
@@ -88,7 +88,7 @@ describe.configure().skipIfPropertiesObfuscated().run('inabox', function() {
         scrollTime = Date.now();
         env.win.scrollTo(0, 1000);
       }, 2000);
-      return Promise.all([imgPromise, pixelPromise, analPromise]);
+      return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
     });
   });
 });
