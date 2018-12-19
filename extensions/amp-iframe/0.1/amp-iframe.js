@@ -652,7 +652,7 @@ export class AmpIframe extends AMP.BaseElement {
       const event =
           createCustomEvent(this.win, 'amp-iframe:message',
               dict({'data': sanitized}));
-      const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+      const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
     };
     // TODO(choumx): Consider using global listener in iframe-helper.

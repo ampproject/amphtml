@@ -302,14 +302,6 @@ const forbiddenTerms = {
       'src/service/video/autoplay.js',
     ],
   },
-  'getServiceForDocDeprecated': {
-    message: 'Use getServiceForDoc() instead.',
-    whitelist: [
-      'src/chunk.js',
-      'src/service.js',
-      'src/services.js',
-    ],
-  },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
@@ -866,6 +858,7 @@ const forbiddenTermsSrcInclusive = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/storage-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   '(cdn|3p)\\.ampproject\\.': {
@@ -875,6 +868,7 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/app.js',
       'build-system/app-index/template.js',
+      'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',

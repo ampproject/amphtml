@@ -18,6 +18,7 @@ goog.provide('amp.validator.ValidatorTest');
 
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.HtmlFormat');
+goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
@@ -830,6 +831,7 @@ describe('ValidatorRulesMakeSense', () => {
 
   // tag_specs
   const specNameIsUnique = {};
+  const namedIdIsUnique = {};
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
@@ -869,6 +871,13 @@ describe('ValidatorRulesMakeSense', () => {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
+      }
+    });
+    it('unique named_id if present', () => {
+      if (tagSpec.namedId !== null &&
+          tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {
+        expect(namedIdIsUnique.hasOwnProperty(tagSpec.namedId)).toBe(false);
+        namedIdIsUnique[tagSpec.namedId] = 0;
       }
     });
     // Verify AMP4ADS extensions are whitelisted.
@@ -1119,10 +1128,11 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // We want to be certain not to allow SCRIPT tagspecs which don't either
-      // define a src attribute OR define a JSON type.
+      // define a src attribute OR define a JSON or TEXT/PLAIN type.
       if (tagSpec.tagName === 'SCRIPT') {
         let hasSrc = false;
         let hasJson = false;
+        let hasTextPlain = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
@@ -1135,11 +1145,15 @@ describe('ValidatorRulesMakeSense', () => {
                   value === 'application/json') {
                 hasJson = true;
               }
+              if (value == 'text/plain') {
+                hasTextPlain = true;
+              }
             }
           }
         }
-        it('script tags must be json or src', () => {
-          expect(hasSrc || hasJson).toBe(true);
+        it('script tags must have either a src attribute or type json or '
+           + 'text/plain', () => {
+          expect(hasSrc || hasJson || hasTextPlain).toBe(true);
         });
       }
       // cdata_regex and mandatory_cdata

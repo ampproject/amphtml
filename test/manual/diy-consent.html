@@ -1,7 +1,7 @@
 <html>
   <div id="consent-wrapper">
     <div id="decision-state">
-      <h1>Hello! I am a consent Iframe.</h1> 
+      <h1>Hello! I am a consent Iframe.</h1>
       <h3>I am in `test/manual/diy-consent.html`</h3>
       <button id='f'>Learn More</button>
     </div>
@@ -42,16 +42,18 @@ if (hashMatch) {
 
 setTimeout(() => {
   parent.postMessage({
-    type: 'consent-ui-ready',
+    type: 'consent-ui',
+    action: 'ready'
   }, '*');
 }, 500);
 
-function registerClickConsentMessage(querySelector, type, action) {
+function registerClickConsentMessage(querySelector, type, action, info) {
   document.querySelector(querySelector).onclick = function () {
     // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
     parent.postMessage({
       type,
-      action
+      action,
+      info
     }, '*');
   };
 }
@@ -82,6 +84,7 @@ const consentObjects = [
     querySelector: '#a',
     type: 'consent-response',
     action: 'accept',
+    info: 'accept-str',
     onclick: () => {
       showConfirmation();
     }
@@ -90,6 +93,7 @@ const consentObjects = [
     querySelector: '#r',
     type: 'consent-response',
     action: 'reject',
+    info: '',
     onclick: () => {
       showConfirmation();
     }
@@ -98,13 +102,15 @@ const consentObjects = [
     querySelector: '#d',
     type: 'consent-response',
     action: 'dismiss',
+    info: 'dismiss-str',
     onclick: () => {
       showConfirmation();
     }
   },
   {
     querySelector: '#f',
-    type: 'consent-ui-enter-fullscreen',
+    type: 'consent-ui',
+    action: 'enter-fullscreen',
     onclick: () => {
       showLearnMoreState();
     }
@@ -114,7 +120,8 @@ consentObjects.forEach(consentObject => {
   registerClickConsentMessage(
     consentObject.querySelector,
     consentObject.type,
-    consentObject.action
+    consentObject.action,
+    consentObject.info
   );
 
   if (consentObject.onclick) {
