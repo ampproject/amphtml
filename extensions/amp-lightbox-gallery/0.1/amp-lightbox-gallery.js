@@ -30,13 +30,13 @@ import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {
+  childElement,
   childElementByTag,
   closest,
   closestBySelector,
   elementByTag,
   escapeCssSelectorIdent,
   scopedQuerySelectorAll,
-  childElement,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
@@ -324,8 +324,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   showCarousel_(lightboxGroupId) {
     return this.mutateElement(() => {
       const numSlides = this.elementsMetadata_[lightboxGroupId].length;
-      const on = numSlides == 1;
-      this.controlsContainer_.classList.toggle('i-amphtml-lbg-single', on);
+      const hideControls = numSlides == 1;
+      this.controlsContainer_.classList.toggle('i-amphtml-ghost',
+          hideControls);
       toggle(dev().assertElement(this.carousel_), true);
     });
   }
@@ -351,8 +352,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
         this.carouselContainer_.appendChild(this.carousel_);
-        const on = list.length == 1;
-        this.controlsContainer_.classList.toggle('i-amphtml-lbg-single', on);
+        const hideControls = list.length == 1;
+        this.controlsContainer_.classList.toggle('i-amphtml-ghost',
+            hideControls);
       });
     });
   }
@@ -1165,7 +1167,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.container_.removeAttribute('gallery-view');
 
       if (this.gallery_) {
-        this.gallery_.classList.add('i-amphtml-lbg-gallery-hidden');
+        this.gallery_.classList.add('i-amphtml-ghost');
         this.gallery_ = null;
       }
       this.clearDescOverflowState_();
@@ -1264,7 +1266,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           escapeCssSelectorIdent(group)
         }]`);
     if (this.gallery_) {
-      this.gallery_.classList.remove('i-amphtml-lbg-gallery-hidden');
+      this.gallery_.classList.remove('i-amphtml-ghost');
       this.updateVideoThumbnails_();
     } else {
       // Build gallery
