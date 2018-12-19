@@ -43,6 +43,10 @@ const headerLinks = [
     'href': 'https://github.com/ampproject/amphtml/',
   },
   {
+    'name': 'Find File',
+    'href': 'https://github.com/ampproject/amphtml/find/master',
+  },
+  {
     'name': 'Travis',
     'href': 'https://travis-ci.org/ampproject/amphtml',
   },
@@ -58,6 +62,8 @@ const requiredExtensions = [
   {name: 'amp-form'},
   {name: 'amp-lightbox'},
   {name: 'amp-selector'},
+  {name: 'amp-mustache', version: '0.2'},
+  {name: 'amp-list'},
 ];
 
 
@@ -94,16 +100,20 @@ const Header = ({isMainPage, links}) => html`
     </ul>
   </header>`;
 
+const FileListSearch = ({basepath}) =>
+  html`<input type="text"
+    class="file-list-search"
+    placeholder="Fuzzy Search"
+    pattern="[a-zA-Z0-9-]+"
+    on="input-debounced: AMP.setState({
+      fileListState: {
+        src: '/dashboard/api/listing?path=${basepath}&search=' + event.value
+      }
+    })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
-
-const ExamplesDocumentModeSelect = ({selectModePrefix}) => html`
-  <amp-state id="documentMode">
-    <script type="application/json">
-    ${JSON.stringify({selectModePrefix})}
-    </script>
-  </amp-state>
+const ExamplesDocumentModeSelect = () => html`
   <label for="examples-mode-select">
     Document mode:
     <select id="examples-mode-select"
@@ -122,62 +132,51 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
     selectModePrefix,
   });
 
+const FileList = ({basepath}) =>
+  html`<amp-state id="fileListState">
+    <script type="application/json">
+      {"src": "/dashboard/api/listing?path=${basepath}"}
+    </script>
+  </amp-state>
+  <amp-list [src]="fileListState.src"
+    src="/dashboard/api/listing?path=${basepath}"
+    items="."
+    layout="fixed-height"
+    width="auto"
+    height="568px"
+    class="file-list custom-loader">
 
-const FileListItem = ({name, href, selectModePrefix}) => {
-  if (!/^\/examples/.test(href) || !/\.html$/.test(href)) {
-    return html`<li>
-      <a class="file-link" href="${href}">${name}</a>
-    </li>`;
-  }
+    <div fallback>Failed to load data.</div>
 
-  const hrefSufix = href.replace(/^\//, '');
+    <template type="amp-mustache">
+      <div class="file-link-container">
+        <a class="file-link"
+          [href]="(documentMode.selectModePrefix || '') +
+          '${basepath.substring(1)}{{.}}'">
+          {{.}}
+        </a>
+      </div>
+    </template>
 
-  return html`<li>
-    <a class="file-link"
-      [href]="documentMode.selectModePrefix + '${hrefSufix}'"
-      href="${selectModePrefix + hrefSufix}">
-      ${name}
-    </a>
-  </li>`;
-};
+    <div overflow
+      role="button"
+      aria-label="Show more"
+      class="list-overflow">
+      Show more
+    </div>
 
-
-const FileList = ({fileSet, selectModePrefix}) => html`
-  <ul class="file-list">
-    ${fileSet.map(({name, href}) =>
-      FileListItem({name, href, selectModePrefix})).join('')}
-  </ul>`;
-
-
-const getFileSet = ({basepath, fileSet, selectModePrefix}) => {
-  // Set at top-level so RegEx is compiled once per call.
-  const documentLinkRegex = /\.html$/;
-  const examplesLinkRegex = /^\/examples\//;
-
-  return fileSet.map(name => {
-    const isExamplesDocument = examplesLinkRegex.test(basepath) &&
-      documentLinkRegex.test(name);
-
-    const prefix = isExamplesDocument ?
-      basepath.replace(/^\//, selectModePrefix) :
-      basepath;
-
-    return {name, href: prefix + name};
-  });
-};
-
+    <div placeholder>Loading...</div>
+  </amp-list>`;
 
 const ProxyFormOptional = ({isMainPage}) => {
   return isMainPage ? ProxyForm() : '';
 };
-
 
 const selectModePrefix = '/';
 
 const renderTemplate = ({
   basepath,
   css,
-  fileSet,
   isMainPage,
   serveMode}) => html`
 
@@ -204,27 +203,22 @@ const renderTemplate = ({
     </div>
     <div class="file-list-container">
       <div class="wrap">
-        <h3 class="code" id="basepath">
-          ${basepath}
-          <a href="https://github.com/ampproject/amphtml/find/master"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="find-icon icon">
-            Find file
-          </a>
-        </h3>
-        <div class="push-right-after-heading">
-          ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
-          <a href="/~" class="underlined">List root directory</a>
+        <div class="file-list-heading">
+          <h3 class="code" id="basepath">
+            ${basepath}
+          </h3>
+          ${FileListSearch({basepath})}
+          <div class="file-list-right-section">
+            <amp-state id="documentMode">
+              <script type="application/json">
+              ${JSON.stringify({selectModePrefix})}
+              </script>
+            </amp-state>
+            ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
+            <a href="/~" class="underlined">List root directory</a>
+          </div>
         </div>
-        ${FileList({
-          fileSet: getFileSet({
-            basepath,
-            selectModePrefix,
-            fileSet,
-          }),
-          selectModePrefix,
-        })}
+        ${FileList({basepath})}
       </div>
     </div>
     <div class="center">

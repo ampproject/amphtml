@@ -15,11 +15,16 @@
  */
 'use strict';
 
-
 const BBPromise = require('bluebird');
 const bundler = require('./bundler');
 const fs = BBPromise.promisifyAll(require('fs'));
-const {join, normalize, sep} = require('path');
+const {
+  getListing,
+  isMainPageFromUrl,
+  formatBasepath,
+} = require('./util/listing');
+const {handleApiRequest} = require('./api/api');
+const {join} = require('path');
 const {renderTemplate} = require('./template');
 
 const pc = process;
@@ -29,34 +34,6 @@ const mainComponent = join(__dirname, '/components/main.js');
 
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
-
-
-function isMaliciousPath(path, rootPath) {
-  return (path + sep).substr(0, rootPath.length) !== rootPath;
-}
-
-
-async function getListing(rootPath, basepath) {
-  const path = normalize(join(rootPath, basepath));
-
-  if (~path.indexOf('\0')) {
-    return null;
-  }
-
-  if (isMaliciousPath(path, rootPath)) {
-    return null;
-  }
-
-  try {
-    if ((await fs.statAsync(path)).isDirectory()) {
-      return fs.readdirAsync(path);
-    }
-  } catch (unusedE) {
-    /* empty catch for fallbacks */
-    return null;
-  }
-}
-
 
 let shouldCache = true;
 function setCacheStatus(cacheStatus) {
@@ -76,22 +53,6 @@ async function bundleMain() {
   return bundle;
 }
 
-
-function isMainPageFromUrl(url) {
-  return url == '/';
-}
-
-
-/**
- * Adds a trailing slash if missing.
- * @param {string} basepath
- * @return {string}
- */
-function formatBasepath(basepath) {
-  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
-}
-
-
 function serveIndex({root, mapBasepath}) {
   const mapBasepathOrPassthru = mapBasepath || (url => url);
 
@@ -103,6 +64,12 @@ function serveIndex({root, mapBasepath}) {
     }
 
     return (async() => {
+
+      if (req.path.startsWith('/dashboard/api')) {
+        handleApiRequest(root, req, res, next);
+        return;
+      }
+
       const isMainPage = isMainPageFromUrl(req.url);
       const basepath = mapBasepathOrPassthru(req.url);
 
