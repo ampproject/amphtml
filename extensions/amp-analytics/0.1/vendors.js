@@ -62,6 +62,7 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PERMUTIVE_CONFIG} from './vendors/permutive';
 import {PIANO_CONFIG} from './vendors/piano';
+import {PINPOLL_CONFIG} from './vendors/pinpoll';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
@@ -218,6 +219,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'piStats': PISTATS_CONFIG,
   'permutive': PERMUTIVE_CONFIG,
   'piano': PIANO_CONFIG,
+  'pinpoll': PINPOLL_CONFIG,
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
   'retargetly': RETARGETLY_CONFIG,
