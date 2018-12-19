@@ -37,6 +37,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
+  attrs: {
     name: "implements-media-session"
     value: ""
   }
@@ -57,6 +61,8 @@ attr_lists: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
+  attrs: { name: "[src]" }
 }
 
 tags: {  # <amp-video-iframe> with poster

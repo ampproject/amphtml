@@ -45,8 +45,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    // ensures window location == AMP cache passes
+
+    // Ensures window location == AMP cache passes.
     env.win.AMP_MODE.test = true;
+
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'width': '200',
@@ -57,6 +59,12 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     doc.body.appendChild(element);
     fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
+
+    // RealTimeConfigManager uses the UrlReplacements service scoped to the A4A
+    // (FIE), but for testing stub in the parent service for simplicity.
+    const urlReplacements = Services.urlReplacementsForDoc(element);
+    sandbox.stub(Services, 'urlReplacementsForDoc')
+        .withArgs(a4aElement.element).returns(urlReplacements);
 
     rtc = new RealTimeConfigManager(a4aElement);
     maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
@@ -765,7 +773,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   });
 
   describe('sendErrorMessage', () => {
-    let imageStub, requestUrl, ampDoc;
+    let imageStub, requestUrl;
     let errorType, errorReportingUrl;
     let imageMock;
 
@@ -776,7 +784,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       sandbox.stub(Xhr.prototype, 'fetch');
       imageMock = {};
       imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
-      ampDoc = a4aElement.getAmpDoc();
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
@@ -785,12 +792,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         ERROR_TYPE: errorType,
         HREF: env.win.location.href,
       };
-      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
-          errorReportingUrl, macros, whitelist);
+
+      requestUrl = Services.urlReplacementsForDoc(a4aElement.element)
+          .expandUrlSync(errorReportingUrl, macros, whitelist);
     });
 
     it('should send error message pingback to correct url', () => {
-      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      sendErrorMessage(errorType, errorReportingUrl);
       expect(imageStub).to.be.calledOnce;
       expect(imageMock.src).to.equal(requestUrl);
     });

@@ -148,6 +148,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
@@ -395,6 +401,18 @@ const EXPERIMENTS = [
     name: 'Allows the use of the amp-video-iframe component.',
     spec: 'https://github.com/ampproject/amphtml/issues/16252',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
+  },
+  {
+    id: 'amp-list-viewport-resize',
+    name: 'Enables amp-list to resize on viewport resize',
+    spec: 'https://github.com/ampproject/amphtml/issues/19945',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
   },
 ];
 

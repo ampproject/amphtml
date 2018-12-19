@@ -293,9 +293,8 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
-    // is migrated to ampdoc as well.
-    Services.actionServiceForDoc(this.ampdoc).installActionHandler(
+    const actionService = Services.actionServiceForDoc(this.accessElement_);
+    actionService.installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     for (let i = 0; i < this.sources_.length; i++) {
