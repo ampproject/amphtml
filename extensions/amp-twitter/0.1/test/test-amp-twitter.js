@@ -15,8 +15,7 @@
  */
 
 import '../amp-twitter';
-import {cleanupTweetId_} from '../../../../3p/twitter';
-import {twitter} from '../../../../3p/twitter';
+import {cleanupTweetId_, twitter} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
   amp: {
@@ -76,6 +75,36 @@ describes.realWin('amp-twitter', {
     twitter(win, {
       momentid: tweetId,
       limit: 5,
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a profile timeline', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      timelineSourceType: 'profile',
+      timelineScreenName: 'amphtml',
+      width: 111,
+      height: 222,
+    });
+    const tweet = doc.body.querySelector('#tweet');
+    expect(tweet).not.to.be.undefined;
+  });
+
+  it('adds tweet element correctly for a likes timeline', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    twitter(win, {
+      timelineSourceType: 'likes',
+      timelineScreenName: 'amphtml',
       width: 111,
       height: 222,
     });

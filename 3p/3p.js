@@ -22,10 +22,9 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {dev, user} from '../src/log';
+import {dev, rethrowAsync, user} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
-import {rethrowAsync} from '../src/log';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -277,10 +276,11 @@ function validateAllowedFields(data, allowedFields) {
     adHolderText: true,
     loadingStrategy: true,
     htmlAccessAllowed: true,
+    adContainerId: true,
   };
 
   for (const field in data) {
-    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+    if (!hasOwn(data, field) || field in defaultAvailableFields) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
@@ -301,7 +301,7 @@ let experimentToggles = {};
  * @return {boolean}
  */
 export function isExperimentOn(experimentId) {
-  return !!experimentToggles[experimentId];
+  return experimentToggles && !!experimentToggles[experimentId];
 }
 
 /**

@@ -18,8 +18,8 @@ tags: {  # amp-next-page
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-next-page"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -39,8 +39,8 @@ tags: {  # amp-next-page: json config
 }
 tags: {
   html_format: AMP
-  tag_name: "DIV"
-  spec_name: "AMP-NEXT-PAGE > DIV [separator]"
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-NEXT-PAGE > [separator]"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
     name: "separator"
@@ -50,15 +50,63 @@ tags: {
 tags: {  # <amp-next-page>
   html_format: AMP
   tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page with inline config"
+  unique: true
+  requires_extension: "amp-next-page"
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "amp-next-page extension .json configuration"
+    mandatory: true
+    unique: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
+}
+tags: {  # <amp-next-page src>
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page with src attribute"
   unique: true
   requires_extension: "amp-next-page"
   attrs: {
     name: "src"
+    mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
+}
+tags: {  # <amp-next-page type="adsense">
+  html_format: AMP
+  tag_name: "AMP-NEXT-PAGE"
+  spec_name: "amp-next-page [type=adsense]"
+  unique: true
+  requires_extension: "amp-next-page"
+  attrs: {
+    name: "data-client"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-slot"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "adsense"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }

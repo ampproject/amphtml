@@ -20,22 +20,26 @@ import {
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
 import {Services} from '../../src/services';
-import {resetServiceForTesting} from '../../src/service';
+import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
 
-describes.fakeWin('Template', {}, env => {
+describes.fakeWin('Template', {amp: true}, env => {
   let templates;
   let doc;
   let win;
+  let container;
 
   beforeEach(() => {
     win = env.win;
     installTemplatesService(win);
     templates = Services.templatesFor(win);
     doc = win.document;
+    container = document.createElement('div');
+    document.body.appendChild(container);
   });
 
   afterEach(() => {
     resetServiceForTesting(win, 'templates');
+    document.body.removeChild(container);
   });
 
   class TemplateImpl extends BaseTemplate {
@@ -46,6 +50,16 @@ describes.fakeWin('Template', {}, env => {
     }
   }
 
+  class TemplateImplCheckingViewer extends TemplateImpl {
+    render(data) {
+      if (!this.viewerCanRenderTemplates()) {
+        throw new Error();
+      }
+
+      return super.render(data);
+    }
+  }
+
   let count = 0;
 
   function createTemplateElement() {
@@ -53,6 +67,7 @@ describes.fakeWin('Template', {}, env => {
     const type = `amp-template-${id}`;
     const element = doc.createElement('template');
     element.setAttribute('type', type);
+    container.appendChild(element);
     return element;
   }
 
@@ -62,6 +77,22 @@ describes.fakeWin('Template', {}, env => {
         TemplateImpl);
     return templates.renderTemplate(templateElement, {value: 1}).then(res => {
       expect(res.textContent).to.equal('abc1');
+    });
+  });
+
+  it('should render when detached', () => {
+    const templateElement = createTemplateElement();
+    // Use TemplateImplCheckingViewer to make sure viewerCanRenderTemplates
+    // works correctly when the template is later detached.
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
+        TemplateImplCheckingViewer);
+    const viewerService = getServiceForDoc(templateElement, 'viewer');
+    env.sandbox.stub(viewerService, 'hasCapability').returns(true);
+    return templates.renderTemplate(templateElement, {value: 1}).then(() => {
+      templateElement.parentElement.removeChild(templateElement);
+      return templates.renderTemplate(templateElement, {value: 2});
+    }).then(res => {
+      expect(res.textContent).to.equal('abc2');
     });
   });
 
@@ -165,9 +196,30 @@ describes.fakeWin('Template', {}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
+    const regexError = new RegExp(
+        'Template must be defined in a <template> or '
+            + '<script type="text/plain"> tag');
     allowConsoleError(() => { expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template element must be a "template" tag/); });
+    }).to.throw(regexError);});
+  });
+
+  it('should require discovered "script" with type defined', () => {
+    // Given a script template with the type not defined.
+    const templateElement = doc.createElement('script');
+    const id = 'template' + Math.random();
+    templateElement.setAttribute('id', id);
+    doc.body.appendChild(templateElement);
+
+    const parentElement = doc.createElement('div');
+    parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
+    const regexError = new RegExp(
+        'Template must be defined in a <template> or '
+            + '<script type="text/plain"> tag');
+    allowConsoleError(() => { expect(() => {
+      templates.findAndRenderTemplate(parentElement, {value: 0});
+    }).to.throw(regexError);});
   });
 
   it('should discover template via children', () => {
@@ -177,6 +229,7 @@ describes.fakeWin('Template', {}, env => {
 
     const parentElement = doc.createElement('div');
     parentElement.appendChild(templateElement);
+    container.appendChild(parentElement);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
           expect(res.textContent).to.equal('abc1');
@@ -240,14 +293,19 @@ describes.fakeWin('Template', {}, env => {
 
 describes.fakeWin('BaseTemplate', {}, env => {
 
-  let templateElement;
   let win;
   let doc;
+  let templateElement;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     templateElement = doc.createElement('div');
+    document.body.appendChild(templateElement);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(templateElement);
   });
 
   it('should require render override', () => {

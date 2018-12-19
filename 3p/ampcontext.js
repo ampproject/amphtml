@@ -18,8 +18,8 @@ import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
 import {dev} from '../src/log';
 import {dict} from '../src/utils/object';
+import {isExperimentOn, nextTick} from './3p';
 import {isObject} from '../src/types';
-import {nextTick} from './3p';
 import {parseUrlDeprecated} from '../src/url';
 import {tryParseJson} from '../src/json';
 
@@ -128,7 +128,7 @@ export class AbstractAmpContext {
         MessageType.SEND_EMBED_STATE,
         MessageType.EMBED_STATE,
         data => {
-          this.hidden = data.pageHidden;
+          this.hidden = data['pageHidden'];
           this.dispatchVisibilityChangeEvent_();
         });
   }
@@ -169,16 +169,18 @@ export class AbstractAmpContext {
         MessageType.SEND_INTERSECTIONS,
         MessageType.INTERSECTION,
         intersection => {
-          callback(intersection.changes);
+          callback(intersection['changes']);
         });
 
-    // Call the callback with the value that was transmitted when the
-    // iframe was drawn. Called in nextTick, so that callers don't
-    // have to specially handle the sync case.
-    // TODO(lannka, #8562): Deprecate this behavior
-    nextTick(this.win_, () => {
-      callback([this.initialIntersection]);
-    });
+    if (!isExperimentOn('no-initial-intersection')) { // eslint-disable-line
+      // Call the callback with the value that was transmitted when the
+      // iframe was drawn. Called in nextTick, so that callers don't
+      // have to specially handle the sync case.
+      // TODO(lannka, #8562): Deprecate this behavior
+      nextTick(this.win_, () => {
+        callback([this.initialIntersection]);
+      });
+    }
 
     return unlisten;
   }
@@ -212,11 +214,13 @@ export class AbstractAmpContext {
    *    This is not guaranteed to succeed. All this does is make the request.
    *  @param {number} width The new width for the ad we are requesting.
    *  @param {number} height The new height for the ad we are requesting.
+   *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
    */
-  requestResize(width, height) {
+  requestResize(width, height, hasOverflow) {
     this.client_.sendMessage(MessageType.EMBED_SIZE, dict({
       'width': width,
       'height': height,
+      'hasOverflow': hasOverflow,
     }));
   }
 

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getMultiSizeDimensions} from '../utils';
+import {
+  getMatchedContentResponsiveHeight,
+  getMultiSizeDimensions,
+} from '../utils';
 
 describe('#getMultiSizeDimensions', () => {
 
@@ -76,5 +79,46 @@ describe('#getMultiSizeDimensions', () => {
         '-1x300,' + multiSizeDataStr, 300, 300,
         /* Ignore lowerbound */ false);
     verifyArray(actual, 0, multiSizes.length);
+  });
+
+  it('should add dummy size for fluid', () => {
+    expect(
+        getMultiSizeDimensions('fluid', 300, 300, /* useLowerBound */ false))
+        .to.deep.equal([[320, 50]]);
+  });
+
+  it('should not add dummy size for fluid if fluid is primary size', () => {
+    expect(getMultiSizeDimensions('fluid', 300, 300,
+        /* useLowerBound */ false,
+        /* isFluidPrimary */ true))
+        .to.deep.equal([]);
+  });
+
+  it('should allow fluid with fixed sizes', () => {
+    expect(getMultiSizeDimensions(
+        'fluid,300x300', 300, 300, /* useLowerBound */ false))
+        .to.deep.equal([[320, 50], [300, 300]]);
+    expect(getMultiSizeDimensions(
+        '300x300,fluid', 300, 300, /* useLowerBound */ false))
+        .to.deep.equal([[300, 300], [320, 50]]);
+  });
+
+  it('should calculate responsive matched content height correctly', () => {
+    const testCases = [
+      [300, 1032],
+      [400, 1376],
+      [500, 350],
+      [600, 360],
+      [900, 450],
+      [1000, 500],
+      [1200, 600],
+      [1300, 600],
+    ];
+    testCases.forEach(testCase => {
+      const width = testCase[0];
+      const expectedHeight = testCase[1];
+      expect(getMatchedContentResponsiveHeight(width),
+          `width = ${width}`).to.equal(expectedHeight);
+    });
   });
 });

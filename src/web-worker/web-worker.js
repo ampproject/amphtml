@@ -23,12 +23,14 @@
 
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {dev, initLogConstructor} from '../log';
 import {exponentialBackoff} from '../exponential-backoff';
-import {initLogConstructor} from '../log';
 import {urls} from '../config';
 
 initLogConstructor();
+
+/** @const {string} */
+const TAG = 'web-worker';
 
 /**
  * Exponential backoff for error reports to avoid any given
@@ -58,15 +60,26 @@ self.addEventListener('error', errorHandler_);
 self.addEventListener('message', function(event) {
   const {method, args, id, scope} =
     /** @type {ToWorkerMessageDef} */ (event.data);
-
   let returnValue;
 
-  if (!evaluators_[scope]) {
-    evaluators_[scope] = new BindEvaluator();
+  // TODO(choumx): Remove this fallback when we confirm there are no errors.
+  if (method !== 'bind.init' && !evaluators_[scope]) {
+    dev().error(TAG, 'Missing evaluator for scope: %s', scope);
+    evaluators_[scope] = new BindEvaluator(/* allowUrlProperties */ true);
   }
   const evaluator = evaluators_[scope];
 
   switch (method) {
+    case 'bind.init':
+      if (evaluator) {
+        dev().error(TAG, 'Evaluator already exists for scope:', scope);
+        returnValue = false;
+      } else {
+        const allowUrlProperties = args[0];
+        evaluators_[scope] = new BindEvaluator(allowUrlProperties);
+        returnValue = true;
+      }
+      break;
     case 'bind.addBindings':
       returnValue = evaluator.addBindings.apply(evaluator, args);
       break;
@@ -84,11 +97,11 @@ self.addEventListener('message', function(event) {
       returnValue = evaluator.evaluateExpression.apply(evaluator, args);
       break;
     default:
-      throw new Error(`Unrecognized method: ${method}`);
+      dev().error(TAG, 'Unrecognized method: %s', method);
   }
 
-  /** @type {FromWorkerMessageDef} */
-  const message = {method, returnValue, id};
+  const message =
+    /** @type {FromWorkerMessageDef} */ ({method, returnValue, id});
   // `message` may only contain values or objects handled by the
   // structured clone algorithm.
   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ActionInvocation,
   ActionService,
@@ -24,7 +23,7 @@ import {
 } from '../../src/service/action-impl';
 import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {KeyCodes} from '../../src/utils/key-codes';
+import {Keys} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
@@ -496,7 +495,7 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
   });
 
   it('should create embedded action service', () => {
-    action.adoptEmbedWindow(embedWin);
+    ActionService.installInEmbedWindow(embedWin, action.ampdoc);
     const embedService = embedWin.services.action
         && embedWin.services.action.obj;
     expect(embedService).to.exist;
@@ -511,7 +510,7 @@ describe('Action findAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -603,7 +602,7 @@ describe('Action hasAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -646,7 +645,7 @@ describe('Action method', () => {
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
@@ -736,7 +735,7 @@ describe('installActionHandler', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -785,7 +784,7 @@ describe('Multiple handlers action method', () => {
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
@@ -871,7 +870,7 @@ describe('Action interceptor', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
@@ -971,7 +970,7 @@ describe('Action common handler', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
@@ -1110,7 +1109,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'button');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1126,7 +1125,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     element.setAttribute('role', 'option');
     const event = {
       target: element,
-      keyCode: KeyCodes.ENTER,
+      key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
     expect(event.preventDefault).to.have.been.called;
@@ -1139,7 +1138,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'not-a-button');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: Keys.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1149,7 +1148,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(window.document.addEventListener).to.have.been.calledWith('keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('input');
-    const event = {target: element, keyCode: KeyCodes.ENTER};
+    const event = {target: element, key: Keys.ENTER};
     handler(event);
     expect(action.trigger).to.not.have.been.called;
   });
@@ -1337,7 +1336,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 });
 
-describes.realWin('whitelist', {
+describes.realWin('Action whitelisting', {
   amp: {
     ampdoc: 'single',
   },
@@ -1347,37 +1346,83 @@ describes.realWin('whitelist', {
   let spy;
 
   beforeEach(() => {
-    const meta = createElementWithAttributes(env.win.document, 'meta', {
-      name: 'amp-action-whitelist',
-      content: 'AMP.pushState, AMP.setState',
-    });
-    env.win.document.head.appendChild(meta);
-
-    action = new ActionService(env.ampdoc, env.win.document);
     spy = env.sandbox.spy();
     target = createExecElement('foo', spy);
   });
 
-  it('should allow whitelisted actions', () => {
-    const i = new ActionInvocation(target, 'setState', /* args */ null,
-        'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
-    action.invoke_(i);
-    expect(spy).to.be.calledWithExactly(i);
+  describe('with non-empty whitelist', () => {
+    beforeEach(() => {
+      const meta = createElementWithAttributes(env.win.document, 'meta', {
+        name: 'amp-action-whitelist',
+        content: 'AMP.pushState, AMP.setState, *.show',
+      });
+      env.win.document.head.appendChild(meta);
+
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    it('should allow whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'setState', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should allow whitelisted actions with wildcard target', () => {
+      const i = new ActionInvocation(target, 'show', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'DIV');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should not allow non-whitelisted actions', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      sandbox.stub(action, 'error_');
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+          '[{"tagOrTarget":"AMP","method":"pushState"},' +
+          '{"tagOrTarget":"AMP","method":"setState"},' +
+          '{"tagOrTarget":"*","method":"show"}].');
+    });
+
+    it('should allow adding actions to the whitelist', () => {
+      const i = new ActionInvocation(target, 'print', /* args */ null,
+          'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
+      action.addToWhitelist('AMP', 'print');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
   });
 
-  it('should not allow non-whitelisted actions', () => {
+  it('should not allow any action with empty string whitelist', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: '',
+    });
+    env.win.document.head.appendChild(meta);
+    action = new ActionService(env.ampdoc, env.win.document);
+
     const i = new ActionInvocation(target, 'print', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
     sandbox.stub(action, 'error_');
     expect(action.invoke_(i)).to.be.null;
-    expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
-        '(AMP.pushState,AMP.setState).');
+    expect(action.error_).to.be.calledWith(
+        '"AMP.print" is not whitelisted [].');
   });
 
-  it('should allow adding actions to the whitelist', () => {
-    const i = new ActionInvocation(target, 'print', /* args */ null,
+  it('should ignore unparseable whitelist entries', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
+    });
+    env.win.document.head.appendChild(meta);
+    allowConsoleError(() => {
+      action = new ActionService(env.ampdoc, env.win.document);
+    });
+
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
         'source', 'caller', 'event', ActionTrust.HIGH, 'tap', 'AMP');
-    action.addToWhitelist('AMP.print');
     action.invoke_(i);
     expect(spy).to.be.calledWithExactly(i);
   });

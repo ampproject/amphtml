@@ -69,6 +69,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+
     const doc = this.element.ownerDocument;
     const container = doc.createElement('div');
 
@@ -88,7 +89,10 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     clip.appendChild(container);
     this.element.appendChild(clip);
 
-    this.getViewport().addToFixedLayer(container);
+    // Make the fixed-layer track the container, but never transfer it out of
+    // this DOM tree. Tracking allows us to compensate for the Viewer's header,
+    // but transferring would break the clipping UI.
+    this.getViewport().addToFixedLayer(container, /* opt_forceTransfer */false);
   }
 
   /** @override */
@@ -179,6 +183,14 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
         return this.attemptCollapse().catch(() => {});
       }
     }
+  }
+
+  /**
+   * Returns our discovered children
+   * @return {!Array<!Element>}
+   */
+  getChildren() {
+    return this.children_;
   }
 
   /**

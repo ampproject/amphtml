@@ -17,13 +17,12 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
+import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
-import {createAmpElementProtoForTesting} from '../../src/custom-element';
-import {poll} from '../../testing/iframe';
-
+import {createAmpElementForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement', {amp: true}, env => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -113,14 +112,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container = doc.createElement('div');
       doc.body.appendChild(container);
 
-      ElementClass = doc.registerElement('amp-test', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test', TestElement),
-      });
-      StubElementClass = doc.registerElement('amp-stub', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-stub', ElementStub),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
+      StubElementClass = createAmpElementForTesting(win, 'amp-stub',
+          ElementStub);
+
+      win.customElements.define('amp-test', ElementClass);
+      win.customElements.define('amp-stub', StubElementClass);
+
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
       ampdoc.declareExtension('amp-stub');
@@ -271,15 +269,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => true);
       element.layoutCount_ = 10;
       element.isFirstLayoutCompleted_ = true;
-      element.signals().signal('render-start');
-      element.signals().signal('load-end');
+      element.signals().signal(CommonSignals.RENDER_START);
+      element.signals().signal(CommonSignals.LOAD_END);
       container.appendChild(element);
       return buildPromise.then(() => {
         expect(buildStub).to.be.called;
         expect(element.layoutCount_).to.equal(0);
         expect(element.isFirstLayoutCompleted_).to.be.false;
-        expect(element.signals().get('render-start')).to.be.null;
-        expect(element.signals().get('load-end')).to.be.null;
+        expect(element.signals().get(CommonSignals.RENDER_START)).to.be.null;
+        expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
       });
     });
 
@@ -293,14 +291,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => false);
       element.layoutCount_ = 10;
       element.isFirstLayoutCompleted_ = true;
-      element.signals().signal('render-start');
-      expect(element.signals().get('render-start')).to.be.ok;
-      element.signals().signal('load-end');
+      element.signals().signal(CommonSignals.RENDER_START);
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+      element.signals().signal(CommonSignals.LOAD_END);
       container.appendChild(element);
       expect(element.layoutCount_).to.equal(10);
       expect(element.isFirstLayoutCompleted_).to.be.true;
-      expect(element.signals().get('render-start')).to.be.ok;
-      expect(element.signals().get('load-end')).to.be.ok;
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
     });
 
     it('Element - getIntersectionChangeEntry', () => {
@@ -552,7 +550,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
-      expect(element.signals().get('built')).to.not.be.ok;
+      expect(element.signals().get(CommonSignals.BUILT)).to.not.be.ok;
 
       clock.tick(1);
       container.appendChild(element);
@@ -561,7 +559,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
         expect(testElementBuildCallback).to.be.calledOnce;
-        expect(element.signals().get('built')).to.be.ok;
+        expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
         return element.whenBuilt(); // Should eventually resolve.
       });
     });
@@ -865,11 +863,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(testElementLayoutCallback).to.be.calledOnce;
         expect(testElementPreconnectCallback).to.have.callCount(2);
         expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
-        expect(element.signals().get('load-start')).to.be.ok;
-        expect(element.signals().get('load-end')).to.be.null;
+        expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
+        expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
         return p.then(() => {
           expect(element.readyState).to.equal('complete');
-          expect(element.signals().get('load-end')).to.be.ok;
+          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
         });
       });
     });
@@ -1013,85 +1011,97 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }).to.throw(/Must never be called in template/); });
     });
 
+    describe('apply sizes and media query', () => {
+      let element1;
+      let element2;
+      let matchMedia;
 
-    it('should apply media condition', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('media', '(min-width: 1px)');
-      element1.applySizesAndMediaQuery();
-      expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+      beforeEach(() => {
+        element1 = new ElementClass();
 
-      const element2 = new ElementClass();
-      element2.setAttribute('media', '(min-width: 1111111px)');
-      element2.applySizesAndMediaQuery();
-      expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
-    });
+        // Fixes #19752. The window.matchMedia call in the code
+        // path of element.applySizesAndMediaQuery is not behaving consistently
+        // in headless mode, thus we mock the calls here. This is fine as we are
+        // not testing window behavior.
+        matchMedia =
+            sandbox.stub(element1.ownerDocument.defaultView, 'matchMedia');
+        matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+        matchMedia.withArgs('(min-width: 1111111px)').returns(
+            {matches: false});
+        element2 = new ElementClass();
+      });
 
-    it('should apply sizes condition', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-      element1.applySizesAndMediaQuery();
-      expect(element1.style.width).to.equal('200px');
+      it('should apply media condition', () => {
+        element1.setAttribute('media', '(min-width: 1px)');
+        element1.applySizesAndMediaQuery();
+        expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
 
-      const element2 = new ElementClass();
-      element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
-      element2.applySizesAndMediaQuery();
-      expect(element2.style.width).to.equal('50vw');
-    });
+        element2.setAttribute('media', '(min-width: 1111111px)');
+        element2.applySizesAndMediaQuery();
+        expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+      });
 
-    it('should apply heights condition', () => {
-      const element1 = new ElementClass();
-      element1.sizerElement = doc.createElement('div');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement.style.paddingTop).to.equal('99%');
+      it('should apply sizes condition', () => {
+        element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
+        element1.applySizesAndMediaQuery();
+        expect(element1.style.width).to.equal('200px');
 
-      const element2 = new ElementClass();
-      element2.sizerElement = doc.createElement('div');
-      element2.setAttribute('layout', 'responsive');
-      element2.setAttribute('width', '200px');
-      element2.setAttribute('height', '200px');
-      element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
-      container.appendChild(element2);
-      element2.applySizesAndMediaQuery();
-      expect(element2.sizerElement.style.paddingTop).to.equal('1%');
-    });
+        element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
+        element2.applySizesAndMediaQuery();
+        expect(element2.style.width).to.equal('50vw');
+      });
 
-    it('should rediscover sizer to apply heights in SSR', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('i-amphtml-layout', 'responsive');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
+      it('should apply heights condition', () => {
+        element1.sizerElement = doc.createElement('div');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement.style.paddingTop).to.equal('99%');
 
-      const sizer = doc.createElement('i-amphtml-sizer');
-      expect(element1.sizerElement).to.be.undefined;
-      element1.appendChild(sizer);
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement).to.equal(sizer);
-      expect(sizer.style.paddingTop).to.equal('99%');
-    });
+        element2.sizerElement = doc.createElement('div');
+        element2.setAttribute('layout', 'responsive');
+        element2.setAttribute('width', '200px');
+        element2.setAttribute('height', '200px');
+        element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
+        container.appendChild(element2);
+        element2.applySizesAndMediaQuery();
+        expect(element2.sizerElement.style.paddingTop).to.equal('1%');
+      });
 
-    it('should NOT rediscover sizer after reset in SSR', () => {
-      const element1 = new ElementClass();
-      element1.setAttribute('i-amphtml-layout', 'responsive');
-      element1.setAttribute('layout', 'responsive');
-      element1.setAttribute('width', '200px');
-      element1.setAttribute('height', '200px');
-      element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-      container.appendChild(element1);
+      it('should rediscover sizer to apply heights in SSR', () => {
+        element1.setAttribute('i-amphtml-layout', 'responsive');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
 
-      const sizer = doc.createElement('i-amphtml-sizer');
-      element1.appendChild(sizer);
-      element1.sizerElement = null;
-      element1.applySizesAndMediaQuery();
-      expect(element1.sizerElement).to.be.null;
-      expect(sizer.style.paddingTop).to.equal('');
+        const sizer = doc.createElement('i-amphtml-sizer');
+        expect(element1.sizerElement).to.be.undefined;
+        element1.appendChild(sizer);
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement).to.equal(sizer);
+        expect(sizer.style.paddingTop).to.equal('99%');
+      });
+
+      it('should NOT rediscover sizer after reset in SSR', () => {
+        element1.setAttribute('i-amphtml-layout', 'responsive');
+        element1.setAttribute('layout', 'responsive');
+        element1.setAttribute('width', '200px');
+        element1.setAttribute('height', '200px');
+        element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+        container.appendChild(element1);
+
+        const sizer = doc.createElement('i-amphtml-sizer');
+        element1.appendChild(sizer);
+        element1.sizerElement = null;
+        element1.applySizesAndMediaQuery();
+        expect(element1.sizerElement).to.be.null;
+        expect(sizer.style.paddingTop).to.equal('');
+      });
     });
 
     it('should reapply layout=nodisplay in SSR', () => {
@@ -1099,10 +1109,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element1.setAttribute('i-amphtml-layout', 'nodisplay');
       element1.setAttribute('layout', 'nodisplay');
       container.appendChild(element1);
-      // TODO(dvoytenko, #9353): cleanup once `toggleLayoutDisplay` API has been
-      // fully migrated.
-      expect(element1.style.display).to.equal('none');
-      expect(element1).to.have.class('i-amphtml-display');
+      expect(element1).to.have.display('none');
     });
 
     it('should change size without sizer', () => {
@@ -1204,6 +1211,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element).to.have.class('i-amphtml-layout-awaiting-size');
       element.changeSize(100, 100);
       expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
+    });
+
+    it('should signal size-changed when size changed', () => {
+      const element = new ElementClass();
+      element.changeSize();
+      expect(element.signals().get(CommonSignals.CHANGE_SIZE_END)).to.be.ok;
+      return element.signals().whenSignal(CommonSignals.CHANGE_SIZE_END);
     });
 
     describe('unlayoutCallback', () => {
@@ -1469,9 +1483,9 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    StubElementClass = doc.registerElement('amp-stub2', {
-      prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
-    });
+    StubElementClass = createAmpElementForTesting(win, 'amp-stub2',
+        ElementStub);
+    win.customElements.define('amp-stub2', StubElementClass);
     env.ampdoc.declareExtension('amp-stub2');
     element = new StubElementClass();
   });
@@ -1503,31 +1517,6 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     const elements = element.getRealChildren();
     expect(elements.length).to.equal(1);
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
-  it('toggleLayoutDisplay should add/remove display class', () => {
-    element.setAttribute('layout', 'nodisplay');
-    win.document.body.appendChild(element);
-    return poll('wait for static layout',
-        () => element.classList.contains('i-amphtml-layout-nodisplay'))
-        .then(() => {
-          // TODO(dvoytenko, #9353): once `toggleLayoutDisplay` API has been
-          // deployed this will start `false`.
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-
-          element.style.display = 'block';
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-
-          element.toggleLayoutDisplay(false);
-          expect(element.classList.contains('i-amphtml-display')).to.be.false;
-          expect(win.getComputedStyle(element).display).to.equal('none');
-
-          element.toggleLayoutDisplay(true);
-          expect(element.classList.contains('i-amphtml-display')).to.be.true;
-          expect(win.getComputedStyle(element).display).to.equal('block');
-        });
   });
 
   it('getPlaceholder should return nothing', () => {
@@ -1647,10 +1636,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win = env.win;
       doc = win.document;
       clock = lolex.install({target: win});
-      ElementClass = doc.registerElement('amp-test-loader', {
-        prototype: createAmpElementProtoForTesting(
-            win, 'amp-test-loader', TestElement),
-      });
+      ElementClass = createAmpElementForTesting(win, 'amp-test-loader',
+          TestElement);
+      win.customElements.define('amp-test-loader', ElementClass);
       win.ampExtendedElements['amp-test-loader'] = TestElement;
       LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
       resources = Services.resourcesForDoc(doc);
@@ -1749,7 +1737,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should ignore loading-on if already rendered', () => {
       stubInA4A(false);
       clock.tick(1);
-      element.signals().signal('render-start');
+      element.signals().signal(CommonSignals.RENDER_START);
       element.toggleLoading(true);
       expect(element.loadingElement_).to.be.null;
     });
@@ -1766,7 +1754,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       clock.tick(1);
       const stub = sandbox.stub(element, 'toggleLoading');
       element.renderStarted();
-      expect(element.signals().get('render-start')).to.be.ok;
+      expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
       expect(stub).to.be.calledOnce;
       expect(stub.args[0][0]).to.be.false;
     });
@@ -1986,10 +1974,9 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ElementClass = doc.registerElement('amp-test-overflow', {
-      prototype: createAmpElementProtoForTesting(
-          win, 'amp-test-overflow', TestElement),
-    });
+    ElementClass = createAmpElementForTesting(win, 'amp-test-overflow',
+        TestElement);
+    win.customElements.define('amp-test-overflow', ElementClass);
     resources = Services.resourcesForDoc(doc);
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();

@@ -267,9 +267,10 @@ function minTime(time) {
 }
 
 /**
- *  Installs embed state listener.
+ * Installs embed state listener.
  */
 export function installEmbedStateListener() {
+  /** @suppress {deprecated} */
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });

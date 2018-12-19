@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createCustomEvent} from '../../../src/event-helper';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+  toggle,
+} from '../../../src/style';
+import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/friendly-iframe-embed';
+import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
-import {tryFocus} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -39,6 +49,57 @@ const LightboxEvents = {
   OPEN: 'lightboxOpen',
   CLOSE: 'lightboxClose',
 };
+
+/**
+ * @typedef {{
+ *   openStyle: !JsonObject,
+ *   closedStyle: !JsonObject,
+ *   durationSeconds: number,
+ * }}
+ */
+let AnimationPresetDef;
+
+/** @private @const {!Object<string, !AnimationPresetDef>} */
+const AnimationPresets = {
+  'fade-in': {
+    openStyle: dict({'opacity': 1}),
+    closedStyle: dict({'opacity': 0}),
+    durationSeconds: 0.1,
+  },
+  'fly-in-bottom': {
+    openStyle: dict({'transform': 'translate(0, 0)'}),
+    closedStyle: dict({'transform': 'translate(0, 100%)'}),
+    durationSeconds: 0.2,
+  },
+  'fly-in-top': {
+    openStyle: dict({'transform': 'translate(0, 0)'}),
+    closedStyle: dict({'transform': 'translate(0, -100%)'}),
+    durationSeconds: 0.2,
+  },
+};
+
+/** @private @const {string} */
+const DEFAULT_ANIMATION = 'fade-in';
+
+/**
+ * @param {!Element} ctx
+ * @return {!Element}
+ */
+function renderCloseButtonHeader(ctx) {
+  return htmlFor(ctx)`
+    <i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad">
+      <div>Ad</div>
+      <i-amphtml-ad-close-button class="amp-ad-close-button">
+      </i-amphtml-ad-close-button>
+    </i-amphtml-ad-close-header>`;
+}
+
+/**
+ * @param {!Element} header
+ */
+function showCloseButtonHeader(header) {
+  header.classList.add('amp-ad-close-header');
+}
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -76,12 +137,23 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {number} */
     this.oldPos_ = 0;
 
+    /** @private {number} */
+    this.eventCounter_ = 0;
+
     /** @private {?number} */
     this.scrollTimerId_ = null;
 
+    /** @private @const {string} */
+    this.animationPreset_ =
+        (element.getAttribute('animate-in') || DEFAULT_ANIMATION).toLowerCase();
+
+    /** @private {?Element} */
+    this.closeButtonHeader_ = null;
+
     /** @const {function()} */
     this.boundReschedule_ = debounce(this.win, () => {
-      const container = dev().assertElement(this.container_);
+      const container = user().assertElement(this.container_,
+          'E#19457 this.container_');
       this.scheduleLayout(container);
       this.scheduleResume(container);
     }, 500);
@@ -89,6 +161,11 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.user().assert(
+        hasOwn(AnimationPresets, this.animationPreset_),
+        'Invalid `animate-in` value %s',
+        this.animationPreset_);
+
     this.element.classList.add('i-amphtml-overlay');
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
@@ -131,15 +208,17 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
 
-    this.isScrollable_ = this.element.hasAttribute('scrollable');
+    const {element} = this;
+
+    this.isScrollable_ = element.hasAttribute('scrollable');
 
     const children = this.getRealChildren();
 
-    this.container_ = this.element.ownerDocument.createElement('div');
+    this.container_ = element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
       this.applyFillContent(this.container_);
     }
-    this.element.appendChild(this.container_);
+    element.appendChild(this.container_);
 
     children.forEach(child => {
       this.container_.appendChild(child);
@@ -150,16 +229,18 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.isScrollable_) {
       this.takeOwnershipOfDescendants_();
 
-      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      element.classList.add('i-amphtml-scrollable');
+
+      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
         this.updateChildrenInViewport_(this.pos_, this.pos_);
       });
 
-      this.element.addEventListener('scroll', this.scrollHandler_.bind(this));
+      element.addEventListener('scroll', this.scrollHandler_.bind(this));
     }
 
     if (!this.isScrollable_) {
-      const gestures = Gestures.get(this.element);
+      const gestures = Gestures.get(element);
       gestures.onGesture(SwipeXYRecognizer, () => {
         // Consume to block scroll events and side-swipe.
       });
@@ -185,6 +266,18 @@ class AmpLightbox extends AMP.BaseElement {
         .then(() => this.finalizeOpen_());
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const open = mutations['open'];
+    if (open !== undefined) {
+      if (open) {
+        this.activate();
+      } else {
+        this.close();
+      }
+    }
+  }
+
   /**
    * Any child of the lightbox with the autofocus attribute should be focused
    * after the lightbox opens.
@@ -201,24 +294,39 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   finalizeOpen_() {
+    const {element} = this;
+
+    const {durationSeconds, openStyle, closedStyle} =
+        this.getAnimationPresetDef_();
+
+    const props = Object.keys(openStyle);
+
+    const transition =
+        props.map(p => `${p} ${durationSeconds}s ease-in`).join(',');
+
+    this.eventCounter_++;
+
     if (this.isScrollable_) {
-      st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
+      setStyle(element, 'webkitOverflowScrolling', 'touch');
     }
 
     // This should be in a mutateElement block, but focus on iOS won't work
     // if triggered asynchronously inside a callback.
-    st.setStyles(this.element, {
-      display: '',
-      opacity: 0,
-      // TODO(dvoytenko): use new animations support instead.
-      transition: 'opacity 0.1s ease-in',
+    setStyle(element, 'transition', transition);
+
+    setStyles(element, assertDoesNotContainDisplay(closedStyle));
+    toggle(element, true);
+
+    this.mutateElement(() => {
+      element./*OK*/scrollTop = 0;
     });
 
     this.handleAutofocus_();
+    this.maybeRenderCloseButtonHeader_();
 
     // TODO (jridgewell): expose an API accomodating this per PR #14676
     this.mutateElement(() => {
-      st.setStyle(this.element, 'opacity', '');
+      setStyles(element, assertDoesNotContainDisplay(openStyle));
     });
 
     const container = dev().assertElement(this.container_);
@@ -230,8 +338,8 @@ class AmpLightbox extends AMP.BaseElement {
     }
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    this.element.addEventListener('transitionend', this.boundReschedule_);
-    this.element.addEventListener('animationend', this.boundReschedule_);
+    element.addEventListener('transitionend', this.boundReschedule_);
+    element.addEventListener('animationend', this.boundReschedule_);
     this.scheduleLayout(container);
     this.scheduleResume(container);
     this.triggerEvent_(LightboxEvents.OPEN);
@@ -243,13 +351,53 @@ class AmpLightbox extends AMP.BaseElement {
     this.active_ = true;
   }
 
+  /** @private */
+  maybeRenderCloseButtonHeader_() {
+    const {element} = this;
+
+    if (element.getAttribute('close-button') == null) {
+      return;
+    }
+
+    const header = renderCloseButtonHeader(element);
+
+    this.closeButtonHeader_ = header;
+
+    listenOnce(header, 'click', () => this.close());
+
+    element.insertBefore(header, this.container_);
+
+    let headerHeight;
+
+    this.measureMutateElement(() => {
+      headerHeight = header./*OK*/getBoundingClientRect().height;
+    }, () => {
+      // Done in vsync in order to apply transition.
+      showCloseButtonHeader(header);
+
+      setImportantStyles(dev().assertElement(this.container_), {
+        'margin-top': px(headerHeight),
+        'min-height': `calc(100vh - ${px(headerHeight)})`,
+      });
+    });
+  }
+
+  /**
+   * @private
+   * @return {!AnimationPresetDef}
+   */
+  getAnimationPresetDef_() {
+    return AnimationPresets[this.animationPreset_];
+  }
+
   /**
    * Handles closing the lightbox when the ESC key is pressed.
    * @param {!Event} event
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == KeyCodes.ESCAPE) {
+    if (event.key == Keys.ESCAPE) {
+      event.preventDefault();
       this.close();
     }
   }
@@ -262,7 +410,11 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     if (this.isScrollable_) {
-      st.setStyle(this.element, 'webkitOverflowScrolling', '');
+      setStyle(this.element, 'webkitOverflowScrolling', '');
+    }
+    if (this.closeButtonHeader_) {
+      removeElement(this.closeButtonHeader_);
+      this.closeButtonHeader_ = null;
     }
     this.getViewport().leaveLightboxMode(this.element)
         .then(() => this.finalizeClose_());
@@ -272,18 +424,47 @@ class AmpLightbox extends AMP.BaseElement {
    * Clean up when closing lightbox.
    */
   finalizeClose_() {
-    this./*OK*/collapse();
+    const {element} = this;
+    const event = ++this.eventCounter_;
+
+    const collapseAndReschedule = () => {
+      // Don't collapse on transitionend if there was a subsequent event.
+      if (event != this.eventCounter_) {
+        return;
+      }
+      this./*OK*/collapse();
+      this.boundReschedule_();
+    };
+
+    // Disable transition for ads since the frame gets immediately collapsed.
+    if (this.isInAd_()) {
+      resetStyles(element, ['transition']);
+      collapseAndReschedule();
+    } else {
+      element.addEventListener('transitionend', collapseAndReschedule);
+      element.addEventListener('animationend', collapseAndReschedule);
+    }
+
+    setStyles(element, assertDoesNotContainDisplay(
+        this.getAnimationPresetDef_().closedStyle));
+
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.element.removeEventListener('transitionend', this.boundReschedule_);
-    this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isInAd_() {
+    return getMode(this.win).runtime == 'inabox' || isInFie(this.element);
   }
 
   /**
@@ -313,13 +494,13 @@ class AmpLightbox extends AMP.BaseElement {
   waitForScroll_(startingScrollTop) {
     this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
       if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'slow scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.scrollTimerId_ = null;
         this.update_(this.pos_);
       } else {
-        dev().fine(TAG, 'fast scrolling: ' + startingScrollTop + ' - '
-            + this.pos_);
+        dev().fine(TAG, 'fast scrolling: %s - %s',
+            startingScrollTop, this.pos_);
         this.waitForScroll_(this.pos_);
       }
     }, 100);
@@ -434,7 +615,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
+import {
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -70,7 +71,7 @@ export class PortraitComponent {
   /** @override */
   build(portraitJson, element) {
     const url = portraitJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const portrait = {
       url,

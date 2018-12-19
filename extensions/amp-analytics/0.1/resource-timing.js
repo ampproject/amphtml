@@ -43,7 +43,7 @@ let IndividualResourceSpecDef;
  * the hostPattern).
  * @typedef{{
  *   hostPattern: !RegExp,
- *   resouces: !Array<{
+ *   resources: !Array<{
  *     name: string,
  *     pathPattern: !RegExp,
  *     queryPattern: !RegExp,
@@ -259,7 +259,7 @@ function serialize(entries, resourceTimingSpec, win) {
  * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-export function serializeResourceTiming(win, resourceTimingSpec) {
+function serializeResourceTiming(win, resourceTimingSpec) {
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
@@ -288,4 +288,19 @@ export function serializeResourceTiming(win, resourceTimingSpec) {
   }
   // Yield the thread in case iterating over all resources takes a long time.
   return yieldThread(() => serialize(entries, resourceTimingSpec, win));
+}
+
+/**
+ * @param {!Window} win resource timing spec.
+ * @param {!JsonObject|undefined} spec resource timing spec.
+ * @param {number} startTime start timestamp.
+ * @return {!Promise<string>}
+ */
+export function getResourceTiming(win, spec, startTime) {
+  // Only allow collecting timing within 1s
+  if (spec && (Date.now() < (startTime + 60 * 1000))) {
+    return serializeResourceTiming(win, spec);
+  } else {
+    return Promise.resolve('');
+  }
 }

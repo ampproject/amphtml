@@ -42,13 +42,13 @@ If this attribute is present, and the browser supports autoplay:
 
 For an example, visit [AMP By Example](https://ampbyexample.com/components/amp-video/#autoplay).
 
-<a id="rotate-to-fullscreen"></a>
+<a id="docking"></a>
 
 ## Docking (minimize to corner)
 
 attribute: **`dock`**
 
-**Experimental feature. Setting this attribute is not currently valid.**
+**Experimental feature.**
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
@@ -58,6 +58,13 @@ component's visual area.
 - Multiple videos on the same page can be docked.
 - Users can dismiss the docked video by flicking it out of view. Once dismissed
 by the user, docking will no longer occur.
+
+In order to use this attribute, the [`amp-video-docking`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md)
+extension script must be present:
+
+```
+<script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+```
 
 ### Styling
 
@@ -114,9 +121,13 @@ Represents the `unmute` button.
 
 Represents the `fullscreen` button.
 
+<a id="rotate-to-fullscreen"></a>
+
 ## Rotate-to-fullscreen
 
 attribute: **`rotate-to-fullscreen`**
+
+This attribute is currently only supported for `amp-video`, `amp-ima-video` and `amp-dailymotion`.
 
 If this attribute is present and a video is playing manually (i.e. user initiated playback, or tapped on the video after autoplay), the video displays fullscreen after the user rotates their device into landscape mode, provided that the video is visible.
 

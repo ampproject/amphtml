@@ -15,7 +15,6 @@
  */
 
 
-import * as sinon from 'sinon';
 import {Poller} from '../poller';
 import {Services} from '../../../../src/services';
 
@@ -28,7 +27,7 @@ describe('Poller', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     const obj = {
       work() {},

@@ -13,7 +13,7 @@
   <!-- Import the `amp-list` component ... -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <!-- ... and the `amp-mustache` component in the header -->
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <link rel="canonical" href="https://ampbyexample.com/components/amp-list/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -57,6 +57,24 @@
     </template>
   </amp-list>
 
+  <!-- ## Using a script to enclose the template. -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
+    <script type="text/plain" template="amp-mustache">
+      <table>
+        <tr>
+          <td>Comment:</td>
+          <td>{{content}}</td>
+        </tr>
+        {{#replies}}
+          <tr>
+            <td>Reply:</td>
+            <td>{{content}}</td>
+          </tr>
+        {{/replies}}
+      </table>
+    </script>
+  </amp-list>
+
   <!-- ## Using an existing template -->
   <!--
     The template can also be specified using an ID of an existing
@@ -93,6 +111,15 @@
     </div>
   </amp-list>
 
+  <!-- ## Handling Paging -->
+  <!--
+ If the `amp-list` multiple pages ... .
+  -->
+  <amp-list width="auto" height="200" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
 
 
 </body>

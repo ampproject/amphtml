@@ -117,8 +117,8 @@ function changelog() {
  * @return {!Promise}
  */
 function getGitMetadata() {
-  if (!argv.version) {
-    throw new Error('no version value passed in. See --version flag option.');
+  if (!argv.tag) {
+    throw new Error('no tag value passed in. See --tag flag option.');
   }
 
   const gitMetadata = {logs: [], tag: undefined, baseTag: undefined};
@@ -134,7 +134,7 @@ function getGitMetadata() {
           return;
         }
         return getCurrentSha().then(
-            submitReleaseNotes.bind(null, argv.version, gitMetadata.changelog)
+            submitReleaseNotes.bind(null, argv.tag, gitMetadata.changelog)
         );
       })
       .catch(errHandler);
@@ -224,7 +224,7 @@ function getCurrentSha() {
  * @return {!GitMetadataDef}
  */
 function buildChangelog(gitMetadata) {
-  let changelog = `## Version: ${argv.version}\n\n`;
+  let changelog = `## Version: ${argv.tag}\n\n`;
 
   if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
     changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
@@ -560,7 +560,7 @@ function changelogUpdate() {
 
 function update() {
   const url = 'https://api.github.com/repos/ampproject/amphtml/releases/tags/' +
-      `${argv.version}`;
+      `${argv.tag}`;
   const tagsOptions = {
     url,
     method: 'GET',
@@ -615,7 +615,7 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
-    version: '  The git tag and github release label',
+    tag: '  The git tag and github release label',
   },
 });
 
@@ -624,6 +624,6 @@ const updateMessage = 'Update github release. Ex. prepend ' +
 gulp.task('changelog:update', updateMessage, changelogUpdate, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
-    version: '  The git tag and github release label',
+    tag: '  The git tag and github release label',
   },
 });

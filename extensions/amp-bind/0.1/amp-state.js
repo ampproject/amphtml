@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -85,22 +86,27 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
-    if (this.element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(this.element).then(bind => {
+    const {element} = this;
+    if (element.hasAttribute('overridable')) {
+      Services.bindForDocOrNull(element).then(bind => {
         dev().assert(bind, 'Bind service can not be found.');
-        bind.makeStateKeyOverridable(this.element.getAttribute('id'));
+        bind.makeStateKeyOverridable(element.getAttribute('id'));
       });
     }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
-    const {children} = this.element;
+    const {children} = element;
     if (children.length > 0) {
       this.parseChildAndUpdateState_();
     }
     if (this.element.hasAttribute('src')) {
       this.fetchAndUpdate_(/* isInit */ true);
     }
+    this.registerAction('refresh', () => {
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    }, ActionTrust.HIGH);
   }
+
 
   /**
    * Parses JSON in child script element and updates state.
@@ -132,9 +138,10 @@ export class AmpState extends AMP.BaseElement {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {boolean} isInit
+   * @param {boolean=} opt_refresh
    * @return {!Promise}
    */
-  fetch_(ampdoc, element, isInit) {
+  fetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
 
     // Require opt-in for URL variable replacements on CORS fetches triggered
@@ -145,19 +152,21 @@ export class AmpState extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
     return batchFetchJsonFor(
-        ampdoc, element, /* opt_expr */ undefined, policy);
+        ampdoc, element, /* opt_expr */ undefined, policy, opt_refresh);
   }
 
   /**
    * @param {boolean} isInit
+   * @param {boolean=} opt_refresh
    * @return {!Promise}
    * @private
    */
-  fetchAndUpdate_(isInit) {
+  fetchAndUpdate_(isInit, opt_refresh) {
     const ampdoc = this.getAmpDoc();
-    return this.fetch_(ampdoc, this.element, isInit).then(json => {
-      this.updateState_(json, isInit);
-    });
+    return this.fetch_(ampdoc, this.element, isInit, opt_refresh)
+        .then(json => {
+          this.updateState_(json, isInit);
+        });
   }
 
   /**

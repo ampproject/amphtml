@@ -18,6 +18,7 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
+  UIType,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
@@ -109,10 +110,10 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
-  it('should toggle the desktop state', () => {
+  it('should toggle the desktop state when setting a UI State', () => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_DESKTOP, true);
+    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -141,8 +142,8 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
 
   it('should toggle the has audio state', () => {
     const listenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.HAS_AUDIO_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_HAS_AUDIO, true);
+    storeService.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -171,6 +172,27 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(pausedListenerSpy).to.have.been.calledWith(true);
   });
 
+  it('should pause the story when displaying the bookend', () => {
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should unpause the story when closing the bookend', () => {
+    // First open the bookend.
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+
+    // Close the bookend.
+    const pausedListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, false);
+
+    expect(pausedListenerSpy).to.have.been.calledOnce;
+    expect(pausedListenerSpy).to.have.been.calledWith(false);
+  });
+
   it('should unpause the story when hiding the share menu', () => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
@@ -197,5 +219,48 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, false);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(false);
+  });
+
+  it('should not update PAUSED_STATE if ACCESS_STATE is unchanged', () => {
+    // Story is paused.
+    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+
+    // ACCESS_STATE was already false but is set to false again.
+    expect(storeService.get(StateProperty.ACCESS_STATE)).to.be.false;
+    storeService.dispatch(Action.TOGGLE_ACCESS, false);
+
+    // PAUSED_STATE did not get affected.
+    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+  });
+
+  it('should add an action to the whitelist', () => {
+    const action1 = {tagOrTarget: 'foo', method: 1};
+    const action2 = {tagOrTarget: 'foo', method: 2};
+
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+
+    const actionsListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action2);
+
+    expect(actionsListenerSpy)
+        .to.have.been.calledOnceWithExactly([action1, action2]);
+  });
+
+  it('should add an array of actions to the whitelist', () => {
+    const action1 = {tagOrTarget: 'foo', method: 1};
+    const action2 = {tagOrTarget: 'foo', method: 2};
+    const action3 = {tagOrTarget: 'foo', method: 3};
+
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+
+    const actionsListenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+
+    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [action2, action3]);
+
+    expect(actionsListenerSpy)
+        .to.have.been.calledOnceWithExactly([action1, action2, action3]);
   });
 });

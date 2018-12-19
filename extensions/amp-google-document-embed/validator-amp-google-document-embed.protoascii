@@ -19,8 +19,8 @@ tags: {  # amp-google-document-embed
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-google-document-embed"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -32,11 +32,14 @@ tags: {  # <amp-google-document-embed>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
+  attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-google-document-embed"
   amp_layout: {

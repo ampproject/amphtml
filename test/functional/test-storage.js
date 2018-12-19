@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   LocalStorageBinding,
@@ -37,7 +36,7 @@ describe('Storage', () => {
   let viewerBroadcastHandler;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     viewerBroadcastHandler = undefined;
     viewer = {
@@ -325,7 +324,7 @@ describe('Store', () => {
   let store;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     store = new Store({}, 2);
   });
@@ -366,6 +365,21 @@ describe('Store', () => {
     expect(store.values_).to.deep.equal({
       'key1': {v: 'value1b', t: 101},
       'key2': {v: 'value2', t: 0},
+    });
+  });
+
+  it('should update a value w/o changing timestamp', () => {
+    store.set('key1', 'value1', true);
+    clock.tick(101);
+    store.set('key2', 'value2', true);
+    store.set('key1', 'value1b', true);
+    expect(store.get('key1')).to.equal('value1b');
+    expect(Object.keys(store.values_).length).to.equal(2);
+    expect(store.values_['key1']['t']).to.equal(0);
+    expect(store.values_['key2']['t']).to.equal(101);
+    expect(store.values_).to.deep.equal({
+      'key1': {v: 'value1b', t: 0},
+      'key2': {v: 'value2', t: 101},
     });
   });
 
@@ -432,7 +446,7 @@ describe('LocalStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowApi = {
       localStorage: {
         getItem: () => {},
@@ -572,7 +586,7 @@ describe('ViewerStorageBinding', () => {
   let binding;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     viewer = {
       sendMessageAwaitResponse: () => {},
     };

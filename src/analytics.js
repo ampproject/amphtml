@@ -21,7 +21,7 @@ import {Services} from './services';
  * TODO: Do not expose this function
  * @param {!Element} target
  * @param {string} eventType
- * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+ * @param {!JsonObject=} opt_vars A map of vars and their values.
  */
 export function triggerAnalyticsEvent(target, eventType, opt_vars) {
   Services.analyticsForDocOrNull(target).then(analytics => {

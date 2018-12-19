@@ -15,7 +15,6 @@
  */
 
 import '../amp-carousel';
-import * as sinon from 'sinon';
 
 
 describes.realWin('SlideScroll', {
@@ -34,7 +33,8 @@ describes.realWin('SlideScroll', {
   });
 
   function getAmpSlideScroll(
-    opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
+    opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true,
+    opt_hasAutoplay = false, opt_autoplayLoops) {
     const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
     const ampSlideScroll = doc.createElement('amp-carousel');
@@ -45,6 +45,13 @@ describes.realWin('SlideScroll', {
     ampSlideScroll.setAttribute('controls', '');
     if (opt_hasLooping) {
       ampSlideScroll.setAttribute('loop', '');
+    }
+    if (opt_hasAutoplay) {
+      if (!opt_autoplayLoops) {
+        ampSlideScroll.setAttribute('autoplay', '');
+      } else {
+        ampSlideScroll.setAttribute('autoplay', opt_autoplayLoops);
+      }
     }
 
     for (let i = 0; i < opt_slideCount; i++) {
@@ -95,22 +102,6 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should create start/end markers when scroll-snap is available', () => {
-    return getAmpSlideScroll().then(ampSlideScroll => {
-      const impl = ampSlideScroll.implementation_;
-      ampSlideScroll.style['scrollSnapType'] = '';
-      ampSlideScroll.style['webkitScrollSnapType'] = '';
-      ampSlideScroll.style['msScrollSnapType'] = '';
-      impl.buildCarousel();
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              'i-amphtml-carousel-start-marker').length).to.be.at.least(1);
-      expect(
-          ampSlideScroll.getElementsByClassName(
-              'i-amphtml-carousel-end-marker').length).to.be.at.least(1);
-    });
-  });
-
   it('should go to the correct slide on button click', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
@@ -129,7 +120,8 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should show the correct slide', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should show the correct slide', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
       const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
@@ -253,7 +245,8 @@ describes.realWin('SlideScroll', {
     });
   });
 
-  it('should hide the unwanted slides', () => {
+  // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+  it.skip('should hide the unwanted slides', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
       const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
@@ -565,7 +558,7 @@ describes.realWin('SlideScroll', {
 
   describe('Looping', () => {
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -584,7 +577,8 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it('should show the correct slides when looping', () => {
+    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+    it.skip('should show the correct slides when looping', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
@@ -686,7 +680,93 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it('should hide unwanted slides when looping', () => {
+    it('show correct slides when looping with `autoplay` for 2 slides', () => {
+      return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
+        const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+        const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
+        const hideRestOfTheSlidesSpy =
+            sandbox.spy(impl, 'hideRestOfTheSlides_');
+        const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
+
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+
+        impl.showSlide_(1);
+
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[0], false);
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[1], true);
+        expect(updateInViewportSpy).to.have.callCount(2);
+        expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(scheduleLayoutSpy).to.be.calledOnce;
+        expect(schedulePreloadSpy).to.have.callCount(1);
+        expect(impl.slideIndex_).to.equal(1);
+        expect(impl.slidesContainer_./*OK*/scrollLeft)
+            .to.equal(impl.slideWidth_);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        expect(hideRestOfTheSlidesSpy).to.be.calledOnce;
+        expect(setControlsStateSpy).to.be.calledOnce;
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('true');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('false');
+
+        impl.showSlide_(0);
+
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[1], false);
+        expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.slides_[0], true);
+        expect(updateInViewportSpy).to.have.callCount(4);
+        expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
+            .to.be.true;
+        expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(scheduleLayoutSpy).to.have.callCount(2);
+        expect(schedulePreloadSpy).to.have.callCount(2);
+        expect(impl.slideIndex_).to.equal(0);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+        expect(hideRestOfTheSlidesSpy).to.have.callCount(2);
+        expect(setControlsStateSpy).to.have.callCount(2);
+        expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
+      });
+    });
+
+    it('do not set `autoplay` status if `autoplay=0` specified', () => {
+      return getAmpSlideScroll(false, 3, true, true, 0).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const setupAutoplaySpy = sandbox.spy(impl, 'setupAutoplay_');
+        expect(setupAutoplaySpy).to.not.have.been.called;
+      });
+    });
+
+    it('removes `autoplay` status after provided loops are made', () => {
+      return getAmpSlideScroll(false, 3, true, true, 2).then(ampSlideScroll => {
+        const impl = ampSlideScroll.implementation_;
+        const removeAutoplaySpy = sandbox.spy(impl, 'removeAutoplay');
+        impl.showSlide_(1);
+        impl.showSlide_(2);
+        expect(impl.loopsMade_).to.equal(1);
+        impl.showSlide_(0);
+        impl.showSlide_(1);
+        impl.showSlide_(2);
+        expect(impl.loopsMade_).to.equal(2);
+        expect(removeAutoplaySpy).to.have.been.called;
+        expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
+      });
+    });
+
+    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+    it.skip('should hide unwanted slides when looping', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
@@ -924,7 +1004,8 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    it('should update slide when `slide` attribute is mutated', () => {
+    // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
+    it.skip('should update slide when `slide` attribute is mutated', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
 
@@ -938,7 +1019,7 @@ describes.realWin('SlideScroll', {
         expect(showSlideSpy).to.have.been.calledWith(0);
 
         // Don't call showSlide_() if slide is not finite.
-        showSlideSpy.reset();
+        showSlideSpy.resetHistory();
         impl.mutatedAttributesCallback({slide: Number.POSITIVE_INFINITY});
         expect(showSlideSpy.called).to.be.false;
       });
@@ -1049,7 +1130,7 @@ describes.realWin('SlideScroll', {
           expect(showSlideSpy).to.be.calledOnce;
 
           // Unlayout
-          showSlideSpy.reset();
+          showSlideSpy.resetHistory();
           impl.unlayoutCallback();
 
           // Test that showSlide_ due to goToSlide(index=4) is not called before

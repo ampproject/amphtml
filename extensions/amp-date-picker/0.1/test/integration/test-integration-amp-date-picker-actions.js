@@ -17,13 +17,57 @@
 import * as lolex from 'lolex';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe.configure().ifNewChrome();
+const config = describe.configure().ifChrome().skipSinglePass();
 config.skip('amp-date-picker', function() {
-  this.skip(); // TODO(cvializ): unskip
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
   const experiments = ['amp-date-picker'];
+
+  const singlePickerWithDateBody = `
+    <amp-date-picker
+      layout="fixed-height"
+      height="360"
+      id="picker"
+      date="2018-01-01"
+    ></amp-date-picker>
+  `;
+
+  const clearButtonBody = `
+    <button id="clear" on="tap:picker.clear">Clear</button>
+  `;
+
+  describes.integration('picker.clear', {
+    body: singlePickerWithDateBody + clearButtonBody,
+    extensions,
+    experiments,
+  }, env => {
+    let clock;
+    let win;
+    let document;
+
+    beforeEach(() => {
+      win = env.win;
+      document = env.win.document;
+      clock = lolex.install({
+        target: win,
+        now: new Date('2018-01-01T08:00:00Z'),
+      });
+    });
+
+    afterEach(() => {
+      clock.uninstall();
+    });
+
+    it('clears the current day', () => {
+      const picker = document.getElementById('picker');
+      const clear = document.getElementById('clear');
+
+      const promise = waitForFalsyAttribute(picker, 'date');
+      clear.click();
+      return promise;
+    });
+  });
 
   const singlePickerBody = `
     <amp-date-picker
@@ -237,5 +281,11 @@ config.skip('amp-date-picker', function() {
 function waitForAttribute(element, attribute) {
   return poll(`wait for attribute ${attribute} on ${element.tagName}`, () => {
     return element.getAttribute(attribute);
+  }, undefined, 8000);
+}
+
+function waitForFalsyAttribute(element, attribute) {
+  return poll(`wait for attribute ${attribute} on ${element.tagName}`, () => {
+    return element.getAttribute(attribute) == null;
   }, undefined, 8000);
 }

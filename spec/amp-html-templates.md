@@ -34,7 +34,7 @@ document.
 Before AMP templates can be used, the templating system has to be declared in the document's `head`:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 ```
 
 The `script` tag must be declared as `async` and with the `custom-template` attribute.

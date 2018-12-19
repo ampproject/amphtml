@@ -214,10 +214,10 @@ json_testutil.renderJSON = function(obj, cmpFn, offset) {
     // we're past 60 chars, or if the segment to process starts
     // with an opening block character (but keep multiple opening blocks
     // together).
-    if (current.length > 60 &&
-            (endsWithChar(current, ',') || endsWithChar(current, ':')) ||
-        (segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
-            !endsWithChar(current, '[')) {
+    if ((current.length > 60 &&
+            (endsWithChar(current, ',') || endsWithChar(current, ':'))) ||
+        ((segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
+            !endsWithChar(current, '['))) {
       lines.push(current);
       current = '';
       for (let i = 0; i < nesting; i++) { // Emit indentation.

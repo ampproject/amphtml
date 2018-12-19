@@ -68,6 +68,15 @@ In this example, we display three sections, where the third section is expanded 
 To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
 {% endcall %}
 
+### Events
+The events below will be triggered on `section`s of `accordion`.
+
+#### `expand`
+This event is triggered on the target `section` that changes from collapsed state to expanded state. Notice that calling `expand` on an already expanded `section` would not trigger this event.
+
+#### `collapse`
+This event is triggered on the target `section` that changes from expanded state to collapsed state. Notice that calling `collapse` on an already collapsed `section` would not trigger this event.
+
 ### Actions
 
 #### `toggle`
@@ -83,7 +92,7 @@ This action collapses an `amp-accordion`. If it is already collapsed, it will st
 
 ##### `animate`
 
-Set this attribute on the `<amp-accordion>` to allow for expand/collapse to animate.
+Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
 
 ##### `disable-session-states`
 
@@ -96,9 +105,6 @@ Set this attribute on a `<section>` to display the section as expanded on page l
 #####  `expand-single-section`
 
 Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
-
-##### `animate`
-Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
 
 ## Styling
 

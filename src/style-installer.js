@@ -16,15 +16,13 @@
 
 import {Services} from './services';
 import {dev, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBody} from './dom';
+import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
-const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
-
 
 /**
  * Adds the given css text to the given ampdoc.
@@ -146,6 +144,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
     if (existing) {
+      if (existing.textContent !== cssText) {
+        existing.textContent = cssText;
+      }
       return existing;
     }
   }
@@ -221,63 +222,78 @@ function maybeTransform(cssRoot, cssText) {
 }
 
 
+/** @private {boolean} */
+let bodyMadeVisible = false;
+
+/**
+ * @param {boolean} value
+ * @visibleForTesting
+ */
+export function setBodyMadeVisibleForTesting(value) {
+  bodyMadeVisible = value;
+}
+
+
 /**
  * Sets the document's body opacity to 1.
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {boolean=} opt_waitForServices Whether the body visibility should
- *     be blocked on key services being loaded.
  */
-export function makeBodyVisible(doc, opt_waitForServices) {
+export function makeBodyVisible(doc) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
-  if (win[bodyVisibleSentinel]) {
-    return;
-  }
   const set = () => {
-    win[bodyVisibleSentinel] = true;
-    setStyles(dev().assertElement(doc.body), {
-      opacity: 1,
-      visibility: 'visible',
-      animation: 'none',
-    });
+    bodyMadeVisible = true;
+    setBodyVisibleStyles(doc);
     renderStartedNoInline(doc);
   };
-  try {
-    waitForBody(doc, () => {
-      if (win[bodyVisibleSentinel]) {
-        return;
-      }
-      win[bodyVisibleSentinel] = true;
-      if (opt_waitForServices) {
-        waitForServices(win).catch(reason => {
-          rethrowAsync(reason);
-          return [];
-        }).then(services => {
-          set();
-          if (services.length > 0) {
-            Services.resourcesForDoc(doc)./*OK*/schedulePass(
-                1, /* relayoutAll */ true);
-          }
-          try {
-            const perf = Services.performanceFor(win);
-            perf.tick('mbv');
-            perf.flush();
-          } catch (e) {}
-        });
-      } else {
+
+  waitForBodyPromise(doc)
+      .then(() => {
+        return waitForServices(win);
+      }).catch(reason => {
+        rethrowAsync(reason);
+        return [];
+      }).then(services => {
         set();
-      }
-    });
-  } catch (e) {
-    // If there was an error during the logic above (such as service not
-    // yet installed, definitely try to make the body visible.
-    set();
-    // Avoid errors in the function to break execution flow as this is
-    // often called as a last resort.
-    rethrowAsync(e);
+        if (services.length > 0) {
+          const resources = Services.resourcesForDoc(doc.documentElement);
+          resources./*OK*/schedulePass(1, /* relayoutAll */ true);
+        }
+        try {
+          const perf = Services.performanceFor(win);
+          perf.tick('mbv');
+          perf.flush();
+        } catch (e) {}
+      });
+}
+
+
+/**
+ * Set the document's body opacity to 1. Called in error cases.
+ * @param {!Document} doc The document who's body we should make visible.
+ */
+export function makeBodyVisibleRecovery(doc) {
+  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
+  if (bodyMadeVisible) {
+    return;
   }
+  bodyMadeVisible = true;
+  setBodyVisibleStyles(doc);
+}
+
+
+/**
+ * Make sure that body exists, and make it visible.
+ * @param {!Document} doc
+ */
+function setBodyVisibleStyles(doc) {
+  setStyles(dev().assertElement(doc.body), {
+    opacity: 1,
+    visibility: 'visible',
+    'animation': 'none',
+  });
 }
 
 
@@ -286,7 +302,7 @@ export function makeBodyVisible(doc, opt_waitForServices) {
  */
 function renderStartedNoInline(doc) {
   try {
-    Services.resourcesForDoc(doc).renderStarted();
+    Services.resourcesForDoc(doc.documentElement).renderStarted();
   } catch (e) {
     // `makeBodyVisible` is called in the error-processing cycle and thus
     // could be triggered when runtime's initialization is incomplete which
@@ -297,10 +313,12 @@ function renderStartedNoInline(doc) {
 
 /**
  * Indicates that the body is always visible. For instance, in case of PWA.
- * @param {!Window} win
+ * This check is on a module level variable, and could be problematic if you are
+ * relying on this function across different binaries.
+ * @param {!Window} unusedWin
  */
-export function bodyAlwaysVisible(win) {
-  win[bodyVisibleSentinel] = true;
+export function bodyAlwaysVisible(unusedWin) {
+  bodyMadeVisible = true;
 }
 
 

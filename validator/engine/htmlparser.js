@@ -138,11 +138,13 @@ const ElementsWhichClosePTag = {
  * @enum {number}
  */
 const TagRegion = {
-  PRE_HEAD: 0,
-  IN_HEAD: 1,
-  PRE_BODY: 2, // After closing head tag, but before open body tag.
-  IN_BODY: 3,
-  IN_SVG: 4,
+  PRE_DOCTYPE: 0,
+  PRE_HTML: 1,
+  PRE_HEAD: 2,
+  IN_HEAD: 3,
+  PRE_BODY: 4,  // After closing head tag, but before open body tag.
+  IN_BODY: 5,
+  IN_SVG: 6,
   // We don't track the region after the closing body tag.
 };
 
@@ -186,7 +188,7 @@ class TagNameStack {
      * @type {number}
      * @private
      */
-    this.region_ = TagRegion.PRE_HEAD;
+    this.region_ = TagRegion.PRE_DOCTYPE;
 
     /**
      * Tracks when the start <head> tag has been encountered or manufactured.
@@ -237,8 +239,52 @@ class TagNameStack {
     // This section deals with manufacturing <head>, </head>, and <body> tags
     // if the document has left them out or placed them in the wrong location.
     switch (this.region_) {
+      case TagRegion.PRE_DOCTYPE:
+        if (tag.upperName() === '!DOCTYPE') {
+          this.region_ = TagRegion.PRE_HTML;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
+      case TagRegion.PRE_HTML:
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE') {
+          return;
+        } else if (tag.upperName() === 'HTML') {
+          this.region_ = TagRegion.PRE_HEAD;
+        } else if (tag.upperName() === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tag.upperName() === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+          } else {
+            if (this.handler_.markManufacturedBody) {
+              this.handler_.markManufacturedBody();
+            }
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
+          }
+        }
+        break;
       case TagRegion.PRE_HEAD:
-        if (tag.upperName() === 'HEAD') {
+        // Stray DOCTYPE/HTML tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML') {
+          return;
+        } else if (tag.upperName() === 'HEAD') {
           this.region_ = TagRegion.IN_HEAD;
         } else if (tag.upperName() === 'BODY') {
           this.region_ = TagRegion.IN_BODY;
@@ -253,7 +299,11 @@ class TagNameStack {
         }
         break;
       case TagRegion.IN_HEAD:
-        if (!HeadElements.hasOwnProperty(tag.upperName())) {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (!HeadElements.hasOwnProperty(tag.upperName())) {
           this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
           if (tag.upperName() !== 'BODY') {
             if (this.handler_.markManufacturedBody)
@@ -265,7 +315,11 @@ class TagNameStack {
         }
         break;
       case TagRegion.PRE_BODY:
-        if (tag.upperName() !== 'BODY') {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (tag.upperName() !== 'BODY') {
           if (this.handler_.markManufacturedBody)
           {this.handler_.markManufacturedBody();}
           this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
@@ -274,7 +328,11 @@ class TagNameStack {
         }
         break;
       case TagRegion.IN_BODY:
-        if (tag.upperName() === 'BODY') {
+        // Stray DOCTYPE/HTML/HEAD tags are ignored, not emitted twice.
+        if (tag.upperName() === '!DOCTYPE' || tag.upperName() === 'HTML' ||
+            tag.upperName() === 'HEAD') {
+          return;
+        } else if (tag.upperName() === 'BODY') {
           // We only report the first body for each document - either
           // a manufactured one, or the first one encountered.
           return;
@@ -335,18 +393,18 @@ class TagNameStack {
   pcdata(text) {
     if (!amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
       switch (this.region_) {
+        // Fallthroughs intentional.
+        case TagRegion.PRE_DOCTYPE:  // doctype is not manufactured
+        case TagRegion.PRE_HTML:
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('HTML'));
         case TagRegion.PRE_HEAD:
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+        case TagRegion.IN_HEAD:
+          this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
         case TagRegion.PRE_BODY:
           if (this.handler_.markManufacturedBody)
           {this.handler_.markManufacturedBody();}
           this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
-          break;
-        case TagRegion.IN_HEAD:
-          this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
-          if (this.handler_.markManufacturedBody)
-          {this.handler_.markManufacturedBody();}
-          this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
-          break;
         default:
           break;
       }
@@ -558,6 +616,7 @@ amp.htmlparser.HtmlParser = class {
               tagStack.pcdata('&amp;');
               break;
           }
+        } else {
         }
       }
     }
@@ -860,10 +919,14 @@ amp.htmlparser.HtmlParser.ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
 /**
  * Regular expression that matches strings composed of all space characters:
  * https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#space-character
+ *
+ * Note: Do not USE \s to match whitespace as this includes byte order mark
+ * characters, which html parsing does not consider whitespace.
  * @type {RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.SPACE_RE_ = /^\s*$/;
+amp.htmlparser.HtmlParser.SPACE_RE_ =
+    /^[ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/;
 
 
 /**

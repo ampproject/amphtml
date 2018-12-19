@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {dict, map} from '../utils/object';
 import {
   getProxyServingType,
   getSourceUrl,
@@ -22,6 +21,7 @@ import {
   parseUrlDeprecated,
 } from '../url';
 import {isArray} from '../types';
+import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -39,6 +39,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       contents (value).
  *     - replaceParams: A map object of extra query string parameter names (key)
  *       to corresponding values, used for custom analytics.
+ *       Null if not applicable.
  *
  * @typedef {{
  *   sourceUrl: string,
@@ -46,7 +47,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   pageViewId: string,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
- *   replaceParams: !Object<string, string|!Array<string>>
+ *   replaceParams: ?Object<string, string|!Array<string>>
  * }}
  */
 export let DocumentInfoDef;
@@ -193,17 +194,21 @@ function getMetaTags(doc) {
 
 /**
  * Attempts to retrieve extra parameters from the "amp_r" query param,
- * returning an empty result if invalid.
+ * returning null if invalid.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!JsonObject<string, string|!Array<string>>}
+ * @return {?JsonObject<string, string|!Array<string>>}
  */
 function getReplaceParams(ampdoc) {
   // The "amp_r" parameter is only supported for ads.
   if (!ampdoc.isSingleDoc() ||
       getProxyServingType(ampdoc.win.location.href) != 'a') {
-    return dict();
+    return null;
   }
   const url = parseUrlDeprecated(ampdoc.win.location.href);
   const replaceRaw = parseQueryString(url.search)['amp_r'];
+  if (replaceRaw === undefined) {
+    // Differentiate the case between empty replace params and invalid result
+    return null;
+  }
   return parseQueryString(replaceRaw);
 }

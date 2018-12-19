@@ -35,6 +35,7 @@ const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
+const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -174,8 +175,13 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babelify, {compact: false});
+  const bundler = browserify(entryModule, {debug: true})
+      .transform(babelify, {
+        compact: false,
+        // Transform files in node_modules since deps use ES6 export.
+        // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
+        global: true,
+      });
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -297,5 +303,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['update-packages', 'css'],
+    maybeUpdatePackages.concat(['css']),
     depCheck);

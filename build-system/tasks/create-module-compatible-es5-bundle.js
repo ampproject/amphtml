@@ -16,8 +16,7 @@
 
 const $$ = require('gulp-load-plugins')();
 const gulp = $$.help(require('gulp'));
-const gulpRename = require('gulp-rename');
-const gulpReplace = require('gulp-replace');
+
 /* Copy source to source-nomodule.js and
  * make it compatible with `<script type=module`.
  *
@@ -31,7 +30,8 @@ const gulpReplace = require('gulp-replace');
  */
 exports.createModuleCompatibleES5Bundle = function(src) {
   return gulp.src('dist/' + src)
-      .pipe(gulpRename(src.replace(/\.js$/, '-module.js')))
-      .pipe(gulpReplace(/(global\?global:\w*})\(this\)/, '$1(self)'))
+      .pipe($$.sourcemaps.init({loadMaps: true}))
+      .pipe($$.regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
+      .pipe($$.sourcemaps.write('./'))
       .pipe(gulp.dest('dist'));
 };

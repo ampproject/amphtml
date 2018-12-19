@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,
@@ -31,7 +30,6 @@ import {Deferred} from '../../../../src/utils/promise';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
@@ -46,6 +44,7 @@ import {
   getExperimentIds,
   getForceSafeframe,
   getIdentity,
+  getIsFluid,
   getPageOffsets,
   getSizes,
   getTargetingAndExclusions,
@@ -53,6 +52,7 @@ import {
   isAdTest,
   sraBlockCallbackHandler,
 } from '../sra-utils';
+import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -249,6 +249,12 @@ describes.realWin('Doubleclick SRA', config , env => {
         parentElement: {tagName: 'AMP-STICKY-AD'}}}};
       expect(getContainers(impls)).to.jsonEqual({'acts': '|ac|ac,sa'});
     });
+    it('should combine fluid state', () => {
+      impls[0] = {isFluidRequest: () => true};
+      impls[1] = {isFluidRequest: () => false};
+      impls[2] = {isFluidRequest: () => true};
+      expect(getIsFluid(impls)).to.jsonEqual({'fluid': 'height,0,height'});
+    });
   });
 
   describe('#SRA AMP creative unlayoutCallback', () => {
@@ -419,11 +425,7 @@ describes.realWin('Doubleclick SRA', config , env => {
             });
             return Promise.resolve(slotDataString);
           },
-          headers: new FetchResponseHeaders({
-            getResponseHeader(name) {
-              return headers[name];
-            },
-          }),
+          headers,
         }));
       }
     }
@@ -447,11 +449,10 @@ describes.realWin('Doubleclick SRA', config , env => {
           }).returns(Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
-        headers: new FetchResponseHeaders({
-          getResponseHeader(name) {
-            return headers[name];
-          },
-        }),
+        headers: {
+          get: header => headers[header],
+          has: header => header in headers,
+        },
         text: () => {
           throw new Error('should not be SRA!');
         },
@@ -470,7 +471,8 @@ describes.realWin('Doubleclick SRA', config , env => {
      *    instances:number,
      *    xhrFail:(boolean|undefined),
      *    invalidInstances:number,
-     *    nestHeaders:(boolean|undefined)}}>} items
+     *    nestHeaders:(boolean|undefined),
+     *    expIds:(boolean|Array<string>)}}>} items
      * @param {boolean=} opt_implicitSra where SRA implicitly enabled (meaning
      *    pub did not enable via meta).
      */
@@ -487,6 +489,7 @@ describes.realWin('Doubleclick SRA', config , env => {
       const networkNestHeaders = [];
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
+      const expIds = [];
       let expectedAttemptCollapseCalls = 0;
       items.forEach(network => {
         if (typeof network == 'number') {
@@ -513,6 +516,7 @@ describes.realWin('Doubleclick SRA', config , env => {
         networkNestHeaders[network.networkId] = network.nestHeaders;
         expectedAttemptCollapseCalls +=
             network.xhrFail && !opt_implicitSra ? network.instances : 0;
+        expIds[network.networkId] = network.expIds || [];
       });
       const grouping = {};
       const groupingPromises = {};
@@ -528,6 +532,7 @@ describes.realWin('Doubleclick SRA', config , env => {
       let idx = 0;
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {
+        impl.experimentIds.concat(expIds);
         impl.buildCallback();
         impl.onLayoutMeasure();
         return impl.layoutCallback().then(() => {
@@ -557,7 +562,8 @@ describes.realWin('Doubleclick SRA', config , env => {
       Object.keys(grouping).forEach(networkId => {
         const validInstances = grouping[networkId].filter(impl =>
           impl.element.getAttribute('data-test-invalid') != 'true');
-        const isSra = validInstances.length > 1;
+        const isSra = validInstances.length > 1 &&
+            !validInstances[0].experimentIds.includes('21062235');
         const sraResponses = [];
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
@@ -618,6 +624,9 @@ describes.realWin('Doubleclick SRA', config , env => {
 
     it('should not send SRA request if only 1 slot is valid', () =>
       executeTest([{networkId: 1234, instances: 1, invalidInstances: 2}]));
+
+    it('should send SRA request if only 1 slot and no recovery exp', () =>
+      executeTest([{networkId: 1234, instances: 1, expIds: ['21062235']}]));
 
     it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));

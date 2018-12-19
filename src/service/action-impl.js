@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../action-constants';
-import {KeyCodes} from '../utils/key-codes';
-import {RAW_OBJECT_ARGS_KEY} from '../action-constants';
+import {ActionTrust, RAW_OBJECT_ARGS_KEY} from '../action-constants';
+import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
+import {dict, hasOwn, map} from '../utils/object';
+import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {hasOwn, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -167,7 +167,7 @@ export class ActionInvocation {
    */
   constructor(node, method, args, source, caller, event, trust,
     actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
-    /** @const {!Node} */
+    /** @type {!Node} */
     this.node = node;
     /** @const {string} */
     this.method = method;
@@ -231,10 +231,18 @@ export class ActionService {
     this.root_ = opt_root || ampdoc.getRootNode();
 
     /**
-     * Optional whitelist of actions e.g. ["AMP.navigateTo", "amp-form.submit"].
+     * Optional whitelist of actions, e.g.:
+     *
+     *     [{tagOrTarget: 'AMP', method: 'navigateTo'},
+     *      {tagOrTarget: 'AMP-FORM', method: 'submit'},
+     *      {tagOrTarget: '*', method: 'show'}]
+     *
      * If not null, any actions that are not in the whitelist will be ignored
-     * and throw a user error at invocation time.
-     * @private {?Array<string>}
+     * and throw a user error at invocation time. Note that `tagOrTarget` is
+     * always the canonical uppercased form (same as
+     * `Element.prototype.tagName`). If `tagOrTarget` is the wildcard '*', then
+     * the whitelisted method is allowed on any tag or target.
+     * @private {?Array<{tagOrTarget: string, method: string}>}
      */
     this.whitelist_ = this.queryWhitelist_();
 
@@ -245,7 +253,6 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
-
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -256,10 +263,10 @@ export class ActionService {
     this.addEvent('invalid');
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
-        new ActionService(this.ampdoc, embedWin.document));
+        new ActionService(ampdoc, embedWin.document));
   }
 
   /**
@@ -279,8 +286,8 @@ export class ActionService {
       });
       this.root_.addEventListener('keydown', event => {
         const element = dev().assertElement(event.target);
-        const {keyCode} = event;
-        if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
+        const {key} = event;
+        if (key == Keys.ENTER || key == Keys.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
@@ -293,6 +300,8 @@ export class ActionService {
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
+        // For get requests, the delegating to the viewer needs to happen
+        // before this.
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
@@ -390,10 +399,10 @@ export class ActionService {
   installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
-    const debugid = target.tagName + '#' + targetId;
+    const debugId = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-    'AMP element or a whitelisted target element is expected: %s', debugid);
+    'AMP element or a whitelisted target element is expected: %s', debugId);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
@@ -436,24 +445,24 @@ export class ActionService {
   }
 
   /**
-   * Overwrites the current action whitelist (if any). Takes an array of strings
-   * of the form "<tagOrTarget>.<method>" e.g. "amp-form.submit" or "AMP.print".
-   * @param {!Array<string>} whitelist
+   * Sets the action whitelist. Can be used to clear it.
+   * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
    */
   setWhitelist(whitelist) {
     this.whitelist_ = whitelist;
   }
 
   /**
-   * Adds an action to the whitelist. Takes one string of the form
-   * "<tagOrTarget>.<method>", e.g. "amp-form.submit" or "AMP.print".
-   * @param {string} action
+   * Adds an action to the whitelist.
+   * @param {string} tagOrTarget The tag or target to whitelist, e.g.
+   *     'AMP-LIST', '*'.
+   * @param {string} method The method to whitelist, e.g. 'show', 'hide'.
    */
-  addToWhitelist(action) {
+  addToWhitelist(tagOrTarget, method) {
     if (!this.whitelist_) {
       this.whitelist_ = [];
     }
-    this.whitelist_.push(action);
+    this.whitelist_.push({tagOrTarget, method});
   }
 
   /**
@@ -527,9 +536,9 @@ export class ActionService {
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      const id = `${tagOrTarget}.${method}`;
-      if (!this.whitelist_.includes(id)) {
-        this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
+      if (!isActionWhitelisted_(invocation, this.whitelist_)) {
+        this.error_(`"${tagOrTarget}.${method}" is not whitelisted ${
+          JSON.stringify(this.whitelist_)}.`);
         return null;
       }
     }
@@ -656,9 +665,10 @@ export class ActionService {
    * <meta name="amp-action-whitelist" content="AMP.setState, amp-form.submit">
    *
    * Returns:
-   * ["AMP.setState", "amp-form.submit"]
+   * [{tagOrTarget: 'AMP', method: 'setState'},
+   *  {tagOrTarget: 'AMP-FORM', method: 'submit'}]
    *
-   * @return {?Array<string>}
+   * @return {?Array<{tagOrTarget: string, method: string}>}
    * @private
    */
   queryWhitelist_() {
@@ -670,7 +680,22 @@ export class ActionService {
     if (!meta) {
       return null;
     }
-    return meta.getAttribute('content').split(',').map(action => action.trim());
+    return meta.getAttribute('content').split(',')
+        // Turn an empty string whitelist into an empty array, otherwise the
+        // parse error in the mapper below would trigger.
+        .filter(action => action)
+        .map(action => {
+          const parts = action.split('.');
+          if (parts.length < 2) {
+            this.error_(`Invalid action whitelist entry: ${action}.`);
+            return;
+          }
+          const tagOrTarget = parts[0].trim();
+          const method = parts[1].trim();
+          return {tagOrTarget, method};
+        })
+        // Filter out undefined elements because of the parse error above.
+        .filter(action => action);
   }
 
   /**
@@ -710,6 +735,22 @@ export class ActionService {
 
 
 /**
+ * Returns `true` if the given action invocation is whitelisted in the given
+ * whitelist.
+ * @param {!ActionInvocation} invocation
+ * @param {!Array<{tagOrTarget: string, method: string}>} whitelist
+ * @return {boolean}
+ * @private
+ */
+function isActionWhitelisted_(invocation, whitelist) {
+  return whitelist.some(({tagOrTarget, method}) => {
+    return (tagOrTarget === '*' || tagOrTarget === invocation.tagOrTarget) &&
+        method === invocation.method;
+  });
+}
+
+
+/**
  * A clone of an event object with its function properties replaced.
  * This is useful e.g. for event objects that need to be passed to an async
  * context, but the browser might have cleaned up the original event object.
@@ -724,6 +765,9 @@ export class DeferredEvent {
   constructor(event) {
     /** @type {?Object} */
     this.detail = null;
+
+    /** @type {?Object} */
+    this.additionalViewportData;
 
     cloneWithoutFunctions(event, this);
   }
@@ -776,7 +820,7 @@ export function parseActionMap(s, context) {
   do {
     tok = toks.next();
     if (tok.type == TokenType.EOF ||
-            tok.type == TokenType.SEPARATOR && tok.value == ';') {
+            (tok.type == TokenType.SEPARATOR && tok.value == ';')) {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
 
@@ -934,9 +978,9 @@ export function dereferenceExprsInArgs(args, event) {
   if (!args) {
     return args;
   }
-  const data = map();
-  if (event && event.detail) {
-    data['event'] = event.detail;
+  const data = dict();
+  if (event && getDetail(/** @type {!Event} */ (event))) {
+    data['event'] = getDetail(/** @type {!Event} */ (event));
   }
   const applied = map();
   Object.keys(args).forEach(key => {
@@ -1081,8 +1125,8 @@ class ParserTokenizer {
 
     // A numeric. Notice that it steals the `.` from separators.
     if (convertValues && (isNum(c) ||
-            c == '.' && newIndex + 1 < this.str_.length &&
-            isNum(this.str_[newIndex + 1]))) {
+            (c == '.' && newIndex + 1 < this.str_.length &&
+            isNum(this.str_[newIndex + 1])))) {
       let hasFraction = c == '.';
       let end = newIndex + 1;
       for (; end < this.str_.length; end++) {

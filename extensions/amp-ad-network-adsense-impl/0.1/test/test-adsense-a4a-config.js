@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ADSENSE_EXPERIMENTS,
   ADSENSE_EXP_NAMES,
-} from '../adsense-a4a-config';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {
   URL_EXPERIMENT_MAPPING,
   adsenseIsA4AEnabled,
 } from '../adsense-a4a-config';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {
@@ -39,7 +36,7 @@ describe('adsense-a4a-config', () => {
   let testFixture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockWin = {
       location: parseUrlDeprecated('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
       document: {

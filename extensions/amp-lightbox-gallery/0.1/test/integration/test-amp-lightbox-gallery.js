@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as analytics from '../../../../../src/analytics';
 import {poll} from '../../../../../testing/iframe';
 
 // TODO(cathyxz, #16822): This suite is flaky.
@@ -31,22 +32,27 @@ describe.configure().skip('amp-lightbox-gallery', function() {
     This is a figcaption.
   </figcaption>
 </figure>
-  `;
+`;
+
   describes.integration('amp-lightbox-gallery with one image', {
     body,
     extensions,
   }, env => {
 
     let win;
+    let triggerAnalyticsEventSpy;
+
     beforeEach(() => {
       win = env.win;
       win.AMP_MODE.localDev = true;
+      triggerAnalyticsEventSpy =
+        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
     });
 
     it('should open and close correctly', () => {
       const lightbox = win.document.getElementById('amp-lightbox-gallery');
       return openLightbox(win.document).then(() => {
-        expect(lightbox.style.display).to.not.equal('none');
+        expect(lightbox).to.not.have.display('none');
         const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
         expect(carouselQuery.length).to.equal(1);
         const carousel = carouselQuery[0];
@@ -63,7 +69,7 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         closeButton.click();
         return lightboxClose;
       }).then(() => {
-        expect(lightbox.style.display).to.equal('none');
+        expect(lightbox).to.have.display('none');
       });
     });
 
@@ -79,20 +85,20 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         const closeButton = getButton(win.document,
             'i-amphtml-lbg-button-close');
         expect(closeButton.getAttribute('aria-label')).to.equal('Close');
-        expect(win.getComputedStyle(closeButton).display).to.equal('block');
+        expect(closeButton).to.have.display('block');
 
         const galleryButton = getButton(win.document,
             'i-amphtml-lbg-button-gallery');
         expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
-        expect(win.getComputedStyle(galleryButton).display).to.equal('none');
+        expect(galleryButton).to.have.display('none');
 
         const prevButton = getButton(win.document, 'i-amphtml-lbg-button-prev');
         expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
-        expect(win.getComputedStyle(prevButton).display).to.equal('none');
+        expect(prevButton).to.have.display('none');
 
         const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
         expect(nextButton.getAttribute('aria-label')).to.equal('Next');
-        expect(win.getComputedStyle(nextButton).display).to.equal('none');
+        expect(nextButton).to.have.display('none');
       });
     });
 
@@ -114,12 +120,88 @@ describe.configure().skip('amp-lightbox-gallery', function() {
         expect(descriptionText.textContent).to.equal('This is a figcaption.');
       });
     });
+
+    it('should trigger analytics events for description displayed', () => {
+      openLightbox(win.document).then(() => {
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'controlsToggled');
+      });
+    });
+
+    it('should trigger analytics events for thumbnails displayed', () => {
+      openLightbox(win.document).then(() => {
+        const thumbnail =
+          document.getElementsByClassName('i-amphtml-lbg-button-gallery');
+        thumbnail[0].click();
+        const thumbnailQuery =
+          win.document.getElementsByClassName('i-amphtml-lbg-gallery');
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled');
+        expect(thumbnailQuery.length).to.equal(1);
+      });
+    });
+  });
+
+  const multipleImagesBody = `
+  <figure>
+  <amp-img id="img0"
+      src="/examples/img/sample.jpg"
+      width=641 height=481 layout="responsive"
+      lightbox
+      role="button" tabindex="0"></amp-img>
+  <figcaption>
+    This is a figcaption.
+  </figcaption>
+  </figure>
+  <figure>
+  <amp-img id="img1"
+    src="/examples/img/sample.jpg"
+    width=641 height=481 layout="responsive"
+    lightbox
+    role="button" tabindex="0"></amp-img>
+  <figcaption>
+  This is a figcaption.
+  </figcaption>
+  </figure>
+  `;
+
+  describes.integration('amp-lightbox-gallery with multiple images', {
+    multipleImagesBody,
+    extensions,
+  }, env => {
+
+    let win;
+    let triggerAnalyticsEventSpy;
+
+    beforeEach(() => {
+      win = env.win;
+      win.AMP_MODE.localDev = true;
+      triggerAnalyticsEventSpy =
+        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
+    });
+
+    it('should trigger analytics events for description toggled', () => {
+      const lightbox = win.document.getElementById('amp-lightbox-gallery');
+      openLightbox(win.document).then(() => {
+        const nextButton = lightbox
+            .querySelector('i-amphtml-lbg-button-next');
+        nextButton.click();
+        expect(triggerAnalyticsEventSpy).to.be.called;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled');
+      });
+    });
   });
 });
 
 function openLightbox(document) {
   const lightbox = document.getElementById('amp-lightbox-gallery');
-  expect(lightbox.style.display).to.equal('none');
+  expect(lightbox).to.have.display('none');
   const ampImage = document.getElementById('img0');
   const imageLoadedPromise = waitForImageToLoad(ampImage);
   return imageLoadedPromise.then(() => {
@@ -141,13 +223,15 @@ function getButton(document, className) {
 
 function waitForLightboxOpen(lightbox) {
   return poll('wait for amp-lightbox-gallery to open', () => {
-    return lightbox.style.display == '' && lightbox.style.opacity == '';
+    const styles = lightbox.ownerNode.defaultView.getComputedStyle(lightbox);
+    return styles.display != 'none' && lightbox.style.opacity == '';
   });
 }
 
 function waitForLightboxClose(lightbox, carousel) {
   return poll('wait for amp-lightbox-gallery to close', () => {
-    return carousel.style.display == 'none';
+    const styles = carousel.ownerNode.defaultView.getComputedStyle(carousel);
+    return styles.display == 'none';
   });
 }
 

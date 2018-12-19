@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
+import {
+  IntersectionObserverPolyfill,
+} from '../../../src/intersection-observer-polyfill';
 import {dev} from '../../../src/log';
 
 export class RefreshIntersectionObserverWrapper {

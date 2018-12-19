@@ -20,8 +20,10 @@ import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
@@ -121,9 +123,17 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
+    // Keep CSS Scroll Snap points turned on for the following:
+    // - All iOS devices except for 10.3
+    // - All places where the experiment flag is deliberately set.
+    // Conversely turn CSS Scroll Snap points off for the following:
+    // - iOS devices on version 10.3
+    // - Non iOS devices with the flag turned off.
     /** @private {boolean} */
     this.shouldDisableCssSnap_ = startsWith(
-        Services.platformFor(this.win).getIosVersionString(), '10.3');
+        Services.platformFor(this.win).getIosVersionString(),
+        '10.3') ? true : this.isIos_ ? false : !isExperimentOn(
+          this.win, 'amp-carousel-chrome-scroll-snap');
   }
 
   /** @override */
@@ -208,7 +218,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   isLoopingEligible() {
-    return this.noOfSlides_ > 2;
+    return this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -262,12 +272,20 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
+
+    if (this.hasNativeSnapPoints_) {
+      // The state being calculated after this short circuit is only needed if
+      // CSS Scroll Snap is not enabled.
+      return;
+    }
+
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
       this.slidesContainer_./*OK*/scrollLeft =
-          this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
+          this.getScrollLeftForIndex_(user().assertNumber(this.slideIndex_,
+              'E#19457 this.slideIndex_'));
+      this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
     }
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
@@ -279,7 +297,8 @@ export class AmpSlideScroll extends BaseSlides {
       // it will need to be re-laid-out. This is only needed when the slide
       // does not change (example when browser window size changes,
       // or orientation changes)
-      this.scheduleLayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
+      this.scheduleLayout(this.slides_[user().assertNumber(this.slideIndex_,
+          'E#19457 this.slideIndex_')]);
     }
     return Promise.resolve();
   }
@@ -294,7 +313,8 @@ export class AmpSlideScroll extends BaseSlides {
   updateViewportState(inViewport) {
     if (this.slideIndex_ !== null) {
       this.updateInViewport(
-          this.slides_[dev().assertNumber(this.slideIndex_)], inViewport);
+          this.slides_[user().assertNumber(this.slideIndex_,
+              'E#19457 this.slideIndex_')], inViewport);
     }
   }
 
@@ -604,23 +624,21 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(prevIndex);
     }
     showIndexArr.push(newIndex);
-    if (nextIndex != null) {
+    if (nextIndex != null && nextIndex !== prevIndex) {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
       this.updateInViewport(this.slides_[
-          dev().assertNumber(this.slideIndex_)], false);
+          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')],
+      false);
     }
     const newSlideInView = this.slides_[newIndex];
 
     if (newSlideInView === undefined) {
-      const error = new Error(
-          `Attempting to access a non-existant slide ${newIndex}/${noOfSlides_}`
-      );
-      dev().error(TAG, error);
+      dev().error(TAG, 'Attempting to access a non-existant slide %s / %s',
+          newIndex, noOfSlides_);
       return false;
     }
-
     this.updateInViewport(newSlideInView, true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
@@ -640,6 +658,16 @@ export class AmpSlideScroll extends BaseSlides {
         this.getScrollLeftForIndex_(newIndex);
     this.triggerAnalyticsEvent_(newIndex);
     this.slideIndex_ = newIndex;
+    // If we have a specified number of autoplay loops and
+    // we have reached the last slide in the set
+    // carry out removing autoplay logic.
+    // This only works because the initial Slide is always the first slide.
+    if (this.autoplayLoops_ && this.slideIndex_ === this.noOfSlides_ - 1) {
+      this.loopsMade_++;
+      if (this.loopsMade_ == this.autoplayLoops_) {
+        this.removeAutoplay();
+      }
+    }
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
     this.updateButtonTitles();
@@ -657,7 +685,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (slideChanged) {
       const name = 'slideChange';
       const event =
-          createCustomEvent(this.win, `slidescroll.${name}`, {index: newIndex});
+          createCustomEvent(this.win, `slidescroll.${name}`,
+              dict({'index': newIndex}));
       this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
@@ -699,7 +728,8 @@ export class AmpSlideScroll extends BaseSlides {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        dev().assertElement(this.slideWrappers_[i]).classList
+            .remove(SHOWN_CSS_CLASS);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
@@ -722,7 +752,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
     const slidesContainer = dev().assertElement(this.slidesContainer_);
     return Animation.animate(slidesContainer, pos => {
@@ -764,10 +794,10 @@ export class AmpSlideScroll extends BaseSlides {
         this.slideIndex_ === null ?
           'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = {
-      fromSlide,
+    const vars = dict({
+      'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    };
+    });
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
@@ -779,7 +809,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

@@ -17,7 +17,6 @@
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
-import {computedStyle} from '../../../../src/style';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-consent', {amp: true}, env => {
@@ -147,8 +146,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    const styles = computedStyle(window, buttonEl);
-    expect(styles.display).to.equal('block');
+    expect(buttonEl).to.have.display('block');
   });
 
   it('should hide the decline button if onlyAccept is true', () => {
@@ -162,8 +160,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
-    const styles = computedStyle(window, buttonEl);
-    expect(styles.display).to.equal('none');
+    expect(buttonEl).to.have.display('none');
   });
 
   it('should hide the external link by default', () => {
@@ -172,8 +169,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    const styles = computedStyle(window, linkEl);
-    expect(styles.display).to.equal('none');
+    expect(linkEl).to.have.display('none');
   });
 
   it('should require an external link title if a URL is provided', () => {
@@ -220,8 +216,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const linkEl = storyConsent.storyConsentEl_
         .querySelector('.i-amphtml-story-consent-external-link');
 
-    const styles = computedStyle(window, linkEl);
-    expect(styles.display).not.to.equal('none');
+    expect(linkEl).not.to.have.display('none');
   });
 
   it('should whitelist the <amp-consent> actions', () => {
@@ -231,9 +226,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     storyConsent.buildCallback();
 
     expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT.reject');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
+    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
   });
 
   it('should broadcast the amp actions', () => {

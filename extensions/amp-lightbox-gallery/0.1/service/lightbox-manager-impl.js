@@ -244,7 +244,7 @@ export class LightboxManager {
     }
 
     user().assert(this.baseElementIsSupported_(element),
-        `The element ${element.tagName} isn't supported in lightbox yet.`);
+        'The element %s isn\'t supported in lightbox yet.', element.tagName);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
@@ -295,8 +295,7 @@ export class LightboxManager {
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
-      const descriptionElement = element.ownerDocument
-          .getElementById(ariaDescribedBy);
+      const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
         return descriptionElement./*OK*/innerText;
       }
@@ -361,7 +360,7 @@ export class LightboxManager {
   getThumbnailSrcset_(element) {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
-      const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
+      const thumbnailImage = this.ampdoc_.getElementById(thumbnailId);
       if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
         return srcsetFromElement(thumbnailImage);
       }

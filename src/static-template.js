@@ -57,7 +57,7 @@ function html(strings) {
   dev().assert(!el.nextElementSibling, 'Too many root elements in template');
 
   // Clear to free memory.
-  container./*OK*/innerHTML = '';
+  container.removeChild(el);
 
   return el;
 }

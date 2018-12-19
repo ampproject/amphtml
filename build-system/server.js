@@ -36,6 +36,8 @@ const {
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const noCachingExtensions = process.env.SERVE_EXTENSIONS_WITHOUT_CACHING ==
+    'true';
 const header = require('connect-header');
 
 // Exit if the port is in use.
@@ -60,20 +62,32 @@ const middleware = [];
 if (!quiet) {
   middleware.push(morgan('dev'));
 }
-middleware.push(app);
+middleware.push(app.middleware);
 if (sendCachingHeaders) {
   middleware.push(header({
     'cache-control': ' max-age=600',
   }));
 }
 
-// Start gulp webserver
-gulp.src(process.cwd())
-    .pipe(webserver({
-      port,
-      host,
-      directoryListing: true,
-      https: useHttps,
-      middleware,
-    }));
+if (noCachingExtensions) {
+  middleware.push(function(req, res, next) {
+    if (req.url.startsWith('/dist/v0/amp-')) {
+      log('Skipping caching for ', req.url);
+      res.header('Cache-Control', 'no-store');
+    }
+    next();
+  });
+}
 
+// Start gulp webserver
+(async() => {
+  await app.beforeServeTasks();
+  gulp.src(process.cwd())
+      .pipe(webserver({
+        port,
+        host,
+        directoryListing: true,
+        https: useHttps,
+        middleware,
+      }));
+})();

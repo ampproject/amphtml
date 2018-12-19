@@ -13,9 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
+import {
+  DevelopmentModeLog,
+  DevelopmentModeLogButtonSet,
+} from './development-ui';
 import {LocalizedStringId} from './localization';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
@@ -36,16 +44,34 @@ const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
 /** @private @const {string} */
+const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
 /** @private @const {string} */
+const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
+
+/** @private @const {string} */
+const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
+
+/** @private @const {string} */
+const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
+
+/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
+
+/** @private @const {string} */
+const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
+
+/** @private @const {number} */
+const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -67,22 +93,69 @@ const TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({
-            'role': 'button',
-            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+            'class': 'i-amphtml-story-sound-display',
           }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': MUTE_CLASS + ' i-amphtml-story-button',
-          }),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-message-container',
+              }),
+              children: [
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-mute-text' ,
+                  }),
+                  localizedStringId:
+                        LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-unmute-sound-text',
+                  }),
+                  localizedStringId:
+                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({
+                    'class': 'i-amphtml-story-unmute-no-sound-text' ,
+                  }),
+                  localizedStringId:
+                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
+                },
+              ],
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class': MUTE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+          ],
         },
         {
           tag: 'div',
           attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
       ],
@@ -165,10 +238,16 @@ export class SystemLayer {
     this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
+
+    /** @private {?number|?string} */
+    this.timeoutId_ = null;
   }
 
   /**
@@ -188,7 +267,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-        this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
+        this.progressBar_.build(pageIds), this.systemLayerEl_.firstChild);
 
     this.buttonsContainer_ =
         this.systemLayerEl_.querySelector(
@@ -211,8 +290,12 @@ export class SystemLayer {
     if (Services.viewerForDoc(this.win_.document.documentElement)
         .isEmbedded()) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
+      this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
+    } else {
+      this.getShadowRoot().removeAttribute(HAS_INFO_BUTTON_ATTRIBUTE);
     }
 
+    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     return this.getRoot();
   }
 
@@ -238,13 +321,15 @@ export class SystemLayer {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
-        this.onMuteAudioClick_();
+        this.onAudioIconClick_(true);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
-        this.onUnmuteAudioClick_();
+        this.onAudioIconClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_();
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
+      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
+        this.onSidebarClick_();
       }
     });
 
@@ -260,21 +345,40 @@ export class SystemLayer {
       this.onCanShowSharingUisUpdate_(show);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
-
-    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
-      this.onHasAudioStateUpdate_(hasAudio);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE,
+        hasAudio => {
+          this.onStoryHasAudioStateUpdate_(hasAudio);
+        }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
 
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
       this.onPageIndexUpdate_(index);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
+      this.onPageHasAudioStateUpdate_(audio);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
+        hasSidebar => {
+          this.onHasSidebarStateUpdate_(hasSidebar);
+        }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+        isVisible => {
+          this.onSystemUiIsVisibleStateUpdate_(isVisible);
+        });
   }
 
   /**
@@ -315,6 +419,20 @@ export class SystemLayer {
   }
 
   /**
+   * Checks if the story has a sidebar in order to display the icon representing
+   * the opening of the sidebar.
+   * @param {boolean} hasSidebar
+   * @private
+   */
+  onHasSidebarStateUpdate_(hasSidebar) {
+    if (hasSidebar) {
+      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
+    } else {
+      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
+    }
+  }
+
+  /**
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
    * @param {boolean} canShowSharingUis
@@ -328,33 +446,35 @@ export class SystemLayer {
   }
 
   /**
-   * Reacts to desktop state updates and triggers the desktop UI.
-   * @param {boolean} isDesktop
+   * Reacts to has audio state updates, determining if the story has a global
+   * audio track playing, or if any page has audio.
+   * @param {boolean} hasAudio
    * @private
    */
-  onDesktopStateUpdate_(isDesktop) {
-    if (isDesktop) {
-      this.buildSharePill_();
-    }
-
+  onStoryHasAudioStateUpdate_(hasAudio) {
     this.vsync_.mutate(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-has-audio', hasAudio);
     });
   }
 
   /**
-   * Reacts to has audio state updates, displays the audio controls if needed.
-   * @param {boolean} hasAudio
+   * Reacts to the presence of audio on a page to determine which audio messages
+   * to display.
+   * @param {boolean} pageHasAudio
    * @private
    */
-  onHasAudioStateUpdate_(hasAudio) {
+  onPageHasAudioStateUpdate_(pageHasAudio) {
+    pageHasAudio =
+        pageHasAudio || !!this.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
+      pageHasAudio ?
+        this.getShadowRoot()
+            .setAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE);
     });
   }
-
   /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
@@ -369,6 +489,62 @@ export class SystemLayer {
   }
 
   /**
+   * Hides audio message after elapsed time.
+   * @private
+   */
+  hideAudioMessageAfterTimeout_() {
+    if (this.timeoutId_) {
+      this.timer_.cancel(this.timeoutId_);
+    }
+    this.timeoutId_ =
+        this.timer_.delay(
+            () => this.hideAudioMessageInternal_(),
+            HIDE_AUDIO_MESSAGE_TIMEOUT_MS);
+  }
+
+  /**
+   * Hides audio message.
+   * @private
+   */
+  hideAudioMessageInternal_() {
+    if (!this.isBuilt_) {
+      return;
+    }
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+    });
+  }
+
+  /**
+   * Reacts to desktop state updates and triggers the desktop UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if (uiState === UIType.DESKTOP_PANELS) {
+      this.buildSharePill_();
+    }
+
+    this.vsync_.mutate(() => {
+      uiState === UIType.DESKTOP_PANELS ?
+        this.getShadowRoot().classList.add('i-amphtml-story-desktop-panels') :
+        this.getShadowRoot().classList.remove('i-amphtml-story-desktop-panels');
+    });
+  }
+
+  /**
+   * Reacts to system UI visibility state updates.
+   * @param {boolean} isVisible
+   * @private
+   */
+  onSystemUiIsVisibleStateUpdate_(isVisible) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-hidden', !isVisible);
+    });
+  }
+
+  /**
    * Reacts to the active page index changing.
    * @param {number} index
    */
@@ -379,19 +555,29 @@ export class SystemLayer {
   }
 
   /**
-   * Handles click events on the mute button.
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
    * @private
    */
-  onMuteAudioClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState ?
+        this.getShadowRoot().setAttribute('dir', 'rtl') :
+        this.getShadowRoot().removeAttribute('dir');
+    });
   }
 
   /**
-   * Handles click events on the unmute button.
+   * Handles click events on the mute and unmute buttons.
+   * @param {boolean} mute Specifies if the audio is being muted or unmuted.
    * @private
    */
-  onUnmuteAudioClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+  onAudioIconClick_(mute) {
+    this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
+      this.hideAudioMessageAfterTimeout_();
+    });
   }
 
   /**
@@ -413,12 +599,11 @@ export class SystemLayer {
   }
 
   /**
-   * @param {string} pageId The page id of the new active page.
-   * @public
+   * Handles click events on the sidebar button and toggles the sidebar.
+   * @private
    */
-  setActivePageId(pageId) {
-    // TODO(newmuis) avoid passing progress logic through system-layer
-    this.progressBar_.setActiveSegmentId(pageId);
+  onSidebarClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
   }
 
   /**
@@ -445,7 +630,7 @@ export class SystemLayer {
     this.sharePillContainerNode_ =
         renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
 
-    const shareWidget = new ShareWidget(this.win_);
+    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')

@@ -15,19 +15,19 @@
  */
 
 import * as analytics from '../../src/analytics';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
   blockedByConsentError,
   cancellation,
   detectJsEngineFromStack,
   detectNonAmpJs,
+  errorReportingDataForViewer,
   getErrorReportData,
   installErrorReporting,
   isCancellation,
-  maybeReportErrorToViewer,
   reportError,
   reportErrorToAnalytics,
+  reportErrorToServerOrViewer,
 } from '../../src/error';
 import {
   getMode,
@@ -101,18 +101,19 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 });
 
-describe('maybeReportErrorToViewer', () => {
+describe('reportErrorToServerOrViewer', () => {
   let win;
   let viewer;
   let sandbox;
   let ampdocServiceForStub;
   let sendMessageStub;
+  let createXhr;
 
   const data = getErrorReportData(undefined, undefined, undefined, undefined,
       new Error('XYZ', false));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
@@ -131,57 +132,81 @@ describe('maybeReportErrorToViewer', () => {
     sendMessageStub = sandbox.stub(viewer, 'sendMessage');
 
     sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+    createXhr = sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('should not report if AMP doc is not single', () => {
+  it('should report to server if AMP doc is not single', () => {
     ampdocServiceForStub.returns({isSingleDoc: () => false});
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should not report if AMP doc is not opted in', () => {
+  it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc =
-          window.document.implementation.createHTMLDocument('');
+      window.document.implementation.createHTMLDocument('');
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
       getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
     });
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should not report if viewer is not capable', () => {
+  it('should report to server if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
         .returns(false);
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should not report if viewer is not trusted', () => {
+  it('should report to server if viewer is not trusted', () => {
     sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.not.have.been.called);
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.be.calledOnce;
+          expect(sendMessageStub).to.not.have.been.called;
+        });
   });
 
-  it('should send viewer message named `error`', () => {
-    return maybeReportErrorToViewer(win, data)
-        .then(() => expect(sendMessageStub).to.have.been
-            .calledWith('error', data));
+  it('should report to viewer with message named `error` with stripped down '
+    + 'error data set', () => {
+    return reportErrorToServerOrViewer(win, data)
+        .then(() => {
+          expect(createXhr).to.not.have.been.called;
+          expect(sendMessageStub).to.have.been
+              .calledWith('error', errorReportingDataForViewer(data));
+          expect(data['m']).to.not.be.undefined;
+          expect(data['a']).to.not.be.undefined;
+          expect(data['s']).to.not.be.undefined;
+          expect(data['el']).to.not.be.undefined;
+          expect(data['v']).to.not.be.undefined;
+          expect(data['jse']).to.not.be.undefined;
+        });
   });
 });
 
-describe('reportErrorToServer', () => {
+describe('getErrorReportData', () => {
   let sandbox;
   let onError;
   let nextRandomNumber;
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });
@@ -317,6 +342,50 @@ describe('reportErrorToServer', () => {
     expect(data.m).to.equal('XYZ');
     expect(data['ca']).to.equal('1');
     expect(data['vs']).to.equal('some-state');
+  });
+
+  describe('reportError marks single pass type', () => {
+    it('reports single pass', () => {
+      window.AMP_CONFIG = {
+        spt: 'sp',
+      };
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data['spt']).to.equal('sp');
+    });
+
+    it('reports multi pass', () => {
+      window.AMP_CONFIG = {
+        spt: 'mp',
+      };
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data['spt']).to.equal('mp');
+    });
+
+    it('reports esm', () => {
+      window.AMP_CONFIG = {
+        spt: 'esm',
+      };
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data['spt']).to.equal('esm');
+    });
+
+    it('does nothing for undeclared single pass type', () => {
+      window.AMP_CONFIG = {};
+      const e = new Error('XYZ');
+      e.fromAssert = true;
+      const data = getErrorReportData(undefined, undefined, undefined,
+          undefined, e);
+      expect(data['spt']).to.be.undefined;
+    });
   });
 
   it('reportError marks binary type', () => {

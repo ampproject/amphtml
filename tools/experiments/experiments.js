@@ -66,7 +66,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype',
+    name: 'AMP Access iframe prototype (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/13287',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
@@ -83,12 +83,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
-    id: 'amp-access-signin',
-    name: 'AMP Access sign-in',
-    spec: 'https://github.com/ampproject/amphtml/issues/4227',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
-  },
-  {
     id: 'amp-auto-ads',
     name: 'AMP Auto Ads',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
@@ -99,6 +93,12 @@ const EXPERIMENTS = [
     name: 'AMP Auto Ads AdSense Holdout',
     spec: 'https://github.com/ampproject/amphtml/issues/6196',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
+  },
+  {
+    id: 'amp-auto-ads-adsense-responsive',
+    name: 'AMP Auto Ads AdSense Responsive',
+    spec: '',
+    cleanupIssue: '',
   },
   {
     id: 'amp-google-vrview-image',
@@ -148,11 +148,25 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'ios-embed-wrapper',
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
+    id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root (launched)',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
+      ' shadow root',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
+  },
+  {
+    id: 'ios-embed-sd-notransfer',
+    name: 'Disables transfer mode for the new iOS embedded viewport model',
+    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
+        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
     id: 'chunked-amp',
@@ -165,16 +179,9 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
   },
   {
-    id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP (launched).',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-animation/amp-animation.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
-  },
-  {
     id: 'pump-early-frame',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
+    name: 'If applicable, let the browser paint the current frame before ' +
+        'executing the callback.',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
@@ -236,31 +243,21 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
+  },
+  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
-    id: 'inline-styles',
-    name: 'Enables the usage of inline styles for non fixed elements',
-    spec: 'https://github.com/ampproject/amphtml/issues/11881',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
-  },
-  {
-    id: 'url-replacement-v2',
-    name: 'new parsing engine for url variables',
-    spec: 'https://github.com/ampproject/amphtml/issues/12119',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
-  },
-  {
-    id: 'inabox-rov',
-    name: 'Extensions layout independent of viewport location if inabox.',
   },
   {
     id: 'amp-live-list-sorting',
@@ -280,6 +277,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
+    id: 'sandbox-ads',
+    name: 'Applies a sandbox to ad iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/14240',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
@@ -292,35 +295,124 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-img-native-srcset',
-    name: 'Enables native browser implementation of srcset and sizes',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11575',
-  },
-  {
     id: 'layers',
     name: 'Enables the new Layers position/measurement system',
     spec: 'https://github.com/ampproject/amphtml/issues/3434',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
-    id: 'disable-faster-amp-list',
-    name: 'Disables new default behavior where <amp-list> will not evaluate ' +
-       'bindings on rendered children before first setState() mutation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/15311',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15610',
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'amp-google-document-embed',
-    name: 'Enables the experiment amp-google-document-embed component' +
-        ' which is a wrapper around the Google Drive document viewer embed.',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
+    id: 'amp-list-diffing',
+    name: 'Enables DOM diffing of amp-list renders via set-dom',
+    spec: 'https://github.com/ampproject/amphtml/pull/17000',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
   },
   {
-    id: 'amp-orientation-observer',
-    name: 'Enables actions based on the orientation of a mobile device',
-    spec: 'https://github.com/ampproject/amphtml/issues/14740',
-    cleanupissue: 'https://github.com/ampproject/amphtml/issues/16075',
+    id: 'no-initial-intersection',
+    name: 'Do not invoke context.observeIntersection callback with ' +
+        'initialintersection',
+    spec: 'https://github.com/ampproject/amphtml/issues/8562',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8562',
+  },
+  {
+    id: 'custom-elements-v1',
+    name: 'Enable a new custom elements v1 polyfill',
+    spec: 'https://github.com/ampproject/amphtml/pull/17205',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
+  },
+  {
+    id: 'amp-carousel-chrome-scroll-snap',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
+  {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'amp-inputmask',
+    name: 'Enables the amp-inputmask extension enabled through amp-form',
+    spec: 'https://github.com/ampproject/amphtml/issues/12079',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18630',
+  },
+  {
+    id: 'linker-form',
+    name: 'Enables form support in linker',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18068',
+  },
+  {
+    id: 'fie-metadata-extension',
+    name: 'Use version supporting extension field in amp-ad-metadata.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18737',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
+  {
+    id: 'amp-script',
+    name: 'Enables <amp-script>.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
+  },
+  {
+    id: 'amp-list-resizable-children',
+    name: 'Experiment for allowing amp-list to resize when its children resize',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'scroll-height-bounce',
+    name: 'Bounces the scrolling when scroll height changes' +
+        ' (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'scroll-height-minheight',
+    name: 'Forces min-height on body (fix for #18861 and #8798)',
+    spec: 'https://github.com/ampproject/amphtml/issues/18861',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
+  },
+  {
+    id: 'amp-video-iframe',
+    name: 'Allows the use of the amp-video-iframe component.',
+    spec: 'https://github.com/ampproject/amphtml/issues/16252',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19563',
+  },
+  {
+    id: 'amp-date-display',
+    name: 'Enables displaying dates',
+    spec: 'https://github.com/ampproject/amphtml/issues/10837',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXXX',
+  },
+  {
+    id: 'amp-list-viewport-resize',
+    name: 'Enables amp-list to resize on viewport resize',
+    spec: 'https://github.com/ampproject/amphtml/issues/19945',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
   },
 ];
 

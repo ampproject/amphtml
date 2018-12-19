@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-google-document-embed" src="https://cdn.ampproject.org/v0/amp-google-document-embed-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <title>Hello, AMPs</title>
     <link rel="canonical" href="http://www.example.com/google-document-embed.amp.html" />
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -15,7 +16,7 @@
     </style>
   </head>
   <body>
-    <h1>amp-doc-viewer</h1>
+    <h1>amp-google-document-embed</h1>
     <h2>PDF document</h2>
     <amp-google-document-embed
       src="https://www.gpo.gov/fdsys/pkg/GPO-CONAN-1992/pdf/GPO-CONAN-1992-6.pdf"
@@ -34,6 +35,33 @@
     <h2>Google Sheets</h2>
     <amp-google-document-embed
       src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQoTpScZNIRJY9lPDSIv1kZo1jfs5k_3WV6_orhvd-MrSuWnPo93_uGMWiJ9L5McH0kygBaQpxgWl8A/pubhtml"
+      width="1" height="1" layout="responsive"></amp-google-document-embed>
+
+    <h2>with amp-bind</h2>
+    <amp-state id="toggle">
+      <script type="application/json">
+      {
+        "constitution": true
+      }
+      </script>
+    </amp-state>
+    <button
+      on="tap: AMP.setState({ toggle: {constitution: !toggle.constitution } })"
+      [text]="'Toggle to ' + (toggle.constitution ? 'Sheets' : 'Constitution')"
+    >Toggle to Sheets</button>
+    <amp-google-document-embed
+      src="https://www.gpo.gov/fdsys/pkg/GPO-CONAN-1992/pdf/GPO-CONAN-1992-6.pdf"
+      [src]="
+        toggle.constitution ?
+          'https://www.gpo.gov/fdsys/pkg/GPO-CONAN-1992/pdf/GPO-CONAN-1992-6.pdf' :
+          'https://docs.google.com/spreadsheets/d/e/2PACX-1vQoTpScZNIRJY9lPDSIv1kZo1jfs5k_3WV6_orhvd-MrSuWnPo93_uGMWiJ9L5McH0kygBaQpxgWl8A/pubhtml'
+      "
+      title="The United States Constitution"
+      [title]="
+        toggle.constitution ?
+          'The United States Constitution' :
+          'An amazing spreadsheet'
+      "
       width="1" height="1" layout="responsive"></amp-google-document-embed>
   </body>
 </html>

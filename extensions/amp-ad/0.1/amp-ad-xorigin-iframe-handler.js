@@ -36,7 +36,7 @@ import {
 } from '../../../src/iframe-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getData, loadPromise} from '../../../src/event-helper';
+import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -70,7 +70,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?AMP.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** {?Element} iframe instance */
+    /** @type {?Element} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -165,6 +165,9 @@ export class AmpAdXOriginIframeHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
+          if (!!data['hasOverflow']) {
+            this.element_.warnOnMissingOverflow = false;
+          }
           this.handleResize_(data['height'], data['width'], source, origin);
         }, true, true));
 
@@ -178,14 +181,15 @@ export class AmpAdXOriginIframeHandler {
         }, true, true /* opt_includingNestedWindows */));
 
     // Iframe.onload normally called by the Ad after full load.
-    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
-      // Wait just a little to allow `no-content` message to arrive.
-      if (this.iframe) {
-        // Chrome does not reflect the iframe readystate.
-        this.iframe.readyState = 'complete';
-      }
-      return timer.promise(10);
-    });
+    const iframeLoadPromise = this.baseInstance_.loadPromise(this.iframe)
+        .then(() => {
+          // Wait just a little to allow `no-content` message to arrive.
+          if (this.iframe) {
+            // Chrome does not reflect the iframe readystate.
+            this.iframe.readyState = 'complete';
+          }
+          return timer.promise(10);
+        });
 
     // Calculate render-start and no-content signals.
     const {

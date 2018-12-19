@@ -14,42 +14,46 @@
  * limitations under the License.
  */
 
-import {
-  depositRequestUrl,
-  withdrawRequest,
-} from '../../testing/test-helper';
+import {BrowserController, RequestBank} from '../../testing/test-helper';
 
-describe.configure().skipSafari().skipEdge().run('user-error', function() {
-  //TODO(zhouyx, #11459): Unskip the test on safari.
-  let randomId;
-  beforeEach(() => {
-    randomId = Math.random();
-  });
+const t = describe.configure()
+    .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
+    .skipEdge()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
 
+t.run('user-error', function() {
   describes.integration('user-error integration test', {
     extensions: ['amp-analytics'],
     hash: 'log=0',
     experiments: ['user-error-reporting'],
-    body: () => `
-    <amp-analytics><script type="application/json">
-          {
-              "requests": {
-                  "error": "${depositRequestUrl(randomId)}"
-              },
-              "triggers": {
-                  "userError": {
-                      "on": "user-error",
-                      "request": "error"
-                  }
-              }
+    body: `
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "requests": {
+            "error": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "userError": {
+              "on": "user-error",
+              "request": "error"
+            }
           }
-    </script></amp-analytics>
+        }
+      </script>
+    </amp-analytics>
 
     <amp-pixel src="https://foo.com/tracker/foo"
-               referrerpolicy="fail-referrer">`,
+            referrerpolicy="fail-referrer">
+            `,
   }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics');
+    });
+
     it('should ping correct host with amp-pixel user().assert err', () => {
-      return withdrawRequest(env.win, randomId);
+      return RequestBank.withdraw();
     });
   });
 
@@ -58,29 +62,36 @@ describe.configure().skipSafari().skipEdge().run('user-error', function() {
     hash: 'log=0',
     experiments: ['user-error-reporting'],
 
-    body: () => `
+    body: `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
       width="360" height="216" layout="responsive"
       role='img'>
     </amp-img>
 
-    <amp-analytics><script type="application/json">
-          {
-              "requests": {
-                  "error": "${depositRequestUrl(randomId)}"
-              },
-              "triggers": {
-                  "userError": {
-                      "on": "user-error",
-                      "request": "error"
-                  }
-              }
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "requests": {
+            "error": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "userError": {
+              "on": "user-error",
+              "request": "error"
+            }
           }
-    </script></amp-analytics>`,
+        }
+      </script>
+    </amp-analytics>`,
   }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-img');
+    });
+
     it('should ping correct host with amp-img user().error err', () => {
-      return withdrawRequest(env.win, randomId);
+      return RequestBank.withdraw();
     });
   });
 
@@ -89,7 +100,7 @@ describe.configure().skipSafari().skipEdge().run('user-error', function() {
     hash: 'log=0',
     experiments: ['user-error-reporting'],
 
-    body: () => `
+    body: `
     <amp-ad width=300 height=250
         type="_ping_"
         data-url='not-exist'
@@ -97,22 +108,29 @@ describe.configure().skipSafari().skipEdge().run('user-error', function() {
         data-error='true'>
     </amp-ad>
 
-    <amp-analytics><script type="application/json">
-    {
-      "requests": {
-        "error": "${depositRequestUrl(randomId)}"
-      },
-      "triggers": {
-        "userError": {
-          "on": "user-error",
-          "request": "error"
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "requests": {
+            "error": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "userError": {
+              "on": "user-error",
+              "request": "error"
+            }
+          }
         }
-      }
-    }
-    </script></amp-analytics>`,
+      </script>
+    </amp-analytics>`,
   }, env => {
+    beforeEach(() => {
+      const browser = new BrowserController(env.win);
+      return browser.waitForElementLayout('amp-analytics, amp-ad');
+    });
+
     it('should ping correct host with 3p error message', () => {
-      return withdrawRequest(env.win, randomId);
+      return RequestBank.withdraw();
     });
   });
 });

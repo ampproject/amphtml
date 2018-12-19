@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
@@ -22,7 +21,9 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {RefreshIntersectionObserverWrapper} from '../refresh-intersection-observer-wrapper';
+import {
+  RefreshIntersectionObserverWrapper,
+} from '../refresh-intersection-observer-wrapper';
 import {Services} from '../../../../src/services';
 
 function getTestElement() {
@@ -44,7 +45,7 @@ describe('refresh', () => {
   };
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockA4a = {
       win: window,
       element: getTestElement(),
@@ -179,6 +180,19 @@ describe('refresh', () => {
         height: 10,
         x: 0,
         y: 0,
+      });
+
+      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getRect,
+        };
+      });
+      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+        return {
+          getRootNode: () => {return window.document;},
+          win: window,
+          isSingleDoc: () => {return true;},
+        };
       });
 
       mockA4a.element.setAttribute(DATA_MANAGER_ID_NAME, '0');

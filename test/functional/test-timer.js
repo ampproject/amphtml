@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Timer} from '../../src/service/timer-impl';
 
 describes.fakeWin('Timer', {}, env => {
@@ -24,11 +23,12 @@ describes.fakeWin('Timer', {}, env => {
   let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
     WindowApi.prototype.document = {};
+    WindowApi.prototype.Promise = window.Promise;
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
 

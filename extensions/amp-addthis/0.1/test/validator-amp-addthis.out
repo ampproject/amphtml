@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ PASS
 |      data-pub-id="ra-59c2c366435ef478"
 |      data-widget-id="0fyg">
 |    </amp-addthis>
-|  
+|
 |    <!-- Example of a valid amp-addthis tag with responsive layout. -->
 |    <amp-addthis
 |      width="320"
@@ -45,7 +45,7 @@ PASS
 |      data-pub-id="ra-59c3d23bf51957fd"
 |      data-widget-id="o2x1">
 |    </amp-addthis>
-|  
+|
 |    <!-- Example of a valid amp-addthis tag with custom share attributes. -->
 |    <amp-addthis
 |      width="320"
@@ -57,6 +57,6 @@ PASS
 |      data-share-media="https://i.imgur.com/yNlQWRM.jpg"
 |      data-share-description="This is the description that will be shared.">
 |    </amp-addthis>
-|  
+|
 |  </body>
 |  </html>

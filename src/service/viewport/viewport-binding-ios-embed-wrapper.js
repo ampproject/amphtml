@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../observable';
+import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -43,16 +44,22 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
+    /** @private {!../vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
     const doc = this.win.document;
     const {documentElement} = doc;
     const topClasses = documentElement.className;
-    documentElement.className = 'i-amphtml-ios-embed';
+    documentElement.classList.add('i-amphtml-ios-embed');
 
     const wrapper = doc.createElement('html');
     /** @private @const {!Element} */
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
+    if (isExperimentOn(win, 'scroll-height-minheight')) {
+      wrapper.classList.add('i-amphtml-body-minheight');
+    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -238,6 +245,22 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  contentHeightChanged() {
+    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
+      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
+      // iOS rendering bugs. See #8798 for details.
+      const doc = this.win.document;
+      const {documentElement} = doc;
+      this.vsync_.mutate(() => {
+        documentElement.classList.remove('i-amphtml-ios-overscroll');
+        this.vsync_.mutate(() => {
+          documentElement.classList.add('i-amphtml-ios-overscroll');
+        });
+      });
+    }
+  }
+
+  /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/getBoundingClientRect();
     if (this.useLayers_) {
@@ -292,5 +315,10 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getScrollingElement() {
     return this.wrapper_;
+  }
+
+  /** @override */
+  getScrollingElementScrollsLikeViewport() {
+    return false;
   }
 }

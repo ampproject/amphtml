@@ -18,7 +18,6 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('Caja-based', () => {
   runSanitizerTests();
@@ -56,14 +55,19 @@ describe('Caja-based', () => {
   describe('for <amp-bind>', () => {
     it('should output [text] and [class] attributes', () => {
       expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
-          .equal('<p [text]="foo" [class]="bar"></p>');
+          .equal('<p [text]="foo" [class]="bar" i-amphtml-binding=""></p>');
+    });
+
+    it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
+      expect(sanitizeHtml('<p data-amp-bind-text="foo"></p>')).to.be
+          .equal('<p data-amp-bind-text="foo" i-amphtml-binding=""></p>');
     });
 
     it('should NOT rewrite values of binding attributes', () => {
       // Should not change "foo.bar". Adding `target` attribute is not necessary
       // (but harmless) since <amp-bind> will use rewriteAttributesForElement().
-      expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
-          .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+      expect(sanitizeHtml('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a [href]="foo.bar" target="_top" i-amphtml-binding="">link</a>');
     });
   });
 });
@@ -112,7 +116,6 @@ function runSanitizerTests() {
     it('should NOT output security-sensitive markup', () => {
       expect(sanitizeHtml('a<script>b</script>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<script>b<img>d</script>c')).to.be.equal('ac');
-      expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
       expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
@@ -240,10 +243,6 @@ function runSanitizerTests() {
       allowConsoleError(() => {
         expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal(
             'a<a>b</a>');
-        expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
-        expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
-            'a<a>b</a>');
         expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
             'a<a target="_top">b</a>');
         expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
@@ -307,6 +306,40 @@ function runSanitizerTests() {
       expect(sanitizeHtml('<form action-xhr="https://foo.com/bar"></form>'))
           .to.equal('<form action-xhr="https://foo.com/bar"></form>');
     });
+
+    it('should allow <amp-form>-related attributes', () => {
+      expect(sanitizeHtml('<div submitting></div>'))
+          .to.equal('<div submitting=""></div>');
+      expect(sanitizeHtml('<div submit-success></div>'))
+          .to.equal('<div submit-success=""></div>');
+      expect(sanitizeHtml('<div submit-error></div>'))
+          .to.equal('<div submit-error=""></div>');
+      expect(sanitizeHtml('<div verify-error></div>'))
+          .to.equal('<div verify-error=""></div>');
+      expect(sanitizeHtml('<span visible-when-invalid="valueMissing"></span>'))
+          .to.equal('<span visible-when-invalid="valueMissing"></span>');
+      expect(sanitizeHtml('<span validation-for="form1"></span>'))
+          .to.equal('<span validation-for="form1"></span>');
+    });
+
+    it('should allow <amp-lightbox> attributes', () => {
+      expect(sanitizeHtml('<amp-lightbox scrollable></amp-lightbox>'))
+          .to.equal('<amp-lightbox scrollable=""></amp-lightbox>');
+    });
+
+    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
+      // Elements with bindings should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<p [text]="foo"></p>', true)).to.match(
+          /<p \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/);
+      // AMP elements should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<amp-img></amp-img>', true)).to.match(
+          /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/);
+      // AMP elements with bindings should have i-amphtml-key="<number>".
+      expect(sanitizeHtml('<amp-img [text]="foo"></amp-img>', true)).to.match(
+          /<amp-img \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-img>/);
+      // Other elements should NOT have i-amphtml-key-set.
+      expect(sanitizeHtml('<p></p>')).to.equal('<p></p>');
+    });
   });
 
   describe('sanitizeTagsForTripleMustache', () => {
@@ -340,30 +373,12 @@ function runSanitizerTests() {
           .to.be.equal('ac');
     });
 
-    it('should output style attributes if inline styles enabled', () => {
-      toggleExperiment(self, 'inline-styles', true,
-          /* opt_transientExperiment */ true);
-      expect(sanitizeTagsForTripleMustache(
-          '<b style="color: red">abc</b>'))
-          .to.be.equal('<b style="color: red">abc</b>');
-    });
-
     it('should compensate for broken markup', () => {
       expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
           '<b>a<i>b</i></b>');
     });
 
     describe('should sanitize `style` attribute', () => {
-      beforeEach(() => {
-        toggleExperiment(self, 'inline-styles', true,
-            /* opt_transientExperiment */ true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(self, 'inline-styles', false,
-            /* opt_transientExperiment */ true);
-      });
-
       it('should allow valid styles',() => {
         expect(sanitizeHtml('<div style="color:blue">Test</div>'))
             .to.equal('<div style="color:blue">Test</div>');

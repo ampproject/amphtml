@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
   getExtraParamsUrl,
   getTrackImpressionPromise,
+  isTrustedReferrer,
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
@@ -33,11 +33,11 @@ describe('impression', () => {
   let viewer;
   let xhr;
   let isTrustedViewer;
-  let isTrustedReferrer;
+  let referrer = 'http://do-not-trust-me.com';
   let warnStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
     sandbox.stub(viewer, 'hasCapability');
@@ -55,8 +55,8 @@ describe('impression', () => {
     sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
     });
-    sandbox.stub(viewer, 'isTrustedReferrer').callsFake(() => {
-      return Promise.resolve(isTrustedReferrer);
+    sandbox.stub(viewer, 'getReferrerUrl').callsFake(() => {
+      return Promise.resolve(referrer);
     });
     resetTrackImpressionPromiseForTesting();
   });
@@ -167,7 +167,7 @@ describe('impression', () => {
     it('should invoke click URL for trusted referrer', function* () {
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = false;
-      isTrustedReferrer = true;
+      referrer = 'https://t.co/docref';
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;
@@ -413,4 +413,32 @@ describe('impression', () => {
           'gclsrc=QUERY_PARAM(gclsrc)');
     });
   });
+
+  describe('isTrustedReferrer', () => {
+    /**
+     * Tests trust determination by referrer.
+     * @param {string} referrer URL under test.
+     * @param {boolean} toBeTrusted The expected outcome.
+     */
+    function test(referrer, toBeTrusted) {
+      it('testing ' + referrer, () => {
+        expect(isTrustedReferrer(referrer)).to.equal(toBeTrusted);
+      });
+    }
+
+    it('should return true for whitelisted hosts', () => {
+      test('https://t.co/docref', true);
+    });
+
+    it('should not trust host as referrer with http', () => {
+      test('http://t.co/asdf', false);
+    });
+
+    it('should not trust non-whitelisted hosts', () => {
+      test('https://www.t.co/asdf', false);
+      test('https://t.com/asdf', false);
+      test('https://t.cn/asdf', false);
+    });
+  });
+
 });

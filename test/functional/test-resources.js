@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -33,7 +32,7 @@ describe('Resources', () => {
   let resources;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
@@ -589,7 +588,7 @@ describes.fakeWin('Resources startup', {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
@@ -704,7 +703,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     vsyncSpy = sandbox.stub(resources.vsync_, 'run').callsFake(task => {
@@ -1091,7 +1090,7 @@ describe('Resources discoverWork', () => {
   let resource1, resource2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -1635,6 +1634,24 @@ describe('Resources discoverWork', () => {
       });
     });
   });
+
+  describe('onNextPass', () => {
+
+    it('should only run callbacks once.', () => {
+      resources.isRuntimeOn_ = true;
+      resources.documentReady_ = true;
+      resources.firstPassAfterDocumentReady_ = true;
+
+      const passCallback = sandbox.spy();
+      resources.onNextPass(passCallback);
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+
+      resources.doPass();
+      expect(passCallback).to.be.calledOnce;
+    });
+  });
 });
 
 describes.realWin('Resources contentHeight', {
@@ -1644,12 +1661,14 @@ describes.realWin('Resources contentHeight', {
 }, env => {
   let win;
   let resources;
-  let viewerSendMessageStub;
+  let viewerSendMessageStub, viewportContentHeightChangedStub;
 
   beforeEach(() => {
     win = env.win;
     resources = win.services.resources.obj;
     viewerSendMessageStub = sandbox.stub(resources.viewer_, 'sendMessage');
+    viewportContentHeightChangedStub =
+        sandbox.stub(resources.viewport_, 'contentHeightChanged');
     sandbox.stub(resources.vsync_, 'run').callsFake(task => {
       task.measure({});
     });
@@ -1676,6 +1695,7 @@ describes.realWin('Resources contentHeight', {
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+    expect(viewportContentHeightChangedStub).to.be.calledOnce;
   });
 
   it('should not send contentHeight to viewer if height is not changed', () => {
@@ -1687,6 +1707,7 @@ describes.realWin('Resources contentHeight', {
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.contentHeight_).to.equal(contentHeight);
     expect(viewerSendMessageStub).to.not.be.called;
+    expect(viewportContentHeightChangedStub).to.not.be.called;
   });
 
   it('should send contentHeight to viewer if viewport resizes', () => {
@@ -1702,6 +1723,7 @@ describes.realWin('Resources contentHeight', {
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+    expect(viewportContentHeightChangedStub).to.be.calledOnce;
   });
 
 });
@@ -1766,7 +1788,7 @@ describe('Resources changeSize', () => {
   let resource1, resource2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
@@ -2181,7 +2203,7 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 0, 222, undefined, false);
       expect(vsyncSpy).to.be.calledOnce;
-      vsyncSpy.reset();
+      vsyncSpy.resetHistory();
       resources.mutateWork_();
 
       expect(resources.requestsChangeSize_).to.be.empty;
@@ -2530,7 +2552,7 @@ describe('Resources mutateElement and collapse', () => {
   let resource1RequestMeasureStub, resource2RequestMeasureStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);

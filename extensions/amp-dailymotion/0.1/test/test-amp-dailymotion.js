@@ -43,7 +43,7 @@ describes.realWin('amp-dailymotion', {
     }
     doc.body.appendChild(dailymotion);
     return dailymotion.build().then(() => {
-      return dailymotion.layoutCallback();
+      dailymotion.layoutCallback();
     }).then(() => dailymotion);
   }
 

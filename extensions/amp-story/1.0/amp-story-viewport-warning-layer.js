@@ -17,9 +17,14 @@
 import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
+import {
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {renderAsElement} from './simple-template';
 
 
@@ -114,7 +119,7 @@ export class ViewportWarningLayer {
     this.platform_ = Services.platformFor(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
@@ -133,18 +138,20 @@ export class ViewportWarningLayer {
       return;
     }
 
-    this.isBuilt_ = true;
+    const template = this.getViewportWarningOverlayTemplate_();
+    if (!template) {
+      return;
+    }
 
+    this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
-    this.overlayEl_ =
-        renderAsElement(
-            this.win_.document, this.getViewportWarningOverlayTemplate_());
+    this.overlayEl_ = renderAsElement(this.win_.document, template);
 
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
-    // Initializes the desktop state now that the component is built.
-    this.onDesktopStateUpdate_(
-        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
+    // Initializes the UI state now that the component is built.
+    this.onUIStateUpdate_(/** @type {!UIType} */
+        (this.storeService_.get(StateProperty.UI_STATE)));
 
     this.vsync_.mutate(() => {
       this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
@@ -163,8 +170,8 @@ export class ViewportWarningLayer {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
     }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
@@ -178,10 +185,11 @@ export class ViewportWarningLayer {
    * @private
    */
   onLandscapeStateUpdate_(isLandscape) {
-    const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
+    const isMobile =
+        this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
 
     // Adds the landscape class if we are mobile landscape.
-    const shouldShowLandscapeOverlay = !isDesktop && isLandscape;
+    const shouldShowLandscapeOverlay = isMobile && isLandscape;
 
     // Don't build the layer until we need to display it.
     if (!shouldShowLandscapeOverlay && !this.isBuilt()) {
@@ -191,23 +199,23 @@ export class ViewportWarningLayer {
     this.build();
 
     this.vsync_.mutate(() => {
-      this.overlayEl_
-          .classList.toggle(LANDSCAPE_OVERLAY_CLASS, !isDesktop && isLandscape);
+      this.overlayEl_.classList.toggle(
+          LANDSCAPE_OVERLAY_CLASS, shouldShowLandscapeOverlay);
     });
   }
 
   /**
-   * Reacts to desktop state updates.
-   * @param {boolean} isDesktop
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
    * @private
    */
-  onDesktopStateUpdate_(isDesktop) {
+  onUIStateUpdate_(uiState) {
     if (!this.isBuilt()) {
       return;
     }
 
     this.vsync_.mutate(() => {
-      isDesktop ?
+      uiState === UIType.DESKTOP_PANELS ?
         this.overlayEl_.setAttribute('desktop', '') :
         this.overlayEl_.removeAttribute('desktop');
     });
@@ -215,12 +223,18 @@ export class ViewportWarningLayer {
 
   /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {!./simple-template.ElementDef} template
+   * @return {?./simple-template.ElementDef} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
-    return (this.platform_.isIos() || this.platform_.isAndroid()) ?
-      LANDSCAPE_ORIENTATION_WARNING_TEMPLATE :
-      DESKTOP_SIZE_WARNING_TEMPLATE;
+    if (this.platform_.isIos() || this.platform_.isAndroid()) {
+      return LANDSCAPE_ORIENTATION_WARNING_TEMPLATE;
+    }
+
+    if (!isExperimentOn(this.win_, 'disable-amp-story-desktop')) {
+      return DESKTOP_SIZE_WARNING_TEMPLATE;
+    }
+
+    return null;
   }
 }

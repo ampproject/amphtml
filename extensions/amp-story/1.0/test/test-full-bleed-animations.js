@@ -20,9 +20,14 @@
 
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
+import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../localization';
 import {PRESETS} from '../animation-presets';
-import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
+import {Services} from '../../../../src/services';
+import {
+  calculateTargetScalingFactor,
+  targetFitsWithinPage,
+} from '../animation-presets-utils';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-full-bleed-animations', {
@@ -37,6 +42,10 @@ describes.realWin('amp-story-full-bleed-animations', {
 
   beforeEach(() => {
     win = env.win;
+
+    sandbox.stub(Services, 'storyStoreService')
+        .callsFake(() => new AmpStoryStoreService(win));
+
     storyElem = win.document.createElement('amp-story');
     win.document.body.appendChild(storyElem);
 

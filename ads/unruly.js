@@ -30,5 +30,5 @@ export function unruly(global, data, scriptLoader = loadScript) {
     siteId: data.siteId,
   };
 
-  scriptLoader(global, 'https://video.unrulymedia.com/amp-demo/native-loader.js');
+  scriptLoader(global, 'https://video.unrulymedia.com/native/native-loader.js');
 }

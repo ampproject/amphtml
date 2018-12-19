@@ -22,8 +22,8 @@ tags: {  # amp-carousel
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-carousel"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -42,7 +42,7 @@ tags: {  # <amp-carousel>
   }
   attrs: {
     name: "autoplay"
-    value: ""
+    value_regex: "(|[0-9]+)"
   }
   attrs: { name: "controls" }
   attrs: {
@@ -59,7 +59,8 @@ tags: {  # <amp-carousel>
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }
@@ -108,7 +109,8 @@ tags: {  # <amp-carousel> lightbox
   }
   attrs: {
     name: "type"
-    value_regex: "slides|carousel"
+    value: "slides"
+    value: "carousel"
   }
   # <amp-bind>
   attrs: { name: "[slide]" }

@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
+  <tr>
+    <td><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
+  </tr>
 </table>
 
 ## Usage
@@ -57,6 +61,10 @@ Unsupported features:
 - embeded cameras
 - animation
 
+### CORS
+
+`amp-3d-gltf` makes a `fetch` request from the origin `https://<random>.ampproject.net` so `access-control-allow-origin: *.ampproject.net` must be set on the response header of the endpoint specified as `src`. Wildcard is needed since the origin has a random sub-domain component to it.
+
 ## Attributes
 
 ##### src [required]
@@ -71,6 +79,10 @@ Default value is `false`.
 
 A Boolean attribute that specifies whether to turn on antialiasing. Default value is `false`.
 
+##### clearColor [optional]
+
+A string that must contain valid CSS color, that will be used to fill free space on canvas. 
+
 ##### maxPixelRatio [optional]
 
 A numeric value that specifies the upper limit for the pixelRatio render option. The default is `window.devicePixelRatio`.
@@ -81,6 +93,16 @@ A Boolean attribute that specifies whether to automatically rotate the camera ar
 ##### enableZoom [optional]
 
 A Boolean attribute that specifies whether to turn on zoom. Default value is `true`.
+
+## Actions
+
+##### setModelRotation(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)
+sets model rotation. rotation order is ZYX
+
+- x/y/z - number 0..1, defaults to previous value of model rotation.
+- min/max - angle in radians, defaults to 0 / pi * 2, defines target range
+
+for example `setModelRotation(x=0.5, xMin=0, xMax=3.14)` will change `x` component of rotation to `1.57`.  
 
 ## Validation
 See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.

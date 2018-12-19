@@ -16,31 +16,36 @@
 
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
+import {install as installCustomElements} from './polyfills/custom-elements';
 import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
+import {install as installFetch} from './polyfills/fetch';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
+import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-// Importing the document-register-element module has the side effect
-// of installing the custom elements polyfill if necessary.
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+import {installCustomElements as installRegisterElement} from
+  'document-register-element/build/document-register-element.patched';
+import {isExperimentOn} from './experiments';
 
-/**
-  Only install in closure binary and not in babel/browserify binary, since in
-  the closure binary we strip out the `document-register-element` install side
-  effect so we can tree shake the dependency correctly and we have to make
-  sure to not `install` it during dev since the `install` is done as a side
-  effect in importing the module.
-*/
-if (!getMode().localDev) {
-  installCustomElements(self, 'auto');
-}
 installDOMTokenListToggle(self);
+installFetch(self);
 installMathSign(self);
 installObjectAssign(self);
+installObjectValues(self);
 installPromise(self);
 installDocContains(self);
 installArrayIncludes(self);
+// isExperimentOn() must be called after Object.assign polyfill is installed.
+if (isExperimentOn(self, 'custom-elements-v1') || getMode().test) {
+  installCustomElements(self);
+} else {
+  installRegisterElement(self, 'auto');
+}
+
+// TODO(#18268, erwinm): For whatever reason imports to modules that have no
+// export currently break for singlepass runs. This is a temporary workaround
+// until we figure the issue out.
+export const erwinmHack = 'this export is a temporary hack for single pass';

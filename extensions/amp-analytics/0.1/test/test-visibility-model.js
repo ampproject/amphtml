@@ -24,6 +24,13 @@ describes.sandboxed('VisibilityModel', {}, () => {
   let startTime;
   let clock;
 
+  const tick = async(timeout = 0) => {
+    // Wait for the micro-task queue to clear since we need to wait for
+    // internal promises to finish before running assertions;
+    await Promise.resolve();
+    clock.tick(timeout);
+  };
+
   beforeEach(() => {
     clock = sandbox.useFakeTimers();
     startTime = 10000;
@@ -164,8 +171,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
   });
 
-  describe('structure', () => {
-    let visibility;
+  describe('structure', () => { let visibility;
     let calcVisibility;
 
     beforeEach(() => {
@@ -459,14 +465,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
         reportPromise = new Promise(resolve => {
           promiseResolver = resolve;
         });
-        vh.setReportReady(() => {return reportPromise;});
+        vh.setReportReady(() => reportPromise);
       });
 
       it('conditions met, send when report ready', () => {
-        visibilityValueForTesting = 0.5;
-        vh.update_(1);
+        visibilityValueForTesting = 1;
+        vh.update();
         clock.tick(20);
-        vh.update_(1);
+        vh.update();
         expect(eventSpy).to.not.be.called;
         promiseResolver();
         return reportPromise.then(() => {
@@ -476,16 +482,56 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
       it('conditions met, but no longer met when ready to report', () => {
         visibilityValueForTesting = 1;
-        vh.update_(1);
+        vh.update();
         clock.tick(20);
-        vh.update_(1);
-        eventSpy.reset();
+        vh.update();
+        eventSpy.resetHistory();
         expect(eventSpy).to.not.be.called;
         clock.tick(1001);
         promiseResolver();
         return reportPromise.then(() => {
           expect(eventSpy).to.not.be.called;
         });
+      });
+
+      describe('with reportWhen', () => {
+        beforeEach(() => {
+          visibilityValueForTesting = 0;
+        });
+
+        const shouldTriggerEventTestSpecs = [
+          {reportWhen: 'documentExit'},
+          {reportWhen: 'documentHidden'},
+          {reportWhen: 'documentExit', totalTimeMin: 100000,
+            visiblePercentageMin: 50},
+        ];
+
+        for (const i in shouldTriggerEventTestSpecs) {
+          it('should trigger event with reportWhen,' +
+              `test case #${i}`, async() => {
+            const vh = new VisibilityModel(
+                shouldTriggerEventTestSpecs[i], () => 0);
+
+            vh.onTriggerEvent(eventSpy);
+            // TODO(warrengm): Inverting the two following lines will break this
+            // test. Consider updating the API to make it safer.
+            vh.setReportReady(() => reportPromise);
+            vh.setReady(true);
+
+            vh.update();
+            await tick();
+            expect(eventSpy).to.not.be.called;
+
+            promiseResolver();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
+
+            // Subsequent calls should not trigger the event again.
+            vh.update();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
+          });
+        }
       });
     });
 
@@ -1048,7 +1094,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.update();
       expect(eventSpy).to.be.calledOnce;
 
-      eventSpy.reset();
+      eventSpy.resetHistory();
       visibility = 1;
       clock.tick(200);
       vh.update();

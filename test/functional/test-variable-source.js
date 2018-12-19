@@ -90,6 +90,13 @@ describes.fakeWin('VariableSource', {
     });
   });
 
+  it('Does not cache a built Expr', () => {
+    varSource.set('ONE', () => 'foo');
+    const firstExpr = varSource.getExpr();
+    varSource.set('TWO', () => 'bar');
+    expect(firstExpr).not.to.equal(varSource.getExpr());
+  });
+
   describes.realWin('Whitelist of variable substitutions', {
     amp: {
       ampdoc: 'single',
@@ -125,6 +132,23 @@ describes.fakeWin('VariableSource', {
       });
     });
 
+  });
+
+  it('Should not work with empty variable whitelist', () => {
+    env.win.document.head.appendChild(
+        createElementWithAttributes(env.win.document, 'meta', {
+          name: 'amp-allowed-url-macros',
+          content: '',
+        }));
+    const variableSource = new VariableSource(env.ampdoc);
+
+    variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
+    expect(variableSource.getExpr()).to.be.ok;
+    expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
+
+    return variableSource.get('RANDOM')['async']().then(value => {
+      expect(value).to.equal('0.1234');
+    });
   });
 
   describes.fakeWin('getTimingData', {}, env => {

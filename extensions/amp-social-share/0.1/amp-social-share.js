@@ -15,16 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {openWindowDialog} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -71,7 +69,7 @@ class AmpSocialShare extends AMP.BaseElement {
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
       if (!this.systemShareSupported_()) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     } else {
@@ -80,7 +78,7 @@ class AmpSocialShare extends AMP.BaseElement {
         !!this.win.document.querySelectorAll(
             'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
-        setStyle(element, 'display', 'none');
+        toggle(element, false);
         return;
       }
     }
@@ -93,7 +91,7 @@ class AmpSocialShare extends AMP.BaseElement {
         getDataParamsFromAttributes(element));
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
     if (bindingVars) {
@@ -135,8 +133,8 @@ class AmpSocialShare extends AMP.BaseElement {
    * @private
    */
   handleKeyPress_(event) {
-    const {keyCode} = event;
-    if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+    const {key} = event;
+    if (key == Keys.SPACE || key == Keys.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

@@ -23,7 +23,6 @@ import {
   isJsonOrObj,
   mutedOrUnmutedEvent,
   objOrParseJson,
-  originMatches,
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user} from '../../../src/log';
@@ -36,7 +35,9 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 
@@ -77,6 +78,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.playerId_ = null;
+
+    /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = null;
   }
 
   /** @override */
@@ -98,16 +102,17 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const deferred = new Deferred();
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
+    const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
     this.readyTimeout_ = Services.timerFor(window).delay(() => {
       user().warn(TAG,
-          `Did not receive ready callback from player ${this.playerId_}.` +
-        ' Ensure it has the videojs-amp-support plugin.');
+          'Did not receive ready callback from player %s.' +
+        ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
     }, 3000);
 
     this.playerReadyResolver_(this.iframe_);
@@ -154,7 +159,7 @@ class AmpBrightcove extends AMP.BaseElement {
   handlePlayerMessage_(event) {
     const {element} = this;
 
-    if (originMatches(event, this.iframe_, 'https://players.brightcove.net')) {
+    if (event.source != this.iframe_.contentWindow) {
       return;
     }
 
@@ -186,6 +191,8 @@ class AmpBrightcove extends AMP.BaseElement {
 
     if (redispatch(element, eventType, {
       'ready': VideoEvents.LOAD,
+      'playing': VideoEvents.PLAYING,
+      'pause': VideoEvents.PAUSE,
       'ended': VideoEvents.ENDED,
       'ads-ad-started': VideoEvents.AD_START,
       'ads-ad-ended': VideoEvents.AD_END,
@@ -220,9 +227,11 @@ class AmpBrightcove extends AMP.BaseElement {
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
 
-    dev().info(TAG, `Player ${this.playerId_} ready. ` +
-        `Brightcove Player version: ${data['bcVersion']} ` +
-        `AMP Support version: ${data['ampSupportVersion']}`);
+    dev().info(TAG,
+        'Player %s ready. ' +
+        'Brightcove Player version: %s AMP Support version: %s',
+        this.playerId_, data['bcVersion'], data['ampSupportVersion']
+    );
   }
 
   /**
@@ -248,7 +257,20 @@ class AmpBrightcove extends AMP.BaseElement {
         // These are encodeURIComponent'd in encodeId_().
         (el.getAttribute('data-playlist-id') ?
           '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')));
+          (el.getAttribute('data-video-id') ?
+            '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')) :
+            ''
+          )
+        );
+
+    const customReferrer = el.getAttribute('data-referrer');
+
+    if (customReferrer) {
+      el.setAttribute(
+          'data-param-referrer',
+          this.urlReplacements_.expandUrlSync(customReferrer)
+      );
+    }
 
     el.setAttribute('data-param-playsinline', 'true');
 

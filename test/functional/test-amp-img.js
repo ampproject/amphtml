@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -32,7 +32,7 @@ describe('amp-img', () => {
                         /examples/img/hero@2x.jpg 1282w`;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     screenWidth = 320;
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'isInViewport')
@@ -207,6 +207,7 @@ describe('amp-img', () => {
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
+      el.getPlaceholder = sandbox.stub();
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
@@ -341,7 +342,7 @@ describe('amp-img', () => {
     el.setAttribute('height', 100);
     el.setAttribute('noprerender', '');
     const impl = new AmpImg(el);
-    impl.buildCallback();
+    impl.firstAttachedCallback();
     expect(impl.prerenderAllowed()).to.equal(false);
   });
 
@@ -364,6 +365,7 @@ describe('amp-img', () => {
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
 
+    el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
     impl.buildCallback();
     impl.layoutCallback();
@@ -374,4 +376,75 @@ describe('amp-img', () => {
     impl.unlayoutCallback();
   });
 
+  describe('blurred image placeholder', () => {
+    beforeEach(() => {
+      toggleExperiment(window, 'blurry-placeholder', true, true);
+    });
+
+    /**
+     * Creates an amp-img with an image child that could potentially be a
+     * blurry placeholder.
+     * @param {boolean} addPlaceholder Whether the child should have a
+     *     placeholder attribute.
+     * @param {boolean} addBlurClass Whether the child should have the
+     *     class that allows it to be a blurred placeholder.
+     * @return {AmpImg} An amp-img object potentially with a blurry placeholder
+     */
+    function getImgWithBlur(addPlaceholder, addBlurClass) {
+      const el = document.createElement('amp-img');
+      const img = document.createElement('img');
+      if (addPlaceholder) {
+        img.setAttribute('placeholder', '');
+        el.getPlaceholder = () => img;
+      } else {
+        el.getPlaceholder = sandbox.stub();
+      }
+      if (addBlurClass) {
+        img.classList.add('i-amphtml-blurry-placeholder');
+      }
+      el.appendChild(img);
+      el.getResources = () => Services.resourcesForDoc(document);
+      const impl = new AmpImg(el);
+      sandbox.stub(impl, 'getLayoutWidth').returns(200);
+      impl.togglePlaceholder = sandbox.stub();
+      return impl;
+    }
+
+    it('should set placeholder opacity to 0 on image load', () => {
+      let impl = getImgWithBlur(true, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      let el = impl.element;
+      let img = el.firstChild;
+      expect(img.style.opacity).to.equal('0');
+      expect(impl.togglePlaceholder).to.not.be.called;
+
+      impl = getImgWithBlur(true, false);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(img.style.opacity).to.be.equal('');
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+
+      impl = getImgWithBlur(false, true);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(img.style.opacity).to.be.equal('');
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+
+      impl = getImgWithBlur(false, false);
+      impl.buildCallback();
+      impl.layoutCallback();
+      impl.firstLayoutCompleted();
+      el = impl.element;
+      img = el.firstChild;
+      expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+    });
+  });
 });

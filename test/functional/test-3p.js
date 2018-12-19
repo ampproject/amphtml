@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   computeInMasterFrame,
   loadScript,
@@ -30,7 +29,7 @@ describe('3p', () => {
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
   });
 
@@ -138,23 +137,19 @@ describe('3p', () => {
         location: true,
         mode: true,
       }, /* mandatory */[], /* optional */[]);
-      clock.tick(1);
 
       validateData({
         width: '',
         foo: true,
         bar: true,
       }, /* mandatory */[], ['foo', 'bar']);
-      clock.tick(1);
-
-      validateData({
-        type: 'TEST',
-        foo: true,
-        'not-whitelisted': true,
-      }, [], ['foo']);
 
       allowConsoleError(() => { expect(() => {
-        clock.tick(1);
+        validateData({
+          type: 'TEST',
+          foo: true,
+          'not-whitelisted': true,
+        }, [], ['foo']);
       }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 

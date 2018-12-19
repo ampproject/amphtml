@@ -16,8 +16,7 @@
 
 import {isExperimentOn, toggleExperiment} from '../../../../../src/experiments';
 
-const config = describe.configure().ifNewChrome();
-config.run('amp-fx-collection', function() {
+describe.skip('amp-fx-collection', function() {
   this.timeout(100000);
 
   const css = `
@@ -62,8 +61,8 @@ config.run('amp-fx-collection', function() {
       win = env.win;
       toggleExperiment(win, 'amp-fx-fly-in', true, false);
     });
-
-    it('runs fly-in-left animation with default parameters', () => {
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
+    it.skip('runs fly-in-left animation with default parameters', () => {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
       win.scrollTo(0, 0.5 * getViewportHeight(win));
@@ -97,8 +96,8 @@ config.run('amp-fx-collection', function() {
       win = env.win;
       toggleExperiment(win, 'amp-fx-fly-in', true, false);
     });
-
-    it('runs fly-in-right animation with default parameters', () => {
+    //TODO(esth, #19392): Fails on Firefox 63.0.0
+    it.skip('runs fly-in-right animation with default parameters', () => {
       expect(isExperimentOn(win, 'amp-fx-fly-in')).to.be.true;
       const initialLeft = getComputedLeft(win);
       win.scrollTo(0, 0.5 * getViewportHeight(win));

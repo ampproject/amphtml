@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
-import {Action} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {Layout} from '../../../src/layout';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestByTag,
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
-import {createShadowRootWithStyle} from './utils';
+import {
+  createShadowRootWithStyle,
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {renderAsElement} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
 
 
 /** @const {string} */
@@ -180,11 +186,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
     /** @private {?Object} */
     this.consentConfig_ = null;
 
-    /** @private {?Element} */
-    this.scrollableEl_ = null;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {?Object} */
     this.storyConsentConfig_ = null;
@@ -197,7 +200,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
+    const storyEl =
+        dev().assertElement(closestByTag(this.element, 'AMP-STORY'));
     const consentEl = closestByTag(this.element, 'AMP-CONSENT');
     const consentId = consentEl.id;
 
@@ -205,10 +209,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    if (!logoSrc) {
+    logoSrc ?
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
       user().warn(
           TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
-    }
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
@@ -218,9 +222,12 @@ export class AmpStoryConsent extends AMP.BaseElement {
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
-      this.actions_.addToWhitelist('AMP-CONSENT.accept');
-      this.actions_.addToWhitelist('AMP-CONSENT.prompt');
-      this.actions_.addToWhitelist('AMP-CONSENT.reject');
+      const actions = [
+        {tagOrTarget: 'AMP-CONSENT', method: 'accept'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
+        {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
+      ];
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
 
       this.setAcceptButtonFontColor_();
 
@@ -233,11 +240,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return false;
-  }
-
   /**
    * @private
    */
@@ -245,10 +247,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.storyConsentEl_.addEventListener(
         'click', event => this.onClick_(event), true /** useCapture */);
 
-    this.scrollableEl_ =
-        this.storyConsentEl_.querySelector('.i-amphtml-story-consent-overflow');
-    this.scrollableEl_.addEventListener(
-        'scroll', throttle(this.win, () => this.onScroll_(), 100));
+    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
+      this.onRtlStateUpdate_(rtlState);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -267,21 +268,18 @@ export class AmpStoryConsent extends AMP.BaseElement {
   }
 
   /**
-   * Toggles the fullbleed UI on scroll.
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
    * @private
    */
-  onScroll_() {
-    let isFullBleed;
-
-    const measurer =
-        () => isFullBleed = this.scrollableEl_./*OK*/scrollTop > 88;
+  onRtlStateUpdate_(rtlState) {
     const mutator = () => {
-      this.storyConsentEl_
-          .classList.toggle('i-amphtml-story-consent-fullbleed', isFullBleed);
+      rtlState ?
+        this.storyConsentEl_.setAttribute('dir', 'rtl') :
+        this.storyConsentEl_.removeAttribute('dir');
     };
 
-    this.element.getResources()
-        .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    this.mutateElement(mutator, this.storyConsentEl_);
   }
 
   /**

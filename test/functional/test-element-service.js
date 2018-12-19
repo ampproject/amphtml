@@ -21,6 +21,7 @@ import {
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
+  isExtensionScriptInNode,
 } from '../../src/element-service';
 import {
   installServiceInEmbedScope,
@@ -177,6 +178,8 @@ describes.realWin('in single ampdoc', {
     });
 
     it('should fail if element is not in page.', () => {
+      expectAsyncConsoleError(
+          /e1 was requested to be provided through element-bar/);
       markElementScheduledForTesting(env.win, 'element-foo');
 
       return getElementService(env.win, 'e1', 'element-bar').then(() => {
@@ -226,6 +229,8 @@ describes.realWin('in single ampdoc', {
     });
 
     it('should fail if element is not in page.', () => {
+      expectAsyncConsoleError(
+          /e1 was requested to be provided through element-bar/);
       markElementScheduledForTesting(env.win, 'element-foo');
 
       return getElementServiceForDoc(ampdoc, 'e1', 'element-bar').then(() => {
@@ -329,6 +334,17 @@ describes.realWin('in single ampdoc', {
       }).then(service => {
         expect(service).to.deep.equal({str: 'fake1'});
       });
+    });
+
+    it('isExtensionScriptInNode', () => {
+      const extension = document.createElement('script');
+      extension.setAttribute('custom-element', 'amp-form');
+      extension.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-form-0.1.js');
+      ampdoc.getHeadNode().appendChild(extension);
+      return isExtensionScriptInNode(ampdoc, 'amp-form')
+          .then(ampFormInstalled => {
+            expect(ampFormInstalled).to.equal(true);
+          });
     });
   });
 });

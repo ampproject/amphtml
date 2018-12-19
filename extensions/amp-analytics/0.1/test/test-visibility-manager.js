@@ -112,6 +112,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Root model starts invisible.
     expect(root.getRootVisibility()).to.equal(0);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should initialize correctly foregrounded', () => {
@@ -127,6 +128,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Root model starts invisible.
     expect(root.parent).to.be.null;
     expect(root.getRootVisibility()).to.equal(1);
+    expect(root.getRootMinOpacity()).to.equal(1);
   });
 
   it('should resolve root layout box', () => {
@@ -431,11 +433,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
+      expect(state.opacity).to.equal(1);
 
       expect(state.elementX).to.equal(11);
       expect(state.elementY).to.equal(21);
       expect(state.elementWidth).to.equal(101);
       expect(state.elementHeight).to.equal(201);
+      expect(state.intersectionRatio).to.equal(1);
     });
   });
 
@@ -461,11 +465,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
 
+      expect(state.opacity).to.equal(1);
       expect(state.totalVisibleTime).to.equal(0);
       expect(state.firstSeenTime).to.equal(22);
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(22);
+      expect(state.intersectionRatio).to.equal(1);
     });
   });
 
@@ -987,6 +993,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     ampElement.id = 'abc';
     ampElement.setAttribute('width', '100');
     ampElement.setAttribute('height', '100');
+    ampElement.style.opacity = 0.5;
     doc.body.appendChild(ampElement);
     return new Promise(resolve => {
       if (resources.getResourceForElementOptional(ampElement)) {
@@ -1067,6 +1074,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         loadTimeVisibility: 25,
         maxVisiblePercentage: 25,
         minVisiblePercentage: 25,
+        opacity: 0.5,
         totalVisibleTime: 5,
         maxContinuousVisibleTime: 5,
         intersectionRatio: 0.25,
@@ -1075,6 +1083,237 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       });
     });
   });
+
+  it('should wait for readyPromise with readyReportPromise', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {}, readyPromise, () =>
+      readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(20);
+    fireIntersect(25); // visible
+    clock.tick(30);
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(35);
+
+    readyResolver();
+    await Promise.resolve();
+    await Promise.resolve(); // Wait again for handles to execute.
+    expect(isModelResolved(model)).to.be.true;
+
+    clock.tick(40); // Not counted since model is resolved.
+
+    const state = await eventPromise;
+    expect(state).to.contains({
+      backgrounded: 0,
+      backgroundedAtStart: 0,
+      elementHeight: 100,
+      elementWidth: 100,
+      elementX: 0,
+      elementY: 75,
+      firstSeenTime: 85,
+      lastSeenTime: 85,
+      lastVisibleTime: 85,
+      loadTimeVisibility: 25,
+      maxVisiblePercentage: 25,
+      minVisiblePercentage: 25,
+      totalVisibleTime: 0,
+      maxContinuousVisibleTime: 0,
+    });
+  });
+
+  it('should wait for readyReportPromise with reportWhen', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {reportWhen: 'documentExit'},
+        readyPromise, () => readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(20);
+    fireIntersect(25); // visible
+    clock.tick(30);
+
+    readyResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(40);
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+
+    const state = await eventPromise;
+    expect(state).to.contains({
+      backgrounded: 0,
+      backgroundedAtStart: 0,
+      elementHeight: 100,
+      elementWidth: 100,
+      elementX: 0,
+      elementY: 75,
+      firstSeenTime: 50,
+      lastSeenTime: 90,
+      lastVisibleTime: 90,
+      loadTimeVisibility: 25,
+      maxVisiblePercentage: 25,
+      minVisiblePercentage: 25,
+      totalVisibleTime: 40,
+      maxContinuousVisibleTime: 40,
+    });
+  });
+
+  it('should wait for readyReportPromise with reportWhen and never meets  ' +
+      'visiblePercentageMin', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {
+      reportWhen: 'documentExit',
+      visiblePercentageMin: 50,
+    },
+    readyPromise, () => readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(20);
+    fireIntersect(25); // Doesn't meet visiblePercentageMin.
+    clock.tick(30);
+
+    readyResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(40);
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+
+    const state = await eventPromise;
+    expect(state).to.contains({
+      backgrounded: 0,
+      backgroundedAtStart: 0,
+      elementHeight: 100,
+      elementWidth: 100,
+      elementX: 0,
+      elementY: 75,
+      firstSeenTime: 50,
+      lastSeenTime: 90,
+      lastVisibleTime: 0, // Didn't meet visibility.
+      loadTimeVisibility: 25,
+      // FIXME: max/minVisiblePercentage should equal loadTimeVisibility.
+      // See https://github.com/ampproject/amphtml/issues/19567
+      maxVisiblePercentage: 0,
+      minVisiblePercentage: 0,
+      totalVisibleTime: 0,
+      maxContinuousVisibleTime: 0,
+    });
+  });
+
+  it('should accumulate timings and wait for readyReportPromise with ' +
+        'reportWhen and high minTotalVisibleTime', async() => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    visibility.listenElement(ampElement, {
+      reportWhen: 'documentExit',
+      minTotalVisibleTime: 100000, // Never met
+    }, readyPromise, () => readyReportPromise, eventResolver);
+    const model = visibility.models_[0];
+
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    readyResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.false;
+
+    clock.tick(20);
+    fireIntersect(25); // visible
+    clock.tick(20);
+    fireIntersect(0); // hidden
+    clock.tick(20);
+    fireIntersect(35); // visible again
+    clock.tick(30);
+    fireIntersect(0); // hidden
+    clock.tick(20);
+
+    readyReportResolver();
+    await Promise.resolve();
+    expect(isModelResolved(model)).to.be.true;
+
+    const state = await eventPromise;
+    expect(state).to.contains({
+      backgrounded: 0,
+      backgroundedAtStart: 0,
+      elementHeight: 100,
+      elementWidth: 100,
+      elementX: 0,
+      elementY: 100,
+      firstSeenTime: 20,
+      lastSeenTime: 60,
+      lastVisibleTime: 90,
+      loadTimeVisibility: 25,
+      maxVisiblePercentage: 35,
+      minVisiblePercentage: 25,
+      totalVisibleTime: 50,
+      maxContinuousVisibleTime: 30,
+    });
+  });
+
+  it('should wait for readyReportPromise when missing readyPromise',
+      async() => {
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
+        visibility = new VisibilityManagerForDoc(ampdoc);
+
+        visibility.listenElement(ampElement, {}, null, () =>
+          readyReportPromise, eventResolver);
+        const model = visibility.models_[0];
+
+        clock.tick(20);
+        fireIntersect(25); // visible
+        clock.tick(30);
+
+        await Promise.resolve();
+        expect(isModelResolved(model)).to.be.false;
+
+        readyReportResolver();
+        await Promise.resolve();
+        expect(isModelResolved(model)).to.be.true;
+
+        const state = await eventPromise;
+        expect(state).to.contains({
+          backgrounded: 0,
+          backgroundedAtStart: 0,
+          elementHeight: 100,
+          elementWidth: 100,
+          elementX: 0,
+          elementY: 75,
+          firstSeenTime: 20,
+          lastSeenTime: 50,
+          lastVisibleTime: 50,
+          loadTimeVisibility: 25,
+          maxVisiblePercentage: 25,
+          minVisiblePercentage: 25,
+          totalVisibleTime: 30,
+          maxContinuousVisibleTime: 30,
+        });
+      });
 
   it('should execute "visible" trigger with percent range', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);

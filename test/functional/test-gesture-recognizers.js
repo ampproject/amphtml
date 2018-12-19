@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
   TapzoomRecognizer} from '../../src/gesture-recognizers';
 import {Gestures} from '../../src/gesture';
@@ -29,7 +28,7 @@ describe('TapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -123,7 +122,7 @@ describe('DoubletapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -190,7 +189,7 @@ describe('DoubletapRecognizer', () => {
 
   it('should ask pending for first touchend', () => {
     gesturesMock.expects('signalPending_').withExactArgs(
-        recognizer, 300).once();
+        recognizer, 200).once();
     gesturesMock.expects('signalReady_').never();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(1);
@@ -230,7 +229,7 @@ describe('SwipeXYRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -356,7 +355,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should stop on touchend; velocity doesn\'t change', () => {
-    const event = {};
+    const event = {touches: []};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -381,7 +380,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should stop on touchend; velocity changes', () => {
-    const event = {};
+    const event = {touches: []};
 
     recognizer.startX_ = 101;
     recognizer.startY_ = 201;
@@ -404,6 +403,45 @@ describe('SwipeXYRecognizer', () => {
     recognizer.onTouchEnd(event);
     expect(recognizer.eventing_).to.equal(false);
   });
+
+  it('should ignore additional touches if eventing', () => {
+    const event = {touches: [{clientX: 111, clientY: 211}]};
+
+    recognizer.startX_ = recognizer.prevX_ = 101;
+    recognizer.startY_ = recognizer.prevY_ = 201;
+    recognizer.eventing_ = true;
+    gesturesMock.expects('signalEmit_').twice();
+
+    clock.tick(10);
+    let res = recognizer.onTouchMove(event);
+    expect(res).to.equal(true);
+    expect(recognizer.lastX_).to.equal(111);
+    expect(recognizer.lastY_).to.equal(211);
+
+    res = recognizer.onTouchStart({touches: [
+      {clientX: 111, clientY: 211},
+      {clientX: 122, clientY: 254},
+    ]});
+
+    // Additional touch start should not have any effect
+    expect(res).to.equal(true);
+
+    res = recognizer.onTouchMove({touches: [
+      {clientX: 111, clientY: 211},
+      {clientX: 122, clientY: 234},
+    ]});
+
+    // Additional touch move should not have any effect
+    expect(res).to.equal(true);
+
+    clock.tick(50);
+
+    // If further touches are remaining, do not fire signal end.
+    recognizer.onTouchEnd({touches: [{clientX: 111, clientY: 211}]});
+    expect(recognizer.eventing_).to.equal(true);
+    gesturesMock.expects('signalEnd_').never();
+  });
+
 });
 
 
@@ -417,7 +455,7 @@ describe('TapzoomRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -598,7 +636,7 @@ describe('PinchRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -790,7 +828,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    const event = {};
+    const event = {touches: []};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&
@@ -820,7 +858,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    const event = {};
+    const event = {touches: []};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&
@@ -836,4 +874,77 @@ describe('PinchRecognizer', () => {
     recognizer.onTouchEnd(event);
     expect(recognizer.eventing_).to.equal(false);
   });
+
+
+  it('should ignore additional touches if eventing', () => {
+    clock.tick(1);
+    let res = recognizer.onTouchStart({touches:
+    [{clientX: 90, clientY: 80},
+      {clientX: 110, clientY: 120}]});
+    expect(res).to.equal(true);
+
+    res = recognizer.onTouchMove({touches:
+    [{clientX: 80, clientY: 70},
+      {clientX: 120, clientY: 130}]});
+    expect(res).to.equal(true);
+
+    // On acceptStart, we get a null event
+    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
+        sinon.match(data => {
+          return data.centerClientX == 100 &&
+            data.centerClientY == 100 &&
+            data.deltaX == 10 &&
+            data.deltaY == 10 &&
+            data.dir == 1 &&
+            data.first == true &&
+            data.last == false &&
+            data.time == 1;
+        }), null).once();
+
+    // On onTouchMove, we didn't actually move the original touches
+    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
+        sinon.match(data => {
+          return data.centerClientX == 100 &&
+            data.centerClientY == 100 &&
+            data.deltaX == 10 &&
+            data.deltaY == 10 &&
+            data.dir == 1 &&
+            data.first == false &&
+            data.last == false;
+        }), {touches: [
+          {clientX: 80, clientY: 70},
+          {clientX: 120, clientY: 130},
+          {clientX: 160, clientY: 160},
+        ]}).once();
+
+    recognizer.acceptStart();
+
+    expect(recognizer.eventing_).to.equal(true);
+
+    // Trigger additional touch start; nothing should happen
+    // for the additional touch
+    res = recognizer.onTouchStart({touches:
+      [{clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+        {clientX: 160, clientY: 160}]});
+    expect(res).to.equal(true);
+
+    // Trigger additional touch move; nothing should happen since the
+    // existing touches did not move.
+    res = recognizer.onTouchMove({touches:
+      [{clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+        {clientX: 160, clientY: 160}]});
+    expect(res).to.equal(true);
+
+    // Trigger touch end; should not end since two touches are remaining
+    res = recognizer.onTouchEnd({touches:
+      [{clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130}]});
+
+    clock.tick(50);
+    // Additional touch start and touch move should not trigger a signal
+    gesturesMock.expects('signalEnd_').never();
+  });
+
 });

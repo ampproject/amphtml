@@ -19,8 +19,8 @@ tags: {  # amp-ima-video
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-ima-video"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -36,7 +36,7 @@ tags: {  # <amp-ima-video>
   attrs: {
     name: "data-src"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -45,13 +45,13 @@ tags: {  # <amp-ima-video>
     name: "data-tag"
     mandatory: true
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
   }
   attrs: {
     name: "rotate-to-fullscreen"
-    value_regex: ""
+    value: ""
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"

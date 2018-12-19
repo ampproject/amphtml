@@ -16,6 +16,8 @@
 import {Services} from '../../../src/services';
 import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
+import {getMode} from '../../../src/mode';
+import {getSourceOrigin} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -93,18 +95,16 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
- * @return {!ShadowRoot}
  */
 export function createShadowRootWithStyle(container, element, css) {
-  const shadowRoot = createShadowRoot(container);
-
   const style = self.document.createElement('style');
   style./*OK*/textContent = css;
 
-  shadowRoot.appendChild(style);
-  shadowRoot.appendChild(element);
+  const containerToUse = getMode().test ?
+    container : createShadowRoot(container);
 
-  return shadowRoot;
+  containerToUse.appendChild(style);
+  containerToUse.appendChild(element);
 }
 
 
@@ -201,4 +201,25 @@ export function removeAttributeInMutate(elementImpl, name) {
 export function userAssertValidProtocol(element, url) {
   user().assert(Services.urlForDoc(element).isProtocolValid(url),
       'Unsupported protocol for URL %s', url);
+}
+
+/**
+ * Gets the origin url for elements that display a url. It
+ * trims the protocol prefix and returns only the hostname of the origin.
+ * @param {!Element} element
+ * @param {string} url
+ * @return {string}
+ */
+export function getSourceOriginForElement(element, url) {
+  let domainName;
+
+  try {
+    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
+    // Remove protocol prefix.
+    domainName = Services.urlForDoc(element).parse(domainName).hostname;
+  } catch (e) {
+    // Unknown path prefix in url.
+    domainName = Services.urlForDoc(element).parse(url).hostname;
+  }
+  return domainName;
 }

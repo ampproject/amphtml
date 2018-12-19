@@ -99,8 +99,16 @@ describe('HtmlParser', () => {
     parser.parse(handler, 'hello world');
 
     expect(handler.log).toEqual([
-      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'pcdata("hello world")', 'endTag(BODY)', 'effectiveBodyTag([])',
+      'startDoc()',
+      'startTag(HTML,[])',
+      'startTag(HEAD,[])',
+      'endTag(HEAD)',
+      'markManufacturedBody()',
+      'startTag(BODY,[])',
+      'pcdata("hello world")',
+      'endTag(BODY)',
+      'endTag(HTML)',
+      'effectiveBodyTag([])',
       'endDoc()',
     ]);
   });

@@ -67,8 +67,14 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
      ```shell
      git remote add upstream git@github.com:ampproject/amphtml.git
      ```
+
+11.  Fetch data from the `upstream` remote:
+     
+     ```shell
+     git fetch upstream master
+     ```
     
-11.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
+12.  Set up your local `master` branch to track `upstream/master` instead of `origin/master` (which will rapidly become 
      outdated).
      
      ```shell
@@ -131,7 +137,7 @@ git checkout -b <branch name> master
 5. If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
 6. For pushes after the first, just use `git push`
 7. If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
-8. If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
+8. If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), click through the check on GitHub to access the results. Differences that are expected can be approved by a core contributor.
 9. Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge).
 
 ## Delete your branch after your changes are merged (optional)

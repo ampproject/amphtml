@@ -157,6 +157,14 @@ export class ViewportBindingDef {
   getContentHeight() {}
 
   /**
+   * Resource manager signals to the viewport that content height is changed
+   * and some action may need to be taken.
+   * @restricted Use is restricted due to potentially very heavy performance
+   *   impact. Can only be called when not actively scrolling.
+   */
+  contentHeightChanged() {}
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} unusedEl
    * @param {number=} unusedScrollLeft Optional arguments that the caller may
@@ -178,4 +186,11 @@ export class ViewportBindingDef {
    * @return {!Element}
    */
   getScrollingElement() {}
+
+  /**
+   * Whether the root scroller is a native root scroller (behaves like a
+   * viewport), or an overflow scroller (scrolls like an element).
+   * @return {boolean}
+   */
+  getScrollingElementScrollsLikeViewport() {}
 }

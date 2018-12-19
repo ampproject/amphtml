@@ -51,10 +51,9 @@ import {ampGeoPresets} from './amp-geo-presets';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
+import {isJsonScriptTag, waitForBodyPromise} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
-import {waitForBodyPromise} from '../../../src/dom';
 
 /**
  * @enum {number}
@@ -92,6 +91,17 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
+/**
+ * @typedef {{
+ *   ISOCountry: string,
+ *   matchedISOCountryGroups: !Array<string>,
+ *   allISOCountryGroups: !Array<string>,
+ *   isInCountryGroup: GEO_IN_GROUP,
+ *   ISOCountryGroups: !Array<string>
+ * }}
+ */
+export let GeoDef;
+
 
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -128,7 +138,7 @@ export class AmpGeo extends AMP.BaseElement {
               `${TAG} Unable to parse JSON`)
       ) : {};
 
-    /** @type {!Promise<!Object<string, (string|Array<string>)>>} */
+    /** @type {!Promise<!GeoDef>} */
     const geo = this.addToBody_(config || {});
 
     /* resolve the service promise singleton we stashed earlier */
@@ -163,7 +173,7 @@ export class AmpGeo extends AMP.BaseElement {
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
     if (preRenderMatch &&
-        !Services.urlForDoc(this.getAmpDoc()).isProxyOrigin(doc.location)) {
+        !Services.urlForDoc(this.element).isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else {
@@ -263,7 +273,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<!Object<string, (string|Array<string>)>>} service response
+   * @return {!Promise<!GeoDef>} service response
    * @private
    */
   addToBody_(config) {

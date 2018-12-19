@@ -15,13 +15,13 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
+  ScrollEventTracker,
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
@@ -158,6 +158,192 @@ describes.realWin('Events', {amp: 1}, env => {
     });
   });
 
+  describe('ScrollEventTracker', () => {
+
+    let tracker;
+    let fakeViewport;
+    let getFakeViewportChangedEvent;
+    const defaultScrollConfig = {
+      'on': 'scroll',
+      'scrollSpec': {
+        'verticalBoundaries': [0, 100],
+        'horizontalBoundaries': [0, 100],
+      },
+    };
+    let scrollManager;
+
+    beforeEach(() => {
+      tracker = root.getTracker('scroll', ScrollEventTracker);
+      fakeViewport = {
+        'getSize': sandbox.stub().returns(
+            {top: 0, left: 0, height: 200, width: 200}),
+        'getScrollTop': sandbox.stub().returns(0),
+        'getScrollLeft': sandbox.stub().returns(0),
+        'getScrollHeight': sandbox.stub().returns(500),
+        'getScrollWidth': sandbox.stub().returns(500),
+        'onChanged': sandbox.stub(),
+      };
+      scrollManager = tracker.root_.getScrollManager();
+      scrollManager.viewport_ = fakeViewport;
+
+      getFakeViewportChangedEvent = () => {
+        const size = fakeViewport.getSize();
+        return {
+          top: fakeViewport.getScrollTop(),
+          left: fakeViewport.getScrollLeft(),
+          width: size.width,
+          height: size.height,
+          relayoutAll: false,
+          velocity: 0, // Hack for typing.
+        };
+      };
+    });
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+
+      tracker.add(undefined, 'scroll', defaultScrollConfig, sandbox.stub());
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
+
+      tracker.dispose();
+      expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
+    });
+
+
+    it('fires on scroll', () => {
+      const fn1 = sandbox.stub();
+      const fn2 = sandbox.stub();
+      tracker.add(undefined, 'scroll', defaultScrollConfig, fn1);
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [92],
+          'horizontalBoundaries': [92],
+        },
+      }, fn2);
+
+      function matcher(expected) {
+        return actual => {
+          return actual.vars.horizontalScrollBoundary === String(expected) ||
+            actual.vars.verticalScrollBoundary === String(expected);
+        };
+      }
+      expect(fn1).to.have.callCount(2);
+      expect(
+          fn1.getCall(0)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
+      expect(
+          fn1.getCall(1)
+              .calledWithMatch(sinon.match(matcher(0)))
+      ).to.be.true;
+      expect(fn2).to.have.not.been.called;
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(500);
+      fakeViewport.getScrollLeft.returns(500);
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(4);
+      expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
+          .true;
+      expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
+          .true;
+      expect(fn2).to.have.callCount(2);
+      expect(
+          fn2.getCall(0)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
+      expect(
+          fn2.getCall(1)
+              .calledWithMatch(sinon.match(matcher(90)))
+      ).to.be.true;
+    });
+
+    it('does not fire duplicates on scroll', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(undefined, 'scroll', defaultScrollConfig, fn1);
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(10);
+      fakeViewport.getScrollLeft.returns(10);
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(2);
+    });
+
+    it('fails gracefully on bad scroll config', () => {
+      const fn1 = sandbox.stub();
+
+      allowConsoleError(() => {
+        tracker.add(undefined, 'scroll', {'on': 'scroll'}, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {},
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {
+            'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
+          },
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []},
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+
+        tracker.add(undefined, 'scroll', {
+          'on': 'scroll',
+          'scrollSpec': {
+            'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
+          },
+        }, fn1);
+        expect(fn1).to.have.not.been.called;
+      });
+    });
+
+    it('normalizes boundaries correctly.', () => {
+      allowConsoleError(() => {
+        expect(tracker.normalizeBoundaries_([])).to.be.empty;
+        expect(tracker.normalizeBoundaries_(undefined)).to.be.empty;
+        expect(tracker.normalizeBoundaries_(['foo'])).to.be.empty;
+        expect(tracker.normalizeBoundaries_(['0', '1'])).to.be.empty;
+      });
+      expect(tracker.normalizeBoundaries_([1])).to.deep.equal({0: false});
+      expect(tracker.normalizeBoundaries_([1, 4, 99, 1001])).to.deep.equal({
+        0: false,
+        5: false,
+        100: false,
+      });
+    });
+
+    it('fires events on normalized boundaries.', () => {
+      const fn1 = sandbox.stub();
+      const fn2 = sandbox.stub();
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [1],
+        },
+      }, fn1);
+      tracker.add(undefined, 'scroll', {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [4],
+        },
+      }, fn2);
+      expect(fn2).to.be.calledOnce;
+    });
+  });
+
 
   describe('CustomEventTracker', () => {
     let tracker;
@@ -240,7 +426,7 @@ describes.realWin('Events', {amp: 1}, env => {
       return getElementSpy.returnValues[1].then(() => {
         expect(handler).to.be.calledOnce;
         expect(handler2).to.not.be.called;
-        handler.reset();
+        handler.resetHistory();
         tracker.trigger(new AnalyticsEvent(child2, 'custom-event'));
       }).then(() => {
         expect(handler).to.not.be.called;
@@ -1020,7 +1206,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               matchEmptySpec,
               /* readyPromise */ null,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1077,7 +1263,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .withExactArgs(
               config.visibilitySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1108,7 +1294,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1152,7 +1338,7 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               matchEmptySpec,
               readyPromise,
-              /* createReadyReportPromiseFunc */ null,
+              /* createReportReadyPromiseFunc */ null,
               saveCallback)
           .returns(unlisten)
           .once();
@@ -1175,13 +1361,13 @@ describes.realWin('Events', {amp: 1}, env => {
               target,
               config.visibilitySpec,
               /* readyPromise */ null,
-              /* createReadyReportPromiseFunc */ matchFunc,
+              /* createReportReadyPromiseFunc */ matchFunc,
               saveCallback)
           .returns(null)
           .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
       const unlistenReady = getAmpElementSpy.returnValues[0];
-      // NOTE: createReadyReportPromiseFunc is
+      // NOTE: createReportReadyPromiseFunc is
       // fully tested in test-visibility-manager
       return unlistenReady.then(() => {
         saveCallback.callback({totalVisibleTime: 10});
@@ -1278,16 +1464,51 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
-    describe('should create correct readyReportPromise', () => {
+    describe('should create correct reportReadyPromise', () => {
       it('with viewer hidden', () => {
         const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
           return {
             isVisible: () => {return false;},
           };
         });
-        const promise = tracker.createReportReadyPromise_();
+        const promise = tracker.createReportReadyPromiseForDocumentHidden_();
         return promise.then(() => {
           expect(stub).to.be.calledOnce;
+        });
+      });
+
+      it('with documentExit trigger on unload', () => {
+        const config = {visibilitySpec: {reportWhen: 'documentExit'}};
+        const tracker = root.getTracker('visible', VisibilityTracker);
+        tracker.add(tracker.root, 'visible', config, handler);
+        expect(handler).to.have.not.been.called;
+
+        win.dispatchEvent(new Event('unload'));
+
+        return new Promise(resolve => {
+          setTimeout(() => {
+            expect(handler).to.be.calledOnce;
+            const event = handler.args[0][0];
+            expect(event.type).to.equal('visible');
+            resolve();
+          }, 0);
+        });
+      });
+
+      it('with documentExit trigger on pagehide', () => {
+        const config = {visibilitySpec: {reportWhen: 'documentExit'}};
+        const tracker = root.getTracker('visible', VisibilityTracker);
+        tracker.add(tracker.root, 'visible', config, handler);
+        expect(handler).to.have.not.been.called;
+
+        win.dispatchEvent(new Event('pagehide'));
+        return new Promise(resolve => {
+          setTimeout(() => {
+            expect(handler).to.be.calledOnce;
+            const event = handler.args[0][0];
+            expect(event.type).to.equal('visible');
+            resolve();
+          }, 0);
         });
       });
     });

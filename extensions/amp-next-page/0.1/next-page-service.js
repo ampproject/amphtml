@@ -16,9 +16,12 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -26,7 +29,7 @@ import {
 import {installStylesForDoc} from '../../../src/style-installer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 // TODO(emarchiori): Make this a configurable parameter.
@@ -64,6 +67,9 @@ export class NextPageService {
     /** @private {?Element} */
     this.element_ = null;
 
+    /** @private {?../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = null;
+
     /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
 
@@ -85,8 +91,8 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
@@ -102,6 +108,12 @@ export class NextPageService {
 
     /** @private {function(!Element): !Promise} */
     this.appendPageHandler_ = () => {};
+
+    /** @private {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
+
+    /** @private {string} */
+    this.origin_ = '';
   }
 
   /** Returns true if the service has already been initialized. */
@@ -130,23 +142,26 @@ export class NextPageService {
     this.win_ = win;
     this.separator_ = separator || this.createDefaultSeparator_();
     this.element_ = element;
+    this.xhr_ = Services.xhrFor(win);
 
     if (this.config_.hideSelectors) {
       this.hideSelector_ = this.config_.hideSelectors.join(',');
     }
 
-    this.viewer_ = Services.viewerForDoc(ampDoc);
+    this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
     this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
             Services.extensionsFor(win), Services.timerFor(win));
+    this.urlService_ = Services.urlForDoc(dev().assertElement(this.element_));
+    this.origin_ = this.urlService_.parse(ampDoc.getUrl()).origin;
 
     installPositionObserverServiceForDoc(ampDoc);
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     const documentRef =
-        createDocumentRef(win.document.location.url, win.document.title);
+        createDocumentRef(win.document.location.href, win.document.title);
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -248,8 +263,24 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      Services.xhrFor(/** @type {!Window} */ (this.win_))
-          .fetchDocument(next.ampUrl, {ampCors: false})
+      this.xhr_.fetch(next.ampUrl, {ampCors: false})
+          .then(response => {
+            // Update AMP URL in case we were redirected.
+            documentRef.ampUrl = response.url;
+            const url = this.urlService_.parse(response.url);
+            user().assert(url.origin === this.origin_,
+                'ampUrl resolved to a different origin from the origin of the '
+                + 'current document');
+            return response.text();
+          })
+          .then(html => {
+            const doc =
+                this.win_.document.implementation.createHTMLDocument('');
+            doc.open();
+            doc.write(html);
+            doc.close();
+            return doc;
+          })
           .then(doc => new Promise((resolve, reject) => {
             if (documentRef.cancelled) {
               // User has reached the end of the document already, don't render.
@@ -266,7 +297,7 @@ export class NextPageService {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
-                setStyle(documentRef.recUnit.el, 'display', 'none');
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
                 this.documentQueued_ = false;
                 resolve();
               } catch (e) {
@@ -274,9 +305,9 @@ export class NextPageService {
               }
             });
           }),
-          e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
+          e => dev().error(TAG, 'failed to fetch %s', next.ampUrl, e))
           .catch(e => dev().error(TAG,
-              `failed to attach shadow document for ${next.ampUrl}`, e))
+              'failed to attach shadow document for %s', next.ampUrl, e))
           // The new page may be short and the next may already need fetching.
           .then(() => this.scrollHandler_());
     }
@@ -314,7 +345,7 @@ export class NextPageService {
         this.triggerAnalyticsEvent_(
             'amp-next-page-click', next.ampUrl, currentAmpUrl);
         const a2a =
-            this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
+            this.navigation_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
         if (a2a) {
           // A2A is enabled, don't navigate the browser.
           e.preventDefault();
@@ -442,9 +473,8 @@ export class NextPageService {
       return;
     }
 
-    const urlService = Services.urlForDoc(dev().assertElement(this.element_));
     const {title} = documentRef.amp;
-    const {pathname, search} = urlService.parse(documentRef.ampUrl);
+    const {pathname, search} = this.urlService_.parse(documentRef.ampUrl);
     this.win_.history.replaceState({}, title, pathname + search);
   }
 
@@ -457,7 +487,10 @@ export class NextPageService {
   triggerAnalyticsEvent_(eventType, toURL, fromURL) {
     fromURL = fromURL || '';
 
-    const vars = {toURL, fromURL};
+    const vars = dict({
+      'toURL': toURL,
+      'fromURL': fromURL,
+    });
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }

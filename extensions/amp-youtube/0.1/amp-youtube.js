@@ -157,7 +157,6 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /**
@@ -235,17 +234,30 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
+    // Listening for VideoEvents.LOAD in AutoFullscreenManager.register may
+    // introduce race conditions which may break elements e.g. amp-ima-video
+    Services.videoManagerForDoc(this.element).register(this);
+
     this.unlistenMessage_ = listen(
         this.win,
         'message',
         this.handleYoutubeMessage_.bind(this)
     );
 
-    const loaded = this.loadPromise(this.iframe_).then(() => {
-      // Tell YT that we want to receive messages
-      this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const loaded = this.loadPromise(this.iframe_)
+        // Make sure the YT player is ready for this. For some reason YT player
+        // would send couple of messages but then stop. Waiting for a bit before
+        // sending the 'listening' event seems to fix that and allow YT Player
+        // to send messages continuously.
+        //
+        // This was removed in #6915 but due to #17979 it has been taken back
+        // for a workaround.
+        .then(() => Services.timerFor(this.win).promise(300))
+        .then(() => {
+          // Tell YT that we want to receive messages
+          this.listenToFrame_();
+          this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        });
     this.playerReadyResolver_(loaded);
     return loaded;
   }
@@ -387,6 +399,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
+      element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
 
@@ -554,7 +567,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.info_) {
       return this.info_.currentTime;
     }
-    return 0;
+    return NaN;
   }
 
   /** @override */
@@ -563,7 +576,7 @@ class AmpYoutube extends AMP.BaseElement {
       return this.info_.duration;
     }
     // Not supported.
-    return 1;
+    return NaN;
   }
 
   /** @override */

@@ -38,7 +38,7 @@ describes.realWin('amp-jwplayer', {
     jw.setAttribute('height', '180');
     jw.setAttribute('layout', 'responsive');
     doc.body.appendChild(jw);
-    return jw.build().then(() => jw.layoutCallback()).then(() => jw);
+    return jw.build().then(() => { jw.layoutCallback(); return jw; });
   }
 
   it('renders', () => {

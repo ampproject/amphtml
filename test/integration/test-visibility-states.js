@@ -20,8 +20,12 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
+const t = describe.configure()
+    .skipIfPropertiesObfuscated()
+    .ifChrome()
+    .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
 
+t.run('Viewer Visibility State', () => {
   function noop() {}
 
   describes.integration('Element Transitions', {
@@ -42,7 +46,8 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
     let prerenderAllowed;
 
     function visChangeEventName() {
-      const hiddenName = getVendorJsPropertyName(win.document, 'hidden', true);
+      const hiddenName = getVendorJsPropertyName(win.document, 'hidden',
+          true);
       const index = hiddenName.indexOf('Hidden');
       if (index == -1) {
         return 'visibilitychange';
@@ -51,7 +56,8 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
     }
     function changeVisibility(vis) {
       docHidden.returns(vis === 'hidden');
-      win.document.dispatchEvent(createCustomEvent(win, visChangeEventName(),
+      win.document.dispatchEvent(createCustomEvent(win,
+          visChangeEventName(),
           /* detail */ null));
     }
 
@@ -107,11 +113,13 @@ describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
 
         return whenUpgradedToCustomElement(img);
       }).then(img => {
-        layoutCallback = sandbox.stub(img.implementation_, 'layoutCallback');
+        layoutCallback = sandbox.stub(img.implementation_,
+            'layoutCallback');
         unlayoutCallback = sandbox.stub(img.implementation_,
             'unlayoutCallback');
         pauseCallback = sandbox.stub(img.implementation_, 'pauseCallback');
-        resumeCallback = sandbox.stub(img.implementation_, 'resumeCallback');
+        resumeCallback = sandbox.stub(img.implementation_,
+            'resumeCallback');
         prerenderAllowed = sandbox.stub(img.implementation_,
             'prerenderAllowed');
         sandbox.stub(img.implementation_, 'isRelayoutNeeded').callsFake(

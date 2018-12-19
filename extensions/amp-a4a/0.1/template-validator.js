@@ -31,7 +31,7 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
 export const DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME =
   'AMP-template-amp-creative';
 
-/** {?AmpAdTemplateHelper} */
+/** @type {?AmpAdTemplateHelper} */
 let ampAdTemplateHelper;
 
 /**
@@ -52,13 +52,16 @@ export class TemplateValidator extends Validator {
   validate(context, unvalidatedBytes, headers) {
 
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
+    const parsedResponseBody =
+    /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body));
 
     // If we're missing the relevant header, or headers altogether, we cannot
     // proceed. In this case, we return a NON_AMP response, since we cannot
     // ensure this template will be valid AMP. We will pass the body of the
     // response as the creative, and downstream renderers may attempt to render
     // it as a non-AMP creative within a cross-domain iframe.
-    if (!headers ||
+    if (!parsedResponseBody || !headers ||
         (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache' &&
          headers.get(DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME) !==
            'amp-mustache')) {
@@ -72,9 +75,6 @@ export class TemplateValidator extends Validator {
           }));
     }
 
-    const parsedResponseBody =
-    /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
-        tryParseJson(body) || {});
     return getAmpAdTemplateHelper(context.win)
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {

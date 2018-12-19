@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- amp-consent {
+amp-consent {
   /* Fixed to make position independent of page other elements. */
   position: fixed;
   bottom: 0;
@@ -23,17 +23,76 @@
   background: rgba(255, 255, 255, .7);
   z-index: 1000;
   width: 100%;
- }
+}
 
- amp-consent > * {
-   display: none !important;
-   max-height: 100vh !important;
- }
+amp-consent[i-amphtml-notbuilt] > * {
+  display: none !important;
+}
 
- amp-consent.amp-active {
+amp-consent > * {
+  max-height: 100vh !important;
+}
+
+amp-consent.amp-active {
   visibility: visible;
 }
 
 amp-consent.amp-hidden {
   visibility: hidden;
 }
+
+@keyframes amp-consent-ui-placeholder-spin  {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.i-amphtml-consent-ui-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.i-amphtml-consent-ui-placeholder > svg {
+  width: 30px;
+  height: 30px;
+
+  fill: none;
+  stroke-width: 1.5px;
+  transform-origin: 50% 50%;
+  animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
+}
+
+.i-amphtml-consent-ui-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 30vh;
+  width: 100%;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active {
+  height: 100vh !important;
+  transform: translate3d(0px, 100%, 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
+  transition: transform 0.5s ease-out !important;
+  transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
+}
+
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
+  transform: translate3d(0px, calc(100% - 100vh), 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-amphtml-consent-ui-fill {
+  height: 100vh !important;
+}
+

@@ -20,7 +20,7 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * Localized string bundle used for Latin American Spanish strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default {
+export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Aceptar',
   },
@@ -43,7 +43,7 @@ export default {
     string: 'No se pudo copiar al portapapeles enlace :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Enlace copiado!',
+    string: '¡Enlace copiado!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'Email',
@@ -73,19 +73,19 @@ export default {
     string: 'Tumblr',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER]: {
-    string: 'Gorjeo',
+    string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
-    string: 'Whatsapp',
+    string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Compartir',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Ampliar su ventana para ver esta experiencia',
+    string: 'Ampliar la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Debe habilitar el experimento amp pisos para ver este contenido',
+    string: 'Debe habilitar el experimento amp-story para ver este contenido',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'La página se ve mejor en modo vertical',
@@ -93,4 +93,4 @@ export default {
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Lo sentimos, parece que su navegador no soporta esta experiencia',
   },
-};
+});

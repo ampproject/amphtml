@@ -36,6 +36,20 @@ describes.realWin('amp-ima-video', {
     doc = win.document;
   });
 
+  function getVideoPlayerMock() {
+    return {
+      load: function() {},
+      addEventListener: function() {},
+      removeEventListener: function() {},
+      play: function() {},
+      pause: function() {},
+      muted: false,
+      played: {
+        length: 0,
+      },
+    };
+  }
+
   it('adds ad container', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -83,11 +97,9 @@ describes.realWin('amp-ima-video', {
       },
       removeEventListener() {},
     };
-    const removeEventListenerSpy = sandbox.spy(
-        bigPlayDivMock, 'removeEventListener');
     const adDisplayContainerMock = {initialize() {}};
     const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
-    const videoPlayerMock = {load() {}};
+    const videoPlayerMock = getVideoPlayerMock();
     const loadSpy = sandbox.spy(videoPlayerMock, 'load');
     const mockAdsLoader = {requestAds() {}};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
@@ -98,18 +110,83 @@ describes.realWin('amp-ima-video', {
     imaVideoObj.setAdDisplayContainerForTesting(adDisplayContainerMock);
     imaVideoObj.setVideoPlayerForTesting(videoPlayerMock);
 
-    imaVideoObj.onClick();
+    imaVideoObj.onBigPlayClick();
 
     expect(imaVideoObj.getPropertiesForTesting().playbackStarted).to.be.true;
     expect(imaVideoObj.getPropertiesForTesting().uiTicker)
         .to.exist;
-    expect(removeEventListenerSpy).to.be.calledWith(
-        imaVideoObj.getPropertiesForTesting().interactEvent);
     expect(bigPlayDivMock.style.display).to.eql('none');
     expect(initSpy).to.be.called;
     expect(loadSpy).to.be.called;
     // TODO - Fix one I figure out how to spy on internals.
     //expect(playAdsSpy).to.be.called;
+  });
+
+  it('updates ad countdown timer', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    const videoDefaults = {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    };
+    const tests = [
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 0},
+        'expected': 'Ad (1 of 1): 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 2},
+        'expected': 'Ad (1 of 1): 0:02',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 3.923462062},
+        'expected': 'Ad (1 of 1): 0:03',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 1},
+        'expected': 'Ad (1 of 3): 0:01',
+      },
+      {
+        'mock': {'adPosition': 2, 'totalAds': 79, 'remainingTime': 7600},
+        'expected': 'Ad (2 of 79): 126:40',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 0},
+        'label': 'Publicidad',
+        'expected': 'Publicidad: 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 1, 'remainingTime': 0},
+        'label': 'Publicidad (%s de %s)',
+        'expected': 'Publicidad (1 de 1): 0:00',
+      },
+      {
+        'mock': {'adPosition': 1, 'totalAds': 3, 'remainingTime': 0},
+        'label': 'Publicidad %s',
+        'expected': 'Publicidad 1: 0:00',
+      },
+    ];
+
+    tests.forEach(({mock, label, expected}) => {
+      let defaults = videoDefaults;
+      if (label) {
+        defaults = Object.assign(defaults, {adLabel: label});
+      }
+      imaVideoObj.imaVideo(win, defaults);
+      const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+      const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
+      imaVideoObj.setAdsManagerForTesting({
+        getRemainingTime: () => mock.remainingTime,
+      });
+      imaVideoObj.onAdProgress({
+        getAdData: () => mock,
+      });
+      expect(countdownDiv.textContent).to.eql(expected);
+    });
   });
 
   it('plays ads with ads manager', () => {
@@ -205,16 +282,13 @@ describes.realWin('amp-ima-video', {
     mockGlobal.google.ima.AdsRenderingSettings = function() {
       return mockAdsRenderingSettings;
     };
-    mockGlobal.google.ima.UiElements = {
-      AD_ATTRIBUTION: 'adattr',
-      COUNTDOWN: 'countdown',
-    };
     mockGlobal.google.ima.AdErrorEvent = {};
     mockGlobal.google.ima.AdErrorEvent.Type = {
       AD_ERROR: 'aderror',
     };
     mockGlobal.google.ima.AdEvent = {};
     mockGlobal.google.ima.AdEvent.Type = {
+      AD_PROGRESS: 'adprogress',
       CONTENT_PAUSE_REQUESTED: 'cpr',
       CONTENT_RESUME_REQUESTED: 'crr',
     };
@@ -239,11 +313,10 @@ describes.realWin('amp-ima-video', {
     expect(
         mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
         .to.be.true;
-    expect(mockAdsRenderingSettings.uiElements)
-        .to.eql(['adattr', 'countdown']);
     expect(amleSpy).to.be.calledWith(
         mockVideoPlayer, mockAdsRenderingSettings);
     expect(addEventListenerSpy).to.be.calledWith('aderror');
+    expect(addEventListenerSpy).to.be.calledWith('adprogress');
     expect(addEventListenerSpy).to.be.calledWith('cpr');
     expect(addEventListenerSpy).to.be.calledWith('crr');
   });
@@ -266,16 +339,13 @@ describes.realWin('amp-ima-video', {
     mockGlobal.google.ima.AdsRenderingSettings = function() {
       return mockAdsRenderingSettings;
     };
-    mockGlobal.google.ima.UiElements = {
-      AD_ATTRIBUTION: 'adattr',
-      COUNTDOWN: 'countdown',
-    };
     mockGlobal.google.ima.AdErrorEvent = {};
     mockGlobal.google.ima.AdErrorEvent.Type = {
       AD_ERROR: 'aderror',
     };
     mockGlobal.google.ima.AdEvent = {};
     mockGlobal.google.ima.AdEvent.Type = {
+      AD_PROGRESS: 'adprogress',
       CONTENT_PAUSE_REQUESTED: 'cpr',
       CONTENT_RESUME_REQUESTED: 'crr',
     };
@@ -301,11 +371,10 @@ describes.realWin('amp-ima-video', {
     expect(
         mockAdsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete)
         .to.be.true;
-    expect(mockAdsRenderingSettings.uiElements)
-        .to.eql(['adattr', 'countdown']);
     expect(amleSpy).to.be.calledWith(
         mockVideoPlayer, mockAdsRenderingSettings);
     expect(addEventListenerSpy).to.be.calledWith('aderror');
+    expect(addEventListenerSpy).to.be.calledWith('adprogress');
     expect(addEventListenerSpy).to.be.calledWith('cpr');
     expect(addEventListenerSpy).to.be.calledWith('crr');
     expect(setVolumeSpy).to.be.calledWith(0);
@@ -365,9 +434,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.removeEventListener = function() {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const removeEventListenerSpy =
         sandbox.spy(videoMock, 'removeEventListener');
     //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
@@ -398,21 +465,19 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.removeEventListener = function() {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const removeEventListenerSpy =
         sandbox.spy(videoMock, 'removeEventListener');
     //const hideControlsSpy = sandbox.spy(imaVideoObj, 'hideControls');
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
-    const adsManagerMock = {};
-    adsManagerMock.resize = function() {};
-    const mockGlobal = {};
-    mockGlobal.google = {
-      ima: {
-        ViewMode: {
-          NORMAL: 'normal',
+    const adsManagerMock = {resize: () => {}};
+    const mockGlobal = {
+      google: {
+        ima: {
+          ViewMode: {
+            NORMAL: 'normal',
+          },
         },
       },
     };
@@ -439,6 +504,62 @@ describes.realWin('amp-ima-video', {
     expect(pauseSpy).to.have.been.called;
   });
 
+  it('shows modified controls when content is paused', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const adsManagerMock = {
+      resize: function() {},
+    };
+    const mockGlobal = {
+      google: {
+        ima: {
+          ViewMode: {
+            NORMAL: 'normal',
+          },
+        },
+      },
+    };
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.setAdsManagerDimensionsOnLoadForTesting(100, 200);
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+    expect(controlsDiv).not.to.be.null;
+    const countdownWrapperDiv = controlsDiv.querySelector('#ima-countdown');
+    expect(countdownWrapperDiv).not.to.be.null;
+    const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
+    expect(playPauseDiv).not.to.be.null;
+    const timeDiv = controlsDiv.querySelector('#ima-time');
+    expect(timeDiv).not.to.be.null;
+    const progressBarWrapperDiv
+      = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.null;
+    const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+    expect(muteUnmuteDiv).not.to.be.null;
+    const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+    expect(fullscreenDiv).not.to.be.null;
+    // expect controls to be hidden initially
+    expect(controlsDiv.style.display).to.eql('none');
+    expect(countdownWrapperDiv.style.display).to.eql('none');
+    // call pause function to display ads
+    imaVideoObj.onContentPauseRequested(mockGlobal);
+    // expect a subset of controls to be hidden / displayed
+    expect(controlsDiv.style.display).not.to.eql('none');
+    expect(countdownWrapperDiv.style.display).not.to.eql('none');
+    expect(playPauseDiv.style.display).to.eql('none');
+    expect(timeDiv.style.display).to.eql('none');
+    expect(progressBarWrapperDiv.style.display).to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+  });
+
   it('resumes content', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -450,9 +571,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.addEventListener = function() {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
     //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
@@ -479,9 +598,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.addEventListener = function() {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
     //const playVideoSpy = sandbox.spy(imaVideoObj, 'playVideo');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
@@ -492,9 +609,190 @@ describes.realWin('amp-ima-video', {
     expect(imaVideoObj.getPropertiesForTesting().adsActive).to.be.false;
     expect(addEventListenerSpy).to.have.been.calledWith(
         imaVideoObj.getPropertiesForTesting().interactEvent);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('ended');
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
     // TODO - Fix when I can spy on internals.
     //expect(playVideoSpy).to.have.been.called;
+  });
+
+  it('controls are restored after content resumes', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    imaVideoObj.setVideoPlayerForTesting(getVideoPlayerMock());
+    imaVideoObj.setContentCompleteForTesting(true);
+    // expect a subset of controls to be hidden / displayed during ad
+    const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+    expect(controlsDiv).not.to.be.null;
+    const countdownWrapperDiv = controlsDiv.querySelector('#ima-countdown');
+    expect(countdownWrapperDiv).not.to.be.null;
+    const playPauseDiv = controlsDiv.querySelector('#ima-play-pause');
+    expect(playPauseDiv).not.to.be.null;
+    const timeDiv = controlsDiv.querySelector('#ima-time');
+    expect(timeDiv).not.to.be.null;
+    const progressBarWrapperDiv
+      = controlsDiv.querySelector('#ima-progress-wrapper');
+    expect(progressBarWrapperDiv).not.to.be.null;
+    const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+    expect(muteUnmuteDiv).not.to.be.null;
+    const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+    expect(fullscreenDiv).not.to.be.null;
+    imaVideoObj.showAdControls();
+    expect(controlsDiv.style.display).not.to.eql('none');
+    expect(countdownWrapperDiv.style.display).not.to.eql('none');
+    expect(playPauseDiv.style.display).to.eql('none');
+    expect(timeDiv.style.display).to.eql('none');
+    expect(progressBarWrapperDiv.style.display).to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+    // resume content after ad finishes
+    imaVideoObj.onContentResumeRequested();
+    // expect default control buttons to be displayed again
+    expect(countdownWrapperDiv.style.display).to.eql('none');
+    expect(playPauseDiv.style.display).not.to.eql('none');
+    expect(timeDiv.style.display).not.to.eql('none');
+    expect(progressBarWrapperDiv.style.display).not.to.eql('none');
+    expect(muteUnmuteDiv.style.display).not.to.eql('none');
+    expect(fullscreenDiv.style.display).not.to.eql('none');
+    expect(controlsDiv.style.display).not.to.eql('none');
+  });
+
+  it('ad controls are smaller when skippable on mobile', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    const videoDefaults = {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    };
+    imaVideoObj.imaVideo(win, videoDefaults);
+
+    const ad = {
+      skippable: {getSkipTimeOffset: () => 30},
+      unskippable: {getSkipTimeOffset: () => -1},
+    };
+    const video = {
+      hasMobileStyles: 400,
+      noMobileStyles: 401,
+    };
+
+    const tests = [
+      {
+        msg: 'Controls should be small when ad is skippable and mobile',
+        ad: ad.skippable,
+        videoSize: video.hasMobileStyles,
+        expected: {heightControls: '20px', heightButtons: '18px'},
+      },
+      {
+        msg: 'Controls should be tall when ad is not skippable',
+        ad: ad.unskippable,
+        videoSize: video.hasMobileStyles,
+        expected: {heightControls: '30px', heightButtons: '22px'},
+      },
+      {
+        msg: 'Controls should be tall when ad is not mobile',
+        ad: ad.skippable,
+        videoSize: video.noMobileStyles,
+        expected: {heightControls: '30px', heightButtons: '22px'},
+      },
+    ];
+    tests.forEach(({ad, videoSize, expected, msg}) => {
+      imaVideoObj.setVideoWidthAndHeightForTesting(videoSize, 300);
+      imaVideoObj.onAdLoad({getAd: () => ad});
+      imaVideoObj.showAdControls();
+      const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
+      const muteUnmuteDiv = controlsDiv.querySelector('#ima-mute-unmute');
+      const fullscreenDiv = controlsDiv.querySelector('#ima-fullscreen');
+      expect(controlsDiv.style.height).to.eql(expected.heightControls, msg);
+      expect(muteUnmuteDiv.style.height).to.eql(expected.heightButtons, msg);
+      expect(fullscreenDiv.style.height).to.eql(expected.heightButtons, msg);
+    });
+  });
+
+  it('shows bigPlayDiv with content complete, ' +
+    'when content resume is called', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    imaVideoObj.setContentCompleteForTesting(true);
+
+    imaVideoObj.onContentResumeRequested();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(
+        imaVideoProperties.interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(imaVideoProperties.bigPlayDiv.style.display)
+        .to.be.equal('table-cell');
+  });
+
+  it('shows bigPlayDiv with allAdsCompleted, and content ended', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    imaVideoObj.setAllAdsCompletedForTesting(true);
+
+    imaVideoObj.onContentEnded();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.bigPlayDiv.style.display)
+        .to.be.equal('table-cell');
+  });
+
+  it('does not show bigPlayDiv when content is resumed, ' +
+    'and not content complete', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    const addEventListenerSpy = sandbox.spy(videoMock, 'addEventListener');
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+
+    imaVideoObj.onBigPlayClick();
+    imaVideoObj.onContentResumeRequested();
+
+    const imaVideoProperties = imaVideoObj.getPropertiesForTesting();
+
+    expect(imaVideoProperties.adsActive).to.be.false;
+    expect(addEventListenerSpy).to.have.been.calledWith(
+        imaVideoProperties.interactEvent);
+    expect(addEventListenerSpy).to.have.been.calledWith('ended');
+    expect(imaVideoProperties.bigPlayDiv.style.display).to.be.equal('none');
   });
 
   it('updates UI', () => {
@@ -633,8 +931,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.play = function() {};
+    const videoMock = getVideoPlayerMock();
     const playSpy = sandbox.spy(videoMock, 'play');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
 
@@ -660,8 +957,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.pause = function() {};
+    const videoMock = getVideoPlayerMock();
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     imaVideoObj.setVideoPlayerForTesting(videoMock);
     //const showControlsSpy = sandbox.spy(imaVideoObj, 'showControls');
@@ -677,6 +973,62 @@ describes.realWin('amp-ima-video', {
     //expect(showControlsSpy).to.have.been.called;
   });
 
+  it('mutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(false);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.true;
+  });
+
+  it('unmutes on click', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+
+    imaVideoObj.imaVideo(win, {
+      width: 640,
+      height: 360,
+      src: srcUrl,
+      tag: adTagUrl,
+    });
+    const videoMock = getVideoPlayerMock();
+    imaVideoObj.setVideoPlayerForTesting(videoMock);
+    const adsManagerMock = {};
+    adsManagerMock.setVolume = () => {};
+    imaVideoObj.setAdsManagerForTesting(adsManagerMock);
+    imaVideoObj.setVideoPlayerMutedForTesting(true);
+    //const pauseVideoSpy = sandbox.spy(imaVideoObj, 'pauseVideo');
+
+    imaVideoObj.onMuteUnmuteClick();
+
+    const isMuted = imaVideoObj.getPropertiesForTesting().videoPlayer.muted;
+
+    //expect(pauseVideoSpy).to.have.been.called;
+    expect(isMuted).to.be.false;
+  });
+
+
+
   it('pauses video after webkit end fullscreen', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
@@ -688,9 +1040,7 @@ describes.realWin('amp-ima-video', {
       src: srcUrl,
       tag: adTagUrl,
     });
-    const videoMock = {};
-    videoMock.pause = function() {};
-    videoMock.removeEventListener = function() {};
+    const videoMock = getVideoPlayerMock();
     const pauseSpy = sandbox.spy(videoMock, 'pause');
     const removeEventListenerSpy =
       sandbox.spy(videoMock, 'removeEventListener');

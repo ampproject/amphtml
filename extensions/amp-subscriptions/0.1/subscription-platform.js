@@ -40,8 +40,16 @@ export class SubscriptionPlatform {
    * Activates the subscription platform and hands over the control for
    * rendering.
    * @param {!./entitlement.Entitlement} unusedEntitlement
+   * @param {?./entitlement.Entitlement} unusedGrantEntitlement
    */
-  activate(unusedEntitlement) {}
+  activate(unusedEntitlement, unusedGrantEntitlement) {}
+
+  /**
+   * Reset the platform and renderer.
+   * This should clear dialogs and toasts originating
+   * from the platform.
+   */
+  reset() {}
 
   /**
    * Returns if pingback is enabled for this platform.
@@ -57,10 +65,11 @@ export class SubscriptionPlatform {
   pingback(unusedSelectedPlatform) {}
 
   /**
-   * Tells if this platform supports the current viewer.
-   * @return {boolean}
+   * Tells if the platform supports a score factor
+   * @param {string} unusedFactor
+   * @return {number}
    */
-  supportsCurrentViewer() {}
+  getSupportedScoreFactor(unusedFactor) {}
 
   /**
    * Executes action for the local platform.

@@ -136,8 +136,8 @@ export class RealTimeConfigManager {
       ERROR_TYPE: errorType,
       HREF: this.win_.location.href,
     };
-    const url = Services.urlReplacementsForDoc(this.ampDoc_).expandUrlSync(
-        errorReportingUrl, macros, whitelist);
+    const service = Services.urlReplacementsForDoc(this.a4aElement_.element);
+    const url = service.expandUrlSync(errorReportingUrl, macros, whitelist);
     new this.win_.Image().src = url;
   }
 
@@ -151,8 +151,8 @@ export class RealTimeConfigManager {
    * @return {string}
    */
   getCalloutParam_(url) {
-    const parsedUrl = Services.urlForDoc(
-        this.a4aElement_.getAmpDoc()).parse(url);
+    const urlService = Services.urlForDoc(this.a4aElement_.element);
+    const parsedUrl = urlService.parse(url);
     return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
   }
 
@@ -291,7 +291,7 @@ export class RealTimeConfigManager {
     Object.keys(this.rtcConfig_.vendors || []).forEach(vendor => {
       const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
       const url = vendorObject ? vendorObject.url : '';
-      const errorReportingUrl = vendorObject ?
+      const errorReportingUrl = vendorObject && vendorObject.errorReportingUrl ?
         vendorObject.errorReportingUrl : '';
       if (!url) {
         return this.promiseArray_.push(
@@ -351,7 +351,7 @@ export class RealTimeConfigManager {
             callout, errorReportingUrl);
       }
       if (!Services.urlForDoc(
-          this.a4aElement_.getAmpDoc()).isSecure(url)) {
+          this.a4aElement_.element).isSecure(url)) {
         return this.buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
             callout, errorReportingUrl);
       }
@@ -373,7 +373,7 @@ export class RealTimeConfigManager {
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(Services.timerFor(this.win_).timeoutPromise(
         timeoutMillis,
-        Services.urlReplacementsForDoc(this.ampDoc_).expandUrlAsync(
+        Services.urlReplacementsForDoc(this.a4aElement_.element).expandUrlAsync(
             url, macros, whitelist)).then(url => {
       checkStillCurrent();
       timeoutMillis -= (urlReplacementStartTime - Date.now());
@@ -505,7 +505,7 @@ export class RealTimeConfigManager {
       const validateErrorReportingUrl = urlObj => {
         const errorUrl = urlObj['errorReportingUrl'];
         if (errorUrl && !Services.urlForDoc(
-            this.a4aElement_.getAmpDoc()).isSecure(errorUrl)) {
+            this.a4aElement_.element).isSecure(errorUrl)) {
           dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorUrl}`);
           urlObj['errorReportingUrl'] = undefined;
         }

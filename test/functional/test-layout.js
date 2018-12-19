@@ -199,12 +199,24 @@ describe('Layout', () => {
     expect(applyStaticLayout(div)).to.equal(Layout.NODISPLAY);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div.style.display).to.equal('none');
+    document.body.appendChild(div);
+    expect(div).to.have.display('none');
+    document.body.removeChild(div);
     expect(div).to.have.class('i-amphtml-layout-nodisplay');
     expect(div).to.not.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
 
+  it('layout=nodisplay with SSR', () => {
+    div.setAttribute('layout', 'nodisplay');
+    div.style.display = 'none';
+    applyStaticLayout(div);
+    expect(div.style.display).to.equal('');
+
+    document.body.appendChild(div);
+    expect(div).to.have.display('none');
+    document.body.removeChild(div);
+  });
 
   it('layout=fixed', () => {
     div.setAttribute('layout', 'fixed');
@@ -388,7 +400,6 @@ describe('Layout', () => {
   it('layout=fluid - default', () => {
     div.setAttribute('height', 'fluid');
     const parentDiv = document.createElement('div');
-    div.parentElement = parentDiv;
     parentDiv.appendChild(div);
     expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');

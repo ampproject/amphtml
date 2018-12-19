@@ -34,9 +34,6 @@ export const EventType = {
   // Triggered when the story should switch to the next page
   NEXT_PAGE: 'ampstory:nextpage',
 
-  // Triggered when the story should navigate after a tap on active page.
-  TAP_NAVIGATION: 'ampstory:tapnavigation',
-
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
@@ -55,32 +52,20 @@ export const EventType = {
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
+
+  // Dispatches an action to the amp-story store service. Only works under test.
+  DISPATCH_ACTION: 'ampstory:dispatchaction',
 };
-
-
-/**
- * @param {!EventTarget} source
- * @param {string} eventName
- * @param {boolean=} opt_bubbles
- */
-export function dispatch(source, eventName, opt_bubbles) {
-  const event = new Event(eventName, {bubbles: !!opt_bubbles});
-  if (event.initEvent) {
-    event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
-        /* cancelable */ false);
-  }
-  source.dispatchEvent(event);
-}
-
 
 /**
  * @param {!Window} win
  * @param {!EventTarget} source
  * @param {string} eventName
- * @param {!Object} payload
- * @param {!CustomEventInit=} opt_eventInit
+ * @param {!JsonObject=} payload
+ * @param {!CustomEventInit=} eventInit
  */
-export function dispatchCustom(win, source, eventName, payload, opt_eventInit) {
-  const event = createCustomEvent(win, eventName, payload, opt_eventInit);
+export function dispatch(win, source, eventName, payload = undefined,
+  eventInit = undefined) {
+  const event = createCustomEvent(win, eventName, payload, eventInit);
   source.dispatchEvent(event);
 }

@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
@@ -22,16 +23,20 @@ import {
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
 import {dev, user} from '../../../src/log';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
+const SCROLL_PRECISION_PERCENT = 5;
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
-const TAG = 'analytics-events';
+const TAG = 'amp-analytics/events';
 
 /**
  * Events that can result in analytics data to be sent.
@@ -62,6 +67,11 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) { return new ClickEventTracker(root); },
+  },
+  'scroll': {
+    name: 'scroll',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new ScrollEventTracker(root); },
   },
   'custom': {
     name: 'custom',
@@ -128,7 +138,7 @@ export function getTrackerKeyName(eventType) {
   if (!isReservedTriggerType(eventType)) {
     return 'custom';
   }
-  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+  return hasOwn(TRACKER_TYPE, eventType) ?
     TRACKER_TYPE[eventType].name : eventType;
 }
 
@@ -139,7 +149,7 @@ export function getTrackerKeyName(eventType) {
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
   Object.keys(TRACKER_TYPE).forEach(key => {
-    if (TRACKER_TYPE.hasOwnProperty(key) &&
+    if (hasOwn(TRACKER_TYPE, key) &&
         TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
@@ -167,20 +177,21 @@ class SignalTrackerDef {
 
 /**
  * The analytics event.
+ * @dict
  */
 export class AnalyticsEvent {
   /**
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
+   * @param {?JsonObject=} opt_vars A map of vars and their values.
    */
   constructor(target, type, opt_vars) {
     /** @const */
-    this.target = target;
+    this['target'] = target;
     /** @const */
-    this.type = type;
+    this['type'] = type;
     /** @const */
-    this.vars = opt_vars || Object.create(null);
+    this['vars'] = opt_vars || dict();
   }
 }
 
@@ -286,7 +297,7 @@ export class CustomEventTracker extends EventTracker {
         setTimeout(() => {
           for (let i = 0; i < bufferLength; i++) {
             const event = buffer[i];
-            if (target.contains(event.target)) {
+            if (target.contains(event['target'])) {
               listener(event);
             }
           }
@@ -308,7 +319,7 @@ export class CustomEventTracker extends EventTracker {
     return this.observables_[eventType].add(event => {
       // Wait for target selected
       targetReady.then(target => {
-        if (target.contains(event.target)) {
+        if (target.contains(event['target'])) {
           listener(event);
         }
       });
@@ -320,7 +331,7 @@ export class CustomEventTracker extends EventTracker {
    * @param {!AnalyticsEvent} event
    */
   trigger(event) {
-    const eventType = event.type;
+    const eventType = event['type'];
     const isSandboxEvent = startsWith(eventType, 'sandbox-');
     const observables = this.observables_[eventType];
 
@@ -399,6 +410,149 @@ export class ClickEventTracker extends EventTracker {
   }
 }
 
+/**
+ * Tracks scroll events.
+ */
+export class ScrollEventTracker extends EventTracker {
+
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+
+    /** @private {!./analytics-root.AnalyticsRoot} root */
+    this.root_ = root;
+
+    /** @private {function(!Object)|null} */
+    this.boundScrollHandler_ = null;
+  }
+
+  /** @override */
+  dispose() {
+    if (this.boundScrollHandler_ !== null) {
+      this.root_.getScrollManager()
+          .removeScrollHandler(this.boundScrollHandler_);
+      this.boundScrollHandler_ = null;
+    }
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    if (!config['scrollSpec']) {
+      user().error(TAG, 'Missing scrollSpec on scroll trigger.');
+      return NO_UNLISTEN;
+    }
+
+    if (!Array.isArray(config['scrollSpec']['verticalBoundaries']) &&
+      !Array.isArray(config['scrollSpec']['horizontalBoundaries'])) {
+      user().error(TAG, 'Boundaries are required for the scroll ' +
+        'trigger to work.');
+      return NO_UNLISTEN;
+    }
+
+    const boundsV = this.normalizeBoundaries_(
+        config['scrollSpec']['verticalBoundaries']
+    );
+    const boundsH = this.normalizeBoundaries_(
+        config['scrollSpec']['horizontalBoundaries']
+    );
+
+    this.boundScrollHandler_ =
+      this.scrollHandler_.bind(this, boundsV, boundsH, listener);
+
+    return this.root_.getScrollManager()
+        .addScrollHandler(this.boundScrollHandler_);
+  }
+
+  /**
+   * Function to handle scroll events from the Scroll manager
+   * @param {!Object<number,boolean>} boundsV
+   * @param {!Object<number,boolean>} boundsH
+   * @param {function(!AnalyticsEvent)} listener
+   * @param {!Object} e
+   * @private
+   */
+  scrollHandler_(boundsV, boundsH, listener, e) {
+    // Calculates percentage scrolled by adding screen height/width to
+    // top/left and dividing by the total scroll height/width.
+    this.triggerScrollEvents_(boundsV,
+        (e.top + e.height) * 100 / e./*OK*/scrollHeight,
+        VAR_V_SCROLL_BOUNDARY,
+        listener
+    );
+    this.triggerScrollEvents_(boundsH,
+        (e.left + e.width) * 100 / e./*OK*/scrollWidth,
+        VAR_H_SCROLL_BOUNDARY,
+        listener
+    );
+  }
+
+  /**
+   * Rounds the boundaries for scroll trigger to nearest
+   * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
+   * as keys and false as values.
+   *
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!JsonObject} Object with normalized bounds as keys
+   * and false as value.
+   * @private
+   */
+  normalizeBoundaries_(bounds) {
+    const result = dict({});
+    if (!bounds || !Array.isArray(bounds)) {
+      return result;
+    }
+
+    for (let b = 0; b < bounds.length; b++) {
+      let bound = bounds[b];
+      if (typeof bound !== 'number' || !isFinite(bound)) {
+        user().error(TAG, 'Scroll trigger boundaries must be finite.');
+        return result;
+      }
+
+      bound = Math.min(Math.round(bound / SCROLL_PRECISION_PERCENT) *
+        SCROLL_PRECISION_PERCENT, 100);
+      result[bound] = false;
+    }
+    return result;
+  }
+
+  /**
+   * @param {!Object<number, boolean>} bounds
+   * @param {number} scrollPos Number representing the current scroll
+   * @param {string} varName variable name to assign to the bound that
+   * @param {function(!AnalyticsEvent)} listener
+   * triggers the event position.
+   */
+  triggerScrollEvents_(bounds, scrollPos, varName, listener) {
+    if (!scrollPos) {
+      return;
+    }
+
+    // Goes through each of the boundaries and fires an event if it has not
+    // been fired so far and it should be.
+    for (const b in bounds) {
+      if (!hasOwn(bounds, b)) {
+        continue;
+      }
+      const bound = parseInt(b, 10);
+      if (bound > scrollPos || bounds[bound]) {
+        continue;
+      }
+      bounds[bound] = true;
+      const vars = dict();
+      vars[varName] = b;
+      listener(
+          new AnalyticsEvent(
+              this.root_.getRootElement(),
+              AnalyticsEventType.SCROLL,
+              vars
+          )
+      );
+    }
+  }
+}
 
 /**
  * Tracks events based on signals.
@@ -696,17 +850,17 @@ class TimerEventHandler {
     return 0;
   }
 
-  /** @return {{timerDuration: number, timerStart: number}} */
+  /** @return {!JsonObject} */
   getTimerVars() {
     let timerDuration = 0;
     if (this.isRunning()) {
       timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    return {
+    return dict({
       'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
-    };
+    });
   }
 }
 
@@ -917,16 +1071,21 @@ export class VideoEventTracker extends EventTracker {
     const endSessionWhenInvisible = videoSpec['end-session-when-invisible'];
     const excludeAutoplay = videoSpec['exclude-autoplay'];
     const interval = videoSpec['interval'];
+    const percentages = videoSpec['percentages'];
+
     const on = config['on'];
 
+    const percentageInterval = 5;
+
     let intervalCounter = 0;
+    let lastPercentage = 0;
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
       const isVisibleType = (type === VideoAnalyticsEvents.SESSION_VISIBLE);
       const normalizedType =
           isVisibleType ? VideoAnalyticsEvents.SESSION : type;
-      const details = /** @type {!VideoAnalyticsDetailsDef} */ (getData(event));
+      const details = /** @type {?JsonObject|undefined} */ (getData(event));
 
       if (normalizedType !== on) {
         return;
@@ -934,7 +1093,7 @@ export class VideoEventTracker extends EventTracker {
 
       if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
         user().error(TAG, 'video-seconds-played requires interval spec ' +
-            'with non-zero value');
+          'with non-zero value');
         return;
       }
 
@@ -943,6 +1102,43 @@ export class VideoEventTracker extends EventTracker {
         if (intervalCounter % interval !== 0) {
           return;
         }
+      }
+
+      if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
+        if (!percentages) {
+          user().error(TAG,
+              'video-percentage-played requires percentages spec.');
+          return;
+        }
+
+        for (let i = 0; i < percentages.length; i++) {
+          const percentage = percentages[i];
+
+          if (percentage <= 0 || (percentage % percentageInterval) != 0) {
+            user().error(TAG,
+                'Percentages must be set in increments of %s with non-zero ' +
+                  'values',
+                percentageInterval);
+
+            return;
+          }
+        }
+
+        const normalizedPercentage = details['normalizedPercentage'];
+        const normalizedPercentageInt = parseInt(normalizedPercentage, 10);
+
+        dev().assert(isFiniteNumber(normalizedPercentageInt));
+        dev().assert((normalizedPercentageInt % percentageInterval) == 0);
+
+        if (lastPercentage == normalizedPercentageInt) {
+          return;
+        }
+
+        if (percentages.indexOf(normalizedPercentageInt) < 0) {
+          return;
+        }
+
+        lastPercentage = normalizedPercentageInt;
       }
 
       if (isVisibleType && !endSessionWhenInvisible) {
@@ -988,11 +1184,33 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
+    let reportWhenSpec = visibilitySpec['reportWhen'];
     const visibilityManager = this.root.getVisibilityManager();
-    // special polyfill for eventType: 'hidden'
-    let createReadyReportPromiseFunc = null;
+    let createReportReadyPromiseFunc = null;
+
+    if (reportWhenSpec) {
+      user().assert(!visibilitySpec['repeat'],
+          'reportWhen and repeat are mutually exclusive.');
+    }
+
     if (eventType == 'hidden') {
-      createReadyReportPromiseFunc = this.createReportReadyPromise_.bind(this);
+      if (reportWhenSpec) {
+        user().error(TAG,
+            'ReportWhen should not be defined when eventType is "hidden"');
+      }
+      // special polyfill for eventType: 'hidden'
+      reportWhenSpec = 'documentHidden';
+    }
+
+    if (reportWhenSpec == 'documentHidden') {
+      createReportReadyPromiseFunc =
+          this.createReportReadyPromiseForDocumentHidden_.bind(this);
+    } else if (reportWhenSpec == 'documentExit') {
+      createReportReadyPromiseFunc =
+          this.createReportReadyPromiseForDocumentExit_.bind(this);
+    } else {
+      user().assert(!reportWhenSpec, 'reportWhen value "%s" not supported.',
+          reportWhenSpec);
     }
 
     // Root selectors are delegated to analytics roots.
@@ -1002,7 +1220,7 @@ export class VisibilityTracker extends EventTracker {
       return visibilityManager.listenRoot(
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(
               this, eventType, listener, this.root.getRootElement()));
     }
@@ -1020,7 +1238,7 @@ export class VisibilityTracker extends EventTracker {
           element,
           visibilitySpec,
           this.getReadyPromise(waitForSpec, selector, element),
-          createReadyReportPromiseFunc,
+          createReportReadyPromiseFunc,
           this.onEvent_.bind(this, eventType, listener, element));
     });
     return function() {
@@ -1031,9 +1249,12 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: documentHidden
    * @return {!Promise}
+   * @private
    */
-  createReportReadyPromise_() {
+  createReportReadyPromiseForDocumentHidden_() {
     const viewer = this.root.getViewer();
 
     if (!viewer.isVisible()) {
@@ -1047,6 +1268,50 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     });
+  }
+
+  /**
+   * Returns a Promise indicating that we're ready to report the analytics,
+   * in the case of reportWhen: documentExit
+   * @return {!Promise}
+   * @private
+   */
+  createReportReadyPromiseForDocumentExit_() {
+    const deferred = new Deferred();
+    const {win} = this.root.ampdoc;
+    let unloadListener, pageHideListener;
+
+    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
+    // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
+    // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
+    // short the difference between them is:
+    // * unload is fired when document is being unloaded. Does not fire on
+    //   Safari.
+    // * pagehide is fired when traversing away from a session history item.
+    // Usually, if one is fired, the other is too, with pagehide being fired
+    // first. An exception is that in Safari (desktop and mobile), pagehide is
+    // fired when navigating to another page, but unload is not.
+    // On mobile Chrome, and mobile Firefox, neither of these will fire if the
+    // user presses the home button, uses the OS task switcher to switch to
+    // a different app, answers an incoming call, etc.
+
+    win.addEventListener('unload', unloadListener = () => {
+      win.removeEventListener('unload', unloadListener);
+      deferred.resolve();
+    });
+
+    // Note: pagehide is currently not supported on Opera Mini, nor IE<=10.
+    // Documentation conflicts as to whether Safari on iOS will also fire it
+    // when switching tabs or switching to another app. Chrome does not fire it
+    // in this case.
+    // Good, but several years old, analysis at:
+    // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
+    // Especially note the event table on this page.
+    win.addEventListener('pagehide', pageHideListener = () => {
+      win.removeEventListener('pagehide', pageHideListener);
+      deferred.resolve();
+    });
+    return deferred.promise;
   }
 
   /**
@@ -1091,7 +1356,7 @@ export class VisibilityTracker extends EventTracker {
    * @param {string} eventType
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Element} target
-   * @param {!Object<string, *>} state
+   * @param {!JsonObject} state
    * @private
    */
   onEvent_(eventType, listener, target, state) {

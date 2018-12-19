@@ -50,6 +50,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal class form',
     whitelist: [
       'build-system/amp4test.js',
+      'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/amp.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -75,6 +76,10 @@ const forbiddenTerms = {
         'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
         'for a list of alternatives.',
   },
+  'document-register-element.node': {
+    message: 'Use `document-register-element.patched` instead',
+    whitelist: ['build-system/tasks/update-packages.js'],
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -95,6 +100,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/amp4test.js',
       'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
@@ -140,13 +146,15 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/config.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
       'src/runtime.js',
@@ -193,6 +201,7 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/ampdoc-impl.js',
       'testing/describes.js',
       'testing/iframe.js',
@@ -204,12 +213,14 @@ const forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/performance-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/storage-impl.js',
     ],
@@ -224,6 +235,7 @@ const forbiddenTerms = {
   'installUrlReplacementsServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
@@ -233,6 +245,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/runtime.js',
       'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -262,6 +275,7 @@ const forbiddenTerms = {
   'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
+      'src/inabox/amp-inabox-lite.js',
       'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
@@ -277,21 +291,15 @@ const forbiddenTerms = {
   'installPositionObserverServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-next-page/0.1/next-page-service.js',
+      // Please keep list alphabetically sorted.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-list/0.1/amp-list.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-video-docking/0.1/amp-video-docking.js',
+      'src/service/position-observer/position-observer-impl.js',
       'src/service/video-manager-impl.js',
-      'src/service/video/docking.js',
       'src/service/video/autoplay.js',
-    ],
-  },
-  'getServiceForDocDeprecated': {
-    message: 'Use getServiceForDoc() instead.',
-    whitelist: [
-      'src/chunk.js',
-      'src/service.js',
-      'src/services.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -300,6 +308,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
+      '3p/recaptcha.js',
       'ads/alp/install-alp.js',
       'ads/inabox/inabox-host.js',
       'dist.3p/current/integration.js',
@@ -325,34 +334,38 @@ const forbiddenTerms = {
     whitelist: [
       // viewer-impl.sendMessage
       'src/error.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
+      'extensions/amp-bind/0.1/bind-impl.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
       '3p/ampcontext.js',
       '3p/ampcontext-integration.js',
+      '3p/recaptcha.js',
       'dist.3p/current/integration.js', // includes previous
     ],
   },
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
-      'src/service/xhr-impl.js',
-      'src/service/viewer-impl.js',
-      'src/service/viewer-cid-api.js',
-      'src/service/storage-impl.js',
-      'src/service/history-impl.js',
-      'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
+      'src/service/cid-impl.js',
+      'src/service/history-impl.js',
+      'src/service/storage-impl.js',
+      'src/ssr-template-helper.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewer-cid-api.js',
+      'src/utils/xhr-utils.js',
     ],
   },
   // Privacy sensitive
@@ -382,7 +395,7 @@ const forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/error.js',
-      'src/service/xhr-impl.js',
+      'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -532,6 +545,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
+      'src/polyfills/custom-elements.js',
     ],
   },
   'startupChunk\\(': {
@@ -549,8 +563,10 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'build-system/app.js',
+      'build-system/tasks/firebase.js',
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/visual-diff/index.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
@@ -572,7 +588,7 @@ const forbiddenTerms = {
     ],
   },
   'new FormData\\(': {
-    message: 'Use new FormDataWrapper() instead and call ' +
+    message: 'Use createFormDataWrapper() instead and call ' +
         'formDataWrapper.getFormData() to get the native FormData object.',
     whitelist: [
       'src/form-data-wrapper.js',
@@ -584,6 +600,8 @@ const forbiddenTerms = {
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
       'src/video-iframe-integration.js',
+      'extensions/amp-consent/0.1/amp-consent.js',
+      'extensions/amp-consent/0.1/consent-ui.js',
     ],
   },
   '\\.defer\\(\\)': {
@@ -595,8 +613,26 @@ const forbiddenTerms = {
   'eslint no-unused-vars': {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
-      'viewer-api/swipe-api.js',
       'extensions/amp-access/0.1/iframe-api/access-controller.js',
+    ],
+  },
+  'this\\.skip\\(\\)': {
+    message: 'Use of `this.skip()` is forbidden in test files. Use ' +
+        '`this.skipTest()` from within a `before()` block instead. See #17245.',
+    checkInTestFolder: true,
+    whitelist: [
+      'test/_init_tests.js',
+    ],
+  },
+  '[^\\.]makeBodyVisible\\(': {
+    message: 'This is a protected function. If you are calling this to show ' +
+        'body after an error please use `makeBodyVisibleRecovery`',
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/style-installer.js',
+      'src/inabox/amp-inabox.js',
+      'src/inabox/amp-inabox-lite.js',
     ],
   },
 };
@@ -664,7 +700,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.getBoundingClientRect\\(': bannedTermsHelpString,
   '\\.getClientRects\\(': bannedTermsHelpString,
   '\\.getMatchedCSSRules\\(': bannedTermsHelpString,
-  '\\.postMessage\\(': bannedTermsHelpString,
   '\\.scrollBy\\(': bannedTermsHelpString,
   '\\.scrollIntoView\\(': bannedTermsHelpString,
   '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
@@ -672,6 +707,12 @@ const forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  '\\.postMessage\\(': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js',
+    ],
+  },
   'getComputedStyle\\(': {
     message: 'Due to various bugs in Firefox, you must use the computedStyle ' +
     'helper in style.js.',
@@ -703,6 +744,18 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
+    ],
+  },
+  'contentHeightChanged': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/inabox/inabox-viewport.js',
+      'src/service/resources-impl.js',
+      'src/service/viewport/viewport-binding-def.js',
+      'src/service/viewport/viewport-binding-ios-embed-sd.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   'preloadExtension': {
@@ -761,6 +814,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-image-lightbox/0.1/amp-image-lightbox.js',
       'extensions/amp-analytics/0.1/transport.js',
       'extensions/amp-web-push/0.1/iframehost.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -782,6 +836,8 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-form/0.1/amp-form.js',
       'src/service/url-replacements-impl.js',
+      'extensions/amp-analytics/0.1/cookie-writer.js',
+      'extensions/amp-analytics/0.1/requests.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -798,19 +854,31 @@ const forbiddenTermsSrcInclusive = {
       'src/service/url-replacements-impl.js',
     ],
   },
+  '\\.setNonBoolean\\(': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/storage-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
+    ],
+  },
   '(cdn|3p)\\.ampproject\\.': {
     message: 'The CDN domain should typically not be hardcoded in source ' +
         'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
+      'build-system/app-index/template.js',
+      'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
+      'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
+      'build-system/app-video-testbench.js',
+      'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'gulpfile.js',
@@ -836,9 +904,6 @@ const forbiddenTermsSrcInclusive = {
       'src/mode.js',
       'dist.3p/current/integration.js',
     ],
-  },
-  '\\.remove\\(\\)': {
-    message: 'use removeElement helper in src/dom.js',
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
@@ -868,6 +933,17 @@ const requiredTerms = {
 function isInTestFolder(path) {
   const dirs = path.split('/');
   return dirs.indexOf('test') >= 0;
+}
+
+/**
+ * Check if file is inside the build-system/babel-plugins test/fixture folder.
+ * @param {string} filePath
+ * @return {boolean}
+ */
+function isInBuildSystemFixtureFolder(filePath) {
+  const folder = path.dirname(filePath);
+  return folder.startsWith('build-system/babel-plugins') &&
+    folder.includes('test/fixtures');
 }
 
 /**
@@ -910,9 +986,9 @@ function matchTerms(file, terms) {
     const {whitelist, checkInTestFolder} = terms[term];
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) &&
+    if (isInBuildSystemFixtureFolder(relative) || (Array.isArray(whitelist) &&
       (whitelist.indexOf(relative) != -1 ||
-      (isInTestFolder(relative) && !checkInTestFolder))) {
+      (isInTestFolder(relative) && !checkInTestFolder)))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build
@@ -988,7 +1064,8 @@ function hasAnyTerms(file) {
       basename == 'style.js';
   // Yet another reason to move ads/google/a4a somewhere else
   const isA4A = /\/a4a\//.test(pathname);
-  if (is3pFile && !isTestFile && !isA4A) {
+  const isRecaptcha = basename == 'recaptcha.js';
+  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

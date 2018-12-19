@@ -46,6 +46,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /**@private {string} */
+    this.embedCode_ = '';
+
+    /**@private {string} */
+    this.pCode_ = '';
+
+    /**@private {string} */
+    this.playerId_ = '';
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -54,6 +63,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
   }
 
   /**
@@ -66,43 +76,45 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const {element: el} = this;
+
+    this.embedCode_ = user().assert(
+        el.getAttribute('data-embedcode'),
+        'The data-embedcode attribute is required for %s', el);
+
+    this.pCode_ = user().assert(
+        el.getAttribute('data-pcode'),
+        'The data-pcode attribute is required for %s', el);
+
+    this.playerId_ = user().assert(
+        el.getAttribute('data-playerid'),
+        'The data-playerid attribute is required for %s', el);
+
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
+    installVideoManagerForDoc(el);
+    Services.videoManagerForDoc(el).register(this);
   }
 
   /** @override */
   layoutCallback() {
     const {element: el} = this;
 
-    const embedCode = user().assert(
-        el.getAttribute('data-embedcode'),
-        'The data-embedcode attribute is required for %s', el);
-
-    const pCode = user().assert(
-        el.getAttribute('data-pcode'),
-        'The data-pcode attribute is required for %s', el);
-
-    const playerId = user().assert(
-        el.getAttribute('data-playerid'),
-        'The data-playerid attribute is required for %s', el);
-
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src = 'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
-        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(pCode);
+        'skin-plugin/amp_iframe.html?pcode=' + encodeURIComponent(this.pCode_);
       const configUrl = el.getAttribute('data-config');
       if (configUrl) {
         src += '&options[skin.config]=' + encodeURIComponent(configUrl);
       }
     }
 
-    src += '&ec=' + encodeURIComponent(embedCode) +
-      '&pbid=' + encodeURIComponent(playerId);
+    src += '&ec=' + encodeURIComponent(this.embedCode_) +
+      '&pbid=' + encodeURIComponent(this.playerId_);
 
     const iframe = createFrameFor(this, src);
 

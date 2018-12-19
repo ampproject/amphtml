@@ -16,5 +16,6 @@
      "title": "amp-accordion",
      "url": "/components/amp-accordion/"
    }
- ]
+ ],
+ "next": "./list.example.json"
 }

@@ -59,12 +59,14 @@ export function gltfViewer(global) {
   loadThree(global, () => {
     const viewer = new GltfViewer(dataReceived, {
       onload: () => {
+        /** @suppress {deprecated} */
         nonSensitiveDataPostMessage('loaded');
       },
       onprogress: e => {
         if (!e.lengthComputable) {
           return;
         }
+        /** @suppress {deprecated} */
         nonSensitiveDataPostMessage('progress', dict({
           'total': e.total,
           'loaded': e.loaded,
@@ -72,6 +74,7 @@ export function gltfViewer(global) {
       },
       onerror: err => {
         user().error('3DGLTF', err);
+        /** @suppress {deprecated} */
         nonSensitiveDataPostMessage('error', dict({
           'error': (err || '').toString(),
         }));
@@ -80,6 +83,7 @@ export function gltfViewer(global) {
     listenParent(global, 'action', msg => {
       viewer.actions[msg['action']](msg['args']);
     });
+    /** @suppress {deprecated} */
     nonSensitiveDataPostMessage('ready');
   });
 }

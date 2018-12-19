@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
@@ -49,7 +48,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -94,6 +93,7 @@ describe('Activity getTotalEngagedTime', () => {
       // required to instantiate Viewport service
       addEventListener: () => {},
       removeEventListener: () => {},
+      Promise: window.Promise,
     };
     fakeDoc.defaultView = fakeWin;
 
@@ -252,7 +252,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -297,6 +297,7 @@ describe('Activity getIncrementalEngagedTime', () => {
       // required to instantiate Viewport service
       addEventListener: () => {},
       removeEventListener: () => {},
+      Promise: window.Promise,
     };
     fakeDoc.defaultView = fakeWin;
 
@@ -340,7 +341,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     sandbox.restore();
   });
 
-  it('should have 0 seconds of incremental engaged' +
+  it('should have 0 seconds of incremental engaged ' +
   'time with no activity', () => {
     return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
   });

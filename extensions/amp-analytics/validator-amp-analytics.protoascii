@@ -22,8 +22,8 @@ tags: {  # amp-analytics
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-analytics"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
@@ -61,7 +61,7 @@ tags: {  # <amp-analytics>
   attrs: {
     name: "config"
     value_url: {
-      allowed_protocol: "https"
+      protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }

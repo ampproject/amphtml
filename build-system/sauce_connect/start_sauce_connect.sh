@@ -20,9 +20,10 @@
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 
-SC_VERSION="sc-4.4.12-linux"
+SC_VERSION="sc-4.5.2-linux"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
-TAR_FILE="$SC_VERSION.tar.gz"
+DOWNLOAD_DIR="sauce_connect"
+TAR_FILE="$DOWNLOAD_DIR/$SC_VERSION.tar.gz"
 BINARY_FILE="$SC_VERSION/bin/sc"
 PID_FILE="sauce_connect_pid"
 LOG_FILE="sauce_connect_log"
@@ -30,9 +31,13 @@ READY_FILE="sauce_connect_ready"
 READY_DELAY_SECS=60
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
 
-# Download and unpack sauce connect proxy binary.
-echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
-wget -q "$DOWNLOAD_URL"
+# Download the sauce connect proxy binary (if needed) and unpack it.
+if [[ -f $TAR_FILE ]]; then
+  echo "$LOG_PREFIX Using cached Sauce Connect binary $(CYAN "$TAR_FILE")"
+else
+  echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
+  wget -q "$DOWNLOAD_URL" -P "$DOWNLOAD_DIR"
+fi
 echo "$LOG_PREFIX Unpacking $(CYAN "$TAR_FILE")"
 tar -xzf "$TAR_FILE"
 
@@ -67,16 +72,16 @@ do
     echo "$LOG_PREFIX Sauce Connect Proxy with tunnel ID $(CYAN "$TUNNEL_ID") and identifier $(CYAN "$TUNNEL_IDENTIFIER") is now running as pid $(CYAN "$PID")"
     break
   else
-      # Continue waiting.
-      sleep 1
-      (( count++ ))
-      if [ $count -eq $READY_DELAY_SECS ]
-      then
-        # Print the error logs.
-        echo "$LOG_PREFIX Sauce Connect Proxy has not started after $(CYAN "$READY_DELAY_SECS") seconds."
-        echo "$LOG_PREFIX Log file contents:"
-        cat "$LOG_FILE"
-        exit 1
-      fi
+    # Continue waiting.
+    sleep 1
+    (( count++ ))
+    if [ $count -eq $READY_DELAY_SECS ]
+    then
+      # Print the error logs.
+      echo "$LOG_PREFIX Sauce Connect Proxy has not started after $(CYAN "$READY_DELAY_SECS") seconds."
+      echo "$LOG_PREFIX Log file contents:"
+      cat "$LOG_FILE"
+      exit 1
+    fi
   fi
 done

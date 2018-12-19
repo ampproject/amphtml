@@ -131,7 +131,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   height: 100% !important;
   justify-content: center !important;
   position: relative !important;
-  scroll-snap-align: center !important;
+  scroll-snap-align: start !important;
   width: 100% !important;
 }
 
@@ -152,7 +152,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex: 0 0 1px !important;
   height: 100% !important;
   position: relative !important;
-  scroll-snap-align: center !important;
+  scroll-snap-align: start !important;
   width: 1px !important;
 }
 

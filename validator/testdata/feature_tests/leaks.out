@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@ FAIL
 |    This tests a bunch of cases that might allow AMP pages to leak network
 |    requests during a browser prefetch from a search result page. These are
 |    cases that the validator considers not allowed.
-|  
+|
 |    All of these test cases should produce errors.
 |  -->
 |  <!doctype html SYSTEM "https://leaking.via/doctype">
@@ -27,12 +27,12 @@ FAIL
 feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
 feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
-|  
+|
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
-feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
-|  
-|  
+feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+|
+|
 |  <!-- AMP boilerplate which should not produce errors -->
 |  <head>
 |  <meta charset="utf-8">
@@ -40,12 +40,12 @@ feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'ht
 |  <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |  <link rel=canonical href="self" />
-|  
-|  
+|
+|
 |  <base href="https://leaking.via/base-href/">
 >> ^~~~~~~~~
 feature_tests/leaks.html:38:0 The attribute 'href' in tag 'base' is set to the invalid value 'https://leaking.via/base-href/'. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %CSS
 |  -->
@@ -57,14 +57,14 @@ feature_tests/leaks.html:44:4 CSS syntax error in tag 'style amp-custom' - saw i
 >>     ^~~~~~~~~
 feature_tests/leaks.html:45:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@import'. [AUTHOR_STYLESHEET_PROBLEM]
 |  </style>
-|  
+|
 |  <!--
 |  %Redirects
 |  -->
 |  <meta http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
 >> ^~~~~~~~~
 feature_tests/leaks.html:51:0 The attribute 'http-equiv' may not appear in tag 'meta name= and content='. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %CSP
 |  -->
@@ -74,7 +74,7 @@ feature_tests/leaks.html:56:0 The attribute 'http-equiv' may not appear in tag '
 |  <meta http-equiv="Content-Security-Policy-Report-Only" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri-2">
 >> ^~~~~~~~~
 feature_tests/leaks.html:57:0 The attribute 'http-equiv' may not appear in tag 'meta name= and content='. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %Links
 |  -->
@@ -90,7 +90,7 @@ feature_tests/leaks.html:64:0 The attribute 'rel' in tag 'link rel=' is set to t
 |  <link rel="subresource" href="https://leaking.via/link-subresource">
 >> ^~~~~~~~~
 feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'subresource'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %MSIE Imports
 |  -->
@@ -99,10 +99,10 @@ feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link rel=' is set to t
 feature_tests/leaks.html:70:0 Tag or text which is only allowed inside the body section found outside of the body section. [DISALLOWED_HTML]
 >> ^~~~~~~~~
 feature_tests/leaks.html:70:0 The tag 'import' is disallowed. [DISALLOWED_HTML]
-|  
+|
 |  </head>
 |  <body>
-|  
+|
 |  <!--
 |  %Table Background
 |  -->
@@ -115,7 +115,7 @@ feature_tests/leaks.html:78:0 The attribute 'background' may not appear in tag '
 feature_tests/leaks.html:80:8 The attribute 'background' may not appear in tag 'td'. [DISALLOWED_HTML]
 |      </tr>
 |  </table>
-|  
+|
 |  <!--
 |  %Images
 |  -->
@@ -131,26 +131,22 @@ feature_tests/leaks.html:89:0 The tag 'img' may only appear as a descendant of t
 |  <img src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttp:%2f/leaking.via/svg-via-data'></image></svg>">
 >> ^~~~~~~~~
 feature_tests/leaks.html:90:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
-|  
-|  <image src="https://leaking.via/image-src">
+|
+|  <image src="https://leaking.via/image-src"></image>
 >> ^~~~~~~~~
 feature_tests/leaks.html:92:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
-|  <image href="https://leaking.via/image-href">
+|  <image href="https://leaking.via/image-href"></image>
 >> ^~~~~~~~~
 feature_tests/leaks.html:93:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
-|  
+|
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:95:0 The tag 'picture' is disallowed. [DISALLOWED_HTML]
+feature_tests/leaks.html:95:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |      <source srcset="https://leaking.via/picture-source-srcset">
->>     ^~~~~~~~~
-feature_tests/leaks.html:96:4 The parent tag of tag 'amp-ima-video > source' is 'picture', but it can only be 'amp-ima-video'. (see https://www.ampproject.org/docs/reference/components/amp-ima-video) [AMP_TAG_PROBLEM]
->>     ^~~~~~~~~
-feature_tests/leaks.html:96:4 The tag 'amp-ima-video > source' requires including the 'amp-ima-video' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-ima-video) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </picture>
 |  <picture>
 >> ^~~~~~~~~
-feature_tests/leaks.html:98:0 The tag 'picture' is disallowed. [DISALLOWED_HTML]
+feature_tests/leaks.html:98:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
 |      <img srcset="https://leaking.via/picture-img-srcset">
 >>     ^~~~~~~~~
 feature_tests/leaks.html:99:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
@@ -162,7 +158,7 @@ feature_tests/leaks.html:101:0 The tag 'img' may only appear as a descendant of 
 >> ^~~~~~~~~
 feature_tests/leaks.html:102:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |  <!-- longdesc works on Firefox but requires right-click, "View Description" -->
-|  
+|
 |  <!--
 |  %Forms
 |  -->
@@ -184,7 +180,7 @@ feature_tests/leaks.html:111:0 The mandatory attribute 'target' is missing in ta
 feature_tests/leaks.html:111:0 The tag 'FORM [method=GET]' requires including the 'amp-form' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-form) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>                         ^~~~~~~~~
 feature_tests/leaks.html:111:24 The tag 'isindex' is disallowed. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %Media
 |  -->
@@ -212,7 +208,7 @@ feature_tests/leaks.html:124:0 The tag 'audio' may only appear as a descendant o
 |  <video poster="https://leaking.via/video-poster" src="https://leaking.via/video-poster-2"></video>
 >> ^~~~~~~~~
 feature_tests/leaks.html:127:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
-|  
+|
 |  <!--
 |  %Object & Embed
 |  -->
@@ -255,8 +251,8 @@ feature_tests/leaks.html:144:0 The tag 'object' is disallowed. [DISALLOWED_HTML]
 >>     ^~~~~~~~~
 feature_tests/leaks.html:145:4 The tag 'param' is disallowed. [DISALLOWED_HTML]
 |  </object>
-|  
-|  
+|
+|
 |  <!--
 |  %Script
 |  -->
@@ -274,7 +270,7 @@ feature_tests/leaks.html:154:5 Custom JavaScript is not allowed. (see https://ww
 feature_tests/leaks.html:155:0 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
-|  
+|
 |  <!--
 |  %Frames
 |  -->
@@ -299,7 +295,7 @@ feature_tests/leaks.html:167:0 The tag 'iframe' may only appear as a descendant 
 |  <iframe src="javascript:atob('PGltZyBzcmM9Imh0dHBzOi8vbGVha2luZy52aWEvaWZyYW1lLWphdmFzY3JpcHQtc3JjLTMiPg==')"></iframe>
 >> ^~~~~~~~~
 feature_tests/leaks.html:168:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
-|  
+|
 |  <!--
 |  %Menu
 |  -->
@@ -313,8 +309,8 @@ feature_tests/leaks.html:174:0 The tag 'menu' is disallowed. [DISALLOWED_HTML]
 >>     ^~~~~~~~~
 feature_tests/leaks.html:175:4 The tag 'menuitem' is disallowed. [DISALLOWED_HTML]
 |  </menu>
-|  
-|  
+|
+|
 |  <!--
 |  %Applet
 |  -->
@@ -327,7 +323,7 @@ feature_tests/leaks.html:183:0 The tag 'applet' is disallowed. [DISALLOWED_HTML]
 |  <applet code="Test" object="https://leaking.via/applet-object"></applet>
 >> ^~~~~~~~~
 feature_tests/leaks.html:184:0 The tag 'applet' is disallowed. [DISALLOWED_HTML]
-|  
+|
 |  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 |      <image xmlns:xlink="http://www.w3.org/1999/xlink">
 |          <animate attributeName="xlink:href" begin="0s" from="#" to="https://leaking.via/svg-image-animate" />
@@ -335,20 +331,20 @@ feature_tests/leaks.html:184:0 The tag 'applet' is disallowed. [DISALLOWED_HTML]
 feature_tests/leaks.html:188:8 The tag 'animate' is disallowed. [DISALLOWED_HTML]
 |      </image>
 |  </svg>
-|  
+|
 |  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 |      <feImage xlink:href="https://leaking.via/svg-feimage" />
 >>     ^~~~~~~~~
 feature_tests/leaks.html:193:4 The tag 'feimage' is disallowed. [DISALLOWED_HTML]
 |  </svg>
-|  
+|
 |  <!--
 |  %XSLT Stylesheets
 |  -->
 |  <?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
 >> ^~~~~~~~~
 feature_tests/leaks.html:199:0 The tag '?xml-stylesheet' is disallowed. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %Data Islands
 |  -->
@@ -362,7 +358,7 @@ feature_tests/leaks.html:205:0 The attribute 'datafld' may not appear in tag 'di
 feature_tests/leaks.html:205:0 The attribute 'dataformatas' may not appear in tag 'div'. [DISALLOWED_HTML]
 >> ^~~~~~~~~
 feature_tests/leaks.html:205:0 The attribute 'datasrc' may not appear in tag 'div'. [DISALLOWED_HTML]
-|  
+|
 |  <!--
 |  %VML
 |  -->
@@ -386,6 +382,6 @@ feature_tests/leaks.html:215:0 The tag 'vmlframe' is disallowed. [DISALLOWED_HTM
 |      style="behavior:url(#default#vml);position:absolute;width:100%;height:100%" 
 |      src="https://leaking.via/vmlframe-src#xss">
 |  </vmlframe>
-|  
+|
 |  </body>
 |  </html>

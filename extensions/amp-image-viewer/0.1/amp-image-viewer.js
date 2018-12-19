@@ -37,6 +37,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
+import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -49,9 +50,6 @@ const ELIGIBLE_TAGS = {
   'amp-img': true,
   'amp-anim': true,
 };
-
-const SUPPORT_VALIDATION_MSG = `amp-image-viewer should have its target element
-   as the one and only child`;
 
 export class AmpImageViewer extends AMP.BaseElement {
 
@@ -126,10 +124,15 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
-    user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
+    user().assert(
+        children.length == 1,
+        '%s should have its target element as its one and only child',
+        TAG);
     user().assert(
         this.elementIsSupported_(children[0]),
-        children[0].tagName + ' is not supported by <amp-image-viewer>'
+        '%s is not supported by %s',
+        children[0].tagName,
+        TAG
     );
 
     this.sourceAmpImage_ = children[0];
@@ -148,9 +151,18 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (this.loadPromise_) {
       return this.loadPromise_;
     }
-    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
-    this.loadPromise_ = this.sourceAmpImage_.signals()
-        .whenSignal(CommonSignals.LOAD_END)
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||
+      ampImg.classList.contains('i-amphtml-layout');
+    const laidOutPromise = isLaidOut
+      ? Promise.resolve()
+      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
+
+    if (!isLaidOut) {
+      this.scheduleLayout(ampImg);
+    }
+
+    this.loadPromise_ = laidOutPromise
         .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
         .then(() => this.setupGestures_());
@@ -170,9 +182,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (this.sourceAmpImage_) {
-      this.scheduleLayout(this.sourceAmpImage_);
-    }
     if (!this.loadPromise_) {
       return;
     }
@@ -276,7 +285,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.srcset_ = srcsetFromElement(ampImg);
 
     return this.mutateElement(() => {
-      st.setStyles(dev().assertElement(this.image_), {
+      setStyles(dev().assertElement(this.image_), {
         top: 0,
         left: 0,
         width: 0,
@@ -344,7 +353,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       const image = dev().assertElement(this.image_);
       return this.mutateElement(() => {
         // Set the actual dimensions of the image
-        st.setStyles(image, {
+        setStyles(image, {
           top: st.px(this.imageBox_.top),
           left: st.px(this.imageBox_.left),
           width: st.px(this.imageBox_.width),
@@ -552,7 +561,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   updatePanZoom_() {
-    st.setStyles(dev().assertElement(this.image_), {
+    setStyles(dev().assertElement(this.image_), {
       transform: st.translate(this.posX_, this.posY_) +
           ' ' + st.scale(this.scale_),
     });

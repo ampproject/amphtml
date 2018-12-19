@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty} from './amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
@@ -58,7 +62,7 @@ export class InfoDialog {
     this.localizationService_ = Services.localizationService(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -138,8 +142,8 @@ export class InfoDialog {
   }
 
   /**
-   * Reacts to menu state updates and decides whether to show either the native
-   * system sharing, or the fallback UI.
+   * Reacts to dialog state updates and decides whether to show either the
+   * native system sharing, or the fallback UI.
    * @param {boolean} isOpen
    * @private
    */
@@ -175,23 +179,15 @@ export class InfoDialog {
    * @private
    */
   requestMoreInfoLink_() {
-    const messagingPromise = this.viewer_.whenMessagingReady();
-
-    if (!messagingPromise) {
-      // There is no viewer to supply the more info URL.
+    if (!this.viewer_.isEmbedded()) {
       return Promise.resolve();
     }
-
-    return messagingPromise
-        .then(() => {
-          return this.viewer_./*OK*/sendMessageAwaitResponse('moreInfoLinkUrl',
-              /* data */ undefined);
-        })
+    return this.viewer_./*OK*/sendMessageAwaitResponse(
+        'moreInfoLinkUrl', /* data */ undefined)
         .then(moreInfoUrl => {
           if (!moreInfoUrl) {
             return null;
           }
-
           return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
         });
   }

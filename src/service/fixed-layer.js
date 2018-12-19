@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
+import {Pass} from '../pass';
 import {Services} from '../services';
+import {closest, domOrderComparator, matches} from '../dom';
 import {
   computedStyle,
+  getStyle,
   getVendorJsPropertyName,
   setImportantStyles,
+  setInitialDisplay,
   setStyle,
   setStyles,
+  toggle,
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
@@ -32,6 +36,15 @@ const TAG = 'FixedLayer';
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
+/**
+ * Passed to closest to determine if the fixed element is a lightbox, or a
+ * descendant of one. If so, FixedLayer ignores the element. #19149
+ *
+ * @param {!Element} el
+ */
+function lightboxOrDescendant(el) {
+  return el.tagName.indexOf('LIGHTBOX') !== -1;
+}
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
@@ -71,7 +84,7 @@ export class FixedLayer {
     /** @private @const {boolean} */
     this.transfer_ = transfer && ampdoc.isSingleDoc();
 
-    /** @private {?Element} */
+    /** @private {?TransferLayerDef} */
     this.transferLayer_ = null;
 
     /** @private {number} */
@@ -79,6 +92,14 @@ export class FixedLayer {
 
     /** @const @private {!Array<!ElementDef>} */
     this.elements_ = [];
+
+    /** @const @private {!Pass} */
+    this.updatePass_ = new Pass(ampdoc.win, () => {
+      this.update();
+    });
+
+    /** @private {?MutationObserver} */
+    this.mutationObserver_ = null;
   }
 
   /**
@@ -87,7 +108,9 @@ export class FixedLayer {
   setVisible(visible) {
     if (this.transferLayer_) {
       this.vsync_.mutate(() => {
-        setStyle(this.transferLayer_, 'visibility',
+        setStyle(
+            this.transferLayer_.getRoot(),
+            'visibility',
             visible ? 'visible' : 'hidden');
       });
     }
@@ -101,6 +124,8 @@ export class FixedLayer {
     if (!stylesheets) {
       return;
     }
+
+
 
     const fixedSelectors = [];
     const stickySelectors = [];
@@ -121,8 +146,12 @@ export class FixedLayer {
 
     this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
-    // Sort in document order.
+    // Sort tracked elements in document order.
     this.sortInDomOrder_();
+
+    if (this.elements_.length > 0) {
+      this.observeHiddenMutations();
+    }
 
     const platform = Services.platformFor(this.ampdoc.win);
     if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
@@ -132,6 +161,70 @@ export class FixedLayer {
     }
 
     this.update();
+  }
+
+  /**
+   * Begin observing changes to the hidden attribute.
+   * @visibleForTesting
+   */
+  observeHiddenMutations() {
+    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
+      return;
+    }
+    const mo = this.initMutationObserver_();
+    mo.observe(this.ampdoc.getRootNode(), {
+      attributes: true,
+      subtree: true,
+    });
+  }
+
+  /**
+   * Stop observing changes to the hidden attribute. Does not destroy the
+   * mutation observer.
+   */
+  unobserveHiddenMutations_() {
+    this.clearMutationObserver_();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.disconnect();
+    }
+  }
+
+  /**
+   * Clears the mutation observer and its pass queue.
+   */
+  clearMutationObserver_() {
+    this.updatePass_.cancel();
+    const mo = this.mutationObserver_;
+    if (mo) {
+      mo.takeRecords();
+    }
+  }
+
+  /**
+   * @return {!MutationObserver}
+   */
+  initMutationObserver_() {
+    if (this.mutationObserver_) {
+      return this.mutationObserver_;
+    }
+
+    const mo = new this.ampdoc.win.MutationObserver(mutations => {
+      if (this.updatePass_.isPending()) {
+        return;
+      }
+
+      for (let i = 0; i < mutations.length; i++) {
+        const mutation = mutations[i];
+        if (mutation.attributeName === 'hidden') {
+          // Wait one animation frame so that other mutations may arrive.
+          this.updatePass_.schedule(16);
+          return;
+        }
+      }
+    });
+
+    return this.mutationObserver_ = mo;
   }
 
   /**
@@ -189,23 +282,24 @@ export class FixedLayer {
   /**
    * Adds the element directly into the fixed/sticky layer, bypassing discovery.
    * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the transfer layer.
+   * @param {boolean=} opt_forceTransfer If set to true, then the element needs
+   *    to be forcefully transferred to the transfer layer. If false, then it
+   *    will only receive top-padding compensation for the header and never be
+   *    transferred.
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
-    const {win} = this.ampdoc;
-    if (!element./*OK*/offsetParent &&
-        computedStyle(win, element).display === 'none') {
-      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
-          element.tagName);
-    }
     this.setupElement_(
         element,
         /* selector */ '*',
         /* position */ 'fixed',
         opt_forceTransfer);
     this.sortInDomOrder_();
+
+    // If this is the first element, we need to start the mutation observer.
+    // This'll only be created once.
+    this.observeHiddenMutations();
+
     return this.update();
   }
 
@@ -220,10 +314,13 @@ export class FixedLayer {
         for (let i = 0; i < removed.length; i++) {
           const fe = removed[i];
           if (fe.position == 'fixed') {
-            this.returnFromTransferLayer_(fe);
+            this.transferLayer_.returnFrom(fe);
           }
         }
       });
+      if (!this.elements_.length) {
+        this.unobserveHiddenMutations_();
+      }
     }
   }
 
@@ -265,6 +362,9 @@ export class FixedLayer {
       return Promise.resolve();
     }
 
+    // Clear out the mutation observer's queue since we're doing the work now.
+    this.clearMutationObserver_();
+
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
     // it will be decorated and possibly moved to a separate layer.
@@ -303,7 +403,7 @@ export class FixedLayer {
 
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
-          const {element} = fe;
+          const {element, forceTransfer} = fe;
           const style = computedStyle(win, element);
 
           const {offsetWidth, offsetHeight, offsetTop} = element;
@@ -317,12 +417,8 @@ export class FixedLayer {
           const transform = style[getVendorJsPropertyName(style, 'transform')];
           let {top} = style;
 
-          // Element is indeed fixed. Visibility is added to the test to
-          // avoid moving around invisible elements.
-          const isFixed = (
-            position == 'fixed' &&
-              (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
-          // Element is indeed sticky.
+          const isFixed = position === 'fixed' &&
+            (forceTransfer || (offsetWidth > 0 && offsetHeight > 0));
           const isSticky = endsWith(position, 'sticky');
           const isDisplayed = (display !== 'none');
 
@@ -346,20 +442,31 @@ export class FixedLayer {
             }
           }
 
-          // Transferability requires element to be fixed and top or bottom to
-          // be styled with `0`. Also, do not transfer transparent
-          // elements - that's a lot of work for no benefit.  Additionally,
-          // transparent elements used for "service" needs and thus
-          // best kept in the original tree. The visibility, however, is not
-          // considered because `visibility` CSS is inherited. Also, the
-          // `height` is constrained to at most 300px. This is to avoid
-          // transfering of more substantial sections for now. Likely to be
-          // relaxed in the future.
-          const isTransferrable = isFixed && (
-            fe.forceTransfer || (
-              opacity > 0 &&
-                  offsetHeight < 300 &&
-                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
+          // Transferability requires an element to be:
+          // 1. Greater than 0% opacity. That's a lot of work for no benefit.
+          //    Additionally, transparent elements used for "service" needs and
+          //    thus best kept in the original tree. The visibility, however,
+          //    is not considered because `visibility` CSS is inherited.
+          // 2. Height < 300. This avoids transferring large sections of UI,
+          //    e.g. publisher-customized amp-consent UI (#17995).
+          // 3. Has `top` or `bottom` CSS set. This ensures we only transfer
+          //    fixed elements that are _not_ auto-positioned to avoid jumping
+          //    position after transferring to the fixed layer (due to loss of
+          //    parent positioning context). We could calculate this offset, but
+          //    we don't (yet).
+          let isTransferrable = false;
+          if (isFixed) {
+            if (forceTransfer === true) {
+              isTransferrable = true;
+            } else if (forceTransfer === false) {
+              isTransferrable = false;
+            } else {
+              isTransferrable = (
+                opacity > 0 &&
+                offsetHeight < 300 &&
+                !!(top || bottom));
+            }
+          }
           if (isTransferrable) {
             hasTransferables = true;
           }
@@ -375,10 +482,7 @@ export class FixedLayer {
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
-          const transferLayer = this.getTransferLayer_();
-          if (transferLayer.className != this.ampdoc.getBody().className) {
-            transferLayer.className = this.ampdoc.getBody().className;
-          }
+          this.getTransferLayer_().update();
         }
         const elements = this.elements_;
         for (let i = 0; i < elements.length; i++) {
@@ -404,15 +508,6 @@ export class FixedLayer {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
-  }
-
-  /**
-   * We currently only allow elements with `top: 0` or `bottom: 0`.
-   * @param {string} s
-   * @return {boolean}
-   */
-  isAllowedCoord_(s) {
-    return (!!s && parseInt(s, 10) == 0);
   }
 
   /**
@@ -447,7 +542,7 @@ export class FixedLayer {
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           fixedSelector);
       for (let j = 0; j < elements.length; j++) {
-        if (j > 10) {
+        if (this.elements_.length > 10) {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
@@ -472,13 +567,11 @@ export class FixedLayer {
    * @private
    */
   warnAboutInlineStylesIfNecessary_(element) {
-    if (isExperimentOn(this.ampdoc.win, 'inline-styles')) {
-      if (element.hasAttribute('style')
-          && (element.style.top || element.style.bottom)) {
-        user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
-            'CSS rules are not supported yet for fixed or sticky elements ' +
-            '(#14186). Unexpected behavior may occur.', element);
-      }
+    if (element.hasAttribute('style')
+        && (getStyle(element, 'top') || getStyle(element, 'bottom'))) {
+      user().error(TAG, 'Inline styles with `top`, `bottom` and other ' +
+          'CSS rules are not supported yet for fixed or sticky elements ' +
+          '(#14186). Unexpected behavior may occur.', element);
     }
   }
 
@@ -497,6 +590,11 @@ export class FixedLayer {
   setupElement_(element, selector, position, opt_forceTransfer) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
     this.warnAboutInlineStylesIfNecessary_(element);
+
+    // TODO(jridgewell, #19149): This should be an official API.
+    if (closest(element, lightboxOrDescendant)) {
+      return;
+    }
 
     let fe = null;
     for (let i = 0; i < this.elements_.length; i++) {
@@ -532,7 +630,7 @@ export class FixedLayer {
       this.elements_.push(fe);
     }
 
-    fe.forceTransfer = isFixed && !!opt_forceTransfer;
+    fe.forceTransfer = isFixed ? opt_forceTransfer : false;
   }
 
   /**
@@ -557,16 +655,12 @@ export class FixedLayer {
     return removed;
   }
 
-  /** @private */
+  /**
+   * @private
+   */
   sortInDomOrder_() {
-    this.elements_.sort(function(fe1, fe2) {
-      // 8 | 2 = 0x0A
-      // 2 - preceeding
-      // 8 - contains
-      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
-        return 1;
-      }
-      return -1;
+    this.elements_.sort((fe1, fe2) => {
+      return domOrderComparator(fe1.element, fe2.element);
     });
   }
 
@@ -590,8 +684,9 @@ export class FixedLayer {
     fe.transform = state.transform;
 
     // Move back to the BODY layer and reset transfer z-index.
-    if (oldFixed && (!state.fixed || !state.transferrable)) {
-      this.returnFromTransferLayer_(fe);
+    if (oldFixed && (!state.fixed || !state.transferrable) &&
+        this.transferLayer_) {
+      this.transferLayer_.returnFrom(fe);
     }
 
     // Update `top`. This is necessary to adjust position to the viewer's
@@ -602,7 +697,7 @@ export class FixedLayer {
         // non iOS Safari.
         setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
       } else {
-        // On iOS Safari (this.transfer_ = true), stickies need to be cannot
+        // On iOS Safari (this.transfer_ = true), stickies cannot
         // have an offset because they are already offset by the padding-top.
         if (this.committedPaddingTop_ === this.paddingTop_) {
           // So, when the header is shown, just use top.
@@ -616,96 +711,13 @@ export class FixedLayer {
     }
 
     // Move element to the fixed layer.
-    if (this.transfer_ && state.fixed && !oldFixed && state.transferrable) {
-      this.transferToTransferLayer_(fe, index, state);
+    if (this.transfer_ && state.fixed && state.transferrable) {
+      this.getTransferLayer_().transferTo(fe, index, state);
     }
   }
 
   /**
-   * @param {!ElementDef} fe
-   * @param {number} index
-   * @param {!ElementStateDef} state
-   * @private
-   */
-  transferToTransferLayer_(fe, index, state) {
-    const {element} = fe;
-    if (element.parentElement == this.transferLayer_) {
-      return;
-    }
-
-    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
-        ' we now move the element to a fixed positioning layer:', fe.element);
-
-    if (!fe.placeholder) {
-      // Never been transfered before: ensure that it's properly configured.
-      setStyle(element, 'pointer-events', 'initial');
-      const placeholder = fe.placeholder = htmlFor(element)`
-          <i-amphtml-fpa style="display: none"></i-amphtml-fpa>`;
-      placeholder.setAttribute('i-amphtml-fixedid', fe.id);
-    }
-
-    // Calculate z-index based on the declared z-index and DOM position.
-    setStyle(element, 'zIndex',
-        `calc(${10000 + index} + ${state.zIndex || 0})`);
-
-    element.parentElement.replaceChild(fe.placeholder, element);
-    this.getTransferLayer_().appendChild(element);
-
-    // Test if the element still matches one of the `fixed` selectors. If not
-    // return it back to BODY.
-    const matches = fe.selectors.some(
-        selector => this.matches_(element, selector));
-    if (!matches) {
-      user().warn(TAG,
-          'Failed to move the element to the fixed position layer.' +
-          ' This is most likely due to the compound CSS selector:',
-          fe.element);
-      this.returnFromTransferLayer_(fe);
-    }
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {string} selector
-   * @return {boolean}
-   */
-  matches_(element, selector) {
-    try {
-      const matcher = element.matches ||
-          element.webkitMatchesSelector ||
-          element.mozMatchesSelector ||
-          element.msMatchesSelector ||
-          element.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(element, selector);
-      }
-    } catch (e) {
-      // Fail silently.
-      dev().error(TAG, 'Failed to test query match:', e);
-    }
-    return false;
-  }
-
-  /**
-   * @param {!ElementDef} fe
-   * @private
-   */
-  returnFromTransferLayer_(fe) {
-    if (!fe.placeholder || !this.ampdoc.contains(fe.placeholder)) {
-      return;
-    }
-    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (this.ampdoc.contains(fe.element)) {
-      setStyle(fe.element, 'zIndex', '');
-      fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
-    } else {
-      fe.placeholder.parentElement.removeChild(fe.placeholder);
-    }
-  }
-
-  /**
-   * @return {?Element}
+   * @return {?TransferLayerDef}
    */
   getTransferLayer_() {
     // This mode is only allowed for a single-doc case.
@@ -713,35 +725,10 @@ export class FixedLayer {
       return this.transferLayer_;
     }
     const doc = this.ampdoc.win.document;
-    this.transferLayer_ = doc.body.cloneNode(/* deep */ false);
-    this.transferLayer_.removeAttribute('style');
-    setStyles(this.transferLayer_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      height: 0,
-      width: 0,
-      pointerEvents: 'none',
-      overflow: 'hidden',
-
-      // Reset possible BODY styles.
-      animation: 'none',
-      background: 'none',
-      border: 'none',
-      borderImage: 'none',
-      boxSizing: 'border-box',
-      boxShadow: 'none',
-      display: 'block',
-      float: 'none',
-      margin: 0,
-      opacity: 1,
-      outline: 'none',
-      padding: 'none',
-      transform: 'none',
-      transition: 'none',
-      visibility: 'visible',
-    });
-    doc.documentElement.appendChild(this.transferLayer_);
+    this.transferLayer_ =
+        doc.body.shadowRoot ?
+          new TransferLayerShadow(doc) :
+          new TransferLayerBody(doc);
     return this.transferLayer_;
   }
 
@@ -755,18 +742,23 @@ export class FixedLayer {
   discoverSelectors_(rules, foundSelectors, stickySelectors) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
+      if (rule.type == /* CSSMediaRule */ 4 ||
+          rule.type == /* CSSSupportsRule */ 12) {
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        continue;
+      }
+
       if (rule.type == /* CSSStyleRule */ 1) {
-        if (rule.selectorText != '*' && rule.style.position) {
-          if (rule.style.position == 'fixed') {
-            foundSelectors.push(rule.selectorText);
-          } else if (endsWith(rule.style.position, 'sticky')) {
-            stickySelectors.push(rule.selectorText);
-          }
+        const {selectorText} = rule;
+        const {position} = rule.style;
+        if (selectorText === '*' || !position) {
+          continue;
         }
-      } else if (rule.type == /* CSSMediaRule */ 4) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
-      } else if (rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
+        if (position === 'fixed') {
+          foundSelectors.push(selectorText);
+        } else if (endsWith(position, 'sticky')) {
+          stickySelectors.push(selectorText);
+        }
       }
     }
   }
@@ -789,6 +781,7 @@ export class FixedLayer {
  */
 let ElementDef;
 
+
 /**
  * @typedef {{
  *   fixed: boolean,
@@ -799,3 +792,250 @@ let ElementDef;
  * }}
  */
 let ElementStateDef;
+
+
+/**
+ * The contract for transfer layer.
+ * @interface
+ */
+class TransferLayerDef {
+
+  /**
+   * @return {!Element}
+   */
+  getRoot() {}
+
+  /**
+   * Update most current styles for the transfer layer.
+   */
+  update() {}
+
+  /**
+   * Transfer the element from the body into the transfer layer.
+   * @param {!ElementDef} unusedFe
+   * @param {number} unusedIndex
+   * @param {!ElementStateDef} unusedState
+   */
+  transferTo(unusedFe, unusedIndex, unusedState) {}
+
+  /**
+   * Return the element from the transfer layer back to the body.
+   * @param {!ElementDef} unusedFe
+   */
+  returnFrom(unusedFe) {}
+}
+
+
+/**
+ * The parallel `<body>` element is created and fixed elements are moved into
+ * this element.
+ * @implements {TransferLayerDef}
+ */
+class TransferLayerBody {
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+
+    /** @private @const {!Element} */
+    this.layer_ = doc.body.cloneNode(/* deep */ false);
+    this.layer_.removeAttribute('style');
+    setStyles(this.layer_, {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      height: 0,
+      width: 0,
+      pointerEvents: 'none',
+      overflow: 'hidden',
+
+      // Reset possible BODY styles.
+      animation: 'none',
+      background: 'none',
+      border: 'none',
+      borderImage: 'none',
+      boxSizing: 'border-box',
+      boxShadow: 'none',
+      float: 'none',
+      margin: 0,
+      opacity: 1,
+      outline: 'none',
+      padding: 'none',
+      transform: 'none',
+      transition: 'none',
+      visibility: 'visible',
+    });
+    setInitialDisplay(this.layer_, 'block');
+    doc.documentElement.appendChild(this.layer_);
+  }
+
+  /** @override */
+  getRoot() {
+    return this.layer_;
+  }
+
+  /**
+   * Synchronizes any attribute mutations done on the real body to the layer.
+   * This is to better simulate the body in CSS selectors.
+   * @override
+   */
+  update() {
+    const {body} = this.doc_;
+    const layer = this.layer_;
+    const bodyAttrs = body.attributes;
+    const layerAttrs = layer.attributes;
+    for (let i = 0; i < bodyAttrs.length; i++) {
+      const attr = bodyAttrs[i];
+      // Style is not copied because the fixed-layer must have very precise
+      // styles to enable smooth scrolling.
+      if (attr.name === 'style') {
+        continue;
+      }
+      // Use cloneNode to get around invalid attribute names. Ahem, amp-bind.
+      layerAttrs.setNamedItem(attr.cloneNode(false));
+    }
+    for (let i = 0; i < layerAttrs.length; i++) {
+      const {name} = layerAttrs[i];
+      if (name === 'style' || body.hasAttribute(name)) {
+        continue;
+      }
+      layer.removeAttribute(name);
+      i--;
+    }
+  }
+
+  /** @override */
+  transferTo(fe, index, state) {
+    const {element} = fe;
+    if (element.parentElement == this.layer_) {
+      return;
+    }
+
+    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
+        ' we now move the element to a fixed positioning layer:', fe.element);
+
+    if (!fe.placeholder) {
+      // Never been transfered before: ensure that it's properly configured.
+      setStyle(element, 'pointer-events', 'initial');
+      const placeholder = fe.placeholder = this.doc_.createElement(
+          'i-amphtml-fpa');
+      toggle(placeholder, false);
+      placeholder.setAttribute('i-amphtml-fixedid', fe.id);
+    }
+
+    // Calculate z-index based on the declared z-index and DOM position.
+    setStyle(element, 'zIndex',
+        `calc(${10000 + index} + ${state.zIndex || 0})`);
+
+    element.parentElement.replaceChild(fe.placeholder, element);
+    this.layer_.appendChild(element);
+
+    // Test if the element still matches one of the `fixed` selectors. If not
+    // return it back to BODY.
+    const matches = fe.selectors.some(
+        selector => this.matches_(element, selector));
+    if (!matches) {
+      user().warn(TAG,
+          'Failed to move the element to the fixed position layer.' +
+          ' This is most likely due to the compound CSS selector:',
+          fe.element);
+      this.returnFrom(fe);
+    }
+  }
+
+  /** @override */
+  returnFrom(fe) {
+    if (!fe.placeholder || !this.doc_.contains(fe.placeholder)) {
+      return;
+    }
+    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
+    if (this.doc_.contains(fe.element)) {
+      setStyle(fe.element, 'zIndex', '');
+      fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
+    } else {
+      fe.placeholder.parentElement.removeChild(fe.placeholder);
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} selector
+   * @return {boolean}
+   * @private
+   */
+  matches_(element, selector) {
+    try {
+      return matches(element, selector);
+    } catch (e) {
+      // Fail silently.
+      dev().error(TAG, 'Failed to test query match:', e);
+      return false;
+    }
+  }
+}
+
+
+const FIXED_LAYER_SLOT = 'i-amphtml-fixed';
+
+
+/**
+ * The fixed layer is created inside the shadow root of the `<body>` element
+ * and fixed elements are distributed into this element via slots.
+ * @implements {TransferLayerDef}
+ */
+class TransferLayerShadow {
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Element} */
+    this.layer_ = doc.createElement('div');
+    this.layer_.id = 'i-amphtml-fixed-layer';
+    setImportantStyles(this.layer_, {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      height: 0,
+      width: 0,
+      overflow: 'hidden',
+    });
+
+    // The slot where all fixed elements will be distributed.
+    const slot = doc.createElement('slot');
+    slot.setAttribute('name', FIXED_LAYER_SLOT);
+    this.layer_.appendChild(slot);
+
+    doc.body.shadowRoot.appendChild(this.layer_);
+  }
+
+  /** @override */
+  getRoot() {
+    return this.layer_;
+  }
+
+  /** @override */
+  update() {
+    // Nothing to do.
+  }
+
+  /** @override */
+  transferTo(fe) {
+    const {element} = fe;
+
+    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
+        ' we now move the element to a fixed positioning layer:', fe.element);
+
+    // Distribute to the slot.
+    element.setAttribute('slot', FIXED_LAYER_SLOT);
+  }
+
+  /** @override */
+  returnFrom(fe) {
+    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
+    fe.element.removeAttribute('slot');
+  }
+}

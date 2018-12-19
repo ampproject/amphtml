@@ -18,6 +18,7 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
+import {startsWith} from '../src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -69,6 +70,16 @@ export function twitter(global, data) {
     } else if (data.momentid) {
       twttr.widgets.createMoment(data.momentid, tweet, data)
           ./*OK*/then(el => tweetCreated(twttr, el));
+    } else if (data.timelineSourceType) {
+      // Extract properties starting with 'timeline'.
+      const timelineData = Object.keys(data)
+          .filter(prop => startsWith(prop, 'timeline'))
+          .reduce((newData, prop) => {
+            newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+            return newData;
+          }, {});
+      twttr.widgets.createTimeline(timelineData, tweet, data)
+          ./*OK*/then(el => tweetCreated(twttr, el));
     }
   });
 
@@ -106,6 +117,15 @@ export function twitter(global, data) {
     context.updateDimensions(
         container./*OK*/offsetWidth,
         height + /* margins */ 20);
+  }
+
+  /**
+   * @param {string} input
+   * @param {string} prefix
+   */
+  function stripPrefixCamelCase(input, prefix) {
+    const stripped = input.replace(new RegExp('^' + prefix), '');
+    return stripped.charAt(0).toLowerCase() + stripped.substr(1);
   }
 }
 

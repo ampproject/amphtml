@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  ADSENSE_MCRSPV_TAG,
+  getMatchedContentResponsiveHeight,
+} from '../../../ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
@@ -22,6 +26,7 @@ import {
 import {
   Layout, // eslint-disable-line no-unused-vars
   LayoutPriority,
+  isLayoutSizeDefined,
 } from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
@@ -42,10 +47,8 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getIframe} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {preloadBootstrap} from '../../../src/3p-frame';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -71,10 +74,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      */
     this.iframe_ = null;
 
-    /** {?Object} */
+    /** @type {?Object} */
     this.config = null;
 
-    /** {?AmpAdUIHandler} */
+    /** @type {?AmpAdUIHandler} */
     this.uiHandler = null;
 
     /** @private {?AmpAdXOriginIframeHandler} */
@@ -230,7 +233,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(
-        this.win, this.preconnect, this.type_, this.config.remoteHTMLDisabled);
+        this.win, this.preconnect, this.config.remoteHTMLDisabled);
     if (typeof this.config.prefetch == 'string') {
       this.preconnect.preload(this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -408,10 +411,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   attemptFullWidthSizeChange_() {
     const viewportSize = this.getViewport().getSize();
     const maxHeight = Math.min(MAX_FULL_WIDTH_HEIGHT, viewportSize.height);
-    const ratio = this.config.fullWidthHeightRatio;
-    const idealHeight = Math.round(viewportSize.width / ratio);
-    const height = clamp(idealHeight, MIN_FULL_WIDTH_HEIGHT, maxHeight);
     const {width} = viewportSize;
+    const height = this.getFullWidthHeight_(width, maxHeight);
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
@@ -424,5 +425,22 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
         }
     );
+  }
+
+  /**
+   * Calculates the appropriate width for a responsive full width ad unit.
+   * @param {number} width
+   * @param {number} maxHeight
+   * @return {number}
+   * @private
+   */
+  getFullWidthHeight_(width, maxHeight) {
+    // TODO(google a4a eng): remove this once adsense switches fully to
+    // fast fetch.
+    if (this.element.getAttribute('data-auto-format') == ADSENSE_MCRSPV_TAG) {
+      return getMatchedContentResponsiveHeight(width);
+    }
+    return clamp(Math.round(width / this.config.fullWidthHeightRatio),
+        MIN_FULL_WIDTH_HEIGHT, maxHeight);
   }
 }

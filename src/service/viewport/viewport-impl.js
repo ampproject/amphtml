@@ -20,10 +20,14 @@ import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {
+  ViewportBindingIosEmbedShadowRoot_,
+} from './viewport-binding-ios-embed-sd';
+import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {closestBySelector, isIframed} from '../../dom';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -34,7 +38,6 @@ import {
 } from '../../service';
 import {installLayersServiceForDoc} from '../layers-impl';
 import {isExperimentOn} from '../../experiments';
-import {isIframed} from '../../dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -42,6 +45,7 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {setStyle} from '../../style';
+import {tryResolve} from '../../utils/promise';
 
 
 const TAG_ = 'Viewport';
@@ -157,7 +161,8 @@ export class Viewport {
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
     if (this.useLayers_) {
       installLayersServiceForDoc(this.ampdoc,
-          this.binding_.getScrollingElement());
+          this.binding_.getScrollingElement(),
+          this.binding_.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
@@ -372,6 +377,16 @@ export class Viewport {
   }
 
   /**
+   * Resource manager signals to the viewport that content height is changed
+   * and some action may need to be taken.
+   * @restricted Use is restricted due to potentially very heavy performance
+   *   impact. Can only be called when not actively scrolling.
+   */
+  contentHeightChanged() {
+    this.binding_.contentHeightChanged();
+  }
+
+  /**
    * Returns the rect of the viewport which includes scroll positions and size.
    * @return {!../../layout-rect.LayoutRectDef}}
    */
@@ -474,16 +489,27 @@ export class Viewport {
    * Scrolls element into view much like Element. scrollIntoView does but
    * in the AMP/Viewer environment.
    * @param {!Element} element
+   * @return {!Promise}
    */
   scrollIntoView(element) {
+    return this.getScrollingContainerFor_(element).then(parent =>
+      this.scrollIntoViewInternal_(element, parent));
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Element} parent
+   */
+  scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-    let newScrollTop;
-    if (this.useLayers_) {
-      newScrollTop = elementTop + this.getScrollTop();
-    } else {
-      newScrollTop = Math.max(0, elementTop - this.paddingTop_);
-    }
-    this.binding_.setScrollTop(newScrollTop);
+
+    const newScrollTopPromise = this.useLayers_ ?
+      this.getElementScrollTop_(parent)
+          .then(scrollTop => elementTop + scrollTop) :
+      tryResolve(() => Math.max(0, elementTop - this.paddingTop_));
+
+    newScrollTopPromise.then(newScrollTop =>
+      this.setElementScrollTop_(parent, newScrollTop));
   }
 
   /**
@@ -501,42 +527,135 @@ export class Viewport {
     duration = 500,
     curve = 'ease-in',
     pos = 'top') {
+
+    return this.getScrollingContainerFor_(element).then(parent =>
+      this.animateScrollIntoViewInternal_(
+          element,
+          parent,
+          dev().assertNumber(duration),
+          dev().assertString(curve),
+          dev().assertString(pos)));
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Element} parent Should be scrollable.
+   * @param {number} duration
+   * @param {string} curve
+   * @param {string} pos (takes one of 'top', 'bottom', 'center')
+   * @return {!Promise}
+   * @private
+   */
+  animateScrollIntoViewInternal_(element, parent, duration, curve, pos) {
     const elementRect = this.binding_.getLayoutRect(element);
+
+    const {height: parentHeight} = this.isScrollingElement_(parent) ?
+      this.getSize() :
+      this.getLayoutRect(parent);
+
     let offset;
     switch (pos) {
       case 'bottom':
-        offset = -this.getHeight() + elementRect.height;
+        offset = -parentHeight + elementRect.height;
         break;
       case 'center':
-        offset = (-this.getHeight() / 2) + (elementRect.height / 2);
+        offset = (-parentHeight / 2) + (elementRect.height / 2);
         break;
       default:
         offset = 0;
         break;
     }
-    let newScrollTop;
-    let curScrollTop;
 
-    if (this.useLayers_) {
-      newScrollTop = elementRect.top + offset;
-      curScrollTop = 0;
-    } else {
-      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-      newScrollTop = Math.max(0, calculatedScrollTop);
-      curScrollTop = this.getScrollTop();
-    }
-    if (newScrollTop == curScrollTop) {
-      return Promise.resolve();
-    }
+    return this.getElementScrollTop_(parent).then(curScrollTop => {
+      let newScrollTop;
+      if (this.useLayers_) {
+        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
+      } else {
+        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+        newScrollTop = Math.max(0, calculatedScrollTop);
+      }
+      if (newScrollTop == curScrollTop) {
+        return;
+      }
+      return this.interpolateScrollIntoView_(
+          parent, curScrollTop, newScrollTop, duration, curve);
+    });
+  }
+
+  /**
+   * @param {!Element} parent
+   * @param {number} curScrollTop
+   * @param {number} newScrollTop
+   * @param {number} duration
+   * @param {string} curve
+   * @private
+   */
+  interpolateScrollIntoView_(
+    parent, curScrollTop, newScrollTop, duration, curve) {
+
     /** @const {!TransitionDef<number>} */
     const interpolate = numeric(curScrollTop, newScrollTop);
-    // TODO(aghassemi, #10463): the duration should not be a constant and should
-    // be proportional to the distance to be scrolled for better transition
-    // experience when things are closer vs farther.
-    return Animation.animate(this.ampdoc.getRootNode(), position => {
-      this.binding_.setScrollTop(interpolate(position));
-    }, duration, curve).then();
+
+    // TODO(aghassemi, #10463): the duration should not be a constant and
+    // should be proportional to the distance to be scrolled for better
+    // transition experience when things are closer vs farther.
+    return Animation.animate(parent, position => {
+      this.setElementScrollTop_(parent, interpolate(position));
+    }, duration, curve).thenAlways(() => {
+      this.setElementScrollTop_(parent, newScrollTop);
+    });
   }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!Element>}
+   */
+  getScrollingContainerFor_(element) {
+    return this.vsync_.measurePromise(() =>
+      closestBySelector(element, '.i-amphtml-scrollable') ||
+        this.binding_.getScrollingElement());
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {number} scrollTop
+   */
+  setElementScrollTop_(element, scrollTop) {
+    if (this.isScrollingElement_(element)) {
+      this.binding_.setScrollTop(scrollTop);
+      return;
+    }
+    this.vsync_.mutate(() => {
+      element./*OK*/scrollTop = scrollTop;
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<number>}
+   */
+  getElementScrollTop_(element) {
+    if (this.isScrollingElement_(element)) {
+      return tryResolve(() => this.getScrollTop());
+    }
+    return this.vsync_.measurePromise(() => element./*OK*/scrollTop);
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isScrollingElement_(element) {
+    return element == this.binding_.getScrollingElement();
+  }
+
+  /**
+   * @return {!Element}
+   */
+  getScrollingElement() {
+    return this.binding_.getScrollingElement();
+  }
+
 
   /**
    * Registers the handler for ViewportChangedEventDef events.
@@ -640,7 +759,7 @@ export class Viewport {
           'Lightbox mode for A4A is only available when ' +
           "'amp-lightbox-a4a-proto' experiment is on");
 
-      dev().assert(fieOptional).enterFullOverlayMode(requestingElement);
+      fieOptional.enterFullOverlayMode();
     }
   }
 
@@ -1127,7 +1246,14 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+    if (isExperimentOn(ampdoc.win, 'ios-embed-sd') &&
+        ampdoc.win.Element.prototype.attachShadow &&
+        // Even though iOS 10 supports Shadow DOM, the support is buggy.
+        Services.platformFor(ampdoc.win).getMajorVersion() >= 11) {
+      binding = new ViewportBindingIosEmbedShadowRoot_(ampdoc.win);
+    } else {
+      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
+    }
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }

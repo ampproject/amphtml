@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/* global require: false */
-const mustache = require('../../third_party/mustache/mustache');
+import mustache from '../../third_party/mustache/mustache';
+
 
 describe('Mustache', () => {
 
@@ -23,13 +23,13 @@ describe('Mustache', () => {
 
   beforeEach(() => {
     savedSanitizer = mustache.sanitizeUnescaped;
-    mustache.setUnescapedSanitizier(function(value) {
+    mustache.setUnescapedSanitizer(function(value) {
       return value.toUpperCase();
     });
   });
 
   afterEach(() => {
-    mustache.setUnescapedSanitizier(savedSanitizer);
+    mustache.setUnescapedSanitizer(savedSanitizer);
   });
 
   it('should escape html', () => {

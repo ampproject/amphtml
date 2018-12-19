@@ -153,7 +153,7 @@ describes.realWin('test-cid-api', {amp: true}, env => {
     return api.getScopedCid('api-key', 'scope-a').then(cid => {
       expect(cid).to.be.null;
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$ERROR');
-    });
+    }).catch(() => {}); // Prevent the rejection from being thrown.
   });
 
   it('should return null if AMP_TOKEN=$ERROR', () => {

@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# DoubleClick
+# Google Ad Manager
 
 ### <a name="amp-ad-network-doubleclick-impl"></a> `amp-ad-network-doubleclick-impl`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
+    <td>Google Ad Manager implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
     for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
@@ -97,7 +97,7 @@ limitations under the License.
 </table>
 
 #### Examples
-Example - DoubleClick Ad
+Example - Google Ad Manager Ad
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"
@@ -155,7 +155,7 @@ Example with json attribute:
 ```
 
 ### Supported DFP Formats
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
 - Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats

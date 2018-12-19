@@ -14,13 +14,15 @@
     amp-3d-gltf [placeholder] {
       background: green;
     }
-    
+
     section amp-3d-gltf {
       max-width: 600px;
       border: 1px solid black;
     }
   </style>
   <script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -29,7 +31,7 @@
   <h2>Layout: fixed</h2>
   <section>
     <amp-3d-gltf layout="fixed"
-                 alpha="true"
+                 clearColor="cyan"
                  antialiasing="true"
                  width="320"
                  height="240"
@@ -38,13 +40,19 @@
 
   <h2>Layout: responsive</h2>
   <section>
-    <amp-3d-gltf layout="responsive"
-                 alpha="true"
+    <amp-3d-gltf id="bottle"
+                 layout="responsive"
                  antialiasing="true"
                  maxPixelRatio="1.5"
                  width="240"
                  height="320"
                  src="https://webgears-3d.github.io/3d-gltf-static/m/WaterBottle.glb"></amp-3d-gltf>
+    <amp-position-observer on="scroll:bottle.setModelRotation(z=event.percent, zMin=6.59, zMax=5.96)"
+                           intersection-ratios="0.6"
+                           layout="nodisplay">
+    </amp-position-observer>
+    <amp-orientation-observer on="gamma:bottle.setModelRotation(y=event.percent)"
+                              layout="nodisplay"></amp-orientation-observer>
   </section>
 
   <h2>With placeholder</h2>

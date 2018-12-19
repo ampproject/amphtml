@@ -176,6 +176,10 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+  }
+
+  /** @override */
   isPingbackEnabled() {
     return this.platform_.isPingbackEnabled();
   }
@@ -185,9 +189,10 @@ export class ViewerSubscriptionPlatform {
     this.platform_.pingback(selectedPlatform);
   }
 
+
   /** @override */
-  supportsCurrentViewer() {
-    return this.platform_.supportsCurrentViewer();
+  getSupportedScoreFactor(factorName) {
+    return this.platform_.getSupportedScoreFactor(factorName);
   }
 
   /** @override */

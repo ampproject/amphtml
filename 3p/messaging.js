@@ -21,6 +21,7 @@ import {parseJson} from '../src/json';
  * Send messages to parent frame. These should not contain user data.
  * @param {string} type Type of messages
  * @param {!JsonObject=} opt_object Data for the message.
+ * @deprecated Use iframe-messaging-client.js
  */
 export function nonSensitiveDataPostMessage(type, opt_object) {
   if (window.parent == window) {
@@ -45,6 +46,7 @@ const listeners = [];
  * @param {string} type Type of messages
  * @param {function(!JsonObject)} callback Called with data payload of message.
  * @return {function()} function to unlisten for messages.
+ * @deprecated Use iframe-messaging-client.js
  */
 export function listenParent(win, type, callback) {
   const listener = {

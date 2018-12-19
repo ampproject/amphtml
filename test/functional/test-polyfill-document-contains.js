@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {install} from '../../src/polyfills/document-contains';
 
 
@@ -31,7 +30,7 @@ describe('HTMLDocument.contains', () => {
   let disconnectedChild;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     fakeWinWithContains = {
       HTMLDocument: class {

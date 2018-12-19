@@ -17,6 +17,7 @@
 import {HighlightHandler, getHighlightParam} from '../highlight-handler';
 import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.fakeWin('getHighlightParam', {
@@ -118,13 +119,19 @@ describes.realWin('HighlightHandler', {
     scrollStub.returns(Promise.reject());
     const sendMsgStub = sandbox.stub(
         Services.viewerForDoc(ampdoc), 'sendMessage');
+    const setScrollTop = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'setScrollTop');
 
     const handler = new HighlightHandler(
         ampdoc,{sentences: ['amp', 'highlight']});
 
+    expect(setScrollTop).to.be.calledOnce;
+    expect(setScrollTop.firstCall.args.length).to.equal(1);
+
     expect(scrollStub).to.be.calledOnce;
     expect(scrollStub.firstCall.args.length).to.equal(1);
     expect(scrollStub.firstCall.args[0].style.pointerEvents).to.equal('none');
+    expect(scrollStub.firstCall.args[0].style.display).to.equal('block');
 
     // For some reason, expect(args).to.deep.equal does not work.
     expect(sendMsgStub.callCount).to.equal(2);
@@ -135,10 +142,10 @@ describes.realWin('HighlightHandler', {
         {state: 'auto_scroll'});
 
     expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(255, 255, 0); ' +
-          'color: rgb(51, 51, 51);">amp</span> doc</div><div>' +
-          '<span style="background-color: rgb(255, 255, 0); color: ' +
-          'rgb(51, 51, 51);">highlight</span>ed text</div>');
+        '<div>text in <span style="background-color: rgb(255, 150, 50); ' +
+          'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
+          '<span style="background-color: rgb(255, 150, 50); color: ' +
+          'rgb(0, 0, 0);">highlight</span>ed text</div>');
 
     const viewerOrigin = 'http://localhost:9876';
     const port = new WindowPortEmulator(
@@ -208,6 +215,33 @@ describes.realWin('HighlightHandler', {
         '<div>text in amp doc</div><div>highlighted text</div>');
   });
 
+  it('initialize with visibility=prerender', () => {
+    // If visibility != visible, highlight texts and scroll to the start
+    // position of the animation. But do not trigger the animation.
+    const {ampdoc} = env;
+    const scrollStub = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'animateScrollIntoView');
+    scrollStub.returns(Promise.reject());
+    const sendMsgStub = sandbox.stub(
+        Services.viewerForDoc(ampdoc), 'sendMessage');
+    const setScrollTop = sandbox.stub(
+        Services.viewportForDoc(ampdoc), 'setScrollTop');
+    sandbox.stub(Services.viewerForDoc(ampdoc), 'getVisibilityState')
+        .returns(VisibilityState.PRERENDER);
+
+    new HighlightHandler(ampdoc,{sentences: ['amp', 'highlight']});
+
+    expect(setScrollTop).to.be.calledOnce;
+    expect(setScrollTop.firstCall.args.length).to.equal(1);
+    expect(scrollStub).not.to.be.called;
+    // For some reason, expect(args).to.deep.equal does not work.
+    expect(sendMsgStub.callCount).to.equal(1);
+    expect(sendMsgStub.firstCall.args[1]).to.deep.equal(
+        {state: 'found', scroll: 0});
+
+    expect(root.innerHTML).to.have.string('highlight</span>ed');
+  });
+
   it('calcTopToCenterHighlightedNodes_ center elements', () => {
     const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
     expect(handler.highlightedNodes_).not.to.be.null;
@@ -233,8 +267,32 @@ describes.realWin('HighlightHandler', {
     sandbox.stub(viewport, 'getHeight').returns(300);
     sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
-    // Scroll to the top of the element because it's too tall.
-    // 500px (The top of the element) - 50px (padding top) = 450px.
-    expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(450);
+    // Scroll to the top of the element with PAGE_TOP_MARGIN margin
+    // because it's too tall.
+    // 500px (The top of the element) - 50px (padding top)
+    // - 80px (PAGE_TOP_MARGIN) = 370px.
+    expect(handler.calcTopToCenterHighlightedNodes_()).to.equal(370);
+  });
+
+  it('mayAdjustTop_', () => {
+    const handler = new HighlightHandler(env.ampdoc, {sentences: ['amp']});
+    expect(handler.highlightedNodes_).not.to.be.null;
+
+    // Set up an environment where calcTopToCenterHighlightedNodes_
+    // returns 350.
+    const viewport = Services.viewportForDoc(env.ampdoc);
+    sandbox.stub(viewport, 'getLayoutRect').returns(
+        layoutRectLtwh(0, 500, 100, 50));
+    sandbox.stub(viewport, 'getHeight').returns(300);
+    sandbox.stub(viewport, 'getPaddingTop').returns(50);
+    // The current top is 500.
+    sandbox.stub(viewport, 'getScrollTop').returns(500);
+
+    const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+
+    const param = handler.mayAdjustTop_(400);
+    expect(param).to.deep.equal({'nd': 150, 'od': 100});
+    expect(setScrollTopStub).to.be.calledOnce;
+    expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
   });
 });

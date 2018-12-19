@@ -15,12 +15,13 @@
  */
 
 
-import {ArticleComponent, ArticleComponentDef} from './components/article';
-import {CtaLinkComponent, CtaLinkDef} from './components/cta-link';
-import {HeadingComponent, HeadingComponentDef} from './components/heading';
-import {LandscapeComponent, LandscapeComponentDef} from './components/landscape';
-import {PortraitComponent, PortraitComponentDef} from './components/portrait';
-import {TextBoxComponent, TextBoxComponentDef} from './components/text-box';
+import {ArticleComponent} from './components/article';
+import {CtaLinkComponent} from './components/cta-link';
+import {HeadingComponent} from './components/heading';
+import {LandscapeComponent} from './components/landscape';
+import {LocalizedStringId} from '../localization';
+import {PortraitComponent} from './components/portrait';
+import {TextBoxComponent} from './components/text-box';
 import {dev} from '../../../../src/log';
 import {htmlFor} from '../../../../src/static-template';
 
@@ -38,12 +39,12 @@ export let BookendDataDef;
 
 /**
  * @typedef {
- *   (!ArticleComponentDef|
- *    !CtaLinkDef|
- *    !HeadingComponentDef|
- *    !LandscapeComponentDef|
- *    !PortraitComponentDef|
- *    !TextBoxComponentDef)
+ *   (!./components/article.ArticleComponentDef|
+ *    !./components/cta-link.CtaLinkDef|
+ *    !./components/heading.HeadingComponentDef|
+ *    !./components/landscape.LandscapeComponentDef|
+ *    !./components/portrait.PortraitComponentDef|
+ *    !./components/text-box.TextBoxComponentDef)
  * }
  */
 export let BookendComponentDef;
@@ -103,6 +104,25 @@ function componentBuilderInstanceFor(type) {
 }
 
 /**
+ * Prepend a heading to the related articles section if first component is not a
+ * heading already.
+ * @param {!Array<BookendComponentDef>} components
+ * @param {?../localization.LocalizationService} localizationService
+ * @return {!Array<BookendComponentDef>}
+ */
+function prependTitle(components, localizationService) {
+  if (components[0] && components[0].type == 'heading') {
+    return components;
+  }
+
+  const title = localizationService
+      .getLocalizedString(
+          LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL);
+  components.unshift({'type': 'heading', 'text': title});
+  return components;
+}
+
+/**
  * Delegator class that dispatches the logic to build different components
  * on the bookend to their corresponding classes.
  */
@@ -129,14 +149,18 @@ export class BookendComponent {
   }
 
   /**
-   * Delegates components to their corresponding element builder.
-   * class.
+   * Builds the bookend components elements by choosing the appropriate builder
+   * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
+   * @param {?../localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
-  static buildElements(components, doc) {
+  static buildElements(components, doc, localizationService) {
     const fragment = doc.createDocumentFragment();
+
+    components = prependTitle(components, localizationService);
+
     components.forEach(component => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
@@ -156,7 +180,8 @@ export class BookendComponent {
   static buildContainer(element, doc) {
     const html = htmlFor(doc);
     const containerTemplate =
-      html`<div class="i-amphtml-story-bookend-component-set"></div>`;
+      html`<div class="i-amphtml-story-bookend-component-set
+          i-amphtml-story-bookend-top-level"></div>`;
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }

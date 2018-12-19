@@ -93,6 +93,9 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is specified but the value is left blank, the system assigns a float value, which optimizes for viewability without drastically impacting the impressions.  Note, specifying `prefer-viewability-over-views` as the value also automatically optimizes viewability.
 
+##### data-ad-container-id (optional)
+Informs the ad of the container component id in the case of attempting to collapse. The container component must be an `<amp-layout>` component that's parent of the ad. When the `data-ad-container-id` is specified, and such a `<amp-layout>` container component is found, AMP runtime will try to collapse the container component instead of the ad component during no fill. This feature can be useful when an ad indicator is in presence.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
@@ -110,9 +113,9 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
+If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
-If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled, and AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
 Example with fallback:
 
@@ -222,11 +225,13 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
 - [AdvertServe](../../ads/advertserve.md)
+- [Adyoulike](../../ads/adyoulike.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
+- [Baidu](../../ads/baidu.md)
 - [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
@@ -254,6 +259,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [FlexOneHARRIER](../../ads/f1h.md)
 - [Flite](../../ads/flite.md)
 - [fluct](../../ads/fluct.md)
+- [FreeWheel](../../ads/freewheel.md)
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
 - [Giraff](../../ads/giraff.md)
@@ -284,6 +290,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
+- [MixiMedia](../../ads/miximedia.md)
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [myTarget](../../ads/mytarget.md)
@@ -294,12 +301,14 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [NETLETIX](../../ads/netletix.md)
 - [Noddus](../../ads/noddus.md)
 - [Nokta](../../ads/nokta.md)
+- [OneAD](../../ads/onead.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
 - [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
+- [Pressboard](../../ads/pressboard.md)
 - [PubGuru](../../ads/pubguru.md)
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
@@ -307,10 +316,13 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Purch](../../ads/purch.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [Realclick](../../ads/realclick.md)
+- [recomAD](../../ads/recomad.md)
+- [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
+- [RUNative](../../ads/runative.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
@@ -328,6 +340,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
@@ -363,4 +376,5 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
+- [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

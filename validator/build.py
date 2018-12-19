@@ -48,7 +48,7 @@ def EnsureNodeJsIsInstalled():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
-  Die('Node.js not found. Try "apt-get install nodejs" or install NVM.')
+  Die('Node.js not found. Try "apt-get install nodejs" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
 
 
 def CheckPrereqs():
@@ -74,7 +74,7 @@ def CheckPrereqs():
   try:
     libprotoc_version = subprocess.check_output(['protoc', '--version'])
   except (subprocess.CalledProcessError, OSError):
-    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler".')
+    Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation.')
 
   # Ensure 'libprotoc 2.5.0' or newer.
   m = re.search('^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
@@ -88,7 +88,7 @@ def CheckPrereqs():
     try:
       __import__(module)
     except ImportError:
-      Die('%s not found. Try "apt-get install python-protobuf"' % module)
+      Die('%s not found. Try "apt-get install python-protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
 
   # Ensure that yarn is installed.
   try:
@@ -102,7 +102,7 @@ def CheckPrereqs():
   try:
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
   except (subprocess.CalledProcessError, OSError):
-    Die('Java missing. Try "apt-get install openjdk-7-jre"')
+    Die('Java missing. Try "apt-get install openjdk-7-jre" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation')
   logging.info('... done')
 
 

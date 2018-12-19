@@ -14,47 +14,48 @@
  * limitations under the License.
  */
 
+import * as ResourceTiming from '../resource-timing';
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
-import {RequestHandler, expandConfigRequest} from '../requests';
-import {dict} from '../../../../src/utils/object';
+import {RequestHandler, expandPostMessage} from '../requests';
 import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Requests', {amp: 1}, env => {
   let ampdoc;
-  let analyticsMock;
   let clock;
   let preconnect;
   let preconnectSpy;
+  let analyticsElement;
 
   beforeEach(() => {
     installVariableService(env.win);
     ampdoc = env.ampdoc;
     ampdoc.defaultView = env.win;
-    analyticsMock = {
-      nodeType: 1,
-      ownerDocument: ampdoc,
-      getAmpDoc: function() { return ampdoc; },
-    };
     clock = lolex.install({target: ampdoc.win});
     preconnectSpy = sandbox.spy();
     preconnect = {
       url: preconnectSpy,
     };
+    analyticsElement = env.win.document.createElement('amp-analytics');
+    env.win.document.body.appendChild(analyticsElement);
+    analyticsElement.getAmpDoc = () => ampdoc;
   });
 
   afterEach(() => {
     clock.uninstall();
   });
 
+  function createRequestHandler(request, spy) {
+    return new RequestHandler(
+        analyticsElement, request, preconnect, {sendRequest: spy}, false);
+  }
+
   describe('RequestHandler', () => {
     describe('batch', () => {
       it('should batch multiple send', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r2', 'batchInterval': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         handler.send({}, {}, expansionOptions, {});
@@ -68,8 +69,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should work properly with no batch', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1'};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         handler.send({}, {}, expansionOptions, {});
@@ -80,8 +80,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should preconnect', function* () {
         const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, sandbox.spy(), false);
+        const handler = createRequestHandler(r, sandbox.spy());
         const expansionOptions = new ExpansionOptions({'test': 'expanded'});
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -98,16 +97,16 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should support number', () => {
         const r = {'baseUrl': 'r1', 'batchInterval': 5};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         expect(handler.batchIntervalPointer_).to.not.be.null;
         expect(handler.batchInterval_).to.deep.equal([5000]);
       });
 
       it('should support array', () => {
         const r = {'baseUrl': 'r1', 'batchInterval': [1, 2, 3]};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         expect(handler.batchIntervalPointer_).to.not.be.null;
         expect(handler.batchInterval_).to.deep.equal([1000, 2000, 3000]);
       });
@@ -117,13 +116,13 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r1 = {'baseUrl': 'r', 'batchInterval': 'invalid'};
         const r2 = {'baseUrl': 'r', 'batchInterval': ['invalid']};
         try {
-          new RequestHandler(analyticsMock, r1, preconnect, spy, false);
+          createRequestHandler(r1, spy);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analyticsMock, r2, preconnect, spy, false);
+          createRequestHandler(r2, spy);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
@@ -134,19 +133,19 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r4 = {'baseUrl': 'r', 'batchInterval': [-1, 5]};
         const r5 = {'baseUrl': 'r', 'batchInterval': [1, 0.01]};
         try {
-          new RequestHandler(analyticsMock, r3, preconnect, spy, false);
+          createRequestHandler(r3, spy);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analyticsMock, r4, preconnect, spy, false);
+          createRequestHandler(r4, spy);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analyticsMock, r5, preconnect, spy, false);
+          createRequestHandler(r5, spy);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
@@ -155,15 +154,14 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should schedule send request with interval array', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
         clock.tick(998);
         handler.send({}, {}, expansionOptions, {});
         clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -172,7 +170,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
@@ -184,7 +182,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should not schedule send request w/o trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1]};
-        new RequestHandler(analyticsMock, r, preconnect, spy, false);
+        createRequestHandler(r, spy);
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.not.be.called;
@@ -192,15 +190,14 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should schedule send independent of trigger immediate', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(999);
         handler.send({}, {'important': true}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1);
         yield macroTask();
@@ -216,14 +213,14 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should accept reportWindow with number', () => {
         const r = {'baseUrl': 'r', 'reportWindow': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const r2 = {'baseUrl': 'r', 'reportWindow': '2'};
-        const handler2 = new RequestHandler(
-            analyticsMock, r2, preconnect, spy, false);
+        const handler2 = createRequestHandler(r2, spy);
+
         const r3 = {'baseUrl': 'r', 'reportWindow': 'invalid'};
-        const handler3 = new RequestHandler(
-            analyticsMock, r3, preconnect, spy, false);
+        const handler3 = createRequestHandler(r3, spy);
+
         expect(handler.reportWindow_).to.equal(1);
         expect(handler2.reportWindow_).to.equal(2);
         expect(handler3.reportWindow_).to.be.null;
@@ -231,14 +228,14 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should stop bathInterval outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.5, 'reportWindow': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(500);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(500);
         expect(handler.batchIntervalTimeoutId_).to.be.null;
         handler.send({}, {}, expansionOptions, {});
@@ -249,13 +246,13 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should stop send request outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'reportWindow': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        spy.reset();
+        spy.resetHistory();
         clock.tick(1000);
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -264,8 +261,8 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should flush batch queue after batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 5, 'reportWindow': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
@@ -275,8 +272,8 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should respect immediate trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.2, 'reportWindow': 0.5};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
         clock.tick(500);
         yield macroTask();
@@ -291,22 +288,24 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should respect config extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
-        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
-        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
+        handler.send({'e1': 'e1'}, {}, expansionOptions);
+        handler.send({'e1': 'e1'}, {}, expansionOptions);
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledOnce;
-        expect(spy.args[0][0]).to.equal('r1?e1=e1&e1=e1');
+        expect(spy).to.be.calledWith('r1', [
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+        ]);
       });
 
       it('should respect trigger extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({'v2': '中'});
         handler.send({}, {
           'extraUrlParams': {
@@ -318,15 +317,18 @@ describes.realWin('Requests', {amp: 1}, env => {
             {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledOnce;
-        expect(spy.args[0][0]).to.equal('r1?e1=e1&e2=%E4%B8%AD&e1=e1');
+        expect(spy).to.be.calledWith('r1', [
+          {extraUrlParams: {e1: 'e1', e2: '中'},
+            timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+        ]);
       });
 
-      it('should replace extraUrlParam', function* () {
+      it('should keep extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
+        const handler = createRequestHandler(r, spy);
+
         const expansionOptions = new ExpansionOptions({});
         handler.send(
             {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
@@ -334,8 +336,10 @@ describes.realWin('Requests', {amp: 1}, env => {
             {}, {'extraUrlParams': {'e2': 'e2'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
-        expect(spy).to.be.calledOnce;
-        expect(spy.args[0][0]).to.equal('r1&e1=e1&e2=e2&r2');
+        expect(spy).to.be.calledWith('r1&${extraUrlParams}&r2', [
+          {extraUrlParams: {e1: 'e1'}, timestamp: 0, trigger: undefined},
+          {extraUrlParams: {e2: 'e2'}, timestamp: 0, trigger: undefined},
+        ]);
       });
     });
 
@@ -344,7 +348,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchPlugin': '_ping_'};
         try {
-          new RequestHandler(analyticsMock, r, preconnect, spy, false);
+          createRequestHandler(r, spy);
         } catch (e) {
           expect(e).to.match(
               /batchPlugin cannot be set on non-batched request/);
@@ -356,161 +360,77 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r =
             {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': 'invalid'};
         try {
-          new RequestHandler(analyticsMock, r, preconnect, spy, false);
+          createRequestHandler(r, spy);
         } catch (e) {
           expect(e).to.match(/unsupported batch plugin/);
         }
       });
-
-      it('should handle batchPlugin function error', function* () {
-        const spy = sandbox.spy();
-        const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
-        // Overwrite batchPlugin function
-        handler.batchingPlugin_ = () => {throw new Error('test');};
-        const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
-        clock.tick(1000);
-        yield macroTask();
-        expect(spy).to.be.calledOnce;
-        expect(spy.args[0][0]).to.equal('');
-      });
-
-      it('should pass in correct batchSegments', function* () {
-        const spy = sandbox.spy();
-        const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
-        const handler = new RequestHandler(
-            analyticsMock, r, preconnect, spy, false);
-        // Overwrite batchPlugin function
-        const batchPluginSpy = sandbox.spy(handler, 'batchingPlugin_');
-        const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {'on': 'timer', 'extraUrlParams': {'e1': 'e1'}},
-            expansionOptions);
-        clock.tick(5);
-        // Test that we decode when pass to batchPlugin function
-        handler.send({}, {'on': 'click', 'extraUrlParams': {'e2': '&e2'}},
-            expansionOptions);
-        clock.tick(5);
-        handler.send({}, {'on': 'visible', 'extraUrlParams': {'e3': ''}},
-            expansionOptions);
-        clock.tick(1000);
-        yield macroTask();
-        expect(batchPluginSpy).to.be.calledOnce;
-        expect(batchPluginSpy).to.be.calledWith('r', [dict({
-          'trigger': 'timer',
-          'timestamp': 0,
-          'extraUrlParams': {
-            'e1': 'e1',
-          },
-        }), dict({
-          'trigger': 'click',
-          'timestamp': 5,
-          'extraUrlParams': {
-            'e2': '&e2',
-          },
-        }), dict({
-          'trigger': 'visible',
-          'timestamp': 10,
-          'extraUrlParams': {
-            'e3': '',
-          },
-        })]);
-        expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith('testFinalUrl');
-      });
-    });
-  });
-
-  //TODO: Move the expansion related tests here.
-
-  it('expandConfigRequest function', () => {
-    let config = {
-      'requests': {
-        'foo': 'test',
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
-    };
-    config = expandConfigRequest(config);
-    expect(config).to.jsonEqual({
-      'requests': {
-        'foo': {
-          'baseUrl': 'test',
-        },
-        'bar': {
-          'baseUrl': 'test1',
-        },
-        'foobar': {},
-      },
     });
   });
 
   it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
-    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
-    const handler = new RequestHandler(
-        analyticsMock, r, preconnect, spy, false);
+    const r = {'baseUrl': 'r1&${resourceTiming}'};
+    const handler = createRequestHandler(r, spy);
     const expansionOptions = new ExpansionOptions({
-      'param1': 'PARAM_1',
-      'param2': 'PARAM_2',
-      'param3': 'PARAM_3',
+      'resourceTiming': 'RESOURCE_TIMING',
     });
-    const bindings = {
-      'PARAM_1': 'val1',
-      'PARAM_2': () => 'val2',
-      'PARAM_3': Promise.resolve('val3'),
-      'BASE_VALUE': 'val_base',
-    };
-    const params = {
-      'extraUrlParams': {
-        'key1': '${param1}',
-        'key2': '${param2}',
-        'key3': '${param3}',
-      },
-    };
-    handler.send({}, params, expansionOptions, bindings);
+    sandbox.stub(ResourceTiming, 'getResourceTiming')
+        .returns(Promise.resolve('resource-timing'));
+    handler.send({}, {}, expansionOptions);
     yield macroTask();
-    expect(spy).to.be.calledOnce;
-    expect(spy.args[0][0]).to.equal(
-        'r1&key1=val1&key2=val2&key3=val3&val_base');
+    expect(spy).to.be.calledWith('r1&resource-timing');
   });
 
+  describe('expandPostMessage', () => {
+    let expansionOptions;
+    let params;
+    let element;
 
-  it('should replace bindings with v2 flag', function* () {
-    toggleExperiment(env.win, 'url-replacement-v2', true);
-    const spy = sandbox.spy();
-    const r = {
-      'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
-    };
-    const handler = new RequestHandler(
-        analyticsMock, r, preconnect, spy, false);
-    const expansionOptions = new ExpansionOptions({
-      'param1': 'PARAM_1',
-      'param2': 'PARAM_2',
-      'param3': 'PARAM_3',
-      'foo': 'TOUPPERCASE(BASE64(foo))',
+    beforeEach(() => {
+      expansionOptions = new ExpansionOptions({
+        'teste1': 'TESTE1',
+      });
+      params = {
+        'e1': '${teste1}',
+        'e2': 'teste2',
+      };
+      // expandPostMessage() uses the URL replacements service scoped to the
+      // passed element. Use the top-level service for testing.
+      element = env.win.document.documentElement;
     });
-    const bindings = {
-      'PARAM_1': 'val1',
-      'PARAM_2': () => 'val2',
-      'PARAM_3': Promise.resolve('val3'),
-      'BASE_VALUE': 'val_base',
-    };
-    const params = {
-      'extraUrlParams': {
-        'key1': '${param1}',
-        'key2': '${param2}',
-        'key3': '${param3}',
-      },
-    };
-    handler.send({}, params, expansionOptions, bindings);
-    yield macroTask();
-    expect(spy).to.be.calledOnce;
-    expect(spy.args[0][0]).to.equal(
-        'r1&key1=val1&key2=val2&key3=val3&val_base&foo=ZM9V');
-    toggleExperiment(env.win, 'url-replacement-v2');
+
+    it('should expand', () => {
+      return expandPostMessage(
+          ampdoc,
+          'test foo 123 ... ${teste1}',
+          undefined,
+          {},
+          expansionOptions,
+          element).then(msg => {
+        expect(msg).to.equal('test foo 123 ... TESTE1');
+      });
+    });
+
+    it('should replace not append ${extraUrlParams}', () => {
+      const replacePromise = expandPostMessage(
+          ampdoc,
+          'test ${extraUrlParams} foo',
+          params, /* configParams */
+          {}, /* trigger */
+          expansionOptions,
+          element);
+      const appendPromise = expandPostMessage(
+          ampdoc,
+          'test foo',
+          params, /* configParams */
+          {}, /* trigger */
+          expansionOptions,
+          element);
+      return replacePromise.then(replace => {
+        expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
+        expect(appendPromise).to.eventually.equal('test foo');
+      });
+    });
   });
 });

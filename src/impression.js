@@ -36,11 +36,29 @@ const DEFAULT_APPEND_URL_PARAM = [
 ];
 
 /**
+ * These domains are trusted with more sensitive viewer operations such as
+ * sending impression requests. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /**
+   * Twitter's link wrapper domains:
+   * - t.co
+   */
+  /^t.co$/,
+];
+
+/**
  * A function to get the trackImpressionPromise;
  * @return {!Promise}
  */
 export function getTrackImpressionPromise() {
-  return dev().assert(trackImpressionPromise);
+  return user().assert(trackImpressionPromise,
+      'E#19457 trackImpressionPromise');
 }
 
 /**
@@ -60,15 +78,15 @@ export function maybeTrackImpression(win) {
   const deferred = new Deferred();
   const {promise, resolve: resolveImpression} = deferred;
 
-
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
     dev().warn('IMPRESSION', error);
   });
 
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
-  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  const isTrustedReferrerPromise = viewer.getReferrerUrl().then(
+      referrer => isTrustedReferrer(referrer));
   Promise.all([
     isTrustedViewerPromise,
     isTrustedReferrerPromise,
@@ -110,7 +128,7 @@ export function doNotTrackImpression() {
  * @return {!Promise}
  */
 function handleReplaceUrl(win) {
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
 
   // ReplaceUrl substitution doesn't have to wait until the document is visible
   if (!viewer.getParam('replaceUrl')) {
@@ -139,6 +157,17 @@ function handleReplaceUrl(win) {
       });
 }
 
+/**
+ * @param {string} referrer
+ * @visibleForTesting
+ */
+export function isTrustedReferrer(referrer) {
+  const url = parseUrlDeprecated(referrer);
+  if (url.protocol != 'https:') {
+    return false;
+  }
+  return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+}
 
 /**
  * Perform the impression request if it has been provided via
@@ -147,11 +176,10 @@ function handleReplaceUrl(win) {
  * @return {!Promise}
  */
 function handleClickUrl(win) {
-  const viewer = Services.viewerForDoc(win.document);
+  const viewer = Services.viewerForDoc(win.document.documentElement);
+
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
-
-
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -232,7 +260,7 @@ function applyResponse(win, response) {
       return;
     }
 
-    const viewer = Services.viewerForDoc(win.document);
+    const viewer = Services.viewerForDoc(win.document.documentElement);
     const currentHref = win.location.href;
     const url = parseUrlDeprecated(adLocation);
     const params = parseQueryString(url.search);

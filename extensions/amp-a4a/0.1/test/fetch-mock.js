@@ -123,7 +123,8 @@ export class FetchMock {
             return new Response(data);
           } else {
             const {body, status, headers} = data;
-            return new Response(body, {status, headers});
+            return new Response(body, /** @type {!ResponseInit} */ (
+              {status, headers}));
           }
         });
   }

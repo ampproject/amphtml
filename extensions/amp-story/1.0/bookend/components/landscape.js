@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
-import {Services} from '../../../../../src/services';
+import {
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {user} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -29,7 +30,7 @@ import {userAssertValidProtocol} from '../../utils';
  *   title: string,
  *   url: string,
  *   domainName: string,
- *   image: string
+ *   image: string,
  * }}
  */
 export let LandscapeComponentDef;
@@ -70,7 +71,7 @@ export class LandscapeComponent {
   /** @override */
   build(landscapeJson, element) {
     const url = landscapeJson['url'];
-    const {hostname: domainName} = Services.urlForDoc(element).parse(url);
+    const domainName = getSourceOriginForElement(element, url);
 
     const landscape = {
       url,

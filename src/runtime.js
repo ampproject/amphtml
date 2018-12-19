@@ -14,21 +14,32 @@
  * limitations under the License.
  */
 
-import * as config from './config';
+
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {
+  BaseTemplate,
+  installTemplatesService,
+  registerExtendedTemplate,
+} from './service/template-impl';
 import {CommonSignals} from './common-signals';
-import {LogLevel, overrideLogLevel} from './log'; // eslint-disable-line no-unused-vars
+import {
+  LogLevel, // eslint-disable-line no-unused-vars
+  dev,
+  initLogConstructor,
+  overrideLogLevel,
+  setReportError,
+  user,
+} from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {childElementsByTag, isConnectedNode, waitForBodyPromise} from './dom';
+import {config} from './config';
 import {
   createShadowDomWriter,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
 import {cssText} from '../build/css';
-import {dev, initLogConstructor, setReportError, user} from './log';
 import {
   disposeServicesForDoc,
 } from './service';
@@ -56,7 +67,6 @@ import {installResourcesServiceForDoc} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
-import {installTemplatesService} from './service/template-impl';
 import {installTimerService} from './service/timer-impl';
 import {installUrlForDoc} from './service/url-impl';
 import {installUrlReplacementsServiceForDoc} from
@@ -75,7 +85,6 @@ import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {waitForBodyPromise} from './dom';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -148,7 +157,7 @@ function adoptShared(global, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  /** @const {!Array<function(!Object)|ExtensionPayload>} */
+  /** @const {!Array<function(!Object)|!ExtensionPayload>} */
   const preregisteredExtensions = global.AMP || [];
 
   installExtensionsService(global);
@@ -159,6 +168,8 @@ function adoptShared(global, callback) {
 
   global.AMP = {
     win: global,
+    // Might not be available in tests.
+    '_': global.AMP ? global.AMP['_'] : undefined,
   };
 
   // `AMP.extension()` function is only installed in a non-minified mode.
@@ -239,32 +250,28 @@ function adoptShared(global, callback) {
   const iniPromise = callback(global, extensions);
 
   /**
-   * @param {function(!Object)|ExtensionPayload} fnOrStruct
+   * @param {function(!Object,!Object)|!ExtensionPayload} fnOrStruct
    */
   function installExtension(fnOrStruct) {
     const register = () => {
       iniPromise.then(() => {
         if (typeof fnOrStruct == 'function') {
-          fnOrStruct(global.AMP);
+          fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }
       });
     };
-    if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
-      // "High priority" extensions do not go through chunking.
-      // This should be used for extensions that need to run early.
-      // One example would be viewer communication that is required
-      // to transition document from pre-render to visible (which
-      // affects chunking itself).
-      // We consider functions as high priority, because
-      // - if in doubt, that is a better default
-      // - the only actual  user is a viewer integration that should
-      //   be high priority.
-      Promise.resolve().then(register);
+
+    // We support extension declarations which declare they have an
+    // "intermediate" dependency that needs to be loaded before they
+    // can execute.
+    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
+      preloadDeps(extensions, fnOrStruct).then(function() {
+        return startRegisterOrChunk(global, fnOrStruct, register);
+      });
     } else {
-      register.displayName = fnOrStruct.n;
-      startupChunk(global.document, register);
+      startRegisterOrChunk(global, fnOrStruct, register);
     }
   }
 
@@ -292,7 +299,7 @@ function adoptShared(global, callback) {
   maybePumpEarlyFrame(global, () => {
     /**
      * Registers a new custom element.
-     * @param {function(!Object)|ExtensionPayload} fnOrStruct
+     * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
      */
     global.AMP.push = function(fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
@@ -335,6 +342,52 @@ function adoptShared(global, callback) {
   return iniPromise;
 }
 
+/**
+ * @param {!./service/extensions-impl.Extensions} extensions
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
+ * @return {!Promise}
+ */
+function preloadDeps(extensions, fnOrStruct) {
+  // Allow a single string as the intermediate dependency OR allow
+  // for an array if intermediate dependencies that needs to be
+  // resolved first before executing this current extension.
+  if (Array.isArray(fnOrStruct.i)) {
+    const promises = fnOrStruct.i.map(dep => {
+      return extensions.preloadExtension(dep);
+    });
+    return Promise.all(promises);
+  } else if (typeof fnOrStruct.i == 'string') {
+    return extensions.preloadExtension(fnOrStruct.i);
+  }
+  dev().error('RUNTIME',
+      'dependency is neither an array or a string', fnOrStruct.i);
+  return Promise.resolve();
+}
+
+
+/**
+ * @param {!Window} global Global scope to adopt.
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
+ * @param {function()} register
+ */
+function startRegisterOrChunk(global, fnOrStruct, register) {
+  if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
+    // "High priority" extensions do not go through chunking.
+    // This should be used for extensions that need to run early.
+    // One example would be viewer communication that is required
+    // to transition document from pre-render to visible (which
+    // affects chunking itself).
+    // We consider functions as high priority, because
+    // - if in doubt, that is a better default
+    // - the only actual  user is a viewer integration that should
+    //   be high priority.
+    Promise.resolve().then(register);
+  } else {
+    register.displayName = fnOrStruct.n;
+    startupChunk(global.document, register);
+  }
+}
+
 
 /**
  * Applies the runtime to a given global scope for a single-doc mode.
@@ -344,20 +397,21 @@ function adoptShared(global, callback) {
  */
 export function adopt(global) {
   return adoptShared(global, global => {
+    const {documentElement} = global.document;
+
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
 
-    const viewer = Services.viewerForDoc(global.document);
+    const viewer = Services.viewerForDoc(documentElement);
     global.AMP.viewer = viewer;
 
     if (getMode().development) {
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = Services.resourcesForDoc(global.document);
+      global.AMP.resources = Services.resourcesForDoc(documentElement);
     }
 
-    const viewport = Services.viewportForDoc(global.document);
-
+    const viewport = Services.viewportForDoc(documentElement);
     global.AMP.viewport = {};
     global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
@@ -477,7 +531,7 @@ export class MultidocManager {
      * Sets the document's visibility state.
      * @param {!VisibilityState} state
      */
-    amp.setVisibilityState = function(state) {
+    amp['setVisibilityState'] = function(state) {
       setViewerVisibilityState(viewer, state);
     };
 
@@ -489,7 +543,7 @@ export class MultidocManager {
      * @param {boolean} unusedAwaitResponse
      * @return {(!Promise<*>|undefined)}
      */
-    amp.postMessage = viewer.receiveMessage.bind(viewer);
+    amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
     /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
     let onMessage;
@@ -499,7 +553,7 @@ export class MultidocManager {
      * messages to the viewer.
      * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
-    amp.onMessage = function(callback) {
+    amp['onMessage'] = function(callback) {
       onMessage = callback;
     };
 
@@ -519,7 +573,7 @@ export class MultidocManager {
     /**
      * Closes the document. The document can no longer be activated again.
      */
-    amp.close = () => {
+    amp['close'] = () => {
       this.closeShadowRoot_(shadowRoot);
     };
 
@@ -603,7 +657,7 @@ export class MultidocManager {
           // Start streaming.
           let renderStarted = false;
           const writer = createShadowDomWriter(this.win);
-          amp.writer = writer;
+          amp['writer'] = writer;
           writer.onBody(doc => {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
@@ -855,7 +909,7 @@ export class MultidocManager {
  * to have the same AMP release version.
  *
  * @param {!Window} win
- * @param {function(!Object)|ExtensionPayload} fnOrStruct
+ * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {

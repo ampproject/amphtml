@@ -79,8 +79,8 @@ tags: {  # amp-cat
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-cat"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -91,7 +91,9 @@ tags: {  # <amp-cat>
   requires_extension: "amp-cat"
   attrs: {
     name: "data-selected-cat"
-    value_regex_casei: "(oscar|chloe|bella)"
+    value_casei: "bella"
+    value_casei: "chloe"
+    value_casei: "oscar"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -174,15 +176,15 @@ extension with the "amp-cat" name. This will add requirements for the
 as well as a link to documentation on ampproject.org for all error messages.
 
 ```
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+    version: "0.1"
+    version: "latest"
   }
 ```
 
 These fields define a list of all allowed version numbers. Currently, almost all
 extended components are at version `0.1`, and we also allow `latest` to be specified.
 
-The combination of the `allowed_versions` and `name` fields of the
+The combination of the `version` and `name` fields of the
 `extension_spec` define the allowed values of the `src` attribute in the
 script tag, for example `src=https://cdn.ampproject.org/v0/amp-cat-0.1.js`.
 
@@ -228,13 +230,15 @@ matching extension script tag that we defined above.
 ```
   attrs: {
     name: "data-selected-cat"
-    value_regex_casei: "(oscar|chloe|bella)"
+    value_casei: "bella"
+    value_casei: "chloe"
+    value_casei: "oscar"
   }
 ```
 
 Here we specify the rules for validating the `data-selected-cat` attribute. In
 our case, we tell the validator that we want the attribute value to
-case-insensitively match the regular expression of "(oscar|chloe|bella)" which
+case-insensitively match for either "bella", "chloe", or "oscar" which
 essentially means the value must be one of those 3 options.
 
 ```
@@ -269,7 +273,9 @@ We saw a very simple example of an attribute validation rule above:
 ```
   attrs: {
     name: "data-selected-cat"
-    value_regex_casei: "(oscar|chloe|bella)"
+    value_casei: "bella"
+    value_casei: "chloe"
+    value_casei: "oscar"
   }
 ```
 
@@ -286,12 +292,6 @@ By specifying no value rules, any value is allowed for this attribute.
 If your code expects certain values, it is best to specify them here it will
 produce helpful error messages for developers trying to debug their tag.
 
-```
-  value_regex: "(oscar|chloe|bella)"
-```
-
-Similar to `value_regex_casei`, but case-sensitive.
-
 
 ```
 value: "oscar"
@@ -302,13 +302,22 @@ value_casei: "oscar"
 Specifies that only "oscar" is an allowed value, as case-sensitive and
 case-insensitive variants.
 
+```
+  value_regex: "\\d+"
+```
+```
+  value_regex_casei: "[a-z0-9]+"
+```
+Specifies that only values matching these RegEx patterns is an allowed value,
+as case-sensitive and case-instensitive variants.
+
 
 ```
 value_url: {
+  protocol: "https"
+  protocol: "http"
+  allow_relative: false
   allow_empty: true
-  allow_relative: true
-  allowed_protocol: "https"
-  allowed_protocol: "http"
 }
 ```
 This specifies that the attribute value must be a valid URL or an empty string.
@@ -324,7 +333,8 @@ Only one of:
  - `value_regex_casei`
  - `value_url`
 
-may be specified for a single attribute.
+may be specified for a single attribute. However, multiple values may be specified
+for `value` and `value_casei` as seen in the example above.
 
 Unless specified, attributes are all optional. To specify that an attribute is
 mandatory, use the `mandatory` field:
@@ -347,7 +357,7 @@ attrs: {
   name: "img-src"
   mandatory_oneof: "['data-selected-cat', 'img-src']"
   value_url: {
-    allowed_protocol: "https"
+    protocol: "https"
   }
 }
 ```

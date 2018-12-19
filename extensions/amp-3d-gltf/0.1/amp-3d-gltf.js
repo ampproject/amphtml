@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
@@ -95,19 +96,31 @@ export class Amp3dGltf extends AMP.BaseElement {
         getOption('src', string, ''),
         this.element);
 
+    const useAlpha = getOption('alpha', bool, false);
+
     this.context_ = dict({
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
-        'alpha': getOption('alpha', bool, false),
+        'alpha': useAlpha,
         'antialias': getOption('antialiasing', bool, true),
       },
-      'maxPixelRatio':
-          getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      'rendererSettings': {
+        'clearAlpha': useAlpha ? 0 : 1,
+        'clearColor':
+            getOption('clearColor', string, '#fff'),
+        'maxPixelRatio':
+            getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      },
       'controls': {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
     });
+    this.registerAction('setModelRotation', invocation => {
+      this.sendCommandWhenReady_('setModelRotation', invocation.args)
+          .catch(e => dev()
+              .error('AMP-3D-GLTF', 'setModelRotation failed: %s', e));
+    }, ActionTrust.LOW);
   }
 
   /** @override */

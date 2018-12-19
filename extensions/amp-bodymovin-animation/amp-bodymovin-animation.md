@@ -68,6 +68,12 @@ Indicates whether the animation should be looping or not.  By default, this attr
 
 By default, an animation autoplays. If this attribute is added the video waits for an action to start playing.
 
+##### renderer (optional)
+
+By default, this component uses the SVG renderer, this uses a light version of the Bodymovin animation player. However, if developers feel that they need the full player and want to use an HTML renderer they may do so by specifying the `renderer` attribute to be `html`.
+
+This attribute only accepts the values `html` and `svg`.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.

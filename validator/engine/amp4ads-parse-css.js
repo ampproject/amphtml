@@ -17,7 +17,6 @@
 
 goog.provide('parse_css.validateAmp4AdsCss');
 
-goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.RuleVisitor');
@@ -83,10 +82,6 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
     const ident = firstIdent(declaration.value);
     if (ident === 'fixed' || ident === 'sticky') {
-      if (amp.validator.LIGHT) {
-        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-        return;
-      }
       this.errors.push(createParseErrorTokenAt(
           declaration, amp.validator.ValidationError.Code
               .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
@@ -106,10 +101,6 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             parse_css.stripVendorPrefix(transitionedProperty);
         if (transitionedPropertyStripped !== 'opacity' &&
             transitionedPropertyStripped !== 'transform') {
-          if (amp.validator.LIGHT) {
-            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-            return;
-          }
           this.errors.push(createParseErrorTokenAt(
               decl, amp.validator.ValidationError.Code
                   .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
@@ -124,10 +115,6 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       // are opacity, transform, and animation-timing-function.
       if (this.inKeyframes !== null && name !== 'transform' &&
           name !== 'opacity' && name !== 'animation-timing-function') {
-        if (amp.validator.LIGHT) {
-          this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-          return;
-        }
         this.errors.push(createParseErrorTokenAt(
             decl, amp.validator.ValidationError.Code
                 .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,

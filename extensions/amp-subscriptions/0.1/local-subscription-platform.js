@@ -16,13 +16,16 @@
 
 import {Actions} from './actions';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
+import {
+  LocalSubscriptionPlatformRenderer,
+} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 
 /**
@@ -160,11 +163,16 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
+  reset() {
+    this.renderer_.reset();
+  }
+
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {
       if (result) {
-        this.serviceAdapter_.reAuthorizePlatform(this);
+        this.serviceAdapter_.resetPlatforms();
       }
       return !!result;
     });
@@ -198,20 +206,21 @@ export class LocalSubscriptionPlatform {
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
+      // Content should be 'text/plain' to avoid CORS preflight.
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: {
+        headers: dict({
           'Content-Type': 'text/plain',
-        },
+        }),
         body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
   }
 
   /** @override */
-  supportsCurrentViewer() {
-    return false;
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
   }
 
   /** @override */

@@ -20,367 +20,511 @@ import {
 } from '../../src/service/layers-impl';
 import {Services} from '../../src/services';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installFriendlyIframeEmbed} from '../../src/friendly-iframe-embed';
 
-describes.realWin('Layers', {amp: false}, env => {
-  let win;
-  let root;
+describes.realWin('Layers', {amp: true}, env => {
+  describes.repeated('Layers', {
+    'Real document scroller': 'native',
+    'Overflow scroller': 'overflow',
+    'Shadow DOM scroller': 'shadow',
+  }, (name, impl) => {
+    let win;
+    let root;
+    let scrollingElement;
 
-  function createElement() {
-    const div = win.document.createElement('div');
-    Object.defineProperty(div, 'isConnected', {
-      value: true,
-    });
-    return div;
-  }
+    function createElement(tag = 'div') {
+      return win.document.createElement(tag);
+    }
 
-  beforeEach(() => {
-    win = env.win;
-    root = win.document.scrollingElement;
-    installDocService(win, true);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    installLayersServiceForDoc(ampdoc, root);
-  });
+    function friendlyIframe() {
+      const iframe = createElement('iframe');
+      iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('scrolling', 'no');
 
-  function scroll(element, top, left) {
-    element.scrollTop = top;
-    element.scrollLeft = left;
-    const layout = LayoutElement.for(element);
-    layout.dirtyScrollMeasurements();
-  }
+      const container = createElement('div');
+      container.appendChild(iframe);
+      root.appendChild(container);
 
-  describe('LayoutElement', () => {
-
-    describe('.getParentLayer', () => {
-      it('returns null for root layer', () => {
-        expect(LayoutElement.getParentLayer(root)).to.be.null;
+      return installFriendlyIframeEmbed(iframe, container, {
+        url: `${location.origin}/fie`,
+        html: '<!doctype html><html ⚡><head></head><body></body></html>',
+      }).then(() => {
+        return {
+          iframe,
+          body: iframe.contentDocument.body,
+        };
       });
+    }
 
-      it('returns parent layer', () => {
-        const div = createElement();
-        root.appendChild(div);
-
-        expect(LayoutElement.getParentLayer(div)).to.equal(
-            LayoutElement.for(root));
-      });
-
-      it('returns null if element is fixed', () => {
-        const div = createElement();
-        root.appendChild(div);
-
-        div.style.position = 'fixed';
-        expect(LayoutElement.getParentLayer(div)).to.be.null;
-      });
-
-      it('returns parent if parent element is fixed', () => {
-        const parent = createElement();
-        const div = createElement();
-        parent.appendChild(div);
-        root.appendChild(parent);
-
-        parent.style.position = 'fixed';
-        const layer = LayoutElement.getParentLayer(div);
-        expect(layer).to.equal(LayoutElement.for(parent));
-      });
+    before(function() {
+      if (impl === 'shadow' && !Element.prototype.attachShadow) {
+        this.skipTest();
+      }
     });
 
-    describe('#getScrolledPosition', () => {
-      let parent;
-      let div;
-      let layout;
-      let parentLayout;
-      let rootLayout;
-      beforeEach(() => {
-        parent = createElement();
-        div = createElement();
-        parent.appendChild(div);
-        root.appendChild(parent);
+    beforeEach(() => {
+      win = env.win;
+      switch (impl) {
+        case 'native':
+          root = scrollingElement = win.document.scrollingElement;
+          break;
 
-        root.style.width = '100vw';
-        root.style.height = '100vh';
-        root.style.position = 'absolute';
-        root.style.overflow = 'scroll';
-        parent.style.width = '110vw';
-        parent.style.height = '110vh';
-        parent.style.position = 'absolute';
-        parent.style.overflow = 'scroll';
-        div.style.width = '120vw';
-        div.style.height = '120vh';
-        div.style.position = 'absolute';
-        div.style.overflow = 'scroll';
+        case 'overflow':
+          root = scrollingElement = createElement();
+          win.document.body.appendChild(root);
+          break;
 
-        const layers = Services.layersForDoc(parent);
-        layers.declareLayer(parent);
-        layers.add(div);
-        layout = LayoutElement.for(div);
-        parentLayout = LayoutElement.for(parent);
-        rootLayout = LayoutElement.for(root);
-      });
+        case 'shadow': {
+          root = win.document.body;
+          scrollingElement = createElement('div');
+          const sd = root.attachShadow({mode: 'open'});
+          const slot = createElement('slot');
+          scrollingElement.appendChild(slot);
+          sd.appendChild(scrollingElement);
+        }
+      }
 
-      it('calculates layout offsets without scrolls', () => {
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-
-        div.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 10,
-        });
-
-        div.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
-        });
-      });
-
-      it('calculates parent offsets without scrolls', () => {
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-
-        parent.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 10,
-        });
-
-        parent.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
-        });
-      });
-
-      it('calculates parent and offsets without scrolls', () => {
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-
-        parent.style.top = '10px';
-        div.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
-        });
-
-        parent.style.left = '10px';
-        div.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: 20,
-          top: 20,
-        });
-      });
-
-      it('does not change when layout itself scrolls', function*() {
-        scroll(parent, 10, 0);
-        expect(parentLayout.getScrollTop()).to.equal(10);
-        expect(parentLayout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(parentLayout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-
-        scroll(root, 10, 0);
-        expect(rootLayout.getScrollTop()).to.equal(10);
-        expect(rootLayout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(rootLayout.getScrolledPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-      });
-
-      it('updates as parent layers scroll', () => {
-        scroll(parent, 10, 5);
-        expect(parentLayout.getScrollTop()).to.equal(10);
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: -5,
-          top: -10,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: -5,
-          top: -10,
-        });
-
-        scroll(root, 10, 5);
-        expect(rootLayout.getScrollTop()).to.equal(10);
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: -10,
-          top: -20,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(layout.getScrolledPosition()).to.deep.equal({
-          left: -10,
-          top: -20,
-        });
-      });
+      installDocService(win, true);
+      const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+      installLayersServiceForDoc(ampdoc, scrollingElement, impl === 'native');
     });
 
-    describe('#getOffsetPosition', () => {
-      let parent;
-      let div;
-      let layout;
-      let parentLayout;
-      let rootLayout;
-      beforeEach(() => {
-        parent = createElement();
-        div = createElement();
-        parent.appendChild(div);
-        root.appendChild(parent);
+    function scroll(element, top, left) {
+      element.scrollTop = top;
+      element.scrollLeft = left;
+      const layout = LayoutElement.for(element);
+      layout.dirtyScrollMeasurements();
+    }
 
-        root.style.width = '100vw';
-        root.style.height = '100vh';
-        root.style.position = 'absolute';
-        root.style.overflow = 'scroll';
-        parent.style.width = '110vw';
-        parent.style.height = '110vh';
-        parent.style.position = 'absolute';
-        parent.style.overflow = 'scroll';
-        div.style.width = '120vw';
-        div.style.height = '120vh';
-        div.style.position = 'absolute';
-        div.style.overflow = 'scroll';
+    describe('LayoutElement', () => {
 
-        const layers = Services.layersForDoc(parent);
-        layers.declareLayer(parent);
-        layers.add(div);
-        layout = LayoutElement.for(div);
-        parentLayout = LayoutElement.for(parent);
-        rootLayout = LayoutElement.for(root);
-      });
-
-      it('calculates layout offsets without scrolls', () => {
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
+      describe('.getParentLayer', () => {
+        it('returns null for scrolling layer', () => {
+          expect(LayoutElement.getParentLayer(scrollingElement)).to.be.null;
         });
 
-        div.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 10,
+        it('returns parent layer', () => {
+          const div = createElement();
+          root.appendChild(div);
+
+          expect(LayoutElement.getParentLayer(div)).to.equal(
+              LayoutElement.for(scrollingElement));
         });
 
-        div.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
-        });
-      });
+        it('returns null if element is fixed', () => {
+          const div = createElement();
+          root.appendChild(div);
 
-      it('calculates parent offsets without scrolls', () => {
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
+          div.style.position = 'fixed';
+          expect(LayoutElement.getParentLayer(div)).to.be.null;
         });
 
-        parent.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 10,
+        it('returns parent if parent element is fixed', () => {
+          const parent = createElement();
+          const div = createElement();
+          parent.appendChild(div);
+          root.appendChild(parent);
+
+          parent.style.position = 'fixed';
+          const layer = LayoutElement.getParentLayer(div);
+          expect(layer).to.equal(LayoutElement.for(parent));
         });
 
-        parent.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
-        });
-      });
+        it('does not cause double references in layer tree', () => {
+          const layers = Services.layersForDoc(root);
+          const div = createElement();
+          root.appendChild(div);
+          layers.add(div);
 
-      it('calculates parent and offsets without scrolls', () => {
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
+          const layout = LayoutElement.for(div);
+          const rootLayout = LayoutElement.for(scrollingElement);
+          expect(layout.getParentLayer()).to.equal(rootLayout);
 
-        parent.style.top = '10px';
-        div.style.left = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 10,
-          top: 10,
+          layout.forgetParentLayer();
+          expect(layout.getParentLayer()).to.equal(rootLayout);
+
+          const spy = sinon.sandbox.spy(div, 'getBoundingClientRect');
+          rootLayout.dirtyMeasurements();
+          rootLayout.remeasure();
+
+          expect(spy).to.have.callCount(1);
         });
 
-        parent.style.left = '10px';
-        div.style.top = '10px';
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 20,
-          top: 20,
-        });
-      });
+        describe('inside FIE', () => {
+          let iframe;
+          let iframeBody;
 
-      it('does not change when layout itself scrolls', function*() {
-        scroll(parent, 10, 0);
-        expect(parentLayout.getScrollTop()).to.equal(10);
-        expect(parentLayout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(parentLayout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
+          beforeEach(() => {
+            return friendlyIframe().then(struct => {
+              iframe = struct.iframe;
+              iframeBody = struct.body;
+            });
+          });
 
-        scroll(root, 10, 0);
-        expect(rootLayout.getScrollTop()).to.equal(10);
-        expect(rootLayout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(rootLayout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
+          it('returns parent layer', () => {
+            const div = createElement();
+            iframeBody.appendChild(div);
+
+            expect(LayoutElement.getParentLayer(div)).to.equal(
+                LayoutElement.for(scrollingElement));
+          });
+
+          it('returns frameElement if element is fixed', () => {
+            const div = createElement();
+            iframeBody.appendChild(div);
+
+            div.style.position = 'fixed';
+            expect(LayoutElement.getParentLayer(div)).to.equal(
+                LayoutElement.for(iframe));
+          });
+
+          it('returns parent if parent element is fixed', () => {
+            const parent = createElement();
+            const div = createElement();
+            parent.appendChild(div);
+            iframeBody.appendChild(parent);
+
+            parent.style.position = 'fixed';
+            const layer = LayoutElement.getParentLayer(div);
+            expect(layer).to.equal(LayoutElement.for(parent));
+          });
         });
       });
 
-      it('doe snot change when parent layers scroll', () => {
-        scroll(parent, 10, 5);
-        expect(parentLayout.getScrollTop()).to.equal(10);
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
+      describes.repeated('Parent layer', {
+        'regular element': 'div',
+        'FIE embed': 'fie',
+      }, (name, impl) => {
+        describe('#getScrolledPosition', () => {
+          let parent;
+          let div;
+          let layout;
+          let parentLayout;
+          let rootLayout;
+
+          beforeEach(() => {
+            return new Promise(res => {
+              if (impl === 'fie') {
+                res(friendlyIframe().then(struct => {
+                  const {iframe, body} = struct;
+                  // ensure the scrolling element has enough content to scroll
+                  iframe.style.width = '200vw';
+                  iframe.style.height = '200vh';
+                  return body;
+                }));
+              } else {
+                res(root);
+              }
+            }).then(container => {
+              parent = createElement();
+              div = createElement();
+              container.appendChild(parent);
+              parent.appendChild(div);
+
+              scrollingElement.style.width = '100vw';
+              scrollingElement.style.height = '100vh';
+              scrollingElement.style.position = 'absolute';
+              scrollingElement.style.overflow = 'scroll';
+              parent.style.width = '200vw';
+              parent.style.height = '200vh';
+              parent.style.position = 'absolute';
+              parent.style.overflow = 'scroll';
+              div.style.width = '250vw';
+              div.style.height = '250vh';
+              div.style.position = 'absolute';
+              div.style.overflow = 'scroll';
+
+              const layers = Services.layersForDoc(parent);
+              layers.declareLayer(parent);
+              layers.add(div);
+              layout = LayoutElement.for(div);
+              parentLayout = LayoutElement.for(parent);
+              rootLayout = LayoutElement.for(scrollingElement);
+            });
+          });
+
+          it('calculates layout offsets without scrolls', () => {
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            div.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 10,
+            });
+
+            div.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+          });
+
+          it('calculates parent offsets without scrolls', () => {
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            parent.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 10,
+            });
+
+            parent.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+          });
+
+          it('calculates parent and offsets without scrolls', () => {
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            parent.style.top = '10px';
+            div.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+
+            parent.style.left = '10px';
+            div.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: 20,
+              top: 20,
+            });
+          });
+
+          it('does not change when layout itself scrolls', function*() {
+            scroll(parent, 10, 0);
+            expect(parentLayout.getScrollTop()).to.equal(10);
+            expect(parentLayout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(parentLayout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            scroll(scrollingElement, 10, 0);
+            expect(rootLayout.getScrollTop()).to.equal(10);
+            expect(rootLayout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(rootLayout.getScrolledPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+          });
+
+          it('updates as parent layers scroll', () => {
+            scroll(parent, 10, 5);
+            expect(parentLayout.getScrollTop()).to.equal(10);
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: -5,
+              top: -10,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: -5,
+              top: -10,
+            });
+
+            scroll(scrollingElement, 10, 5);
+            expect(rootLayout.getScrollTop()).to.equal(10);
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: -10,
+              top: -20,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(layout.getScrolledPosition()).to.deep.equal({
+              left: -10,
+              top: -20,
+            });
+          });
         });
 
-        scroll(root, 10, 5);
-        expect(rootLayout.getScrollTop()).to.equal(10);
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
-        });
-        rootLayout.dirtyMeasurements();
-        expect(layout.getOffsetPosition()).to.deep.equal({
-          left: 0,
-          top: 0,
+        describe('#getOffsetPosition', () => {
+          let parent;
+          let div;
+          let layout;
+          let parentLayout;
+          let rootLayout;
+          beforeEach(() => {
+            return new Promise(res => {
+              if (impl === 'fie') {
+                res(friendlyIframe().then(struct => {
+                  const {iframe, body} = struct;
+                  // ensure the scrolling element has enough content to scroll
+                  iframe.style.width = '200vw';
+                  iframe.style.height = '200vh';
+                  return body;
+                }));
+              } else {
+                res(root);
+              }
+            }).then(container => {
+              parent = createElement();
+              div = createElement();
+              parent.appendChild(div);
+              container.appendChild(parent);
+
+              scrollingElement.style.width = '100vw';
+              scrollingElement.style.height = '100vh';
+              scrollingElement.style.position = 'absolute';
+              scrollingElement.style.overflow = 'scroll';
+              parent.style.width = '110vw';
+              parent.style.height = '110vh';
+              parent.style.position = 'absolute';
+              parent.style.overflow = 'scroll';
+              div.style.width = '120vw';
+              div.style.height = '120vh';
+              div.style.position = 'absolute';
+              div.style.overflow = 'scroll';
+
+              const layers = Services.layersForDoc(parent);
+              layers.declareLayer(parent);
+              layers.add(div);
+              layout = LayoutElement.for(div);
+              parentLayout = LayoutElement.for(parent);
+              rootLayout = LayoutElement.for(scrollingElement);
+            });
+          });
+
+          it('calculates layout offsets without scrolls', () => {
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            div.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 10,
+            });
+
+            div.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+          });
+
+          it('calculates parent offsets without scrolls', () => {
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            parent.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 10,
+            });
+
+            parent.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+          });
+
+          it('calculates parent and offsets without scrolls', () => {
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            parent.style.top = '10px';
+            div.style.left = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 10,
+              top: 10,
+            });
+
+            parent.style.left = '10px';
+            div.style.top = '10px';
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 20,
+              top: 20,
+            });
+          });
+
+          it('does not change when layout itself scrolls', function*() {
+            scroll(parent, 10, 0);
+            expect(parentLayout.getScrollTop()).to.equal(10);
+            expect(parentLayout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(parentLayout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            scroll(scrollingElement, 10, 0);
+            expect(rootLayout.getScrollTop()).to.equal(10);
+            expect(rootLayout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(rootLayout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+          });
+
+          it('doe snot change when parent layers scroll', () => {
+            scroll(parent, 10, 5);
+            expect(parentLayout.getScrollTop()).to.equal(10);
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+
+            scroll(scrollingElement, 10, 5);
+            expect(rootLayout.getScrollTop()).to.equal(10);
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+            rootLayout.dirtyMeasurements();
+            expect(layout.getOffsetPosition()).to.deep.equal({
+              left: 0,
+              top: 0,
+            });
+          });
         });
       });
     });

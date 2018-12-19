@@ -67,7 +67,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.getAttribute('aria-hidden')).to.equal('true');
-    expect(win.getComputedStyle(pixel).display).to.equal('none');
+    expect(pixel).to.have.display('none');
   });
 
   it('should NOT trigger when src is empty', () => {

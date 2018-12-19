@@ -93,16 +93,22 @@ Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/resp
 
 ## Attributes
 
-##### data-tweetid / data-momentid (required)
+##### data-tweetid / data-momentid / data-timeline-source-type (required)
 
-The ID of the Tweet or Moment.
+The ID of the Tweet or Moment, or the source type if a Timeline should be displayed.
 In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweet id.
 In a URL like https://twitter.com/i/moments/1009149991452135424, `1009149991452135424` is the moment id.
+Valid timeline source types include `profile`, `likes`, `list`, `collection`, `url`, and `widget`.
+
+##### data-timeline-* (optional)
+
+When displaying a timeline, further arguments need to be provided in addition to `timeline-source-type`. For example, `data-timeline-screen-name="amphtml"` in combination with `data-timeline-source-type="profile"` will display a timeline of the AMP Twitter account.
+For details on the available arguments, see the "Timelines" section in [Twitter's JavaScript Factory Functions Guide](https://developer.twitter.com/en/docs/twitter-for-websites/javascript-api/guides/scripting-factory-functions).
 
 ##### data-* (optional)
 
-You can specify options for the Tweet or Moment appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
-For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference) and [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0). 
+You can specify options for the Tweet, Moment, or Timeline appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards.
+For details on the available options, see Twitter's docs [for tweets](https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference), [for moments](https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0) and [for timelines](https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference). 
 
 <div>
 <amp-iframe height="202"

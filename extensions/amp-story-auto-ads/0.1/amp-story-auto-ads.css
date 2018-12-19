@@ -20,6 +20,20 @@
   transform: scale(1.0) translateX(-100%) translateY(200%) !important;
 }
 
+/**
+ * amp-story-auto-ads tags should never be visible. keep them hidden.
+ */
+amp-story-auto-ads {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
 .i-amphtml-story-ad-link {
   background-color: #FFFFFF !important;
   border-radius: 20px !important;
@@ -70,11 +84,22 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   z-index: 100001 !important;
 }
 
+[dir=rtl] .i-amphtml-ad-overlay-container {
+  left: auto !important;
+  right: 0 !important;
+}
+
 [desktop] .i-amphtml-ad-overlay-container {
   /* On desktop a story page has a with of 45vh. */
   left: calc(50vw - 22.5vh) !important;
   /* And a height of 75 vh. */
   top: 12.5vh !important;
+}
+
+[dir=rtl] [desktop] .i-amphtml-ad-overlay-container {
+  left: auto !important;
+  /* On desktop a story page has a with of 45vh. */
+  right: calc(50vw - 22.5vh) !important;
 }
 
 .i-amphtml-story-ad-attribution {
@@ -87,6 +112,11 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   opacity: 0 !important;
   padding: 0 !important;
   visibility: hidden !important;
+}
+
+[dir=rtl] .i-amphtml-story-ad-attribution {
+  margin-left: 0px !important;
+  margin-right: 16px !important;
 }
 
 amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {

@@ -17,9 +17,11 @@
 import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
-import {computedStyle, getStyle, toggle} from '../style';
+import {computedStyle, toggle} from '../style';
 import {dev, user} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
+import {
+  getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
+} from '../service';
 import {startsWith} from '../string';
 import {toWin} from '../types';
 import {tryFocus} from '../dom';
@@ -29,8 +31,7 @@ import {tryFocus} from '../dom';
  * @return {boolean}
  */
 function isShowable(element) {
-  return getStyle(element, 'display') == 'none'
-      || element.hasAttribute('hidden');
+  return element.hasAttribute('hidden');
 }
 
 /** @const {string} */
@@ -49,13 +50,18 @@ const PERMITTED_POSITIONS = ['top','bottom','center'];
 export class StandardActions {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window=} opt_win
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, opt_win) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    const context = (opt_win)
+      ? opt_win.document.documentElement
+      : ampdoc.getHeadNode();
+
     /** @const @private {!./action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(ampdoc);
+    this.actions_ = Services.actionServiceForDoc(context);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
@@ -66,9 +72,10 @@ export class StandardActions {
     this.installActions_(this.actions_);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
-    this.installActions_(Services.actionServiceForDoc(embedWin.document));
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
+    installServiceInEmbedScope(embedWin, 'standard-actions',
+        new StandardActions(ampdoc, embedWin));
   }
 
   /**
@@ -107,8 +114,9 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const ampdoc = getAmpdoc(node);
-        return Services.bindForDocOrNull(ampdoc).then(bind => {
+        const element = (node.nodeType === Node.DOCUMENT_NODE)
+          ? node.documentElement : node;
+        return Services.bindForDocOrNull(element).then(bind => {
           user().assert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
@@ -125,10 +133,20 @@ export class StandardActions {
         }
         return permission.then(() => {
           Services.navigationForDoc(this.ampdoc).navigateTo(
-              win, args['url'], `AMP.${method}`);
+              win, args['url'], `AMP.${method}`,
+              {target: args['target'], opener: args['opener']});
         }, /* onrejected */ e => {
           user().error(TAG, e.message);
         });
+
+      case 'scrollTo':
+        user().assert(args['id'],
+            'AMP.scrollTo must provide element ID');
+        invocation.node = dev().assertElement(
+            getAmpdoc(node).getElementById(args['id']),
+            'scrollTo element ID must exist on page'
+        );
+        return this.handleScrollTo(invocation);
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack();
@@ -173,9 +191,8 @@ export class StandardActions {
       invocation.args['position'] : 'top';
 
     // Animate the scroll
-    this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
-
-    return null;
+    // Should return a promise instead of null
+    return this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);
   }
 
   /**
@@ -250,7 +267,6 @@ export class StandardActions {
         target./*OK*/expand();
       } else {
         toggle(target, true);
-        target.removeAttribute('hidden');
       }
     });
 

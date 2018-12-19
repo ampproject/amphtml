@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {
-  FetchResponse,
-  assertSuccess,
-  fetchPolyfill,
-  xhrServiceForTesting,
-} from '../../src/service/xhr-impl';
-import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {Services} from '../../src/services';
+import {assertSuccess} from '../../src/utils/xhr-utils';
+import {createFormDataWrapper} from '../../src/form-data-wrapper';
+import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -74,7 +70,7 @@ describe.configure().skipSafari().run('XHR', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
@@ -141,7 +137,12 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should allow FormData as body', () => {
-          const formData = new FormDataWrapper();
+          const fakeWin = null;
+          sandbox.stub(Services, 'platformFor').returns({
+            isIos() { return false; },
+          });
+
+          const formData = createFormDataWrapper(fakeWin);
           sandbox.stub(JSON, 'stringify');
           formData.append('name', 'John Miller');
           formData.append('age', 56);
@@ -333,12 +334,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
-          if (test.desc == 'Native' && 'Response' in Window) {
-            return new Response(body, init);
-          } else {
-            init.responseText = body;
-            return new FetchResponse(init);
-          }
+          return new Response(body, init);
         }
         const mockXhr = {
           status: 200,
@@ -383,7 +379,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should do simple JSON fetch', () => {
         sandbox.stub(user(), 'assert');
-        return xhr.fetchJson('http://localhost:31862/get?k=v1')
+        return xhr.fetchJson('http://localhost:8081/get?k=v1')
             .then(res => res.json())
             .then(res => {
               expect(res).to.exist;
@@ -392,8 +388,8 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should redirect fetch', () => {
-        const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
-            'http://localhost:31862/get?k=v2');
+        const url = 'http://localhost:8081/redirect-to?url=' + encodeURIComponent(
+            'http://localhost:8081/get?k=v2');
         return xhr.fetchJson(url, {ampCors: false})
             .then(res => res.json())
             .then(res => {
@@ -403,7 +399,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should fail fetch for 400-error', () => {
-        const url = 'http://localhost:31862/status/404';
+        const url = 'http://localhost:8081/status/404';
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
@@ -412,7 +408,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'http://localhost:31862/status/500?CID=cid';
+        const url = 'http://localhost:8081/status/500?CID=cid';
         return xhr.fetchJson(url).then(() => {
           throw new Error('UNREACHABLE');
         }, error => {
@@ -423,7 +419,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should NOT succeed CORS setting cookies without credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.be.null;
@@ -432,7 +428,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should succeed CORS setting cookies with credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.equal('v1');
@@ -441,7 +437,7 @@ describe.configure().skipSafari().run('XHR', function() {
 
       it('should ignore CORS setting cookies w/omit credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:8081/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.be.null;
@@ -455,7 +451,7 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should expose HTTP headers', () => {
-        const url = 'http://localhost:31862/response-headers?' +
+        const url = 'http://localhost:8081/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
@@ -475,119 +471,22 @@ describe.configure().skipSafari().run('XHR', function() {
       });
     });
 
-    describe('#fetchDocument', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
-
-      it('should be able to fetch a document', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc.nodeType).to.equal(9);
-        });
-        xhrCreated.then(xhr => {
-          expect(xhr.requestHeaders['Accept']).to.equal('text/html');
-          xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>');
-          expect(xhr.responseType).to.equal('document');
-        });
-        return promise;
-      });
-
-      it('should mark 400 as not retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                400, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.be.undefined;
-          expect(e.retriable).to.not.equal(true);
-        });
-      });
-
-      it('should mark 415 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should mark 500 as retriable', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '<html></html>'));
-        return promise.catch(e => {
-          expect(e.retriable).to.exist;
-          expect(e.retriable).to.be.true;
-        });
-      });
-
-      it('should error on non truthy responseXML', () => {
-        setupMockXhr();
-        const promise = xhr.fetchDocument('/index.html');
-        xhrCreated.then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                      'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-                },
-                '{"hello": "world"}'));
-        return promise.catch(e => {
-          expect(e.message)
-              .to.contain('responseXML should exist');
-        });
-      });
-    });
-
     describe('#fetchText', () => {
       const TEST_TEXT = 'test text';
       let fetchStub;
 
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
-        const mockXhr = {
-          status: 200,
-          responseText: TEST_TEXT,
-        };
         fetchStub = sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
-            () => Promise.resolve(new FetchResponse(mockXhr)));
+            () => Promise.resolve(new Response(TEST_TEXT)));
       });
 
       it('should be able to fetch a document', () => {
         const promise = xhr.fetchText('/text.html');
-        expect(fetchStub.calledWith('/text.html', {
+        expect(fetchStub).to.be.calledWith('/text.html', {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
-        })).to.be.true;
+        });
         return promise.then(res => {
           return res.text();
         }).then(text => {
@@ -638,7 +537,7 @@ describe.configure().skipSafari().run('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const url = 'http://localhost:31862/post';
+    const url = 'http://localhost:8081/post';
 
     describe(test.desc + ' POST', () => {
       let xhr;
@@ -718,87 +617,6 @@ describe.configure().skipSafari().run('XHR', function() {
         allowConsoleError(() => { expect(nullFn).to.throw(); });
       });
 
-    });
-  });
-
-  describe('FetchResponse', () => {
-    const TEST_TEXT = 'this is some test text';
-    const mockXhr = {
-      status: 200,
-      responseText: TEST_TEXT,
-    };
-
-    it('should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-      });
-    });
-
-    it('should provide text only once', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text().then(result => {
-        expect(result).to.equal(TEST_TEXT);
-        expect(response.text.bind(response), 'should throw').to.throw(Error,
-            /Body already used/);
-      });
-    });
-
-    it('should be cloneable and each instance should provide text', () => {
-      const response = new FetchResponse(mockXhr);
-      const clone = response.clone();
-      return Promise.all([
-        response.text(),
-        clone.text(),
-      ]).then(results => {
-        expect(results[0]).to.equal(TEST_TEXT);
-        expect(results[1]).to.equal(TEST_TEXT);
-      });
-    });
-
-    it('should not be cloneable if body is already accessed', () => {
-      const response = new FetchResponse(mockXhr);
-      return response.text()
-          .then(() => {
-            expect(() => response.clone(), 'should throw').to.throw(
-                Error,
-                /Body already used/);
-          });
-    });
-
-    scenarios.forEach(test => {
-      if (test.desc === 'Polyfill') {
-        // FetchRequest is only returned by the Polyfill version of Xhr.
-        describe('#text', () => {
-          let xhr;
-
-          beforeEach(() => {
-            xhr = xhrServiceForTesting(test.win);
-            setupMockXhr();
-          });
-
-          it('should return text from a full XHR request', () => {
-            const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
-                response => {
-                  expect(response).to.be.instanceof(FetchResponse);
-                  return response.text().then(result => {
-                    expect(result).to.equal(TEST_TEXT);
-                  });
-                });
-            xhrCreated.then(
-                xhr => xhr.respond(
-                    200, {
-                      'Content-Type': 'text/plain',
-                      'Access-Control-Expose-Headers':
-                          'AMP-Access-Control-Allow-Source-Origin',
-                      'AMP-Access-Control-Allow-Source-Origin':
-                          'https://acme.com',
-                    },
-                    TEST_TEXT));
-            return promise;
-          });
-        });
-      }
     });
   });
 
@@ -983,7 +801,12 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should post correct structurally-cloneable FormData request', () => {
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
-      const formData = new FormDataWrapper();
+      const fakeWin = null;
+      sandbox.stub(Services, 'platformFor').returns({
+        isIos() { return false; },
+      });
+
+      const formData = createFormDataWrapper(fakeWin);
       formData.append('a', 42);
       formData.append('b', '24');
       formData.append('b', true);
@@ -1070,22 +893,6 @@ describe.configure().skipSafari().run('XHR', function() {
           });
         });
       });
-
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/').then(doc => {
-          expect(doc).to.have.nested.property('body.textContent')
-              .that.equals('Foo');
-        });
-      });
     });
 
     describe('when native Response type is unavailable', () => {
@@ -1118,20 +925,6 @@ describe.configure().skipSafari().run('XHR', function() {
             content: 32,
           });
         });
-      });
-
-      it('should return correct document response', () => {
-        sendMessageStub.returns(
-            Promise.resolve({
-              body: '<html><body>Foo</body></html>',
-              init: {
-                headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
-              },
-            }));
-        const xhr = xhrServiceForTesting(interceptionEnabledWin);
-
-        return xhr.fetchDocument('https://www.some-url.org/some-resource/')
-            .then(doc => expect(doc.body.textContent).to.equal('Foo'));
       });
 
       it('should return default response when body/init missing', () => {

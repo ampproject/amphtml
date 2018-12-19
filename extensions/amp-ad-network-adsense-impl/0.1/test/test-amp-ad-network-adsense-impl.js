@@ -207,6 +207,23 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // exact value of ampAnalyticsConfig_ covered in
       // ads/google/test/test-utils.js
     });
+
+    it('should consume sandbox header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'amp-ff-sandbox':
+              return 'true';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
+    });
   });
 
   describe('#onNetworkFailure', () => {
@@ -322,6 +339,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
           {
             getUpgradeDelayMs: () => 1,
           });
+
+      // Make sure the ad iframe (FIE) has a local URL replacements service.
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(a).returns(urlReplacements);
+
       impl.buildCallback();
       impl.size_ = {width: 123, height: 456};
       impl.onCreativeRender({customElementExtensions: []});
@@ -359,6 +382,17 @@ describes.realWin('amp-ad-network-adsense-impl', {
       button.dispatchEvent(ev1);
       expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
       expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should set iframe id and data-google-query-id attribute', () => {
+      impl.buildCallback();
+      impl.ifi_ = 3;
+      impl.qqid_ = 'abc';
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender(null);
+      expect(impl.element.getAttribute('data-google-query-id')).to.equal('abc');
+      expect(impl.iframe.id).to.equal('google_ads_iframe_3');
     });
   });
 
@@ -565,6 +599,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
         element.setAttribute('data-auto-format', 'rspv');
         return impl.getAdUrl().then(url => {
           expect(url).to.match(/(\?|&)ramft=13(&|$)/);
+        });
+      });
+      it('sets rafmt for matched content responsive', () => {
+        element.setAttribute('data-ad-slot', 'some_slot');
+        element.setAttribute('data-auto-format', 'mcrspv');
+        return impl.getAdUrl().then(url => {
+          expect(url).to.match(/(\?|&)ramft=15(&|$)/);
         });
       });
       it('sets matched content specific fields', () => {
@@ -797,6 +838,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
       adsense.buildCallback();
       expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
     });
+
+    it('should schedule a resize for matched content responsive', function *() {
+      const adsense = constructImpl({
+        width: '100vw',
+        height: '100',
+        'data-auto-format': 'mcrspv',
+      });
+      env.sandbox.stub(adsense, 'attemptChangeSize').returns(Promise.resolve());
+
+      const promise = adsense.buildCallback();
+      expect(promise).to.exist;
+      yield promise;
+
+      expect(adsense.attemptChangeSize).to.be.calledWith(1290, VIEWPORT_WIDTH);
+    });
   });
 
   describe('#onLayoutMeasure', () => {
@@ -892,9 +948,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       }).then(() => {
         impl.onLayoutMeasure();
         // Right margin is 9px from containerContainer and 25px from container.
-        // TODO(charliereams): In the test harness it is also offset by 15px due
-        // to strange scrollbar behaviour. Figure out how to disable this.
-        expect(element.style.marginRight).to.be.equal('-124px');
+        expect(element.style.marginRight).to.be.equal('-109px');
         expect(element.style.marginLeft).to.be.equal('');
       });
     });
@@ -904,22 +958,38 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should request 100px height for very small viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 100, height: 667}))
+              'rspv', {width: 100, height: 667}))
           .to.be.equal(100);
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 320, height: 568}))
+              'rspv', {width: 320, height: 568}))
           .to.be.equal(267);
     });
 
     it('should request 300px height for wide viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              {width: 500, height: 667}))
+              'rspv', {width: 500, height: 667}))
           .to.be.equal(300);
+    });
+  });
+
+  describe('#getMCResponsiveHeightForContext_', () => {
+    it('get matched content responsive height for iPhone 6', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              'mcrspv', {width: 375, height: 320}))
+          .to.be.equal(1290);
+    });
+
+    it('get matched content responsive height for iPhone 5', () => {
+      expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+              'mcrspv', {width: 320, height: 320}))
+          .to.be.equal(1100);
     });
   });
 

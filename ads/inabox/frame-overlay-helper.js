@@ -23,12 +23,12 @@ import {
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
 } from '../../src/full-overlay-frame-helper';
+import {resetStyles, setImportantStyles} from '../../src/style';
 import {restrictedVsync, timer} from './util';
 
 
-const CENTER_TRANSITION_TIME_MS = 500;
-const CENTER_TRANSITION_END_WAIT_TIME_MS = 200;
-
+const CENTER_TRANSITION_TIME_MS = 150;
+const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
 
 /**
  * Places the child frame in full overlay mode.
@@ -44,21 +44,24 @@ const expandFrameImpl = function(win, iframe, onFinish) {
         width: win./*OK*/innerWidth,
         height: win./*OK*/innerHeight,
       };
-      state.rect = iframe./*OK*/getBoundingClientRect();
+      state.rect = layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
     },
     mutate(state) {
-      const collapsedRect = layoutRectFromDomRect(state.rect);
-      const expandedRect = layoutRectLtwh(
-          0, 0, state.viewportSize.width, state.viewportSize.height);
+      const {width, height} = state.viewportSize;
+      const expandedRect = layoutRectLtwh(0, 0, width, height);
 
       centerFrameUnderVsyncMutate(iframe, state.rect, state.viewportSize,
           CENTER_TRANSITION_TIME_MS);
 
+      // To prevent double click during transition;
+      setImportantStyles(iframe, {'pointer-events': 'none'});
+
       timer(() => {
         restrictedVsync(win, {
           mutate() {
+            resetStyles(iframe, ['pointer-events']);
             expandFrameUnderVsyncMutate(iframe);
-            onFinish(collapsedRect, expandedRect);
+            onFinish(state.rect, expandedRect);
           },
         });
       }, CENTER_TRANSITION_TIME_MS + CENTER_TRANSITION_END_WAIT_TIME_MS);

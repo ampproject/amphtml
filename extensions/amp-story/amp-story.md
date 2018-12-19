@@ -43,7 +43,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -109,6 +109,71 @@ The new attributes:
 | `poster-portrait-src` [required] | The story poster in portrait format (3x4 aspect ratio). |
 | `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
 | `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
+
+#### `publisher-logo-src` guidelines
+
+The following guidelines apply to the image for the publisher logo:
+
+- The file should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- Avoid animated images, such as animated gifs.
+- The graphic part of the logo should be legible on the background color.
+
+<table>
+  <tr>
+    <td>
+      <amp-img alt="Logo with blue text on white background"
+          layout="fixed"
+          width="107" height="112" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+        <noscript>
+          <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with white text on blue background"
+          layout="fixed"
+          width="107" height="101" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+        <noscript>
+          <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with blue text on blue background"
+          layout="fixed"
+          width="103" height="102" 
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+        <noscript>
+          <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
+        </noscript>
+      </amp-img>
+      Avoid this
+    </td>
+  </tr>
+</table>
+
+- The logo shape should be a square, not a rectangle.
+- The background color should not be transparent.
+- Use one logo per brand that is consistent across AMP stories.
+- The logo should be at least 96x96 pixels.
+
+#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
+
+The following guidelines apply to the image for the story poster image(s):
+
+- The poster image should be representative of the entire AMP story.
+- The poster image should be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
+- The poster image should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+- Each poster image should meet the recommended minimium size:
+  - Portrait: 696px x 928px
+  - Landscape: 928px x 696px
+  - Square: 928px x 928px
 
 ## Overview
 
@@ -445,6 +510,36 @@ src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/a
     <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
   </noscript>
 </amp-img>
+
+**AMP-to-AMP linking**
+
+For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
+
+```json
+...
+{
+  "type": "small",
+  "title": "This is India an the best places you should go",
+  "url": "http://example.com/my-amp-document.html",
+  "image": "http://placehold.it/256x128",
+  "amphtml": true
+},
+{
+  "type": "cta-link",
+  "links": [
+    {
+      "text": "Sign Up",
+      "url": "example.com/signup",
+      "amphtml": true
+    },
+    {
+      "text": "Subscribe",
+      "url": "example.com/subscribe"
+    }
+  ]
+},
+...
+```
 
 #### Social sharing
 

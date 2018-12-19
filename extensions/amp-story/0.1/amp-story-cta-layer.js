@@ -33,19 +33,13 @@ import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
 /**
  * Call to action button layer template.
+ *
+ * No pre-rendering to let more computing-intensive elements (like
+ * videos) get pre-rendered first. Since this layer will not contain
+ * computing-intensive resources such as videos, we can just risk rendering
+ * while the user is looking.
  */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
-
-  /** @override */
-  prerenderAllowed() {
-    /**
-     * Skip pre-rendering to let more computing-intensive elements (like
-     * videos) get pre-rendered first. Since this layer will not contain
-     * computing-intensive resources such as videos, we can just risk rendering
-     * while the user is looking.
-     */
-    return false;
-  }
 
   /** @override */
   buildCallback() {

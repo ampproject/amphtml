@@ -10,19 +10,36 @@ requirement: {
 # Element
 
 requirement: {
-  type: BANNED_PROPERTY_WRITE
-  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use getStyle, setStyle, or setStyles in src/style.js'
   value: 'Element.prototype.style'
   whitelist: 'src/style.js'
+  whitelist: 'src/layout.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use closestBySelector, closestByTag etc in src/dom.js'
+  value: 'Element.prototype.closest'
+  whitelist: 'src/dom.js'
 }
 
 # CSSStyleDeclaration
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  error_message: 'Use setStyle or setStyles in src/style.js'
   value: 'CSSStyleDeclaration.prototype.setProperty'
   whitelist: 'src/style.js'
+}
+
+# History
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
+  value: 'History.prototype.state'
+  whitelist: 'src/history.js'
 }
 
 # Strings
@@ -82,13 +99,6 @@ requirement: {
 }
 
 # Object
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'Object.values is not allowed'
-  value: 'Object.values'
-  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
-}
 
 requirement: {
   type: BANNED_NAME
@@ -204,6 +214,7 @@ requirement: {
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/zen.js'
   whitelist: 'src/json.js' # Where jsonParse itself is implemented.
 }
 
@@ -224,6 +235,19 @@ requirement: {
   whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
   whitelist: 'src/service/history-impl.js' # False-positive
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.detail'
+  value: 'MessageEvent.prototype.detail'
+  whitelist: 'src/event-helper.js' # getDetail is implemented here
+
+  # 3p ads are OK
+  whitelist: 'ads/adhese.js'
+  whitelist: 'ads/loka.js'
+  whitelist: 'ads/xlift.js'
 }
 
 requirement: {
@@ -267,6 +291,7 @@ requirement: {
   whitelist: 'src/experiments.js'
   whitelist: 'src/service/cid-api.js'
   whitelist: 'src/service/cid-impl.js'
+  whitelist: 'extensions/amp-analytics/0.1/cookie-writer.js'
 }
 
 # Function
@@ -275,4 +300,58 @@ requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
   value: 'Function.prototype.name'
+}
+
+
+# Bans DOM v4 methods, to limit the surface area of the Custom Elements Polyfill
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.remove() is unusual. Please use Node.p.removeChild()'
+  value: 'DocumentType.prototype.remove'
+  value: 'Element.prototype.remove'
+  value: 'CharacterData.prototype.remove'
+  whitelist: 'extensions/amp-inputmask/0.1/mask-impl.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.replaceWith() is unusual. Please use Node.p.replaceChild()'
+  value: 'DocumentType.prototype.replaceWith'
+  value: 'Element.prototype.replaceWith'
+  value: 'CharacterData.prototype.replaceWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.append() is unusual. Please use Node.p.appendChild()'
+  value: 'Element.prototype.append'
+  value: 'Document.prototype.append'
+  value: 'DocumentFragment.prototype.append'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ParentNode.p.prepend() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.prepend'
+  value: 'Document.prototype.prepend'
+  value: 'DocumentFragment.prototype.prepend'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.before() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.before'
+  value: 'DocumentType.prototype.before'
+  value: 'CharacterData.prototype.before'
+  # It's really hard to properly type check this one.
+  whitelist: 'extensions/amp-date-picker/0.1/dates-list.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'ChildNode.p.after() is unusual. Please use Node.p.insertBefore()'
+  value: 'Element.prototype.after'
+  value: 'DocumentType.prototype.after'
+  value: 'CharacterData.prototype.after'
 }

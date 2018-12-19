@@ -7,7 +7,7 @@ Use this issue to track a release from the initial canary release build through
 production.  The community uses this issue to keep track of what is going on
 with the release so please keep this issue up to date:
 
-- Check the checkboxes as you reach each stage of the release.
+- As you reach each stage of the release, check the appropriate checkbox and replace <CL submit time> with the "Submitted" text from the corresponding CL, e.g. "2:49 PM, Jul 25, 2018 UTC-4".
 - If you need to perform cherry picks, add new checkboxes here (by editing this
   issue),  making sure to use the release number for the new build.  Link the
   release number to the GitHub tag page the first time a given release number
@@ -21,9 +21,9 @@ Note: remove the backticks (``) from the link.
 -->
 
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
-- [ ] Release <RELEASE_NUMBER> pushed to Dev Channel
-- [ ] Release <RELEASE_NUMBER> pushed to 1%
-- [ ] Release <RELEASE_NUMBER> pushed to production
+- [ ] Release <RELEASE_NUMBER> pushed to dev channel (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> pushed to 1% (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> pushed to production (<CL submit time>)
 
 <!--
 

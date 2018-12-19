@@ -17,10 +17,10 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import mustache from '../../../third_party/mustache/mustache';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -38,22 +38,43 @@ export class AmpMustache extends AMP.BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    setUnescapedSanitizier(purifyTagsForTripleMustache);
+    mustache.setUnescapedSanitizer(value =>
+      purifyTagsForTripleMustache(value, this.win.document));
   }
 
   /** @override */
   compileCallback() {
+    // If viewer is renderTemplate capable, skip the handling of the mustache
+    // templates as its rendering is managed by the viewer. This template will
+    // only be responsible for sanitizing and inserting it into the DOM.
+    if (this.viewerCanRenderTemplates()) {
+      return;
+    }
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
-    const content = templateContentClone(this.element);
-    this.processNestedTemplates_(content);
-    const container = this.element.ownerDocument.createElement('div');
-    container.appendChild(content);
-
     /** @private @const {string} */
-    this.template_ = container./*OK*/innerHTML;
-    mustacheParse(this.template_);
+    this.template_ = this.initTemplateString_();
+
+    mustache.parse(this.template_, /* tags */ undefined);
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  initTemplateString_() {
+    if (this.element.tagName == 'TEMPLATE') {
+      const content = templateContentClone(this.element);
+      this.processNestedTemplates_(content);
+      const container = this.element.ownerDocument.createElement('div');
+      container.appendChild(content);
+      return container./*OK*/innerHTML;
+    } else if (this.element.tagName == 'SCRIPT') {
+      return this.element.textContent;
+    }
+
+    return '';
   }
 
   /**
@@ -80,16 +101,34 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
+  setHtml(html) {
+    return this.purifyAndSetHtml_(html);
+  }
+
+  /** @override */
   render(data) {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
-    const html = mustacheRender(this.template_, mustacheData);
-    const sanitized = purifyHtml(html);
+    const html = mustache.render(this.template_, mustacheData,
+        /* partials */ undefined);
+    return this.purifyAndSetHtml_(html);
+  }
+
+  /**
+   *
+   * @param {string} html
+   * @private
+   */
+  purifyAndSetHtml_(html) {
+    const diffing = isExperimentOn(self, 'amp-list-diffing');
+    const body = purifyHtml(html, diffing);
+    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
+    // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');
-    root./*OK*/innerHTML = sanitized;
+    root./*OK*/innerHTML = body./*OK*/innerHTML;
     return this.unwrap(root);
   }
 }

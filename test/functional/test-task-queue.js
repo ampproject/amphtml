@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {TaskQueue} from '../../src/service/task-queue';
 
 
@@ -25,7 +24,7 @@ describe('TaskQueue', () => {
   let queue;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     queue = new TaskQueue();
   });

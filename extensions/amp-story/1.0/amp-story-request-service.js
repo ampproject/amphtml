@@ -16,12 +16,17 @@
 
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
-import {getAmpdoc} from '../../../src/service';
+import {getChildJsonConfig} from '../../../src/json';
+import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
+import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
+
+/** @private @const {string} */
+const TAG = 'amp-story-request-service';
 
 /**
  * Service to send XHRs.
@@ -50,27 +55,41 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-  }
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
     const bookendEl = childElementByTag(this.storyElement_,
         'amp-story-bookend');
-
-    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
+    if (!bookendEl) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = bookendEl.getAttribute(attributeName);
+    if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
+      const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
+      return this.loadJsonFromAttribute_(rawUrl);
+    }
+
+    // Fallback. Check for an inline json config.
+    let config = null;
+    try {
+      config = getChildJsonConfig(bookendEl);
+    } catch (err) {}
+
+    return Promise.resolve(config);
+  }
+
+  /**
+   * @param {string} rawUrl
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   * @private
+   */
+  loadJsonFromAttribute_(rawUrl) {
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
-    return Services.urlReplacementsForDoc(getAmpdoc(this.storyElement_))
+    if (!isProtocolValid(rawUrl)) {
+      user().error(TAG, 'Invalid config url.');
+      return Promise.resolve(null);
+    }
+
+    return Services.urlReplacementsForDoc(this.storyElement_)
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => this.xhr_.fetchJson(url, opts))
         .then(response => {
@@ -79,3 +98,22 @@ export class AmpStoryRequestService {
         });
   }
 }
+
+/**
+ * Util function to retrieve the request service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @param  {!Element} storyEl
+ * @return {!AmpStoryRequestService}
+ */
+export const getRequestService = (win, storyEl) => {
+  let service = Services.storyRequestService(win);
+
+  if (!service) {
+    service = new AmpStoryRequestService(win, storyEl);
+    registerServiceBuilder(win, 'story-request', () => service);
+  }
+
+  return service;
+};

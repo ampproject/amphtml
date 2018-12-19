@@ -312,7 +312,9 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    return !!PROTECTED_ELEMENTS[event.target.tagName];
+    return !!closest(dev().assertElement(event.target), el => {
+      return PROTECTED_ELEMENTS[el.tagName];
+    }, /* opt_stopAt */ this.element_);
   }
 
 

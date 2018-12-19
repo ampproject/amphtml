@@ -116,6 +116,22 @@ describe('LayoutRect', () => {
   });
 });
 
+describe('cloneLayoutMarginsChangeDef', () => {
+  it('should clone margins change correctly into new object', () => {
+    const marginsChange = {
+      top: 1,
+      bottom: 5,
+      left: 4,
+    };
+    const marginsChangeClone = lr.cloneLayoutMarginsChangeDef(marginsChange);
+    expect(marginsChangeClone).to.not.equal(marginsChange);
+    expect(marginsChangeClone.top).to.equal(1);
+    expect(marginsChangeClone.bottom).to.equal(5);
+    expect(marginsChangeClone.left).to.equal(4);
+    expect(marginsChangeClone.right).to.be.undefined;
+  });
+});
+
 describe('layoutRectSizeEquals', () => {
   it('should detect changes', () => {
     const from = lr.layoutRectLtwh(10, 20, 1, 1);

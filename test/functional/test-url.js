@@ -15,6 +15,7 @@
  */
 
 import {
+  addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
@@ -32,6 +33,7 @@ import {
   parseUrlDeprecated,
   removeAmpJsParamsFromUrl,
   removeFragment,
+  removeParamsFromSearch,
   removeSearch,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
@@ -534,6 +536,24 @@ describe('addParamsToUrl', () => {
   });
 });
 
+describe('addMissingParamsToUrl', () => {
+  let url;
+  const params = {
+    hello: 'world',
+    foo: 'bar',
+    replace: 'error',
+    safe: 'error',
+  };
+  beforeEach(() => {
+    url = 'https://www.ampproject.org/get/here?replace=1&safe#hash-value';
+  });
+
+  it('should not replace existing params', () => {
+    expect(addMissingParamsToUrl(url, params)).to.equal(
+        'https://www.ampproject.org/get/here?replace=1&safe&hello=world&foo=bar#hash-value');
+  });
+});
+
 describe('isProxyOrigin', () => {
 
   function testProxyOrigin(href, bool) {
@@ -862,26 +882,41 @@ describe('removeAmpJsParamsFromUrl', () => {
   });
 
   it('should remove all internal params', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&usqp=4'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js=1&amp_gsa=2&amp_r=3&amp_kit=4&usqp=4'))
         .to.equal('http://example.com/');
-    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&usqp'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?amp_js&amp_gsa&amp_r&amp_kit&usqp'))
         .to.equal('http://example.com/');
   });
 
   it('should remove all internal params, leaving others intact', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e'))
         .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e');
   });
 
   it('should preserve the fragment', () => {
-    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+    expect(removeAmpJsParamsFromUrl('http://example.com?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e#frag=yes'))
         .to.equal('http://example.com/?a=a&b=b&c=c&d=d&e=e#frag=yes');
   });
 
   it('should preserve the path', () => {
     expect(
-        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&d=d&usqp=4&e=e#frag=yes'))
+        removeAmpJsParamsFromUrl('http://example.com/toast?a=a&amp_js=1&b=b&amp_gsa=2&c=c&amp_r=3&amp_kit=4&d=d&usqp=4&e=e#frag=yes'))
         .to.equal('http://example.com/toast?a=a&b=b&c=c&d=d&e=e#frag=yes');
+  });
+});
+
+describe('removeParamsFromSearch', () => {
+  it('should remove the leading ? or &', () => {
+    expect(removeParamsFromSearch('?a=1&', 'a')).to.equal('');
+  });
+
+  it('should remove the param from searchUrl', () => {
+    expect(removeParamsFromSearch('?a=1&b=2&c', 'a')).to.equal('?b=2&c');
+  });
+
+  it('should remove all param with same name from searchUrl', () => {
+    expect(removeParamsFromSearch('?a=1&b=2&a=2&a=3&c&ab=3', 'a')).to.equal(
+        '?b=2&c&ab=3');
   });
 });
 

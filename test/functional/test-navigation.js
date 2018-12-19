@@ -60,19 +60,26 @@ describes.sandboxed('Navigation', {}, () => {
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      const {documentElement} = doc;
 
       handler = Services.navigationForDoc(doc);
       handler.isIframed_ = true;
+
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
+
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
+
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
+
       win.open = function() {};
       winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
         return {};
       });
+
       const viewport = Services.viewportForDoc(doc);
       scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
+
       const history = Services.historyForDoc(doc);
       replaceStateForTargetPromise = Promise.resolve();
       replaceStateForTargetStub = sandbox.stub(
@@ -83,6 +90,10 @@ describes.sandboxed('Navigation', {}, () => {
       anchor.href = 'https://www.google.com/other';
       doc.body.appendChild(anchor);
       event.target = anchor;
+
+      const urlReplacements = Services.urlReplacementsForDoc(documentElement);
+      sandbox.stub(Services, 'urlReplacementsForDoc')
+          .withArgs(anchor).returns(urlReplacements);
 
       elementWithId = doc.createElement('div');
       elementWithId.id = 'test';
@@ -141,6 +152,68 @@ describes.sandboxed('Navigation', {}, () => {
         handler.handle_(event);
         expect(handleNavSpy).to.not.be.called;
         expect(handleCustomProtocolSpy).to.not.be.called;
+      });
+    });
+
+    describe('anchor mutators', () => {
+      it('should throw error if priority is already in use', () => {
+        const priority = 10;
+        handler.registerAnchorMutator(element => {
+          element.href += '?am=1';
+        }, priority);
+        allowConsoleError(() => {
+          expect(() => handler.registerAnchorMutator(element => {
+            element.href += '?am=2';
+          }, priority)).to.not.throw();
+        });
+      });
+
+      it('should execute in order', () => {
+        anchor.href = 'https://www.testing-1-2-3.org';
+        let transformedHref;
+        handler.registerAnchorMutator(element => {
+          element.href += '&second=2';
+          transformedHref = element.href;
+        }, 2);
+        handler.registerAnchorMutator(element => {
+          element.href += '&first=1';
+          transformedHref = element.href;
+        }, 1);
+        handler.registerAnchorMutator(element => {
+          element.href += '?third=3';
+          transformedHref = element.href;
+        }, 3);
+        // If using a same priority, the order of registration is respected.
+        handler.registerAnchorMutator(element => {
+          element.href += '&third=3-1';
+          transformedHref = element.href;
+        }, 3);
+        handler.handle_(event);
+        expect(transformedHref).to.equal(
+            'https://www.testing-1-2-3.org/?third=3&third=3-1&second=2'
+            + '&first=1');
+      });
+
+      it('verify order of operations', () => {
+        const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
+        const parseUrl = sandbox.spy(handler, 'parseUrl_');
+        const obj = {
+          callback: () => {
+          },
+        };
+        const linkRuleSpy = sandbox.spy(obj, 'callback');
+        handler.registerAnchorMutator(linkRuleSpy, 1);
+        handler.handle_(event);
+        // Verify that the expansion of variables occurs first
+        // followed by the anchor transformation and then the parsing
+        // of the possibly mutated anchor href into the location object
+        // for navigation.handleNavClick.
+        sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+        expect(expandVars).to.be.calledOnce;
+        // Verify that parseUrl is called once when the variables are
+        // expanded, then after the anchor mutators and then once more
+        // in handleNavClick
+        expect(parseUrl).to.be.calledThrice;
       });
     });
 
@@ -469,7 +542,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should delegate navigation if viewer supports A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
 
         handler.handle_(event);
 
@@ -485,7 +558,7 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should behave normally if viewer does not support A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+            sandbox.stub(handler, 'navigateToAmpUrl').returns(false);
 
         handler.handle_(event);
 
@@ -525,30 +598,31 @@ describes.sandboxed('Navigation', {}, () => {
         meta.setAttribute('content', 'feature-foo, action-bar');
         ampdoc.getRootNode().head.appendChild(meta);
 
-        const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+        const send = sandbox.stub(handler.viewer_, 'sendMessage');
+        const hasCapability = sandbox.stub(handler.viewer_, 'hasCapability');
+        hasCapability.returns(true);
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // Delegate to viewer if opt_requestedBy matches the <meta> tag content
         // and the viewer supports A2A.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'feature-foo');
-        expect(stub).to.be.calledOnce;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/amp_page', 'feature-foo');
+        expect(hasCapability).to.be.calledWithExactly('a2a');
+        expect(send).to.be.calledOnce;
+        expect(send).to.be.calledWithExactly('a2aNavigate',
+            {requestedBy: 'feature-foo', url: 'https://amp.pub.com/amp_page'});
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // If opt_requestedBy doesn't match, navigate top normally.
         handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'no-match');
-        expect(stub).to.be.calledOnce;
+        expect(send).to.be.calledOnce;
         expect(win.location.href).to.equal('https://amp.pub.com/amp_page');
 
         // If opt_requestedBy matches but viewer doesn't support A2A, navigate
         // top normally.
-        stub.returns(false);
+        send.reset();
+        hasCapability.returns(false);
         handler.navigateTo(win, 'https://amp.pub.com/different', 'action-bar');
-        expect(stub).to.be.calledTwice;
-        expect(stub).to.be.calledWithExactly(
-            'https://amp.pub.com/different', 'action-bar');
+        expect(send).to.not.be.called;
         expect(win.location.href).to.equal('https://amp.pub.com/different');
       });
     });
@@ -597,6 +671,13 @@ describes.sandboxed('Navigation', {}, () => {
         anchor.href = 'http://ads.localhost:8000/example';
         doc.body.appendChild(anchor);
         event.target = anchor;
+
+        // Navigation uses the UrlReplacements service scoped to the event
+        // target, but for testing stub in the top-level service for simplicity.
+        const {documentElement} = parentWin.document;
+        const urlReplacements = Services.urlReplacementsForDoc(documentElement);
+        sandbox.stub(Services, 'urlReplacementsForDoc')
+            .withArgs(anchor).returns(urlReplacements);
 
         elementWithId = doc.createElement('div');
         elementWithId.id = 'test';

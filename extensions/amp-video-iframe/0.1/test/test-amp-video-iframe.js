@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {VideoEvents} from '../../../../src/video-interface';
+import {
+  VideoAnalyticsEvents,
+  VideoEvents,
+} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
@@ -33,8 +35,11 @@ function getIntersectionMessage(id) {
 describes.realWin('amp-video-iframe', {
   amp: {
     extensions: ['amp-video-iframe'],
+    experiments: ['amp-video-iframe'],
   },
 }, env => {
+
+  const defaultFixture = 'video-iframe.html';
 
   let win;
   let doc;
@@ -51,10 +56,11 @@ describes.realWin('amp-video-iframe', {
     env.sandbox.stub(Services, 'videoManagerForDoc').returns(videoManagerStub);
   });
 
-  function getIframeSrc() {
+  function getIframeSrc(fixture = null) {
     const {port} = location;
     return (
-      `http://iframe.localhost:${port}/test/fixtures/served/video-iframe.html`);
+      `http://iframe.localhost:${port}/test/fixtures/served/${
+        fixture || defaultFixture}`);
   }
 
   function createVideoIframe(opt_size) {
@@ -127,20 +133,6 @@ describes.realWin('amp-video-iframe', {
       expect(dummySpy.withArgs(sinon.match(metadata))).to.have.been.calledOnce;
     });
 
-    it('rejects ads', () => {
-      const adSizes = [
-        [300, 250],
-        [320, 50],
-        [300, 50],
-        [320, 100],
-      ];
-
-      adSizes.forEach(size => {
-        const videoIframe = createVideoIframe(size);
-        expect(whenLoaded(videoIframe)).to.eventually.be.rejected;
-      });
-    });
-
     it('rejects tracking iframes', () => {
       const trackingSizes = [
         [10, 10],
@@ -200,7 +192,7 @@ describes.realWin('amp-video-iframe', {
       const invalidEvents = 'tacos al pastor'.split(' ');
 
       invalidEvents.forEach(event => {
-        videoIframe.implementation_.onMessage_({event});
+        videoIframe.implementation_.onMessage_({data: {event}});
         expect(dispatch.withArgs(event)).to.not.have.been.called;
       });
     });
@@ -288,6 +280,89 @@ describes.realWin('amp-video-iframe', {
       expect(postMessage.withArgs(sinon.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
     });
+
+    [
+      {
+        accept: true,
+        sufix: 'without data',
+        eventType: 'video-custom-foo',
+      },
+      {
+        accept: true,
+        sufix: 'with data',
+        eventType: 'video-custom-foo',
+        vars: {
+          myVar: 'bar',
+        },
+      },
+      {
+        accept: false,
+        eventType: 'tacos al pastor',
+        sufix: 'with invalid event name',
+      },
+    ].forEach(({sufix, eventType, vars, accept}) => {
+      const verb = accept ? 'dispatch' : 'reject';
+
+      it(`should ${verb} custom analytics event ${sufix}`, function* () {
+        const videoIframe = createVideoIframe();
+        const dispatch = spyDispatch(videoIframe);
+
+        yield whenLoaded(videoIframe);
+
+        acceptMockedMessages(videoIframe);
+
+        const data = {
+          event: 'analytics',
+          analytics: {
+            'eventType': eventType,
+          },
+        };
+
+        const expectedVars = vars || {};
+
+        if (vars) {
+          Object.assign(data.analytics, {vars});
+        }
+
+        if (accept) {
+          videoIframe.implementation_.onMessage_({data});
+          expect(
+              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
+              expectedVars).to.have.been.calledOnce;
+        } else {
+          allowConsoleError(() => {
+            expect(() => {
+              videoIframe.implementation_.onMessage_({data});
+            }).to.throw();
+          });
+
+          expect(
+              dispatch.withArgs(VideoAnalyticsEvents.CUSTOM),
+              expectedVars).to.not.have.been.called;
+        }
+      });
+    });
+  });
+
+  describe('#mutatedAttributesCallback', () => {
+    it('updates src', function* () {
+      const videoIframe = createVideoIframe();
+      const {implementation_} = videoIframe;
+
+      yield whenLoaded(videoIframe);
+
+      const {iframe_} = implementation_;
+
+      expect(iframe_.src).to.equal(getIframeSrc(defaultFixture));
+
+      const newSrc = getIframeSrc('video-iframe-2.html');
+
+      videoIframe.setAttribute('src', newSrc);
+
+      implementation_.mutatedAttributesCallback({'src': true});
+
+      expect(iframe_.src).to.equal(newSrc);
+    });
   });
 
   const implementedVideoInterfaceMethods = [
@@ -321,4 +396,6 @@ describes.realWin('amp-video-iframe', {
       });
     });
   });
+
+
 });

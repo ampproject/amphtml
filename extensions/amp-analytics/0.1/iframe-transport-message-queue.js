@@ -19,7 +19,7 @@ import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev} from '../../../src/log';
 
 /** @private @const {string} */
-const TAG_ = 'amp-analytics.IframeTransportMessageQueue';
+const TAG_ = 'amp-analytics/iframe-transport-message-queue';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;

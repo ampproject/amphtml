@@ -17,6 +17,10 @@
 import {AmpEvents} from '../../../../../src/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
+import {Services} from '../../../../../src/services';
+import {
+  installGlobalSubmitListenerForDoc,
+} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
@@ -32,7 +36,7 @@ describes.realWin('AmpForm Integration', {
   },
   mockFetch: false,
 }, env => {
-  const baseUrl = 'http://localhost:31862';
+  const baseUrl = 'http://localhost:8081';
   let doc;
   let sandbox;
 
@@ -48,11 +52,23 @@ describes.realWin('AmpForm Integration', {
   beforeEach(() => {
     sandbox = env.sandbox;
     doc = env.win.document;
-    const scriptElement = document.createElement('script');
-    scriptElement.setAttribute('custom-template', 'amp-mustache');
-    doc.body.appendChild(scriptElement);
+
+    sandbox.stub(Services, 'formSubmitForDoc')
+        .returns(() => { fire: () => {}; });
+
+    const mustache = document.createElement('script');
+    mustache.setAttribute('custom-template', 'amp-mustache');
+    doc.body.appendChild(mustache);
     registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
+
+    const form = document.createElement('script');
+    form.setAttribute('custom-element', 'amp-form');
+    doc.head.appendChild(form);
+
     new AmpFormService(env.ampdoc);
+
+    // Wait for submit listener to be installed before starting tests.
+    return installGlobalSubmitListenerForDoc(env.ampdoc);
   });
 
   function getForm(config) {
@@ -115,7 +131,8 @@ describes.realWin('AmpForm Integration', {
   }
 
   const describeChrome =
-      describe.configure().skipFirefox().skipSafari().skipEdge();
+      describe.configure().skipChromeDev()
+          .skipFirefox().skipSafari().skipEdge();
 
   describeChrome.run('on=submit:form.submit', () => {
     it('should be protected from recursive-submission', () => {
@@ -139,7 +156,6 @@ describes.realWin('AmpForm Integration', {
         // The second time in response to the `submit` event being triggered
         // and sameform.submit being invoked.
         expect(ampForm.handleSubmitAction_).to.have.been.calledTwice;
-
         // However, only the first invocation should be handled completely.
         // and any subsequent calls should be stopped early-on.
         expect(ampForm.handleXhrSubmit_).to.have.been.calledOnce;
@@ -148,7 +164,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-POST', function() {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit xhr-POST', function() {
     this.timeout(RENDER_TIMEOUT);
 
     it('should submit and render success', () => {
@@ -212,7 +229,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit xhr-GET', function() {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit xhr-GET', function() {
     this.timeout(RENDER_TIMEOUT);
 
     it('should submit and render success', () => {
@@ -278,7 +296,8 @@ describes.realWin('AmpForm Integration', {
     });
   });
 
-  describeChrome.run('Submit result message', () => {
+  // TODO(cvializ, #19647): Broken on SL Chrome 71.
+  describeChrome.skip('Submit result message', () => {
     it('should render messages with or without a template', () => {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the

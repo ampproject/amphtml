@@ -23,7 +23,7 @@ AMP.extension('amp-access-scroll', '0.1', function(AMP) {
       function(ampdoc) {
         return Services.accessServiceForDoc(ampdoc).then(accessService => {
           const source = accessService.getVendorSource('scroll');
-          const vendor = new ScrollAccessVendor(ampdoc, accessService, source);
+          const vendor = new ScrollAccessVendor(ampdoc, source);
           const adapter = /** @type {
             !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
           } */ (source.getAdapter());

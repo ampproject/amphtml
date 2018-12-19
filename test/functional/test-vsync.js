@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {Vsync} from '../../src/service/vsync-impl';
@@ -32,7 +31,7 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {
@@ -51,6 +50,7 @@ describe('vsync', () => {
       requestAnimationFrame: window.requestAnimationFrame.bind(window),
     };
     win.document.defaultView = win;
+    win.Promise = window.Promise;
 
     installTimerService(win);
 
