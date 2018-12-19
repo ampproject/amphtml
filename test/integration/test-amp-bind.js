@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
+import {BrowserController} from '../../testing/test-helper';
 import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
 import {Services} from '../../src/services';
 import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
@@ -34,7 +35,7 @@ describe.configure().skipEdge().run('amp-bind', function() {
     body: `
       <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
       <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
-      <p id="text" class="before_class" [class]="c" [text]="t">before_text</p>
+      <p class="before_class" [class]="c" [text]="t">before_text</p>
     `,
     /* eslint-enable max-len */
     extensions: ['amp-bind'],
@@ -43,7 +44,7 @@ describe.configure().skipEdge().run('amp-bind', function() {
 
     beforeEach(() => {
       doc = env.win.document;
-      text = doc.getElementById('text');
+      text = doc.querySelector('p');
     });
 
     it('[text]', () => {
@@ -79,7 +80,7 @@ describe.configure().skipEdge().run('amp-bind', function() {
 
     beforeEach(() => {
       doc = env.win.document;
-      img = doc.getElementById('image');
+      img = doc.querySelector('amp-img');
     });
 
     it('[src] with valid URL', () => {
@@ -112,17 +113,15 @@ describe.configure().skipEdge().run('amp-bind', function() {
   describes.integration('+ forms', {
     /* eslint-disable max-len */
     body: `
-      <input id="range" type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
-      <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
+      <input type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
+      <p id="range" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
 
-      <input id="checkbox" type="checkbox" on="change:AMP.setState({checkboxChange: event})">
-      <p id="checkboxText" [text]="'checked: ' + checkboxChange.checked" id="checkboxText">before_check</p>
+      <input type="checkbox" on="change:AMP.setState({checkboxChange: event})" [checked]="isChecked">
+      <p id="checkbox" [text]="'checked: ' + checkboxChange.checked" id="checkboxText">before_check</p>
+      <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})"></button>
 
-      <input id="radio" type="radio" on="change:AMP.setState({radioChange: event})">
-      <p id="radioText" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
-
-      <input id="checkbox_two" type="checkbox" [checked]="isChecked">
-      <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})" id="button"></button>
+      <input type="radio" on="change:AMP.setState({radioChange: event})">
+      <p id="radio" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
     `,
     /* eslint-enable max-len */
     extensions: ['amp-bind'],
@@ -134,8 +133,8 @@ describe.configure().skipEdge().run('amp-bind', function() {
     });
 
     it('input[type=range] on:change', () => {
-      const rangeText = doc.getElementById('rangeText');
-      const range = doc.getElementById('range');
+      const rangeText = doc.getElementById('range');
+      const range = doc.querySelector('input[type="range"]');
       expect(rangeText.textContent).to.equal('before_range');
       // Calling #click() on the range element will not generate a change event,
       // so it must be generated manually.
@@ -145,24 +144,16 @@ describe.configure().skipEdge().run('amp-bind', function() {
     });
 
     it('input[type=checkbox] on:change', () => {
-      const checkboxText = doc.getElementById('checkboxText');
-      const checkbox = doc.getElementById('checkbox');
+      const checkboxText = doc.getElementById('checkbox');
+      const checkbox = doc.querySelector('input[type="checkbox"]');
       expect(checkboxText.textContent).to.equal('before_check');
       checkbox.click();
       poll('[text]', () => checkboxText.textContent === 'checked: true');
     });
 
-    it('input[type=radio] on:change', () => {
-      const radioText = doc.getElementById('radioText');
-      const radio = doc.getElementById('radio');
-      expect(radioText.textContent).to.equal('before_radio');
-      radio.click();
-      poll('[text]', () => radioText.textContent === 'checked: true');
-    });
-
     it('[checked]', function*() {
-      const checkbox = doc.getElementById('checkbox_two');
-      const button = doc.getElementById('button');
+      const checkbox = doc.querySelector('input[type="checkbox"]');
+      const button = doc.querySelector('button');
 
       checkbox.click();
       // Note that attributes are initial values, properties are current values.
@@ -178,14 +169,22 @@ describe.configure().skipEdge().run('amp-bind', function() {
       // amp-bind sets both the attribute and property.
       expect(checkbox.hasAttribute('checked')).to.be.true;
     });
+
+    it('input[type=radio] on:change', () => {
+      const radioText = doc.getElementById('radio');
+      const radio = doc.querySelector('input[type="radio"]');
+      expect(radioText.textContent).to.equal('before_radio');
+      radio.click();
+      poll('[text]', () => radioText.textContent === 'checked: true');
+    });
   });
 
   describes.integration('+ amp-carousel', {
     /* eslint-disable max-len */
     body: `
       <button on="tap:AMP.setState({slide: 1})" id="goToSlideOne"></button>
-      <p id="slideText" [text]="slide">0</p>
-      <amp-carousel id="carousel" type="slides" width=10 height=10
+      <p [text]="slide">0</p>
+      <amp-carousel type="slides" width=10 height=10
           on="slideChange:AMP.setState({slide: event.index})" [slide]="slide">
         <amp-img src="http://example.com/foo.jpg" width=10 height=10></amp-img>
         <amp-img src="http://example.com/bar.jpg" width=10 height=10></amp-img>
@@ -198,8 +197,11 @@ describe.configure().skipEdge().run('amp-bind', function() {
 
     beforeEach(() => {
       doc = env.win.document;
-      carousel = doc.getElementById('carousel');
-      slideText = doc.getElementById('slideText');
+      carousel = doc.querySelector('amp-carousel');
+      slideText = doc.querySelector('p');
+
+      const browserController = new BrowserController(env.win);
+      return browserController.waitForElementLayout('amp-carousel');
     });
 
     it('on:slideChange', () => {
@@ -229,30 +231,29 @@ describe.configure().skipEdge().run('amp-bind', function() {
     });
   });
 
-  describes.integration('+ amp-list', {
-    /* eslint-disable max-len */
-    body: `
-      <amp-state id="foo">
-        <script type="application/json">
-          {"bar": "Evaluated!"}
-        </script>
-      </amp-state>
-      <button id="button" on="tap:AMP.setState({src: 'https://example.com/data'})"></button>
-      <amp-list id="list" width=200 height=50 template=mustache src="/list/fruit-data/get?cors=0" [src]="src">
-      </amp-list>
-      <template id=mustache type="amp-mustache">
-        <p [text]="foo.bar"></p>
-      </template>
-    `,
-    /* eslint-enable max-len */
-    extensions: ['amp-bind', 'amp-list', 'amp-mustache'],
-  }, env => {
+  /* eslint-disable max-len */
+  const list = `
+    <amp-state id="foo">
+      <script type="application/json">
+        {"bar": "123"}
+      </script>
+    </amp-state>
+    <button on="tap:AMP.setState({src: 'https://example.com/data'})"></button>
+    <amp-list width=200 height=50 template=mustache src="/list/fruit-data/get?cors=0" [src]="src">
+    </amp-list>
+    <template id=mustache type="amp-mustache">
+      <p [text]="foo.bar"></p>
+    </template>
+  `;
+  /* eslint-enable max-len */
+
+  const listTests = env => {
     let doc, list, button;
 
     beforeEach(() => {
       doc = env.win.document;
-      list = doc.getElementById('list');
-      button = doc.getElementById('button');
+      list = doc.querySelector('amp-list');
+      button = doc.querySelector('button');
     });
 
     it('[src]', () => {
@@ -267,20 +268,31 @@ describe.configure().skipEdge().run('amp-bind', function() {
       const children = list.querySelectorAll('p');
       expect(children.length).to.equal(3);
       children.forEach(span => {
-        expect(span.textContent).to.equal('Evaluated!');
+        expect(span.textContent).to.equal('123');
       });
     });
-  });
+  };
+
+  // TODO(choumx): amp-mustache-0.1 is broken on --single_pass.
+  // describes.integration('+ amp-list, amp-mustache:0.1', {
+  //   body: list,
+  //   extensions: ['amp-bind', 'amp-list', 'amp-mustache:0.1'],
+  // }, listTests);
+
+  describes.integration('+ amp-list, amp-mustache:0.2', {
+    body: list,
+    extensions: ['amp-bind', 'amp-list', 'amp-mustache:0.2'],
+  }, listTests);
 
   describes.integration('+ amp-selector', {
     /* eslint-disable max-len */
     body: `
-      <button on="tap:AMP.setState({selected: 2})" id="button"></button>
-      <p id="text" [text]="selected"></p>
+      <button on="tap:AMP.setState({selected: 2})"></button>
+      <p [text]="selected"></p>
       <amp-selector layout="container" [selected]="selected" on="select:AMP.setState({selected: event.targetOption})">
-        <amp-img src="/0.jpg" width="60" height="40" option="0" id="selectorImg1"></amp-img>
-        <amp-img src="/1.jpg" width="60" height="40" option="1" id="selectorImg2"></amp-img>
-        <amp-img src="/2.jpg" width="60" height="40" option="2" id="selectorImg3"></amp-img>
+        <amp-img src="/0.jpg" width=10 height=10 option=0></amp-img>
+        <amp-img src="/1.jpg" width=10 height=10 option=1></amp-img>
+        <amp-img src="/2.jpg" width=10 height=10 option=2></amp-img>
       </amp-selector>
     `,
     /* eslint-enable max-len */
@@ -291,7 +303,10 @@ describe.configure().skipEdge().run('amp-bind', function() {
     beforeEach(() => {
       doc = env.win.document;
       images = doc.getElementsByTagName('amp-img');
-      selectedText = doc.getElementById('text');
+      selectedText = doc.querySelector('p');
+
+      const browserController = new BrowserController(env.win);
+      return browserController.waitForElementLayout('amp-selector');
     });
 
     it('on:select', function*() {
@@ -307,7 +322,7 @@ describe.configure().skipEdge().run('amp-bind', function() {
     });
 
     it('[selected]', function*() {
-      const button = doc.getElementById('button');
+      const button = doc.querySelector('button');
       expect(images[0].hasAttribute('selected')).to.be.false;
       expect(images[1].hasAttribute('selected')).to.be.false;
       expect(images[2].hasAttribute('selected')).to.be.false;

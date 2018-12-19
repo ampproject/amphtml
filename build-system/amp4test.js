@@ -144,57 +144,41 @@ app.get('/a4a/:bid', (req, res) => {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   const {bid} = req.params;
-
-  const extensions = [
-    'amp-accordion',
-    'amp-analytics',
-    'amp-anim',
-    'amp-audio',
-    'amp-carousel',
-    'amp-fit-text',
-    'amp-font',
-    'amp-form',
-    'amp-social-share',
-  ];
-
-  const css = 'body { background-color: #f4f4f4; }';
-
   const body = `
-  <a href=https://ampbyexample.com target=_blank>
-    <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
-  </a>
-  <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
-  <amp-analytics>
-    <script type="application/json">
-    {
-      "requests": {
-        "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
-      },
-      "triggers": {
-        "pageview": {
-          "on": "visible",
-          "request": "pageview",
-          "extraUrlParams": {
-            "title": "\${title}",
-            "ampdocUrl": "\${ampdocUrl}",
-            "canonicalUrl": "\${canonicalUrl}",
-            "cid": "\${clientId(a)}",
-            "img": "\${htmlAttr(amp-img,src)}",
-            "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
-            "adNavType": "\${adNavType}",
-            "adRedirectCount": "\${adRedirectCount}"
+    <a href=https://ampbyexample.com target=_blank>
+      <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
+    </a>
+    <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
+    <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "pageview": "//localhost:9876/amp4test/request-bank/${bid}/deposit/analytics/bar"
+        },
+        "triggers": {
+          "pageview": {
+            "on": "visible",
+            "request": "pageview",
+            "extraUrlParams": {
+              "title": "\${title}",
+              "ampdocUrl": "\${ampdocUrl}",
+              "canonicalUrl": "\${canonicalUrl}",
+              "cid": "\${clientId(a)}",
+              "img": "\${htmlAttr(amp-img,src)}",
+              "adNavTiming": "\${adNavTiming(requestStart,requestStart)}",
+              "adNavType": "\${adNavType}",
+              "adRedirectCount": "\${adRedirectCount}"
+            }
           }
         }
       }
-    }
-    </script>
-  </amp-analytics>`;
-
+      </script>
+    </amp-analytics>`;
   const doc = composeDocument({
     spec: 'amp4ads',
     body,
-    css,
-    extensions,
+    css: 'body { background-color: #f4f4f4; }',
+    extensions: ['amp-analytics'],
     mode: 'cdn',
   });
   res.send(doc);
@@ -247,11 +231,13 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions.map(extension => {
+      const tuple = extension.split(':');
+      const name = tuple[0];
+      const version = tuple[1] || '0.1';
       const src = (cdn)
-        ? `https://cdn.ampproject.org/v0/${extension}-0.1.js`
-        // TODO: Version 0.1 is hard-coded. Use '-latest'?
-        : `/dist/v0/${extension}-0.1.${compiled ? '' : 'max.'}js`;
-      return `<script async custom-element="${extension}" src="${src}"></script>`;
+        ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
+        : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
+      return `<script async custom-element="${name}" src="${src}"></script>`;
     }).join('\n');
   }
 
