@@ -62,19 +62,19 @@ export function a9(global, data) {
     if (data.amzn_assoc_ad_mode === 'auto') {
       if (data.adinstanceid &&
       (data.adinstanceid !== '')) {
-        loadRecTag(global, data);
+        loadRecTag(global, data, publisherUrl);
       }
       else {
-        loadSearTag(global, data);
+        loadSearTag(global, data, publisherUrl);
       }
     }
     else if ((data.amzn_assoc_ad_mode === 'search')
     || (data.amzn_assoc_ad_mode === 'manual')) {
-      loadSearTag(global, data);
+      loadSearTag(global, data, publisherUrl);
     }
   }
   else {
-    loadSearTag(global, data);
+    loadSearTag(global, data, publisherUrl);
   }
 }
 
@@ -93,8 +93,9 @@ function getURL(data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!String} publisherURL
  */
-function loadRecTag(global, data) {
+function loadRecTag(global, data, publisherUrl) {
   let url = getURL(data);
   url += '&adInstanceId=' + data['adinstanceid'];
   global['amzn_assoc_URL'] = publisherUrl;
@@ -113,8 +114,9 @@ function loadRecTag(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!String} publisherURL
  */
-function loadSearTag(global, data) {
+function loadSearTag(global, data, publisherUrl) {
   /**
   * Sets macro type.
   * @param {string} type
