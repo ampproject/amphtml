@@ -265,10 +265,10 @@ export class ActionService {
     this.addEvent('invalid');
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'action',
-        new ActionService(this.ampdoc, embedWin.document));
+        new ActionService(ampdoc, embedWin.document));
   }
 
   /**

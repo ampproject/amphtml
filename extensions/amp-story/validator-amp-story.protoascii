@@ -91,6 +91,10 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
+    name: "supports-landscape"
+    value: ""
+  }
+  attrs: {
     name: "title"
     mandatory: true
   }

@@ -520,60 +520,43 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
-  describes.fakeWin('adoptEmbedWindow', {}, env => {
+  describes.fakeWin('installInEmbedWindow', {}, env => {
     let embedWin;
     let embedActions;
-    let hideStub;
 
     beforeEach(() => {
+      embedWin = env.win;
+      setParentWindow(embedWin, window);
+
       embedActions = {
         addGlobalTarget: sandbox.spy(),
         addGlobalMethodHandler: sandbox.spy(),
       };
-      embedWin = env.win;
-      embedWin.services = {
-        action: {obj: embedActions},
-      };
-      setParentWindow(embedWin, window);
-      hideStub = sandbox.stub(standardActions, 'handleHide');
+      const embedElement = embedWin.document.documentElement;
+      sandbox.stub(Services, 'actionServiceForDoc')
+          .withArgs(embedElement).returns(embedActions);
     });
 
     it('should configured the embedded actions service', () => {
-      const stub = sandbox.stub(standardActions, 'handleAmpTarget');
-      standardActions.adoptEmbedWindow(embedWin);
+      StandardActions.installInEmbedWindow(embedWin, ampdoc);
+
+      const {
+        addGlobalTarget: target,
+        addGlobalMethodHandler: handler,
+      } = embedActions;
 
       // Global targets.
-      expect(embedActions.addGlobalTarget).to.be.calledOnce;
-      expect(embedActions.addGlobalTarget.args[0][0]).to.equal('AMP');
-      embedActions.addGlobalTarget.args[0][1]();
-      expect(stub).to.be.calledOnce;
+      expect(target).to.be.calledOnce;
+      expect(target).to.be.calledWith('AMP', sinon.match.func);
 
       // Global actions.
-      expect(embedActions.addGlobalMethodHandler).to.have.callCount(6);
-      expect(embedActions.addGlobalMethodHandler.args[0][0]).to.equal('hide');
-      expect(
-          embedActions.addGlobalMethodHandler.args[0][1]).to.be.a('function');
-      expect(embedActions.addGlobalMethodHandler.args[1][0]).to.equal('show');
-      expect(
-          embedActions.addGlobalMethodHandler.args[1][1]).to.be.a('function');
-      expect(embedActions.addGlobalMethodHandler.args[2][0]).to
-          .equal('toggleVisibility');
-      expect(
-          embedActions.addGlobalMethodHandler.args[2][1]).to.be.a('function');
-      expect(embedActions.addGlobalMethodHandler.args[3][0]).to
-          .equal('scrollTo');
-      expect(
-          embedActions.addGlobalMethodHandler.args[3][1]).to.be.a('function');
-      expect(embedActions.addGlobalMethodHandler.args[4][0]).to
-          .equal('focus');
-      expect(
-          embedActions.addGlobalMethodHandler.args[4][1]).to.be.a('function');
-      expect(embedActions.addGlobalMethodHandler.args[5][0]).to
-          .equal('toggleClass');
-      expect(
-          embedActions.addGlobalMethodHandler.args[5][1]).to.be.a('function');
-      embedActions.addGlobalMethodHandler.args[0][1]();
-      expect(hideStub).to.be.calledOnce;
+      expect(handler).to.have.callCount(6);
+      expect(handler).to.be.calledWith('hide', sinon.match.func);
+      expect(handler).to.be.calledWith('show', sinon.match.func);
+      expect(handler).to.be.calledWith('toggleVisibility', sinon.match.func);
+      expect(handler).to.be.calledWith('scrollTo', sinon.match.func);
+      expect(handler).to.be.calledWith('focus', sinon.match.func);
+      expect(handler).to.be.calledWith('toggleClass', sinon.match.func);
     });
   });
 });

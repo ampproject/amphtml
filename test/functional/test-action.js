@@ -500,7 +500,7 @@ describes.sandboxed('Action adoptEmbedWindow', {}, () => {
   });
 
   it('should create embedded action service', () => {
-    action.adoptEmbedWindow(embedWin);
+    ActionService.installInEmbedWindow(embedWin, action.ampdoc);
     const embedService = embedWin.services.action
         && embedWin.services.action.obj;
     expect(embedService).to.exist;
