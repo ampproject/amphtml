@@ -351,13 +351,15 @@ async function performBundleSizeCheck() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else {
-    if (argv.on_push_build) {
+    if (argv.on_pre_push_build) {
       const files = gitDiffNameOnlyMaster();
       const runtimeFiles = files.filter(fileName => fileName.startsWith('src'));
       if (runtimeFiles.length == 0) {
         log('No runtime files were touched, skipping bundle size check.');
         return;
       }
+    }
+    if (argv.on_push_build) {
       await storeBundleSize();
     } else if (argv.on_pr_build) {
       await reportBundleSize();
@@ -381,5 +383,7 @@ gulp.task(
             + 'GitHub',
         'on_skipped_build': '  Set the status of this pull request\'s bundle '
             + 'size check in GitHub to `skipped`',
+        'on_pre_push_build': ' Skip bundle size check if no runtime files '
+            + 'were touched.',
       },
     });
