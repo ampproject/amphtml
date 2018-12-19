@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {AmpEvents} from '../../../../src/amp-events';
 import {Keys} from '../../../../src/utils/key-codes';
 
 describes.realWin('amp-selector', {
@@ -32,54 +33,51 @@ describes.realWin('amp-selector', {
 
     function getSelector(options) {
       win = env.win;
+
       const attributes = options.attributes || {};
+      const config = options.config || {};
+
       const ampSelector = win.document.createElement('amp-selector');
       ampSelector.setAttribute('layout', 'container');
       Object.keys(attributes).forEach(key => {
         ampSelector.setAttribute(key, attributes[key]);
       });
 
-      const config = options.config || {};
-      let noOfSelectables = 3;
-      let selectedCount = 0;
-      let disabledCount = 0;
-      if (config) {
-        noOfSelectables = config.count || 3;
-        selectedCount = config.selectedCount || 0;
-        disabledCount = config.disabledCount || 0;
-      }
+      const numberOfChildren = config.count || 3;
+      let selectedCount = config.selectedCount || 0;
+      let disabledCount = config.disabledCount || 0;
 
-      for (let i = 0; i < noOfSelectables; i++) {
-        const img = win.document.createElement('div');
-        img.setAttribute('width', '10');
-        img.setAttribute('height', '10');
-        img.setAttribute('option', i);
+      for (let i = 0; i < numberOfChildren; i++) {
+        const child = win.document.createElement('div');
+        child.setAttribute('width', '10');
+        child.setAttribute('height', '10');
+        child.setAttribute('option', i);
 
-        if (noOfSelectables > selectedCount + disabledCount) {
+        if (numberOfChildren > selectedCount + disabledCount) {
           if (selectedCount > 0) {
-            img.setAttribute('selected', '');
+            child.setAttribute('selected', '');
             selectedCount--;
           } else if (disabledCount > 0) {
-            img.setAttribute('disabled', '');
+            child.setAttribute('disabled', '');
             disabledCount--;
           }
         } else {
           if (selectedCount > 0) {
-            img.setAttribute('selected', '');
+            child.setAttribute('selected', '');
             selectedCount--;
           }
           if (disabledCount > 0) {
-            img.setAttribute('disabled', '');
+            child.setAttribute('disabled', '');
             disabledCount--;
           }
         }
 
-        const optionAttributes = options.optionAttributes || {};
-        Object.keys(optionAttributes).forEach(key => {
-          img.setAttribute(key, optionAttributes[key]);
+        const childAttributes = options.optionAttributes || {};
+        Object.keys(childAttributes).forEach(key => {
+          child.setAttribute(key, childAttributes[key]);
         });
 
-        ampSelector.appendChild(img);
+        ampSelector.appendChild(child);
       }
       win.document.body.appendChild(ampSelector);
       return ampSelector;
@@ -923,7 +921,6 @@ describes.realWin('amp-selector', {
     });
 
     describe('keyboard-select-mode', () => {
-
       it('should have `none` mode by default', () => {
         const ampSelector = getSelector({});
         ampSelector.build();
@@ -1129,6 +1126,60 @@ describes.realWin('amp-selector', {
         expect(ampSelector.children[3].hasAttribute('selected')).to.be.false;
         expect(ampSelector.querySelectorAll('input[type="hidden"]').length)
             .to.equal(0);
+      });
+    });
+
+    describe.only('on DOM_UPDATE', () => {
+      it('should refresh stored state if child DOM changes', () => {
+        const ampSelector = getSelector({
+          attributes: {
+            'keyboard-select-mode': 'focus',
+          },
+          config: {
+            count: 2,
+          },
+        });
+        ampSelector.build();
+        const impl = ampSelector.implementation_;
+        impl.mutateElement = fn => fn();
+
+        expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+
+        // Add a new child after amp-selector initializes.
+        const newChild = env.win.document.createElement('div');
+        newChild.setAttribute('option', '3');
+        newChild.setAttribute('selected', '');
+        ampSelector.appendChild(newChild);
+        expect(ampSelector.children[2]).to.equal(newChild);
+
+        expect(ampSelector.children[0].tabIndex).to.equal(0);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+
+        // Note that the newly added third child is ignored.
+        keyPress(ampSelector, Keys.LEFT_ARROW);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(0);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+
+        const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+        newChild.dispatchEvent(e);
+
+        // `newChild` should be focused since it has the 'selected' attribute.
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
+
+        // Tabbing between children now works for `newChild`.
+        keyPress(ampSelector, Keys.LEFT_ARROW);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(0);
+        expect(ampSelector.children[2].tabIndex).to.equal(-1);
+
+        keyPress(ampSelector, Keys.RIGHT_ARROW);
+        expect(ampSelector.children[0].tabIndex).to.equal(-1);
+        expect(ampSelector.children[1].tabIndex).to.equal(-1);
+        expect(ampSelector.children[2].tabIndex).to.equal(0);
       });
     });
   });
