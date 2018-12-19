@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {getSourceUrl} from '../src/url';
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
-import {getSourceUrl, parseUrlDeprecated} from '../src/url';
 import {parseJson} from '../src/json';
 
 const mandatoryParams = [],
@@ -53,10 +53,7 @@ export function a9(global, data) {
   validateData(data, mandatoryParams, optionalParams);
 
   const publisherUrl = global.context.canonicalUrl ||
-      getSourceUrl(global.context.location.href),
-      referrerUrl = global.context.referrer;
-
-  const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
+      getSourceUrl(global.context.location.href);
 
   if (data.amzn_assoc_ad_mode) {
     if (data.amzn_assoc_ad_mode === 'auto') {
@@ -93,7 +90,7 @@ function getURL(data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!String} publisherURL
+ * @param {string} publisherUrl
  */
 function loadRecTag(global, data, publisherUrl) {
   let url = getURL(data);
@@ -114,7 +111,7 @@ function loadRecTag(global, data, publisherUrl) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!String} publisherURL
+ * @param {string} publisherUrl
  */
 function loadSearTag(global, data, publisherUrl) {
   /**
@@ -155,7 +152,7 @@ function loadSearTag(global, data, publisherUrl) {
     }
     if (data.amzn_assoc_url) {
       global['amzn_assoc_URL'] = data['amzn_assoc_url'];
-    } 
+    }
     else {
       global['amzn_assoc_URL'] = publisherUrl;
     }
