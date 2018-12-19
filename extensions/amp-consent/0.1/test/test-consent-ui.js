@@ -65,7 +65,10 @@ describes.realWin('consent-ui', {
         };
       },
       scheduleLayout: () => {},
-      mutateElement: callback => callback(),
+      mutateElement: callback => {
+        callback();
+        return Promise.resolve();
+      },
     };
     toggleExperiment(win, 'amp-consent-v2', true);
   });
@@ -142,6 +145,32 @@ describes.realWin('consent-ui', {
     });
   });
 
+  describe('placeholder', () => {
+    it('should be created / shown' +
+      ' while loading CMP Iframe', async() => {
+
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+          new ConsentUI(mockInstance, config);
+
+      const placeholder = consentUI.placeholder_;
+      expect(placeholder).to.be.ok;
+      expect(placeholder.hidden).to.be.true;
+
+      consentUI.show();
+
+      // Pop onto the back of the event queue,
+      // so we expect() once our mutate element in show() resolves
+      await mockInstance.mutateElement(() => {});
+
+      expect(placeholder.hidden).to.be.false;
+      expect(placeholder.childNodes).to.not.be.empty;
+    });
+  });
+
+
   describe('CMP Iframe', () => {
 
     it('should load the iframe, ' +
@@ -185,7 +214,8 @@ describes.realWin('consent-ui', {
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen',
+            type: 'consent-ui',
+            action: 'enter-fullscreen',
           },
         });
 
@@ -206,7 +236,8 @@ describes.realWin('consent-ui', {
         consentUI.handleIframeMessages_({
           source: 'mock-src',
           data: {
-            type: 'consent-ui-enter-fullscreen',
+            type: 'consent-ui',
+            action: 'enter-fullscreen',
           },
         });
 
