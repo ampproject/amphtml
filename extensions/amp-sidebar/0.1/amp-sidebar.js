@@ -373,7 +373,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.maskElement_ = mask;
     }
-    toggle(this.maskElement_, /* display */true);
+    this.maskElement_.classList.toggle('i-amphtml-ghost', false);
   }
 
   /**
@@ -381,7 +381,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   closeMask_() {
     if (this.maskElement_) {
-      toggle(this.maskElement_, /* display */false);
+      this.maskElement_.classList.toggle('i-amphtml-ghost', true);
     }
   }
 

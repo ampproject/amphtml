@@ -62,6 +62,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
+
+    /** @private {string} */
+    this.videoId_ = '';
   }
 
   /**
@@ -69,8 +72,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://static.viqeo.tv', opt_onLayout);
-    this.preconnect.url('https://stage.embed.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://api.viqeo.tv', opt_onLayout);
+    this.preconnect.url('https://cdn.viqeo.tv', opt_onLayout);
   }
 
   /**
@@ -85,7 +88,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
 
-    user().assert(
+    this.videoId_ = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-viqeo-player> %s',
         this.element);
@@ -186,6 +189,26 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
     return true; // Call layoutCallback again.
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.element.ownerDocument.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute('alt',
+          'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
+    placeholder.setAttribute('src',
+        `http://cdn.viqeo.tv/preview/${encodeURIComponent(this.videoId_)}.jpg`);
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    this.applyFillContent(placeholder);
+    return placeholder;
   }
 
   /** @override */

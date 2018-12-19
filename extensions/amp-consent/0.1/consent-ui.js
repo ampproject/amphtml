@@ -27,6 +27,7 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData} from '../../../src/event-helper';
+import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 
@@ -37,9 +38,9 @@ export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
   in: 'i-amphtml-consent-ui-in',
-  loading: 'i-amphtml-consent-loading',
-  fill: 'i-amphtml-consent-fill',
-  placeholder: 'i-amphtml-consent-placeholder',
+  loading: 'i-amphtml-consent-ui-loading',
+  fill: 'i-amphtml-consent-ui-fill',
+  placeholder: 'i-amphtml-consent-ui-placeholder',
 };
 
 export class ConsentUI {
@@ -204,9 +205,8 @@ export class ConsentUI {
         classList.add('amp-hidden');
       }
 
-      // Need to remove from fixed layer and add it back to update element's top
-      this.baseInstance_.getViewport().removeFromFixedLayer(this.parent_);
       toggle(dev().assertElement(this.ui_), false);
+      this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
     });
   }
@@ -245,12 +245,24 @@ export class ConsentUI {
    * @return {!Element}
    */
   createPlaceholder_() {
-    // TODO(@zhouyx): Allow publishers to provide placeholder upon request
     const placeholder = this.parent_.ownerDocument.createElement('placeholder');
     toggle(placeholder, false);
-    const {classList} = placeholder;
-    classList.add(consentUiClasses.fill);
-    classList.add(consentUiClasses.placeholder);
+    placeholder.classList.add(consentUiClasses.placeholder);
+
+    const loadingSpinner = htmlFor(placeholder)`
+      <svg viewBox="0 0 40 40">
+        <defs>
+          <linearGradient id="grad">
+            <stop stop-color="rgb(105, 105, 105)"></stop>
+            <stop offset="100%"
+            stop-color="rgb(105, 105, 105)"
+            stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="M11,4.4 A18,18, 0,1,0, 38,20" stroke="url(#grad)"></path>
+      </svg>`;
+
+    placeholder.appendChild(loadingSpinner);
     return placeholder;
   }
 
@@ -268,11 +280,16 @@ export class ConsentUI {
           dev().assertElement(this.placeholder_), null);
     }
     classList.add(consentUiClasses.loading);
-    toggle(dev().assertElement(this.placeholder_), true);
     toggle(dev().assertElement(this.ui_), false);
     this.win_.addEventListener('message', this.boundHandleIframeMessages_);
     insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    return this.iframeReady_.promise;
+
+    return Promise.all([
+      this.iframeReady_.promise,
+      this.baseInstance_.mutateElement(() => {
+        toggle(dev().assertElement(this.placeholder_), true);
+      }),
+    ]);
   }
 
   /**
@@ -365,12 +382,14 @@ export class ConsentUI {
    *
    * Required message from iframe to hide placeholder and display iframe
    * {
-   *   type: 'consent-ui-ready'
+   *   type: 'consent-ui',
+   *   action: 'ready'
    * }
    *
    * Enter Fullscreen
    * {
-   *   type: 'consent-ui-enter-fullscreen'
+   *   type: 'consent-ui',
+   *   action: 'enter-fullscreen'
    * }
    *
    * @param {!Event} event
@@ -382,15 +401,15 @@ export class ConsentUI {
     }
 
     const data = getData(event);
-    if (!data || !data['type']) {
+    if (!data || data['type'] != 'consent-ui') {
       return;
     }
 
-    if (data['type'] === 'consent-ui-ready') {
+    if (data['action'] === 'ready') {
       this.iframeReady_.resolve();
     }
 
-    if (data['type'] === 'consent-ui-enter-fullscreen') {
+    if (data['action'] === 'enter-fullscreen') {
 
       // TODO (@torch2424) Send response back if enter fullscreen was succesful
       if (!this.isIframeVisible_) {
