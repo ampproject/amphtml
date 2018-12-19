@@ -103,7 +103,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should send request', () => {
@@ -152,7 +152,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should trigger on scroll', () => {
@@ -208,7 +208,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
 
     beforeEach(() => {
       browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should trigger when image being 50% visible for 0.5s', () => {
@@ -266,7 +266,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should trigger 1s after amp-analytics starts', () => {
@@ -324,7 +324,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     afterEach(() => {
@@ -390,7 +390,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should send request in batch', () => {
@@ -450,7 +450,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should send request use POST body payload', () => {
@@ -519,7 +519,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should send batch request use POST body payload', () => {
@@ -558,7 +558,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     it('should remove referrer if referrerpolicy=no-referrer', () => {
@@ -603,7 +603,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp' +
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics');
+      return browser.waitForElementLayout('amp-analytics');
     });
 
     afterEach(() => {

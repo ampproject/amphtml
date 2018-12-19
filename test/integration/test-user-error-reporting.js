@@ -50,7 +50,10 @@ t.run('user-error', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics, amp-pixel');
+      return Promise.all([
+        browser.waitForElementLayout('amp-analytics'),
+        browser.waitForElementBuild('amp-pixel'),
+      ]);
     });
 
     it('should ping correct host with amp-pixel user().assert err', () => {
@@ -88,7 +91,7 @@ t.run('user-error', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics, amp-img');
+      return browser.waitForElementLayout('amp-analytics, amp-img');
     });
 
     it('should ping correct host with amp-img user().error err', () => {
@@ -127,7 +130,7 @@ t.run('user-error', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-analytics, amp-ad');
+      return browser.waitForElementLayout('amp-analytics, amp-ad');
     });
 
     it('should ping correct host with 3p error message', () => {

@@ -29,7 +29,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-pixel');
+      return browser.waitForElementBuild('amp-pixel');
     });
 
     it('should expand the TITLE macro', () => {
@@ -46,7 +46,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-pixel');
+      return browser.waitForElementBuild('amp-pixel');
     });
 
     it('should keep referrer if no referrerpolicy specified', () => {
@@ -63,7 +63,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-pixel', function() {
   }, env => {
     beforeEach(() => {
       const browser = new BrowserController(env.win);
-      return browser.waitForElementReady('amp-pixel');
+      return browser.waitForElementBuild('amp-pixel');
     });
 
     it('should remove referrer if referrerpolicy=no-referrer', () => {

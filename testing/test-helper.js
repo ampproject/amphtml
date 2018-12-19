@@ -210,7 +210,27 @@ export class BrowserController {
    * @param {number=} timeout
    * @return {!Promise}
    */
-  waitForElementReady(selector, timeout = 5000) {
+  waitForElementBuild(selector, timeout = 5000) {
+    const elements = this.doc_.querySelectorAll(selector);
+    if (!elements.length) {
+      throw new Error(`BrowserController query failed: ${selector}`);
+    }
+    return poll(`"${selector}" to layout`,
+        () => {
+          const someNotBuilt = [].some.call(elements,
+              e => e.classList.contains('i-amphtml-notbuilt'));
+          return !someNotBuilt;
+        },
+        /* onError */ undefined,
+        timeout);
+  }
+
+  /**
+   * @param {string} selector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForElementLayout(selector, timeout = 5000) {
     const elements = this.doc_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
