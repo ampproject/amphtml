@@ -158,7 +158,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
-| [HTML Attributes](#html-attr)           | `HTML_ATTR`      | `${htmlAttr}` |
+| [HTML Attributes](#html-attributes) | `HTML_ATTR`      | `${htmlAttr}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
