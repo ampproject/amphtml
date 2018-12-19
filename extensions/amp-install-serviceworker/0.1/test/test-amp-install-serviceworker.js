@@ -398,8 +398,9 @@ describes.realWin('amp-install-serviceworker', {
           });
     }
 
-    it('should inject iframe on proxy if provided (valid canonical)',
-        testIframe);
+    it('should inject iframe on proxy if provided (valid canonical)', () => {
+      return testIframe();
+    });
 
     it('should inject iframe on proxy if provided (valid source)', () => {
       docInfo = {
@@ -427,7 +428,7 @@ describes.realWin('amp-install-serviceworker', {
 
     it('should not inject iframe on proxy if safari', () => {
       implementation.isSafari_ = true;
-      return testIframe(0);
+      return allowConsoleError(() => testIframe(0));
     });
   });
 });
