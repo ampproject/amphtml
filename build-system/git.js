@@ -66,12 +66,17 @@ exports.gitDiffStatMaster = function() {
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
+  const maxCount = 100;
   const branchPoint = process.env.TRAVIS ?
     exports.gitPrBranchPoint() : exports.gitBranchPointFromMaster();
-  return getStdout(`git -c color.ui=always log --graph --pretty=format:\
-"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) -%C(yellow)%d%C(reset) \
-%C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
---abbrev-commit ${branchPoint}^...HEAD --max-count=100`).trim();
+  let commitLog = getStdout(`git -c color.ui=always log --graph \
+--pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
+-%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
+--abbrev-commit ${branchPoint}^...HEAD --max-count=${maxCount}`).trim();
+  if (commitLog.split('\n').length >= maxCount) {
+    commitLog += `\n<Output limited to ${maxCount} commits>`;
+  }
+  return commitLog;
 };
 
 /**
