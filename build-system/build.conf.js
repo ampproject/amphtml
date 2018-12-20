@@ -54,10 +54,10 @@ module.exports = {
     }
     if (!isForTesting) {
       pluginsToApply = pluginsToApply.concat([
-          require.resolve(
-              './babel-plugins/babel-plugin-is_dev-constant-transformer'
-          ),
-          require.resolve(
+        require.resolve(
+            './babel-plugins/babel-plugin-is_dev-constant-transformer'
+        ),
+        require.resolve(
             './babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
