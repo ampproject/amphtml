@@ -548,7 +548,7 @@ export class AmpForm {
         presubmitPromises,
         SUBMIT_TIMEOUT
     ).then(
-        () => this.handlePresubmitSuccess_(trust),
+        () => this.handlePresubmitSuccess_(trust, event),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
@@ -566,9 +566,10 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
+   * @param {?Event} event
    * @return {!Promise}
    */
-  handlePresubmitSuccess_(trust) {
+  handlePresubmitSuccess_(trust, event) {
     if (this.xhrAction_) {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
