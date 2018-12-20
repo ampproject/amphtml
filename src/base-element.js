@@ -640,7 +640,8 @@ export class BaseElement {
     }
     this.initActionMap_();
     const holder = this.actionMap_[method];
-    user().assert(holder, `Method not found: ${method} in %s`, this);
+    const {tagName} = this.element;
+    user().assert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
