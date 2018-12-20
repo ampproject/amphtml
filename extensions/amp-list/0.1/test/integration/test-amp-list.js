@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
-const TIMEOUT = 12500;
+const TIMEOUT = 15000;
 
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
@@ -60,7 +60,7 @@ describe('amp-list (integration)', function() {
   describes.integration('"changeToLayoutContainer" action', {
     body: `
       <button on="tap:list.changeToLayoutContainer()">+</button>
-      <amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+      <amp-list id=list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
         <template type="amp-mustache">
           {{name}} : {{quantity}} @ {{unitPrice}}
         </template>
