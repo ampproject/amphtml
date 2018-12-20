@@ -84,7 +84,6 @@ export class ConsentStateManager {
    * @param {string=} consentStr
    */
   updateConsentInstanceState(instanceId, state, consentStr) {
-    console.log('update Consent Instance State');
     if (!this.instances_[instanceId] ||
         !this.consentChangeObservables_[instanceId]) {
       dev().error(TAG, 'instance %s not registered', instanceId);
