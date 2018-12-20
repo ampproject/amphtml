@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getMultiSizeDimensions} from '../utils';
+import {
+  getMatchedContentResponsiveHeight,
+  getMultiSizeDimensions,
+} from '../utils';
 
 describe('#getMultiSizeDimensions', () => {
 
@@ -98,5 +101,24 @@ describe('#getMultiSizeDimensions', () => {
     expect(getMultiSizeDimensions(
         '300x300,fluid', 300, 300, /* useLowerBound */ false))
         .to.deep.equal([[300, 300], [320, 50]]);
+  });
+
+  it('should calculate responsive matched content height correctly', () => {
+    const testCases = [
+      [300, 1032],
+      [400, 1376],
+      [500, 350],
+      [600, 360],
+      [900, 450],
+      [1000, 500],
+      [1200, 600],
+      [1300, 600],
+    ];
+    testCases.forEach(testCase => {
+      const width = testCase[0];
+      const expectedHeight = testCase[1];
+      expect(getMatchedContentResponsiveHeight(width),
+          `width = ${width}`).to.equal(expectedHeight);
+    });
   });
 });
