@@ -22,6 +22,7 @@ import {
   getHighlightParam,
 } from './highlight-handler';
 import {KeyboardHandler} from './keyboard-handler';
+import {WindowResizeHandler} from './window-resize-handler';
 import {
   Messaging,
   WindowPortEmulator,
@@ -203,6 +204,9 @@ export class AmpViewerIntegration {
     if (viewer.hasCapability('focus-rect')) {
       this.initFocusHandler_(messaging);
     }
+    if (viewer.hasCapability('windowResize')) {
+      this.initWindowResizeHandler_(messaging);
+    }
     if (this.highlightHandler_ != null) {
       this.highlightHandler_.setupMessaging(messaging);
     }
@@ -216,6 +220,14 @@ export class AmpViewerIntegration {
    */
   handleUnload_(messaging) {
     return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+  }
+
+  /**
+   * @param {!Messaging} messaging
+   * @private
+   */
+  initWindowResizeHandler_(messaging) {
+    new WindowResizeHandler(this.win, messaging);
   }
 
   /**

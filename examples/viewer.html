@@ -242,7 +242,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate',
+        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,windowResize',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -448,6 +448,9 @@
         } else {
           return Promise.reject({error: 'source amp component is not valid'})
         }
+        case 'resize':
+          log('window resize!', data);
+          return Promise.resolve();
         case 'documentHeight':
         case 'setFlushParams':
         case 'prerenderComplete':
