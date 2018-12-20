@@ -334,17 +334,9 @@ export class AmpStoryBookend extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      this.getShadowRoot().removeAttribute('desktop');
-      this.getShadowRoot().removeAttribute('desktop-fullbleed');
-
-      switch (uiState) {
-        case UIType.DESKTOP:
-          this.getShadowRoot().setAttribute('desktop', '');
-          break;
-        case UIType.DESKTOP_FULLBLEED:
-          this.getShadowRoot().setAttribute('desktop-fullbleed', '');
-          break;
-      }
+      [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -569,7 +561,7 @@ export class AmpStoryBookend extends AMP.BaseElement {
   getStoryMetadata_() {
     const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
 
-    const urlService = Services.urlForDoc(this.getAmpDoc());
+    const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 

@@ -54,7 +54,7 @@
   content: " " !important;
   display: block !important;
   z-index: -1 !important; /* places it under content */
-  background: rgba(0, 0, 0, 0.70) !important;
+  background: #202125 !important;
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
@@ -342,62 +342,53 @@
   color: #FFF !important;
 }
 
-[desktop].i-amphtml-story-bookend,
-[desktop-fullbleed].i-amphtml-story-bookend {
+[desktop].i-amphtml-story-bookend {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   transform: translateY(0) !important;
   opacity: 1 !important;
 }
 
-[desktop].i-amphtml-story-bookend.i-amphtml-hidden,
-[desktop-fullbleed].i-amphtml-story-bookend.i-amphtml-hidden {
+[desktop].i-amphtml-story-bookend.i-amphtml-hidden {
   transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
   transform: translateY(100vh) !important;
   opacity: 0 !important;
 }
 
-[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget,
-[desktop-fullbleed].i-amphtml-story-bookend .i-amphtml-story-share-widget {
+[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
   /* TODO(alanorozco): Don't render at all when on desktop */
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-bookend-inner,
-[desktop-fullbleed] .i-amphtml-story-bookend-inner {
+[desktop] .i-amphtml-story-bookend-inner {
   box-sizing: border-box !important;
   min-height: 100vh !important;
   padding: 104px 156px 64px !important;
   margin: 0 !important;
 }
 
-[desktop] .i-amphtml-story-bookend-inner::before.
-[desktop-fullbleed] .i-amphtml-story-bookend-inner::before {
+[desktop] .i-amphtml-story-bookend-inner::before {
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-bookend-replay,
-[desktop-fullbleed] .i-amphtml-story-bookend-replay {
+[desktop] .i-amphtml-story-bookend-replay {
   /* This is replaced with the forward button on desktop. */
   display: none !important;
 }
 
-[desktop] .i-amphtml-story-bookend-overflow,
-[desktop-fullbleed] .i-amphtml-story-bookend-overflow {
+[desktop] .i-amphtml-story-bookend-overflow {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
 
 @media (min-width: 952px) {
-  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading),
-  [desktop-fullbleed] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /* 12px to match 24px margin-bottom with margin between 2 elements. */
     width: calc(50% - 12px) !important;
   }
 }
 
 @media (min-width: 1272px) {
-  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading),
-  [desktop-fullbleed] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
+  [desktop] .i-amphtml-story-bookend-component:not(.i-amphtml-story-bookend-heading) {
     /**
      * 16px to get 24 in the two margins between the 3 elements and match the margin-bottom.
      * 16px = (24px * 2) / 3
