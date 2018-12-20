@@ -21,7 +21,6 @@ amp-consent {
   left: 0;
   overflow: hidden !important;
   background: rgba(255, 255, 255, .7);
-  z-index: 1000;
   width: 100%;
   z-index: 2147483645;
 }
