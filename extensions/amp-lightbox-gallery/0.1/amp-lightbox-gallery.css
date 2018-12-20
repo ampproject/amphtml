@@ -137,12 +137,6 @@ amp-lightbox-gallery .amp-carousel-button {
   }
 }
 
-.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-prev,
-.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-next,
-.i-amphtml-lbg-controls.i-amphtml-lbg-single .i-amphtml-lbg-button-gallery {
-  display: none;
-}
-
 .i-amphtml-lbg-controls.i-amphtml-lbg-hidden {
   opacity: 0;
   visibility: hidden;
@@ -220,10 +214,6 @@ amp-lightbox-gallery .amp-carousel-button {
   .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
     grid-template-columns: repeat(4, calc(1024px/4 - 5px * 5 / 4));
   }
-}
-
-.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery.i-amphtml-lbg-gallery-hidden {
-  display: none !important;
 }
 
 .i-amphtml-lbg-gallery-thumbnail {
