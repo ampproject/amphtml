@@ -864,8 +864,7 @@ export class AmpList extends AMP.BaseElement {
     });
   }
   /**
-   * Toggles the visibility of the load-more-loading element, the
-   * amp-load-more-loading CSS class, and the active state of the loader.
+   * Toggles the visibility of the load-more-loading element.
    * @param {boolean} state
    * @private
    */
@@ -878,7 +877,8 @@ export class AmpList extends AMP.BaseElement {
           this.loadMoreEndElement_.classList.toggle('amp-visible', false);
         }
       }
-      this.loadMoreButton_.classList.toggle('amp-load-more-loading', state);
+      this.loadMoreButton_.classList.toggle('amp-visible', !state);
+      this.loadMoreLoadingElement_.classList.toggle('amp-visible', state);
     });
   }
 
