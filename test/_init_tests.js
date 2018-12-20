@@ -142,26 +142,12 @@ class TestConfig {
     return this.skip(this.runOnChrome);
   }
 
-  skipChromeDev() {
-    return this.skip(() => {
-      return this.platform.isChrome() &&
-        this.platform.getMajorVersion() > latestVersion.chrome;
-    });
-  }
-
   skipEdge() {
     return this.skip(this.runOnEdge);
   }
 
   skipFirefox() {
     return this.skip(this.runOnFirefox);
-  }
-
-  skipFirefoxDev() {
-    return this.skip(() => {
-      return this.platform.isFirefox() &&
-        this.platform.getMajorVersion() > latestVersion.firefox;
-    });
   }
 
   skipSafari() {

@@ -19,8 +19,7 @@ const baseUrl = 'http://localhost:8081';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome =
-    describe.configure().ifChrome().skipChromeDev().skipSinglePass();
+const describeChrome = describe.configure().skipSinglePass();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
 describeChrome.skip('amp-form verifiers', function() {
