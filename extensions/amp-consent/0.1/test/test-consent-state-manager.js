@@ -439,10 +439,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield instance.get().then(v => value = v);
         expect(value).to.deep.equal(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED));
-        yield instance.update(CONSENT_ITEM_STATE.DISMISSED, 'test');
-        yield instance.get().then(v => value = v);
-        expect(value).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED));
         yield instance.update(CONSENT_ITEM_STATE.REJECTED, 'test1');
         yield instance.get().then(v => value = v);
         expect(value).to.deep.equal(

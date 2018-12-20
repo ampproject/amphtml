@@ -28,7 +28,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
 
@@ -84,10 +84,19 @@ export class ConsentStateManager {
    * @param {string=} consentStr
    */
   updateConsentInstanceState(instanceId, state, consentStr) {
+    console.log('update Consent Instance State');
     if (!this.instances_[instanceId] ||
         !this.consentChangeObservables_[instanceId]) {
       dev().error(TAG, 'instance %s not registered', instanceId);
       return;
+    }
+    if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      if (consentStr) {
+        user().error(TAG,
+            'Consent string value %s will be ignored on user dismiss',
+            consentStr);
+        consentStr = undefined;
+      }
     }
     this.consentChangeObservables_[instanceId].fire(
         constructConsentInfo(state, consentStr));
@@ -213,9 +222,6 @@ export class ConsentInstance {
    * @param {string=} consentString
    */
   update(state, consentString) {
-    if (state === CONSENT_ITEM_STATE.DISMISSED) {
-      consentString = undefined;
-    }
     const localStateValue =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
