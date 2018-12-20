@@ -198,7 +198,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         </div>`;
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
-      this.buildMask_();
       this.registerDefaultAction(
           invocation => this.open_(invocation),
           'open');
