@@ -129,8 +129,8 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
-    same symbol it would use in the core compilation unit for the private
+    build-system/amp.extern.multipass.js, this is so closure compiler doesn't
+    reuse the same symbol it would use in the core compilation unit for the private
     property in the extensions compilation unit's private properties.
      */
 
