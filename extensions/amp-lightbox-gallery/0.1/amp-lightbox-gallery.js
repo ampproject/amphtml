@@ -30,7 +30,6 @@ import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {
-  childElement,
   childElementByTag,
   closest,
   closestBySelector,
@@ -380,11 +379,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         <div class="i-amphtml-lbg-desc-mask"></div>
       </div>`;
 
-    this.descriptionTextArea_ = childElement(this.descriptionBox_,
-        elem => elem.classList.contains('i-amphtml-lbg-desc-text'));
+    this.descriptionTextArea_ = this.descriptionBox_.querySelector(
+        '.i-amphtml-lbg-desc-text');
 
-    this.descriptionOverflowMask_ = childElement(this.descriptionBox_,
-        elem => elem.classList.contains('i-amphtml-lbg-desc-mask'));
+    this.descriptionOverflowMask_ = this.descriptionBox_.querySelector(
+        '.i-amphtml-lbg-desc-mask');
 
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
