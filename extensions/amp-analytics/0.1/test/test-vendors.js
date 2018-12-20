@@ -51,13 +51,11 @@ describes.realWin('amp-analytics', {
   },
 }, function(env) {
   let win, doc;
-  let ampdoc;
   let requestVerifier;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ampdoc = env.ampdoc;
     const wi = mockWindowInterface(env.sandbox);
     wi.getLocation.returns(win.location);
     requestVerifier = new ImagePixelVerifier(wi);
@@ -132,7 +130,7 @@ describes.realWin('amp-analytics', {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
-                  Services.urlReplacementsForDoc(ampdoc);
+                  Services.urlReplacementsForDoc(doc.documentElement);
             const variableService = variableServiceForDoc(ampdoc);
 
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
