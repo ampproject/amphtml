@@ -73,6 +73,9 @@ export class ConsentUI {
     /** @private {?Element} */
     this.ui_ = null;
 
+    /** @private {boolean} */
+    this.scrollDisabled_ = false;
+
     /** @private {?Element} */
     this.maskElement_ = null;
 
@@ -208,6 +211,8 @@ export class ConsentUI {
       toggle(dev().assertElement(this.ui_), false);
       this.baseInstance_.getViewport().updateFixedLayer();
       this.isVisible_ = false;
+
+      this.enableScroll_();
     });
   }
 
@@ -221,6 +226,8 @@ export class ConsentUI {
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
+
+    this.disableScroll_();
 
     this.isFullscreen_ = true;
   }
@@ -322,7 +329,8 @@ export class ConsentUI {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
 
-        this.showMaskElement_();
+        // TODO (torch2424): Show mask if publisher provides the option
+        // this.showMaskElement_();
       });
     });
   }
@@ -346,7 +354,28 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     removeElement(dev().assertElement(this.ui_));
 
-    this.hideMaskElement_();
+    // TODO (torch2424): Hide mask if publisher provides the option
+    // this.hideMaskElement_();
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  disableScroll_() {
+    if (!this.scrollDisabled_) {
+      this.viewport_.enterOverlayMode();
+    }
+  }
+
+  /**
+   * Disables scrolling on the document
+   * @private
+   */
+  enableScroll_() {
+    if (!this.scrollDisabled_) {
+      this.viewport_.leaveOverlayMode();
+    }
   }
 
   /**
@@ -361,7 +390,6 @@ export class ConsentUI {
       this.maskElement_ = mask;
     }
     toggle(this.maskElement_, /* display */true);
-    this.viewport_.enterOverlayMode();
   }
 
   /**
@@ -372,7 +400,6 @@ export class ConsentUI {
     if (this.maskElement_) {
       toggle(this.maskElement_, /* display */false);
     }
-    this.viewport_.leaveOverlayMode();
   }
 
 
