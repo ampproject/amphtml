@@ -120,7 +120,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
       });
     });
 
-    it.only('add field only when defined', () => {
+    it('add field only when defined', () => {
       consentInfo['consentState'] = CONSENT_ITEM_STATE.REJECTED;
       expect(composeStoreValue(consentInfo)).to.deep.equal(false);
       consentInfo['idDirty'] = false;

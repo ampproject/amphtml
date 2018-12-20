@@ -213,6 +213,9 @@ export class ConsentInstance {
    * @param {string=} consentString
    */
   update(state, consentString) {
+    if (state === CONSENT_ITEM_STATE.DISMISSED) {
+      consentString = undefined;
+    }
     const localStateValue =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
