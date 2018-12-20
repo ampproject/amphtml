@@ -1288,7 +1288,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.updateHistoryState_(HistoryStates.PAGE_ID, pageId);
+    this.setHistoryState_(HistoryStates.PAGE_ID, pageId);
   }
 
   /**
@@ -1637,24 +1637,20 @@ export class AmpStory extends AMP.BaseElement {
   onBookendStateUpdate_(isActive) {
     this.toggleElementsOnBookend_(/* display */ isActive);
     this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-    this.updateHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
+    this.setHistoryState_(HistoryStates.BOOKEND_ACTIVE, isActive);
   }
 
   /**
    * Updates the value for a given state in the window history.
    * @param {string} stateName
-   * @param {string|boolean} newValue
+   * @param {string|boolean} value
    */
-  updateHistoryState_(stateName, newValue) {
+  setHistoryState_(stateName, value) {
     const {history} = this.win;
-    if (history.replaceState && getState(history) &&
-        this.getHistoryState_(stateName) !== newValue) {
-      getState(history)[stateName] = newValue;
-      history.replaceState(getState(history), '');
-    } else if (!getState(history)) {
-      // First time writing to history state. Nothing to overwrite.
-      history.replaceState({[stateName]: newValue}, '');
-    }
+    const newHistory = Object.assign({}, getState(history) || {},
+        {[stateName]: value});
+
+    history.replaceState(newHistory);
   }
 
   /**
