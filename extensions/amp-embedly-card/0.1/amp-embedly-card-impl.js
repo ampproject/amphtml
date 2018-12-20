@@ -55,9 +55,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
   buildCallback() {
     user().assert(
         this.element.getAttribute('data-url'),
-        `The data-url attribute is required for <${TAG}> %s`,
-        this.element
-    );
+        'The data-url attribute is required for <%s> %s', TAG, this.element);
 
     const ampEmbedlyKeyElement = document.querySelector(KEY_TAG);
     if (ampEmbedlyKeyElement) {
