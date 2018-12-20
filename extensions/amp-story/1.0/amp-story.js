@@ -164,6 +164,13 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
+/**
+ * CSS class for the opacity layer that separates the amp-sidebar and the rest
+ * of the story when the amp-sidebar is entering the screen.
+ * @const {string}
+ */
+const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -301,6 +308,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?Array<string>} */
     this.supportedOrientations_ = null;
+
+    /** @private {?Element} */
+    this.maskElement_ = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -618,6 +628,7 @@ export class AmpStory extends AMP.BaseElement {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
           this.storeService_.get(StateProperty.TOOLTIP_ELEMENT) ||
           this.storeService_.get(StateProperty.ACCESS_STATE) ||
+          this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
           !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
           !this.storeService_
               .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
@@ -1466,8 +1477,9 @@ export class AmpStory extends AMP.BaseElement {
       if (this.sidebar_ && sidebarState) {
         this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
         actions.execute(this.sidebar_, 'open', /* args */ null,
-        /* source */ null, /* caller */ null, /* event */ null,
+            /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
+        this.openOpacityMask_();
       } else {
         this.sidebarObserver_.disconnect();
       }
@@ -1475,7 +1487,45 @@ export class AmpStory extends AMP.BaseElement {
       actions.execute(this.sidebar_, 'open', /* args */ null,
           /* source */ null, /* caller */ null, /* event */ null,
           ActionTrust.HIGH);
+      this.openOpacityMask_();
       this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
+    }
+  }
+
+  /**
+   * @private
+   */
+  openOpacityMask_() {
+    if (!this.maskElement_) {
+      const maskEl = this.win.document.createElement('div');
+      maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
+      maskEl.addEventListener('click', () => {
+        const actions = Services.actionServiceForDoc(this.element);
+        if (this.sidebar_) {
+          actions.execute(this.sidebar_, 'close', /* args */ null,
+              /* source */ null, /* caller */ null, /* event */ null,
+              ActionTrust.HIGH);
+          this.closeOpacityMask_();
+        }
+      });
+      this.maskElement_ = maskEl;
+      this.mutateElement(() => {
+        this.element.appendChild(this.maskElement_);
+      });
+    }
+    this.mutateElement(() => {
+      toggle(dev().assertElement(this.maskElement_), /* display */true);
+    });
+  }
+
+  /**
+   * @private
+   */
+  closeOpacityMask_() {
+    if (this.maskElement_) {
+      this.mutateElement(() => {
+        toggle(dev().assertElement(this.maskElement_), /* display */false);
+      });
     }
   }
 
