@@ -53,7 +53,7 @@ export function a9(global, data) {
   validateData(data, mandatoryParams, optionalParams);
 
   const publisherUrl = global.context.canonicalUrl ||
-      getSourceUrl(global.context.location.href);
+      global.context.sourceUrl;
 
   if (data.amzn_assoc_ad_mode) {
     if (data.amzn_assoc_ad_mode === 'auto') {
