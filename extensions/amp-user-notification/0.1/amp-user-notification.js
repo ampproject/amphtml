@@ -191,7 +191,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.persistDismissal_ = (
       persistDismissal != 'false' && persistDismissal != 'no');
 
-    this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
+    this.registerDefaultAction(
+        () => this.dismiss(/*forceNoPersist*/ false),
+        'dismiss');
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
 
     const userNotificationManagerPromise =
@@ -413,11 +415,6 @@ export class AmpUserNotification extends AMP.BaseElement {
           dev().error(TAG, 'Failed to read storage', reason);
           return false;
         });
-  }
-
-  /** @override */
-  activate() {
-    this.dismiss(/*forceNoPersist*/false);
   }
 
   /**

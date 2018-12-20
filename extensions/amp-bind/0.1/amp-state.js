@@ -46,15 +46,6 @@ export class AmpState extends AMP.BaseElement {
   }
 
   /** @override */
-  activate(unusedInvocation) {
-    // TODO(choumx): Remove this after a few weeks in production.
-    const TAG = this.getName_();
-    this.user().error(TAG,
-        'Please use AMP.setState() action explicitly, e.g. ' +
-        'on="submit-success:AMP.setState({myAmpState: event.response})"');
-  }
-
-  /** @override */
   buildCallback() {
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');

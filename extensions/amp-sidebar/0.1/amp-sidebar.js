@@ -169,9 +169,8 @@ export class AmpSidebar extends AMP.BaseElement {
       this.close_();
     });
     element.appendChild(screenReaderCloseButton);
-
+    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
     this.registerAction('toggle', this.toggle_.bind(this));
-    this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
 
     element.addEventListener('click', e => {
@@ -194,11 +193,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     }, true);
 
-  }
-
-  /** @override */
-  activate(invocation) {
-    this.open_(invocation);
   }
 
   /** @override */

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
@@ -233,8 +232,7 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_, true);
 
-    this.registerAction(
-        'update', this.updateAction_.bind(this), ActionTrust.HIGH);
+    this.registerDefaultAction(this.updateAction_.bind(this), 'update');
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -253,11 +251,6 @@ export class AmpLiveList extends AMP.BaseElement {
     } else {
       this.element.setAttribute('disabled', '');
     }
-  }
-
-  /** @override */
-  activate() {
-    this.updateAction_();
   }
 
   /** @override */
