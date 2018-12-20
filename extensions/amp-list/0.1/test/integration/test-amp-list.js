@@ -18,7 +18,6 @@ import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 12500;
-const extensions = ['amp-list', 'amp-mustache', 'amp-bind'];
 
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
@@ -50,12 +49,12 @@ describe('amp-list (integration)', function() {
 
   describes.integration('basic (mustache-0.1)', {
     body: basicBody,
-    extensions: ['amp-list', 'amp-mustache:0.1', 'amp-bind'],
+    extensions: ['amp-list', 'amp-mustache:0.1'],
   }, basicTests);
 
   describes.integration('basic (mustache-0.2)', {
     body: basicBody,
-    extensions: ['amp-list', 'amp-mustache:0.2', 'amp-bind'],
+    extensions: ['amp-list', 'amp-mustache:0.2'],
   }, basicTests);
 
   describes.integration('"changeToLayoutContainer" action', {
@@ -66,7 +65,7 @@ describe('amp-list (integration)', function() {
           {{name}} : {{quantity}} @ {{unitPrice}}
         </template>
       </amp-list>`,
-    extensions,
+    extensions: ['amp-list', 'amp-mustache'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
     let win, doc;
@@ -86,7 +85,7 @@ describe('amp-list (integration)', function() {
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
         return layout === 'container';
-      }, undefined, /* opt_timeout */ TIMEOUT);
+      }, /* onError */ undefined, TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });
@@ -107,7 +106,7 @@ describe('amp-list (integration)', function() {
         {{name}} : {{quantity}} @ {{unitPrice}}
       </template>
     </amp-list>`,
-    extensions,
+    extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
     experiments: ['amp-list-resizable-children'],
   }, env => {
     let win, doc;
@@ -127,7 +126,7 @@ describe('amp-list (integration)', function() {
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
         return layout == 'container';
-      }, undefined, /* opt_timeout */ TIMEOUT);
+      }, /* onError */ undefined, TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });
