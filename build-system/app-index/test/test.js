@@ -20,6 +20,11 @@ const {join} = require('path');
 const bundler = require('../bundler');
 const devDashboard = require('../index');
 
+const expressReqMock = {
+  path: '/',
+  url: '/'
+}
+
 const expressResMock = {
   end: () => {},
 };
@@ -36,7 +41,7 @@ describe('Tests for the dev dashboard', () => {
   it('should be able to return HTML', () => {
     return devDashboard.serveIndex({
       root: __dirname,
-    })({url: '/'}, expressResMock).then(renderedHtml => {
+    })(expressReqMock, expressResMock).then(renderedHtml => {
       assert.ok(renderedHtml);
     });
   });
