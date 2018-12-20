@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getSourceUrl} from '../src/url';
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
