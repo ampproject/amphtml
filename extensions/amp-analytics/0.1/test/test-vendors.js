@@ -131,7 +131,7 @@ describes.realWin('amp-analytics', {
               '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                   Services.urlReplacementsForDoc(doc.documentElement);
-            const variableService = variableServiceForDoc(ampdoc);
+            const variableService = variableServiceForDoc(doc.documentElement);
 
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(

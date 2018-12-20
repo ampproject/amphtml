@@ -162,16 +162,18 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
-    let win;
+  describes.fakeWin('macros', {amp: true}, () => {
     let urlReplacementService;
 
     beforeEach(() => {
-      win = env.win;
       installVariableServiceForDoc(ampdoc);
       variables = variableServiceForDoc(ampdoc);
-      const {documentElement} = win.document;
-      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+
+      // Create an element for our url replacement service
+      const element = ampdoc.win.document.body.appendChild(
+        ampdoc.win.document.createElement('div')
+      );
+      urlReplacementService = Services.urlReplacementsForDoc(element);
     });
 
     function check(input, output) {
@@ -263,7 +265,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
       installVariableServiceForDoc(ampdoc);
       variables = variableServiceForDoc(ampdoc);
-      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+
+      // Create an element for our url replacement service
+      const element = ampdoc.win.document.body.appendChild(
+        ampdoc.win.document.createElement('div')
+      );
+      urlReplacementService = Services.urlReplacementsForDoc(element);
     });
 
     function match(input, regex) {
