@@ -26,7 +26,7 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {getStdout} = require('../exec');
-const {gitBranchPoint, gitCommitHash} = require('../git');
+const {gitBranchPointFromMaster, gitCommitHash} = require('../git');
 
 const runtimeFile = './dist/v0.js';
 
@@ -108,7 +108,7 @@ function isPullRequest() {
  * @return {string} the `master` ancestor's bundle size.
  */
 async function getAncestorBundleSize() {
-  const gitBranchPointSha = gitBranchPoint();
+  const gitBranchPointSha = gitBranchPointFromMaster();
   const gitBranchPointShortSha = gitBranchPointSha.substring(0, 7);
   log('Branch point from master is', cyan(gitBranchPointShortSha));
   return await octokit.repos.getContents(
@@ -296,7 +296,7 @@ async function skipBundleSize() {
     try {
       const response = await requestPost(url.resolve(bundleSizeAppBaseUrl,
           path.join('commit', commitHash, 'skip')));
-      if (response.statusCode !== 200) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
             `${response.statusCode} ${response.statusMessage}: ` +
             response.body);
@@ -329,7 +329,7 @@ async function reportBundleSize() {
           bundleSize,
         },
       });
-      if (response.statusCode !== 200) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
             `${response.statusCode} ${response.statusMessage}: ` +
             response.body);

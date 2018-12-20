@@ -113,7 +113,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   it('should toggle the desktop state when setting a UI State', () => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP);
+    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });

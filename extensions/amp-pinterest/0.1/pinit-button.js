@@ -56,8 +56,11 @@ export class PinItButton {
     this.round = rootElement.getAttribute('data-round');
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
+    /** @type {?string} */
     this.media = null;
+    /** @type {?string} */
     this.url = null;
+    /** @type {?string} */
     this.href = null;
   }
 

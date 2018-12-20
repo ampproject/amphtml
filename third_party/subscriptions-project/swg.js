@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.39 */
+/** Version: 0.1.22.41 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -114,10 +114,16 @@ let ActivityRequest;
  *   redirect is used. By default, the activity request is appended to the
  *   activity URL. This option can be used if the activity request is passed
  *   to the activity by some alternative means.
+ * - disableRedirectFallback: disallows popup fallback to redirect. By default
+ *   the redirect fallback is allowed. This option has to be used very carefully
+ *   because there are many user agents that may fail to open a popup and it
+ *   won't be always possible for the opener window to even be aware of such
+ *   failures.
  *
  * @typedef {{
  *   returnUrl: (string|undefined),
  *   skipRequestInUrl: (boolean|undefined),
+ *   disableRedirectFallback: (boolean|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  * }}
@@ -413,6 +419,25 @@ function isEdgeBrowser(win) {
  */
 function throwAsync(e) {
   setTimeout(() => {throw e;});
+}
+
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isNodeConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return root && root.contains(node) || false;
 }
 
 
@@ -905,7 +930,7 @@ class ActivityIframePort {
    * @return {!Promise}
    */
   connect() {
-    if (!this.win_.document.documentElement.contains(this.iframe_)) {
+    if (!isNodeConnected(this.iframe_)) {
       throw new Error('iframe must be in DOM');
     }
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -1069,8 +1094,8 @@ class ActivityWindowPort {
     this.openTarget_ = target;
     /** @private @const {?Object} */
     this.args_ = opt_args || null;
-    /** @private @const {?ActivityOpenOptions} */
-    this.options_ = opt_options || null;
+    /** @private @const {!ActivityOpenOptions} */
+    this.options_ = opt_options || {};
 
     /** @private {?function((!ActivityResult|!Promise))} */
     this.resultResolver_ = null;
@@ -1160,9 +1185,9 @@ class ActivityWindowPort {
     // Protectively, the URL will contain the request payload, unless explicitly
     // directed not to via `skipRequestInUrl` option.
     let url = this.url_;
-    if (!(this.options_ && this.options_.skipRequestInUrl)) {
+    if (!this.options_.skipRequestInUrl) {
       const returnUrl =
-          this.options_ && this.options_.returnUrl ||
+          this.options_.returnUrl ||
           removeFragment(this.win_.location.href);
       const requestString = serializeRequest({
         requestId: this.requestId_,
@@ -1191,7 +1216,9 @@ class ActivityWindowPort {
       // Ignore.
     }
     // Then try with `_top` target.
-    if (!targetWin && openTarget != '_top') {
+    if (!targetWin &&
+        openTarget != '_top' &&
+        !this.options_.disableRedirectFallback) {
       openTarget = '_top';
       try {
         targetWin = this.win_.open(url, openTarget);
@@ -1248,13 +1275,11 @@ class ActivityWindowPort {
     const maxHeight = Math.max(availHeight - controlsHeight, availHeight * 0.5);
     let w = Math.floor(Math.min(600, maxWidth * 0.9));
     let h = Math.floor(Math.min(600, maxHeight * 0.9));
-    if (this.options_) {
-      if (this.options_.width) {
-        w = Math.min(this.options_.width, maxWidth);
-      }
-      if (this.options_.height) {
-        h = Math.min(this.options_.height, maxHeight);
-      }
+    if (this.options_.width) {
+      w = Math.min(this.options_.width, maxWidth);
+    }
+    if (this.options_.height) {
+      h = Math.min(this.options_.height, maxHeight);
     }
     const x = Math.floor((screen.width - w) / 2);
     const y = Math.floor((screen.height - h) / 2);
@@ -1404,8 +1429,7 @@ function discoverRedirectPort(win, fragment, requestId) {
   if (!fragmentParam) {
     return null;
   }
-  const response = /** @type {?Object} */ (JSON.parse(
-      decodeURIComponent(fragmentParam)));
+  const response = /** @type {?Object} */ (JSON.parse(fragmentParam));
   if (!response || response['requestId'] != requestId) {
     return null;
   }
@@ -1500,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.16';
+    this.version = '1.20';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -2481,16 +2505,16 @@ function removeChildren(parent) {
 
 /**
  * Injects the provided styles in the HEAD section of the document.
- * @param {!Document} doc The document object.
+ * @param {*} doc The document object.
  * @param {string} styleText The style string.
  * @return {!Element}
  */
 function injectStyleSheet(doc, styleText) {
-  const styleElement = createElement(doc, 'style', {
+  const styleElement = createElement(doc.getWin().document, 'style', {
     'type': styleType,
   });
   styleElement.textContent = styleText;
-  doc.head.appendChild(styleElement);
+  doc.getHead().appendChild(styleElement);
   return styleElement;
 }
 
@@ -2511,6 +2535,16 @@ function isConnected(node) {
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
   return root && root.contains(node) || false;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isEdgeBrowser$1(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
 }
 
 /**
@@ -4298,7 +4332,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.39',
+    '_client': 'SwG 0.1.22.41',
   });
 }
 
@@ -4848,6 +4882,176 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -5318,7 +5522,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(iframeDoc, CSS$1);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -5783,176 +5987,6 @@ class DialogManager {
  * limitations under the License.
  */
 
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/** @implements {Doc} */
-class GlobalDoc {
-
-  /**
-   * @param {!Window|!Document} winOrDoc
-   */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
-  }
-
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
-  whenReady() {
-    return whenDocumentReady(this.doc_);
-  }
-}
-
-
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
-  }
-  // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
-  }
-  return /** @type {!Doc} */ (input);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
   'height': 0,
@@ -6197,6 +6231,24 @@ class EntitlementsManager {
   }
 
   /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.win_.location.search;
+  }
+
+  /**
+   * @private
+   * @return boolean true if UTM source is google
+   */
+  isGoogleUtmSource_() {
+    // TODO(sohanirao): b/120294106
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    return (utmParams['utm_source'] == 'google');
+  }
+
+  /**
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
@@ -6207,7 +6259,8 @@ class EntitlementsManager {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
-      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS) {
+      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
+            this.isGoogleUtmSource_()) {
         this.logPaywallImpression_();
       }
       return response;
@@ -7301,6 +7354,12 @@ class LinkSaveFlow {
     /** @private {?Promise<*>} */
     this.requestPromise_ = null;
 
+    /** @private {?Promise<!Object>} */
+    this.linkedPromise_ = null;
+
+    /** @private {?Promise<boolean>} */
+    this.confirmPromise_ = null;
+
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
   }
@@ -7312,6 +7371,33 @@ class LinkSaveFlow {
   getRequestPromise() {
     return this.requestPromise_;
   }
+
+  /**
+   * @return {?Promise}
+   * @package Visible for testing.
+   */
+  whenLinked() {
+    return this.linkedPromise_;
+  }
+
+  /**
+   * @return {?Promise<boolean>}
+   * @package Visible for testing.
+   */
+  whenConfirmed() {
+    return this.confirmPromise_;
+  }
+
+  /**
+   * @private
+   */
+  complete_() {
+    this.dialogManager_.completeView(this.activityIframeView_);
+  }
+
+  /**
+   * @return {?Promise}
+   */
   /**
    * Starts the save subscription
    * @return {!Promise}
@@ -7327,7 +7413,8 @@ class LinkSaveFlow {
         this.activityPorts_,
         feUrl('/linksaveiframe'),
         feArgs(iframeArgs),
-        /* shouldFadeBody */ false
+        /* shouldFadeBody */ false,
+        /* hasLoadingIndicator */ true
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
@@ -7349,30 +7436,51 @@ class LinkSaveFlow {
           this.activityIframeView_.message(saveRequest);
         }).catch(reason => {
           // The flow is complete.
-          this.dialogManager_.completeView(this.activityIframeView_);
+          this.complete_();
           throw reason;
         });
       }
     });
+
+    this.linkedPromise_ = this.activityIframeView_.port().then(port => {
+      return acceptPortResultData(
+          port,
+          feOrigin(),
+          /* requireOriginVerified */ true,
+          /* requireSecureChannel */ true);
+    });
+
+    let linkConfirm = null;
+    this.confirmPromise_ = this.linkedPromise_.then(result => {
+      // This flow is complete
+      this.complete_();
+      if (result['linked']) {
+        this.dialogManager_.popupClosed();
+        this.deps_.callbacks().triggerFlowStarted(
+            SubscriptionFlows.LINK_ACCOUNT);
+        linkConfirm = new LinkCompleteFlow(this.deps_, result);
+        return linkConfirm.start();
+      }
+      return Promise.reject(createCancelError(this.win_, 'not linked'));
+    }).then(() => {
+      this.deps_.callbacks().triggerLinkProgress();
+      return linkConfirm.whenComplete();
+    }).then(() => {
+      return true;
+    }).catch(reason => {
+      if (isCancelError(reason)) {
+        this.deps_.callbacks().triggerFlowCanceled(
+            SubscriptionFlows.LINK_ACCOUNT);
+        return false;
+      }
+      // In case this flow wasn't complete, complete it here
+      this.complete_();
+      throw reason;
+    });
+
     /** {!Promise<boolean>} */
     return this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true).then(() => {
-          return this.activityIframeView_.port().then(port => {
-            return acceptPortResultData(
-                port,
-                feOrigin(),
-                /* requireOriginVerified */ true,
-                /* requireSecureChannel */ true);
-          }).then(result => {
-            return result['linked'];
-          }).catch(() => {
-            return false;
-          }).then(result => {
-            // The flow is complete.
-            this.dialogManager_.completeView(this.activityIframeView_);
-            return result;
-          });
-        });
+        /* hidden */ true);
   }
 }
 
@@ -8777,10 +8885,6 @@ function apiV2DoesMerchantSupportSpecifiedCardType(
  * message.
  */
 function validateSecureContext() {
-  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
-    // This is for local development.
-    return null;
-  }
   if (window.isSecureContext === undefined) {
     // Browser not support isSecureContext, figure out a way to validate this
     // for the unsupported browser.
@@ -12066,6 +12170,11 @@ class ConfiguredRuntime {
 
     /** @private @const {*} */
     this.config_ = defaultConfig();
+    if (isEdgeBrowser$1(this.win_)) {
+      // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
+      // or move it to Web Activities.
+      this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
+    }
     if (opt_config) {
       this.configure_(opt_config);
     }
@@ -12119,7 +12228,7 @@ class ConfiguredRuntime {
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
 
-    injectStyleSheet(this.win_.document, CSS);
+    injectStyleSheet(this.doc_, CSS);
 
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {

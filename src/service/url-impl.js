@@ -53,10 +53,10 @@ export class Url {
     this.cache_ = new LruCache(100);
   }
 
-  /** @override */
-  adoptEmbedWindow(embedWin) {
+  /** @override @nocollapse */
+  static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, SERVICE,
-        new Url(this.ampdoc_, embedWin.document));
+        new Url(ampdoc, embedWin.document));
   }
 
   /**

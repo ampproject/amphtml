@@ -385,6 +385,8 @@ describes.realWin('Requests', {amp: 1}, env => {
   describe('expandPostMessage', () => {
     let expansionOptions;
     let params;
+    let element;
+
     beforeEach(() => {
       expansionOptions = new ExpansionOptions({
         'teste1': 'TESTE1',
@@ -393,6 +395,9 @@ describes.realWin('Requests', {amp: 1}, env => {
         'e1': '${teste1}',
         'e2': 'teste2',
       };
+      // expandPostMessage() uses the URL replacements service scoped to the
+      // passed element. Use the top-level service for testing.
+      element = env.win.document.documentElement;
     });
 
     it('should expand', () => {
@@ -401,7 +406,8 @@ describes.realWin('Requests', {amp: 1}, env => {
           'test foo 123 ... ${teste1}',
           undefined,
           {},
-          expansionOptions).then(msg => {
+          expansionOptions,
+          element).then(msg => {
         expect(msg).to.equal('test foo 123 ... TESTE1');
       });
     });
@@ -412,13 +418,15 @@ describes.realWin('Requests', {amp: 1}, env => {
           'test ${extraUrlParams} foo',
           params, /* configParams */
           {}, /* trigger */
-          expansionOptions);
+          expansionOptions,
+          element);
       const appendPromise = expandPostMessage(
           ampdoc,
           'test foo',
           params, /* configParams */
           {}, /* trigger */
-          expansionOptions);
+          expansionOptions,
+          element);
       return replacePromise.then(replace => {
         expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
         expect(appendPromise).to.eventually.equal('test foo');
