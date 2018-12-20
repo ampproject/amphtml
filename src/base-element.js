@@ -616,7 +616,7 @@ export class BaseElement {
    */
   registerDefaultAction(
     handler, alias = DEFAULT_ACTION, minTrust = ActionTrust.HIGH) {
-    dev().assert(!this.defaultActionAlias_,
+    devAssert(!this.defaultActionAlias_,
         'Default action "%s" already registered.', this.defaultActionAlias_);
     this.registerAction(alias, handler, minTrust);
     this.defaultActionAlias_ = alias;
