@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 const test = getMode().test;
 const localDev = getMode().localDev;
 const minified = getMode().minified;

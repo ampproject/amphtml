@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { getMode } from './src/mode';
+import { getMode } from '../../../../../../../src/mode';
 const test = false;
 const localDev = false;
 const minified = true;

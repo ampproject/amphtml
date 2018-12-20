@@ -43,7 +43,7 @@ module.exports = function({types: t}) {
         const {node} = path;
         const {object: obj, property} = node;
         const {callee} = obj;
-        if (!getModeFound || true) {
+        if (!getModeFound) {
           return;
         }
         if (callee && callee.name === 'getMode') {
