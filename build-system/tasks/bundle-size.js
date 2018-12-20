@@ -277,7 +277,17 @@ async function legacyBundleSizeCheck() {
             cyan(maxSize), red('(Δ +') + cyan(sizeDelta) + red('KB)'));
         log(red('This is part of a new effort to reduce AMP\'s binary size ' +
                 '(#14392).'));
-        log(red('Please contact @choumx or @jridgewell for assistance.'));
+        log(green('How to proceed from here:'), 'send a pull request to edit',
+            'the', cyan('bundle-size/.max_size'), 'file in the',
+            cyan('ampproject/amphtml-build-artifacts'), 'repository.');
+        log('Increases to the max size should be in', cyan('0.1KB'),
+            'intervals');
+        log('Direct link to edit this file and create a pull request:',
+            cyan('https://github.com/ampproject/amphtml-build-artifacts/edit/' +
+                 'master/bundle-size/.max_size'));
+        log('Tag @choumx and @jridgewell in the PR description for approval.');
+        log(yellow('Note: this process is being replaced by a GitHub' +
+                   'Application check, instead of running on Travis.'));
         process.exitCode = 1;
         return;
       case STATUS_PASS:
