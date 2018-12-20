@@ -74,7 +74,7 @@ export class ConsentUI {
     this.ui_ = null;
 
     /** @private {boolean} */
-    this.scrollDisabled_ = false;
+    this.scrollEnabled_ = true;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -363,8 +363,9 @@ export class ConsentUI {
    * @private
    */
   disableScroll_() {
-    if (!this.scrollDisabled_) {
+    if (this.scrollEnabled_) {
       this.viewport_.enterOverlayMode();
+      this.scrollEnabled_ = false;
     }
   }
 
@@ -373,8 +374,9 @@ export class ConsentUI {
    * @private
    */
   enableScroll_() {
-    if (!this.scrollDisabled_) {
+    if (!this.scrollEnabled_) {
       this.viewport_.leaveOverlayMode();
+      this.scrollEnabled_ = true;
     }
   }
 

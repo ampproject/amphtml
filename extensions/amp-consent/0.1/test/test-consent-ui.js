@@ -144,6 +144,31 @@ describes.realWin('consent-ui', {
       consentUI.hide();
       expect(elementByTag(parent, 'iframe')).to.be.null;
     });
+
+    it('should not lock scrolling', () => {
+
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+      });
+      consentUI =
+        new ConsentUI(mockInstance, config);
+
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.show();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.hide();
+      expect(consentUI.scrollEnabled_).to.be.true;
+
+      consentUI.show();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.disableScroll_();
+      expect(consentUI.scrollEnabled_).to.be.false;
+      consentUI.enableScroll_();
+      expect(consentUI.scrollEnabled_).to.be.true;
+      consentUI.disableScroll_();
+      consentUI.hide();
+      expect(consentUI.scrollEnabled_).to.be.true;
+    });
   });
 
   describe('placeholder', () => {
@@ -268,6 +293,17 @@ describes.realWin('consent-ui', {
               parent.classList.contains(consentUiClasses.iframeFullscreen)
           ).to.be.false;
         });
+      });
+    });
+
+    it('should disable scrolling', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+
+        expect(consentUI.scrollEnabled_).to.be.true;
+
+        consentUI.enterFullscreen_();
+
+        expect(consentUI.scrollEnabled_).to.be.false;
       });
     });
 
