@@ -558,7 +558,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         });
         impl.scheduleLayout = sandbox.stub();
 
-        impl.buildCallback();
         impl.open_();
         expect(triggerSpy).to.be.calledOnce;
         expect(triggerSpy).to.be.calledWith(impl.element, 'sidebarOpen');
