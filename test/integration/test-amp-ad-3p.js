@@ -77,9 +77,8 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
 
       // make sure the context.data is the same instance as the data param
       // passed into the vendor function. see #10628
-      // TODO(lannka,16825): unmute it.
-      // expect(context.data).to.equal(
-      //    iframe.contentWindow.networkIntegrationDataParamForTesting);
+      expect(context.data).to.equal(
+          iframe.contentWindow.networkIntegrationDataParamForTesting);
 
       expect(context.domFingerprint).to.be.ok;
       expect(context.hidden).to.be.false;
