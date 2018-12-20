@@ -350,7 +350,8 @@ export class AmpConsent extends AMP.BaseElement {
           CONSENT_ITEM_STATE.REJECTED,
           consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
-      // TODO: Throw user warning at dismiss and defined consent string
+      // TODO (@zhouyx #20010): Consider it a user error if
+      // consentString is undefined, but has value before.
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_,
           CONSENT_ITEM_STATE.DISMISSED,
