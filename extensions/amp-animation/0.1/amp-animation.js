@@ -154,8 +154,10 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     // Actions.
-    this.registerAction('start',
-        this.startAction_.bind(this), ActionTrust.LOW);
+    this.registerDefaultAction(
+        this.startAction_.bind(this),
+        'start',
+        ActionTrust.LOW);
     this.registerAction('restart',
         this.restartAction_.bind(this), ActionTrust.LOW);
     this.registerAction('pause',
@@ -195,15 +197,11 @@ export class AmpAnimation extends AMP.BaseElement {
     this.setVisible_(false);
   }
 
-  /** @override */
-  activate(invocation) {
-    return this.startAction_(invocation);
-  }
-
   /**
    * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @return {?Promise}
    * @private
+   * @visibleForTesting
    */
   startAction_(opt_invocation) {
     // The animation has been triggered, but there's no guarantee that it

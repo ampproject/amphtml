@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
+import {DEFAULT_ACTION} from '../../src/action-constants';
 import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
@@ -96,51 +97,58 @@ describes.realWin('BaseElement', {amp: true}, env => {
     };
     element.registerAction('foo', handler);
     const invocation = {method: 'foo', satisfiesTrust: () => true};
-    element.executeAction(invocation, false);
+    element.executeAction(invocation, null, false);
   });
 
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
     const invocation = {method: 'method1', satisfiesTrust: () => true};
-    element.executeAction(invocation, false);
+    element.executeAction(invocation, null, false);
     expect(handler).to.be.calledOnce;
   });
 
-  it('should execute "activate" action without registration', () => {
+  it('should execute default method by "activate"', () => {
     const handler = sandbox.spy();
-    element.activate = handler;
-    const invocation = {method: 'activate', satisfiesTrust: () => true};
-    element.executeAction(invocation, false);
+    element.registerDefaultAction(handler);
+    const invocation = {method: DEFAULT_ACTION, satisfiesTrust: () => true};
+    element.executeAction(invocation, null, false);
     expect(handler).to.be.calledOnce;
+  });
+
+  it('should not allow two default actions', () => {
+    const handler = sandbox.spy();
+    const anotherHandler = sandbox.spy();
+    element.registerDefaultAction(handler);
+    return allowConsoleError(() => { expect(() => {
+      element.registerDefaultAction(anotherHandler);
+    }).to.throw(/Default action "activate" already registered./);});
   });
 
   it('should check trust before invocation', () => {
     const handler = sandbox.spy();
-    const minTrust = 123;
-    element.registerAction('foo', handler, minTrust);
-    const activate = sandbox.stub(element, 'activate');
+    const minTrust = 100;
+    element.foo = () => {};
+    element.registerDefaultAction(handler, 'foo', minTrust);
 
     // Registered action.
-    element.executeAction({method: 'foo', satisfiesTrust: () => false}, false);
+    element.executeAction({
+      method: 'foo',
+      satisfiesTrust: () => false,
+    }, null, false);
     expect(handler).to.not.be.called;
     element.executeAction({
       method: 'foo',
       satisfiesTrust: t => (t == minTrust),
-    }, false);
-    expect(handler).to.be.calledOnce;
+    }, null, false);
+    expect(handler).to.be.called;
 
-    // Unregistered action (activate).
+    // Action 'foo' is invoked by default 'activate' method.
     element.executeAction({
       method: 'activate',
-      satisfiesTrust: () => false,
-    }, false);
-    expect(activate).to.not.be.called;
-    element.executeAction({
-      method: 'activate',
-      satisfiesTrust: t => (t <= element.activationTrust()),
-    }, false);
-    expect(activate).to.be.calledOnce;
+      satisfiesTrust: () => true,
+    }, null, false);
+    expect(handler).to.be.called;
   });
 
   it('should return correct layoutBox', () => {
