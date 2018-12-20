@@ -26,6 +26,7 @@ import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
+import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -101,6 +102,13 @@ const ALLOWED_AD_TYPES = map({
   'custom': true,
   'doubleclick': true,
 });
+
+/** @enum {boolean} */
+const DISALLOWED_AD_ATTRS = {
+  'height': true,
+  'layout': true,
+  'width': true,
+};
 
 /** @enum {string} */
 const Events = {
@@ -423,12 +431,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const configAttrs = this.config_['ad-attributes'];
 
-    ['height', 'width', 'layout'].forEach(attr => {
-      if (configAttrs[attr] !== undefined) {
-        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+    for (const attr in configAttrs) {
+      const value = configAttrs[attr];
+      if (isObject(value)) {
+        configAttrs[attr] = JSON.stringify(value);
+      }
+      if (DISALLOWED_AD_ATTRS[attr]) {
+        user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
         delete configAttrs[attr];
       }
-    });
+    }
 
     user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
       `"${configAttrs.type}" ad type is not supported`);
