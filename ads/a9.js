@@ -51,23 +51,26 @@ export function a9(global, data) {
 
   validateData(data, mandatoryParams, optionalParams);
 
+  const publisherUrl = global.context.canonicalUrl ||
+      global.context.sourceUrl;
+
   if (data.amzn_assoc_ad_mode) {
     if (data.amzn_assoc_ad_mode === 'auto') {
       if (data.adinstanceid &&
       (data.adinstanceid !== '')) {
-        loadRecTag(global, data);
+        loadRecTag(global, data, publisherUrl);
       }
       else {
-        loadSearTag(global, data);
+        loadSearTag(global, data, publisherUrl);
       }
     }
     else if ((data.amzn_assoc_ad_mode === 'search')
     || (data.amzn_assoc_ad_mode === 'manual')) {
-      loadSearTag(global, data);
+      loadSearTag(global, data, publisherUrl);
     }
   }
   else {
-    loadSearTag(global, data);
+    loadSearTag(global, data, publisherUrl);
   }
 }
 
@@ -86,10 +89,13 @@ function getURL(data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {string} publisherUrl
  */
-function loadRecTag(global, data) {
+function loadRecTag(global, data, publisherUrl) {
   let url = getURL(data);
   url += '&adInstanceId=' + data['adinstanceid'];
+  global['amzn_assoc_URL'] = publisherUrl;
+
   if (data['recomtype'] === 'sync') {
     writeScript(global, url);
   }
@@ -104,8 +110,9 @@ function loadRecTag(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {string} publisherUrl
  */
-function loadSearTag(global, data) {
+function loadSearTag(global, data, publisherUrl) {
   /**
   * Sets macro type.
   * @param {string} type
@@ -144,6 +151,9 @@ function loadSearTag(global, data) {
     }
     if (data.amzn_assoc_url) {
       global['amzn_assoc_URL'] = data['amzn_assoc_url'];
+    }
+    else {
+      global['amzn_assoc_URL'] = publisherUrl;
     }
 
     writeScript(global, url);
