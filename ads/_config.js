@@ -1068,4 +1068,6 @@ export const adConfig = {
     ],
   },
 
+  'speakol': {},
+
 };

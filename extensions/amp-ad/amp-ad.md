@@ -330,6 +330,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [sogou Ad](../../ads/sogouad.md)
 - [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
+- [Speakol](../../ads/speakol.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
