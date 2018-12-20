@@ -33,9 +33,17 @@ import java.util.Collection;
  * A coding convention for AMP.
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
+
+  private boolean singleFileCompilation = false;
+
   /** By default, decorate the ClosureCodingConvention. */
   public AmpCodingConvention() {
     this(new ClosureCodingConvention());
+  }
+
+  public AmpCodingConvention(boolean singleFileCompilation) {
+    this(new ClosureCodingConvention());
+    this.singleFileCompilation = singleFileCompilation;
   }
 
   /** Decorates a wrapped CodingConvention. */
@@ -45,12 +53,13 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
 
   @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-        new AssertionFunctionSpec("user.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("dev.assert", JSTypeNative.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSTypeNative.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
+      new AssertionFunctionSpec("module$src$log.devAssert", null),
+      new AssertionFunctionSpec("devAssert$$module$src$log", null),
+      new AssertionFunctionSpec("module$src$log.userAssert", null),
+      new AssertionFunctionSpec("userAssert$$module$src$log", null),
+      new AssertionFunctionSpec("assertService$$module$src$element_service", null),
+      new AssertFunctionByTypeName("module$src$layout.assertLength", "string"),
+      new AssertFunctionByTypeName("assertLength$$module$src$layout", "string")
     );
   }
 
@@ -62,6 +71,9 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
+    if (singleFileCompilation) {
+      return false;
+    }
     // This stops compiler from inlining functions (local or not) that end with
     // NoInline in their name. Mostly used for externing try-catch to avoid v8
     // de-optimization (https://goo.gl/gvzlDp)

@@ -105,9 +105,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected void setRunOptions(CompilerOptions options)
       throws IOException, FlagUsageException {
     super.setRunOptions(options);
-    if (!single_file_compilation) {
-      options.setCodingConvention(new AmpCodingConvention());
-    }
+    options.setCodingConvention(new AmpCodingConvention(single_file_compilation));
   }
 
   /**
