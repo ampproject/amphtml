@@ -568,6 +568,14 @@
       ]
     },
     {
+      "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
+      "name": "AMP Inabox GPT Ad",
+      "loading_complete_css": [
+        ".slot-render-ended",
+        ".slot-onload",
+      ],
+    },
+    {
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip",
       "viewport": {"width": 320, "height": 480},
@@ -588,6 +596,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
+      "flaky": true,
+      // See https://percy.io/ampproject/amphtml/builds/1260087
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
       "viewport": {"width": 1440, "height": 900},

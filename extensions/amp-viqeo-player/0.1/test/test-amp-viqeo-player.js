@@ -96,6 +96,21 @@ describes.realWin('amp-viqeo-player', {
 
   });
 
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', () => {
+      return getViqeo().then(p => {
+        const img = p.viqeoElement.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'http://cdn.viqeo.tv/preview/922d04f30b66f1a32eb2.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
+      });
+    });
+  });
+
   function getViqeo(params) {
     const {id, viqeoProfileId, viqeoId, width, height, opt_params} =
       Object.assign({
