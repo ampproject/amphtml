@@ -1278,10 +1278,10 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const {win} = this.root.ampdoc;
+    const {win} = this.root.ampdoc.win;
     let unloadListener, pageHideListener;
 
-    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
+    // Listeners are provided below for both 'unload' and 'pagehide'. For
     // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
     // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
     // short the difference between them is:
