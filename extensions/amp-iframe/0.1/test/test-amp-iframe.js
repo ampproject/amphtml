@@ -64,7 +64,7 @@ describes.realWin('amp-iframe', {
       content = '';
       timer = Services.timerFor(env.win);
       win.addEventListener('message', message => {
-        if (!message.data) {
+        if (typeof message.data != 'string') {
           return;
         }
         if (message.data == 'loaded-iframe') {
