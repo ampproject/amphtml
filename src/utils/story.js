@@ -26,7 +26,7 @@ import {closestByTag, waitForChild} from '../dom';
  * @return {boolean}
  */
 export function descendsFromStory(element) {
-  return !!closestByTag(element, 'amp-story-page');
+  return !!closestByTag(element, 'amp-story');
 }
 
 /**
