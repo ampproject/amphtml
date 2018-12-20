@@ -452,7 +452,7 @@ export class AmpConsent extends AMP.BaseElement {
     return Services.geoForDocOrNull(this.element).then(geo => {
       user().assert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
+      return (geo.isInCountryGroup(geoGroup));
     });
   }
 

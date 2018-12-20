@@ -76,7 +76,7 @@ describes.realWin('amp-consent', {
     resetServiceForTesting(win, 'geo');
     registerServiceBuilder(win, 'geo', function() {
       return Promise.resolve({
-        'ISOCountryGroups': ISOCountryGroups,
+        isInCountryGroup: group => ISOCountryGroups.indexOf(group) >= 0,
       });
     });
 

@@ -329,7 +329,7 @@ export class GlobalVariableSource extends VariableSource {
               'The value passed to AMP_GEO() is not valid name:' + geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
-        return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
+        return /** @type {string} */ (geos.matchedISOCountryGroups.join(GEO_DELIM));
       }, 'AMP_GEO');
     }));
 

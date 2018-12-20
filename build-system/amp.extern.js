@@ -649,6 +649,27 @@ let BindEvaluateBindingsResultDef;
 let BindEvaluateExpressionResultDef;
 
 /////////////////////////////
+////// amp-geo externs
+/////////////////////////////
+
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-geo/0.1/amp-geo.js
+ * @enum {number}
+ */
+const GEO_IN_GROUP = {};
+
+/** 
+  * @typedef {{ 
+  *   ISOCountry: string, 
+  *   matchedISOCountryGroups: !Array<string>, 
+  *   allISOCountryGroups: !Array<string>, 
+  *   isInCountryGroup: (function(string):GEO_IN_GROUP), 
+  * }} 
+  */ 
+let GeoDef; 
+
+/////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////
 /**

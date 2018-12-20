@@ -215,7 +215,7 @@ export class AmpUserNotification extends AMP.BaseElement {
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
       const matchedGeos = geoGroup.split(/,\s*/).filter(group => {
-        return geo.ISOCountryGroups.indexOf(group) >= 0;
+        return geo.isInCountryGroup(group);
       });
 
       // Invert if includeGeos is false

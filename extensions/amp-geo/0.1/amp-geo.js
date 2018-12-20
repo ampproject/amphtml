@@ -91,17 +91,6 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
-/**
- * @typedef {{
- *   ISOCountry: string,
- *   matchedISOCountryGroups: !Array<string>,
- *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: GEO_IN_GROUP,
- *   ISOCountryGroups: !Array<string>
- * }}
- */
-export let GeoDef;
-
 
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -351,13 +340,6 @@ export class AmpGeo extends AMP.BaseElement {
         allISOCountryGroups: this.definedGroups_,
         /* API */
         isInCountryGroup: this.isInCountryGroup.bind(this),
-        /**
-         * Temp still return old interface to avoid version skew
-         * with consuming extensions.  This will go away don't use it!
-         * replace with matchedISOCountryGroups or use the isInCountryGroup
-         * API
-         */
-        ISOCountryGroups: self.matchedGroups_,
       };
     });
   }
