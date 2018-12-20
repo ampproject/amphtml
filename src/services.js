@@ -92,6 +92,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/standard-actions-impl.StandardActions}
+   */
+  static standardActionsForDoc(element) {
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (
+      getExistingServiceForDocInEmbedScope(element, 'standard-actions'));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!../extensions/amp-analytics/0.1/activity-impl.Activity>}
    */
@@ -469,6 +478,7 @@ export class Services {
    * @return {!./service/timer-impl.Timer}
    */
   static timerFor(window) {
+    // TODO(alabiaga): This will always return the top window's Timer service.
     return /** @type {!./service/timer-impl.Timer} */ (
       getService(window, 'timer'));
   }

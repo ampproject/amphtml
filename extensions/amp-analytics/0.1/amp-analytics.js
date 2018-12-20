@@ -17,6 +17,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {CSS} from '../../../build/amp-analytics-0.1.css';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
@@ -708,5 +709,5 @@ AMP.extension(TAG, '0.1', AMP => {
   installVariableService(AMP.win);
   installLinkerReaderService(AMP.win);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics);
+  AMP.registerElement(TAG, AmpAnalytics, CSS);
 });
