@@ -72,9 +72,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
         '_ping_': {
-          'checkConsentHref': 'http://localhost:8000/get-consent-v1',
+          'checkConsentHref': '/get-consent-v1',
           'promptUISrc':
-              'http://ads.localhost:8000/test/manual/diy-consent.html',
+              '/test/manual/diy-consent.html',
         },
       }));
       expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
@@ -102,7 +102,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         '_ping_': {
           'checkConsentHref': '/override',
           'promptUISrc':
-              'http://ads.localhost:8000/test/manual/diy-consent.html',
+              '/test/manual/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
         },
       }));
