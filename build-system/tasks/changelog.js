@@ -122,11 +122,11 @@ function getGitMetadata() {
   }
 
   const gitMetadata = {logs: [], tag: undefined, baseTag: undefined};
-  return getLastGitTag(gitMetadata)
+  return getLastProdReleasedGitTag(gitMetadata)
       .then(getGitLog)
       .then(getGithubPullRequestsMetadata)
       .then(getGithubFilesMetadata)
-      .then(getBaseCanaryVersion)
+      .then(getLastGitTag)
       .then(buildChangelog)
       .then(function(gitMetadata) {
         log(colors.blue('\n' + gitMetadata.changelog));
@@ -142,35 +142,18 @@ function getGitMetadata() {
 
 
 /**
- * When creating a special `amp-release-*` branch always find its root
- * canary version so we can add it to the changelog. We do this by
- * cross referencing the refs/remotes/origin/canary sha to all the
- * tags' sha and look for the matching once. This should only be done on
- * none canary branches since this assumes our baseTag should be whatever
- * is currently in canary.
- *
- * To be more accurate we need to query github for list of current
- * pre-release tags, but this is a cheaper operation than that and will
- * only be wrong if somebody pushes new changes to canary and had not
- * tagged it yet during the build/release process.
+ * Get the last git tag this current HEAD bases off of from.
  *
  * @param {!GitMetadataDef} gitMetadata
  * @return {!GitMetadataDef}
  */
-function getBaseCanaryVersion(gitMetadata) {
-  const command = 'git show-ref --tags | ' +
-      'grep $(git show-ref refs/remotes/origin/canary | cut -d \' \' -f 1) | ' +
-      'cut -d \'/\' -f 3';
+function getLastGitTag(gitMetadata) {
+  const command = 'git describe --tags';
 
-  if (isAmpRelease(argv.branch)) {
-    return exec(command).then(baseCanaryVersion => {
-      if (baseCanaryVersion) {
-        gitMetadata.baseTag = baseCanaryVersion.trim();
-      }
-      return gitMetadata;
-    });
-  }
-  return gitMetadata;
+  return exec(command).then(lastTag => {
+    gitMetadata.baseTag = lastTag.trim();
+    return gitMetadata;
+  });
 }
 
 /**
@@ -227,7 +210,7 @@ function buildChangelog(gitMetadata) {
   let changelog = `## Version: ${argv.tag}\n\n`;
 
   if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
-    changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
+    changelog += `## Baseline: [${gitMetadata.baseTag}]` +
         '(https://github.com/ampproject/amphtml/releases/' +
         `tag/${gitMetadata.baseTag})\n\n`;
   }
@@ -242,14 +225,13 @@ function buildChangelog(gitMetadata) {
     return !pr.filenames.every(function(filename) {
       return config.changelogIgnoreFileTypes.test(filename);
     });
-  })
-      .map(function(log) {
-        const {pr} = log;
-        if (!pr) {
-          return '  - ' + log.title;
-        }
-        return `  - ${pr.title.trim()} (#${pr.id})`;
-      }).join('\n');
+  }).map(function(log) {
+    const {pr} = log;
+    if (!pr) {
+      return '  - ' + log.title;
+    }
+    return `  - ${pr.title.trim()} (#${pr.id})`;
+  }).join('\n');
   changelog += '\n\n## Breakdown by component\n\n';
   const sections = buildSections(gitMetadata);
 
@@ -329,11 +311,11 @@ function buildSections(gitMetadata) {
  * @param {!GitMetadataDef} gitMetadata
  * @return {!Promise<GitMetadataDef>}
  */
-function getLastGitTag(gitMetadata) {
+function getLastProdReleasedGitTag(gitMetadata) {
   return request(latestReleaseOptions).then(res => {
     const body = JSON.parse(res.body);
     if (!body.tag_name) {
-      throw new Error('getLastGitTag: ' + body.message);
+      throw new Error('getLastProdReleasedGitTag: ' + body.message);
     }
     gitMetadata.tag = body.tag_name;
     return gitMetadata;
