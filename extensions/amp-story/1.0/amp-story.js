@@ -312,9 +312,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?MutationObserver} */
     this.sidebarObserver_ = null;
 
-    /** @private {?Array<string>} */
-    this.supportedOrientations_ = null;
-
     /** @private {?Element} */
     this.maskElement_ = null;
 
