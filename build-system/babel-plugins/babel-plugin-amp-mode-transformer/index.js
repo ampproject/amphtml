@@ -32,7 +32,7 @@ module.exports = function({types: t}) {
         specifiers.forEach(specifier => {
           if (specifier.imported.name === 'getMode') {
             const filepath = resolve(
-              dirname(state.file.opts.filename), source.value);
+                dirname(state.file.opts.filename), source.value);
             if (filepath.endsWith('/amphtml/src/mode')) {
               getModeFound = true;
             }
