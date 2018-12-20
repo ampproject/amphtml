@@ -182,10 +182,10 @@ const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
 /**
- * The default light gray for chrome supported theme color.
+ * The default dark gray for chrome supported theme color.
  * @const {string}
  */
-const DEFAULT_THEME_COLOR = '#F1F3F4';
+const DEFAULT_THEME_COLOR = '#202125';
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -358,7 +358,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
-    this.setThemeColor_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
     this.navigationState_.observe(stateChangeEvent => {
@@ -438,14 +437,17 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
     // The theme color should be copied from the story's primary accent color
-    // if possible, with the fall back being default light gray.
+    // if possible, with the fall back being default dark gray.
     const meta = this.win.document.createElement('meta');
-    const ampStoryEl = this.win.document.getElementsByTagName('amp-story')[0];
-    const styles = computedStyle(this.win, ampStoryEl);
+    const ampStoryPageEl = this.element.querySelector('amp-story-page');
     meta.name = 'theme-color';
-    meta.content = styles.getPropertyValue('--primary-color') ||
-        DEFAULT_THEME_COLOR;
-    this.win.document.getElementsByTagName('head')[0].appendChild(meta);
+    meta.content =
+      computedStyle(
+          this.win, this.element).getPropertyValue('--primary-color') ||
+      computedStyle(this.win, dev().assertElement(ampStoryPageEl))
+          .getPropertyValue('background-color') ||
+      DEFAULT_THEME_COLOR;
+    this.win.document.head.appendChild(meta);
   }
 
   /**
@@ -731,6 +733,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.initializeBookend_();
     this.initializeSidebar_();
+    this.setThemeColor_();
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => {
