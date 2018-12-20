@@ -17,7 +17,7 @@
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -182,7 +182,7 @@ export class ConsentConfig {
         ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
-      dev().assert(config[attribute], 'CMP config must specify %s', attribute);
+      devAssert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
 }

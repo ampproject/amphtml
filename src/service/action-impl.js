@@ -22,7 +22,7 @@ import {
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
@@ -402,7 +402,7 @@ export class ActionService {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugId = target.tagName + '#' + targetId;
-    dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
+    devAssert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
     'AMP element or a whitelisted target element is expected: %s', debugId);
 
@@ -612,7 +612,7 @@ export class ActionService {
       }
       const actionInfos = this.matchActionInfos_(n, actionEventType);
       if (actionInfos && isEnabled(n)) {
-        return {node: n, actionInfos: dev().assert(actionInfos)};
+        return {node: n, actionInfos: devAssert(actionInfos)};
       }
       n = n.parentElement;
     }
@@ -812,7 +812,7 @@ function cloneWithoutFunctions(original, opt_dest) {
 
 /** @private */
 function notImplemented() {
-  dev().assert(null, 'Deferred events cannot access native event functions.');
+  devAssert(null, 'Deferred events cannot access native event functions.');
 }
 
 

@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {FxProvider} from './providers/fx-provider';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user} from '../../../src/log';
+import {devAssert, rethrowAsync, user} from '../../../src/log';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
@@ -112,9 +112,9 @@ export class AmpFxCollection {
    * @param {!Element} fxElement
    */
   register_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
-    dev().assert(!this.seen_.includes(fxElement));
-    dev().assert(this.viewer_.isVisible());
+    devAssert(fxElement.hasAttribute('amp-fx'));
+    devAssert(!this.seen_.includes(fxElement));
+    devAssert(this.viewer_.isVisible());
 
     const fxTypes = this.getFxTypes_(fxElement);
 
@@ -133,7 +133,7 @@ export class AmpFxCollection {
    * @return {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
-    dev().assert(fxElement.hasAttribute('amp-fx'));
+    devAssert(fxElement.hasAttribute('amp-fx'));
     const fxTypes = fxElement.getAttribute('amp-fx')
         .trim()
         .toLowerCase()

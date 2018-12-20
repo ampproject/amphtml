@@ -31,7 +31,7 @@ import {
   parseLength,
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getServiceForDoc} from '../../../src/service';
 import {
@@ -390,9 +390,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   recalculateMargins_() {
-    dev().assert(this.viewportRect_);
-    dev().assert(this.bottomMarginExpr_);
-    dev().assert(this.topMarginExpr_);
+    devAssert(this.viewportRect_);
+    devAssert(this.bottomMarginExpr_);
+    devAssert(this.topMarginExpr_);
 
     this.resolvedTopMargin_ =
         this.validateAndResolveMargin_(this.topMarginExpr_);
@@ -407,7 +407,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * @private
    */
   applyMargins_(rect) {
-    dev().assert(rect);
+    devAssert(rect);
     rect = layoutRectLtwh(
         rect.left,
         (rect.top + this.resolvedTopMargin_),
