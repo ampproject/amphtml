@@ -1129,7 +1129,7 @@ describes.realWin('amp-selector', {
       });
     });
 
-    describe.only('on DOM_UPDATE', () => {
+    describe('on DOM_UPDATE', () => {
       it('should refresh stored state if child DOM changes', () => {
         const ampSelector = getSelector({
           attributes: {
