@@ -161,7 +161,7 @@ describe.configure().skipIfPropertiesObfuscated().run('amp-ad 3P', () => {
     }).then(() => {
       return poll('wait for attemptChangeSize', () => {
         return iframe.contentWindow.ping.resizeSuccess != undefined;
-      });
+      }, null, 5000);
     }).then(() => {
       lastIO = null;
       iframe.contentWindow.context.observeIntersection(changes => {
