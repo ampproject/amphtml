@@ -101,28 +101,28 @@ export const TransportMode = {
 /**
  * Checks whether the object conforms to the AmpAdExitConfig spec.
  *
- * @param {*} config The config to validate.
- * @return {!./config.AmpAdExitConfig}
+ * @param {?JsonObject} config The config to validate.
+ * @return {!JsonObject}
  */
 export function assertConfig(config) {
   user().assert(typeof config == 'object');
-  if (config.filters) {
-    assertFilters(config.filters);
+  if (config['filters']) {
+    assertFilters(config['filters']);
   } else {
-    config.filters = {};
+    config['filters'] = {};
   }
-  if (config.transport) {
-    assertTransport(config.transport);
+  if (config['transport']) {
+    assertTransport(config['transport']);
   } else {
-    config.transport = {};
+    config['transport'] = {};
   }
-  assertTargets(config.targets, config);
-  return /** @type {!AmpAdExitConfig} */ (config);
+  assertTargets(config['targets'], /** @type {!JsonObject} */ (config));
+  return /** @type {!JsonObject} */ (config);
 }
 
 /**
  * Asserts a transport.
- * @param {!Object} transport
+ * @param {!JsonObject} transport
  */
 function assertTransport(transport) {
   for (const t in transport) {
@@ -134,7 +134,7 @@ function assertTransport(transport) {
 
 /**
  * Asserts an array of filters.
- * @param {*} filters
+ * @param {!JsonObject} filters
  */
 function assertFilters(filters) {
   const validFilters = [
@@ -153,8 +153,8 @@ function assertFilters(filters) {
 /**
  * Asserts targets and its config
  *
- * @param {!Object} targets
- * @param {*} config
+ * @param {!JsonObject} targets
+ * @param {!JsonObject} config
  */
 function assertTargets(targets, config) {
   user().assert(typeof targets == 'object', '\'targets\' must be an object');
@@ -167,22 +167,22 @@ function assertTargets(targets, config) {
  * Asserts target
  *
  * @param {string} name
- * @param {!Object} target
- * @param {*} config
+ * @param {!JsonObject} target
+ * @param {!JsonObject} config
  */
 function assertTarget(name, target, config) {
   user().assert(
-      typeof target.finalUrl == 'string',
+      typeof target['finalUrl'] == 'string',
       'finalUrl of target \'%s\' must be a string', name);
-  if (target.filters) {
-    target.filters.forEach(filter => {
+  if (target['filters']) {
+    target['filters'].forEach(filter => {
       user().assert(
-          config.filters[filter], 'filter \'%s\' not defined', filter);
+          config['filters'][filter], 'filter \'%s\' not defined', filter);
     });
   }
-  if (target.vars) {
+  if (target['vars']) {
     const pattern = /^_[a-zA-Z0-9_-]+$/;
-    for (const variable in target.vars) {
+    for (const variable in target['vars']) {
       user().assert(
           pattern.test(variable), '\'%s\' must match the pattern \'%s\'',
           variable, pattern);
