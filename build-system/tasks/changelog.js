@@ -38,8 +38,7 @@ const {GITHUB_ACCESS_TOKEN} = process.env;
 const exec = BBPromise.promisify(childProcess.exec);
 const gitExec = BBPromise.promisify(git.exec);
 
-const branch = argv.branch || 'canary';
-const isDryrun = argv.dryrun;
+const {branch: overrideBranch, dryrun: isDryrun} = argv;
 
 const pullOptions = {
   url: 'https://api.github.com/repos/ampproject/amphtml/pulls',
@@ -72,8 +71,9 @@ if (GITHUB_ACCESS_TOKEN) {
  * @typedef {{
  *  logs: !Array<!LogMetadataDef>,
  *  tag: (string|undefined),
- *  changelog: (string|undefined)
- *  baseTag: (string|undefined)
+ *  changelog: (string|undefined),
+ *  baseTag: (string|undefined),
+ *  branch: (string|undefined)
  * }}
  */
 let GitMetadataDef;
@@ -121,8 +121,14 @@ function getGitMetadata() {
     throw new Error('no tag value passed in. See --tag flag option.');
   }
 
-  const gitMetadata = {logs: [], tag: undefined, baseTag: undefined};
+  const gitMetadata = {
+    logs: [],
+    tag: undefined,
+    baseTag: undefined,
+    branch: undefined,
+  };
   return getLastProdReleasedGitTag(gitMetadata)
+      .then(getCurrentBranchName)
       .then(getGitLog)
       .then(getGithubPullRequestsMetadata)
       .then(getGithubFilesMetadata)
@@ -148,10 +154,29 @@ function getGitMetadata() {
  * @return {!GitMetadataDef}
  */
 function getLastGitTag(gitMetadata) {
-  const command = 'git describe --tags';
+  const command = 'git describe --tags --abbrev=0';
 
   return exec(command).then(lastTag => {
     gitMetadata.baseTag = lastTag.trim();
+    return gitMetadata;
+  });
+}
+
+/**
+ * Get the current working branch name.
+ *
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!GitMetadataDef}
+ */
+function getCurrentBranchName(gitMetadata) {
+  if (overrideBranch) {
+    gitMetadata.branch = overrideBranch;
+    return gitMetadata;
+  }
+  const command = 'git rev-parse --abbrev-ref HEAD';
+
+  return exec(command).then(branchName => {
+    gitMetadata.branch = branchName.trim();
     return gitMetadata;
   });
 }
@@ -209,7 +234,7 @@ function getCurrentSha() {
 function buildChangelog(gitMetadata) {
   let changelog = `## Version: ${argv.tag}\n\n`;
 
-  if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
+  if (gitMetadata.baseTag) {
     changelog += `## Baseline: [${gitMetadata.baseTag}]` +
         '(https://github.com/ampproject/amphtml/releases/' +
         `tag/${gitMetadata.baseTag})\n\n`;
@@ -328,12 +353,12 @@ function getLastProdReleasedGitTag(gitMetadata) {
  * @return {!Promise<GitMetadataDef>}
  */
 function getGitLog(gitMetadata) {
-  const options = {
-    args: `log ${branch}...${gitMetadata.tag} --pretty=oneline --first-parent`,
-  };
+  const args = `log ${gitMetadata.branch}...${gitMetadata.tag} ` +
+      '--pretty=oneline --first-parent';
+  const options = {args};
   return gitExec(options).then(function(logs) {
     if (!logs) {
-      throw new Error('No logs found "git log ' + branch + '...' +
+      throw new Error('No logs found "git log ' + gitMetadata.branch + '...' +
           gitMetadata.tag + '".\nIs it possible that there is no delta?\n' +
           'Make sure to fetch and rebase (or reset --hard) the latest ' +
           'from remote upstream.');
@@ -501,14 +526,6 @@ function isJs(str) {
   return str./* OK*/endsWith('.js');
 }
 
-/**
- * Checks if amp-release-* branch
- * @param {?string|undefined} str
- * @return {boolean}
- */
-function isAmpRelease(str) {
-  return !!(str && str./* OK*/indexOf('amp-release') == 0);
-}
 
 /**
  * @param {!JSONValue} pr
