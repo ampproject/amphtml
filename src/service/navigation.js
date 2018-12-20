@@ -123,6 +123,14 @@ export class Navigation {
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
 
+    /**
+     * Must use URL parsing scoped to `rootNode_` for correct FIE behavior.
+     * @private @const {!Element|!ShadowRoot}
+     */
+    this.serviceContext_ =
+      (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
+        ? this.rootNode_.documentElement
+        : this.rootNode_;
 
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
@@ -219,7 +227,7 @@ export class Navigation {
    */
   navigateTo(
     win, url, opt_requestedBy, {target = '_top', opener = false} = {}) {
-    const urlService = Services.urlForDoc(this.ampdoc.getHeadNode());
+    const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
@@ -578,12 +586,7 @@ export class Navigation {
    * @private
    */
   parseUrl_(url) {
-    // Must use URL parsing scoped to this.rootNode_ for correct FIE behavior.
-    const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (
-      (this.rootNode_.nodeType == Node.DOCUMENT_NODE)
-        ? this.rootNode_.documentElement
-        : this.rootNode_);
-    return Services.urlForDoc(elementOrShadowRoot).parse(url);
+    return Services.urlForDoc(this.serviceContext_).parse(url);
   }
 }
 
