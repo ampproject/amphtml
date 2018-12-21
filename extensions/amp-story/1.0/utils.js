@@ -18,7 +18,7 @@ import {closestBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

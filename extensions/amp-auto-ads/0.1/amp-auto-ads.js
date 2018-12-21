@@ -26,7 +26,7 @@ import {getAdNetworkConfig} from './ad-network-config';
 import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
 import {isExperimentOn} from '../../../src/experiments';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 
 /**

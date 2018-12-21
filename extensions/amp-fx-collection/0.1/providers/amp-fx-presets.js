@@ -15,7 +15,7 @@
  */
 
 import {computedStyle, setStyles} from '../../../../src/style';
-import {devAssert, user} from '../../../../src/log';
+import {devAssert, userAssert} from '../../../../src/log';
 
 export const Presets = {
   'parallax': {
