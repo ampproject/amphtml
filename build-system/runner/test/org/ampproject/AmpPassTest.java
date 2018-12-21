@@ -123,6 +123,19 @@ public class AmpPassTest extends CompilerTestCase {
              "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
              "  a.shift()(\"test\");",
              "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var a = 0;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  module$src$log.dev().assert(a++);",
+             "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var a = 0;",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  a++",
+             "})()"));
   }
 
   public void testDevAssertPreserveFirstArg() throws Exception {
