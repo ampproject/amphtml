@@ -178,7 +178,7 @@ export class InaboxMessagingHost {
    * @param {?JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
-    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+    dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/postMessage(
         serializeMessage(MessageType.POSITION, request.sentinel, data),
         origin);

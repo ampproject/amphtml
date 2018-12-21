@@ -23,6 +23,7 @@ import {hasOwn} from '../../../src/utils/object';
 import {ACQUIALIFT_CONFIG} from './vendors/acquialift';
 import {AFSANALYTICS_CONFIG} from './vendors/afsanalytics';
 import {ALEXAMETRICS_CONFIG} from './vendors/alexametrics';
+import {AMPLITUDE_CONFIG} from './vendors/amplitude';
 import {ATINTERNET_CONFIG} from './vendors/atinternet';
 import {UMENGANALYTICS_CONFIG} from './vendors/umenganalytics';
 import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
@@ -62,9 +63,11 @@ import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
 import {PERMUTIVE_CONFIG} from './vendors/permutive';
 import {PIANO_CONFIG} from './vendors/piano';
+import {PINPOLL_CONFIG} from './vendors/pinpoll';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
+import {RETARGETLY_CONFIG} from './vendors/retargetly';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
 import {
   ADOBEANALYTICS_NATIVECONFIG_CONFIG,
@@ -173,6 +176,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'adobeanalytics_nativeConfig': ADOBEANALYTICS_NATIVECONFIG_CONFIG,
   'afsanalytics': AFSANALYTICS_CONFIG,
   'alexametrics': ALEXAMETRICS_CONFIG,
+  'amplitude': AMPLITUDE_CONFIG,
   'atinternet': ATINTERNET_CONFIG,
   'baiduanalytics': BAIDUANALYTICS_CONFIG,
   'bg': BG_CONFIG,
@@ -217,8 +221,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'piStats': PISTATS_CONFIG,
   'permutive': PERMUTIVE_CONFIG,
   'piano': PIANO_CONFIG,
+  'pinpoll': PINPOLL_CONFIG,
   'pressboard': PRESSBOARD_CONFIG,
   'quantcast': QUANTCAST_CONFIG,
+  'retargetly': RETARGETLY_CONFIG,
   'rakam': RAKAM_CONFIG,
   'segment': SEGMENT_CONFIG,
   'shinystat': SHINYSTAT_CONFIG,

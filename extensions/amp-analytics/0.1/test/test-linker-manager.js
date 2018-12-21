@@ -54,12 +54,14 @@ describes.realWin('Linker Manager', {amp: true}, env => {
           canonicalUrl: 'https://www.canonical.com/some/path?q=123',
         });
 
-    // LinkerManager uses the UrlReplacements service scoped to the element,
+    // LinkerManager uses Url/UrlReplacements services scoped to the element,
     // but for testing stub in the top-level ampdoc service for simplicity.
     element = {};
-    const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+    const urlReplacements = Services.urlReplacementsForDoc(doc.documentElement);
     sandbox.stub(Services, 'urlReplacementsForDoc')
         .withArgs(element).returns(urlReplacements);
+    const url = Services.urlForDoc(doc.documentElement);
+    sandbox.stub(Services, 'urlForDoc').withArgs(element).returns(url);
 
     handlers = [];
     sandbox.stub(Services, 'navigationForDoc').returns({

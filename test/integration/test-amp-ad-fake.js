@@ -15,9 +15,10 @@
  */
 
 import {RequestBank} from '../../testing/test-helper';
-import {parseQueryString} from '../../src/url';
+import {addParamsToUrl, parseQueryString} from '../../src/url';
+import {poll} from '../../testing/iframe';
 
-describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
+describe.configure().run('A4A', function() {
   this.timeout(15000);
 
   describes.integration('AMPHTML ads rendered on AMP page', {
@@ -58,6 +59,47 @@ describe.configure().skipIfPropertiesObfuscated().run('A4A', function() {
         expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
         expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
       });
+    });
+  });
+
+  const src = addParamsToUrl('/amp4test/compose-doc', {
+    body: `
+      <p [text]="foo">123</p>
+      <button on="tap:AMP.setState({foo: 456})"></button>
+      `,
+    extensions: 'amp-bind',
+    spec: 'amp4ads',
+  });
+  describes.integration('amp-bind in A4A', {
+    body: `
+      <amp-ad width="300" height="400"
+          id="i-amphtml-demo-id"
+          type="fake"
+          src="${src}">
+        <div placeholder>Loading...</div>
+        <div fallback>Could not display the fake ad :(</div>
+      </amp-ad>
+      `,
+  }, env => {
+    it('p[text]', function*() {
+      // Wait for the amp-ad to construct its child iframe.
+      const ad = env.win.document.getElementById('i-amphtml-demo-id');
+      yield poll('amp-ad > iframe', () => ad.querySelector('iframe'));
+
+      // Wait for the iframe contents to load.
+      const fie = ad.querySelector('iframe').contentWindow;
+      yield poll('iframe > button', () => fie.document.querySelector('button'));
+
+      const text = fie.document.querySelector('p');
+      expect(text.textContent).to.equal('123');
+
+      const button = fie.document.querySelector('button');
+      return poll('[text]', () => {
+        // We click this too many times but there's no good way to tell whether
+        // amp-bind is initialized yet.
+        button.click();
+        return text.textContent === '456';
+      }, /* onError */ undefined, 5000);
     });
   });
 });

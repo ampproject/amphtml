@@ -24,6 +24,7 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
+  getMatchedContentResponsiveHeight,
 } from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
@@ -581,7 +582,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
       case ADSENSE_MCRSPV_TAG:
-        return Math.floor((viewportSize.width * 3.4) + 112);
+        return getMatchedContentResponsiveHeight(viewportSize.width);
       default:
         return 0;
     }

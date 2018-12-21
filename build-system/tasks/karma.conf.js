@@ -156,11 +156,11 @@ module.exports = {
       platform: 'Windows 10',
       version: 'latest',
     }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_Dev: Object.assign({
+    SL_Chrome_Beta: Object.assign({
       base: 'SauceLabs',
       browserName: 'chrome',
       platform: 'Windows 10',
-      version: 'dev',
+      version: 'beta',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Chrome_Android_7: Object.assign({
       base: 'SauceLabs',
@@ -180,7 +180,7 @@ module.exports = {
     }, SAUCE_TIMEOUT_CONFIG),
     SL_iOS_11: Object.assign({
       base: 'SauceLabs',
-      appiumVersion: '1.8.1',
+      appiumVersion: '1.9.1',
       deviceName: 'iPhone X Simulator',
       browserName: 'Safari',
       platformName: 'iOS',
@@ -191,6 +191,12 @@ module.exports = {
       browserName: 'firefox',
       platform: 'Windows 10',
       version: 'latest',
+    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Firefox_Beta: Object.assign({
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'beta',
     }, SAUCE_TIMEOUT_CONFIG),
     SL_Safari_12: Object.assign({
       base: 'SauceLabs',
@@ -233,7 +239,7 @@ module.exports = {
       // Longer timeout on Travis; fail quickly at local.
       timeout: process.env.TRAVIS ? 10000 : 2000,
     },
-    captureConsole: true,
+    captureConsole: false,
     verboseLogging: false,
   },
 

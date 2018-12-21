@@ -21,6 +21,10 @@
     "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
     "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
   },
+  "amplitude": {
+    "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
+    "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
+  },
   "atinternet": {
     "base": "https://!log!domain/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
@@ -300,7 +304,7 @@
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
-    "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview",
+    "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview&metadata={\"canonical_url\":\"_canonical_url_\"}",
     "heartbeat": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=!apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=heartbeat&tt=_total_engaged_time_&inc=_incremental_engaged_time_"
   },
   "permutive": {
@@ -320,6 +324,9 @@
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid",
     "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=!contentCreated&content_author=!contentAuthor&content_section=!contentSection&timezone_offset=_timezone_&tags=!tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=!aid"
   },
+  "pinpoll": {
+    "pageview": "https://pa.pinpoll.com/v1?url=_source_url_&sourceHost=_source_host_&sourceHostname=_source_hostname_&sourcePath=_source_path_&canonicalUrl=_canonical_url_&platform=AMP&title=_title_&referrer=_document_referrer_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&ua=_user_agent_&clientId=_client_id_"
+  },
   "pressboard": {
     "host": "https://adserver.pressboard.ca",
     "common_params": "&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset",
@@ -334,6 +341,10 @@
     "base": "?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
     "pageview": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!pageViewName",
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
+  },
+  "retargetly": {
+    "host": "https://api.retargetly.com",
+    "page": "https://api.retargetly.com/api?id=!accountId&src=!sourceId&url=_source_url_&n=_title_&ref=_document_referrer_&ua=_user_agent_&random=_random_&bl=_browser_language_&source=amp"
   },
   "segment": {
     "host": "https://api.segment.io/v1/pixel",
