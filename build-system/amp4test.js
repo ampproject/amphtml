@@ -24,8 +24,8 @@ const argv = minimist(
 /* eslint-disable max-len */
 
 /**
- * Logs the given messages to the console in local dev mode, but not while
- * running on Travis.
+ * Logs the given messages to the console when running individual test files
+ * with --files commend line argument.
  * @param {*} messages
  */
 function log(...messages) {
