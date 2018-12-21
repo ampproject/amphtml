@@ -186,9 +186,6 @@ describes.realWin('amp-analytics', {
                   ' in vendor-requests.json. Expected value: ' + url);
             }
 
-            // Write this out for easy copy pasting.
-            writeOutput(vendor, name, url);
-
             expect(url).to.equal(val);
           });
         }
@@ -197,21 +194,3 @@ describes.realWin('amp-analytics', {
   });
 });
 
-const actualResults = {};
-
-function writeOutput(vendor, name, url) {
-  if (!actualResults[vendor]) {
-    actualResults[vendor] = {};
-  }
-  actualResults[vendor][name] = url;
-  const cnt = Object.keys(AnalyticsConfig[vendor]['requests']).length;
-  AnalyticsConfig[vendor].testCnt = (AnalyticsConfig[vendor].testCnt || 0) + 1;
-  if (cnt == AnalyticsConfig[vendor].testCnt) {
-    delete AnalyticsConfig[vendor];
-    if (Object.keys(AnalyticsConfig).length == 1) {
-      const out = top.document.createElement('div');
-      out.textContent = JSON.stringify(actualResults, null, '  ');
-      top.document.body.insertBefore(out, top.document.body.firstChild);
-    }
-  }
-}

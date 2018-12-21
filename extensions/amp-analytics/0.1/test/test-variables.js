@@ -171,7 +171,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
       // Create an element for our url replacement service
       const element = ampdoc.win.document.body.appendChild(
-        ampdoc.win.document.createElement('div')
+          ampdoc.win.document.createElement('div')
       );
       urlReplacementService = Services.urlReplacementsForDoc(element);
     });
@@ -268,7 +268,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
       // Create an element for our url replacement service
       const element = ampdoc.win.document.body.appendChild(
-        ampdoc.win.document.createElement('div')
+          ampdoc.win.document.createElement('div')
       );
       urlReplacementService = Services.urlReplacementsForDoc(element);
     });
