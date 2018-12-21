@@ -877,7 +877,7 @@ tags: {
   unique: true
   attrs: {
     name: "content"
-    mandatory_oneof: ['AMP', 'NOAMP', 'STORY']
+    mandatory_oneof: "['AMP', 'NONAMP', 'STORY']"
   }
   attrs: {
     name: "name"
