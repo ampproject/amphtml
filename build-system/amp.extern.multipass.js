@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @externs */
+
 // Place externs here if they are only needed in legacy multi pass compilation.
 
 var SomeBaseElementLikeClass;
