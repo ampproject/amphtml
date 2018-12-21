@@ -1113,7 +1113,7 @@ function createBaseCustomElementClass(win) {
         if (!this.isFirstLayoutCompleted_) {
           this.implementation_.firstLayoutCompleted();
           this.isFirstLayoutCompleted_ = true;
-          this.dispatchCustomEventForTesting(CommonSignals.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
         }
       }, reason => {
         // add layoutCount_ by 1 despite load fails or not
