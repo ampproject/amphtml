@@ -22,13 +22,14 @@ import {
 } from '../constants';
 import {ConfigManager} from '../config-manager';
 
+import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
 import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getMode, isProductCode, isPubId, isWidgetId} from '../addthis-utils/mode';
-import {isDateInFuture} from '../addthis-utils/cuid';
+import {getSessionId} from '../addthis-utils/session';
 import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
 
@@ -518,5 +519,34 @@ describes.realWin('amp-addthis', {
     expect(isString([])).to.equal(false);
     expect(isString(void 0)).to.equal(false);
     expect(isString(null)).to.equal(false);
+  });
+
+  it('getSessionId: returns a string of 16 characters containing 0-9 a-f', () => {
+    expect(isString(getSessionId())).to.equal(true);
+    expect(getSessionId().length).to.equal(16);
+    expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
+
+    // within the same session, ids match
+    const a = getSessionId();
+    const b = getSessionId();
+    expect(a).to.equal(b);
+  });
+
+  it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
+    expect(isString(createCUID())).to.equal(true);
+
+    const a = createCUID();
+    const b = createCUID();
+    expect(a).to.not.equal(b);
+
+    let o = {};
+    for (let i = 0; i < 100000; i += 1) {
+      const c = createCUID().length;
+      if (!o[c]) {
+        o[c]= 0;
+      }
+      o[c] = o[c] + 1;
+    }
+    expect(o[16]).to.equal(100000);
   });
 });
