@@ -131,11 +131,15 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
     return res.status(500).send('another client is withdrawing this ID');
   }
   const callback = function(result) {
-    res.json({
-      headers: result.headers,
-      body: result.body,
-      url: result.url,
-    });
+    if (result === undefined) {
+      res.status(404).end();
+    } else {
+      res.json({
+        headers: result.headers,
+        body: result.body,
+        url: result.url,
+      });
+    }
     delete bank[req.params.bid][key];
   };
   if (result) {
@@ -149,8 +153,16 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
  * Clean up all pending withdraw & deposit requests.
  */
 app.use('/request-bank/:bid/teardown/', (req, res) => {
-  bank[req.params.bid] = {};
   log('SERVER-LOG [TEARDOWN]');
+  const b = bank[req.params.bid];
+  for (const id in b) {
+    const callback = b[id];
+    if (typeof callback === 'function') {
+      // Respond 404 to pending request.
+      callback();
+    }
+    delete b[id];
+  }
   res.end();
 });
 
