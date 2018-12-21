@@ -339,6 +339,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
+    externs.push('build-system/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
