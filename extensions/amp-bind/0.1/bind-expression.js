@@ -15,7 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -179,7 +179,7 @@ function generateFunctionWhitelist() {
     Object.keys(functionsForType).forEach(name => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
+        devAssert(!func.name || name === func.name, 'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`);
         out[type][name] = func;
       } else {

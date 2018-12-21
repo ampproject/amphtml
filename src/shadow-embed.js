@@ -29,7 +29,7 @@ import {
   iterateCursor,
   removeElement,
 } from './dom';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {installCssTransformer} from './style-installer';
 import {setInitialDisplay, setStyle} from './style';
 import {toArray, toWin} from './types';
@@ -249,7 +249,7 @@ export function transformShadowCss(shadowRoot, css) {
  * @visibleForTesting
  */
 export function scopeShadowCss(shadowRoot, css) {
-  const id = dev().assert(shadowRoot.id);
+  const id = devAssert(shadowRoot.id);
   const doc = shadowRoot.ownerDocument;
   let rules = null;
   // Try to use a separate document.
@@ -539,7 +539,7 @@ export class ShadowDomWriterStreamer {
 
   /** @private */
   schedule_() {
-    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
     if (!this.mergeScheduled_) {
       this.mergeScheduled_ = true;
       this.vsync_.mutate(this.boundMerge_);
@@ -557,8 +557,8 @@ export class ShadowDomWriterStreamer {
 
     // Merge body children.
     if (this.targetBody_) {
-      const inputBody = /** @type !Element */(dev().assert(this.parser_.body));
-      const targetBody = dev().assert(this.targetBody_);
+      const inputBody = /** @type !Element */(devAssert(this.parser_.body));
+      const targetBody = devAssert(this.targetBody_);
       let transferCount = 0;
       removeNoScriptElements(inputBody);
       while (inputBody.firstChild) {
@@ -633,7 +633,7 @@ export class ShadowDomWriterBulk {
 
   /** @override */
   write(chunk) {
-    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
     if (this.eof_) {
       throw new Error('closed already');
     }
@@ -645,7 +645,7 @@ export class ShadowDomWriterBulk {
 
   /** @override */
   close() {
-    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
     this.eof_ = true;
     this.vsync_.mutate(() => this.complete_());
     return this.success_;
