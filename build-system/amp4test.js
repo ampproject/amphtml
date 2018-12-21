@@ -16,6 +16,10 @@
 'use strict';
 
 const app = module.exports = require('express').Router();
+const minimist = require('minimist');
+const argv = minimist(
+    process.argv.slice(2), {boolean: ['strictBabelTransform']});
+
 
 /* eslint-disable max-len */
 
@@ -25,7 +29,7 @@ const app = module.exports = require('express').Router();
  * @param {*} messages
  */
 function log(...messages) {
-  if (!process.env.TRAVIS) {
+  if (argv.files) {
     console.log(messages);
   }
 }
