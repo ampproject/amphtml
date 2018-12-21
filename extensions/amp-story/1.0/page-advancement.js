@@ -351,6 +351,10 @@ class ManualAdvancement extends AdvancementConfig {
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
     }, HOLD_TOUCH_THRESHOLD_MS);
+
+    // Prevent the default action on some browsers of popping up a context menu
+    // on long-press.
+    event.preventDefault();
   }
 
   /**
