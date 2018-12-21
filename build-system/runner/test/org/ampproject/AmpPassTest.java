@@ -11,6 +11,7 @@ import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.CompilerTestCase;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
+import org.junit.Test;
 
 
 /**
@@ -41,7 +42,7 @@ public class AmpPassTest extends CompilerTestCase {
     return 1;
   }
 
-  public void testDevFineRemoval() throws Exception {
+  @Test public void testDevFineRemoval() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -69,7 +70,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testDevErrorPreserve() throws Exception {
+  @Test public void testDevErrorPreserve() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -85,7 +86,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertExpressionRemoval() throws Exception {
+  @Test public void testDevAssertExpressionRemoval() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -114,7 +115,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertPreserveFirstArg() throws Exception {
+  @Test public void testDevAssertPreserveFirstArg() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -146,7 +147,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testShouldPreserveNoneCalls() throws Exception {
+  @Test public void testShouldPreserveNoneCalls() throws Exception {
     test(
         // Does reliasing
         LINE_JOINER.join(
@@ -163,7 +164,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeLocalDevPropertyReplacement() throws Exception {
+  @Test public void testGetModeLocalDevPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -183,7 +184,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeTestPropertyReplacement() throws Exception {
+  @Test public void testGetModeTestPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -203,7 +204,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeMinifiedPropertyReplacement() throws Exception {
+  @Test public void testGetModeMinifiedPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -223,7 +224,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeWinTestPropertyReplacement() throws Exception {
+  @Test public void testGetModeWinTestPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -245,7 +246,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
+  @Test public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -267,7 +268,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModePreserve() throws Exception {
+  @Test public void testGetModePreserve() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -304,7 +305,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testOptimizeGetModeFunction() throws Exception {
+  @Test public void testOptimizeGetModeFunction() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -320,7 +321,7 @@ public class AmpPassTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
+  @Test public void testRemoveAmpAddExtensionCallWithExplicitContext() throws Exception {
     test(
         LINE_JOINER.join(
             "var a = 'hello';",
@@ -338,7 +339,7 @@ public class AmpPassTest extends CompilerTestCase {
             "console.log(a);"));
   }
 
-  public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
+  @Test public void testRemoveAmpAddExtensionCallWithNoContext() throws Exception {
     test(
         LINE_JOINER.join(
             "var a = 'hello';",
