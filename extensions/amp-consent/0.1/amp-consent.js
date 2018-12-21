@@ -21,6 +21,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {Deferred} from '../../../src/utils/promise';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -452,7 +453,7 @@ export class AmpConsent extends AMP.BaseElement {
     return Services.geoForDocOrNull(this.element).then(geo => {
       user().assert(geo,
           'requires <amp-geo> to use promptIfUnknownForGeoGroup');
-      return (geo.isInCountryGroup(geoGroup));
+      return (geo.isInCountryGroup(geoGroup) == GEO_IN_GROUP.IN);
     });
   }
 

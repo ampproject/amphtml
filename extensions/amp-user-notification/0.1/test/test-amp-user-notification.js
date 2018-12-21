@@ -18,6 +18,7 @@ import {
   AmpUserNotification,
   UserNotificationManager,
 } from '../amp-user-notification';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
@@ -54,7 +55,9 @@ describes.realWin('amp-user-notification', {
     resetServiceForTesting(win, 'geo');
     registerServiceBuilder(win, 'geo', function() {
       return Promise.resolve({
-        isInCountryGroup: group => ISOCountryGroups.indexOf(group) >= 0,
+        isInCountryGroup: group =>
+          ISOCountryGroups.indexOf(group) >= 0 ?
+            GEO_IN_GROUP.IN : GEO_IN_GROUP.NOT_IN,
       });
     });
 
