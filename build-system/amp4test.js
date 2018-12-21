@@ -29,7 +29,7 @@ const argv = minimist(
  * @param {*} messages
  */
 function log(...messages) {
-  if (argv.files) {
+  if (argv.files || argv.verbose) {
     console.log.apply(console, messages);
   }
 }
