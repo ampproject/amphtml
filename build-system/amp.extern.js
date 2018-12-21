@@ -144,9 +144,6 @@ process.env.SERVE_MODE;
 window.IS_AMP_ALT;
 
 // Exposed to ads.
-// TODO: @erwinmombay I do believe this is safe to remove because
-// All are passed to ampcontext in JsonObject. While isMaster and master is
-// calculated in ampcontext-integration within the iframe.
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
