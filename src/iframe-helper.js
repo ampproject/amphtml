@@ -16,7 +16,7 @@
 
 import {addAttributesToElement, closestBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
@@ -252,10 +252,10 @@ function registerGlobalListenerIfNeeded(parentWin) {
  */
 export function listenFor(
   iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
-  dev().assert(iframe.src, 'only iframes with src supported');
-  dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
+  devAssert(iframe.src, 'only iframes with src supported');
+  devAssert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
-  dev().assert(callback);
+  devAssert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
 
   registerGlobalListenerIfNeeded(parentWin);

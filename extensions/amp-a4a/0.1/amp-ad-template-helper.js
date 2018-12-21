@@ -17,7 +17,7 @@
 import {LruCache} from '../../../src/utils/lru-cache';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
@@ -65,7 +65,7 @@ export class AmpAdTemplateHelper {
           .then(response => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
-    dev().assert(templatePromise);
+    devAssert(templatePromise);
     return /** @type{!Promise<string>} */ (templatePromise);
   }
 

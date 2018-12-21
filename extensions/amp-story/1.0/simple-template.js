@@ -16,7 +16,7 @@
 import {LocalizedStringId} from './localization'; // eslint-disable-line no-unused-vars
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isArray, toWin} from '../../../src/types';
 
@@ -83,7 +83,7 @@ function renderSingle(doc, elementDef) {
   if (hasOwn(elementDef, 'localizedStringId')) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNull(win).then(localizationService => {
-      dev().assert(localizationService,
+      devAssert(localizationService,
           'Could not retrieve LocalizationService.');
       el.textContent = localizationService
           .getLocalizedString(/** @type {!LocalizedStringId} */ (

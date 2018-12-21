@@ -16,7 +16,7 @@
 
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport-message-queue';
@@ -92,7 +92,7 @@ export class IframeTransportMessageQueue {
    * creative) is sending it.
    */
   enqueue(event) {
-    dev().assert(event && event.creativeId && event.message,
+    devAssert(event && event.creativeId && event.message,
         'Attempted to enqueue malformed message for: ' +
         event.creativeId);
     this.pendingEvents_.push(event);

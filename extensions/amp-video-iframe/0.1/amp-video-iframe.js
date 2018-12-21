@@ -27,7 +27,7 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
@@ -289,7 +289,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     this.canPlay_ = this.canPlay_ || isCanPlayEvent;
 
-    const {reject, resolve} = dev().assert(this.readyDeferred_);
+    const {reject, resolve} = devAssert(this.readyDeferred_);
 
     if (isCanPlayEvent) {
       return resolve();
@@ -300,7 +300,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (eventReceived == 'analytics') {
-      const spec = dev().assert(data['analytics']);
+      const spec = devAssert(data['analytics']);
 
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;

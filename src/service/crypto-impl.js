@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 
@@ -170,7 +170,7 @@ export class Crypto {
    * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
   importPkcsKey(jwk) {
-    dev().assert(this.isPkcsAvailable());
+    devAssert(this.isPkcsAvailable());
     // Safari 10 and earlier want this as an ArrayBufferView.
     const keyData = this.isLegacyWebkit_
       ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
@@ -191,7 +191,7 @@ export class Crypto {
    *     data and public key
    */
   verifyPkcs(key, signature, data) {
-    dev().assert(this.isPkcsAvailable());
+    devAssert(this.isPkcsAvailable());
     return /** @type {!Promise<boolean>} */ (
       this.subtle.verify(this.pkcsAlgo, key, signature, data)
     );

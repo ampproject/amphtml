@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -152,7 +152,7 @@ export class VisibilityModel {
    * @private
    */
   reset_() {
-    dev().assert(!this.eventResolver_,
+    devAssert(!this.eventResolver_,
         'Attempt to refresh visible event before previous one resolve');
     const deferred = new Deferred();
     this.eventPromise_ = deferred.promise;
@@ -357,7 +357,7 @@ export class VisibilityModel {
    * @return {boolean}
    */
   isVisibilityMatch_(visibility) {
-    dev().assert(visibility >= 0 && visibility <= 1,
+    devAssert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
     // Special case: If visiblePercentageMin is 100%, then it doesn't make
     // sense to do the usual (min, max] since that would never be true.
@@ -379,7 +379,7 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
-    dev().assert(visibility >= 0 && visibility <= 1,
+    devAssert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
     const now = Date.now();
 
@@ -407,7 +407,7 @@ export class VisibilityModel {
             Math.max(this.maxContinuousVisibleTime_, this.continuousTime_);
       } else {
         // The resource came into view: start counting.
-        dev().assert(!this.lastVisibleUpdateTime_);
+        devAssert(!this.lastVisibleUpdateTime_);
         this.firstVisibleTime_ = this.firstVisibleTime_ || now;
       }
       this.lastVisibleUpdateTime_ = now;
@@ -420,7 +420,7 @@ export class VisibilityModel {
       this.lastVisibleTime_ = now;
     } else if (prevMatchesVisibility) {
       // The resource went out of view. Do final calculations and reset state.
-      dev().assert(this.lastVisibleUpdateTime_ > 0);
+      devAssert(this.lastVisibleUpdateTime_ > 0);
 
       this.maxContinuousVisibleTime_ = Math.max(
           this.maxContinuousVisibleTime_,

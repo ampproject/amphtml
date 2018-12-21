@@ -15,7 +15,7 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {map} from './utils/object.js';
 import {startsWith} from './string';
 
@@ -202,9 +202,9 @@ export function assertDoesNotContainDisplay(styles) {
  */
 export function setInitialDisplay(el, value) {
   const {style} = el;
-  dev().assert(value !== '' && value !== 'none', 'Initial display value must ' +
+  devAssert(value !== '' && value !== 'none', 'Initial display value must ' +
     'not be "none". Use toggle instead.');
-  dev().assert(!style['display'], 'setInitialDisplay MUST NOT be used for ' +
+  devAssert(!style['display'], 'setInitialDisplay MUST NOT be used for ' +
     'resetting the display style. If you are looking for display:none ' +
     'toggling, use toggle instead.');
   style['display'] = value;

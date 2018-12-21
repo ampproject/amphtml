@@ -25,7 +25,7 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
@@ -2044,7 +2044,7 @@ export class Resources {
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
     opt_forceOutsideViewport) {
-    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
+    devAssert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
     'Not ready for layout: %s (%s)',
     resource.debugid, resource.getState());
@@ -2172,7 +2172,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev().assert(parentResource.element.contains(element));
+      devAssert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }

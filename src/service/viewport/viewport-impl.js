@@ -28,7 +28,7 @@ import {
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {closestBySelector, isIframed} from '../../dom';
-import {dev} from '../../log';
+import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
 import {getMode} from '../../mode';
@@ -755,7 +755,7 @@ export class Viewport {
     const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
 
     if (fieOptional) {
-      dev().assert(this.isLightboxExperimentOn(),
+      devAssert(this.isLightboxExperimentOn(),
           'Lightbox mode for A4A is only available when ' +
           "'amp-lightbox-a4a-proto' experiment is on");
 
@@ -772,7 +772,7 @@ export class Viewport {
     const fieOptional = this.getFriendlyIframeEmbed_(requestingElement);
 
     if (fieOptional) {
-      dev().assert(fieOptional).leaveFullOverlayMode();
+      devAssert(fieOptional).leaveFullOverlayMode();
     }
   }
 

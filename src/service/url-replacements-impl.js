@@ -36,7 +36,7 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
@@ -873,7 +873,7 @@ export class UrlReplacements {
    * @return {string|!Promise<string>}
    */
   expandInputValue_(element, opt_sync) {
-    dev().assert(element.tagName == 'INPUT' &&
+    devAssert(element.tagName == 'INPUT' &&
         (element.getAttribute('type') || '').toLowerCase() == 'hidden',
     'Input value expansion only works on hidden input fields: %s', element);
 
@@ -960,7 +960,7 @@ export class UrlReplacements {
    * @return {string|undefined} Replaced string for testing
    */
   maybeExpandLink(element, defaultUrlParams) {
-    dev().assert(element.tagName == 'A');
+    devAssert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,

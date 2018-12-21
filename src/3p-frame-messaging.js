@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
+import {dev, devAssert} from './log';
 import {dict} from './utils/object';
 import {internalListenImplementation} from './event-helper-listen';
 import {parseJson} from './json';
@@ -109,7 +109,7 @@ export function deserializeMessage(message) {
     return null;
   }
   const startPos = message.indexOf('{');
-  dev().assert(startPos != -1, 'JSON missing in %s', message);
+  devAssert(startPos != -1, 'JSON missing in %s', message);
   try {
     return parseJson(message.substr(startPos));
   } catch (e) {

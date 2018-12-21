@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 
@@ -165,7 +165,7 @@ class AmpWorker {
           'from worker.');
       return;
     }
-    dev().assert(method == message.method, 'Received mismatched method ' +
+    devAssert(method == message.method, 'Received mismatched method ' +
         `(${method}, ${id}), expected ${message.method}.`);
 
     message.resolve(returnValue);

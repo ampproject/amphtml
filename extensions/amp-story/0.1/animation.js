@@ -28,7 +28,7 @@ import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {
   escapeCssSelectorIdent,
   scopedQuerySelector,
@@ -131,7 +131,7 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    this.keyframes_.then(keyframes => dev().assert(
+    this.keyframes_.then(keyframes => devAssert(
         !keyframes[0].offset,
         'First keyframe offset for animation preset should be 0 or undefined'));
 
@@ -245,7 +245,7 @@ class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return this.isActivityScheduled_(PlaybackActivity.START) ||
-        (!!this.runner_ && dev().assert(this.runner_)
+        (!!this.runner_ && devAssert(this.runner_)
             .getPlayState() == WebAnimationPlayState.RUNNING);
   }
 
@@ -273,7 +273,7 @@ class AnimationRunner {
     this.scheduledWait_ = null;
 
     if (this.runner_) {
-      dev().assert(this.runner_).cancel();
+      devAssert(this.runner_).cancel();
     }
   }
 
@@ -304,7 +304,7 @@ class AnimationRunner {
         /**
          * @type {!../../amp-animation/0.1/web-animations.WebAnimationRunner}
          */
-        (dev().assert(
+        (devAssert(
             this.runner_,
             'Tried to execute playbackWhenReady_ before runner was resolved.'));
 
@@ -375,7 +375,7 @@ export class AnimationManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(root, ampdoc) {
-    dev().assert(hasAnimations(root));
+    devAssert(hasAnimations(root));
 
     /** @private @const */
     this.root_ = root;
@@ -445,7 +445,7 @@ export class AnimationManager {
 
   /** @private */
   getRunners_() {
-    return dev().assert(this.runners_, 'Executed before applyFirstFrame');
+    return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
 
   /**
@@ -458,7 +458,7 @@ export class AnimationManager {
           scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
           el => this.createRunner_(el));
     }
-    return dev().assert(this.runners_);
+    return devAssert(this.runners_);
   }
 
   /**
@@ -472,7 +472,7 @@ export class AnimationManager {
     return new AnimationRunner(
         this.root_,
         animationDef,
-        dev().assert(this.builderPromise_),
+        devAssert(this.builderPromise_),
         this.vsync_,
         this.timer_,
         this.sequence_);
@@ -566,7 +566,7 @@ class AnimationSequence {
    */
   notifyFinish(id) {
     if (id in this.subscriptionPromises_) {
-      dev().assert(this.subscriptionResolvers_[id])();
+      devAssert(this.subscriptionResolvers_[id])();
 
       delete this.subscriptionPromises_[id];
     }

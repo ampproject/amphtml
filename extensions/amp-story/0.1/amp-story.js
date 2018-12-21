@@ -87,7 +87,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
@@ -798,7 +798,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   next_(opt_isAutomaticAdvance) {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
@@ -820,7 +820,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   previous_() {
-    const activePage = dev().assert(this.activePage_,
+    const activePage = devAssert(this.activePage_,
         'No active page set when navigating to next page.');
     activePage.previous();
   }
@@ -1415,7 +1415,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getPageById(id) {
     const pageIndex = this.getPageIndexById_(id);
-    return dev().assert(this.pages_[pageIndex],
+    return devAssert(this.pages_[pageIndex],
         `Page at index ${pageIndex} exists, but is missing from the array.`);
   }
 

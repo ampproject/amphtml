@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
@@ -242,7 +242,7 @@ function setupLegacyProxy(form, proxy) {
           },
         });
       } else {
-        dev().assert(false, 'unknown property access type: %s', desc.access);
+        devAssert(false, 'unknown property access type: %s', desc.access);
       }
     } else {
       // Not a known property - proxy directly.

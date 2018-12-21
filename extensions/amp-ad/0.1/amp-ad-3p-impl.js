@@ -34,7 +34,7 @@ import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed}
   from '../../../src/ad-helper';
@@ -323,7 +323,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-      dev().assert(this.iframeLayoutBox_));
+      devAssert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 

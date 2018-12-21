@@ -19,7 +19,7 @@ import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
-import {dev, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
 
@@ -260,7 +260,7 @@ export class Vsync {
    * @return {boolean}
    */
   canAnimate(contextNode) {
-    return this.canAnimate_(dev().assert(contextNode));
+    return this.canAnimate_(devAssert(contextNode));
   }
 
   /**
@@ -453,7 +453,7 @@ export class Vsync {
  * @param {!VsyncStateDef} state
  */
 function callTaskNoInline(callback, state) {
-  dev().assert(callback);
+  devAssert(callback);
   try {
     callback(state);
   } catch (e) {

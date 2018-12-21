@@ -23,7 +23,7 @@ import {
 import {Services} from '../../../src/services';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -356,7 +356,7 @@ export class AmpAdExit extends AMP.BaseElement {
           'not in inabox case.');
       return;
     }
-    dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
+    devAssert(!this.unlisten_, 'Unlistener should not already exist.');
     this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {
           // We shouldn't deserialize just any message...it would be too

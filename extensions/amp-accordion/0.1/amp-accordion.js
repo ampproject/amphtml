@@ -23,7 +23,7 @@ import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   numeric,
@@ -205,7 +205,7 @@ class AmpAccordion extends AMP.BaseElement {
               dev().assertString(this.sessionId_));
       return sessionStr
         ? /** @type {!JsonObject} */ (
-          dev().assert(parseJson(dev().assertString(sessionStr))))
+          devAssert(parseJson(dev().assertString(sessionStr))))
         : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION',
