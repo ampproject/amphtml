@@ -157,6 +157,15 @@ function getSrcs() {
         .map(getEntryModule)
         // Concat the core binary and integration binary as entry points.
         .concat('src/amp.js', '3p/integration.js'));
+  }).then(files => {
+    // Write all the entry modules into a single file so they can be processed
+    // together.
+    fs.mkdirpSync('./.amp-build');
+    const filename = './.amp-build/gulp-dep-check-collection.js';
+    fs.writeFileSync(filename, files.map(file => {
+      return `import '../${file}';`;
+    }).join('\n'));
+    return [filename];
   });
 }
 
@@ -195,7 +204,9 @@ function getGraph(entryModule) {
       .pipe(source(entryModule))
       // Unfortunately we need to write the files out.
       .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
+      .on('end', () => {
+        resolve(module);
+      });
   return promise;
 }
 
