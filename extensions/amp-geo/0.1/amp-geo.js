@@ -196,7 +196,7 @@ export class AmpGeo extends AMP.BaseElement {
       this.country_ = trimmedCountry;
     } else if (trimmedCountry.length > 2 && !getMode(this.win).localDev) {
       // We were not patched, if we're not in dev this is an error
-      // and we leave the country at the defaulr 'unknown'
+      // and we leave the country at the default 'unknown'
       this.error_ = true;
       dev().error(TAG,
           'GEONOTPATCHED: amp-geo served unpatched, ISO country not set');
