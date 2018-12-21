@@ -544,8 +544,6 @@ async function runTests() {
     };
   }
 
-  // Run fake-server to test XHR responses.
-  process.env.AMP_TEST = 'true';
   const server = gulp.src(process.cwd(), {base: '.'}).pipe(webserver({
     port: 8081,
     host: 'localhost',

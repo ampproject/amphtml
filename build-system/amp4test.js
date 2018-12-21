@@ -16,17 +16,20 @@
 'use strict';
 
 const app = module.exports = require('express').Router();
+const minimist = require('minimist');
+const argv = minimist(
+    process.argv.slice(2), {boolean: ['strictBabelTransform']});
+
 
 /* eslint-disable max-len */
 
 /**
- * Logs the given messages to the console in local dev mode, but not while
- * running automated tests.
+ * Logs the given messages to the console when --verbose is specified.
  * @param {*} messages
  */
 function log(...messages) {
-  if (!process.env.AMP_TEST) {
-    console.log(messages);
+  if (argv.verbose) {
+    console.log.apply(console, messages);
   }
 }
 
