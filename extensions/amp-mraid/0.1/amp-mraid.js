@@ -26,10 +26,9 @@
  *
  */
 
-import {Exit, Fullscreen, HostServices, Visible, VisibilityDataDef} from '../../../src/inabox/host-services';
-import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {MraidService} from './mraid-service';
 
 const TAG = 'amp-mraid';
 const FALLBACK_ON = 'fallback-on';
@@ -43,78 +42,7 @@ const ErrorCodes = {
   incomplete: 'incomplete',
 }
 
-/**
- * @implements {Visibility}
- * @implements {Fullscreen}
- * @implements {Exit}
- */
-export class MraidService {
-  constructor(mraid) {
-    this.mraid_ = mraid;
-    this.expanded_ = false;
-  }
-
-  /**
-   * Register a callback for visibility change events.
-   *
-   * @param {function(!VisibilityDataDef)} callback
-   */
-  onVisibilityChange(callback) {
-    // todo: impedance matching
-    this.mraid_.addEventListener(
-        'exposureChange',
-        (exposedPercentage,
-         visibileRectangle,
-         occlusionRectangles) => {
-           callback({visibleRect: visibileRectangle,
-                     visibleRatio: exposedPercentage});
-         });
-  }
-
-  /**
-   * Request to expand the given element to fullscreen overlay.
-   *
-   * @param {!Element} targetElement
-   * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request was fulfilled
-   */
-  enterFullscreenOverlay(targetElement) {
-    if (this.expanded_) return Promise.resolve(false);
-
-    this.mraid_.expand();
-    this.expanded_ = true;
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Request to exit from fullscreen overlay.
-   *
-   * @param {!Element} targetElement
-   * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request was fulfilled
-   */
-  exitFullscreenOverlay(targetElement) {
-    if (!this.expanded_) return Promise.resolve(false);
-
-    this.mraid_.close();
-    this.expanded_ = false;
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Request to navigate to URL.
-   *
-   * @param {string} url
-   * @return {!Promise<boolean>} promise resolves to a boolean
-   *     indicating if the request was fulfilled
-   */
-  openUrl(url) {
-    this.mraid_.open(url);
-    return Promise.resolve(true);
-  }
-}
-
-export class AmpMraid {
+export class MraidInitializer {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -157,17 +85,17 @@ export class AmpMraid {
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
     // handled locally.
-    const mraid_js = document.createElement('script');
-    mraid_js.setAttribute('type', 'text/javascript');
-    mraid_js.setAttribute('src', 'mraid.js');
-    mraid_js.addEventListener('load', () => {
+    const mraidJs = document.createElement('script');
+    mraidJs.setAttribute('type', 'text/javascript');
+    mraidJs.setAttribute('src', 'mraid.js');
+    mraidJs.addEventListener('load', () => {
       this.mraidLoadSuccess_()
     });
-    mraid_js.addEventListener('error', () => {
+    mraidJs.addEventListener('error', () => {
       this.handleError_(ErrorCodes.load);
     });
     const head = document.getElementsByTagName('head').item(0);
-    head.appendChild(mraid_js);
+    head.appendChild(mraidJs);
   }
 
   /**
@@ -178,7 +106,7 @@ export class AmpMraid {
         this.fallbackOn_.includes(errorCode)) {
       this.declineService_();
     }
-    // todo: send error ping
+    // TODO: send error ping
   }
 
   mraidReady_() {
@@ -218,5 +146,5 @@ export class AmpMraid {
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(
-      TAG, AmpMraid);
+      TAG, MraidInitializer);
 });
