@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE} from './consent-info';
+import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {dev, user} from '../../../src/log';
@@ -126,12 +126,12 @@ export class ConsentPolicyManager {
         let resolver = deferred.resolve;
 
         manager.whenConsentReady(consentId).then(() => {
-          manager.onConsentStateChange(consentId, state => {
+          manager.onConsentStateChange(consentId, info => {
             if (resolver) {
               resolver();
               resolver = null;
             }
-            instance.consentStateChangeHandler(consentId, state);
+            instance.consentStateChangeHandler(consentId, info);
           });
         });
         initPromises.push(instanceInitValuePromise);
@@ -224,6 +224,18 @@ export class ConsentPolicyManager {
   }
 
   /**
+   * Get the consent string value of a policy. Return a promise that resolves
+   * when the policy resolves.
+   * @param {string} policyId
+   * @return {!Promise<?string>}
+   */
+  getConsentStringInfo(policyId) {
+    return this.whenPolicyResolved(policyId).then(() => {
+      return this.instances_[policyId].getConsentString();
+    });
+  }
+
+  /**
    * Wait for policy instance to be ready.
    * @param {string} policyId
    * @return {!Promise}
@@ -255,6 +267,9 @@ export class ConsentPolicyInstance {
 
     /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
     this.itemToConsentState_ = map();
+
+    /** @private {?string} */
+    this.consentString_ = null;
 
     const deferred = new Deferred();
 
@@ -334,9 +349,9 @@ export class ConsentPolicyInstance {
   /**
    * consent instance state change handlerit
    * @param {string} consentId
-   * @param {CONSENT_ITEM_STATE} state
+   * @param {!ConsentInfoDef} info
    */
-  consentStateChangeHandler(consentId, state) {
+  consentStateChangeHandler(consentId, info) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
     if (!hasOwn(this.itemToConsentState_, consentId)) {
@@ -344,11 +359,14 @@ export class ConsentPolicyInstance {
       return;
     }
 
+    const state = info['consentState'];
+    const consentStr = info['consentString'];
+    this.consentString_ = consentStr || this.consentString_;
+
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
     }
-
 
     if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       const shouldOverwrite =
@@ -452,6 +470,16 @@ export class ConsentPolicyInstance {
    */
   getCurrentPolicyStatus() {
     return this.status_;
+  }
+
+  /**
+   * Returns the current consent string info
+   * @return {?string}
+   */
+  getConsentString() {
+    // Return a string because we only support one consent instance now.
+    // And decide not to support multiple consent instances given CMP approach
+    return this.consentString_;
   }
 
   /**

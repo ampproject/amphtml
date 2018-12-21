@@ -126,32 +126,37 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       it('should call handler when consent state changes', () => {
         manager.onConsentStateChange('test', spy);
         manager.updateConsentInstanceState('test', CONSENT_ITEM_STATE.REJECTED);
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.REJECTED);
+        expect(spy).to.be.calledWith(
+            constructConsentInfo(CONSENT_ITEM_STATE.REJECTED));
       });
 
       it('should call handler when consent is ignored', () => {
         manager.onConsentStateChange('test', spy);
         manager.updateConsentInstanceState('test',
             CONSENT_ITEM_STATE.NOT_REQUIRED);
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.NOT_REQUIRED);
+        expect(spy).to.be.calledWith(
+            constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED));
       });
 
       it('should call handler when register observable', function*() {
         manager.onConsentStateChange('test', spy);
         yield macroTask();
         expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.UNKNOWN);
+        expect(spy).to.be.calledWith(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN));
       });
 
       it('handles race condition', function* () {
         manager.onConsentStateChange('test', spy);
         manager.updateConsentInstanceState('test', CONSENT_ITEM_STATE.REJECTED);
         expect(spy).to.be.calledOnce;
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.REJECTED);
+        expect(spy).to.be.calledWith(
+            constructConsentInfo(CONSENT_ITEM_STATE.REJECTED));
         yield macroTask();
         // Called with updated state value REJECT instead of UNKNOWN
         expect(spy).to.be.calledTwice;
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.REJECTED);
+        expect(spy).to.be.calledWith(
+            constructConsentInfo(CONSENT_ITEM_STATE.REJECTED));
       });
     });
   });
@@ -172,11 +177,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
           instance.update(-1, 'test');
           yield macroTask();
-          expect(storageSetSpy).to.be.calledOnce;
-          const consentInfo =
-              constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN, 'test');
-          const value = composeStoreValue(consentInfo);
-          expect(storageSetSpy).to.be.calledWith('amp-consent:test', value);
+          expect(storageSetSpy).to.not.be.called;
         });
 
         it('single consent state value', function* () {
@@ -251,26 +252,30 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
               'amp-consent:test', composeStoreValue(consentInfo));
         });
 
-        it('new consent string always override old one', function* () {
+        it('do not store consentstring with dismiss consent state',
+            function* () {
+              instance.update(CONSENT_ITEM_STATE.DISMISSED, 'old');
+              yield macroTask();
+              expect(storageSetSpy).to.not.be.called;
+            });
+
+        it('new consent string override old one', function* () {
           instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'old');
           yield macroTask();
           storageSetSpy.resetHistory();
-          instance.update(CONSENT_ITEM_STATE.DISMISSED, 'new');
+          instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'new');
           yield macroTask();
           let consentInfo =
               constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'new');
           expect(storageSetSpy).to.be.calledOnce;
           expect(storageSetSpy).to.be.calledWith(
               'amp-consent:test', composeStoreValue(consentInfo));
-
-          // empty consent string
+          // empty consent string cannot override
           storageSetSpy.resetHistory();
           yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, '');
           consentInfo =
               constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, '');
-          expect(storageSetSpy).to.be.calledOnce;
-          expect(storageSetSpy).to.be.calledWith(
-              'amp-consent:test', composeStoreValue(consentInfo));
+          expect(storageSetSpy).to.not.be.called;
         });
       });
 
@@ -335,15 +340,15 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       });
 
       it('send update request on consentString change', function* () {
-        yield instance.update(CONSENT_ITEM_STATE.DISMISSED, 'old');
+        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'old');
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
-        expect(requestBody.consentState).to.be.undefined;
+        expect(requestBody.consentState).to.be.true;
         expect(requestBody.consentString).to.equal('old');
-        yield instance.update(CONSENT_ITEM_STATE.DISMISSED, 'new');
+        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'new');
         yield macroTask();
         expect(requestSpy).to.be.calledTwice;
-        expect(requestBody.consentState).to.be.undefined;
+        expect(requestBody.consentState).to.be.true;
         expect(requestBody.consentString).to.equal('new');
       });
 
@@ -401,17 +406,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         });
 
         it('consentInfo value', function* () {
-          let testConsentInfo =
-              constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN, 'test');
-          storageValue['amp-consent:test'] = composeStoreValue(testConsentInfo);
-          yield instance.get().then(value => {
-            expect(value).to.deep.equal(testConsentInfo);
-          });
           instance.localConsentInfo_ = null;
-          testConsentInfo =
+          const testConsentInfo =
               constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
           storageValue['amp-consent:test'] = composeStoreValue(testConsentInfo);
           yield instance.get().then(value => {
+
             expect(value).to.deep.equal(testConsentInfo);
           });
         });
@@ -439,10 +439,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield instance.get().then(v => value = v);
         expect(value).to.deep.equal(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED));
-        yield instance.update(CONSENT_ITEM_STATE.DISMISSED, 'test');
-        yield instance.get().then(v => value = v);
-        expect(value).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test'));
         yield instance.update(CONSENT_ITEM_STATE.REJECTED, 'test1');
         yield instance.get().then(v => value = v);
         expect(value).to.deep.equal(
@@ -454,7 +450,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, '');
         yield instance.get().then(v => value = v);
         expect(value).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, ''));
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test1'));
       });
 
       it('should return unknown value with error', () => {

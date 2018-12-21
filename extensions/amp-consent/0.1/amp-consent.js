@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE} from './consent-info';
+import {CONSENT_ITEM_STATE, hasStoredValue} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentConfig, expandPolicyConfig} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
@@ -230,6 +230,12 @@ export class AmpConsent extends AMP.BaseElement {
           user().error(TAG, 'consent-response info only supports string, ' +
               '%s, treated as undefined', data['info']);
         }
+        if (!data['info']) {
+          // TODO (@zhouyx #20010): Decide what's the behavior on receiving
+          // incorrect message.
+          user().error(TAG,
+              'consent-response info does not allow empty string');
+        }
         consentString = data['info'];
       }
 
@@ -346,7 +352,8 @@ export class AmpConsent extends AMP.BaseElement {
           CONSENT_ITEM_STATE.REJECTED,
           consentString);
     } else if (action == ACTION_TYPE.DISMISS) {
-      // dismiss
+      // TODO (@zhouyx #20010): Consider it a user error if
+      // consentString is undefined, but has value before.
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_,
           CONSENT_ITEM_STATE.DISMISSED,
@@ -532,25 +539,25 @@ export class AmpConsent extends AMP.BaseElement {
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo(instanceId)
         .then(info => {
-          const state = info['consentState'];
-          if (state == CONSENT_ITEM_STATE.ACCEPTED ||
-              state == CONSENT_ITEM_STATE.REJECTED) {
-            // Need to display post prompt ui if user previous made a decision
+          if (hasStoredValue(info)) {
+            // Has user stored value, no need to prompt
             this.isPostPromptUIRequired_ = true;
+            return;
           }
-          if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-            if (!this.consentRequired_[instanceId]) {
-              this.consentStateManager_.updateConsentInstanceState(
-                  instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
-              return;
-            }
-            this.isPostPromptUIRequired_ = true;
-            // TODO(@zhouyx):
-            // 1. Race condition on consent state change between schedule to
-            //    display and display. Add one more check before display
-            // 2. Should not schedule display with DISMISSED UNKNOWN state
-            this.scheduleDisplay_(instanceId);
+          if (!this.consentRequired_[instanceId]) {
+            // no need to prompt if remote reponse say so
+            // Also no need to display postPromptUI
+            this.consentStateManager_.updateConsentInstanceState(
+                instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
+            return;
           }
+          // Prompt
+          this.isPostPromptUIRequired_ = true;
+          this.scheduleDisplay_(instanceId);
+
+          // TODO(@zhouyx):
+          // Race condition on consent state change between schedule to
+          // display and display. Add one more check before display
         });
   }
 
