@@ -53,7 +53,6 @@ public class AmpPassTest extends CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
-             "  'hello world';",
              "  console.log('this is preserved');",
             "})()"));
     test(
@@ -97,7 +96,6 @@ public class AmpPassTest extends CompilerTestCase {
         LINE_JOINER.join(
              "(function() {",
              "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
-             "  \"hello world\";",
              "  console.log('this is preserved');",
             "})()"));
     test(
