@@ -193,6 +193,12 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       return false;
     }
 
+    // Temp hack not needed in single pass compiler because it can inline the
+    // this itself.
+    if ("module$src$log.devAssert".equals(callGetprop.getQualifiedName())) {
+      return true;
+    }
+
     Node parentCall = callGetprop.getFirstChild();
     if (parentCall == null || !parentCall.isCall()) {
       return false;
